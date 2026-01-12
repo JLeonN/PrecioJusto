@@ -1,1 +1,26 @@
-/* app global css */
+@import './variables.css';
+
+/* ===========================
+   ESTILOS GENERALES
+   =========================== */
+
+body {
+  background-color: var(--fondo-app);
+  color: var(--texto-primario);
+}
+/* Tarjetas */
+.tarjeta {
+  background-color: var(--fondo-tarjeta);
+  border-radius: var(--borde-radio);
+  box-shadow: var(--sombra-ligera);
+  padding: var(--espaciado-md);
+}
+/* Botones personalizados si necesitás */
+.boton-primario {
+  background-color: var(--color-primario);
+  color: var(--texto-sobre-primario);
+}
+.boton-secundario {
+  background-color: var(--color-secundario);
+  color: var(--texto-sobre-primario);
+}
