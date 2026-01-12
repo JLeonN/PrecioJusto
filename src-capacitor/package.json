@@ -1,0 +1,13 @@
+{
+  "name": "precio-justo",
+  "version": "0.0.1",
+  "description": "Aplicación para comparar y trackear precios de productos en diferentes comercios",
+  "author": "Leonardo Núñez <jorgebike.75@hotmail.com>",
+  "private": true,
+  "dependencies": {
+    "@capacitor/android": "^7.4.4",
+    "@capacitor/app": "^7.0.0",
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/core": "^7.0.0"
+  }
+}
