@@ -12,7 +12,8 @@
     "test": "echo \"No test specified\" && exit 0",
     "dev": "quasar dev",
     "build": "quasar build",
-    "postinstall": "quasar prepare"
+    "postinstall": "quasar prepare",
+    "generar-apk": "quasar build && npx cap sync android && npx cap open android"
   },
   "dependencies": {
     "@capacitor/android": "^8.0.0",

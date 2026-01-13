@@ -1,5 +1,6 @@
 {
-  "appId": "com.example.app",
-  "appName": "precio-justo",
-  "webDir": "www"
+  "appId": "com.preciojusto.app",
+  "appName": "Precio Justo",
+  "webDir": "dist/spa",
+  "bundledWebRuntime": false
 }
