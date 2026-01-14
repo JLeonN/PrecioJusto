@@ -1,28 +1,105 @@
 <template>
   <q-layout view="hHh lpR fFf">
-    <q-header bordered class="header-personalizado">
+    <!-- HEADER -->
+    <q-header elevated class="bg-white text-primary">
       <q-toolbar>
-        <q-btn dense flat round icon="menu" @click="alternarMenuIzquierdo" class="boton-menu" />
-        <q-toolbar-title class="titulo-toolbar">
-          <q-avatar>
-            <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg" />
-          </q-avatar>
-          Precio Justo
-        </q-toolbar-title>
+        <q-btn
+          flat
+          dense
+          round
+          icon="menu"
+          aria-label="Menu"
+          @click="toggleDrawer"
+          color="primary"
+        />
+
+        <q-toolbar-title class="text-weight-bold"> Precio Justo </q-toolbar-title>
+
+        <q-btn flat round dense>
+          <IconSearch :size="24" />
+        </q-btn>
       </q-toolbar>
     </q-header>
 
+    <!-- DRAWER LATERAL -->
     <q-drawer
-      v-model="menuIzquierdoAbierto"
-      side="left"
+      v-model="drawerAbierto"
+      :width="280"
+      :breakpoint="9999"
+      bordered
       overlay
       behavior="mobile"
-      bordered
-      class="drawer-personalizado"
+      class="bg-grey-1"
     >
-      <!-- Contenido del drawer -->
+      <q-scroll-area class="fit">
+        <q-list padding>
+          <!-- Header del drawer -->
+          <q-item class="q-mb-md">
+            <q-item-section avatar>
+              <q-avatar color="primary" text-color="white" size="56px">
+                <IconShoppingCart :size="32" />
+              </q-avatar>
+            </q-item-section>
+            <q-item-section>
+              <q-item-label class="text-h6 text-weight-bold"> Precio Justo </q-item-label>
+              <q-item-label caption> Compará y ahorrá </q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-separator class="q-mb-md" />
+
+          <!-- Opciones del menú -->
+          <q-item clickable v-ripple to="/" exact>
+            <q-item-section avatar>
+              <IconHome :size="24" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Mis Productos</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple>
+            <q-item-section avatar>
+              <IconChartLine :size="24" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Estadísticas</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple>
+            <q-item-section avatar>
+              <IconMapPin :size="24" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Comercios</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-separator class="q-my-md" />
+
+          <q-item clickable v-ripple>
+            <q-item-section avatar>
+              <IconSettings :size="24" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Configuración</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple>
+            <q-item-section avatar>
+              <IconInfoCircle :size="24" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Acerca de</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-scroll-area>
     </q-drawer>
 
+    <!-- CONTENIDO PRINCIPAL -->
     <q-page-container>
       <router-view />
     </q-page-container>
@@ -31,32 +108,19 @@
 
 <script setup>
 import { ref } from 'vue'
+import {
+  IconSearch,
+  IconShoppingCart,
+  IconHome,
+  IconChartLine,
+  IconMapPin,
+  IconSettings,
+  IconInfoCircle,
+} from '@tabler/icons-vue'
 
-const menuIzquierdoAbierto = ref(false)
+const drawerAbierto = ref(false)
 
-function alternarMenuIzquierdo() {
-  menuIzquierdoAbierto.value = !menuIzquierdoAbierto.value
+const toggleDrawer = () => {
+  drawerAbierto.value = !drawerAbierto.value
 }
 </script>
-
-<style scoped>
-.header-personalizado {
-  background-color: var(--color-primario);
-  color: var(--texto-sobre-primario);
-}
-.boton-menu {
-  color: var(--texto-sobre-primario);
-}
-.titulo-toolbar {
-  color: var(--texto-sobre-primario);
-  display: flex;
-  align-items: center;
-  gap: var(--espaciado-sm);
-}
-</style>
-<style>
-/* Sin scoped para sobrescribir Quasar */
-.drawer-personalizado {
-  background-color: var(--fondo-drawer) !important;
-}
-</style>
