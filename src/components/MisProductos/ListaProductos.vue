@@ -6,14 +6,15 @@
       <p class="text-grey-7 q-mb-none">{{ productos.length }} productos guardados</p>
     </div>
 
-    <!-- LISTA DE PRODUCTOS -->
-    <div class="q-gutter-md">
-      <TarjetaProducto
+    <!-- LISTA DE PRODUCTOS - Sistema de Grilla Responsivo -->
+    <div class="row q-col-gutter-md">
+      <div
         v-for="producto in productos"
         :key="producto.id"
-        :producto="producto"
-        @menu-click="abrirMenuProducto(producto)"
-      />
+        class="col-12 col-sm-6 col-md-4 col-xl-3"
+      >
+        <TarjetaProducto :producto="producto" @menu-click="abrirMenuProducto(producto)" />
+      </div>
     </div>
   </div>
 </template>
