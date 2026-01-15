@@ -1,6 +1,9 @@
 <template>
   <q-page class="q-pa-md">
-    <ListaProductos :productos="productosEjemplo" />
+    <!-- Contenedor con ancho máximo -->
+    <div class="contenedor-productos">
+      <ListaProductos :productos="productosEjemplo" />
+    </div>
 
     <!-- BOTÓN FLOTANTE AGREGAR -->
     <q-page-sticky position="bottom-right" :offset="[18, 18]">
@@ -74,3 +77,11 @@ const productosEjemplo = ref([
   },
 ])
 </script>
+
+<style scoped>
+.contenedor-productos {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+</style>

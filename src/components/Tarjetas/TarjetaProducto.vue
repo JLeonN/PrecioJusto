@@ -236,6 +236,8 @@ const clasesResponsivas = computed(() => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  min-height: 3em; /* Fuerza siempre la altura de 2 líneas */
+  line-height: 1.5;
 }
 .ellipsis {
   overflow: hidden;
