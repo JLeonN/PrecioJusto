@@ -25,8 +25,10 @@
               <span class="ellipsis">{{ producto.comercioMejor }}</span>
             </div>
           </div>
+        </div>
 
-          <!-- Botón agregar precio (expandible) -->
+        <!-- Botón agregar precio (ahora fuera del contenedor) -->
+        <div class="contenedor-boton-agregar">
           <q-btn
             :round="!expandida"
             dense
@@ -166,6 +168,12 @@ const clasesResponsivas = computed(() => {
   padding-left: 12px;
   padding-right: 12px;
 }
+/* Contenedor del botón */
+.contenedor-boton-agregar {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 8px;
+}
 /* Transición del texto */
 .fade-texto-enter-active,
 .fade-texto-leave-active {
@@ -200,7 +208,7 @@ const clasesResponsivas = computed(() => {
   display: grid;
   grid-template-columns: 80px 1fr auto;
   gap: 16px;
-  align-items: center;
+  align-items: start;
 }
 .tarjeta-horizontal .tarjeta-imagen {
   width: 80px;
@@ -209,13 +217,15 @@ const clasesResponsivas = computed(() => {
 .tarjeta-horizontal .tarjeta-info {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  min-width: 0;
+  gap: 4px;
 }
 .tarjeta-horizontal .tarjeta-precio-comercio {
   display: flex;
   align-items: center;
   gap: 16px;
+}
+.tarjeta-horizontal .contenedor-boton-agregar {
+  margin-top: 0;
 }
 /* IMAGEN Y PLACEHOLDER */
 .tarjeta-imagen {
@@ -236,7 +246,7 @@ const clasesResponsivas = computed(() => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 3em; /* Fuerza siempre la altura de 2 líneas */
+  min-height: 3em;
   line-height: 1.5;
 }
 .ellipsis {
