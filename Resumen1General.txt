@@ -14,7 +14,7 @@ Sistema colaborativo donde usuarios comparten datos de precios.
 - JavaScript (NO TypeScript)
 
 ## ALMACENAMIENTO DE DATOS
-- Fase 1 (MVP): Capacitor Storage (local)
+- Fase 1 (MVP): Capacitor Storage + localStorage (confirmaciones de usuario)
 - Fase 2: Firebase/Firestore (nube con privacidad configurable)
 
 ## ESTRUCTURA DE ARCHIVOS
@@ -28,7 +28,8 @@ src/
 ├── pages/
 │   ├── ErrorNotFound.vue
 │   ├── IndexPage.vue
-│   └── MisProductosPage.vue
+│   ├── MisProductosPage.vue
+│   └── DetalleProductoPage.vue
 ├── router/
 │   ├── index.js
 │   └── routes.js
@@ -36,8 +37,15 @@ src/
     ├── EssentialLink.vue
     ├── Tarjetas/
     │   └── TarjetaProducto.vue
-    └── MisProductos/
-        └── ListaProductos.vue
+    ├── MisProductos/
+    │   └── ListaProductos.vue
+    └── DetalleProducto/
+        ├── InfoProducto.vue
+        ├── EstadisticasProducto.vue
+        ├── FiltrosHistorial.vue
+        ├── HistorialPrecios.vue
+        ├── ItemComercioHistorial.vue
+        └── ItemPrecioHistorial.vue
 
 ## CONVENCIONES DE NOMENCLATURA
 - Carpetas y archivos: PascalCase (ejemplo: MisProductos/, TarjetaProducto.vue)
@@ -51,9 +59,17 @@ src/
 - Fondo app: #EEEEEE (gris medio)
 - Fondo tarjeta: #FFFFFF
 
+## FEATURES IMPLEMENTADAS
+- Sistema de tarjetas de productos expandibles
+- Navegación con Vue Router
+- Página de historial completo por producto
+- Sistema de confirmaciones con localStorage (1 vez por usuario por precio)
+- Tendencias individuales por comercio
+- Filtros avanzados (comercio, período, ordenamiento)
+- Indicadores de frescura por antigüedad (colores automáticos)
+
 ## FEATURES PLANIFICADAS
 - Escaneo de código de barras/QR (FAB)
-- Historial detallado de precios por producto
 - Sistema de favoritos/listas (NO eliminar productos)
 - Geolocalización para comercios cercanos
 - Control de privacidad de datos compartidos
