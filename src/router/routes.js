@@ -2,11 +2,16 @@ const routes = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/MisProductosPage.vue') }],
+    children: [
+      // Página principal - Lista de productos del usuario
+      { path: '', component: () => import('pages/MisProductosPage.vue') },
+
+      // Página de detalle - Historial completo de un producto específico
+      { path: 'producto/:id', component: () => import('pages/DetalleProductoPage.vue') },
+    ],
   },
 
-  // Always leave this as last one,
-  // but you can also remove it
+  // Página 404 - Siempre debe ir al final
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),

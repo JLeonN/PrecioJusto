@@ -93,7 +93,7 @@
             color="primary"
             label="Ver historial completo"
             class="full-width q-mt-md"
-            @click.stop="$emit('ver-detalle')"
+            :to="`/producto/${producto.id}`"
           >
             <IconChartLine :size="18" class="q-mr-xs" />
           </q-btn>
