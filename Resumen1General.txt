@@ -1,0 +1,61 @@
+# PRECIO JUSTO - RESUMEN GENERAL DEL PROYECTO
+
+## PROPÓSITO
+App móvil Android para comparar y trackear precios de productos en diferentes comercios.
+Énfasis en mostrar diferencias de precios entre tiendas, no solo "ahorros".
+Sistema colaborativo donde usuarios comparten datos de precios.
+
+## STACK TECNOLÓGICO
+- Vue.js 3 (Composition API con <script setup>)
+- Quasar Framework v2
+- Capacitor v8 (para Android)
+- Pinia (state management)
+- Tabler Icons (iconografía exclusiva)
+- JavaScript (NO TypeScript)
+
+## ALMACENAMIENTO DE DATOS
+- Fase 1 (MVP): Capacitor Storage (local)
+- Fase 2: Firebase/Firestore (nube con privacidad configurable)
+
+## ESTRUCTURA DE ARCHIVOS
+src/
+├── App.vue
+├── css/
+│   ├── app.css
+│   └── variables.css
+├── layouts/
+│   └── MainLayout.vue
+├── pages/
+│   ├── ErrorNotFound.vue
+│   ├── IndexPage.vue
+│   └── MisProductosPage.vue
+├── router/
+│   ├── index.js
+│   └── routes.js
+└── components/
+    ├── EssentialLink.vue
+    ├── Tarjetas/
+    │   └── TarjetaProducto.vue
+    └── MisProductos/
+        └── ListaProductos.vue
+
+## CONVENCIONES DE NOMENCLATURA
+- Carpetas y archivos: PascalCase (ejemplo: MisProductos/, TarjetaProducto.vue)
+- Variables/funciones: camelCase en español (ejemplo: productosEjemplo, toggleExpandir)
+- Nombres descriptivos y en español
+
+## PALETA DE COLORES
+- Primario: #1976D2 (azul oscuro)
+- Secundario: #4CAF50 (verde - ahorro/positivo)
+- Acento: #FF9800 (naranja - alertas)
+- Fondo app: #EEEEEE (gris medio)
+- Fondo tarjeta: #FFFFFF
+
+## FEATURES PLANIFICADAS
+- Escaneo de código de barras/QR (FAB)
+- Historial detallado de precios por producto
+- Sistema de favoritos/listas (NO eliminar productos)
+- Geolocalización para comercios cercanos
+- Control de privacidad de datos compartidos
+- Monetización: Google AdMob
+- Import/Export de datos

@@ -1,0 +1,80 @@
+# TARJETAS DE PRODUCTOS - DOCUMENTACIÓN TÉCNICA
+
+## COMPONENTES RELACIONADOS
+- TarjetaProducto.vue (componente reutilizable en /components/Tarjetas/)
+- ListaProductos.vue (contenedor en /components/MisProductos/)
+
+## ESTRUCTURA DE DATOS DEL PRODUCTO
+Cada producto requiere:
+- id (number)
+- nombre (string)
+- imagen (string | null)
+- precioMejor (number)
+- comercioMejor (string)
+- diferenciaPrecio (number)
+- precios (array de objetos):
+  - comercio (string)
+  - valor (number)
+  - fecha (string)
+  - esMejor (boolean)
+
+## COMPORTAMIENTO VISUAL
+
+### ESTADO COLAPSADO (default)
+- Muestra: imagen/placeholder, nombre, mejor precio, comercio del mejor precio
+- Botón "Agregar precio" en modo redondo (solo ícono)
+- Ícono chevron-down indicando expandible
+- Click en tarjeta expande/colapsa
+
+### ESTADO EXPANDIDO
+- Muestra top 3 mejores precios ordenados por valor
+- Botón "Agregar precio" expandido con texto
+- Lista con avatares numerados (1,2,3)
+- Avatar verde para el mejor precio
+- Botón "Ver historial completo" al final
+- Ícono chevron-up indicando colapsable
+
+## DISEÑO RESPONSIVO
+
+### MÓVIL (xs)
+- Layout vertical (flex-direction: column)
+- Imagen: 100% ancho, 120px alto
+- Info apilada verticalmente
+
+### TABLET/PC (gt.xs)
+- Layout horizontal (grid 3 columnas: 80px | 1fr | auto)
+- Imagen: 80px x 80px
+- Info y controles en línea
+
+## INTERACCIONES
+- Click en tarjeta: toggleExpandir()
+- Click en botón agregar: emit('agregar-precio') con stop propagation
+- Click en "Ver historial": emit('ver-detalle') con stop propagation
+- Animación de presión (scale 0.98) en :active
+
+## ESTILOS CLAVE
+- Borde izquierdo azul (4px) marca visual
+- Transiciones suaves (0.2s - 0.3s)
+- Botón agregar con transición de ancho y texto (fade)
+- Texto nombre: ellipsis 2 líneas
+- Texto comercio: ellipsis 1 línea
+
+## ICONOGRAFÍA (Tabler Icons)
+- IconShoppingBag: placeholder imagen
+- IconMapPin: ubicación comercio
+- IconPlus: agregar precio
+- IconChevronDown/Up: expandir/colapsar
+- IconChartLine: ver historial
+
+## EVENTOS EMITIDOS
+- 'agregar-precio': cuando se clickea botón agregar
+- 'ver-detalle': cuando se clickea ver historial completo
+
+## COMPUTED PROPERTIES
+- top3Precios: ordena precios por valor ASC y toma primeros 3
+- clasesResponsivas: determina layout según $q.screen
+
+## LIMITACIONES ACTUALES
+- Solo muestra top 3 en expansión (no scroll infinito)
+- No hay funcionalidad de menú contextual aún
+- Datos hardcodeados en MisProductosPage.vue
