@@ -77,6 +77,7 @@
               :key="precio.id"
               :precio="precio"
               :es-mas-reciente="index === 0"
+              :ya-confirmado="preciosConfirmados.has(precio.id)"
               @confirmar-precio="$emit('confirmar-precio', $event)"
             />
           </div>
@@ -94,6 +95,10 @@ import ItemPrecioHistorial from './ItemPrecioHistorial.vue'
 const props = defineProps({
   comercio: {
     type: Object,
+    required: true,
+  },
+  preciosConfirmados: {
+    type: Set,
     required: true,
   },
 })

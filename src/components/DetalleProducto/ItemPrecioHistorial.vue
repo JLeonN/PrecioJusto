@@ -18,7 +18,13 @@
 
     <!-- Botón confirmar (solo si es el más reciente) -->
     <div v-if="esMasReciente" class="precio-acciones">
-      <q-btn flat dense color="primary" size="sm" @click="$emit('confirmar-precio', precio.id)">
+      <q-btn
+        flat
+        dense
+        color="primary"
+        size="sm"
+        @click.stop="$emit('confirmar-precio', precio.id)"
+      >
         <IconThumbUp :size="16" class="q-mr-xs" />
         Confirmar
       </q-btn>

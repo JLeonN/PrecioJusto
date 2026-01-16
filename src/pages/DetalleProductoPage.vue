@@ -31,7 +31,12 @@
       />
 
       <!-- Historial completo de precios -->
-      <HistorialPrecios :precios="preciosFiltrados" @confirmar-precio="confirmarPrecio" />
+      <HistorialPrecios
+        :precios="preciosFiltrados"
+        :precios-confirmados="preciosConfirmadosPorUsuario"
+        :orden-seleccionado="ordenSeleccionado"
+        @confirmar-precio="confirmarPrecio"
+      />
     </div>
   </q-page>
 </template>
@@ -43,6 +48,31 @@ import InfoProducto from '../components/DetalleProducto/InfoProducto.vue'
 import EstadisticasProducto from '../components/DetalleProducto/EstadisticasProducto.vue'
 import FiltrosHistorial from '../components/DetalleProducto/FiltrosHistorial.vue'
 import HistorialPrecios from '../components/DetalleProducto/HistorialPrecios.vue'
+
+// Simular usuario actual (después viene de autenticación)
+const usuarioActualId = ref('user_actual_123')
+
+// Rastrear confirmaciones del usuario (localStorage en MVP, después Firebase)
+const preciosConfirmadosPorUsuario = ref(new Set())
+
+// Cargar confirmaciones desde localStorage al montar
+const cargarConfirmaciones = () => {
+  const guardado = localStorage.getItem(`confirmaciones_${usuarioActualId.value}`)
+  if (guardado) {
+    preciosConfirmadosPorUsuario.value = new Set(JSON.parse(guardado))
+  }
+}
+
+// Guardar confirmaciones en localStorage
+const guardarConfirmaciones = () => {
+  localStorage.setItem(
+    `confirmaciones_${usuarioActualId.value}`,
+    JSON.stringify([...preciosConfirmadosPorUsuario.value]),
+  )
+}
+
+// Cargar al iniciar
+cargarConfirmaciones()
 
 // Filtros
 const filtroComercio = ref('todos')
@@ -178,6 +208,7 @@ const productoActual = ref({
       confirmaciones: 7,
       usuarioId: 'user111',
     },
+
     // TATA - Camino Maldonado (PRECIO SUBIENDO)
     {
       id: 12,
@@ -204,8 +235,18 @@ const productoActual = ref({
       comercio: 'TATA',
       nombreCompleto: 'TATA - Camino Maldonado 3456',
       direccion: 'Camino Maldonado 3456, Malvín',
+      valor: 999,
+      fecha: '2025-01-28T10:00:00',
+      confirmaciones: 150,
+      usuarioId: 'user555',
+    },
+    {
+      id: 15,
+      comercio: 'TATA',
+      nombreCompleto: 'TATA - Camino Maldonado 3456',
+      direccion: 'Camino Maldonado 3456, Malvín',
       valor: 820,
-      fecha: '2025-12-08T14:30:00',
+      fecha: '2025-10-08T14:30:00',
       confirmaciones: 32,
       usuarioId: 'user666',
     },
@@ -214,7 +255,7 @@ const productoActual = ref({
 
 // Comercios únicos disponibles para el filtro
 const comerciosDisponibles = computed(() => {
-  const comercios = [...new Set(productoActual.value.precios.map((p) => p.comercio))]
+  const comercios = [...new Set(productoActual.value.precios.map((p) => p.nombreCompleto))]
   return comercios.sort()
 })
 
@@ -224,7 +265,7 @@ const preciosFiltrados = computed(() => {
 
   // Filtrar por comercio
   if (filtroComercio.value !== 'todos') {
-    precios = precios.filter((p) => p.comercio === filtroComercio.value)
+    precios = precios.filter((p) => p.nombreCompleto === filtroComercio.value)
   }
 
   // Filtrar por período
@@ -253,9 +294,17 @@ const preciosFiltrados = computed(() => {
 
 // Confirmar precio (dar upvote)
 const confirmarPrecio = (precioId) => {
+  // Verificar si ya confirmó este precio
+  if (preciosConfirmadosPorUsuario.value.has(precioId)) {
+    console.log('Ya confirmaste este precio anteriormente')
+    return
+  }
+
   const precio = productoActual.value.precios.find((p) => p.id === precioId)
   if (precio) {
     precio.confirmaciones++
+    preciosConfirmadosPorUsuario.value.add(precioId)
+    guardarConfirmaciones()
     console.log(`Precio ${precioId} confirmado. Total: ${precio.confirmaciones}`)
     // Acá después guardar en Capacitor/Firebase
   }

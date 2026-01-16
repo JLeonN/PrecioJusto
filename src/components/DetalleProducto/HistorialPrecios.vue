@@ -16,6 +16,7 @@
         v-for="comercio in comerciosAgrupados"
         :key="comercio.nombreCompleto"
         :comercio="comercio"
+        :precios-confirmados="preciosConfirmados"
         @confirmar-precio="$emit('confirmar-precio', $event)"
       />
     </div>
@@ -38,6 +39,14 @@ import ItemComercioHistorial from './ItemComercioHistorial.vue'
 const props = defineProps({
   precios: {
     type: Array,
+    required: true,
+  },
+  preciosConfirmados: {
+    type: Set,
+    required: true,
+  },
+  ordenSeleccionado: {
+    type: String,
     required: true,
   },
 })
@@ -67,12 +76,37 @@ const comerciosAgrupados = computed(() => {
   // Convertir el mapa a array
   const grupos = Array.from(mapaGrupos.values())
 
-  // Ordenar comercios por el precio más bajo de cada uno
-  grupos.sort((a, b) => {
-    const precioMinimoA = Math.min(...a.precios.map((p) => p.valor))
-    const precioMinimoB = Math.min(...b.precios.map((p) => p.valor))
-    return precioMinimoA - precioMinimoB
+  // Para cada grupo, obtener el precio más reciente
+  grupos.forEach((grupo) => {
+    grupo.precios.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+    grupo.precioMasReciente = grupo.precios[0]
   })
+
+  // Ordenar comercios según el filtro seleccionado (usando SOLO el precio más reciente)
+  if (props.ordenSeleccionado === 'precio-menor') {
+    // Ordenar por precio más reciente (menor a mayor)
+    grupos.sort((a, b) => a.precioMasReciente.valor - b.precioMasReciente.valor)
+  } else if (props.ordenSeleccionado === 'precio-mayor') {
+    // Ordenar por precio más reciente (mayor a menor)
+    grupos.sort((a, b) => b.precioMasReciente.valor - a.precioMasReciente.valor)
+  } else if (props.ordenSeleccionado === 'reciente') {
+    // Ordenar por fecha más reciente (más nuevo primero)
+    grupos.sort(
+      (a, b) =>
+        new Date(b.precioMasReciente.fecha).getTime() -
+        new Date(a.precioMasReciente.fecha).getTime(),
+    )
+  } else if (props.ordenSeleccionado === 'antiguo') {
+    // Ordenar por fecha más reciente (más viejo primero)
+    grupos.sort(
+      (a, b) =>
+        new Date(a.precioMasReciente.fecha).getTime() -
+        new Date(b.precioMasReciente.fecha).getTime(),
+    )
+  } else if (props.ordenSeleccionado === 'confirmaciones') {
+    // Ordenar por confirmaciones del precio más reciente
+    grupos.sort((a, b) => b.precioMasReciente.confirmaciones - a.precioMasReciente.confirmaciones)
+  }
 
   return grupos
 })
