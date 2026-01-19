@@ -2,265 +2,114 @@
   <q-page class="q-pa-md">
     <!-- Contenedor con ancho máximo -->
     <div class="contenedor-detalle">
-      <!-- Botón volver -->
-      <q-btn
-        flat
-        dense
-        color="primary"
-        icon=""
-        label="Volver"
-        class="q-mb-md"
-        @click="$router.back()"
-      >
-        <IconArrowLeft :size="20" class="q-mr-xs" />
-      </q-btn>
+      <!-- INDICADOR DE CARGA -->
+      <div v-if="cargando" class="text-center q-pa-xl">
+        <q-spinner color="primary" size="50px" />
+        <p class="text-grey-7 q-mt-md">Cargando producto...</p>
+      </div>
 
-      <!-- Cabecera del producto -->
-      <InfoProducto :producto="productoActual" class="q-mb-lg" />
+      <!-- MENSAJE DE ERROR -->
+      <q-banner v-else-if="error" class="bg-negative text-white q-mb-md" rounded>
+        <template #avatar>
+          <q-icon name="error" color="white" />
+        </template>
+        {{ error }}
+        <template #action>
+          <q-btn flat label="Volver" @click="$router.back()" />
+        </template>
+      </q-banner>
 
-      <!-- Estadísticas en cards -->
-      <EstadisticasProducto :producto="productoActual" class="q-mb-lg" />
+      <!-- CONTENIDO DEL PRODUCTO -->
+      <template v-else-if="productoActual">
+        <!-- Botón volver -->
+        <q-btn
+          flat
+          dense
+          color="primary"
+          icon=""
+          label="Volver"
+          class="q-mb-md"
+          @click="$router.back()"
+        >
+          <IconArrowLeft :size="20" class="q-mr-xs" />
+        </q-btn>
 
-      <!-- Filtros del historial -->
-      <FiltrosHistorial
-        v-model:comercio="filtroComercio"
-        v-model:periodo="filtroPeriodo"
-        v-model:orden="ordenSeleccionado"
-        :comercios-disponibles="comerciosDisponibles"
-        class="q-mb-md"
-      />
+        <!-- Cabecera del producto -->
+        <InfoProducto :producto="productoActual" class="q-mb-lg" />
 
-      <!-- Historial completo de precios -->
-      <HistorialPrecios
-        :precios="preciosFiltrados"
-        :precios-confirmados="preciosConfirmadosPorUsuario"
-        :orden-seleccionado="ordenSeleccionado"
-        @confirmar-precio="confirmarPrecio"
-      />
+        <!-- Estadísticas en cards -->
+        <EstadisticasProducto :producto="productoActual" class="q-mb-lg" />
+
+        <!-- Filtros del historial -->
+        <FiltrosHistorial
+          v-model:comercio="filtroComercio"
+          v-model:periodo="filtroPeriodo"
+          v-model:orden="ordenSeleccionado"
+          :comercios-disponibles="comerciosDisponibles"
+          class="q-mb-md"
+        />
+
+        <!-- Historial completo de precios -->
+        <HistorialPrecios
+          :precios="preciosFiltrados"
+          :precios-confirmados="confirmacionesStore.preciosConfirmados"
+          :orden-seleccionado="ordenSeleccionado"
+          @confirmar-precio="confirmarPrecio"
+        />
+      </template>
     </div>
   </q-page>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { IconArrowLeft } from '@tabler/icons-vue'
 import InfoProducto from '../components/DetalleProducto/InfoProducto.vue'
 import EstadisticasProducto from '../components/DetalleProducto/EstadisticasProducto.vue'
 import FiltrosHistorial from '../components/DetalleProducto/FiltrosHistorial.vue'
 import HistorialPrecios from '../components/DetalleProducto/HistorialPrecios.vue'
+import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
+import { useConfirmacionesStore } from '../almacenamiento/stores/confirmacionesStore.js'
+import { useQuasar } from 'quasar'
 
-// Simular usuario actual (después viene de autenticación)
-const usuarioActualId = ref('user_actual_123')
+// ========================================
+// 🏪 STORES Y ROUTE
+// ========================================
 
-// Rastrear confirmaciones del usuario (localStorage en MVP, después Firebase)
-const preciosConfirmadosPorUsuario = ref(new Set())
+const productosStore = useProductosStore()
+const confirmacionesStore = useConfirmacionesStore()
+const route = useRoute()
+const $q = useQuasar()
 
-// Cargar confirmaciones desde localStorage al montar
-const cargarConfirmaciones = () => {
-  const guardado = localStorage.getItem(`confirmaciones_${usuarioActualId.value}`)
-  if (guardado) {
-    preciosConfirmadosPorUsuario.value = new Set(JSON.parse(guardado))
-  }
-}
+// ========================================
+// 📊 ESTADO
+// ========================================
 
-// Guardar confirmaciones en localStorage
-const guardarConfirmaciones = () => {
-  localStorage.setItem(
-    `confirmaciones_${usuarioActualId.value}`,
-    JSON.stringify([...preciosConfirmadosPorUsuario.value]),
-  )
-}
-
-// Cargar al iniciar
-cargarConfirmaciones()
+const cargando = ref(false)
+const error = ref(null)
+const productoActual = ref(null)
 
 // Filtros
 const filtroComercio = ref('todos')
 const filtroPeriodo = ref('30')
 const ordenSeleccionado = ref('reciente')
 
-// DATOS DE EJEMPLO - Después viene de Capacitor/Firebase
-const productoActual = ref({
-  id: 1,
-  nombre: 'Leche La Serenísima 1L',
-  imagen: null,
-  precioMejor: 850,
-  comercioMejor: 'TATA',
-  tendenciaGeneral: 'bajando',
-  porcentajeTendencia: -5,
-  precios: [
-    // DEVOTO - Av. 18 de Julio 1234
-    {
-      id: 1,
-      comercio: 'DEVOTO',
-      nombreCompleto: 'DEVOTO - Av. 18 de Julio 1234',
-      direccion: 'Av. 18 de Julio 1234',
-      valor: 980,
-      fecha: '2026-01-15T09:00:00',
-      confirmaciones: 0,
-      usuarioId: 'user789',
-    },
-    {
-      id: 2,
-      comercio: 'DEVOTO',
-      nombreCompleto: 'DEVOTO - Av. 18 de Julio 1234',
-      direccion: 'Av. 18 de Julio 1234',
-      valor: 1020,
-      fecha: '2026-01-05T14:30:00',
-      confirmaciones: 5,
-      usuarioId: 'user101',
-    },
-    {
-      id: 3,
-      comercio: 'DEVOTO',
-      nombreCompleto: 'DEVOTO - Av. 18 de Julio 1234',
-      direccion: 'Av. 18 de Julio 1234',
-      valor: 1050,
-      fecha: '2025-12-20T11:00:00',
-      confirmaciones: 18,
-      usuarioId: 'user202',
-    },
-
-    // TATA - Av. Brasil 2550
-    {
-      id: 4,
-      comercio: 'TATA',
-      nombreCompleto: 'TATA - Av. Brasil 2550',
-      direccion: 'Av. Brasil 2550',
-      valor: 850,
-      fecha: '2026-01-13T10:00:00',
-      confirmaciones: 75,
-      usuarioId: 'user123',
-    },
-    {
-      id: 5,
-      comercio: 'TATA',
-      nombreCompleto: 'TATA - Av. Brasil 2550',
-      direccion: 'Av. Brasil 2550',
-      valor: 895,
-      fecha: '2025-12-28T11:00:00',
-      confirmaciones: 42,
-      usuarioId: 'user654',
-    },
-    {
-      id: 6,
-      comercio: 'TATA',
-      nombreCompleto: 'TATA - Av. Brasil 2550',
-      direccion: 'Av. Brasil 2550',
-      valor: 920,
-      fecha: '2025-12-10T16:20:00',
-      confirmaciones: 28,
-      usuarioId: 'user777',
-    },
-
-    // DISCO - Punta Carretas
-    {
-      id: 7,
-      comercio: 'DISCO',
-      nombreCompleto: 'DISCO - Av. Sarmiento 2456',
-      direccion: 'Av. Sarmiento 2456, Punta Carretas',
-      valor: 920,
-      fecha: '2026-01-08T15:30:00',
-      confirmaciones: 8,
-      usuarioId: 'user456',
-    },
-    {
-      id: 8,
-      comercio: 'DISCO',
-      nombreCompleto: 'DISCO - Av. Sarmiento 2456',
-      direccion: 'Av. Sarmiento 2456, Punta Carretas',
-      valor: 950,
-      fecha: '2025-12-25T10:15:00',
-      confirmaciones: 22,
-      usuarioId: 'user888',
-    },
-
-    // DON JOSE - Pocitos
-    {
-      id: 9,
-      comercio: 'DON JOSE',
-      nombreCompleto: 'DON JOSE - Luis Alberto de Herrera 1420',
-      direccion: 'Luis Alberto de Herrera 1420, Pocitos',
-      valor: 1100,
-      fecha: '2025-12-10T14:00:00',
-      confirmaciones: 3,
-      usuarioId: 'user321',
-    },
-
-    // TATA - Tres Cruces (otro TATA diferente)
-    {
-      id: 10,
-      comercio: 'TATA',
-      nombreCompleto: 'TATA - Bv. Artigas 1234',
-      direccion: 'Bv. Artigas 1234, Tres Cruces',
-      valor: 870,
-      fecha: '2026-01-14T12:30:00',
-      confirmaciones: 12,
-      usuarioId: 'user999',
-    },
-    {
-      id: 11,
-      comercio: 'TATA',
-      nombreCompleto: 'TATA - Bv. Artigas 1234',
-      direccion: 'Bv. Artigas 1234, Tres Cruces',
-      valor: 890,
-      fecha: '2026-01-02T09:45:00',
-      confirmaciones: 7,
-      usuarioId: 'user111',
-    },
-
-    // TATA - Camino Maldonado (PRECIO SUBIENDO)
-    {
-      id: 12,
-      comercio: 'TATA',
-      nombreCompleto: 'TATA - Camino Maldonado 3456',
-      direccion: 'Camino Maldonado 3456, Malvín',
-      valor: 1000,
-      fecha: '2026-01-12T16:20:00',
-      confirmaciones: 5,
-      usuarioId: 'user444',
-    },
-    {
-      id: 13,
-      comercio: 'TATA',
-      nombreCompleto: 'TATA - Camino Maldonado 3456',
-      direccion: 'Camino Maldonado 3456, Malvín',
-      valor: 880,
-      fecha: '2025-12-28T10:00:00',
-      confirmaciones: 18,
-      usuarioId: 'user555',
-    },
-    {
-      id: 14,
-      comercio: 'TATA',
-      nombreCompleto: 'TATA - Camino Maldonado 3456',
-      direccion: 'Camino Maldonado 3456, Malvín',
-      valor: 999,
-      fecha: '2025-01-28T10:00:00',
-      confirmaciones: 150,
-      usuarioId: 'user555',
-    },
-    {
-      id: 15,
-      comercio: 'TATA',
-      nombreCompleto: 'TATA - Camino Maldonado 3456',
-      direccion: 'Camino Maldonado 3456, Malvín',
-      valor: 820,
-      fecha: '2025-10-08T14:30:00',
-      confirmaciones: 32,
-      usuarioId: 'user666',
-    },
-  ],
-})
+// ========================================
+// 🧮 COMPUTED
+// ========================================
 
 // Comercios únicos disponibles para el filtro
 const comerciosDisponibles = computed(() => {
+  if (!productoActual.value?.precios) return []
   const comercios = [...new Set(productoActual.value.precios.map((p) => p.nombreCompleto))]
   return comercios.sort()
 })
 
 // Precios filtrados según los filtros activos
 const preciosFiltrados = computed(() => {
+  if (!productoActual.value?.precios) return []
+
   let precios = [...productoActual.value.precios]
 
   // Filtrar por comercio
@@ -292,23 +141,108 @@ const preciosFiltrados = computed(() => {
   return precios
 })
 
-// Confirmar precio (dar upvote)
-const confirmarPrecio = (precioId) => {
-  // Verificar si ya confirmó este precio
-  if (preciosConfirmadosPorUsuario.value.has(precioId)) {
-    console.log('Ya confirmaste este precio anteriormente')
+// ========================================
+// 🔄 FUNCIONES
+// ========================================
+
+/**
+ * 📥 CARGAR PRODUCTO
+ * Obtiene el producto desde el store usando el ID de la URL
+ */
+async function cargarProducto() {
+  cargando.value = true
+  error.value = null
+
+  try {
+    const productoId = parseInt(route.params.id)
+
+    if (isNaN(productoId)) {
+      error.value = 'ID de producto inválido'
+      return
+    }
+
+    console.log(`📥 Cargando producto ${productoId}...`)
+
+    // Buscar en el store (ya cargado en MisProductosPage)
+    let producto = productosStore.obtenerProductoPorId(productoId)
+
+    // Si no está en el store, cargar desde el servicio
+    if (!producto) {
+      producto = await productosStore.obtenerProducto(productoId)
+    }
+
+    if (!producto) {
+      error.value = 'Producto no encontrado'
+      return
+    }
+
+    productoActual.value = producto
+    console.log('✅ Producto cargado:', producto.nombre)
+  } catch (err) {
+    console.error('❌ Error al cargar producto:', err)
+    error.value = 'Error al cargar el producto'
+  } finally {
+    cargando.value = false
+  }
+}
+
+/**
+ * 👍 CONFIRMAR PRECIO
+ * @param {string} precioId - ID del precio a confirmar
+ */
+async function confirmarPrecio(precioId) {
+  if (!productoActual.value) return
+
+  console.log(`👍 Confirmando precio ${precioId}...`)
+
+  // Verificación local rápida
+  if (confirmacionesStore.precioEstaConfirmado(precioId)) {
+    $q.notify({
+      type: 'warning',
+      message: 'Ya confirmaste este precio anteriormente',
+      position: 'top',
+    })
     return
   }
 
-  const precio = productoActual.value.precios.find((p) => p.id === precioId)
-  if (precio) {
-    precio.confirmaciones++
-    preciosConfirmadosPorUsuario.value.add(precioId)
-    guardarConfirmaciones()
-    console.log(`Precio ${precioId} confirmado. Total: ${precio.confirmaciones}`)
-    // Acá después guardar en Capacitor/Firebase
+  // Confirmar usando el store
+  const resultado = await confirmacionesStore.confirmarPrecio(productoActual.value.id, precioId)
+
+  if (resultado.exito) {
+    // Actualizar producto local con los nuevos datos
+    productoActual.value = resultado.producto
+
+    $q.notify({
+      type: 'positive',
+      message: `Precio confirmado (${resultado.nuevasConfirmaciones} confirmaciones)`,
+      position: 'top',
+      icon: 'thumb_up',
+    })
+  } else {
+    $q.notify({
+      type: 'negative',
+      message: resultado.mensaje,
+      position: 'top',
+    })
   }
 }
+
+// ========================================
+// ⚡ LIFECYCLE HOOKS
+// ========================================
+
+/**
+ * Al montar el componente:
+ * 1. Cargar confirmaciones del usuario
+ * 2. Cargar producto específico
+ */
+onMounted(async () => {
+  // Cargar confirmaciones del usuario
+  await confirmacionesStore.cargarConfirmaciones()
+
+  // Cargar producto
+  await cargarProducto()
+})
 </script>
 
 <style scoped>

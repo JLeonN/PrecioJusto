@@ -16,9 +16,10 @@
       </q-badge>
     </div>
 
-    <!-- Botón confirmar (solo si es el más reciente) -->
+    <!-- Botón confirmar (solo si es el más reciente y no está confirmado) -->
     <div v-if="esMasReciente" class="precio-acciones">
       <q-btn
+        v-if="!yaConfirmado"
         flat
         dense
         color="primary"
@@ -28,13 +29,17 @@
         <IconThumbUp :size="16" class="q-mr-xs" />
         Confirmar
       </q-btn>
+      <q-chip v-else color="positive" text-color="white" size="sm">
+        <IconCheck :size="14" class="q-mr-xs" />
+        Confirmado
+      </q-chip>
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
-import { IconThumbUp } from '@tabler/icons-vue'
+import { IconThumbUp, IconCheck } from '@tabler/icons-vue'
 
 const props = defineProps({
   precio: {
@@ -42,6 +47,10 @@ const props = defineProps({
     required: true,
   },
   esMasReciente: {
+    type: Boolean,
+    default: false,
+  },
+  yaConfirmado: {
     type: Boolean,
     default: false,
   },

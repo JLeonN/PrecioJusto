@@ -2,80 +2,103 @@
   <q-page class="q-pa-md">
     <!-- Contenedor con ancho máximo -->
     <div class="contenedor-productos">
-      <ListaProductos :productos="productosEjemplo" />
+      <!-- INDICADOR DE CARGA -->
+      <div v-if="productosStore.cargando" class="text-center q-pa-xl">
+        <q-spinner color="primary" size="50px" />
+        <p class="text-grey-7 q-mt-md">Cargando productos...</p>
+      </div>
+
+      <!-- MENSAJE DE ERROR -->
+      <q-banner v-else-if="productosStore.error" class="bg-negative text-white q-mb-md" rounded>
+        <template #avatar>
+          <q-icon name="error" color="white" />
+        </template>
+        {{ productosStore.error }}
+        <template #action>
+          <q-btn flat label="Reintentar" @click="cargarProductos" />
+        </template>
+      </q-banner>
+
+      <!-- MENSAJE SI NO HAY PRODUCTOS -->
+      <div v-else-if="!productosStore.tieneProductos" class="text-center q-pa-xl">
+        <q-icon name="inventory_2" size="64px" color="grey-5" />
+        <p class="text-h6 text-grey-7 q-mt-md">No tienes productos guardados</p>
+        <p class="text-grey-6">Presiona el botón + para agregar tu primer producto</p>
+        <p class="text-grey-6 q-mt-md">
+          O presiona el botón verde
+          <q-icon name="upload" color="secondary" size="20px" />
+          para cargar datos de ejemplo
+        </p>
+      </div>
+
+      <!-- LISTA DE PRODUCTOS -->
+      <ListaProductos v-else :productos="productosStore.productosOrdenadosPorFecha" />
     </div>
 
     <!-- BOTÓN FLOTANTE AGREGAR -->
     <q-page-sticky position="bottom-right" :offset="[18, 18]">
-      <q-btn fab color="primary" icon="" size="lg">
+      <q-btn fab color="primary" icon="" size="lg" @click="abrirDialogoAgregar">
         <IconPlus :size="28" />
+      </q-btn>
+    </q-page-sticky>
+
+    <!-- BOTÓN TEMPORAL PARA SEED (solo desarrollo) -->
+    <q-page-sticky position="bottom-left" :offset="[18, 18]">
+      <q-btn fab color="secondary" icon="upload" size="md" @click="cargarDatosEjemplo">
+        <q-tooltip>Cargar datos de ejemplo</q-tooltip>
       </q-btn>
     </q-page-sticky>
   </q-page>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted } from 'vue'
 import { IconPlus } from '@tabler/icons-vue'
 import ListaProductos from '../components/MisProductos/ListaProductos.vue'
+import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
+import { ejecutarSeed } from '../almacenamiento/seed.js'
+import { useQuasar } from 'quasar'
 
-// Datos de ejemplo para visualizar
-const productosEjemplo = ref([
-  {
-    id: 1,
-    nombre: 'Leche La Serenísima 1L',
-    imagen: null,
-    precioMejor: 850,
-    comercioMejor: 'TATA',
-    diferenciaPrecio: 250,
-    precios: [
-      { comercio: 'TATA', valor: 850, fecha: 'Hace 2 días', esMejor: true },
-      { comercio: 'DISCO', valor: 920, fecha: 'Hace 1 día', esMejor: false },
-      { comercio: 'DEVOTO', valor: 980, fecha: 'Hoy', esMejor: false },
-      { comercio: 'DON JOSE', valor: 1100, fecha: 'Hace 3 días', esMejor: false },
-    ],
-  },
-  {
-    id: 2,
-    nombre: 'Coca Cola 2.25L',
-    imagen: null,
-    precioMejor: 1250,
-    comercioMejor: 'Kiosco Pepe',
-    diferenciaPrecio: 350,
-    precios: [
-      { comercio: 'Kiosco Pepe', valor: 1250, fecha: 'Hace 1 día', esMejor: true },
-      { comercio: 'DISCO', valor: 1400, fecha: 'Hoy', esMejor: false },
-      { comercio: 'DEVOTO', valor: 1600, fecha: 'Hace 2 días', esMejor: false },
-    ],
-  },
-  {
-    id: 3,
-    nombre: 'Pan Lactal Bimbo Grande',
-    imagen: null,
-    precioMejor: 920,
-    comercioMejor: 'Panaderia Maria',
-    diferenciaPrecio: 180,
-    precios: [
-      { comercio: 'Panaderia Maria', valor: 920, fecha: 'Hoy', esMejor: true },
-      { comercio: 'TATA', valor: 1050, fecha: 'Hace 1 día', esMejor: false },
-      { comercio: 'DISCO', valor: 1100, fecha: 'Hace 2 días', esMejor: false },
-    ],
-  },
-  {
-    id: 4,
-    nombre: 'Aceite Cocinero 900ml',
-    imagen: null,
-    precioMejor: 1580,
-    comercioMejor: 'Gafi',
-    diferenciaPrecio: 420,
-    precios: [
-      { comercio: 'Gafi', valor: 1580, fecha: 'Hace 3 días', esMejor: true },
-      { comercio: 'DEVOTO', valor: 1850, fecha: 'Hace 1 día', esMejor: false },
-      { comercio: 'cyber 3.com', valor: 1920, fecha: 'Hoy', esMejor: false },
-      { comercio: 'DON JOSE', valor: 2000, fecha: 'Hace 2 días', esMejor: false },
-    ],
-  },
-])
+const productosStore = useProductosStore()
+const $q = useQuasar()
+
+async function cargarProductos() {
+  await productosStore.cargarProductos()
+}
+
+function abrirDialogoAgregar() {
+  console.log('🚧 TODO: Implementar diálogo de agregar producto')
+}
+
+async function cargarDatosEjemplo() {
+  $q.notify({
+    type: 'info',
+    message: 'Cargando productos de ejemplo...',
+    position: 'top',
+  })
+
+  const resultado = await ejecutarSeed()
+
+  if (resultado.exitosos > 0) {
+    $q.notify({
+      type: 'positive',
+      message: `${resultado.exitosos} productos cargados`,
+      position: 'top',
+    })
+
+    await cargarProductos()
+  } else {
+    $q.notify({
+      type: 'negative',
+      message: 'Error al cargar productos',
+      position: 'top',
+    })
+  }
+}
+
+onMounted(async () => {
+  await cargarProductos()
+})
 </script>
 
 <style scoped>
