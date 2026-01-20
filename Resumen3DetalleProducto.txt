@@ -76,3 +76,31 @@ Cada precio requiere:
 - Sin validación de direcciones
 - Sin geolocalización (planificado Fase 2)
 - Sin base de datos de comercios precargados
+
+## INTEGRACIÓN CON STORES
+
+### CARGA DE PRODUCTO
+- Obtiene producto desde productosStore.obtenerProductoPorId()
+- ID desde URL: route.params.id (string, NO parseInt)
+- Si no existe en store: muestra error "Producto no encontrado"
+
+### CONFIRMACIONES
+- Usuario hardcodeado: 'user_actual_123'
+- confirmacionesStore.cargarConfirmaciones() al montar componente
+- confirmacionesStore.confirmarPrecio(productoId, precioId)
+- Validación local rápida antes de llamar servicio
+- Feedback con Quasar Notify (success/warning/error)
+
+### PERSISTENCIA
+- Confirmaciones en Capacitor Storage: confirmaciones_{usuarioId}
+- Estructura: { usuarioId, preciosConfirmados: [ids], fechaActualizacion }
+- Producto actualizado automáticamente después de confirmar
+
+### FLUJO CONFIRMACIÓN
+1. Usuario hace click en "Confirmar"
+2. Verificar si ya confirmó (local)
+3. Llamar confirmacionesStore.confirmarPrecio()
+4. Servicio incrementa contador en producto
+5. Servicio registra confirmación del usuario
+6. Store actualiza estado local
+7. UI muestra notificación y actualiza contador

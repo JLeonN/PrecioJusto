@@ -13,6 +13,39 @@ Sistema colaborativo donde usuarios comparten datos de precios.
 - Tabler Icons (iconografía exclusiva)
 - JavaScript (NO TypeScript)
 
+## SISTEMA DE ALMACENAMIENTO (Arquitectura de 3 capas)
+
+### ADAPTADORES
+- LocalStorageAdapter.js: Para testing web
+- CapacitorAdapter.js: Para móvil (SQLite nativo)
+- FirestoreAdapter.js: Futuro (nube colaborativa)
+
+### SERVICIOS
+- AlmacenamientoService.js: Configuración central de adaptadores
+- ProductosService.js: CRUD y lógica de negocio de productos
+- ConfirmacionesService.js: Lógica de upvotes (1 por usuario por precio)
+
+### STORES (PINIA)
+- productosStore.js: Estado global de productos
+- confirmacionesStore.js: Estado global de confirmaciones
+
+### CAMBIO DE ADAPTADOR
+Modificar ADAPTADOR_ACTIVO en AlmacenamientoService.js
+Opciones: 'local' | 'capacitor' | 'firestore'
+
+### SEED
+- seed.js: Script para poblar 4 productos de prueba
+- ejecutarSeed(): Carga productos hardcodeados
+- limpiarDatos(): Elimina todos los productos
+
+### CONFIGURACIÓN QUASAR
+- Notify plugin habilitado en quasar.config.js
+
+### IDS DE PRODUCTOS
+- Generados como strings alfanuméricos (Date.now() + random)
+- NO usar parseInt() en rutas dinámicas
+- Formato: "17688640000082zwcohe41y"
+
 ## ALMACENAMIENTO DE DATOS
 - Fase 1 (MVP): Capacitor Storage + localStorage (confirmaciones de usuario)
 - Fase 2: Firebase/Firestore (nube con privacidad configurable)
@@ -33,19 +66,32 @@ src/
 ├── router/
 │   ├── index.js
 │   └── routes.js
-└── components/
-    ├── EssentialLink.vue
-    ├── Tarjetas/
-    │   └── TarjetaProducto.vue
-    ├── MisProductos/
-    │   └── ListaProductos.vue
-    └── DetalleProducto/
-        ├── InfoProducto.vue
-        ├── EstadisticasProducto.vue
-        ├── FiltrosHistorial.vue
-        ├── HistorialPrecios.vue
-        ├── ItemComercioHistorial.vue
-        └── ItemPrecioHistorial.vue
+├── components/
+│   ├── EssentialLink.vue
+│   ├── Tarjetas/
+│   │   └── TarjetaProducto.vue
+│   ├── MisProductos/
+│   │   └── ListaProductos.vue
+│   └── DetalleProducto/
+│       ├── InfoProducto.vue
+│       ├── EstadisticasProducto.vue
+│       ├── FiltrosHistorial.vue
+│       ├── HistorialPrecios.vue
+│       ├── ItemComercioHistorial.vue
+│       └── ItemPrecioHistorial.vue
+└── almacenamiento/
+    ├── adaptadores/
+    │   ├── LocalStorageAdapter.js
+    │   ├── CapacitorAdapter.js
+    │   └── FirestoreAdapter.js (futuro)
+    ├── servicios/
+    │   ├── AlmacenamientoService.js
+    │   ├── ProductosService.js
+    │   └── ConfirmacionesService.js
+    ├── stores/
+    │   ├── productosStore.js
+    │   └── confirmacionesStore.js
+    └── seed.js
 
 ## CONVENCIONES DE NOMENCLATURA
 - Carpetas y archivos: PascalCase (ejemplo: MisProductos/, TarjetaProducto.vue)

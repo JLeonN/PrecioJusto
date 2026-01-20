@@ -78,3 +78,15 @@ Cada producto requiere:
 - Solo muestra top 3 en expansión (no scroll infinito)
 - No hay funcionalidad de menú contextual aún
 - Datos hardcodeados en MisProductosPage.vue
+
+## INTEGRACIÓN CON STORES
+
+### DATOS
+- Ya NO se usan datos hardcodeados en componentes
+- ListaProductos recibe productos desde productosStore
+- Datos reactivos: cambios en store actualizan UI automáticamente
+
+### CARGA DE DATOS
+- MisProductosPage.vue carga productos con productosStore.cargarProductos()
+- Botón seed temporal para poblar productos de prueba
+- Estados de carga y error manejados por el store
