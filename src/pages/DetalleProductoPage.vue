@@ -147,16 +147,15 @@ const preciosFiltrados = computed(() => {
 
 /**
  * 📥 CARGAR PRODUCTO
- * Obtiene el producto desde el store usando el ID de la URL
  */
 async function cargarProducto() {
   cargando.value = true
   error.value = null
 
   try {
-    const productoId = parseInt(route.params.id)
+    const productoId = route.params.id
 
-    if (isNaN(productoId)) {
+    if (!productoId) {
       error.value = 'ID de producto inválido'
       return
     }
@@ -164,12 +163,7 @@ async function cargarProducto() {
     console.log(`📥 Cargando producto ${productoId}...`)
 
     // Buscar en el store (ya cargado en MisProductosPage)
-    let producto = productosStore.obtenerProductoPorId(productoId)
-
-    // Si no está en el store, cargar desde el servicio
-    if (!producto) {
-      producto = await productosStore.obtenerProducto(productoId)
-    }
+    const producto = productosStore.obtenerProductoPorId(productoId)
 
     if (!producto) {
       error.value = 'Producto no encontrado'
@@ -188,7 +182,6 @@ async function cargarProducto() {
 
 /**
  * 👍 CONFIRMAR PRECIO
- * @param {string} precioId - ID del precio a confirmar
  */
 async function confirmarPrecio(precioId) {
   if (!productoActual.value) return
@@ -232,9 +225,7 @@ async function confirmarPrecio(precioId) {
 // ========================================
 
 /**
- * Al montar el componente:
- * 1. Cargar confirmaciones del usuario
- * 2. Cargar producto específico
+ * Al montar el componente
  */
 onMounted(async () => {
   // Cargar confirmaciones del usuario

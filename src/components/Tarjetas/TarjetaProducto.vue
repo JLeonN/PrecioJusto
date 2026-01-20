@@ -94,6 +94,7 @@
             label="Ver historial completo"
             class="full-width q-mt-md"
             :to="`/producto/${producto.id}`"
+            @click="console.log('ID del producto:', producto.id)"
           >
             <IconChartLine :size="18" class="q-mr-xs" />
           </q-btn>
