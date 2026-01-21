@@ -33,7 +33,13 @@
       hint="Opcional"
       :rules="modo === 'comunidad' ? [requerido] : []"
       @update:model-value="emitirCambios"
-    />
+    >
+      <template #append>
+        <q-btn flat round dense icon="photo_camera" color="grey-6" size="sm" disable>
+          <q-tooltip>Escanear código (próximamente)</q-tooltip>
+        </q-btn>
+      </template>
+    </q-input>
 
     <!-- CANTIDAD Y UNIDAD -->
     <div class="row q-col-gutter-md">
@@ -45,7 +51,7 @@
           dense
           type="number"
           min="0"
-          step="0.01"
+          :step="stepCantidad"
           placeholder="1"
           :rules="modo === 'comunidad' ? [requerido, cantidadValida] : [cantidadValida]"
           @update:model-value="emitirCambios"
@@ -62,7 +68,7 @@
           emit-value
           map-options
           :rules="modo === 'comunidad' ? [requerido] : []"
-          @update:model-value="emitirCambios"
+          @update:model-value="alCambiarUnidad"
         />
       </div>
     </div>
@@ -82,7 +88,8 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
+import preferenciasService from '../../almacenamiento/servicios/PreferenciasService.js'
 
 const props = defineProps({
   modelValue: {
@@ -125,6 +132,25 @@ const datosInternos = ref({
   unidad: props.modelValue.unidad || 'unidad',
   categoria: props.modelValue.categoria || '',
 })
+
+// Step inteligente según unidad
+const stepCantidad = computed(() => {
+  const unidadesEnteras = ['unidad', 'pack', 'metro']
+  return unidadesEnteras.includes(datosInternos.value.unidad) ? '1' : '0.01'
+})
+
+// Cargar unidad guardada al montar
+onMounted(async () => {
+  const preferencias = await preferenciasService.obtenerPreferencias()
+  datosInternos.value.unidad = preferencias.unidad
+  emitirCambios()
+})
+
+// Al cambiar unidad, guardarla
+async function alCambiarUnidad() {
+  await preferenciasService.guardarUnidad(datosInternos.value.unidad)
+  emitirCambios()
+}
 
 // Sincronizar con props externos
 watch(
