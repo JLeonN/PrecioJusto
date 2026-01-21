@@ -72,13 +72,18 @@ src/
 │   │   └── TarjetaProducto.vue
 │   ├── MisProductos/
 │   │   └── ListaProductos.vue
-│   └── DetalleProducto/
-│       ├── InfoProducto.vue
-│       ├── EstadisticasProducto.vue
-│       ├── FiltrosHistorial.vue
-│       ├── HistorialPrecios.vue
-│       ├── ItemComercioHistorial.vue
-│       └── ItemPrecioHistorial.vue
+│   ├── DetalleProducto/
+│   │   ├── InfoProducto.vue
+│   │   ├── EstadisticasProducto.vue
+│   │   ├── FiltrosHistorial.vue
+│   │   ├── HistorialPrecios.vue
+│   │   ├── ItemComercioHistorial.vue
+│   │   └── ItemPrecioHistorial.vue
+│   └── Formularios/
+│       ├── FormularioProducto.vue
+│       ├── FormularioPrecio.vue
+│       └── Dialogos/
+│           └── DialogoAgregarProducto.vue
 └── almacenamiento/
     ├── adaptadores/
     │   ├── LocalStorageAdapter.js
@@ -121,3 +126,5 @@ src/
 - Control de privacidad de datos compartidos
 - Monetización: Google AdMob
 - Import/Export de datos
+- Formularios modulares para agregar productos (manual + precio)
+- Sistema de validación dual (modo local vs comunidad)
