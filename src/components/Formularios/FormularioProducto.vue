@@ -1,57 +1,39 @@
 <template>
   <div class="formulario-producto">
     <!-- NOMBRE DEL PRODUCTO -->
-    <div class="campo-formulario">
-      <q-input
-        v-model="datosInternos.nombre"
-        label="Nombre del producto"
-        outlined
-        dense
-        placeholder="Ej: Leche La Serenísima"
-        :rules="modo === 'comunidad' ? [requerido] : []"
-        @update:model-value="emitirCambios"
-      >
-        <template #prepend>
-          <IconShoppingBag :size="20" />
-        </template>
-      </q-input>
-    </div>
+    <q-input
+      v-model="datosInternos.nombre"
+      label="Nombre del producto"
+      outlined
+      dense
+      placeholder="Ej: Leche La Serenísima"
+      :rules="modo === 'comunidad' ? [requerido] : []"
+      @update:model-value="emitirCambios"
+    />
 
     <!-- MARCA -->
-    <div class="campo-formulario">
-      <q-input
-        v-model="datosInternos.marca"
-        label="Marca"
-        outlined
-        dense
-        placeholder="Ej: La Serenísima, Conaprole"
-        hint="Opcional"
-        :rules="modo === 'comunidad' ? [requerido] : []"
-        @update:model-value="emitirCambios"
-      >
-        <template #prepend>
-          <IconTag :size="20" />
-        </template>
-      </q-input>
-    </div>
+    <q-input
+      v-model="datosInternos.marca"
+      label="Marca"
+      outlined
+      dense
+      placeholder="Ej: La Serenísima, Conaprole"
+      hint="Opcional"
+      :rules="modo === 'comunidad' ? [requerido] : []"
+      @update:model-value="emitirCambios"
+    />
 
     <!-- CÓDIGO DE BARRAS -->
-    <div class="campo-formulario">
-      <q-input
-        v-model="datosInternos.codigoBarras"
-        label="Código de barras"
-        outlined
-        dense
-        placeholder="Ej: 7790742005526"
-        hint="Opcional"
-        :rules="modo === 'comunidad' ? [requerido] : []"
-        @update:model-value="emitirCambios"
-      >
-        <template #prepend>
-          <IconBarcode :size="20" />
-        </template>
-      </q-input>
-    </div>
+    <q-input
+      v-model="datosInternos.codigoBarras"
+      label="Código de barras"
+      outlined
+      dense
+      placeholder="Ej: 7790742005526"
+      hint="Opcional"
+      :rules="modo === 'comunidad' ? [requerido] : []"
+      @update:model-value="emitirCambios"
+    />
 
     <!-- CANTIDAD Y UNIDAD -->
     <div class="row q-col-gutter-md">
@@ -67,11 +49,7 @@
           placeholder="1"
           :rules="modo === 'comunidad' ? [requerido, cantidadValida] : [cantidadValida]"
           @update:model-value="emitirCambios"
-        >
-          <template #prepend>
-            <IconRuler :size="20" />
-          </template>
-        </q-input>
+        />
       </div>
 
       <div class="col-6">
@@ -85,44 +63,26 @@
           map-options
           :rules="modo === 'comunidad' ? [requerido] : []"
           @update:model-value="emitirCambios"
-        >
-          <template #prepend>
-            <IconScale :size="20" />
-          </template>
-        </q-select>
+        />
       </div>
     </div>
 
     <!-- CATEGORÍA -->
-    <div class="campo-formulario">
-      <q-input
-        v-model="datosInternos.categoria"
-        label="Categoría"
-        outlined
-        dense
-        placeholder="Ej: Lácteos, Bebidas, Almacén"
-        hint="Opcional"
-        :rules="modo === 'comunidad' ? [requerido] : []"
-        @update:model-value="emitirCambios"
-      >
-        <template #prepend>
-          <IconCategory :size="20" />
-        </template>
-      </q-input>
-    </div>
+    <q-input
+      v-model="datosInternos.categoria"
+      label="Categoría"
+      outlined
+      dense
+      placeholder="Ej: Lácteos, Bebidas, Almacén"
+      hint="Opcional"
+      :rules="modo === 'comunidad' ? [requerido] : []"
+      @update:model-value="emitirCambios"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue'
-import {
-  IconShoppingBag,
-  IconTag,
-  IconBarcode,
-  IconRuler,
-  IconScale,
-  IconCategory,
-} from '@tabler/icons-vue'
 
 const props = defineProps({
   modelValue: {
@@ -203,8 +163,5 @@ function cantidadValida(val) {
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-.campo-formulario {
-  width: 100%;
 }
 </style>

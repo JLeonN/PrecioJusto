@@ -9,30 +9,28 @@
       </q-card-section>
 
       <!-- CONTENIDO DEL FORMULARIO -->
-      <q-card-section class="q-pt-md">
-        <q-scroll-area style="max-height: 60vh">
-          <div class="formularios-contenedor">
-            <!-- Sección: Datos del Producto -->
-            <div class="seccion-formulario">
-              <div class="seccion-titulo">
-                <IconPackage :size="20" class="q-mr-xs" />
-                <span>Datos del Producto</span>
-              </div>
-              <FormularioProducto v-model="datosProducto" :modo="modo" />
+      <q-card-section class="q-pt-md" style="max-height: 60vh; overflow-y: auto">
+        <div class="formularios-contenedor">
+          <!-- Sección: Datos del Producto -->
+          <div class="seccion-formulario">
+            <div class="seccion-titulo">
+              <q-icon name="inventory_2" size="20px" class="q-mr-xs" />
+              <span>Datos del Producto</span>
             </div>
-
-            <q-separator class="q-my-lg" />
-
-            <!-- Sección: Primer Precio -->
-            <div class="seccion-formulario">
-              <div class="seccion-titulo">
-                <IconShoppingCart :size="20" class="q-mr-xs" />
-                <span>Primer Precio</span>
-              </div>
-              <FormularioPrecio v-model="datosPrecio" :modo="modo" />
-            </div>
+            <FormularioProducto v-model="datosProducto" :modo="modo" />
           </div>
-        </q-scroll-area>
+
+          <q-separator class="q-my-lg" />
+
+          <!-- Sección: Primer Precio -->
+          <div class="seccion-formulario">
+            <div class="seccion-titulo">
+              <q-icon name="local_offer" size="20px" class="q-mr-xs" />
+              <span>Primer Precio</span>
+            </div>
+            <FormularioPrecio v-model="datosPrecio" :modo="modo" />
+          </div>
+        </div>
       </q-card-section>
 
       <!-- ACCIONES -->
@@ -53,7 +51,6 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { IconPackage, IconShoppingCart } from '@tabler/icons-vue'
 import FormularioProducto from '../FormularioProducto.vue'
 import FormularioPrecio from '../FormularioPrecio.vue'
 import { useProductosStore } from '../../../almacenamiento/stores/productosStore.js'
@@ -221,11 +218,13 @@ function cerrarDialogo() {
 .formularios-contenedor {
   padding: 0 4px;
 }
+
 .seccion-formulario {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
+
 .seccion-titulo {
   display: flex;
   align-items: center;

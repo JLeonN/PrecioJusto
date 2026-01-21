@@ -1,66 +1,47 @@
 <template>
   <div class="formulario-precio">
     <!-- COMERCIO -->
-    <div class="campo-formulario">
-      <q-input
-        v-model="datosInternos.comercio"
-        label="Comercio"
-        outlined
-        dense
-        placeholder="Ej: TATA, DISCO, Almacén del barrio"
-        :rules="modo === 'comunidad' ? [requerido] : []"
-        @update:model-value="emitirCambios"
-      >
-        <template #prepend>
-          <IconBuildingStore :size="20" />
-        </template>
-      </q-input>
-    </div>
+    <q-input
+      v-model="datosInternos.comercio"
+      label="Comercio"
+      outlined
+      dense
+      placeholder="Ej: TATA, DISCO, Almacén del barrio"
+      :rules="modo === 'comunidad' ? [requerido] : []"
+      @update:model-value="emitirCambios"
+    />
 
     <!-- DIRECCIÓN / SUCURSAL -->
-    <div class="campo-formulario">
-      <q-input
-        v-model="datosInternos.direccion"
-        label="Dirección / Sucursal"
-        outlined
-        dense
-        placeholder="Ej: Av. Brasil 2550, Pocitos"
-        hint="Opcional: ayuda a identificar la sucursal específica"
-        :rules="modo === 'comunidad' ? [requerido] : []"
-        @update:model-value="emitirCambios"
-      >
-        <template #prepend>
-          <IconMapPin :size="20" />
-        </template>
-      </q-input>
-    </div>
+    <q-input
+      v-model="datosInternos.direccion"
+      label="Dirección / Sucursal"
+      outlined
+      dense
+      placeholder="Ej: Av. Brasil 2550, Pocitos"
+      hint="Opcional: ayuda a identificar la sucursal específica"
+      :rules="modo === 'comunidad' ? [requerido] : []"
+      @update:model-value="emitirCambios"
+    />
 
     <!-- PRECIO -->
-    <div class="campo-formulario">
-      <q-input
-        v-model.number="datosInternos.valor"
-        label="Precio"
-        outlined
-        dense
-        type="number"
-        min="0"
-        step="0.01"
-        suffix="UYU"
-        placeholder="0.00"
-        :rules="modo === 'comunidad' ? [requerido, precioValido] : [precioValido]"
-        @update:model-value="emitirCambios"
-      >
-        <template #prepend>
-          <IconCurrencyDollar :size="20" />
-        </template>
-      </q-input>
-    </div>
+    <q-input
+      v-model.number="datosInternos.valor"
+      label="Precio"
+      outlined
+      dense
+      type="number"
+      min="0"
+      step="0.01"
+      suffix="UYU"
+      placeholder="0.00"
+      :rules="modo === 'comunidad' ? [requerido, precioValido] : [precioValido]"
+      @update:model-value="emitirCambios"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue'
-import { IconBuildingStore, IconMapPin, IconCurrencyDollar } from '@tabler/icons-vue'
 
 const props = defineProps({
   modelValue: {
@@ -121,8 +102,5 @@ function precioValido(val) {
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-.campo-formulario {
-  width: 100%;
 }
 </style>
