@@ -48,13 +48,21 @@
         <q-tooltip>Cargar datos de ejemplo</q-tooltip>
       </q-btn>
     </q-page-sticky>
+
+    <!-- DIÁLOGO AGREGAR PRODUCTO -->
+    <DialogoAgregarProducto
+      v-model="dialogoAgregarAbierto"
+      modo="local"
+      @producto-guardado="onProductoGuardado"
+    />
   </q-page>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { IconPlus } from '@tabler/icons-vue'
 import ListaProductos from '../components/MisProductos/ListaProductos.vue'
+import DialogoAgregarProducto from '../components/Formularios/Dialogos/DialogoAgregarProducto.vue'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
 import { ejecutarSeed } from '../almacenamiento/seed.js'
 import { useQuasar } from 'quasar'
@@ -62,12 +70,20 @@ import { useQuasar } from 'quasar'
 const productosStore = useProductosStore()
 const $q = useQuasar()
 
+// Estado del diálogo
+const dialogoAgregarAbierto = ref(false)
+
 async function cargarProductos() {
   await productosStore.cargarProductos()
 }
 
 function abrirDialogoAgregar() {
-  console.log('🚧 TODO: Implementar diálogo de agregar producto')
+  dialogoAgregarAbierto.value = true
+}
+
+function onProductoGuardado() {
+  // Recargar productos después de guardar uno nuevo
+  cargarProductos()
 }
 
 async function cargarDatosEjemplo() {
