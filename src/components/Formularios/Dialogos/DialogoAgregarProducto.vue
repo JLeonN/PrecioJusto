@@ -17,7 +17,12 @@
               <q-icon name="inventory_2" size="20px" class="q-mr-xs" />
               <span>Datos del Producto</span>
             </div>
-            <FormularioProducto v-model="datosProducto" :modo="modo" />
+            <FormularioProducto
+              v-model="datosProducto"
+              :modo="modo"
+              @buscar-codigo="buscarPorCodigo"
+              @buscar-nombre="buscarPorNombre"
+            />
           </div>
 
           <q-separator class="q-my-lg" />
@@ -47,6 +52,13 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
+
+  <!-- DIÁLOGO DE RESULTADOS DE BÚSQUEDA -->
+  <DialogoResultadosBusqueda
+    v-model="dialogoResultadosAbierto"
+    :resultados="resultadosBusqueda"
+    @producto-seleccionado="autoCompletarFormulario"
+  />
 </template>
 
 <script setup>
@@ -54,7 +66,9 @@ import { ref, computed, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import FormularioProducto from '../FormularioProducto.vue'
 import FormularioPrecio from '../FormularioPrecio.vue'
+import DialogoResultadosBusqueda from './DialogoResultadosBusqueda.vue'
 import { useProductosStore } from '../../../almacenamiento/stores/productosStore.js'
+import openFoodFactsService from '../../../almacenamiento/servicios/OpenFoodFactsService.js'
 import preferenciasService from '../../../almacenamiento/servicios/PreferenciasService.js'
 
 const props = defineProps({
@@ -91,6 +105,7 @@ const datosProducto = ref({
   cantidad: 1,
   unidad: 'unidad',
   categoria: '',
+  imagen: null,
 })
 
 // Datos del formulario de precio
@@ -100,6 +115,10 @@ const datosPrecio = ref({
   valor: null,
   moneda: 'UYU',
 })
+
+// Estados de búsqueda API
+const dialogoResultadosAbierto = ref(false)
+const resultadosBusqueda = ref([])
 
 // Clases responsivas
 const clasesResponsivas = computed(() => {
@@ -142,6 +161,84 @@ watch(dialogoAbierto, async (nuevoValor) => {
   }
 })
 
+// Buscar por código de barras
+async function buscarPorCodigo(codigo, callbackFinalizar) {
+  try {
+    console.log(`🔍 Buscando código: ${codigo}`)
+
+    const producto = await openFoodFactsService.buscarPorCodigoBarras(codigo)
+
+    if (producto) {
+      autoCompletarFormulario(producto)
+      $q.notify({
+        type: 'positive',
+        message: 'Producto encontrado',
+        position: 'top',
+        icon: 'check_circle',
+      })
+    } else {
+      $q.notify({
+        type: 'warning',
+        message: 'Producto no encontrado, completa manualmente',
+        position: 'top',
+      })
+    }
+  } catch (error) {
+    console.error('❌ Error al buscar:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Error al buscar producto',
+      position: 'top',
+    })
+  } finally {
+    if (callbackFinalizar) callbackFinalizar()
+  }
+}
+
+// Buscar por nombre/texto
+async function buscarPorNombre(texto, callbackFinalizar) {
+  try {
+    console.log(`🔍 Buscando texto: ${texto}`)
+
+    const resultados = await openFoodFactsService.buscarPorTexto(texto)
+
+    if (resultados.length > 0) {
+      resultadosBusqueda.value = resultados
+      dialogoResultadosAbierto.value = true
+    } else {
+      $q.notify({
+        type: 'warning',
+        message: 'No se encontraron productos',
+        position: 'top',
+      })
+    }
+  } catch (error) {
+    console.error('❌ Error al buscar:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Error al buscar producto',
+      position: 'top',
+    })
+  } finally {
+    if (callbackFinalizar) callbackFinalizar()
+  }
+}
+
+// Auto-completar formulario con datos de API
+function autoCompletarFormulario(producto) {
+  datosProducto.value = {
+    nombre: producto.nombre || datosProducto.value.nombre,
+    marca: producto.marca || datosProducto.value.marca,
+    codigoBarras: producto.codigoBarras || datosProducto.value.codigoBarras,
+    cantidad: producto.cantidad || datosProducto.value.cantidad,
+    unidad: producto.unidad || datosProducto.value.unidad,
+    categoria: producto.categoria || datosProducto.value.categoria,
+    imagen: producto.imagen || datosProducto.value.imagen,
+  }
+
+  console.log('✅ Formulario auto-completado')
+}
+
 // Guardar producto
 async function guardarProducto() {
   guardando.value = true
@@ -156,7 +253,7 @@ async function guardarProducto() {
       cantidad: datosProducto.value.cantidad || 1,
       unidad: datosProducto.value.unidad || 'unidad',
       categoria: datosProducto.value.categoria.trim() || '',
-      imagen: null, // Por ahora null, en etapas futuras vendrá de la API
+      imagen: datosProducto.value.imagen || null,
 
       // Array de precios (con el primer precio)
       precios: [],
@@ -220,6 +317,7 @@ async function limpiarFormulario() {
     cantidad: 1,
     unidad: preferencias.unidad, // Mantener última unidad
     categoria: '',
+    imagen: null,
   }
 
   datosPrecio.value = {

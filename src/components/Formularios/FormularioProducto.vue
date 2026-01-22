@@ -8,8 +8,25 @@
       dense
       placeholder="Ej: Leche La Serenísima"
       :rules="modo === 'comunidad' ? [requerido] : []"
+      :loading="buscandoNombre"
       @update:model-value="emitirCambios"
-    />
+    >
+      <template #append>
+        <q-btn
+          flat
+          dense
+          round
+          size="sm"
+          color="primary"
+          :loading="buscandoNombre"
+          :disable="!datosInternos.nombre.trim()"
+          @click="buscarPorNombre"
+        >
+          <IconSearch :size="18" />
+          <q-tooltip>Buscar en base de datos</q-tooltip>
+        </q-btn>
+      </template>
+    </q-input>
 
     <!-- MARCA -->
     <q-input
@@ -32,11 +49,25 @@
       placeholder="Ej: 7790742005526"
       hint="Opcional"
       :rules="modo === 'comunidad' ? [requerido] : []"
+      :loading="buscandoCodigo"
       @update:model-value="emitirCambios"
     >
       <template #append>
         <q-btn flat round dense icon="photo_camera" color="grey-6" size="sm" disable>
           <q-tooltip>Escanear código (próximamente)</q-tooltip>
+        </q-btn>
+        <q-btn
+          flat
+          dense
+          round
+          size="sm"
+          color="primary"
+          :loading="buscandoCodigo"
+          :disable="!datosInternos.codigoBarras.trim()"
+          @click="buscarPorCodigo"
+        >
+          <IconSearch :size="18" />
+          <q-tooltip>Buscar por código</q-tooltip>
         </q-btn>
       </template>
     </q-input>
@@ -89,6 +120,7 @@
 
 <script setup>
 import { ref, watch, computed, onMounted } from 'vue'
+import { IconSearch } from '@tabler/icons-vue'
 import preferenciasService from '../../almacenamiento/servicios/PreferenciasService.js'
 
 const props = defineProps({
@@ -110,7 +142,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'buscar-codigo', 'buscar-nombre'])
 
 // Opciones de unidades
 const opcionesUnidades = [
@@ -132,6 +164,10 @@ const datosInternos = ref({
   unidad: props.modelValue.unidad || 'unidad',
   categoria: props.modelValue.categoria || '',
 })
+
+// Estados de búsqueda
+const buscandoCodigo = ref(false)
+const buscandoNombre = ref(false)
 
 // Step inteligente según unidad
 const stepCantidad = computed(() => {
@@ -171,6 +207,21 @@ watch(
 // Emitir cambios al padre
 function emitirCambios() {
   emit('update:modelValue', { ...datosInternos.value })
+}
+
+// Funciones de búsqueda
+function buscarPorCodigo() {
+  buscandoCodigo.value = true
+  emit('buscar-codigo', datosInternos.value.codigoBarras, () => {
+    buscandoCodigo.value = false
+  })
+}
+
+function buscarPorNombre() {
+  buscandoNombre.value = true
+  emit('buscar-nombre', datosInternos.value.nombre, () => {
+    buscandoNombre.value = false
+  })
 }
 
 // Reglas de validación
