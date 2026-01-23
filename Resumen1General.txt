@@ -67,6 +67,9 @@ src/
 │   │   └── TarjetaProducto.vue
 │   ├── MisProductos/
 │   │   └── ListaProductos.vue
+│   ├── Seleccion/
+│   │   ├── BarraSeleccion.vue
+│   │   └── BarraAccionesSeleccion.vue
 │   ├── DetalleProducto/
 │   │   ├── InfoProducto.vue
 │   │   ├── EstadisticasProducto.vue
@@ -79,19 +82,8 @@ src/
 │       ├── FormularioPrecio.vue
 │       └── Dialogos/
 │           └── DialogoAgregarProducto.vue
-└── almacenamiento/
-    ├── adaptadores/
-    │   ├── LocalStorageAdapter.js
-    │   ├── CapacitorAdapter.js
-    │   └── FirestoreAdapter.js (futuro)
-    ├── servicios/
-    │   ├── AlmacenamientoService.js
-    │   ├── ProductosService.js
-    │   └── ConfirmacionesService.js
-    ├── stores/
-    │   ├── productosStore.js
-    │   └── confirmacionesStore.js
-    └── seed.js
+└── composables/
+    └── useSeleccionMultiple.js
 
 ## CONVENCIONES DE NOMENCLATURA
 - Carpetas y archivos: PascalCase (ejemplo: MisProductos/, TarjetaProducto.vue)
@@ -113,6 +105,9 @@ src/
 - Tendencias individuales por comercio
 - Filtros avanzados (comercio, período, ordenamiento)
 - Indicadores de frescura por antigüedad (colores automáticos)
+- Selección múltiple de productos con long-press (1 segundo)
+- Eliminación múltiple con confirmación y deshacer (5 segundos)
+- Composable reutilizable para selección en cualquier lista
 
 ## FEATURES PLANIFICADAS
 - Escaneo de código de barras/QR (FAB)
