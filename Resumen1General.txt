@@ -24,6 +24,8 @@ Sistema colaborativo donde usuarios comparten datos de precios.
 - AlmacenamientoService.js: Configuración central de adaptadores
 - ProductosService.js: CRUD y lógica de negocio de productos
 - ConfirmacionesService.js: Lógica de upvotes (1 por usuario por precio)
+- OpenFoodFactsService.js: Integración con API para búsqueda de productos
+- PreferenciasService.js: Gestión de configuraciones del usuario
 
 ### STORES (PINIA)
 - productosStore.js: Estado global de productos
@@ -33,6 +35,11 @@ Sistema colaborativo donde usuarios comparten datos de precios.
 Modificar ADAPTADOR_ACTIVO en AlmacenamientoService.js
 Opciones: 'local' | 'capacitor' | 'firestore'
 
+### SEED
+- seed.js: Script para poblar 4 productos de prueba
+- ejecutarSeed(): Carga productos hardcodeados
+- limpiarDatos(): Elimina todos los productos
+
 ### CONFIGURACIÓN QUASAR
 - Notify plugin habilitado en quasar.config.js
 
@@ -40,6 +47,57 @@ Opciones: 'local' | 'capacitor' | 'firestore'
 - Generados como strings alfanuméricos (Date.now() + random)
 - NO usar parseInt() en rutas dinámicas
 - Formato: "17688640000082zwcohe41y"
+
+## SISTEMA DE DEDUPLICACIÓN
+
+### OBJETIVO
+Evitar productos duplicados en la base de datos.
+1 PRODUCTO = 1 TARJETA (sin importar cuántos comercios tenga precios)
+
+### CRITERIO DE COINCIDENCIA
+**Prioridad 1:** Código de barras (más confiable)
+- Si código de barras coincide → ES EL MISMO PRODUCTO
+
+### IMPLEMENTACIÓN ACTUAL
+**ProductosService.js:**
+- Método `buscarPorCodigoBarras(codigo)`: Busca producto existente por código
+
+**DialogoAgregarProducto.vue:**
+- ANTES de guardar, busca si existe producto con el mismo código
+- Si existe → Agrega precio al producto existente (mantiene historial completo)
+- Si NO existe → Crea producto nuevo
+
+### FLUJO DE GUARDADO
+```
+1. Usuario completa formulario (manual o con API)
+2. Click en "Guardar Producto"
+3. Sistema busca código de barras en productos existentes
+   ↓
+   ├─ ENCONTRADO → Agregar precio al existente
+   │               Notificación: "Precio agregado a [nombre]"
+   │               Mostrar: comercio y valor agregado
+   ↓
+   └─ NO ENCONTRADO → Crear producto nuevo
+                      Notificación: "Producto agregado exitosamente"
+```
+
+### RESULTADO
+```
+❌ ANTES:
+- Tarjeta: "Coca Cola" (código: 7790123, TATA $150)
+- Tarjeta: "Coca Cola" (código: 7790123, DISCO $160)
+
+✅ AHORA:
+- Tarjeta: "Coca Cola" (código: 7790123)
+  → Precio en TATA: $150
+  → Precio en DISCO: $160
+```
+
+### PRÓXIMAS FASES (PLANIFICADO)
+- Deduplicación por nombre + marca (cuando no hay código)
+- Búsqueda inteligente mientras escribe (autocompletado)
+- Normalización de texto (mayúsculas, tildes, espacios)
+- Diálogo de confirmación para productos similares
 
 ## ALMACENAMIENTO DE DATOS
 - Fase 1 (MVP): Capacitor Storage + localStorage (confirmaciones de usuario)
@@ -67,9 +125,6 @@ src/
 │   │   └── TarjetaProducto.vue
 │   ├── MisProductos/
 │   │   └── ListaProductos.vue
-│   ├── Seleccion/
-│   │   ├── BarraSeleccion.vue
-│   │   └── BarraAccionesSeleccion.vue
 │   ├── DetalleProducto/
 │   │   ├── InfoProducto.vue
 │   │   ├── EstadisticasProducto.vue
@@ -81,9 +136,22 @@ src/
 │       ├── FormularioProducto.vue
 │       ├── FormularioPrecio.vue
 │       └── Dialogos/
-│           └── DialogoAgregarProducto.vue
-└── composables/
-    └── useSeleccionMultiple.js
+│           ├── DialogoAgregarProducto.vue
+│           └── DialogoResultadosBusqueda.vue
+└── almacenamiento/
+    ├── adaptadores/
+    │   ├── LocalStorageAdapter.js
+    │   ├── CapacitorAdapter.js
+    │   └── FirestoreAdapter.js (futuro)
+    ├── servicios/
+    │   ├── AlmacenamientoService.js
+    │   ├── ProductosService.js
+    │   ├── ConfirmacionesService.js
+    │   ├── OpenFoodFactsService.js
+    │   └── PreferenciasService.js
+    └── stores/
+        ├── productosStore.js
+        └── confirmacionesStore.js
 
 ## CONVENCIONES DE NOMENCLATURA
 - Carpetas y archivos: PascalCase (ejemplo: MisProductos/, TarjetaProducto.vue)
@@ -105,9 +173,11 @@ src/
 - Tendencias individuales por comercio
 - Filtros avanzados (comercio, período, ordenamiento)
 - Indicadores de frescura por antigüedad (colores automáticos)
-- Selección múltiple de productos con long-press (1 segundo)
-- Eliminación múltiple con confirmación y deshacer (5 segundos)
-- Composable reutilizable para selección en cualquier lista
+- Integración con Open Food Facts API (búsqueda por código y nombre)
+- Auto-completado de formularios con datos de API
+- **Sistema de deduplicación por código de barras**
+- **Unificación automática de productos idénticos**
+- Preferencias de usuario persistentes (moneda, unidad)
 
 ## FEATURES PLANIFICADAS
 - Escaneo de código de barras/QR (FAB)
@@ -116,5 +186,6 @@ src/
 - Control de privacidad de datos compartidos
 - Monetización: Google AdMob
 - Import/Export de datos
-- Formularios modulares para agregar productos (manual + precio)
-- Sistema de validación dual (modo local vs comunidad)
+- Deduplicación por nombre + marca (inteligente)
+- Búsqueda con autocompletado mientras escribe
+- Normalización de texto para detección de duplicados

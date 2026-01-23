@@ -9,6 +9,7 @@
  * - Validaciones de datos
  * - Cálculos de tendencias y estadísticas
  * - Transformaciones de datos
+ * - Búsqueda y deduplicación
  *
  * 🔥 MIGRACIÓN A FIRESTORE:
  * Este servicio NO necesita cambios al migrar a Firestore.
@@ -190,6 +191,43 @@ class ProductosService {
     } catch (error) {
       console.error('❌ Error al buscar productos:', error)
       return []
+    }
+  }
+
+  /**
+   * 🔍 BUSCAR PRODUCTO POR CÓDIGO DE BARRAS
+   * @param {string} codigoBarras - Código de barras del producto
+   * @returns {Promise<Object|null>} - Producto encontrado o null
+   *
+   * 🎯 NUEVO: Para evitar duplicados
+   */
+  async buscarPorCodigoBarras(codigoBarras) {
+    try {
+      // Si no hay código, retornar null
+      if (!codigoBarras || codigoBarras.trim() === '') {
+        return null
+      }
+
+      const todosLosProductos = await this.obtenerTodos()
+      const codigoNormalizado = codigoBarras.trim()
+
+      // Buscar coincidencia exacta
+      const productoEncontrado = todosLosProductos.find(
+        (producto) => producto.codigoBarras && producto.codigoBarras.trim() === codigoNormalizado,
+      )
+
+      if (productoEncontrado) {
+        console.log(
+          `✅ Producto encontrado por código: ${productoEncontrado.nombre} (${codigoNormalizado})`,
+        )
+      } else {
+        console.log(`ℹ️ No existe producto con código: ${codigoNormalizado}`)
+      }
+
+      return productoEncontrado || null
+    } catch (error) {
+      console.error('❌ Error al buscar por código de barras:', error)
+      return null
     }
   }
 
@@ -386,32 +424,3 @@ class ProductosService {
 
 // Exportar instancia única (Singleton)
 export default new ProductosService()
-
-// 🔥 CHECKLIST PARA FIRESTORE:
-//
-// [ ] Métodos de validación funcionan correctamente
-// [ ] Cálculos de tendencia son precisos
-// [ ] buscarPorNombre() funciona (en Firestore usar índices de texto)
-// [ ] obtenerTodos() no es lento con muchos productos
-//
-// MEJORAS PARA FIRESTORE:
-//
-// 1. PAGINACIÓN:
-//    - Implementar método obtenerProductosPaginados(limite, ultimoDoc)
-//    - Usar startAfter() de Firestore para cargar más resultados
-//
-// 2. BÚSQUEDA:
-//    - Integrar Algolia o ElasticSearch para búsqueda full-text
-//    - O usar índices compuestos de Firestore
-//
-// 3. TIEMPO REAL:
-//    - Implementar suscribirAProductos() que use onSnapshot()
-//    - Actualizar UI automáticamente cuando otros usuarios agreguen precios
-//
-// 4. SOFT DELETE:
-//    - No eliminar físicamente, marcar como eliminado
-//    - Filtrar productos eliminados en obtenerTodos()
-//
-// 5. VALIDACIÓN SERVER-SIDE:
-//    - Firebase Functions para validar datos antes de guardar
-//    - Prevenir datos maliciosos o spam

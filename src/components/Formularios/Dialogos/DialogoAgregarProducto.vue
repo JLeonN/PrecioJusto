@@ -68,6 +68,7 @@ import FormularioProducto from '../FormularioProducto.vue'
 import FormularioPrecio from '../FormularioPrecio.vue'
 import DialogoResultadosBusqueda from './DialogoResultadosBusqueda.vue'
 import { useProductosStore } from '../../../almacenamiento/stores/productosStore.js'
+import productosService from '../../../almacenamiento/servicios/ProductosService.js'
 import openFoodFactsService from '../../../almacenamiento/servicios/OpenFoodFactsService.js'
 import preferenciasService from '../../../almacenamiento/servicios/PreferenciasService.js'
 
@@ -244,6 +245,74 @@ async function guardarProducto() {
   guardando.value = true
 
   try {
+    // ========================================
+    // 🔍 PASO 1: BUSCAR PRODUCTO EXISTENTE POR CÓDIGO
+    // ========================================
+
+    let productoExistente = null
+
+    // Solo buscar si hay código de barras
+    if (datosProducto.value.codigoBarras.trim() !== '') {
+      productoExistente = await productosService.buscarPorCodigoBarras(
+        datosProducto.value.codigoBarras.trim(),
+      )
+    }
+
+    // ========================================
+    // 🎯 CASO 1: PRODUCTO YA EXISTE (mismo código)
+    // ========================================
+
+    if (productoExistente) {
+      console.log(`🎯 Producto existente encontrado: ${productoExistente.nombre}`)
+
+      // Construir nuevo precio
+      const nombreCompleto = datosPrecio.value.direccion.trim()
+        ? `${datosPrecio.value.comercio.trim()} - ${datosPrecio.value.direccion.trim()}`
+        : datosPrecio.value.comercio.trim()
+
+      const nuevoPrecio = {
+        comercio: datosPrecio.value.comercio.trim() || 'Sin comercio',
+        nombreCompleto: nombreCompleto || 'Sin datos',
+        direccion: datosPrecio.value.direccion.trim() || '',
+        valor: datosPrecio.value.valor || 0,
+        moneda: datosPrecio.value.moneda || 'UYU',
+        fecha: new Date().toISOString(),
+        confirmaciones: 0,
+        usuarioId: 'user_actual_123',
+      }
+
+      // Agregar precio al producto existente
+      const productoActualizado = await productosStore.agregarPrecioAProducto(
+        productoExistente.id,
+        nuevoPrecio,
+      )
+
+      if (productoActualizado) {
+        $q.notify({
+          type: 'positive',
+          message: `Precio agregado a "${productoExistente.nombre}"`,
+          caption: `${datosPrecio.value.comercio} - $${datosPrecio.value.valor}`,
+          position: 'top',
+          icon: 'add_circle',
+          timeout: 3000,
+        })
+
+        emit('producto-guardado', productoActualizado)
+        limpiarFormulario()
+        cerrarDialogo()
+      } else {
+        throw new Error('No se pudo agregar el precio al producto existente')
+      }
+
+      return // Terminar aquí
+    }
+
+    // ========================================
+    // 🆕 CASO 2: PRODUCTO NUEVO
+    // ========================================
+
+    console.log('🆕 Creando producto nuevo...')
+
     // Construir objeto completo del producto
     const nuevoProducto = {
       // Datos del producto
@@ -284,8 +353,10 @@ async function guardarProducto() {
       $q.notify({
         type: 'positive',
         message: 'Producto agregado exitosamente',
+        caption: datosProducto.value.nombre,
         position: 'top',
         icon: 'check_circle',
+        timeout: 2500,
       })
 
       emit('producto-guardado', productoGuardado)
@@ -299,7 +370,9 @@ async function guardarProducto() {
     $q.notify({
       type: 'negative',
       message: 'Error al guardar el producto',
+      caption: error.message,
       position: 'top',
+      timeout: 3000,
     })
   } finally {
     guardando.value = false
