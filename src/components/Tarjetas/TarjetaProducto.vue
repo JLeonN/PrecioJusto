@@ -1,5 +1,25 @@
 <template>
-  <q-card class="tarjeta-producto" clickable @click="toggleExpandir">
+  <q-card
+    class="tarjeta-producto"
+    :class="{ 'tarjeta-seleccionada': seleccionado }"
+    clickable
+    @click="manejarClick"
+    v-touch-hold:1000.mouse="manejarLongPress"
+  >
+    <!-- OVERLAY DE SELECCIÓN -->
+    <div v-if="seleccionado" class="overlay-seleccion"></div>
+
+    <!-- CHECKBOX DE SELECCIÓN -->
+    <transition name="fade">
+      <div v-if="modoSeleccion" class="checkbox-seleccion">
+        <q-icon
+          :name="seleccionado ? 'check_circle' : 'radio_button_unchecked'"
+          :color="seleccionado ? 'positive' : 'grey-5'"
+          size="28px"
+        />
+      </div>
+    </transition>
+
     <q-card-section class="tarjeta-contenido" :class="clasesResponsivas">
       <!-- IMAGEN DEL PRODUCTO -->
       <div class="tarjeta-imagen">
@@ -27,8 +47,8 @@
           </div>
         </div>
 
-        <!-- Botón agregar precio (ahora fuera del contenedor) -->
-        <div class="contenedor-boton-agregar">
+        <!-- Botón agregar precio (solo visible si NO está en modo selección) -->
+        <div v-if="!modoSeleccion" class="contenedor-boton-agregar">
           <q-btn
             :round="!expandida"
             dense
@@ -36,7 +56,7 @@
             size="sm"
             class="boton-agregar-precio"
             :class="{ 'boton-expandido': expandida }"
-            @click.stop="$emit('agregar-precio')"
+            @click.stop="emit('agregar-precio')"
           >
             <IconPlus :size="18" />
             <transition name="fade-texto">
@@ -46,16 +66,16 @@
         </div>
       </div>
 
-      <!-- Ícono para indicar expandir/colapsar -->
-      <div class="tarjeta-icono-mas">
+      <!-- Ícono para indicar expandir/colapsar (solo si NO está en modo selección) -->
+      <div v-if="!modoSeleccion" class="tarjeta-icono-mas">
         <IconChevronDown v-if="!expandida" :size="20" class="text-grey-5" />
         <IconChevronUp v-else :size="20" class="text-grey-5" />
       </div>
     </q-card-section>
 
-    <!-- INFORMACIÓN EXPANDIDA -->
+    <!-- INFORMACIÓN EXPANDIDA (solo visible si NO está en modo selección) -->
     <q-slide-transition>
-      <div v-show="expandida">
+      <div v-show="expandida && !modoSeleccion">
         <q-separator />
         <q-card-section>
           <!-- TOP 3 precios más bajos -->
@@ -123,11 +143,41 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  modoSeleccion: {
+    type: Boolean,
+    default: false,
+  },
+  seleccionado: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-defineEmits(['agregar-precio', 'ver-detalle'])
+const emit = defineEmits(['agregar-precio', 'ver-detalle', 'long-press', 'toggle-seleccion'])
 
 const expandida = ref(false)
+
+// Manejar click según modo
+const manejarClick = () => {
+  if (props.modoSeleccion) {
+    // En modo selección: toggle selección
+    emit('toggle-seleccion', props.producto.id)
+  } else {
+    // Modo normal: expandir/colapsar
+    toggleExpandir()
+  }
+}
+
+// Manejar long press
+const manejarLongPress = () => {
+  if (!props.modoSeleccion) {
+    // Vibración háptica si está disponible
+    if ($q.platform.is.mobile && navigator.vibrate) {
+      navigator.vibrate(50)
+    }
+    emit('long-press', props.producto.id)
+  }
+}
 
 const toggleExpandir = () => {
   expandida.value = !expandida.value
@@ -154,9 +204,52 @@ const clasesResponsivas = computed(() => {
   transition:
     transform 0.2s,
     box-shadow 0.2s;
+  position: relative;
+  overflow: visible;
 }
 .tarjeta-producto:active {
   transform: scale(0.98);
+}
+/* MODO SELECCIÓN */
+.tarjeta-seleccionada {
+  border-left: 4px solid var(--color-secundario);
+  box-shadow: 0 0 0 2px var(--color-secundario);
+}
+/* OVERLAY DE SELECCIÓN */
+.overlay-seleccion {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-secundario-claro);
+  opacity: 0.2;
+  pointer-events: none;
+  z-index: 1;
+}
+/* CHECKBOX DE SELECCIÓN */
+.checkbox-seleccion {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  background-color: var(--fondo-tarjeta);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--sombra-ligera);
+}
+/* Animación fade para checkbox */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 /* BOTÓN AGREGAR PRECIO EXPANDIBLE */
 .boton-agregar-precio {

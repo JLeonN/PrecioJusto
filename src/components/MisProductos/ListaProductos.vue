@@ -13,7 +13,14 @@
         :key="producto.id"
         class="col-12 col-sm-6 col-md-4 col-xl-3"
       >
-        <TarjetaProducto :producto="producto" @menu-click="abrirMenuProducto(producto)" />
+        <TarjetaProducto
+          :producto="producto"
+          :modo-seleccion="modoSeleccion"
+          :seleccionado="estaSeleccionado(producto.id)"
+          @menu-click="abrirMenuProducto(producto)"
+          @long-press="$emit('long-press', $event)"
+          @toggle-seleccion="$emit('toggle-seleccion', $event)"
+        />
       </div>
     </div>
   </div>
@@ -22,12 +29,27 @@
 <script setup>
 import TarjetaProducto from '../Tarjetas/TarjetaProducto.vue'
 
-defineProps({
+const props = defineProps({
   productos: {
     type: Array,
     required: true,
   },
+  modoSeleccion: {
+    type: Boolean,
+    default: false,
+  },
+  seleccionados: {
+    type: Set,
+    default: () => new Set(),
+  },
 })
+
+defineEmits(['long-press', 'toggle-seleccion'])
+
+// Verificar si un producto está seleccionado
+const estaSeleccionado = (productoId) => {
+  return props.seleccionados.has(productoId)
+}
 
 const abrirMenuProducto = (producto) => {
   console.log('Abrir menú para:', producto.nombre)
