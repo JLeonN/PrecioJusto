@@ -33,11 +33,6 @@ Sistema colaborativo donde usuarios comparten datos de precios.
 Modificar ADAPTADOR_ACTIVO en AlmacenamientoService.js
 Opciones: 'local' | 'capacitor' | 'firestore'
 
-### SEED
-- seed.js: Script para poblar 4 productos de prueba
-- ejecutarSeed(): Carga productos hardcodeados
-- limpiarDatos(): Elimina todos los productos
-
 ### CONFIGURACIÓN QUASAR
 - Notify plugin habilitado en quasar.config.js
 

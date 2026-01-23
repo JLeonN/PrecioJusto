@@ -77,7 +77,6 @@ Cada producto requiere:
 ## LIMITACIONES ACTUALES
 - Solo muestra top 3 en expansión (no scroll infinito)
 - No hay funcionalidad de menú contextual aún
-- Datos hardcodeados en MisProductosPage.vue
 
 ## INTEGRACIÓN CON STORES
 
@@ -88,5 +87,4 @@ Cada producto requiere:
 
 ### CARGA DE DATOS
 - MisProductosPage.vue carga productos con productosStore.cargarProductos()
-- Botón seed temporal para poblar productos de prueba
 - Estados de carga y error manejados por el store
