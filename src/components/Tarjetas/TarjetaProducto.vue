@@ -36,6 +36,17 @@
           {{ producto.nombre }}
         </div>
 
+        <!-- Código de barras -->
+        <div
+          v-if="producto.codigoBarras"
+          class="codigo-barras"
+          @click.stop="copiarCodigoBarras(producto.codigoBarras)"
+        >
+          <IconBarcode :size="14" class="text-grey-6" />
+          <span class="text-caption text-grey-6">{{ producto.codigoBarras }}</span>
+          <q-tooltip>Click para copiar</q-tooltip>
+        </div>
+
         <!-- Precio y comercio -->
         <div class="tarjeta-precio-comercio">
           <div>
@@ -134,6 +145,7 @@ import {
   IconChevronUp,
   IconPlus,
   IconChartLine,
+  IconBarcode,
 } from '@tabler/icons-vue'
 
 const $q = useQuasar()
@@ -156,6 +168,29 @@ const props = defineProps({
 const emit = defineEmits(['agregar-precio', 'ver-detalle', 'long-press', 'toggle-seleccion'])
 
 const expandida = ref(false)
+
+// Copiar código de barras al portapapeles
+const copiarCodigoBarras = async (codigo) => {
+  try {
+    await navigator.clipboard.writeText(codigo)
+    $q.notify({
+      type: 'positive',
+      message: 'Código copiado',
+      caption: codigo,
+      position: 'top',
+      timeout: 1500,
+      icon: 'content_copy',
+    })
+  } catch (error) {
+    console.error('Error al copiar:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'No se pudo copiar el código',
+      position: 'top',
+      timeout: 1500,
+    })
+  }
+}
 
 // Manejar click según modo
 const manejarClick = () => {
@@ -369,5 +404,32 @@ const clasesResponsivas = computed(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+/* Código de barras */
+.codigo-barras {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: -4px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  width: fit-content;
+}
+/* Hover effect */
+.codigo-barras:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+/* Active effect (cuando hace click) */
+.codigo-barras:active {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+.codigo-barras span {
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.5px;
+  font-family: 'Courier New', monospace;
 }
 </style>
