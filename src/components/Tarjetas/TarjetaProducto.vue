@@ -94,7 +94,7 @@
               </q-item-section>
               <q-item-section>
                 <q-item-label>{{ precio.comercio }}</q-item-label>
-                <q-item-label caption>{{ precio.fecha }}</q-item-label>
+                <q-item-label caption>{{ formatearFecha(precio.fecha) }}</q-item-label>
               </q-item-section>
               <q-item-section side>
                 <div
@@ -160,10 +160,8 @@ const expandida = ref(false)
 // Manejar click según modo
 const manejarClick = () => {
   if (props.modoSeleccion) {
-    // En modo selección: toggle selección
     emit('toggle-seleccion', props.producto.id)
   } else {
-    // Modo normal: expandir/colapsar
     toggleExpandir()
   }
 }
@@ -171,7 +169,6 @@ const manejarClick = () => {
 // Manejar long press
 const manejarLongPress = () => {
   if (!props.modoSeleccion) {
-    // Vibración háptica si está disponible
     if ($q.platform.is.mobile && navigator.vibrate) {
       navigator.vibrate(50)
     }
@@ -188,6 +185,30 @@ const top3Precios = computed(() => {
   const preciosOrdenados = [...props.producto.precios].sort((a, b) => a.valor - b.valor).slice(0, 3)
   return preciosOrdenados
 })
+
+// 👇 NUEVO: Formatear fecha de forma relativa
+const formatearFecha = (fechaISO) => {
+  const ahora = new Date()
+  const fechaPrecio = new Date(fechaISO)
+  const diferencia = ahora - fechaPrecio
+  const minutos = Math.floor(diferencia / (1000 * 60))
+  const horas = Math.floor(diferencia / (1000 * 60 * 60))
+  const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24))
+
+  if (minutos < 60) return `Hace ${minutos} ${minutos === 1 ? 'minuto' : 'minutos'}`
+  if (horas < 24) return `Hace ${horas} ${horas === 1 ? 'hora' : 'horas'}`
+  if (dias < 7) return `Hace ${dias} ${dias === 1 ? 'día' : 'días'}`
+  if (dias < 30) {
+    const semanas = Math.floor(dias / 7)
+    return `Hace ${semanas} ${semanas === 1 ? 'semana' : 'semanas'}`
+  }
+  if (dias < 365) {
+    const meses = Math.floor(dias / 30)
+    return `Hace ${meses} ${meses === 1 ? 'mes' : 'meses'}`
+  }
+  const años = Math.floor(dias / 365)
+  return `Hace ${años} ${años === 1 ? 'año' : 'años'}`
+}
 
 // Clases responsivas según tamaño de pantalla
 const clasesResponsivas = computed(() => {
