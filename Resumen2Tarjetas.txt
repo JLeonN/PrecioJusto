@@ -48,6 +48,7 @@ Cada producto requiere:
 - id (number)
 - nombre (string)
 - imagen (string | null)
+- codigoBarras (string | null)
 - precioMejor (number)
 - comercioMejor (string)
 - diferenciaPrecio (number)
@@ -57,10 +58,18 @@ Cada producto requiere:
   - fecha (string)
   - esMejor (boolean)
 
+## CÓDIGO DE BARRAS COPIABLE
+- Muestra debajo del nombre con ícono IconBarcode (14px)
+- Click para copiar al portapapeles con notificación Quasar
+- Tooltip "Click para copiar" al hacer hover
+- Feedback visual con background hover/active
+- Fuente monoespaciada (Courier New, 11px)
+- Solo visible si producto tiene codigoBarras
+
 ## COMPORTAMIENTO VISUAL
 
 ### ESTADO COLAPSADO (default)
-- Muestra: imagen/placeholder, nombre, mejor precio, comercio del mejor precio
+- Muestra: imagen/placeholder, nombre, código de barras (si existe), mejor precio, comercio del mejor precio
 - Botón "Agregar precio" en modo redondo (solo ícono)
 - Ícono chevron-down indicando expandible
 - Click en tarjeta expande/colapsa (solo en modo normal)
@@ -70,6 +79,7 @@ Cada producto requiere:
 - Botón "Agregar precio" expandido con texto
 - Lista con avatares numerados (1,2,3)
 - Avatar verde para el mejor precio
+- Fechas formateadas en modo relativo (Hace X días/horas/semanas)
 - Botón "Ver historial completo" al final
 - Ícono chevron-up indicando colapsable
 
@@ -77,7 +87,7 @@ Cada producto requiere:
 
 ### MÓVIL (xs)
 - Layout vertical (flex-direction: column)
-- Imagen: 100% ancho, 120px alto
+- Imagen: 140px x 140px centrada
 - Info apilada verticalmente
 
 ### TABLET/PC (gt.xs)
@@ -90,6 +100,7 @@ Cada producto requiere:
 - Click en tarjeta (modo selección): emit('toggle-seleccion')
 - Long-press 1 segundo: emit('long-press') + vibración háptica
 - Click en botón agregar: emit('agregar-precio') con stop propagation
+- Click en código de barras: copiar al portapapeles con notificación
 - Click en "Ver historial": emit('ver-detalle') con stop propagation
 - Animación de presión (scale 0.98) en :active
 
@@ -108,6 +119,7 @@ Cada producto requiere:
 - IconPlus: agregar precio
 - IconChevronDown/Up: expandir/colapsar
 - IconChartLine: ver historial
+- IconBarcode: código de barras
 
 ## EVENTOS EMITIDOS
 - 'agregar-precio': cuando se clickea botón agregar
@@ -118,6 +130,10 @@ Cada producto requiere:
 ## COMPUTED PROPERTIES
 - top3Precios: ordena precios por valor ASC y toma primeros 3
 - clasesResponsivas: determina layout según $q.screen
+
+## FUNCIONES
+- formatearFecha(): Convierte fechas ISO a formato relativo
+- copiarCodigoBarras(): Copia código al portapapeles con notificación
 
 ## LIMITACIONES ACTUALES
 - Solo muestra top 3 en expansión (no scroll infinito)
