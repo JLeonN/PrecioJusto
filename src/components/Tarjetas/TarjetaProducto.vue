@@ -284,8 +284,9 @@ const clasesResponsivas = computed(() => {
   gap: 12px;
 }
 .tarjeta-vertical .tarjeta-imagen {
-  width: 100%;
-  height: 120px;
+  width: 140px;
+  height: 140px;
+  margin: 0 auto;
 }
 .tarjeta-vertical .tarjeta-info {
   display: flex;
