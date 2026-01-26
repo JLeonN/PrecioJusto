@@ -102,7 +102,10 @@ const textoTendencia = computed(() => {
     gap: 16px;
   }
   .info-imagen {
-    max-width: 200px;
+    max-width: 140px;
+    width: 35vw;
+    height: auto;
+    aspect-ratio: 1/1;
     margin: 0 auto;
   }
 }
