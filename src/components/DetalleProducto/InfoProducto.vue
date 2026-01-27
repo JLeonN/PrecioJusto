@@ -14,6 +14,17 @@
         <!-- Nombre del producto -->
         <h5 class="q-my-none text-weight-bold">{{ producto.nombre }}</h5>
 
+        <!-- Código de barras -->
+        <div
+          v-if="producto.codigoBarras"
+          class="codigo-barras"
+          @click.stop="copiarCodigoBarras(producto.codigoBarras)"
+        >
+          <IconBarcode :size="16" class="text-grey-6" />
+          <span class="text-caption text-grey-6">{{ producto.codigoBarras }}</span>
+          <q-tooltip>Click para copiar</q-tooltip>
+        </div>
+
         <!-- Precio más bajo actual -->
         <div class="precio-principal q-mt-sm">
           <div class="text-h4 text-weight-bold text-primary">${{ producto.precioMejor }}</div>
@@ -47,7 +58,10 @@
 
 <script setup>
 import { computed } from 'vue'
-import { IconShoppingBag, IconMapPin, IconPlus } from '@tabler/icons-vue'
+import { IconShoppingBag, IconMapPin, IconPlus, IconBarcode } from '@tabler/icons-vue'
+import { useQuasar } from 'quasar'
+
+const $q = useQuasar()
 
 const props = defineProps({
   producto: {
@@ -83,6 +97,29 @@ const textoTendencia = computed(() => {
   }
   return 'Precio estable (últimos 30 días)'
 })
+
+// Copiar código de barras al portapapeles
+const copiarCodigoBarras = async (codigo) => {
+  try {
+    await navigator.clipboard.writeText(codigo)
+    $q.notify({
+      type: 'positive',
+      message: 'Código copiado',
+      caption: codigo,
+      position: 'top',
+      timeout: 1500,
+      icon: 'content_copy',
+    })
+  } catch (error) {
+    console.error('Error al copiar:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'No se pudo copiar el código',
+      position: 'top',
+      timeout: 1500,
+    })
+  }
+}
 </script>
 
 <style scoped>
@@ -137,5 +174,30 @@ const textoTendencia = computed(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+/* Código de barras */
+.codigo-barras {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  width: fit-content;
+}
+.codigo-barras:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+.codigo-barras:active {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+.codigo-barras span {
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 0.5px;
+  font-family: 'Courier New', monospace;
 }
 </style>
