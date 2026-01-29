@@ -5,6 +5,39 @@ Responsable: Leo + CH
 
 ═══════════════════════════════════════════════════════════════
 
+## 📖 DESCRIPCIÓN DEL PLAN
+
+Este plan detalla la implementación completa de la nueva sección "COMERCIOS" 
+en la aplicación Precio Justo. El objetivo principal es crear una base de 
+datos maestra de comercios que elimine duplicados y mejore la calidad de 
+los datos ingresados por los usuarios.
+
+### OBJETIVOS PRINCIPALES:
+- Centralizar la gestión de comercios en una sección dedicada
+- Eliminar duplicados mediante validación inteligente (3 niveles)
+- Mejorar la experiencia al agregar precios con autocompletado
+- Ordenar comercios/direcciones por últimos usados
+- Reutilizar sistema de selección múltiple para eliminar comercios
+
+### CARACTERÍSTICAS CLAVE:
+- Validación de duplicados por nombre + dirección
+- Algoritmo de similitud de texto (Levenshtein distance)
+- Normalización automática (minúsculas, tildes, abreviaturas)
+- Autocompletado inteligente ordenado por uso reciente
+- Tarjetas estilo "carta vertical" responsivas
+- Soporte para múltiples direcciones por comercio
+- Placeholder para foto del comercio (cámara en fase futura)
+- Eliminación con motivo (cerró/duplicado/otro)
+
+### TECNOLOGÍAS:
+- Vue.js 3 + Composition API
+- Quasar Framework (q-select, q-input, q-dialog)
+- Pinia (comerciosStore)
+- Capacitor Storage
+- Tabler Icons
+
+═══════════════════════════════════════════════════════════════
+
 ## FASE 1: BASE DE DATOS Y SERVICIOS ⚙️
 
 ### ComerciosService.js
