@@ -1,0 +1,281 @@
+# PLAN DE TRABAJO - SECCIÓN COMERCIOS
+Proyecto: Precio Justo
+Fecha inicio: 29 de Enero 2025
+Responsable: Leo + CH
+
+═══════════════════════════════════════════════════════════════
+
+## FASE 1: BASE DE DATOS Y SERVICIOS ⚙️
+
+### ComerciosService.js
+[ ] Crear archivo en src/almacenamiento/servicios/
+[ ] Implementar obtenerTodos()
+[ ] Implementar buscarPorNombre()
+[ ] Implementar buscarPorId()
+[ ] Implementar agregarComercio()
+[ ] Implementar editarComercio()
+[ ] Implementar eliminarComercio()
+[ ] Implementar agregarDireccion()
+[ ] Implementar eliminarDireccion()
+[ ] Implementar validarDuplicados() (algoritmo 3 niveles)
+[ ] Implementar normalizar() (minúsculas, tildes, espacios)
+[ ] Implementar similitudTexto() (Levenshtein distance)
+[ ] Implementar expandirAbreviaturas()
+[ ] Implementar registrarUsoComercio() (para orden últimos usados)
+[ ] Implementar obtenerComercioPorUso() (ordenados por fecha)
+
+### comerciosStore.js
+[ ] Crear archivo en src/almacenamiento/stores/
+[ ] Definir state (comercios, cargando, error)
+[ ] Implementar cargarComercios()
+[ ] Implementar agregarComercio()
+[ ] Implementar editarComercio()
+[ ] Implementar eliminarComercio()
+[ ] Implementar buscarComercios()
+[ ] Implementar obtenerComercioPorId()
+[ ] Integrar con ComerciosService
+
+═══════════════════════════════════════════════════════════════
+
+## FASE 2: ESTRUCTURA DE ARCHIVOS 📁
+
+### Reorganización de carpetas
+[ ] Crear carpeta src/components/Compartidos/
+[ ] Mover BarraSeleccion.vue a Compartidos/
+[ ] Mover BarraAccionesSeleccion.vue a Compartidos/
+[ ] Crear carpeta src/components/Comercios/
+[ ] Actualizar imports en MisProductosPage.vue
+
+### Nuevos archivos
+[ ] Crear src/pages/ComerciosPage.vue
+[ ] Crear src/components/Comercios/ListaComercios.vue
+[ ] Crear src/components/Comercios/TarjetaComercio.vue
+[ ] Crear src/components/Formularios/FormularioComercio.vue
+[ ] Crear src/components/Formularios/Dialogos/DialogoAgregarComercio.vue
+[ ] Crear src/components/Formularios/Dialogos/DialogoCoincidencias.vue
+[ ] Crear src/components/Formularios/Dialogos/DialogoMismaUbicacion.vue
+[ ] Crear src/components/Formularios/Dialogos/DialogoMotivoEliminacion.vue
+
+═══════════════════════════════════════════════════════════════
+
+## FASE 3: UI - PÁGINA DE COMERCIOS 🎨
+
+### ComerciosPage.vue
+[ ] Crear estructura básica del layout
+[ ] Importar ListaComercios
+[ ] Implementar carga de comercios desde store
+[ ] Agregar botón FAB para nuevo comercio
+[ ] Implementar estados: cargando, vacío, error
+[ ] Agregar barra de búsqueda
+[ ] Integrar modo selección múltiple
+[ ] Conectar con BarraSeleccion (Compartidos)
+[ ] Conectar con BarraAccionesSeleccion (Compartidos)
+
+### ListaComercios.vue
+[ ] Crear componente contenedor
+[ ] Recibir props: comercios, modoSeleccion, seleccionados
+[ ] Renderizar TarjetaComercio por cada comercio
+[ ] Implementar mensaje "No hay comercios"
+[ ] Manejar eventos de selección
+[ ] Agregar animaciones de entrada/salida
+
+### TarjetaComercio.vue
+[ ] Crear estructura básica (layout vertical tipo carta)
+[ ] Agregar placeholder foto (IconBuilding de Tabler)
+[ ] Mostrar nombre del comercio
+[ ] Mostrar tipo de comercio
+[ ] Mostrar cantidad de direcciones
+[ ] Implementar estado expandido/colapsado
+[ ] Mostrar lista de direcciones al expandir
+[ ] Agregar botón "Editar" (solo expandido)
+[ ] Implementar modo selección (checkbox circular)
+[ ] Implementar long-press (1 segundo)
+[ ] Agregar estilos responsivos
+[ ] Agregar animaciones de hover/active
+[ ] Implementar vibración háptica (Capacitor)
+
+═══════════════════════════════════════════════════════════════
+
+## FASE 4: FORMULARIOS Y VALIDACIONES 📝
+
+### FormularioComercio.vue
+[ ] Crear estructura del formulario
+[ ] Campo: Nombre (q-input obligatorio)
+[ ] Campo: Tipo (q-select con opciones predefinidas + "Otro")
+[ ] Campo: Calle y número (q-input obligatorio)
+[ ] Campo: Barrio (q-input opcional)
+[ ] Campo: Ciudad (q-input opcional)
+[ ] Botón placeholder cámara (deshabilitado por ahora)
+[ ] Implementar validaciones básicas
+[ ] Implementar validación de duplicados (al escribir)
+[ ] Mostrar feedback visual de validación
+[ ] Método limpiarFormulario()
+[ ] Método validarFormulario()
+[ ] Emitir evento 'guardar' con datos
+
+### DialogoAgregarComercio.vue
+[ ] Crear estructura del diálogo (q-dialog)
+[ ] Importar FormularioComercio
+[ ] Implementar botones Guardar/Cancelar
+[ ] Conectar con comerciosStore.agregarComercio()
+[ ] Manejar loading al guardar
+[ ] Mostrar notificaciones (success/error)
+[ ] Cerrar diálogo después de guardar
+[ ] Implementar prop modelValue para v-model
+
+### DialogoCoincidencias.vue
+[ ] Crear diálogo de advertencia
+[ ] Mostrar lista de comercios similares
+[ ] Mostrar porcentaje de similitud
+[ ] Botones: "Usar existente" / "Es nuevo, continuar"
+[ ] Emitir evento con decisión del usuario
+[ ] Diseño visual claro y amigable
+
+### DialogoMismaUbicacion.vue
+[ ] Crear diálogo informativo
+[ ] Mostrar comercios en misma dirección
+[ ] Explicar que puede ser mismo edificio
+[ ] Botones: "Sí, agregar" / "Cancelar"
+[ ] Emitir evento con confirmación
+
+### DialogoMotivoEliminacion.vue
+[ ] Crear diálogo de confirmación
+[ ] Radio buttons con opciones:
+  [ ] - "Cerró definitivamente"
+  [ ] - "Error / Duplicado"
+  [ ] - "Otro motivo"
+[ ] Campo texto para "Otro motivo"
+[ ] Mostrar cantidad de productos afectados
+[ ] Botones: "Confirmar eliminación" / "Cancelar"
+[ ] Emitir evento con motivo seleccionado
+
+═══════════════════════════════════════════════════════════════
+
+## FASE 5: INTEGRACIÓN CON PRECIOS 🔗
+
+### Modificar FormularioPrecio.vue
+[ ] Reemplazar q-input comercio por q-select
+[ ] Configurar q-select con use-input
+[ ] Implementar @filter para búsqueda en tiempo real
+[ ] Cargar comercios desde comerciosStore
+[ ] Ordenar por últimos usados
+[ ] Agregar opción "➕ Agregar nuevo comercio"
+[ ] Abrir DialogoAgregarComercio si elige "nuevo"
+[ ] Actualizar al agregar comercio nuevo
+[ ] Implementar autocompletado de dirección
+[ ] Filtrar direcciones según comercio seleccionado
+[ ] Ordenar direcciones por últimas usadas
+[ ] Registrar uso al guardar precio (ComerciosService)
+
+### Modificar ProductosService.js
+[ ] Actualizar estructura de precios
+[ ] Guardar comercioId en lugar de string
+[ ] Mantener compatibilidad con datos viejos (si los hay)
+
+═══════════════════════════════════════════════════════════════
+
+## FASE 6: ELIMINACIÓN MÚLTIPLE ✅
+
+### Integrar selección múltiple
+[ ] Verificar useSeleccionMultiple.js funciona
+[ ] Importar en ComerciosPage
+[ ] Implementar handleLongPress
+[ ] Implementar handleToggleSeleccion
+[ ] Implementar seleccionarTodos
+[ ] Implementar cancelarSeleccion
+
+### Eliminar comercios con validación
+[ ] Abrir DialogoMotivoEliminacion
+[ ] Validar si comercios tienen productos asociados
+[ ] Mostrar advertencia si tienen productos
+[ ] Según motivo:
+  [ ] - Cerró: Marcar productos (mantener historial)
+  [ ] - Duplicado: Reasignar a otro comercio
+  [ ] - Otro: Mantener precios con nombre original
+[ ] Implementar eliminación con animación
+[ ] Notificación con botón "Deshacer" (5 seg)
+[ ] Restaurar si elige deshacer
+
+═══════════════════════════════════════════════════════════════
+
+## FASE 7: ROUTER Y NAVEGACIÓN 🗺️
+
+### Actualizar routes.js
+[ ] Agregar ruta /comercios
+[ ] Configurar ComerciosPage como componente
+[ ] Verificar navegación desde drawer
+
+### Actualizar MainLayout.vue
+[ ] Verificar que el item "Comercios" tenga to="/comercios"
+[ ] Confirmar que funciona la navegación
+
+═══════════════════════════════════════════════════════════════
+
+## FASE 8: TESTING Y AJUSTES 🧪
+
+### Testing funcional
+[ ] Crear comercio nuevo
+[ ] Editar comercio existente
+[ ] Agregar dirección a comercio
+[ ] Eliminar dirección de comercio
+[ ] Validación de duplicados exactos
+[ ] Validación de direcciones similares
+[ ] Validación de misma ubicación
+[ ] Búsqueda de comercios
+[ ] Filtrado en tiempo real
+[ ] Orden por últimos usados
+[ ] Selección múltiple
+[ ] Eliminación con motivo
+[ ] Integración con FormularioPrecio
+[ ] Autocompletado de direcciones
+[ ] Navegación entre páginas
+
+### Testing responsivo
+[ ] Móvil (xs) - 360px
+[ ] Tablet (sm) - 768px
+[ ] Desktop (md) - 1024px
+
+### Optimizaciones
+[ ] Revisar performance de búsqueda
+[ ] Optimizar re-renders
+[ ] Verificar memoria (no memory leaks)
+[ ] Lazy loading de imágenes (futuro)
+
+═══════════════════════════════════════════════════════════════
+
+## FASE 9: DOCUMENTACIÓN 📚
+
+### Actualizar Resúmenes
+[ ] Crear Resumen5Comercios.txt
+[ ] Actualizar Resumen1General.txt (features + estructura)
+[ ] Actualizar Resumen4FormularioAgregar.txt (integración)
+
+### Comentarios en código
+[ ] Documentar funciones complejas
+[ ] Agregar JSDoc donde sea necesario
+[ ] Comentar algoritmos de validación
+
+═══════════════════════════════════════════════════════════════
+
+## NOTAS IMPORTANTES 📌
+
+- Fase 1 (Base de datos) es CRÍTICA, hacerla primero
+- No implementar cámara todavía (placeholder solamente)
+- Reutilizar componentes de selección múltiple
+- Mantener consistencia con diseño actual
+- Probar cada fase antes de seguir a la siguiente
+- Guardar progreso con commits frecuentes
+
+═══════════════════════════════════════════════════════════════
+
+## PRÓXIMAS MEJORAS (POST-MVP) 🚀
+
+[ ] Implementar plugin de cámara
+[ ] Subir fotos de comercios
+[ ] Geolocalización de comercios
+[ ] Mapa de comercios cercanos
+[ ] Compartir comercios entre usuarios
+[ ] Sistema de reportes de comercios cerrados
+[ ] Verificación de comercios (badges)
+
+═══════════════════════════════════════════════════════════════
