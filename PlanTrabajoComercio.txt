@@ -41,32 +41,32 @@ los datos ingresados por los usuarios.
 ## FASE 1: BASE DE DATOS Y SERVICIOS ⚙️
 
 ### ComerciosService.js
-[ ] Crear archivo en src/almacenamiento/servicios/
-[ ] Implementar obtenerTodos()
-[ ] Implementar buscarPorNombre()
-[ ] Implementar buscarPorId()
-[ ] Implementar agregarComercio()
-[ ] Implementar editarComercio()
-[ ] Implementar eliminarComercio()
-[ ] Implementar agregarDireccion()
-[ ] Implementar eliminarDireccion()
-[ ] Implementar validarDuplicados() (algoritmo 3 niveles)
-[ ] Implementar normalizar() (minúsculas, tildes, espacios)
-[ ] Implementar similitudTexto() (Levenshtein distance)
-[ ] Implementar expandirAbreviaturas()
-[ ] Implementar registrarUsoComercio() (para orden últimos usados)
-[ ] Implementar obtenerComercioPorUso() (ordenados por fecha)
+[x] Crear archivo en src/almacenamiento/servicios/
+[x] Implementar obtenerTodos()
+[x] Implementar buscarPorNombre()
+[x] Implementar buscarPorId()
+[x] Implementar agregarComercio()
+[x] Implementar editarComercio()
+[x] Implementar eliminarComercio()
+[x] Implementar agregarDireccion()
+[x] Implementar eliminarDireccion()
+[x] Implementar validarDuplicados() (algoritmo 3 niveles)
+[x] Implementar normalizar() (minúsculas, tildes, espacios)
+[x] Implementar similitudTexto() (Levenshtein distance)
+[x] Implementar expandirAbreviaturas()
+[x] Implementar registrarUsoComercio() (para orden últimos usados)
+[x] Implementar obtenerComercioPorUso() (ordenados por fecha)
 
 ### comerciosStore.js
-[ ] Crear archivo en src/almacenamiento/stores/
-[ ] Definir state (comercios, cargando, error)
-[ ] Implementar cargarComercios()
-[ ] Implementar agregarComercio()
-[ ] Implementar editarComercio()
-[ ] Implementar eliminarComercio()
-[ ] Implementar buscarComercios()
-[ ] Implementar obtenerComercioPorId()
-[ ] Integrar con ComerciosService
+[x] Crear archivo en src/almacenamiento/stores/
+[x] Definir state (comercios, cargando, error)
+[x] Implementar cargarComercios()
+[x] Implementar agregarComercio()
+[x] Implementar editarComercio()
+[x] Implementar eliminarComercio()
+[x] Implementar buscarComercios()
+[x] Implementar obtenerComercioPorId()
+[x] Integrar con ComerciosService
 
 ═══════════════════════════════════════════════════════════════
 
