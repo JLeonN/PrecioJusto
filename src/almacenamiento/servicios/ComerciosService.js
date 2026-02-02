@@ -1,4 +1,4 @@
-import AlmacenamientoService from './AlmacenamientoService'
+import { adaptadorActual } from './AlmacenamientoService.js'
 
 /**
  * COMERCIOS SERVICE
@@ -129,7 +129,7 @@ function similitudTexto(texto1, texto2) {
  */
 async function obtenerTodos() {
   try {
-    const comercios = await AlmacenamientoService.obtener(CLAVE_COMERCIOS)
+    const comercios = await adaptadorActual.obtener(CLAVE_COMERCIOS)
     return comercios || []
   } catch (error) {
     console.error('Error al obtener comercios:', error)
@@ -278,7 +278,7 @@ async function agregarComercio(datosComercio) {
   }
 
   comercios.push(nuevoComercio)
-  await AlmacenamientoService.guardar(CLAVE_COMERCIOS, comercios)
+  await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
 
   return nuevoComercio
 }
@@ -301,7 +301,7 @@ async function editarComercio(id, datosActualizados) {
     id, // Mantener ID original
   }
 
-  await AlmacenamientoService.guardar(CLAVE_COMERCIOS, comercios)
+  await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
   return comercios[indice]
 }
 
@@ -318,7 +318,7 @@ async function eliminarComercio(id) {
     return false // No se encontró
   }
 
-  await AlmacenamientoService.guardar(CLAVE_COMERCIOS, comerciosFiltrados)
+  await adaptadorActual.guardar(CLAVE_COMERCIOS, comerciosFiltrados)
   return true
 }
 
@@ -345,7 +345,7 @@ async function agregarDireccion(comercioId, datosDireccion) {
 
   comercio.direcciones.push(nuevaDireccion)
 
-  await AlmacenamientoService.guardar(CLAVE_COMERCIOS, comercios)
+  await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
   return comercio
 }
 
@@ -368,7 +368,7 @@ async function eliminarDireccion(comercioId, direccionId) {
     return false // No se encontró la dirección
   }
 
-  await AlmacenamientoService.guardar(CLAVE_COMERCIOS, comercios)
+  await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
   return true
 }
 
@@ -395,7 +395,7 @@ async function registrarUsoComercio(comercioId, direccionId = null) {
     }
   }
 
-  await AlmacenamientoService.guardar(CLAVE_COMERCIOS, comercios)
+  await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
 }
 
 /**

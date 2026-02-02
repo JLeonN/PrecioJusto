@@ -38,7 +38,7 @@ los datos ingresados por los usuarios.
 
 ═══════════════════════════════════════════════════════════════
 
-## FASE 1: BASE DE DATOS Y SERVICIOS ⚙️
+## ✅ FASE 1: BASE DE DATOS Y SERVICIOS ⚙️ [COMPLETADA]
 
 ### ComerciosService.js
 [x] Crear archivo en src/almacenamiento/servicios/
@@ -68,123 +68,131 @@ los datos ingresados por los usuarios.
 [x] Implementar obtenerComercioPorId()
 [x] Integrar con ComerciosService
 
+### EXTRAS IMPLEMENTADOS (no estaban en el plan original):
+[x] Método eliminarComercios() (eliminación múltiple)
+[x] Método agregarDireccion() en store
+[x] Método eliminarDireccion() en store
+[x] Método registrarUso() en store
+[x] Método validarDuplicados() en store
+[x] Getters: comerciosPorUso, totalComercios, totalDirecciones, comerciosPorTipo
+
 ═══════════════════════════════════════════════════════════════
 
-## FASE 2: ESTRUCTURA DE ARCHIVOS 📁
+## ✅ FASE 2: ESTRUCTURA DE ARCHIVOS 📁 [COMPLETADA]
 
 ### Reorganización de carpetas
-[ ] Crear carpeta src/components/Compartidos/
-[ ] Mover BarraSeleccion.vue a Compartidos/
-[ ] Mover BarraAccionesSeleccion.vue a Compartidos/
-[ ] Crear carpeta src/components/Comercios/
-[ ] Actualizar imports en MisProductosPage.vue
+[x] Crear carpeta src/components/Compartidos/
+[x] Mover BarraSeleccion.vue a Compartidos/
+[x] Mover BarraAccionesSeleccion.vue a Compartidos/
+[x] Actualizar imports en MisProductosPage.vue
+[x] Crear carpeta src/components/Comercios/
 
 ### Nuevos archivos
-[ ] Crear src/pages/ComerciosPage.vue
-[ ] Crear src/components/Comercios/ListaComercios.vue
-[ ] Crear src/components/Comercios/TarjetaComercio.vue
-[ ] Crear src/components/Formularios/FormularioComercio.vue
-[ ] Crear src/components/Formularios/Dialogos/DialogoAgregarComercio.vue
-[ ] Crear src/components/Formularios/Dialogos/DialogoCoincidencias.vue
-[ ] Crear src/components/Formularios/Dialogos/DialogoMismaUbicacion.vue
-[ ] Crear src/components/Formularios/Dialogos/DialogoMotivoEliminacion.vue
+[x] Crear src/pages/ComerciosPage.vue
+[x] Crear src/components/Comercios/ListaComercios.vue
+[x] Crear src/components/Comercios/TarjetaComercio.vue
+[x] Crear src/components/Formularios/FormularioComercio.vue
+[x] Crear src/components/Formularios/Dialogos/DialogoAgregarComercio.vue
+[x] Crear src/components/Formularios/Dialogos/DialogoCoincidencias.vue
+[x] Crear src/components/Formularios/Dialogos/DialogoMismaUbicacion.vue
+[x] Crear src/components/Formularios/Dialogos/DialogoMotivoEliminacion.vue
 
 ═══════════════════════════════════════════════════════════════
 
-## FASE 3: UI - PÁGINA DE COMERCIOS 🎨
+## ✅ FASE 3: UI - PÁGINA DE COMERCIOS 🎨 [COMPLETADA]
 
 ### ComerciosPage.vue
-[ ] Crear estructura básica del layout
-[ ] Importar ListaComercios
-[ ] Implementar carga de comercios desde store
-[ ] Agregar botón FAB para nuevo comercio
-[ ] Implementar estados: cargando, vacío, error
-[ ] Agregar barra de búsqueda
-[ ] Integrar modo selección múltiple
-[ ] Conectar con BarraSeleccion (Compartidos)
-[ ] Conectar con BarraAccionesSeleccion (Compartidos)
+[x] Crear estructura básica del layout
+[x] Importar ListaComercios
+[x] Implementar carga de comercios desde store
+[x] Agregar botón FAB para nuevo comercio
+[x] Implementar estados: cargando, vacío, error
+[x] Agregar barra de búsqueda
+[x] Integrar modo selección múltiple
+[x] Conectar con BarraSeleccion (Compartidos)
+[x] Conectar con BarraAccionesSeleccion (Compartidos)
 
 ### ListaComercios.vue
-[ ] Crear componente contenedor
-[ ] Recibir props: comercios, modoSeleccion, seleccionados
-[ ] Renderizar TarjetaComercio por cada comercio
-[ ] Implementar mensaje "No hay comercios"
-[ ] Manejar eventos de selección
-[ ] Agregar animaciones de entrada/salida
+[x] Crear componente contenedor
+[x] Recibir props: comercios, modoSeleccion, seleccionados
+[x] Renderizar TarjetaComercio por cada comercio
+[x] Implementar mensaje "No hay comercios"
+[x] Manejar eventos de selección
+[x] Agregar animaciones de entrada/salida
 
 ### TarjetaComercio.vue
-[ ] Crear estructura básica (layout vertical tipo carta)
-[ ] Agregar placeholder foto (IconBuilding de Tabler)
-[ ] Mostrar nombre del comercio
-[ ] Mostrar tipo de comercio
-[ ] Mostrar cantidad de direcciones
-[ ] Implementar estado expandido/colapsado
-[ ] Mostrar lista de direcciones al expandir
-[ ] Agregar botón "Editar" (solo expandido)
-[ ] Implementar modo selección (checkbox circular)
-[ ] Implementar long-press (1 segundo)
-[ ] Agregar estilos responsivos
-[ ] Agregar animaciones de hover/active
-[ ] Implementar vibración háptica (Capacitor)
+[x] Crear estructura básica (layout vertical tipo carta)
+[x] Agregar placeholder foto (IconBuilding de Tabler)
+[x] Mostrar nombre del comercio
+[x] Mostrar tipo de comercio
+[x] Mostrar cantidad de direcciones
+[x] Implementar estado expandido/colapsado
+[x] Mostrar lista de direcciones al expandir
+[x] Agregar botón "Editar" (solo expandido)
+[x] Implementar modo selección (checkbox circular)
+[x] Implementar long-press (1 segundo)
+[x] Agregar estilos responsivos
+[x] Agregar animaciones de hover/active
+[x] Implementar vibración háptica (Capacitor)
 
 ═══════════════════════════════════════════════════════════════
 
-## FASE 4: FORMULARIOS Y VALIDACIONES 📝
+## ✅ FASE 4: FORMULARIOS Y VALIDACIONES 📝 [COMPLETADA]
 
 ### FormularioComercio.vue
-[ ] Crear estructura del formulario
-[ ] Campo: Nombre (q-input obligatorio)
-[ ] Campo: Tipo (q-select con opciones predefinidas + "Otro")
-[ ] Campo: Calle y número (q-input obligatorio)
-[ ] Campo: Barrio (q-input opcional)
-[ ] Campo: Ciudad (q-input opcional)
-[ ] Botón placeholder cámara (deshabilitado por ahora)
-[ ] Implementar validaciones básicas
-[ ] Implementar validación de duplicados (al escribir)
-[ ] Mostrar feedback visual de validación
-[ ] Método limpiarFormulario()
-[ ] Método validarFormulario()
-[ ] Emitir evento 'guardar' con datos
+[x] Crear estructura del formulario
+[x] Campo: Nombre (q-input obligatorio)
+[x] Campo: Tipo (q-select con opciones predefinidas + "Otro")
+[x] Campo: Calle y número (q-input obligatorio)
+[x] Campo: Barrio (q-input opcional)
+[x] Campo: Ciudad (q-input opcional)
+[x] Botón placeholder cámara (deshabilitado por ahora)
+[x] Implementar validaciones básicas
+[x] Implementar validación de duplicados (al escribir)
+[x] Mostrar feedback visual de validación
+[x] Método limpiarFormulario()
+[x] Método validarFormulario()
+[x] Emitir evento 'guardar' con datos
 
 ### DialogoAgregarComercio.vue
-[ ] Crear estructura del diálogo (q-dialog)
-[ ] Importar FormularioComercio
-[ ] Implementar botones Guardar/Cancelar
-[ ] Conectar con comerciosStore.agregarComercio()
-[ ] Manejar loading al guardar
-[ ] Mostrar notificaciones (success/error)
-[ ] Cerrar diálogo después de guardar
-[ ] Implementar prop modelValue para v-model
+[x] Crear estructura del diálogo (q-dialog)
+[x] Importar FormularioComercio
+[x] Implementar botones Guardar/Cancelar
+[x] Conectar con comerciosStore.agregarComercio()
+[x] Manejar loading al guardar
+[x] Mostrar notificaciones (success/error)
+[x] Cerrar diálogo después de guardar
+[x] Implementar prop modelValue para v-model
 
 ### DialogoCoincidencias.vue
-[ ] Crear diálogo de advertencia
-[ ] Mostrar lista de comercios similares
-[ ] Mostrar porcentaje de similitud
-[ ] Botones: "Usar existente" / "Es nuevo, continuar"
-[ ] Emitir evento con decisión del usuario
-[ ] Diseño visual claro y amigable
+[x] Crear diálogo de advertencia
+[x] Mostrar lista de comercios similares
+[x] Mostrar porcentaje de similitud
+[x] Botones: "Usar existente" / "Es nuevo, continuar"
+[x] Emitir evento con decisión del usuario
+[x] Diseño visual claro y amigable
 
 ### DialogoMismaUbicacion.vue
-[ ] Crear diálogo informativo
-[ ] Mostrar comercios en misma dirección
-[ ] Explicar que puede ser mismo edificio
-[ ] Botones: "Sí, agregar" / "Cancelar"
-[ ] Emitir evento con confirmación
+[x] Crear diálogo informativo
+[x] Mostrar comercios en misma dirección
+[x] Explicar que puede ser mismo edificio
+[x] Botones: "Sí, agregar" / "Cancelar"
+[x] Emitir evento con confirmación
 
 ### DialogoMotivoEliminacion.vue
-[ ] Crear diálogo de confirmación
-[ ] Radio buttons con opciones:
-  [ ] - "Cerró definitivamente"
-  [ ] - "Error / Duplicado"
-  [ ] - "Otro motivo"
-[ ] Campo texto para "Otro motivo"
-[ ] Mostrar cantidad de productos afectados
-[ ] Botones: "Confirmar eliminación" / "Cancelar"
-[ ] Emitir evento con motivo seleccionado
+[x] Crear diálogo de confirmación
+[x] Radio buttons con opciones:
+  [x] - "Cerró definitivamente"
+  [x] - "Error / Duplicado"
+  [x] - "Otro motivo"
+[x] Campo texto para "Otro motivo"
+[x] Mostrar cantidad de productos afectados
+[x] Botones: "Confirmar eliminación" / "Cancelar"
+[x] Emitir evento con motivo seleccionado
 
 ═══════════════════════════════════════════════════════════════
 
-## FASE 5: INTEGRACIÓN CON PRECIOS 🔗
+## ⏸️ FASE 5: INTEGRACIÓN CON PRECIOS 🔗 [PENDIENTE]
 
 ### Modificar FormularioPrecio.vue
 [ ] Reemplazar q-input comercio por q-select
@@ -207,7 +215,7 @@ los datos ingresados por los usuarios.
 
 ═══════════════════════════════════════════════════════════════
 
-## FASE 6: ELIMINACIÓN MÚLTIPLE ✅
+## ⏸️ FASE 6: ELIMINACIÓN MÚLTIPLE ✅ [PENDIENTE]
 
 ### Integrar selección múltiple
 [ ] Verificar useSeleccionMultiple.js funciona
@@ -231,7 +239,7 @@ los datos ingresados por los usuarios.
 
 ═══════════════════════════════════════════════════════════════
 
-## FASE 7: ROUTER Y NAVEGACIÓN 🗺️
+## 🚧 FASE 7: ROUTER Y NAVEGACIÓN 🗺️ [EN PROGRESO]
 
 ### Actualizar routes.js
 [ ] Agregar ruta /comercios
@@ -292,10 +300,13 @@ los datos ingresados por los usuarios.
 
 ## NOTAS IMPORTANTES 📌
 
-- Fase 1 (Base de datos) es CRÍTICA, hacerla primero
+- Fase 1 (Base de datos) ✅ COMPLETADA
+- Fase 2 (Estructura) ✅ COMPLETADA
+- Fase 3 (UI Página) ✅ COMPLETADA
+- Fase 4 (Formularios) ✅ COMPLETADA
 - No implementar cámara todavía (placeholder solamente)
-- Reutilizar componentes de selección múltiple
-- Mantener consistencia con diseño actual
+- Reutilizar componentes de selección múltiple ✅ HECHO
+- Mantener consistencia con diseño actual ✅ HECHO
 - Probar cada fase antes de seguir a la siguiente
 - Guardar progreso con commits frecuentes
 
@@ -312,3 +323,15 @@ los datos ingresados por los usuarios.
 [ ] Verificación de comercios (badges)
 
 ═══════════════════════════════════════════════════════════════
+
+## 📊 PROGRESO GENERAL: 60% COMPLETADO
+
+✅ Fase 1: 100%
+✅ Fase 2: 100%
+✅ Fase 3: 100%
+✅ Fase 4: 100%
+⏸️ Fase 5: 0%
+⏸️ Fase 6: 0%
+🚧 Fase 7: 50%
+⏸️ Fase 8: 0%
+⏸️ Fase 9: 0%

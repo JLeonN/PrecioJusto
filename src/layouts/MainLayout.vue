@@ -67,7 +67,7 @@
             </q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple>
+          <q-item clickable v-ripple to="/comercios">
             <q-item-section avatar>
               <IconMapPin :size="24" />
             </q-item-section>

@@ -17,7 +17,13 @@
     </div>
 
     <!-- BARRA DE SELECCIÓN (sticky debajo del header) -->
-    <!-- TODO: Agregar BarraSeleccion cuando esté en Compartidos -->
+    <BarraSeleccion
+      :visible="seleccion.modoSeleccion.value"
+      :cantidad-seleccionados="seleccion.cantidadSeleccionados.value"
+      :total-items="seleccion.totalItems.value"
+      :todo-seleccionado="seleccion.todoSeleccionado.value"
+      @toggle-seleccionar-todos="seleccion.toggleSeleccionarTodos()"
+    />
 
     <!-- Contenedor con ancho máximo -->
     <div class="contenedor-comercios">
@@ -56,11 +62,15 @@
       </div>
 
       <!-- LISTA DE COMERCIOS -->
-      <!-- TODO: Agregar ListaComercios cuando esté creado -->
-      <div v-else>
-        <p class="text-grey-7">{{ comerciosFiltrados.length }} comercios encontrados</p>
-        <!-- ListaComercios irá aquí -->
-      </div>
+      <ListaComercios
+        v-else
+        :comercios="comerciosFiltrados"
+        :modo-seleccion="seleccion.modoSeleccion.value"
+        :seleccionados="seleccion.seleccionados.value"
+        @long-press="activarSeleccionConItem"
+        @toggle-seleccion="seleccion.toggleSeleccion($event)"
+        @editar="editarComercio"
+      />
     </div>
 
     <!-- BOTÓN FLOTANTE AGREGAR (oculto en modo selección) -->
@@ -69,10 +79,19 @@
     </q-page-sticky>
 
     <!-- BARRA DE ACCIONES (fixed bottom en modo selección) -->
-    <!-- TODO: Agregar BarraAccionesSeleccion cuando esté en Compartidos -->
+    <BarraAccionesSeleccion
+      :visible="seleccion.modoSeleccion.value"
+      :cantidad-seleccionados="seleccion.cantidadSeleccionados.value"
+      :hay-seleccionados="seleccion.haySeleccionados.value"
+      @eliminar="confirmarEliminacion"
+      @cancelar="seleccion.desactivarModoSeleccion()"
+    />
 
     <!-- DIÁLOGO AGREGAR COMERCIO -->
-    <!-- TODO: Agregar DialogoAgregarComercio cuando esté creado -->
+    <DialogoAgregarComercio
+      v-model="dialogoAgregarAbierto"
+      @comercio-guardado="onComercioGuardado"
+    />
 
     <!-- DIÁLOGO CONFIRMACIÓN ELIMINACIÓN -->
     <q-dialog v-model="dialogoConfirmacionAbierto" persistent>
@@ -174,20 +193,38 @@ function abrirDialogoAgregar() {
 
 /**
  * Activa modo selección con un comercio inicial
- * TODO: Descomentar cuando ListaComercios esté integrado
  */
-// function activarSeleccionConItem(comercioId) {
-//   seleccion.activarModoSeleccion(comercioId)
-// }
+function activarSeleccionConItem(comercioId) {
+  seleccion.activarModoSeleccion(comercioId)
+}
 
 /**
  * Confirmar eliminación de comercios
- * TODO: Descomentar cuando BarraAccionesSeleccion esté integrado
  */
-// function confirmarEliminacion() {
-//   if (!seleccion.haySeleccionados.value) return
-//   dialogoConfirmacionAbierto.value = true
-// }
+function confirmarEliminacion() {
+  if (!seleccion.haySeleccionados.value) return
+  dialogoConfirmacionAbierto.value = true
+}
+
+/**
+ * Callback cuando se guarda un comercio
+ */
+function onComercioGuardado() {
+  cargarComercios()
+}
+
+/**
+ * Editar comercio
+ */
+function editarComercio(comercio) {
+  console.log('Editar comercio:', comercio)
+  // TODO: Implementar edición en fase futura
+  $q.notify({
+    type: 'info',
+    message: 'Función de edición próximamente',
+    position: 'top',
+  })
+}
 
 /**
  * Elimina comercios seleccionados

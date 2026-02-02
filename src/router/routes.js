@@ -8,6 +8,9 @@ const routes = [
 
       // Página de detalle - Historial completo de un producto específico
       { path: 'producto/:id', component: () => import('pages/DetalleProductoPage.vue') },
+
+      // Página de comercios - Gestión de comercios
+      { path: 'comercios', component: () => import('pages/ComerciosPage.vue') },
     ],
   },
 

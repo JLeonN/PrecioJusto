@@ -69,7 +69,6 @@ const iconoSeleccionarTodo = computed(() => {
   box-shadow: var(--sombra-media);
   animation: slideDown 0.3s ease;
 }
-
 @keyframes slideDown {
   from {
     transform: translateY(-100%);
@@ -80,7 +79,6 @@ const iconoSeleccionarTodo = computed(() => {
     opacity: 1;
   }
 }
-
 .barra-contenido {
   display: flex;
   align-items: center;
@@ -88,26 +86,22 @@ const iconoSeleccionarTodo = computed(() => {
   max-width: 1200px;
   margin: 0 auto;
 }
-
 .contador-seleccion {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
 }
-
 .texto-contador {
   font-size: 16px;
   font-weight: bold;
   color: var(--color-primario);
   line-height: 1.2;
 }
-
 .texto-seleccionados {
   font-size: 12px;
   color: var(--texto-secundario);
   line-height: 1;
 }
-
 @media (max-width: 599px) {
   .barra-seleccion {
     top: 56px;
