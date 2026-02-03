@@ -1,0 +1,926 @@
+# SECCIÓN COMERCIOS - DOCUMENTACIÓN TÉCNICA
+
+## PROPÓSITO
+Sistema completo para gestión de comercios que permite registrar tiendas con múltiples direcciones, validar duplicados, y seleccionar comercios al agregar precios a productos. Diseñado para evitar duplicados mediante validación inteligente de similitud.
+
+## COMPONENTES PRINCIPALES
+
+### PÁGINAS
+- ComerciosPage.vue (src/pages/)
+
+### COMPONENTES DE UI
+- ListaComercios.vue (src/components/Comercios/)
+- TarjetaComercio.vue (src/components/Comercios/)
+
+### FORMULARIOS
+- FormularioComercio.vue (src/components/Formularios/)
+- DialogoAgregarComercio.vue (src/components/Formularios/Dialogos/)
+- DialogoCoincidencias.vue (src/components/Formularios/Dialogos/)
+- DialogoMismaUbicacion.vue (src/components/Formularios/Dialogos/)
+- DialogoMotivoEliminacion.vue (src/components/Formularios/Dialogos/)
+
+### COMPONENTES COMPARTIDOS
+- BarraSeleccion.vue (src/components/Compartidos/)
+- BarraAccionesSeleccion.vue (src/components/Compartidos/)
+
+### SERVICIOS Y STORES
+- ComerciosService.js (src/almacenamiento/servicios/)
+- comerciosStore.js (src/almacenamiento/stores/)
+
+## ESTRUCTURA DE DATOS DE COMERCIO
+
+### Objeto Comercio Completo
+```javascript
+{
+  id: string,                    // ID único generado
+  nombre: string,                // Nombre del comercio
+  tipo: string,                  // Tipo de comercio
+  direcciones: [                 // Array de direcciones
+    {
+      id: string,
+      calle: string,
+      barrio: string,
+      ciudad: string,
+      nombreCompleto: string,    // "NOMBRE - Calle"
+      fechaUltimoUso: string
+    }
+  ],
+  foto: string | null,           // URL de la foto (futuro)
+  fechaCreacion: string,         // ISO 8601
+  fechaUltimoUso: string,        // ISO 8601
+  cantidadUsos: number           // Contador de veces usado
+}
+```
+
+### Tipos de Comercio Disponibles
+- Supermercado
+- Almacén
+- Mayorista
+- Farmacia
+- Kiosco
+- Online
+- Otro
+
+## COMERCIOS PAGE (ComerciosPage.vue)
+
+### Propósito
+Página principal que muestra listado de comercios con funcionalidades de búsqueda, selección múltiple y eliminación.
+
+### Estructura
+```
+┌─────────────────────────────────────┐
+│  Barra de búsqueda                  │
+├─────────────────────────────────────┤
+│  BarraSeleccion (si modo activo)    │
+├─────────────────────────────────────┤
+│  ListaComercios                     │
+│  - TarjetaComercio (múltiples)      │
+├─────────────────────────────────────┤
+│  FAB (Agregar comercio)             │
+├─────────────────────────────────────┤
+│  BarraAccionesSeleccion (bottom)    │
+└─────────────────────────────────────┘
+```
+
+### Estados de la Página
+- **Cargando:** Spinner mientras carga comercios
+- **Vacío:** Mensaje "No hay comercios" + botón agregar
+- **Con datos:** Lista de comercios visible
+- **Error:** Banner rojo con mensaje de error
+
+### Funcionalidades Implementadas
+- ✅ Carga de comercios desde comerciosStore
+- ✅ Búsqueda en tiempo real (nombre y tipo)
+- ✅ Modo selección múltiple con long-press
+- ✅ FAB para agregar nuevo comercio
+- ✅ Integración con BarraSeleccion y BarraAccionesSeleccion
+- ✅ Estados de carga, vacío y error
+
+### Props y Computed
+```javascript
+// Computed
+comerciosFiltrados: Filtra por término de búsqueda
+totalComercios: Cantidad de comercios
+```
+
+### Eventos Manejados
+- handleLongPress: Activa modo selección
+- handleToggleSeleccion: Marca/desmarca comercio
+- handleSeleccionarTodos: Selecciona todos visibles
+- handleCancelarSeleccion: Sale del modo selección
+- handleEliminarSeleccionados: Elimina comercios seleccionados
+
+## LISTA COMERCIOS (ListaComercios.vue)
+
+### Propósito
+Componente contenedor que renderiza grid responsivo de TarjetaComercio
+
+### Props
+```javascript
+{
+  comercios: Array (required),
+  modoSeleccion: Boolean,
+  seleccionados: Set
+}
+```
+
+### Eventos Emitidos
+- 'long-press': Pasa evento de long-press al padre
+- 'toggle-seleccion': Pasa toggle de selección al padre
+
+### Sistema de Grilla Responsivo
+- col-12: Móvil (1 tarjeta por fila)
+- col-sm-6: Tablet pequeña (2 tarjetas por fila)
+- col-md-4: Tablet/PC (3 tarjetas por fila)
+- col-xl-3: PC grande (4 tarjetas por fila)
+- Gutter: q-col-gutter-md (16px separación)
+
+### Mensaje "No hay comercios"
+- Muestra ícono IconBuilding grande
+- Texto: "No hay comercios registrados"
+- Solo visible si array está vacío
+
+## TARJETA COMERCIO (TarjetaComercio.vue)
+
+### Propósito
+Tarjeta expandible que muestra información del comercio con lista de direcciones
+
+### Props
+```javascript
+{
+  comercio: Object (required),
+  modoSeleccion: Boolean,
+  seleccionado: Boolean
+}
+```
+
+### Eventos Emitidos
+- 'long-press': Long-press de 1 segundo
+- 'toggle-seleccion': Toggle en modo selección
+- 'editar': Botón editar presionado
+
+### Estructura Visual
+
+#### Estado Colapsado (default)
+- Foto/placeholder (aspect ratio 16:9)
+- Nombre del comercio (bold, 18px)
+- Badge con tipo de comercio
+- Estadísticas rápidas:
+  - Cantidad de direcciones
+  - Última vez usado (formato relativo)
+- Ícono chevron-down
+
+#### Estado Expandido
+- Todo lo del estado colapsado
+- Sección "Direcciones" (fondo gris)
+- Lista de direcciones con ícono location
+- Botón "Editar" (full width)
+- Ícono chevron-up
+
+### Modo Selección
+- Checkbox circular (esquina superior derecha)
+- Overlay verde semi-transparente (15% opacity)
+- Borde verde cuando está seleccionado
+- Animación fade-in del checkbox (0.3s)
+
+### Interacciones
+- Click (modo normal): expande/colapsa
+- Click (modo selección): marca/desmarca
+- Long-press 1 segundo: activa modo selección + vibración
+- Hover (PC): elevación con sombra
+- Active: scale(0.98)
+
+### Estilos Responsivos
+- Móvil: Foto arriba, info abajo (vertical)
+- Tablet/PC: Sin cambios significativos
+- Foto: 100% ancho, aspect-ratio 16/9
+- Padding: 16px consistente
+
+### Formato de Fecha Relativa
+```javascript
+formatearFecha(fechaISO):
+  - < 60 min: "Hace X minutos"
+  - < 24 hrs: "Hace X horas"
+  - < 7 días: "Hace X días"
+  - < 4 semanas: "Hace X semanas"
+  - > 4 semanas: "Hace X meses"
+```
+
+### Iconografía (Tabler Icons)
+- IconBuilding: Placeholder foto (40px)
+- IconMapPin: Ícono de dirección (16px)
+- IconChevronDown/Up: Expandir/colapsar (20px)
+- IconEdit: Botón editar (18px)
+- IconCheck: Checkbox seleccionado
+
+## FORMULARIO COMERCIO (FormularioComercio.vue)
+
+### Propósito
+Formulario para ingresar datos de nuevo comercio con validación en tiempo real
+
+### Props
+```javascript
+{
+  modelValue: Object // v-model con datos del comercio
+}
+```
+
+### Eventos Emitidos
+- 'update:modelValue': Sincronización bidireccional
+- 'validar': Trigger para validación de duplicados
+
+### Campos del Formulario
+
+#### Nombre (obligatorio)
+- Tipo: q-input
+- Validación: requerido, mínimo 2 caracteres
+- Placeholder: "Ej: Ta-Ta, Disco, Farmashop"
+- @blur: emit('validar') para buscar duplicados
+
+#### Tipo (obligatorio)
+- Tipo: q-select
+- Opciones: Supermercado, Almacén, Mayorista, Farmacia, Kiosco, Online, Otro
+- Default: "Supermercado"
+
+#### Calle y número (obligatorio)
+- Tipo: q-input
+- Validación: requerido
+- Placeholder: "Ej: Av. 18 de Julio 1234"
+- @blur: emit('validar') para buscar direcciones similares
+
+#### Barrio (opcional)
+- Tipo: q-input
+- Placeholder: "Ej: Centro, Pocitos"
+
+#### Ciudad (opcional)
+- Tipo: q-input
+- Placeholder: "Ej: Montevideo"
+- Default: "Montevideo"
+
+#### Foto (placeholder - futuro)
+- Botón deshabilitado con ícono cámara
+- Tooltip: "Próximamente"
+- Color: grey-5
+
+### Validaciones en Tiempo Real
+- Nombre: required, min 2 chars
+- Calle: required
+- Feedback visual con colores (rojo/verde)
+- Mensajes de error debajo de inputs
+
+### Métodos Expuestos
+- limpiarFormulario(): Reset todos los campos
+- validarFormulario(): Verifica que campos requeridos estén completos
+
+## DIÁLOGO AGREGAR COMERCIO (DialogoAgregarComercio.vue)
+
+### Propósito
+Modal que contiene FormularioComercio y maneja el flujo completo de guardado con validaciones
+
+### Props
+```javascript
+{
+  modelValue: Boolean // v-model para abrir/cerrar
+}
+```
+
+### Eventos Emitidos
+- 'update:modelValue': Sincronizar estado del diálogo
+- 'comercio-guardado': Emitido cuando se guarda exitosamente
+
+### Flujo de Guardado Completo
+
+#### 1. Usuario completa formulario
+- Ingresa nombre, tipo, dirección
+- Validaciones en tiempo real
+
+#### 2. Al escribir nombre o dirección
+- Se dispara @blur en inputs
+- emit('validar') desde FormularioComercio
+- DialogoAgregarComercio llama validarDuplicados()
+
+#### 3. Validación de Duplicados
+```javascript
+async validarDuplicados() {
+  const similares = await ComerciosService.buscarSimilares(
+    nombre,
+    calle
+  )
+  
+  if (similares.length > 0) {
+    // Abrir DialogoCoincidencias
+    comerciosSimilares.value = similares
+    dialogoCoincidenciasAbierto.value = true
+  }
+}
+```
+
+#### 4. Usuario decide
+**Opción A:** Click en comercio similar
+- emit('usar-existente', comercio)
+- Se cierra diálogo sin crear nuevo
+
+**Opción B:** Click en "No, es nuevo"
+- Continuar con guardado
+- Crear comercio nuevo
+
+#### 5. Guardar Comercio Nuevo
+```javascript
+async guardarComercio() {
+  const comercio = {
+    id: generarId(),
+    nombre: datosComercio.nombre,
+    tipo: datosComercio.tipo,
+    direcciones: [
+      {
+        id: generarId(),
+        calle: datosComercio.calle,
+        barrio: datosComercio.barrio,
+        ciudad: datosComercio.ciudad,
+        nombreCompleto: `${nombre} - ${calle}`,
+        fechaUltimoUso: new Date().toISOString()
+      }
+    ],
+    foto: null,
+    fechaCreacion: new Date().toISOString(),
+    fechaUltimoUso: new Date().toISOString(),
+    cantidadUsos: 0
+  }
+  
+  comerciosStore.comercios.push(comercio)
+  emit('comercio-guardado', comercio)
+}
+```
+
+#### 6. Feedback Visual
+- Notificación Quasar positiva
+- Mensaje: "Comercio agregado como nuevo"
+- Caption: nombre del comercio
+- Duración: 2 segundos
+
+#### 7. Cerrar y Limpiar
+- Cerrar diálogo
+- Limpiar formulario
+- Reset validaciones
+
+### Estados del Diálogo
+- guardando: Boolean (loading spinner)
+- formularioValido: Computed (habilita/deshabilita botón)
+- dialogoCoincidenciasAbierto: Boolean
+- dialogoMismaUbicacionAbierto: Boolean
+
+### Responsive
+- Móvil portrait: 350px-500px ancho
+- Móvil landscape: 90vw ancho, 90vh alto
+- Scroll automático si contenido > 60vh
+
+## DIÁLOGO COINCIDENCIAS (DialogoCoincidencias.vue)
+
+### Propósito
+Mostrar comercios similares detectados y permitir al usuario elegir si usar existente o crear nuevo
+
+### Props
+```javascript
+{
+  modelValue: Boolean,
+  comerciosSimilares: Array,     // [{comercio, similitud}]
+  nivelValidacion: String        // 'nombre' | 'direccion'
+}
+```
+
+### Eventos Emitidos
+- 'update:modelValue': Sincronizar apertura
+- 'usar-existente': Usuario eligió comercio existente
+- 'continuar-nuevo': Usuario confirmó que es nuevo
+
+### Estructura Visual
+
+#### Header (fondo warning)
+- Ícono warning grande
+- Título: "Comercios similares encontrados"
+- Subtítulo: "Verifica si es alguno de estos"
+
+#### Lista de Comercios Similares
+```
+┌─────────────────────────────────────┐
+│  [Avatar] Nombre Comercio           │
+│           Tipo                 95%  │
+│           X direcciones      similar│
+├─────────────────────────────────────┤
+│  [Avatar] Otro Comercio             │
+│           Tipo                 87%  │
+│           X direcciones      similar│
+└─────────────────────────────────────┘
+```
+
+#### Items Clickeables
+- Click en item: emit('usar-existente', comercio)
+- Ripple effect al tocar
+- Feedback visual claro
+
+#### Acciones
+- Botón: "No, es nuevo" (primary, flat)
+- emit('continuar-nuevo')
+
+#### Nota Informativa
+- Banner gris con ícono info
+- Texto explicativo sobre duplicados
+- Ayuda contextual
+
+### Algoritmo de Similitud (desde ComerciosService)
+- Levenshtein distance < 3: Similar
+- Comparación de tokens en dirección > 80%: Misma ubicación
+- Retorna array con comercio + porcentaje de similitud
+
+## DIÁLOGO MISMA UBICACIÓN (DialogoMismaUbicacion.vue)
+
+### Propósito
+Informar al usuario que ya existen comercios en la misma dirección (puede ser mismo edificio)
+
+### Props
+```javascript
+{
+  modelValue: Boolean,
+  comerciosUbicacion: Array      // Comercios en misma ubicación
+}
+```
+
+### Eventos Emitidos
+- 'update:modelValue': Sincronizar apertura
+- 'confirmar': Usuario confirmó agregar de todas formas
+- 'cancelar': Usuario canceló
+
+### Estructura Visual
+
+#### Header (fondo info)
+- Ícono location_on grande
+- Título: "Comercios en esta ubicación"
+- Subtítulo: "Ya hay comercios en esta dirección"
+
+#### Explicación
+- Texto: "Ya existen comercios registrados en esta dirección o muy cerca:"
+
+#### Lista de Comercios
+- Nombre, tipo
+- Lista de direcciones con ícono location
+
+#### Explicación Adicional
+- Banner gris con ícono help_outline
+- Pregunta: "¿Por qué veo esto?"
+- Respuesta: Puede ser mismo edificio/galería
+- Instrucción: Si estás seguro, puedes continuar
+
+#### Acciones
+- Botón: "Sí, agregar de todas formas" (primary)
+- Botón: "Cancelar" (grey, flat)
+
+## DIÁLOGO MOTIVO ELIMINACIÓN (DialogoMotivoEliminacion.vue)
+
+### Propósito
+Solicitar motivo de eliminación y advertir sobre productos afectados
+
+### Props
+```javascript
+{
+  modelValue: Boolean,
+  cantidadProductosAfectados: Number
+}
+```
+
+### Eventos Emitidos
+- 'update:modelValue': Sincronizar apertura
+- 'confirmar': Usuario confirmó eliminación con motivo
+- 'cancelar': Usuario canceló
+
+### Opciones de Motivo
+1. **Cerró definitivamente**
+   - Radio button
+   - Acción: Marcar productos (mantener historial)
+
+2. **Error / Duplicado**
+   - Radio button
+   - Acción: Reasignar a otro comercio
+
+3. **Otro motivo**
+   - Radio button
+   - Campo de texto para especificar
+   - Acción: Mantener precios con nombre original
+
+### Advertencia de Productos
+```
+┌─────────────────────────────────────┐
+│  ⚠️ ADVERTENCIA                     │
+│                                     │
+│  Este comercio tiene X productos    │
+│  asociados. Al eliminarlo:          │
+│                                     │
+│  [según motivo seleccionado]        │
+└─────────────────────────────────────┘
+```
+
+### Acciones
+- Botón: "Confirmar eliminación" (negative)
+- Botón: "Cancelar" (grey, flat)
+- Botón eliminar deshabilitado si no seleccionó motivo
+
+## COMERCIOS SERVICE (ComerciosService.js)
+
+### Propósito
+Lógica de negocio para CRUD de comercios y validación de duplicados
+
+### Constructor
+```javascript
+constructor() {
+  this.adaptador = adaptadorActual
+  this.prefijoComercios = 'comercio_'
+}
+```
+
+### Métodos Principales
+
+#### crear(comercio)
+```javascript
+async crear(comercio) {
+  // Validar duplicados
+  const similares = await this.buscarSimilares(
+    comercio.nombre,
+    comercio.direcciones[0].calle
+  )
+  
+  if (similares.length > 0) {
+    return {
+      exito: false,
+      mensaje: 'Comercios similares encontrados',
+      similares: similares
+    }
+  }
+  
+  // Generar ID
+  comercio.id = generarId()
+  
+  // Guardar
+  await this.adaptador.guardar(clave, comercio)
+  
+  return {
+    exito: true,
+    comercio: comercio
+  }
+}
+```
+
+#### buscarSimilares(nombre, direccion)
+```javascript
+async buscarSimilares(nombre, direccion) {
+  const comercios = await this.obtenerTodos()
+  const similares = []
+  
+  comercios.forEach(comercio => {
+    // Similitud de nombre (Levenshtein)
+    const distancia = levenshteinDistance(
+      nombre.toLowerCase(),
+      comercio.nombre.toLowerCase()
+    )
+    
+    if (distancia < 3) {
+      similares.push({
+        comercio: comercio,
+        similitud: calcularPorcentaje(distancia),
+        razon: 'nombre'
+      })
+    }
+    
+    // Similitud de dirección
+    comercio.direcciones.forEach(dir => {
+      const similitudDir = compararDirecciones(
+        direccion,
+        dir.calle
+      )
+      
+      if (similitudDir > 80) {
+        similares.push({
+          comercio: comercio,
+          similitud: similitudDir,
+          razon: 'direccion'
+        })
+      }
+    })
+  })
+  
+  return similares
+}
+```
+
+#### obtenerTodos()
+- Retorna array de todos los comercios
+- Usa adaptador.listarTodo()
+
+#### obtenerPorId(id)
+- Busca comercio por ID
+- Retorna comercio o null
+
+#### actualizar(id, datos)
+- Actualiza comercio existente
+- Merge de datos
+- Actualiza fechaUltimoUso
+
+#### eliminar(id)
+- Elimina comercio
+- Retorna boolean
+
+#### agregarDireccion(comercioId, direccion)
+- Agrega nueva dirección a comercio
+- Genera ID para dirección
+- Construye nombreCompleto
+
+#### eliminarDireccion(comercioId, direccionId)
+- Elimina dirección específica
+- Valida que no sea la última
+
+#### registrarUso(comercioId, direccionId)
+- Incrementa cantidadUsos
+- Actualiza fechaUltimoUso del comercio
+- Actualiza fechaUltimoUso de la dirección
+
+### Algoritmos de Validación
+
+#### Levenshtein Distance
+```javascript
+function levenshteinDistance(str1, str2) {
+  const matrix = []
+  
+  for (let i = 0; i <= str2.length; i++) {
+    matrix[i] = [i]
+  }
+  
+  for (let j = 0; j <= str1.length; j++) {
+    matrix[0][j] = j
+  }
+  
+  for (let i = 1; i <= str2.length; i++) {
+    for (let j = 1; j <= str1.length; j++) {
+      if (str2.charAt(i-1) == str1.charAt(j-1)) {
+        matrix[i][j] = matrix[i-1][j-1]
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i-1][j-1] + 1,
+          matrix[i][j-1] + 1,
+          matrix[i-1][j] + 1
+        )
+      }
+    }
+  }
+  
+  return matrix[str2.length][str1.length]
+}
+```
+
+#### Comparar Direcciones
+```javascript
+function compararDirecciones(dir1, dir2) {
+  // Normalizar
+  const norm1 = normalizarTexto(dir1)
+  const norm2 = normalizarTexto(dir2)
+  
+  // Tokenizar
+  const tokens1 = norm1.split(' ')
+  const tokens2 = norm2.split(' ')
+  
+  // Contar coincidencias
+  let coincidencias = 0
+  tokens1.forEach(token => {
+    if (tokens2.includes(token)) {
+      coincidencias++
+    }
+  })
+  
+  // Calcular porcentaje
+  const total = Math.max(tokens1.length, tokens2.length)
+  return (coincidencias / total) * 100
+}
+```
+
+## COMERCIOS STORE (comerciosStore.js)
+
+### Propósito
+Estado global de comercios con Pinia
+
+### Estado
+```javascript
+{
+  comercios: [],
+  cargando: false,
+  error: null
+}
+```
+
+### Acciones
+
+#### cargarComercios()
+```javascript
+async cargarComercios() {
+  this.cargando = true
+  try {
+    this.comercios = await ComerciosService.obtenerTodos()
+  } catch (error) {
+    this.error = error.message
+  } finally {
+    this.cargando = false
+  }
+}
+```
+
+#### agregarComercio(comercio)
+- Llama ComerciosService.crear()
+- Agrega a array local
+- Notificación Quasar
+
+#### actualizarComercio(id, datos)
+- Llama ComerciosService.actualizar()
+- Actualiza en array local
+- Notificación Quasar
+
+#### eliminarComercio(id)
+- Llama ComerciosService.eliminar()
+- Elimina de array local
+- Notificación Quasar
+
+#### agregarDireccion(comercioId, direccion)
+- Llama ComerciosService.agregarDireccion()
+- Actualiza comercio en array local
+
+#### eliminarDireccion(comercioId, direccionId)
+- Llama ComerciosService.eliminarDireccion()
+- Actualiza comercio en array local
+
+#### registrarUso(comercioId, direccionId)
+- Llama ComerciosService.registrarUso()
+- Actualiza comercio en array local
+
+### Getters
+
+#### comerciosPorUso
+```javascript
+comerciosPorUso: (state) => {
+  return [...state.comercios].sort((a, b) => {
+    const fechaA = new Date(a.fechaUltimoUso || a.fechaCreacion)
+    const fechaB = new Date(b.fechaUltimoUso || b.fechaCreacion)
+    return fechaB - fechaA
+  })
+}
+```
+
+#### totalComercios
+- Retorna: state.comercios.length
+
+#### totalDirecciones
+```javascript
+totalDirecciones: (state) => {
+  return state.comercios.reduce((total, comercio) => {
+    return total + (comercio.direcciones?.length || 0)
+  }, 0)
+}
+```
+
+#### comerciosPorTipo
+```javascript
+comerciosPorTipo: (state) => {
+  const agrupados = {}
+  state.comercios.forEach(comercio => {
+    const tipo = comercio.tipo || 'Otro'
+    if (!agrupados[tipo]) {
+      agrupados[tipo] = []
+    }
+    agrupados[tipo].push(comercio)
+  })
+  return agrupados
+}
+```
+
+## SELECCIÓN MÚLTIPLE
+
+### Composable Reutilizado
+- useSeleccionMultiple.js (src/composables/)
+- Mismo composable usado en ProductosPage
+- Lógica completa de selección múltiple
+
+### Integración en ComerciosPage
+```javascript
+const {
+  modoSeleccion,
+  seleccionados,
+  handleLongPress,
+  handleToggleSeleccion,
+  seleccionarTodos,
+  cancelarSeleccion,
+  limpiarSeleccion
+} = useSeleccionMultiple()
+```
+
+### Barras de UI
+- BarraSeleccion (sticky, debajo header)
+- BarraAccionesSeleccion (fixed, bottom)
+- Mismas usadas en ProductosPage
+
+## INTEGRACIONES FUTURAS
+
+### Fase 5: Integración con Precios (Pendiente)
+**Modificar FormularioPrecio.vue:**
+- Reemplazar q-input comercio por q-select
+- Cargar comercios desde comerciosStore
+- Ordenar por últimos usados
+- Opción "➕ Agregar nuevo comercio"
+- Autocompletado de dirección según comercio
+- Registrar uso al guardar precio
+
+### Fase 6: Eliminación Múltiple (Pendiente)
+- Validar productos asociados
+- DialogoMotivoEliminacion
+- Opciones según motivo:
+  - Cerró: Marcar productos
+  - Duplicado: Reasignar
+  - Otro: Mantener con nombre original
+
+### Fase 7: Router y Navegación (En Progreso)
+- Ruta /comercios configurada
+- Link en MainLayout drawer
+
+## FEATURES IMPLEMENTADAS
+
+### ✅ Completadas
+- CRUD completo de comercios
+- Validación de duplicados (nombre + dirección)
+- Tarjetas expandibles con direcciones
+- Formulario con validaciones
+- Diálogos de coincidencias y ubicación
+- Búsqueda en tiempo real
+- Modo selección múltiple
+- Grid responsivo
+- Formato de fechas relativo
+- Vibración háptica
+- Tipos de comercio predefinidos
+- Componentes compartidos (barras)
+
+### ⏳ Pendientes
+- Subir foto de comercio (cámara)
+- Edición de comercios
+- Eliminación con motivo
+- Integración con FormularioPrecio
+- Geolocalización
+- Mapa de comercios cercanos
+- Compartir entre usuarios
+- Sistema de reportes (cerrado)
+- Verificación con badges
+
+## PALETA DE COLORES
+
+### Específicos de Comercios
+- Warning (#FF9800): Alerta de duplicados
+- Info (#31CCEC): Misma ubicación
+- Primary (#1976D2): Acciones principales
+- Negative (#C10015): Eliminación
+
+## LIMITACIONES ACTUALES
+- Sin edición de comercios implementada
+- Foto es placeholder (botón deshabilitado)
+- Sin geolocalización
+- Sin validación de direcciones con API
+- Levenshtein distance puede dar falsos positivos
+- No hay base de datos precargada de comercios
+
+## ROADMAP POST-MVP
+1. Implementar plugin de cámara
+2. Subir y guardar fotos
+3. Integrar con FormularioPrecio
+4. Edición completa de comercios
+5. Eliminación con validación de productos
+6. Geolocalización
+7. Mapa interactivo
+8. Compartir comercios
+9. Sistema de reportes
+10. Verificación comunitaria (badges)
+
+## NOTAS PARA IAS
+
+### Orden de lectura recomendado:
+1. Estructura de datos de comercio
+2. ComerciosPage y flujo principal
+3. TarjetaComercio (UI base)
+4. FormularioComercio (entrada de datos)
+5. DialogoAgregarComercio (flujo completo)
+6. DialogoCoincidencias (validación)
+7. ComerciosService (lógica de negocio)
+8. comerciosStore (estado global)
+
+### Estado actual:
+- Fases 1-4: 100% completadas
+- Fase 5: 0% (integración con precios)
+- Fase 6: 0% (eliminación múltiple)
+- Fase 7: 50% (router configurado)
+- Progreso general: ~60% completado
+
+### Diferencias con Productos:
+- Comercios tienen múltiples direcciones
+- Validación de duplicados más compleja
+- Diálogos adicionales (coincidencias, ubicación)
+- No tiene "precios" asociados directamente
+- Usado como referencia en productos

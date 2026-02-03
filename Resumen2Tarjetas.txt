@@ -3,8 +3,8 @@
 ## COMPONENTES RELACIONADOS
 - TarjetaProducto.vue (componente reutilizable en /components/Tarjetas/)
 - ListaProductos.vue (contenedor en /components/MisProductos/)
-- BarraSeleccion.vue (barra sticky para modo selección en /components/Seleccion/)
-- BarraAccionesSeleccion.vue (barra fixed bottom en /components/Seleccion/)
+- BarraSeleccion.vue (barra sticky para modo selección en /components/Compartidos/)
+- BarraAccionesSeleccion.vue (barra fixed bottom en /components/Compartidos/)
 
 ## MODO SELECCIÓN
 
@@ -26,13 +26,16 @@
 - Sección expandida oculta en modo selección
 - Ícono chevron oculto en modo selección
 
-### PROPS NUEVAS
+### PROPS
 - modoSeleccion (Boolean): Indica si está en modo selección
 - seleccionado (Boolean): Indica si esta tarjeta está seleccionada
+- producto (Object, required): Datos del producto a mostrar
 
-### EVENTOS NUEVOS
+### EVENTOS
 - 'long-press': Emitido al hacer long-press (1 seg)
 - 'toggle-seleccion': Emitido al hacer tap en modo selección
+- 'agregar-precio': Emitido al clickear botón agregar precio
+- 'ver-detalle': Emitido al clickear "Ver historial completo"
 
 ### BARRAS DE INTERFAZ
 - BarraSeleccion: Sticky debajo del header, muestra contador y botón "Seleccionar todo"
@@ -45,18 +48,20 @@
 
 ## ESTRUCTURA DE DATOS DEL PRODUCTO
 Cada producto requiere:
-- id (number)
-- nombre (string)
-- imagen (string | null)
-- codigoBarras (string | null)
-- precioMejor (number)
-- comercioMejor (string)
-- diferenciaPrecio (number)
+- id (string): Identificador único alfanumérico
+- nombre (string): Nombre del producto
+- imagen (string | null): URL de la imagen o null
+- codigoBarras (string | null): Código de barras EAN/UPC
+- precioMejor (number): Precio más bajo actual
+- comercioMejor (string): Nombre del comercio con mejor precio
+- diferenciaPrecio (number): Diferencia entre precio más bajo y más alto
 - precios (array de objetos):
-  - comercio (string)
-  - valor (number)
-  - fecha (string)
-  - esMejor (boolean)
+  - id (string): ID único del precio
+  - comercio (string): Nombre del comercio
+  - valor (number): Precio numérico
+  - fecha (string): Fecha en formato ISO 8601
+  - esMejor (boolean): Indica si es el precio más bajo
+  - confirmaciones (number): Cantidad de confirmaciones comunitarias
 
 ## CÓDIGO DE BARRAS COPIABLE
 - Muestra debajo del nombre con ícono IconBarcode (14px)
@@ -65,6 +70,7 @@ Cada producto requiere:
 - Feedback visual con background hover/active
 - Fuente monoespaciada (Courier New, 11px)
 - Solo visible si producto tiene codigoBarras
+- Usa stop propagation para no expandir tarjeta al copiar
 
 ## COMPORTAMIENTO VISUAL
 
@@ -76,87 +82,236 @@ Cada producto requiere:
 
 ### ESTADO EXPANDIDO
 - Muestra top 3 mejores precios ordenados por valor
-- Botón "Agregar precio" expandido con texto
+- Botón "Agregar precio" expandido con texto visible
 - Lista con avatares numerados (1,2,3)
-- Avatar verde para el mejor precio
-- Fechas formateadas en modo relativo (Hace X días/horas/semanas)
-- Botón "Ver historial completo" al final
+- Avatar verde (#4CAF50) para el mejor precio
+- Avatar gris (#9E9E9E) para precios 2 y 3
+- Fechas formateadas en modo relativo (hace X días/horas/semanas/meses)
+- Botón "Ver historial completo" al final con ícono IconChartLine
 - Ícono chevron-up indicando colapsable
+- Transición suave con q-slide-transition
 
 ## DISEÑO RESPONSIVO
 
-### MÓVIL (xs)
+### MÓVIL (xs - menor a 600px)
 - Layout vertical (flex-direction: column)
 - Imagen: 140px x 140px centrada
 - Info apilada verticalmente
+- Espaciado: gap de 12px
+- Padding: 16px
 
-### TABLET/PC (gt.xs)
+### TABLET/PC (sm y mayor - 600px+)
 - Layout horizontal (grid 3 columnas: 80px | 1fr | auto)
 - Imagen: 80px x 80px
-- Info y controles en línea
+- Info y controles en línea horizontal
+- Espaciado: gap de 16px
+- Mejor aprovechamiento del espacio
 
 ## INTERACCIONES
-- Click en tarjeta (modo normal): toggleExpandir()
-- Click en tarjeta (modo selección): emit('toggle-seleccion')
+
+### Gestos Touch
+- Click simple (modo normal): toggleExpandir()
+- Click simple (modo selección): emit('toggle-seleccion')
 - Long-press 1 segundo: emit('long-press') + vibración háptica
-- Click en botón agregar: emit('agregar-precio') con stop propagation
-- Click en código de barras: copiar al portapapeles con notificación
-- Click en "Ver historial": emit('ver-detalle') con stop propagation
+- v-touch-hold:1000.mouse: Directiva Quasar para detectar long-press
+
+### Clicks con Stop Propagation
+- Click en botón agregar: emit('agregar-precio') + stop propagation
+- Click en código de barras: copiar al portapapeles + stop propagation
+- Click en "Ver historial": emit('ver-detalle') + stop propagation
+
+### Feedback Visual
 - Animación de presión (scale 0.98) en :active
+- Transform translateY(-2px) en :hover (solo PC)
+- Box-shadow aumenta en hover
+- Transiciones suaves de 0.3s
 
 ## ESTILOS CLAVE
-- Borde izquierdo azul (4px) marca visual (modo normal)
-- Borde verde (4px) + box-shadow verde (modo seleccionado)
-- Overlay verde semi-transparente cuando está seleccionada
-- Transiciones suaves (0.2s - 0.3s)
-- Botón agregar con transición de ancho y texto (fade)
-- Texto nombre: ellipsis 2 líneas
-- Texto comercio: ellipsis 1 línea
+
+### Estados de la Tarjeta
+- Normal: borde izquierdo azul (4px) como marca visual
+- Seleccionada: borde verde (4px) + box-shadow verde
+- Hover: elevación con translateY(-2px) y sombra mayor
+- Active: scale(0.98) para feedback táctil
+
+### Overlay de Selección
+- Position: absolute cubriendo toda la tarjeta
+- Background: --color-secundario-claro
+- Opacity: 0.15
+- Z-index: 1
+- Pointer-events: none
+
+### Transiciones
+- Tarjeta general: all 0.3s ease
+- Checkbox fade: opacity 0.3s ease
+- Botón agregar: width 0.2s, opacity 0.3s
+- Texto expandido: opacity 0.3s
+
+### Tipografía
+- Nombre producto: text-subtitle1, font-weight-bold
+- Precio: text-h5, font-weight-bold, text-primary
+- Comercio: text-caption, text-grey-7
+- Código barras: 11px, Courier New (monospace)
+
+### Ellipsis y Truncamiento
+- Nombre: ellipsis 2 líneas (-webkit-line-clamp: 2)
+- Comercio: ellipsis 1 línea (white-space: nowrap)
+- Min-height en nombre: 3em para consistencia
 
 ## ICONOGRAFÍA (Tabler Icons)
-- IconShoppingBag: placeholder imagen
-- IconMapPin: ubicación comercio
-- IconPlus: agregar precio
-- IconChevronDown/Up: expandir/colapsar
-- IconChartLine: ver historial
-- IconBarcode: código de barras
-
-## EVENTOS EMITIDOS
-- 'agregar-precio': cuando se clickea botón agregar
-- 'ver-detalle': cuando se clickea ver historial completo
-- 'long-press': cuando se mantiene presionado 1 segundo (activa modo selección)
-- 'toggle-seleccion': cuando se hace tap en modo selección (marca/desmarca)
+- IconShoppingBag: placeholder imagen (32px, grey-5)
+- IconMapPin: ubicación comercio (16px)
+- IconPlus: agregar precio (18px)
+- IconChevronDown/Up: expandir/colapsar (20px)
+- IconChartLine: ver historial (18px)
+- IconBarcode: código de barras (14px)
 
 ## COMPUTED PROPERTIES
-- top3Precios: ordena precios por valor ASC y toma primeros 3
-- clasesResponsivas: determina layout según $q.screen
+- top3Precios: Ordena precios por valor ASC y toma primeros 3
+```javascript
+  const top3Precios = computed(() => {
+    return [...props.producto.precios]
+      .sort((a, b) => a.valor - b.valor)
+      .slice(0, 3)
+  })
+```
+- clasesResponsivas: Determina layout según $q.screen
+```javascript
+  const clasesResponsivas = computed(() => {
+    return $q.screen.xs ? 'tarjeta-vertical' : 'tarjeta-horizontal'
+  })
+```
 
 ## FUNCIONES
-- formatearFecha(): Convierte fechas ISO a formato relativo
-- copiarCodigoBarras(): Copia código al portapapeles con notificación
+
+### formatearFecha(fechaISO)
+Convierte fechas ISO 8601 a formato relativo legible
+- Menos de 60 minutos: "Hace X minutos"
+- Menos de 24 horas: "Hace X horas"
+- Menos de 7 días: "Hace X días"
+- Menos de 4 semanas: "Hace X semanas"
+- Más de 4 semanas: "Hace X meses"
+- Retorno especial: "Hace un momento" si < 1 minuto
+
+### copiarCodigoBarras(codigo)
+Copia código al portapapeles usando Navigator Clipboard API
+- Try/catch para manejo de errores
+- Notificación Quasar tipo 'positive' al copiar
+- Notificación tipo 'negative' si falla
+- Muestra el código copiado en caption
+- Timeout: 1500ms
+- Position: top
+
+### toggleExpandir()
+Alterna el estado expandido de la tarjeta
+```javascript
+const toggleExpandir = () => {
+  expandida.value = !expandida.value
+}
+```
+
+### manejarClick()
+Lógica condicional según modo actual
+```javascript
+const manejarClick = () => {
+  if (props.modoSeleccion) {
+    emit('toggle-seleccion', props.producto.id)
+  } else {
+    toggleExpandir()
+  }
+}
+```
+
+### manejarLongPress()
+Activa modo selección con vibración
+```javascript
+const manejarLongPress = () => {
+  if (!props.modoSeleccion) {
+    if ($q.platform.is.mobile && navigator.vibrate) {
+      navigator.vibrate(50)
+    }
+    emit('long-press', props.producto.id)
+  }
+}
+```
 
 ## LIMITACIONES ACTUALES
 - Solo muestra top 3 en expansión (no scroll infinito)
 - No hay funcionalidad de menú contextual aún
+- No hay edición inline de productos
+- No hay drag & drop para reordenar
 
 ## INTEGRACIÓN CON STORES
 
 ### DATOS
 - ListaProductos recibe productos desde productosStore
 - Datos reactivos: cambios en store actualizan UI automáticamente
+- Props drilling: MisProductosPage → ListaProductos → TarjetaProducto
 
 ### CARGA DE DATOS
 - MisProductosPage.vue carga productos con productosStore.cargarProductos()
 - Estados de carga y error manejados por el store
+- Loading spinner mientras carga
+- Mensaje "No hay productos" si array vacío
 
 ### SELECCIÓN MÚLTIPLE
 - Composable useSeleccionMultiple maneja estado de selección
 - MisProductosPage pasa props modoSeleccion y seleccionados a ListaProductos
-- ListaProductos verifica si cada producto está seleccionado
+- ListaProductos verifica si cada producto está seleccionado con estaSeleccionado(id)
 - TarjetaProducto muestra visual según estado de selección
+- Set de IDs seleccionados para performance O(1)
 
 ### ELIMINACIÓN
-- Eliminación múltiple con diálogo de confirmación
+- Eliminación múltiple con diálogo de confirmación Quasar
 - Notificación con botón "Deshacer" (5 segundos timeout)
 - Productos guardados en caché temporal para restaurar
 - Animación fade-out al eliminar (integrada con Quasar)
+- Limpieza de modo selección después de eliminar
+
+## SISTEMA DE GRILLA RESPONSIVO (ListaProductos)
+- Sistema de columnas Quasar responsive
+- col-12: Móvil (1 tarjeta por fila)
+- col-sm-6: Tablet pequeña (2 tarjetas por fila)
+- col-md-4: Tablet/PC (3 tarjetas por fila)
+- col-xl-3: PC grande (4 tarjetas por fila)
+- Gutter: q-col-gutter-md (16px de separación)
+
+## HEADER DE PÁGINA
+- Título: "Mis Productos" (h5, font-weight-bold)
+- Contador: Cantidad total de productos guardados
+- Color texto secundario: text-grey-7
+- Margin bottom: q-mb-md
+
+## PALETA DE COLORES
+- Primario: #1976D2 (azul oscuro) - precio, bordes, botones
+- Secundario: #4CAF50 (verde) - ahorro, mejor precio, selección
+- Acento: #FF9800 (naranja) - alertas
+- Fondo app: #EEEEEE (gris medio)
+- Fondo tarjeta: #FFFFFF (blanco)
+- Texto primario: #1D1D1D (negro suave)
+- Texto secundario: #757575 (gris)
+
+## FEATURES IMPLEMENTADAS
+- ✅ Sistema de tarjetas de productos expandibles
+- ✅ Modo selección múltiple con long-press
+- ✅ Código de barras copiable
+- ✅ Formato de fechas relativo
+- ✅ Top 3 precios ordenados
+- ✅ Botón "Ver historial completo"
+- ✅ Diseño responsive móvil/tablet/PC
+- ✅ Animaciones suaves y feedback visual
+- ✅ Vibración háptica en móvil
+- ✅ Integración completa con Pinia stores
+- ✅ Sistema de grilla adaptativa
+- ✅ Eliminación múltiple con deshacer
+
+## FEATURES PLANIFICADAS
+- ⏳ Menú contextual (tres puntos)
+- ⏳ Edición inline de productos
+- ⏳ Drag & drop para reordenar
+- ⏳ Filtros por comercio/precio
+- ⏳ Búsqueda con autocompletado
+- ⏳ Vista de cuadrícula vs lista
+- ⏳ Exportar productos seleccionados
+- ⏳ Compartir productos
+- ⏳ Favoritos/listas personalizadas
