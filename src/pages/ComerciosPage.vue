@@ -1,21 +1,5 @@
 <template>
   <q-page class="q-pa-md">
-    <!-- BARRA DE BÚSQUEDA -->
-    <div class="q-mb-md">
-      <q-input
-        v-model="textoBusqueda"
-        outlined
-        dense
-        placeholder="Buscar comercio..."
-        clearable
-        @update:model-value="buscarComercios"
-      >
-        <template #prepend>
-          <q-icon name="search" />
-        </template>
-      </q-input>
-    </div>
-
     <!-- BARRA DE SELECCIÓN (sticky debajo del header) -->
     <BarraSeleccion
       :visible="seleccion.modoSeleccion.value"
@@ -26,7 +10,29 @@
     />
 
     <!-- Contenedor con ancho máximo -->
-    <div class="contenedor-comercios">
+    <div class="contenedor-pagina">
+      <!-- HEADER DE LA PÁGINA -->
+      <div class="header-pagina">
+        <h5 class="titulo-pagina">Mis Comercios</h5>
+        <p class="contador-items">{{ comerciosStore.comercios.length }} comercios guardados</p>
+      </div>
+
+      <!-- BARRA DE BÚSQUEDA CENTRADA -->
+      <div class="buscador-centrado">
+        <q-input
+          v-model="textoBusqueda"
+          outlined
+          dense
+          placeholder="Buscar comercio..."
+          clearable
+          @update:model-value="buscarComercios"
+        >
+          <template #prepend>
+            <q-icon name="search" />
+          </template>
+        </q-input>
+      </div>
+
       <!-- INDICADOR DE CARGA -->
       <div v-if="comerciosStore.cargando" class="text-center q-pa-xl">
         <q-spinner color="primary" size="50px" />
@@ -317,11 +323,3 @@ onMounted(async () => {
   await cargarComercios()
 })
 </script>
-
-<style scoped>
-.contenedor-comercios {
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
-}
-</style>

@@ -1,13 +1,45 @@
 @import './variables.css';
-
 /* ===========================
    ESTILOS GENERALES
    =========================== */
-
 body {
   background-color: var(--fondo-app);
   color: var(--texto-primario);
 }
+/* ===========================
+   CONTENEDORES DE PÁGINA
+   =========================== */
+.contenedor-pagina {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+/* ===========================
+   HEADERS DE PÁGINA
+   =========================== */
+.header-pagina {
+  margin-bottom: 16px;
+}
+.titulo-pagina {
+  margin: 0;
+  font-weight: bold;
+}
+.contador-items {
+  color: var(--texto-secundario);
+  margin-bottom: 0;
+}
+/* ===========================
+   BUSCADORES
+   =========================== */
+.buscador-centrado {
+  max-width: 500px;
+  margin: 0 auto;
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+/* ===========================
+   TARJETAS
+   =========================== */
 /* Tarjetas */
 .tarjeta {
   background-color: var(--fondo-tarjeta);
@@ -15,6 +47,9 @@ body {
   box-shadow: var(--sombra-ligera);
   padding: var(--espaciado-md);
 }
+/* ===========================
+   BOTONES PERSONALIZADOS
+   =========================== */
 /* Botones personalizados si necesitás */
 .boton-primario {
   background-color: var(--color-primario);

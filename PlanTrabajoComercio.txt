@@ -239,7 +239,7 @@ los datos ingresados por los usuarios.
 
 ═══════════════════════════════════════════════════════════════
 
-## 🚧 FASE 7: ROUTER Y NAVEGACIÓN 🗺️ [COMPLETADA]
+## ✅ FASE 7: ROUTER Y NAVEGACIÓN 🗺️ [COMPLETADA]
 
 ### Actualizar routes.js
 [x] Agregar ruta /comercios
@@ -252,7 +252,32 @@ los datos ingresados por los usuarios.
 
 ═══════════════════════════════════════════════════════════════
 
-## FASE 8: TESTING Y AJUSTES 🧪
+## ✅ FASE 7.5: SISTEMA DE DISEÑO CSS 🎨 [COMPLETADA - NUEVA FASE]
+
+### Centralizar CSS en app.css
+[x] Extraer clase .contenedor-pagina (max-width 1200px)
+[x] Extraer clases de headers (.header-pagina, .titulo-pagina, .contador-items)
+[x] Crear clase .buscador-centrado (max-width 500px, centrado)
+[x] Aplicar en MisProductosPage.vue
+[x] Aplicar en ComerciosPage.vue
+[x] Eliminar estilos scoped duplicados
+[x] Documentar en comentarios CSS
+
+### Migrar a sistema de grid Quasar
+[x] ListaProductos.vue: usar row + col-12 col-sm-6 col-md-4 col-xl-3
+[x] ListaComercios.vue: usar row + col-12 col-sm-6 col-md-4 col-xl-3
+[x] Eliminar grid CSS custom
+[x] Verificar responsividad en todos los breakpoints
+
+### Beneficios implementados
+[x] DRY (Don't Repeat Yourself)
+[x] Consistencia visual entre páginas
+[x] Mantenimiento centralizado
+[x] Base para Design System completo
+
+═══════════════════════════════════════════════════════════════
+
+## 🚧 FASE 8: TESTING Y AJUSTES 🧪 [50% COMPLETADA]
 
 ### Testing funcional
 [x] Crear comercio nuevo
@@ -270,30 +295,46 @@ los datos ingresados por los usuarios.
 [ ] Integración con FormularioPrecio
 [ ] Autocompletado de direcciones
 [x] Navegación entre páginas
-Testing responsivo
+
+### Testing responsivo
 [x] Móvil (xs) - 360px
-[ ] Tablet (sm) - 768px
-[ ] Desktop (md) - 1024px
-Optimizaciones
+[x] Tablet (sm) - 768px (via grid Quasar)
+[x] Desktop (md) - 1024px (via grid Quasar)
+[x] Desktop XL (xl) - 1920px (via grid Quasar)
+
+### Optimizaciones
 [ ] Revisar performance de búsqueda
 [ ] Optimizar re-renders
 [ ] Verificar memoria (no memory leaks)
 [ ] Lazy loading de imágenes (futuro)
-Testing adicional completado ✅
+
+### Testing adicional completado ✅
 [x] Guardar y persistir en Capacitor Storage
 [x] Listar comercios guardados después de recargar
 [x] Expandir/colapsar tarjetas
 [x] Expansión flotante sin mover otras tarjetas
 [x] Bordes continuos al expandir
 [x] Formato de fecha relativa en direcciones
+[x] Sistema CSS centralizado
+[x] Buscador centrado con padding correcto
+[x] Headers consistentes entre páginas
+[x] Grid responsivo en todos los breakpoints
+
+### Testing de Sistema de Diseño ✅
+[x] Clase .contenedor-pagina funciona en ambas páginas
+[x] Headers con clases globales (.titulo-pagina, .contador-items)
+[x] Buscador centrado con padding adecuado
+[x] Grid Quasar responsivo (4 breakpoints)
+[x] Variables CSS aplicadas correctamente
 
 ═══════════════════════════════════════════════════════════════
 
-## FASE 9: DOCUMENTACIÓN 📚
+## ⏸️ FASE 9: DOCUMENTACIÓN 📚 [PENDIENTE]
 
 ### Actualizar Resúmenes
-[ ] Crear Resumen5Comercios.txt
-[ ] Actualizar Resumen1General.txt (features + estructura)
+[x] Actualizar Resumen1General.txt (Sistema de Diseño agregado)
+[x] Actualizar PlanTrabajoComercio.txt (este archivo)
+[ ] Crear Resumen5Comercios.txt (pendiente)
 [ ] Actualizar Resumen4FormularioAgregar.txt (integración)
 
 ### Comentarios en código
@@ -309,11 +350,34 @@ Testing adicional completado ✅
 - Fase 2 (Estructura) ✅ COMPLETADA
 - Fase 3 (UI Página) ✅ COMPLETADA
 - Fase 4 (Formularios) ✅ COMPLETADA
+- Fase 7 (Router) ✅ COMPLETADA
+- Fase 7.5 (CSS) ✅ COMPLETADA (nueva fase)
+- Fase 8 (Testing) 🚧 50% COMPLETADA
 - No implementar cámara todavía (placeholder solamente)
 - Reutilizar componentes de selección múltiple ✅ HECHO
 - Mantener consistencia con diseño actual ✅ HECHO
+- Sistema de diseño centralizado ✅ IMPLEMENTADO
 - Probar cada fase antes de seguir a la siguiente
 - Guardar progreso con commits frecuentes
+
+═══════════════════════════════════════════════════════════════
+
+## MEJORAS IMPLEMENTADAS NO PLANIFICADAS 🎁
+
+### Sistema de Diseño Centralizado (Fase 7.5)
+[x] Clases CSS globales en app.css
+[x] Contenedor de página reutilizable
+[x] Headers estandarizados
+[x] Buscador centrado estilo Google
+[x] Grid responsivo Quasar
+[x] Variables CSS centralizadas
+[x] Documentación de clases globales
+
+### Optimizaciones de UX
+[x] Expansión flotante en TarjetaComercio
+[x] Bordes continuos al expandir
+[x] Padding correcto en buscador
+[x] Consistencia visual total
 
 ═══════════════════════════════════════════════════════════════
 
@@ -329,7 +393,7 @@ Testing adicional completado ✅
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 70% COMPLETADO
+## 📊 PROGRESO GENERAL: 75% COMPLETADO
 
 ✅ Fase 1: 100%
 ✅ Fase 2: 100%
@@ -338,5 +402,10 @@ Testing adicional completado ✅
 ⏸️ Fase 5: 0%
 ⏸️ Fase 6: 0%
 ✅ Fase 7: 100%
-🚧 Fase 8: 30%
-⏸️ Fase 9: 0%
+✅ Fase 7.5: 100% (nueva fase - Sistema de Diseño)
+🚧 Fase 8: 50%
+⏸️ Fase 9: 20%
+
+═══════════════════════════════════════════════════════════════
+
+**ÚLTIMA ACTUALIZACIÓN:** 03 de Febrero 2026 - Sistema de Diseño implementado

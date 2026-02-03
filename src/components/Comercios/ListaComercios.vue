@@ -6,19 +6,23 @@
       <p class="text-h6 text-grey-7 q-mt-md">No hay comercios para mostrar</p>
     </div>
 
-    <!-- LISTA DE TARJETAS -->
-    <transition-group v-else name="lista" tag="div" class="lista-grid">
-      <TarjetaComercio
+    <!-- LISTA DE TARJETAS CON SISTEMA QUASAR -->
+    <div v-else class="row q-col-gutter-md">
+      <div
         v-for="comercio in comercios"
         :key="comercio.id"
-        :comercio="comercio"
-        :modo-seleccion="modoSeleccion"
-        :seleccionado="estaSeleccionado(comercio.id)"
-        @long-press="handleLongPress(comercio.id)"
-        @toggle-seleccion="handleToggleSeleccion(comercio.id)"
-        @editar="handleEditar(comercio)"
-      />
-    </transition-group>
+        class="col-12 col-sm-6 col-md-4 col-xl-3"
+      >
+        <TarjetaComercio
+          :comercio="comercio"
+          :modo-seleccion="modoSeleccion"
+          :seleccionado="estaSeleccionado(comercio.id)"
+          @long-press="handleLongPress(comercio.id)"
+          @toggle-seleccion="handleToggleSeleccion(comercio.id)"
+          @editar="handleEditar(comercio)"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -75,40 +79,5 @@ function handleEditar(comercio) {
 <style scoped>
 .lista-comercios {
   width: 100%;
-}
-.lista-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
-  width: 100%;
-}
-/* Animaciones de transición */
-.lista-enter-active,
-.lista-leave-active {
-  transition: all 0.3s ease;
-}
-.lista-enter-from {
-  opacity: 0;
-  transform: translateY(20px);
-}
-.lista-leave-to {
-  opacity: 0;
-  transform: translateX(-20px);
-}
-.lista-move {
-  transition: transform 0.3s ease;
-}
-/* Responsive móvil */
-@media (max-width: 599px) {
-  .lista-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-}
-/* Tablet */
-@media (min-width: 600px) and (max-width: 1023px) {
-  .lista-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  }
 }
 </style>

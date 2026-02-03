@@ -10,7 +10,13 @@
     />
 
     <!-- Contenedor con ancho máximo -->
-    <div class="contenedor-productos">
+    <div class="contenedor-pagina">
+      <!-- HEADER DE LA PÁGINA -->
+      <div class="header-pagina">
+        <h5 class="titulo-pagina">Mis Productos</h5>
+        <p class="contador-items">{{ productosStore.productos.length }} productos guardados</p>
+      </div>
+
       <!-- INDICADOR DE CARGA -->
       <div v-if="productosStore.cargando" class="text-center q-pa-xl">
         <q-spinner color="primary" size="50px" />
@@ -253,11 +259,3 @@ onMounted(async () => {
   seleccion.actualizarItems(productosStore.productos)
 })
 </script>
-
-<style scoped>
-.contenedor-productos {
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
-}
-</style>

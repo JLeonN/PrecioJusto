@@ -74,43 +74,82 @@ PrecioJusto/
 │
 ├── src/
 │   │
-│   ├── adapters/                          # Capa de abstracción de almacenamiento
-│   │   ├── StorageAdapter.js              # Interfaz base (patrón Strategy)
-│   │   └── CapacitorStorageAdapter.js     # Implementación con Capacitor Storage
+│   ├── almacenamiento/                    # Sistema de persistencia
+│   │   ├── adaptadores/                   # Capa de abstracción de almacenamiento
+│   │   │   ├── StorageAdapter.js          # Interfaz base (patrón Strategy)
+│   │   │   └── CapacitorStorageAdapter.js # Implementación con Capacitor Storage
+│   │   │
+│   │   ├── servicios/                     # Servicios de lógica de negocio
+│   │   │   ├── AlmacenamientoService.js   # Configuración central de adaptadores
+│   │   │   ├── ProductosService.js        # CRUD y validaciones de productos
+│   │   │   ├── ComerciosService.js        # CRUD y validación de duplicados de comercios
+│   │   │   ├── ConfirmacionesService.js   # Sistema de confirmaciones de precios
+│   │   │   ├── PreferenciasService.js     # Configuración de usuario
+│   │   │   └── OpenFoodFactsService.js    # Integración con API Open Food Facts
+│   │   │
+│   │   └── stores/                        # Stores de Pinia (estado global)
+│   │       ├── productosStore.js          # Estado y acciones de productos
+│   │       ├── comerciosStore.js          # Estado y acciones de comercios
+│   │       ├── confirmacionesStore.js     # Estado y acciones de confirmaciones
+│   │       └── preferenciaStore.js        # Estado y acciones de preferencias de usuario
 │   │
 │   ├── components/                        # Componentes reutilizables
+│   │   ├── Compartidos/                   # Componentes compartidos entre secciones
+│   │   │   ├── BarraSeleccion.vue         # Barra sticky para modo selección múltiple
+│   │   │   └── BarraAccionesSeleccion.vue # Barra fixed bottom con acciones (eliminar)
+│   │   │
+│   │   ├── Comercios/                     # Componentes de comercios
+│   │   │   ├── ListaComercios.vue         # Contenedor con grid responsivo
+│   │   │   └── TarjetaComercio.vue        # Tarjeta expandible de comercio
+│   │   │
+│   │   ├── DetalleProducto/               # Componentes de detalle de producto
+│   │   │   ├── InfoProducto.vue           # Cabecera con info principal
+│   │   │   ├── EstadisticasProducto.vue   # Métricas en cards
+│   │   │   ├── FiltrosHistorial.vue       # Filtros de historial
+│   │   │   ├── HistorialPrecios.vue       # Contenedor y agrupador
+│   │   │   ├── ItemComercioHistorial.vue  # Comercio expandible
+│   │   │   └── ItemPrecioHistorial.vue    # Precio individual
+│   │   │
+│   │   ├── Formularios/                   # Formularios modulares
+│   │   │   ├── FormularioProducto.vue     # Datos del producto
+│   │   │   ├── FormularioPrecio.vue       # Datos del precio
+│   │   │   ├── FormularioComercio.vue     # Datos del comercio
+│   │   │   └── Dialogos/                  # Diálogos modales
+│   │   │       ├── DialogoAgregarProducto.vue      # Modal para agregar producto
+│   │   │       ├── DialogoAgregarComercio.vue      # Modal para agregar comercio
+│   │   │       ├── DialogoResultadosBusqueda.vue   # Modal con resultados de API
+│   │   │       ├── DialogoCoincidencias.vue        # Alerta de comercios similares
+│   │   │       ├── DialogoMismaUbicacion.vue       # Alerta de misma dirección
+│   │   │       └── DialogoMotivoEliminacion.vue    # Confirmación con motivo
+│   │   │
+│   │   ├── MisProductos/                  # Componentes de productos
+│   │   │   └── ListaProductos.vue         # Contenedor con grid responsivo
+│   │   │
 │   │   └── Tarjetas/                      # Componentes de tarjetas
 │   │       ├── TarjetaProducto.vue        # Tarjeta expandible de producto con precios
 │   │       ├── TarjetaComercio.vue        # Tarjeta de comercio con info y acciones
 │   │       └── TarjetaPrecio.vue          # Tarjeta de precio individual con confirmaciones
 │   │
+│   ├── composables/                       # Composables reutilizables
+│   │   └── useSeleccionMultiple.js        # Lógica de selección múltiple
+│   │
 │   ├── css/                               # Estilos globales
-│   │   ├── app.scss                       # Estilos principales de la aplicación
-│   │   └── quasar.variables.scss          # Variables personalizadas de Quasar (colores, etc.)
+│   │   ├── app.css                        # Sistema de diseño centralizado
+│   │   └── Variables.css                  # Variables CSS personalizadas (colores, espaciados)
 │   │
 │   ├── layouts/                           # Layouts de páginas
 │   │   └── MainLayout.vue                 # Layout principal con drawer de navegación
 │   │
 │   ├── pages/                             # Páginas de la aplicación
 │   │   ├── IndexPage.vue                  # Página de inicio/bienvenida
-│   │   ├── ProductosPage.vue              # Listado de productos con FAB
-│   │   ├── AgregarProductoPage.vue        # Formulario para agregar productos
-│   │   ├── ComerciosPage.vue              # Listado de comercios con FAB
-│   │   └── AgregarComercioPage.vue        # Formulario para agregar comercios
+│   │   ├── MisProductosPage.vue           # Listado de productos con FAB
+│   │   ├── DetalleProductoPage.vue        # Detalle y historial completo de producto
+│   │   ├── ComerciosPage.vue              # Listado de comercios con FAB y buscador
+│   │   └── ErrorNotFound.vue              # Página 404
 │   │
 │   ├── router/                            # Configuración de enrutamiento
 │   │   ├── index.js                       # Configuración de Vue Router
 │   │   └── routes.js                      # Definición de todas las rutas
-│   │
-│   ├── services/                          # Servicios de lógica de negocio
-│   │   ├── ProductosService.js            # CRUD y validaciones de productos
-│   │   ├── ComerciosService.js            # CRUD y validación de duplicados de comercios
-│   │   └── OpenFoodFactsService.js        # Integración con API Open Food Facts
-│   │
-│   ├── stores/                            # Stores de Pinia (estado global)
-│   │   ├── productosStore.js              # Estado y acciones de productos
-│   │   ├── comerciosStore.js              # Estado y acciones de comercios
-│   │   └── preferenciaStore.js            # Estado y acciones de preferencias de usuario
 │   │
 │   ├── App.vue                            # Componente raíz de Vue
 │   └── main.js                            # Punto de entrada de la aplicación
@@ -136,27 +175,195 @@ PrecioJusto/
 └── Documentacion/                         # Documentación del proyecto
     ├── Resumen1General.txt                # Este archivo
     ├── Resumen2Tarjetas.txt               # Documentación de componentes de tarjetas
-    ├── Resumen3OpenFoodFacts.txt          # Documentación de integración API
-    ├── Resumen4LocalStorage.txt           # Documentación de almacenamiento
-    └── ResumenSeccionComercios.txt        # Documentación de sección comercios
+    ├── Resumen3DetalleProducto.txt        # Documentación de detalle de producto
+    ├── Resumen4FormularioAgregar.txt      # Documentación de formularios
+    ├── Resumen5Comercios.txt              # Documentación de sección comercios
+    ├── Resumen6OpenFoodFacts.txt          # Documentación de integración API
+    ├── Resumen7LocalStorage.txt           # Documentación de almacenamiento
+    ├── PlanTrabajoComercio.txt            # Plan de trabajo de comercios
+    └── Instrucciones.txt                  # Instrucciones para IAs
 ```
 
 ---
 
-## 5. FUNCIONALIDADES IMPLEMENTADAS
+## 5. SISTEMA DE DISEÑO (DESIGN SYSTEM)
+
+### Filosofía
+Precio Justo utiliza un **sistema de diseño centralizado** basado en clases CSS globales reutilizables. Esto garantiza:
+- ✅ Consistencia visual en toda la app
+- ✅ Mantenimiento centralizado
+- ✅ DRY (Don't Repeat Yourself)
+- ✅ Escalabilidad para futuras secciones
+
+### Estructura CSS
+```
+src/css/
+├── Variables.css    # Variables CSS (colores, espaciados, sombras)
+└── app.css          # Clases globales del sistema de diseño
+```
+
+### Clases Globales Implementadas
+
+#### **CONTENEDORES**
+```css
+.contenedor-pagina {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+```
+**Uso:** Envuelve todo el contenido de una página
+**Aplicado en:** MisProductosPage.vue, ComerciosPage.vue, DetalleProductoPage.vue
+
+#### **HEADERS DE PÁGINA**
+```css
+.header-pagina {
+  margin-bottom: 16px;
+}
+
+.titulo-pagina {
+  margin: 0;
+  font-weight: bold;
+}
+
+.contador-items {
+  color: var(--texto-secundario);
+  margin-bottom: 0;
+}
+```
+**Uso:** Headers consistentes con título + contador
+**Ejemplo:**
+```vue
+<div class="header-pagina">
+  <h5 class="titulo-pagina">Mis Productos</h5>
+  <p class="contador-items">4 productos guardados</p>
+</div>
+```
+
+#### **BUSCADORES**
+```css
+.buscador-centrado {
+  max-width: 500px;
+  margin: 0 auto;
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+```
+**Uso:** Buscadores estilo Google (centrados, ancho máximo)
+**Aplicado en:** ComerciosPage.vue
+**Futuro:** MisProductosPage.vue (cuando se implemente búsqueda)
+
+#### **TARJETAS**
+```css
+.tarjeta {
+  background-color: var(--fondo-tarjeta);
+  border-radius: var(--borde-radio);
+  box-shadow: var(--sombra-ligera);
+  padding: var(--espaciado-md);
+}
+```
+**Uso:** Tarjetas genéricas (alternativa a componentes específicos)
+
+#### **BOTONES**
+```css
+.boton-primario {
+  background-color: var(--color-primario);
+  color: var(--texto-sobre-primario);
+}
+
+.boton-secundario {
+  background-color: var(--color-secundario);
+  color: var(--texto-sobre-primario);
+}
+```
+**Uso:** Botones personalizados fuera de Quasar
+
+### Variables CSS Principales
+
+#### **Colores**
+```css
+--color-primario: #2196f3;        /* Azul principal */
+--color-secundario: #4caf50;      /* Verde */
+--color-acento: #ff9800;          /* Naranja */
+--color-exito: #4caf50;
+--color-advertencia: #ff9800;
+--color-error: #f44336;
+--color-info: #2196f3;
+```
+
+#### **Fondos**
+```css
+--fondo-app: #eeeeee;             /* Gris medio */
+--fondo-tarjeta: #ffffff;         /* Blanco */
+--fondo-drawer: #f5f5f5;          /* Gris claro */
+```
+
+#### **Texto**
+```css
+--texto-primario: #212121;
+--texto-secundario: #757575;
+--texto-deshabilitado: #bdbdbd;
+--texto-sobre-primario: #ffffff;
+```
+
+#### **Espaciados**
+```css
+--espaciado-xs: 4px;
+--espaciado-sm: 8px;
+--espaciado-md: 16px;
+--espaciado-lg: 24px;
+--espaciado-xl: 32px;
+```
+
+#### **Sombras**
+```css
+--sombra-ligera: 0 1px 3px rgba(0, 0, 0, 0.12);
+--sombra-media: 0 2px 8px rgba(0, 0, 0, 0.15);
+--sombra-fuerte: 0 4px 16px rgba(0, 0, 0, 0.2);
+```
+
+### Sistema de Grid Responsivo
+
+Precio Justo utiliza el **sistema de columnas de Quasar** para layouts responsivos:
+```vue
+<div class="row q-col-gutter-md">
+  <div class="col-12 col-sm-6 col-md-4 col-xl-3">
+    <!-- Contenido -->
+  </div>
+</div>
+```
+
+**Breakpoints:**
+- `col-12`: Móvil (1 columna)
+- `col-sm-6`: Tablet pequeña (2 columnas)
+- `col-md-4`: Tablet/PC (3 columnas)
+- `col-xl-3`: PC grande (4 columnas)
+
+**Aplicado en:**
+- ListaProductos.vue
+- ListaComercios.vue
+
+---
+
+## 6. FUNCIONALIDADES IMPLEMENTADAS
 
 ### A. Gestión de Productos
 - ✅ Registro manual de productos
 - ✅ Búsqueda por código de barras (Open Food Facts)
 - ✅ Búsqueda por nombre y marca (Open Food Facts)
 - ✅ Autocompletado de datos (nombre, marca, imagen, categoría)
-- ✅ Registro de precios con múltiples monedas (UYU, USD, EUR, ARS, BRL)
+- ✅ Registro de precios con múltiples monedas (UYU, USD, EUR, ARS, BRL, etc.)
 - ✅ Validación de cantidades y unidades (kg, g, L, mL, unidades)
 - ✅ Sistema de confirmaciones comunitarias para precios
 - ✅ Visualización de top 3 precios más bajos por producto
 - ✅ Tarjetas expandibles con detalles completos
 - ✅ Formato de fechas relativo (hace 2 días, hace 1 mes)
 - ✅ Click-to-copy en códigos de barras
+- ✅ Selección múltiple con long-press
+- ✅ Eliminación múltiple con deshacer
+- ✅ Detalle de producto con historial completo
+- ✅ Filtros de historial (comercio, período, orden)
+- ✅ Confirmaciones de precios
 
 ### B. Gestión de Comercios
 - ✅ Registro de comercios con formulario completo
@@ -164,14 +371,16 @@ PrecioJusto/
 - ✅ Detección de nombres similares (Levenshtein distance)
 - ✅ Detección de direcciones cercanas
 - ✅ Tipos de comercio: Supermercado, Almacén, Mayorista, Farmacia, Kiosco, Online, Otro
-- ✅ Campos: nombre, tipo, dirección, teléfono, logo/foto
-- ✅ Tarjetas visuales con información completa
-- ✅ Botón de llamada directa desde la tarjeta
+- ✅ Múltiples direcciones por comercio
+- ✅ Tarjetas expandibles con direcciones
+- ✅ Búsqueda en tiempo real
+- ✅ Selección múltiple con long-press
+- ✅ Eliminación múltiple con deshacer
+- ✅ Sistema de uso reciente (ordenamiento)
 
 ### C. Preferencias de Usuario
 - ✅ Configuración de moneda preferida (UYU por defecto)
-- ✅ Selección de idioma (español por defecto, inglés disponible)
-- ✅ Toggle para requerir confirmaciones en acciones destructivas
+- ✅ Configuración de unidad preferida
 - ✅ Persistencia automática de preferencias
 - ✅ Sincronización reactiva con toda la UI
 
@@ -183,7 +392,7 @@ PrecioJusto/
 
 ---
 
-## 6. STORES DE PINIA
+## 7. STORES DE PINIA
 
 ### productosStore.js
 **Estado:**
@@ -194,12 +403,15 @@ PrecioJusto/
 **Acciones:**
 - `cargarProductos()`: Carga todos los productos desde storage
 - `agregarProducto(producto)`: Agrega un nuevo producto
+- `agregarPrecioAProducto(productoId, precio)`: Agrega precio a producto existente
 - `actualizarProducto(id, datos)`: Actualiza producto existente
 - `eliminarProducto(id)`: Elimina un producto
 
 **Getters:**
 - `productosOrdenados`: Productos ordenados alfabéticamente
+- `productosOrdenadosPorFecha`: Productos ordenados por fecha (más reciente primero)
 - `obtenerProductoPorId(id)`: Busca producto por ID
+- `tieneProductos`: Boolean si hay productos
 
 ### comerciosStore.js
 **Estado:**
@@ -212,35 +424,57 @@ PrecioJusto/
 - `agregarComercio(comercio)`: Agrega un nuevo comercio
 - `actualizarComercio(id, datos)`: Actualiza comercio existente
 - `eliminarComercio(id)`: Elimina un comercio
+- `eliminarComercios(ids)`: Elimina múltiples comercios
+- `agregarDireccion(comercioId, direccion)`: Agrega dirección a comercio
+- `eliminarDireccion(comercioId, direccionId)`: Elimina dirección de comercio
 
 **Getters:**
 - `comerciosOrdenados`: Comercios ordenados alfabéticamente
+- `comerciosPorUso`: Comercios ordenados por uso reciente
 - `obtenerComercioPorId(id)`: Busca comercio por ID
-- `obtenerComerciosSimilares(nombre, direccion)`: Detecta duplicados potenciales
+- `totalComercios`: Cantidad total de comercios
+- `totalDirecciones`: Suma de todas las direcciones
+- `comerciosPorTipo`: Comercios agrupados por tipo
+
+### confirmacionesStore.js
+**Estado:**
+- `usuarioActualId`: ID del usuario actual (hardcodeado temporalmente)
+- `preciosConfirmados`: Set de IDs de precios confirmados
+- `cargando`: Boolean de estado de carga
+- `error`: String de mensaje de error
+
+**Acciones:**
+- `cargarConfirmaciones()`: Carga confirmaciones del usuario
+- `confirmarPrecio(productoId, precioId)`: Confirma un precio
+- `eliminarConfirmacion(productoId, precioId)`: Des-confirma un precio
+- `obtenerEstadisticas()`: Estadísticas del usuario
+- `limpiarTodasLasConfirmaciones()`: Reset completo
+
+**Getters:**
+- `totalConfirmaciones`: Cantidad de precios confirmados
+- `precioEstaConfirmado(precioId)`: Verifica si precio está confirmado
+- `listaConfirmaciones`: Array de IDs confirmados
 
 ### preferenciaStore.js
 **Estado:**
 - `idioma`: String del idioma seleccionado ('es' o 'en')
-- `moneda`: String de la moneda preferida ('UYU', 'USD', 'EUR', 'ARS', 'BRL')
-- `requiereConfirmacion`: Boolean para confirmaciones en acciones
+- `moneda`: String de la moneda preferida ('UYU', 'USD', 'EUR', etc.)
+- `unidad`: String de la unidad preferida ('unidad', 'litro', 'kilo', etc.)
 
 **Acciones:**
 - `cargarPreferencias()`: Carga preferencias desde storage
 - `actualizarPreferencia(clave, valor)`: Actualiza una preferencia específica
 
-**Características:**
-- Persistencia automática en cada cambio
-- Valores por defecto: español, UYU, confirmación activada
-
 ---
 
-## 7. SERVICIOS
+## 8. SERVICIOS
 
 ### ProductosService.js
 **Responsabilidades:**
 - CRUD completo de productos
 - Validaciones de datos (nombre, precio, cantidad, unidad)
 - Gestión de precios asociados a productos
+- Cálculo de campos automáticos (precioMejor, tendencias)
 - Integración con productosStore
 
 **Métodos principales:**
@@ -249,6 +483,8 @@ PrecioJusto/
 - `crear(producto)`: Crea un nuevo producto
 - `actualizar(id, datos)`: Actualiza producto existente
 - `eliminar(id)`: Elimina un producto
+- `agregarPrecio(productoId, precio)`: Agrega precio a producto
+- `buscarPorCodigoBarras(codigo)`: Busca producto por código
 
 ### ComerciosService.js
 **Responsabilidades:**
@@ -256,6 +492,7 @@ PrecioJusto/
 - Validación de duplicados con algoritmo de similitud
 - Detección de nombres similares (Levenshtein distance < 3)
 - Detección de direcciones cercanas (similitud > 80%)
+- Gestión de múltiples direcciones por comercio
 - Integración con comerciosStore
 
 **Métodos principales:**
@@ -265,6 +502,23 @@ PrecioJusto/
 - `actualizar(id, datos)`: Actualiza comercio existente
 - `eliminar(id)`: Elimina un comercio
 - `buscarSimilares(nombre, direccion)`: Detecta comercios similares
+- `agregarDireccion(comercioId, direccion)`: Agrega dirección a comercio
+- `eliminarDireccion(comercioId, direccionId)`: Elimina dirección
+- `registrarUso(comercioId, direccionId)`: Actualiza fechas de uso
+
+### ConfirmacionesService.js
+**Responsabilidades:**
+- Sistema de confirmaciones (upvotes) de precios
+- Validación de confirmaciones únicas por usuario
+- Persistencia de confirmaciones por usuario
+- Integración con confirmacionesStore
+
+**Métodos principales:**
+- `confirmarPrecio(usuarioId, productoId, precioId)`: Confirma un precio
+- `usuarioConfirmoPrecio(usuarioId, precioId)`: Verifica si usuario confirmó
+- `registrarConfirmacionUsuario(usuarioId, precioId)`: Guarda confirmación
+- `cargarConfirmacionesUsuario(usuarioId)`: Carga Set de precios confirmados
+- `eliminarConfirmacion(usuarioId, productoId, precioId)`: Des-confirma precio
 
 ### OpenFoodFactsService.js
 **Responsabilidades:**
@@ -276,17 +530,30 @@ PrecioJusto/
 
 **Métodos principales:**
 - `buscarPorCodigoBarras(codigo)`: Busca producto por código de barras
-- `buscarPorNombreYMarca(nombre, marca)`: Busca productos por texto
+- `buscarPorTexto(texto, limite)`: Busca productos por texto
+
+### PreferenciasService.js
+**Responsabilidades:**
+- Guardar configuraciones del usuario
+- Cargar preferencias al iniciar app
+- Valores por defecto
+
+**Métodos principales:**
+- `obtenerPreferencias()`: Retorna preferencias o valores por defecto
+- `guardarMoneda(moneda)`: Actualiza moneda preferida
+- `guardarUnidad(unidad)`: Actualiza unidad preferida
 
 ---
 
-## 8. COMPONENTES PRINCIPALES
+## 9. COMPONENTES PRINCIPALES
 
 ### TarjetaProducto.vue
 **Propósito:** Mostrar productos con sus precios en formato de tarjeta expandible
 
 **Props:**
 - `producto`: Object (requerido) - Datos del producto
+- `modoSeleccion`: Boolean - Indica si está en modo selección
+- `seleccionado`: Boolean - Indica si está seleccionada
 
 **Características:**
 - Muestra top 3 precios más bajos
@@ -295,85 +562,117 @@ PrecioJusto/
 - Código de barras con click-to-copy
 - Fecha relativa de último precio
 - Indicador de ahorro (diferencia entre precio más bajo y más alto)
+- Long-press para modo selección (1 segundo)
+- Checkbox en modo selección
 
 ### TarjetaComercio.vue
-**Propósito:** Mostrar comercios en formato de tarjeta
+**Propósito:** Mostrar comercios en formato de tarjeta expandible
 
 **Props:**
 - `comercio`: Object (requerido) - Datos del comercio
+- `modoSeleccion`: Boolean - Indica si está en modo selección
+- `seleccionado`: Boolean - Indica si está seleccionada
 
 **Características:**
-- Logo/foto del comercio (o icono por defecto)
+- Logo/foto del comercio (o placeholder con IconBuilding)
 - Tipo de comercio con badge
-- Dirección completa
-- Botón de llamada directa (si tiene teléfono)
+- Cantidad de direcciones
+- Expandible para ver lista de direcciones
+- Botón de editar (solo expandido)
+- Long-press para modo selección
+- Checkbox en modo selección
+- Expansión flotante (no mueve otras tarjetas)
 
-### TarjetaPrecio.vue
-**Propósito:** Mostrar detalles de un precio individual
+### ListaProductos.vue
+**Propósito:** Contenedor con grid responsivo de productos
 
 **Props:**
-- `precio`: Object (requerido) - Datos del precio
+- `productos`: Array (requerido)
+- `modoSeleccion`: Boolean
+- `seleccionados`: Set
 
 **Características:**
-- Comercio donde se registró
-- Monto con moneda
-- Fecha relativa
-- Contador de confirmaciones comunitarias
-- Botones de acción (confirmar, editar, eliminar)
+- Grid responsivo Quasar (col-12 col-sm-6 col-md-4 col-xl-3)
+- Maneja eventos de selección
+- Sin header (el header está en la página)
+
+### ListaComercios.vue
+**Propósito:** Contenedor con grid responsivo de comercios
+
+**Props:**
+- `comercios`: Array (requerido)
+- `modoSeleccion`: Boolean
+- `seleccionados`: Set
+
+**Características:**
+- Grid responsivo Quasar (col-12 col-sm-6 col-md-4 col-xl-3)
+- Mensaje si no hay comercios
+- Maneja eventos de selección y edición
 
 ---
 
-## 9. PÁGINAS
+## 10. PÁGINAS
 
 ### IndexPage.vue
 **Ruta:** `/`
 **Propósito:** Página de inicio/bienvenida
+**Estado:** Vacía por ahora
 
-### ProductosPage.vue
-**Ruta:** `/productos`
+### MisProductosPage.vue
+**Ruta:** `/` (default)
 **Propósito:** Listado completo de productos
 
 **Características:**
+- Header con título y contador
 - Lista de TarjetaProducto
 - Floating Action Button para agregar producto
 - Carga desde productosStore
+- Modo selección múltiple
+- BarraSeleccion (sticky)
+- BarraAccionesSeleccion (fixed bottom)
+- Eliminación múltiple con deshacer
+- Estados: cargando, vacío, error
 
-### AgregarProductoPage.vue
-**Ruta:** `/productos/agregar`
-**Propósito:** Formulario para agregar nuevo producto
+### DetalleProductoPage.vue
+**Ruta:** `/producto/:id`
+**Propósito:** Historial completo de un producto específico
 
 **Características:**
-- Búsqueda por código de barras (Open Food Facts)
-- Búsqueda por nombre y marca
-- Formulario manual completo
-- Validación de datos
-- Soporte multimoneda
+- InfoProducto (cabecera)
+- EstadisticasProducto (métricas)
+- FiltrosHistorial (comercio, período, orden)
+- HistorialPrecios (agrupado por comercio)
+- Confirmaciones de precios
+- Tendencias por comercio
+- Navegación desde TarjetaProducto
 
 ### ComerciosPage.vue
 **Ruta:** `/comercios`
 **Propósito:** Listado completo de comercios
 
 **Características:**
+- Header con título y contador
+- Buscador centrado (max-width 500px)
 - Lista de TarjetaComercio
 - Floating Action Button para agregar comercio
 - Carga desde comerciosStore
+- Búsqueda en tiempo real
+- Modo selección múltiple
+- BarraSeleccion (sticky)
+- BarraAccionesSeleccion (fixed bottom)
+- Eliminación múltiple con deshacer
+- Estados: cargando, vacío, sin resultados, error
 
-### AgregarComercioPage.vue
-**Ruta:** `/comercios/agregar`
-**Propósito:** Formulario para agregar nuevo comercio
-
-**Características:**
-- Validación de duplicados
-- Alerta de comercios similares
-- Selección de tipo de comercio
-- Campos opcionales (teléfono, logo)
+### ErrorNotFound.vue
+**Ruta:** Catch-all `/:catchAll(.*)*`
+**Propósito:** Página 404
 
 ---
 
-## 10. NAVEGACIÓN (Router)
+## 11. NAVEGACIÓN (Router)
 
 ### Configuración
-- **Modo:** History (URLs limpias sin #)
+- **Modo:** Hash (URLs con #)
 - **Layout:** MainLayout para todas las rutas
 
 ### Rutas Definidas
@@ -383,22 +682,24 @@ PrecioJusto/
     path: '/',
     component: MainLayout,
     children: [
-      { path: '', component: IndexPage },
-      { path: 'productos', component: ProductosPage },
-      { path: 'productos/agregar', component: AgregarProductoPage },
-      { path: 'comercios', component: ComerciosPage },
-      { path: 'comercios/agregar', component: AgregarComercioPage }
+      { path: '', component: MisProductosPage },
+      { path: 'producto/:id', component: DetalleProductoPage },
+      { path: 'comercios', component: ComerciosPage }
     ]
+  },
+  {
+    path: '/:catchAll(.*)*',
+    component: ErrorNotFound
   }
 ]
 ```
 
 ---
 
-## 11. COLORES Y DISEÑO
+## 12. COLORES Y DISEÑO
 
-### Paleta de Colores (quasar.variables.scss)
-- **$primary:** #1976D2 (Azul oscuro) - Color principal de la app
+### Paleta de Colores (Variables.css)
+- **$primary:** #2196F3 (Azul oscuro) - Color principal de la app
 - **$secondary:** #4CAF50 (Verde) - Indicadores de ahorro y éxito
 - **$accent:** #FF9800 (Naranja) - Alertas y advertencias
 - **$dark:** #1D1D1D - Modo oscuro
@@ -413,10 +714,12 @@ PrecioJusto/
 - Floating Action Buttons para acciones principales
 - Iconos Tabler para consistencia visual
 - Espaciado generoso para táctil
+- Sistema de diseño centralizado (app.css)
+- Grid responsivo Quasar
 
 ---
 
-## 12. CONVENCIONES DE CÓDIGO
+## 13. CONVENCIONES DE CÓDIGO
 
 ### Nomenclatura
 - **Carpetas y Archivos:** PascalCase
@@ -429,6 +732,8 @@ PrecioJusto/
   - `productosStore`, `comerciosStore`
 - **Services:** PascalCase con sufijo "Service"
   - `ProductosService`, `ComerciosService`
+- **Clases CSS globales:** kebab-case
+  - `.contenedor-pagina`, `.buscador-centrado`
 
 ### Estilo de Código
 - Vue 3 Composition API con `<script setup>`
@@ -437,17 +742,20 @@ PrecioJusto/
 - Props tipadas con validación
 - Emits declarados explícitamente
 - Imports organizados: externos primero, luego internos
+- Estilos scoped solo cuando sean específicos del componente
+- Usar clases globales de app.css cuando sea posible
 
 ---
 
-## 13. ROADMAP Y FASES
+## 14. ROADMAP Y FASES
 
 ### Fase 1: MVP Local (Mayormente Completada)
 - ✅ CRUD de productos y comercios
 - ✅ Integración con Open Food Facts
 - ✅ Sistema de preferencias
 - ✅ Validación de duplicados en comercios
-- 🔄 Búsqueda local inteligente (En progreso)
+- ✅ Búsqueda local inteligente
+- ✅ Sistema de diseño centralizado
 - ⏳ Escaneo de código de barras con cámara (Pendiente - Stage 4)
 
 ### Fase 2: Funcionalidades Colaborativas (Futuro)
@@ -467,16 +775,18 @@ PrecioJusto/
 
 ---
 
-## 14. NOTAS PARA ASISTENTES DE IA
+## 15. NOTAS PARA ASISTENTES DE IA
 
 ### Contexto de Este Documento
 - Diseñado para comprensión rápida del proyecto por parte de IAs
 - Proporciona visión de alto nivel
 - Para detalles técnicos específicos, consultar resúmenes por área:
   - Resumen2Tarjetas.txt
-  - Resumen3OpenFoodFacts.txt
-  - Resumen4LocalStorage.txt
-  - ResumenSeccionComercios.txt
+  - Resumen3DetalleProducto.txt
+  - Resumen4FormularioAgregar.txt
+  - Resumen5Comercios.txt
+  - Resumen6OpenFoodFacts.txt
+  - Resumen7LocalStorage.txt
 
 ### Principios del Proyecto
 1. **Nomenclatura en Español:** Todo el código usa español descriptivo
@@ -484,16 +794,17 @@ PrecioJusto/
 3. **Mobile-First:** Diseño optimizado para dispositivos móviles
 4. **UX Primero:** Implementar UI antes que lógica backend
 5. **Commits Incrementales:** Desarrollo paso a paso con control de versiones
+6. **Sistema de Diseño Centralizado:** Clases CSS globales en app.css
 
 ### Estado Actual
-- **Versión:** MVP funcional
+- **Versión:** MVP funcional (~75% completado)
 - **Almacenamiento:** Local (Capacitor Storage)
-- **Próximo Milestone:** Búsqueda inteligente local
+- **Próximo Milestone:** Integración de comercios con FormularioPrecio
 - **Preparación:** Lista para migración a Firebase
 
 ---
 
-## 15. INFORMACIÓN ADICIONAL
+## 16. INFORMACIÓN ADICIONAL
 
 ### Licencia
 Proyecto personal de código propietario
@@ -512,4 +823,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** Febrero 2026
+**Última actualización:** Febrero 2026 (con Sistema de Diseño)

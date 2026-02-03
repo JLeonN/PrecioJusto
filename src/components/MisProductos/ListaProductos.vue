@@ -1,11 +1,5 @@
 <template>
   <div>
-    <!-- HEADER DE LA PÁGINA -->
-    <div class="q-mb-md">
-      <h5 class="q-my-none text-weight-bold">Mis Productos</h5>
-      <p class="text-grey-7 q-mb-none">{{ productos.length }} productos guardados</p>
-    </div>
-
     <!-- LISTA DE PRODUCTOS - Sistema de Grilla Responsivo -->
     <div class="row q-col-gutter-md">
       <div
