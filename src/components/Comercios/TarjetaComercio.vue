@@ -203,7 +203,8 @@ function formatearFechaRelativa(fechaISO) {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
   cursor: pointer;
-  overflow: hidden;
+  overflow: visible;
+  z-index: 1;
 }
 .tarjeta-comercio:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -307,7 +308,22 @@ function formatearFechaRelativa(fechaISO) {
 }
 /* SECCIÓN DIRECCIONES */
 .seccion-direcciones {
-  background-color: #fafafa;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background-color: white;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  max-height: 400px;
+  overflow-y: auto;
+  border-top: 1px solid #e0e0e0;
+}
+/* TARJETA EXPANDIDA */
+.tarjeta-expandida {
+  z-index: 10;
+  border-radius: 12px 12px 0 0;
 }
 .titulo-direcciones {
   display: flex;
