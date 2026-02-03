@@ -121,7 +121,6 @@
 <script setup>
 import { ref } from 'vue'
 import { IconBuilding, IconMapPin, IconShoppingCart } from '@tabler/icons-vue'
-import { Capacitor } from '@capacitor/core'
 
 const props = defineProps({
   comercio: {
@@ -161,18 +160,6 @@ function handleClick() {
  */
 function handleLongPress() {
   if (!props.modoSeleccion) {
-    // Vibración háptica (solo en móvil)
-    if (Capacitor.isNativePlatform()) {
-      try {
-        // Importación dinámica del plugin de vibración si está disponible
-        import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
-          Haptics.impact({ style: ImpactStyle.Medium })
-        })
-      } catch {
-        console.log('Haptics no disponible')
-      }
-    }
-
     emit('long-press', props.comercio.id)
   }
 }
@@ -211,15 +198,15 @@ function formatearFechaRelativa(fechaISO) {
 <style scoped>
 .tarjeta-comercio {
   position: relative;
-  background-color: var(--fondo-tarjeta);
-  border-radius: var(--borde-radio);
-  box-shadow: var(--sombra-ligera);
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
   cursor: pointer;
   overflow: hidden;
 }
 .tarjeta-comercio:hover {
-  box-shadow: var(--sombra-media);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transform: translateY(-2px);
 }
 .tarjeta-comercio:active {
@@ -227,8 +214,8 @@ function formatearFechaRelativa(fechaISO) {
 }
 /* ESTADO SELECCIONADO */
 .tarjeta-seleccionada {
-  border: 2px solid var(--color-secundario);
-  box-shadow: 0 0 0 3px var(--color-secundario-claro);
+  border: 2px solid #4caf50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
 }
 /* OVERLAY DE SELECCIÓN */
 .overlay-seleccion {
@@ -237,7 +224,7 @@ function formatearFechaRelativa(fechaISO) {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--color-secundario-claro);
+  background-color: #4caf50;
   opacity: 0.15;
   z-index: 1;
   pointer-events: none;
@@ -266,7 +253,7 @@ function formatearFechaRelativa(fechaISO) {
   aspect-ratio: 16 / 9;
   border-radius: 8px;
   overflow: hidden;
-  background-color: var(--fondo-drawer);
+  background-color: #f5f5f5;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -292,7 +279,7 @@ function formatearFechaRelativa(fechaISO) {
 .nombre-comercio {
   font-size: 18px;
   font-weight: bold;
-  color: var(--texto-primario);
+  color: #1d1d1d;
   margin-bottom: 8px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -320,14 +307,14 @@ function formatearFechaRelativa(fechaISO) {
 }
 /* SECCIÓN DIRECCIONES */
 .seccion-direcciones {
-  background-color: var(--fondo-drawer);
+  background-color: #fafafa;
 }
 .titulo-direcciones {
   display: flex;
   align-items: center;
   gap: 8px;
   font-weight: bold;
-  color: var(--color-primario);
+  color: #1976d2;
   margin-bottom: 12px;
 }
 .lista-direcciones {
@@ -335,14 +322,14 @@ function formatearFechaRelativa(fechaISO) {
 }
 .direccion-item {
   padding: 8px 0;
-  border-bottom: 1px solid var(--borde-color);
+  border-bottom: 1px solid #e0e0e0;
 }
 .direccion-item:last-child {
   border-bottom: none;
 }
 .texto-direccion {
   font-weight: 500;
-  color: var(--texto-primario);
+  color: #1d1d1d;
 }
 .acciones-expandidas {
   display: flex;

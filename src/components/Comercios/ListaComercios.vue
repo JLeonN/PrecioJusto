@@ -23,7 +23,7 @@
 </template>
 
 <script setup>
-import TarjetaComercio from './ListaComercios.vue'
+import TarjetaComercio from './TarjetaComercio.vue'
 
 const props = defineProps({
   comercios: {

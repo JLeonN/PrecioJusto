@@ -130,6 +130,10 @@ import { ref, computed, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
 import { useSeleccionMultiple } from '../composables/useSeleccionMultiple.js'
+import DialogoAgregarComercio from '../components/Formularios/Dialogos/DialogoAgregarComercio.vue'
+import ListaComercios from '../components/Comercios/ListaComercios.vue'
+import BarraSeleccion from '../components/Compartidos/BarraSeleccion.vue'
+import BarraAccionesSeleccion from '../components/Compartidos/BarraAccionesSeleccion.vue'
 
 const comerciosStore = useComerciStore()
 const $q = useQuasar()

@@ -47,12 +47,13 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useQuasar } from 'quasar'
 import FormularioComercio from '../FormularioComercio.vue'
 import DialogoCoincidencias from './DialogoCoincidencias.vue'
 import DialogoMismaUbicacion from './DialogoMismaUbicacion.vue'
 import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.js'
+import ComerciosService from '../../../almacenamiento/servicios/ComerciosService.js'
 
 const props = defineProps({
   modelValue: {
@@ -63,19 +64,18 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'comercio-guardado'])
 
-const comerciosStore = useComerciStore()
 const $q = useQuasar()
+const comerciosStore = useComerciStore()
 
-// Estado del diálogo
-const dialogoAbierto = computed({
-  get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value),
-})
+// ════════════════════════════════════════════════════════════
+// ESTADO LOCAL
+// ════════════════════════════════════════════════════════════
 
-// Estado de carga
 const guardando = ref(false)
+const dialogoCoincidenciasAbierto = ref(false)
+const dialogoMismaUbicacionAbierto = ref(false)
 
-// Datos del formulario
+// Datos del comercio
 const datosComercio = ref({
   nombre: '',
   tipo: 'Supermercado',
@@ -84,180 +84,141 @@ const datosComercio = ref({
   ciudad: '',
 })
 
-// Estados de validación
-const dialogoCoincidenciasAbierto = ref(false)
-const dialogoMismaUbicacionAbierto = ref(false)
+// Comercios similares encontrados (para diálogo de coincidencias)
 const comerciosSimilares = ref([])
-const comerciosEnMismaUbicacion = ref([])
-const nivelValidacion = ref(0)
-const validacionPendiente = ref(null)
+const nivelValidacion = ref(1)
 
-// Clases responsivas
-const clasesResponsivas = computed(() => {
-  return {
-    'dialogo-landscape': $q.screen.width > $q.screen.height && $q.screen.lt.sm,
-  }
+// Comercios en misma ubicación (para diálogo de ubicación)
+const comerciosEnMismaUbicacion = ref([])
+
+// ════════════════════════════════════════════════════════════
+// COMPUTED
+// ════════════════════════════════════════════════════════════
+
+const dialogoAbierto = computed({
+  get: () => props.modelValue,
+  set: (value) => emit('update:modelValue', value),
 })
 
-// Validación básica del formulario
 const formularioValido = computed(() => {
   return (
     datosComercio.value.nombre.trim() !== '' &&
-    datosComercio.value.tipo !== '' &&
+    datosComercio.value.tipo.trim() !== '' &&
     datosComercio.value.calle.trim() !== ''
   )
 })
 
-// Limpiar formulario al abrir/cerrar
-watch(dialogoAbierto, (nuevoValor) => {
-  if (nuevoValor) {
-    limpiarFormulario()
+const clasesResponsivas = computed(() => {
+  return {
+    'dialogo-landscape': window.innerHeight < window.innerWidth,
   }
 })
 
-/**
- * Valida duplicados mientras el usuario escribe
- */
-async function validarDuplicados(datos) {
-  // Guardar datos para validación posterior
-  validacionPendiente.value = datos
-  // Por ahora no validamos en tiempo real para no saturar
-  // Se validará al intentar guardar
-}
+// ════════════════════════════════════════════════════════════
+// MÉTODOS - VALIDACIÓN
+// ════════════════════════════════════════════════════════════
 
 /**
- * Guardar comercio
+ * Valida si hay duplicados antes de guardar
+ */
+async function validarDuplicados() {
+  if (!formularioValido.value) return
+
+  try {
+    const resultado = await ComerciosService.validarDuplicados(datosComercio.value)
+
+    if (resultado.esDuplicado) {
+      // Hay duplicados - mostrar diálogo correspondiente
+      nivelValidacion.value = resultado.nivel
+
+      if (resultado.nivel === 2) {
+        // Nombres similares
+        comerciosSimilares.value = resultado.comercios
+        dialogoCoincidenciasAbierto.value = true
+      } else if (resultado.nivel === 3) {
+        // Misma ubicación
+        comerciosEnMismaUbicacion.value = resultado.comercios
+        dialogoMismaUbicacionAbierto.value = true
+      }
+
+      return false
+    }
+
+    return true
+  } catch (error) {
+    console.error('❌ Error al validar duplicados:', error)
+    return true // Continuar si hay error
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// MÉTODOS - GUARDADO
+// ════════════════════════════════════════════════════════════
+
+/**
+ * Guardar comercio (con validación de duplicados)
  */
 async function guardarComercio() {
+  if (!formularioValido.value) {
+    $q.notify({
+      type: 'warning',
+      message: 'Por favor completa todos los campos obligatorios',
+      position: 'top',
+    })
+    return
+  }
+
   guardando.value = true
 
   try {
-    // Validar duplicados antes de guardar
-    const resultado = await comerciosStore.agregarComercio(datosComercio.value)
+    // Validar duplicados primero
+    const esDuplicado = await validarDuplicados()
 
-    if (!resultado.exito && resultado.validacion) {
-      // Hay duplicados detectados
-      manejarValidacionDuplicados(resultado.validacion)
+    if (esDuplicado === false) {
+      // Se detectó duplicado y se abrió el diálogo correspondiente
       guardando.value = false
       return
     }
 
-    // Comercio guardado exitosamente
-    if (resultado.exito) {
-      $q.notify({
-        type: 'positive',
-        message: 'Comercio agregado exitosamente',
-        caption: datosComercio.value.nombre,
-        position: 'top',
-        icon: 'check_circle',
-        timeout: 2500,
-      })
-
-      emit('comercio-guardado', resultado.comercio)
-      limpiarFormulario()
-      cerrarDialogo()
-    }
+    // No hay duplicados, continuar con guardado
+    await continuarConNuevo()
   } catch (error) {
     console.error('❌ Error al guardar comercio:', error)
     $q.notify({
       type: 'negative',
       message: 'Error al guardar el comercio',
-      caption: error.message,
       position: 'top',
-      timeout: 3000,
     })
-  } finally {
     guardando.value = false
   }
 }
 
 /**
- * Maneja la validación de duplicados según nivel
- */
-function manejarValidacionDuplicados(validacion) {
-  nivelValidacion.value = validacion.nivel
-
-  if (validacion.nivel === 1) {
-    // NIVEL 1: Duplicado exacto - No permitir
-    $q.notify({
-      type: 'warning',
-      message: 'Este comercio ya existe',
-      caption: 'Usa el comercio existente o edita la dirección',
-      position: 'top',
-      icon: 'warning',
-      timeout: 4000,
-    })
-  } else if (validacion.nivel === 2) {
-    // NIVEL 2: Nombre similar - Mostrar coincidencias
-    comerciosSimilares.value = validacion.comercios || []
-    dialogoCoincidenciasAbierto.value = true
-  } else if (validacion.nivel === 3) {
-    // NIVEL 3: Misma ubicación - Confirmar
-    comerciosEnMismaUbicacion.value = validacion.comercios || []
-    dialogoMismaUbicacionAbierto.value = true
-  }
-}
-
-/**
- * Usuario elige usar comercio existente
- */
-function usarComercioExistente(comercio) {
-  dialogoCoincidenciasAbierto.value = false
-
-  $q.notify({
-    type: 'info',
-    message: `Comercio "${comercio.nombre}" ya existe`,
-    caption: 'Puedes agregar una nueva dirección editando el comercio',
-    position: 'top',
-    icon: 'info',
-  })
-
-  // Cerrar este diálogo
-  cerrarDialogo()
-}
-
-/**
- * Usuario confirma que es un comercio nuevo
+ * Usuario confirma que quiere crear comercio nuevo
  */
 async function continuarConNuevo() {
+  guardando.value = true
   dialogoCoincidenciasAbierto.value = false
   dialogoMismaUbicacionAbierto.value = false
 
-  guardando.value = true
-
   try {
-    // Forzar guardado sin validación
-    const comercio = {
-      ...datosComercio.value,
-      id: `${Date.now()}${Math.random().toString(36).substring(2, 9)}`,
-      direcciones: [
-        {
-          id: `${Date.now()}${Math.random().toString(36).substring(2, 9)}`,
-          calle: datosComercio.value.calle.trim(),
-          barrio: datosComercio.value.barrio?.trim() || '',
-          ciudad: datosComercio.value.ciudad?.trim() || '',
-          nombreCompleto: `${datosComercio.value.nombre.trim()} - ${datosComercio.value.calle.trim()}`,
-          fechaUltimoUso: new Date().toISOString(),
-        },
-      ],
-      foto: null,
-      fechaCreacion: new Date().toISOString(),
-      fechaUltimoUso: new Date().toISOString(),
-      cantidadUsos: 0,
-    }
+    console.log('💾 Guardando comercio nuevo...')
 
-    // Agregar directamente al store sin validación
-    comerciosStore.comercios.push(comercio)
+    // Agregar comercio usando el servicio (esto SÍ persiste en storage)
+    const nuevoComercio = await ComerciosService.agregarComercio(datosComercio.value)
+
+    // Agregar al store local para actualizar UI
+    comerciosStore.comercios.push(nuevoComercio)
 
     $q.notify({
       type: 'positive',
-      message: 'Comercio agregado como nuevo',
+      message: 'Comercio agregado exitosamente',
       caption: datosComercio.value.nombre,
       position: 'top',
       icon: 'check_circle',
     })
 
-    emit('comercio-guardado', comercio)
+    emit('comercio-guardado', nuevoComercio)
     limpiarFormulario()
     cerrarDialogo()
   } catch (error) {
@@ -271,6 +232,30 @@ async function continuarConNuevo() {
     guardando.value = false
   }
 }
+
+/**
+ * Usuario elige usar un comercio existente
+ */
+function usarComercioExistente(comercio) {
+  console.log('📍 Usuario eligió comercio existente:', comercio.nombre)
+
+  dialogoCoincidenciasAbierto.value = false
+
+  $q.notify({
+    type: 'info',
+    message: 'Comercio existente seleccionado',
+    caption: comercio.nombre,
+    position: 'top',
+    icon: 'info',
+  })
+
+  limpiarFormulario()
+  cerrarDialogo()
+}
+
+// ════════════════════════════════════════════════════════════
+// MÉTODOS - UTILIDADES
+// ════════════════════════════════════════════════════════════
 
 /**
  * Limpiar formulario
