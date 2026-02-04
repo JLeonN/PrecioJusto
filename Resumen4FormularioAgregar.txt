@@ -4,16 +4,33 @@
 - FormularioProducto.vue (datos del producto en /components/Formularios/)
 - FormularioPrecio.vue (datos del precio en /components/Formularios/)
 - DialogoAgregarProducto.vue (contenedor modal en /components/Formularios/Dialogos/)
+- DialogoAgregarComercioRapido.vue (diálogo para comercio rápido en /components/Formularios/Dialogos/)
 
 ## ESTRUCTURA DE DATOS
 
 ### PRODUCTO
-- nombre, marca, codigoBarras, cantidad, unidad, categoria, imagen (null por defecto)
+- nombre, marca, codigoBarras, cantidad, unidad, imagen (null por defecto)
+- ❌ CAMPO ELIMINADO: categoria (ya no se usa)
 
 ### PRECIO
-- comercio, direccion, valor
+- comercio, direccion, valor, moneda
+- comercioId, direccionId (IDs de comerciosStore)
 - Se auto-construye nombreCompleto: "COMERCIO - Dirección"
 - Se auto-agrega fecha, confirmaciones (0), usuarioId
+
+## CONSTANTES
+- Monedas: src/almacenamiento/constantes/Monedas.js
+- Lista completa de monedas del mundo (20+ opciones)
+- MONEDA_DEFAULT: 'UYU'
+
+## NUEVO FLUJO: AGREGAR COMERCIO RÁPIDO
+1. Usuario escribe nombre comercio/dirección en selectores
+2. Click en "Agregar nuevo comercio" (debajo de selector dirección)
+3. Abre DialogoAgregarComercioRapido con datos pre-llenados
+4. Solo nombre obligatorio, dirección opcional
+5. Se crea comercio con tipo "Otro" y datos mínimos
+6. Auto-selecciona el comercio recién creado
+7. Usuario continúa agregando precio
 
 ## MODOS DE VALIDACIÓN
 
@@ -27,15 +44,6 @@
 - Validaciones estrictas
 - Para compartir datos públicos
 
-## FLUJO DE GUARDADO
-1. Usuario completa formulario
-2. Click en "Guardar Producto"
-3. Se construye objeto completo con producto + array de precios
-4. Se llama productosStore.agregarProducto()
-5. Se emite evento 'producto-guardado' al padre
-6. MisProductosPage recarga lista
-7. Formulario se limpia y cierra
-
 ## VALIDACIONES IMPLEMENTADAS
 - Nombre: requerido en modo comunidad
 - Cantidad: > 0 si ingresada
@@ -47,31 +55,20 @@ unidad, litro, mililitro, kilo, gramo, metro, pack
 
 ## INTEGRACIÓN CON STORES
 - productosStore.agregarProducto(): Guarda producto completo
+- comerciosStore.agregarComercio(): Crea comercio rápido
+- comerciosStore.registrarUso(): Registra uso de comercio/dirección
 - Quasar Notify para feedback visual
 - Botón flotante FAB en MisProductosPage para abrir diálogo
 
+## COMPONENTES REUTILIZABLES
+- DialogoAgregarComercioRapido.vue:
+  - Props: modelValue, nombreInicial, direccionInicial
+  - Eventos: @comercio-creado
+  - Totalmente independiente y reutilizable
+
 ## ETAPAS DE DESARROLLO
 ✅ ETAPA 1: Formulario manual básico
+✅ ETAPA 1.5: Integración con comercios
 🚧 ETAPA 2: API Open Food Facts (próximo)
 ⏳ ETAPA 3: Búsqueda inteligente local
 ⏳ ETAPA 4: Escaneo código de barras
-```
-
----
-
-**📝 EDITAR:** `Resumen1General.txt`
-
-**En ESTRUCTURA DE ARCHIVOS agregar:**
-```
-└── components/
-    ├── Formularios/
-    │   ├── FormularioProducto.vue
-    │   ├── FormularioPrecio.vue
-    │   └── Dialogos/
-    │       └── DialogoAgregarProducto.vue
-```
-
-**En FEATURES IMPLEMENTADAS agregar:**
-```
-- Formularios modulares para agregar productos manualmente
-- Sistema de validación dual (modo local vs comunidad)

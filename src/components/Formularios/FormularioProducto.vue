@@ -103,18 +103,6 @@
         />
       </div>
     </div>
-
-    <!-- CATEGORÍA -->
-    <q-input
-      v-model="datosInternos.categoria"
-      label="Categoría"
-      outlined
-      dense
-      placeholder="Ej: Lácteos, Bebidas, Almacén"
-      hint="Opcional"
-      :rules="modo === 'comunidad' ? [requerido] : []"
-      @update:model-value="emitirCambios"
-    />
   </div>
 </template>
 
@@ -132,7 +120,6 @@ const props = defineProps({
       codigoBarras: '',
       cantidad: 1,
       unidad: 'unidad',
-      categoria: '',
     }),
   },
   modo: {
@@ -162,7 +149,6 @@ const datosInternos = ref({
   codigoBarras: props.modelValue.codigoBarras || '',
   cantidad: props.modelValue.cantidad || 1,
   unidad: props.modelValue.unidad || 'unidad',
-  categoria: props.modelValue.categoria || '',
 })
 
 // Estados de búsqueda
@@ -198,7 +184,6 @@ watch(
       codigoBarras: nuevoValor.codigoBarras || '',
       cantidad: nuevoValor.cantidad || 1,
       unidad: nuevoValor.unidad || 'unidad',
-      categoria: nuevoValor.categoria || '',
     }
   },
   { deep: true },

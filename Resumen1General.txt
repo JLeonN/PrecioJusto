@@ -72,116 +72,117 @@ PrecioJusto/
 │   ├── favicon.ico
 │   └── icons/                             # Iconos de la app
 │
-├── src/
+src/
+├── almacenamiento/
+│   ├── adaptadores/
+│   │   ├── AdaptadorAlmacenamiento.js      # Interfaz común de almacenamiento
+│   │   ├── CapacitorStorageAdapter.js      # Implementación con Capacitor Storage
+│   │   └── FirestoreAdapter.js             # Implementación con Firebase (futuro)
 │   │
-│   ├── almacenamiento/                    # Sistema de persistencia
-│   │   ├── adaptadores/                   # Capa de abstracción de almacenamiento
-│   │   │   ├── StorageAdapter.js          # Interfaz base (patrón Strategy)
-│   │   │   └── CapacitorStorageAdapter.js # Implementación con Capacitor Storage
-│   │   │
-│   │   ├── servicios/                     # Servicios de lógica de negocio
-│   │   │   ├── AlmacenamientoService.js   # Configuración central de adaptadores
-│   │   │   ├── ProductosService.js        # CRUD y validaciones de productos
-│   │   │   ├── ComerciosService.js        # CRUD y validación de duplicados de comercios
-│   │   │   ├── ConfirmacionesService.js   # Sistema de confirmaciones de precios
-│   │   │   ├── PreferenciasService.js     # Configuración de usuario
-│   │   │   └── OpenFoodFactsService.js    # Integración con API Open Food Facts
-│   │   │
-│   │   └── stores/                        # Stores de Pinia (estado global)
-│   │       ├── productosStore.js          # Estado y acciones de productos
-│   │       ├── comerciosStore.js          # Estado y acciones de comercios
-│   │       ├── confirmacionesStore.js     # Estado y acciones de confirmaciones
-│   │       └── preferenciaStore.js        # Estado y acciones de preferencias de usuario
+│   ├── constantes/                          # 🆕 Constantes globales
+│   │   └── Monedas.js                       # Lista completa de monedas del mundo (20+ opciones)
 │   │
-│   ├── components/                        # Componentes reutilizables
-│   │   ├── Compartidos/                   # Componentes compartidos entre secciones
-│   │   │   ├── BarraSeleccion.vue         # Barra sticky para modo selección múltiple
-│   │   │   └── BarraAccionesSeleccion.vue # Barra fixed bottom con acciones (eliminar)
-│   │   │
-│   │   ├── Comercios/                     # Componentes de comercios
-│   │   │   ├── ListaComercios.vue         # Contenedor con grid responsivo
-│   │   │   └── TarjetaComercio.vue        # Tarjeta expandible de comercio
-│   │   │
-│   │   ├── DetalleProducto/               # Componentes de detalle de producto
-│   │   │   ├── InfoProducto.vue           # Cabecera con info principal
-│   │   │   ├── EstadisticasProducto.vue   # Métricas en cards
-│   │   │   ├── FiltrosHistorial.vue       # Filtros de historial
-│   │   │   ├── HistorialPrecios.vue       # Contenedor y agrupador
-│   │   │   ├── ItemComercioHistorial.vue  # Comercio expandible
-│   │   │   └── ItemPrecioHistorial.vue    # Precio individual
-│   │   │
-│   │   ├── Formularios/                   # Formularios modulares
-│   │   │   ├── FormularioProducto.vue     # Datos del producto
-│   │   │   ├── FormularioPrecio.vue       # Datos del precio
-│   │   │   ├── FormularioComercio.vue     # Datos del comercio
-│   │   │   └── Dialogos/                  # Diálogos modales
-│   │   │       ├── DialogoAgregarProducto.vue      # Modal para agregar producto
-│   │   │       ├── DialogoAgregarComercio.vue      # Modal para agregar comercio
-│   │   │       ├── DialogoResultadosBusqueda.vue   # Modal con resultados de API
-│   │   │       ├── DialogoCoincidencias.vue        # Alerta de comercios similares
-│   │   │       ├── DialogoMismaUbicacion.vue       # Alerta de misma dirección
-│   │   │       └── DialogoMotivoEliminacion.vue    # Confirmación con motivo
-│   │   │
-│   │   ├── MisProductos/                  # Componentes de productos
-│   │   │   └── ListaProductos.vue         # Contenedor con grid responsivo
-│   │   │
-│   │   └── Tarjetas/                      # Componentes de tarjetas
-│   │       ├── TarjetaProducto.vue        # Tarjeta expandible de producto con precios
-│   │       ├── TarjetaComercio.vue        # Tarjeta de comercio con info y acciones
-│   │       └── TarjetaPrecio.vue          # Tarjeta de precio individual con confirmaciones
+│   ├── servicios/
+│   │   ├── ProductosService.js             # CRUD de productos + cálculos automáticos
+│   │   ├── ComerciosService.js             # CRUD de comercios + validación duplicados
+│   │   ├── ConfirmacionesService.js        # Gestión de confirmaciones de precios
+│   │   ├── PreferenciasService.js          # Preferencias del usuario (moneda, unidad)
+│   │   └── OpenFoodFactsService.js         # Integración con API Open Food Facts
 │   │
-│   ├── composables/                       # Composables reutilizables
-│   │   └── useSeleccionMultiple.js        # Lógica de selección múltiple
-│   │
-│   ├── css/                               # Estilos globales
-│   │   ├── app.css                        # Sistema de diseño centralizado
-│   │   └── Variables.css                  # Variables CSS personalizadas (colores, espaciados)
-│   │
-│   ├── layouts/                           # Layouts de páginas
-│   │   └── MainLayout.vue                 # Layout principal con drawer de navegación
-│   │
-│   ├── pages/                             # Páginas de la aplicación
-│   │   ├── IndexPage.vue                  # Página de inicio/bienvenida
-│   │   ├── MisProductosPage.vue           # Listado de productos con FAB
-│   │   ├── DetalleProductoPage.vue        # Detalle y historial completo de producto
-│   │   ├── ComerciosPage.vue              # Listado de comercios con FAB y buscador
-│   │   └── ErrorNotFound.vue              # Página 404
-│   │
-│   ├── router/                            # Configuración de enrutamiento
-│   │   ├── index.js                       # Configuración de Vue Router
-│   │   └── routes.js                      # Definición de todas las rutas
-│   │
-│   ├── App.vue                            # Componente raíz de Vue
-│   └── main.js                            # Punto de entrada de la aplicación
+│   └── stores/
+│       ├── productosStore.js               # Estado global de productos (Pinia)
+│       ├── comerciosStore.js               # Estado global de comercios (Pinia)
+│       └── confirmacionesStore.js          # Estado global de confirmaciones (Pinia)
 │
-├── src-capacitor/                         # Archivos específicos de Capacitor
-│   ├── android/                           # Proyecto Android nativo
-│   └── capacitor.config.json              # Configuración de Capacitor
+├── components/
+│   ├── Compartidos/                         # Componentes reutilizables entre secciones
+│   │   ├── BarraSeleccion.vue              # Barra sticky con contador de seleccionados
+│   │   └── BarraAccionesSeleccion.vue      # Barra fixed bottom con botones (eliminar, cancelar)
+│   │
+│   ├── Comercios/                           # Componentes de comercios
+│   │   ├── ListaComercios.vue              # Contenedor con grid responsivo Quasar
+│   │   └── TarjetaComercio.vue             # Tarjeta expandible de comercio con direcciones
+│   │
+│   ├── DetalleProducto/                     # Componentes de detalle de producto
+│   │   ├── InfoProducto.vue                # Cabecera con imagen, nombre, marca, código
+│   │   ├── EstadisticasProducto.vue        # Métricas en cards (promedio, tendencia, comercios)
+│   │   ├── FiltrosHistorial.vue            # Filtros de comercio, período y ordenamiento
+│   │   ├── HistorialPrecios.vue            # Contenedor y agrupador por comercio
+│   │   ├── ItemComercioHistorial.vue       # Comercio expandible con precios agrupados
+│   │   └── ItemPrecioHistorial.vue         # Precio individual con confirmaciones
+│   │
+│   ├── Formularios/                         # Formularios modulares
+│   │   ├── FormularioProducto.vue          # Datos del producto (sin categoría)
+│   │   ├── FormularioPrecio.vue            # Datos del precio con selectores de comercio/dirección
+│   │   ├── FormularioComercio.vue          # Datos del comercio completo
+│   │   └── Dialogos/                        # Diálogos modales
+│   │       ├── DialogoAgregarProducto.vue           # Modal para agregar producto + precio
+│   │       ├── DialogoAgregarComercio.vue           # Modal para agregar comercio completo
+│   │       ├── DialogoAgregarComercioRapido.vue     # 🆕 Modal comercio rápido (nombre + dirección opcional)
+│   │       ├── DialogoResultadosBusqueda.vue        # Modal con resultados de Open Food Facts
+│   │       ├── DialogoCoincidencias.vue             # Alerta de comercios similares
+│   │       ├── DialogoMismaUbicacion.vue            # Alerta de misma dirección
+│   │       └── DialogoMotivoEliminacion.vue         # Confirmación con motivo de eliminación
+│   │
+│   ├── MisProductos/                        # Componentes de productos
+│   │   └── ListaProductos.vue              # Contenedor con grid responsivo Quasar
+│   │
+│   └── Tarjetas/                            # Componentes de tarjetas
+│       └── TarjetaProducto.vue             # Tarjeta expandible de producto con precios
 │
-├── .editorconfig                          # Configuración de editor
-├── .eslintrc.cjs                          # Configuración de ESLint
-├── .gitignore                             # Archivos ignorados por Git
-├── .prettierrc                            # Configuración de Prettier
-├── .vscode/                               # Configuración de VS Code
-│   ├── extensions.json                    # Extensiones recomendadas
-│   └── settings.json                      # Configuración del workspace
-├── babel.config.cjs                       # Configuración de Babel
-├── jsconfig.json                          # Configuración de JavaScript
-├── package.json                           # Dependencias y scripts del proyecto
-├── package-lock.json                      # Lock de versiones de dependencias
-├── quasar.config.js                       # Configuración principal de Quasar
-├── README.md                              # Documentación del proyecto
+├── composables/
+│   └── useSeleccionMultiple.js             # Lógica de selección múltiple reutilizable
 │
-└── Documentacion/                         # Documentación del proyecto
-    ├── Resumen1General.txt                # Este archivo
-    ├── Resumen2Tarjetas.txt               # Documentación de componentes de tarjetas
-    ├── Resumen3DetalleProducto.txt        # Documentación de detalle de producto
-    ├── Resumen4FormularioAgregar.txt      # Documentación de formularios
-    ├── Resumen5Comercios.txt              # Documentación de sección comercios
-    ├── Resumen6OpenFoodFacts.txt          # Documentación de integración API
-    ├── Resumen7LocalStorage.txt           # Documentación de almacenamiento
-    ├── PlanTrabajoComercio.txt            # Plan de trabajo de comercios
-    └── Instrucciones.txt                  # Instrucciones para IAs
+├── css/
+│   ├── app.css                              # Clases CSS globales del Design System
+│   ├── quasar.variables.scss               # Variables de Quasar (colores, fuentes)
+│   └── Variables.css                        # Variables CSS custom del proyecto
+│
+├── layouts/
+│   └── MainLayout.vue                       # Layout principal con header + drawer + router-view
+│
+├── pages/
+│   ├── ComerciosPage.vue                    # Página de gestión de comercios
+│   ├── DetalleProductoPage.vue              # Página de detalle individual de producto
+│   └── MisProductosPage.vue                 # Página principal de productos
+│
+├── router/
+│   ├── index.js                             # Configuración del router de Vue
+│   └── routes.js                            # Definición de rutas (/, /comercios, /detalle/:id)
+│
+├── App.vue                                  # Componente raíz de Vue
+└── main.js                                  # Punto de entrada de la aplicación
+
+android/                                      # Carpeta generada por Capacitor para Android nativo
+├── app/                                     # Código nativo Android
+│   ├── src/                                 # Fuentes de la app nativa
+│   └── build.gradle                         # Configuración de build de Android
+└── capacitor.config.json                    # Configuración de Capacitor
+
+.editorconfig                                # Configuración de editor
+.eslintrc.cjs                                # Configuración de ESLint
+.gitignore                                   # Archivos ignorados por Git
+.prettierrc                                  # Configuración de Prettier
+.vscode/                                     # Configuración de VS Code
+├── extensions.json                          # Extensiones recomendadas
+└── settings.json                            # Configuración del workspace
+babel.config.cjs                             # Configuración de Babel
+jsconfig.json                                # Configuración de JavaScript
+package.json                                 # Dependencias y scripts del proyecto
+package-lock.json                            # Lock de versiones de dependencias
+quasar.config.js                             # Configuración principal de Quasar
+README.md                                    # Documentación del proyecto
+
+Documentacion/                               # Documentación técnica del proyecto
+├── Resumen1General.txt                      # Documentación general del proyecto
+├── Resumen2Tarjetas.txt                     # Documentación de componentes de tarjetas
+├── Resumen3DetalleProducto.txt              # Documentación de detalle de producto
+├── Resumen4FormularioAgregar.txt            # Documentación de formularios
+├── Resumen5Comercios.txt                    # Documentación de sección comercios
+├── Resumen6OpenFoodFacts.txt                # Documentación de integración API
+├── Resumen7LocalStorage.txt                 # Documentación de almacenamiento
+├── PlanTrabajoComercio.txt                  # Plan de trabajo de comercios
+└── Instrucciones.txt                        # Instrucciones para IAs
 ```
 
 ---
@@ -347,48 +348,112 @@ Precio Justo utiliza el **sistema de columnas de Quasar** para layouts responsiv
 
 ## 6. FUNCIONALIDADES IMPLEMENTADAS
 
-### A. Gestión de Productos
-- ✅ Registro manual de productos
-- ✅ Búsqueda por código de barras (Open Food Facts)
-- ✅ Búsqueda por nombre y marca (Open Food Facts)
-- ✅ Autocompletado de datos (nombre, marca, imagen, categoría)
-- ✅ Registro de precios con múltiples monedas (UYU, USD, EUR, ARS, BRL, etc.)
-- ✅ Validación de cantidades y unidades (kg, g, L, mL, unidades)
-- ✅ Sistema de confirmaciones comunitarias para precios
-- ✅ Visualización de top 3 precios más bajos por producto
-- ✅ Tarjetas expandibles con detalles completos
-- ✅ Formato de fechas relativo (hace 2 días, hace 1 mes)
-- ✅ Click-to-copy en códigos de barras
-- ✅ Selección múltiple con long-press
-- ✅ Eliminación múltiple con deshacer
-- ✅ Detalle de producto con historial completo
-- ✅ Filtros de historial (comercio, período, orden)
-- ✅ Confirmaciones de precios
+A. Gestión de Productos
 
-### B. Gestión de Comercios
-- ✅ Registro de comercios con formulario completo
-- ✅ Validación de duplicados con algoritmo inteligente
-- ✅ Detección de nombres similares (Levenshtein distance)
-- ✅ Detección de direcciones cercanas
-- ✅ Tipos de comercio: Supermercado, Almacén, Mayorista, Farmacia, Kiosco, Online, Otro
-- ✅ Múltiples direcciones por comercio
-- ✅ Tarjetas expandibles con direcciones
-- ✅ Búsqueda en tiempo real
-- ✅ Selección múltiple con long-press
-- ✅ Eliminación múltiple con deshacer
-- ✅ Sistema de uso reciente (ordenamiento)
+✅ Registro manual de productos (nombre, marca, código de barras, cantidad, unidad)
+✅ Campo categoría eliminado (simplificación del formulario)
+✅ Búsqueda por código de barras (Open Food Facts API)
+✅ Búsqueda por nombre y marca (Open Food Facts API)
+✅ Autocompletado de datos desde API (nombre, marca, imagen, cantidad, unidad)
+✅ Registro de precios con múltiples monedas (20+ opciones: UYU, USD, EUR, ARS, BRL, etc.)
+✅ Monedas centralizadas en constantes (fácil agregar nuevas)
+✅ Validación de cantidades y unidades (kg, g, L, mL, unidades, pack, metro)
+✅ Sistema de confirmaciones comunitarias para precios
+✅ Visualización de top 3 precios más bajos por producto
+✅ Tarjetas expandibles con detalles completos
+✅ Formato de fechas relativo (hace 2 días, hace 1 mes)
+✅ Click-to-copy en códigos de barras con notificación
+✅ Selección múltiple con long-press (vibración háptica)
+✅ Eliminación múltiple con deshacer (5 segundos)
+✅ Detalle de producto con historial completo por comercio
+✅ Filtros de historial (comercio, período, orden precio/fecha)
+✅ Confirmaciones de precios con validación de usuario único
+✅ Estadísticas: precio promedio, tendencia, total de comercios
 
-### C. Preferencias de Usuario
-- ✅ Configuración de moneda preferida (UYU por defecto)
-- ✅ Configuración de unidad preferida
-- ✅ Persistencia automática de preferencias
-- ✅ Sincronización reactiva con toda la UI
+B. Gestión de Comercios
 
-### D. Sistema de Almacenamiento
-- ✅ Patrón Strategy con adaptadores intercambiables
-- ✅ Implementación actual: CapacitorStorageAdapter (local)
-- ✅ Preparado para migración futura a Firebase/Firestore
-- ✅ Métodos estándar: obtenerTodos, obtenerPorId, crear, actualizar, eliminar, existe
+✅ Registro de comercios con formulario completo (nombre, tipo, dirección, barrio, ciudad)
+✅ 🆕 Creación rápida de comercios desde formulario de precio (solo nombre obligatorio)
+✅ 🆕 Diálogo reutilizable DialogoAgregarComercioRapido.vue
+✅ 🆕 Pre-llenado de datos escritos por el usuario en diálogo rápido
+✅ 🆕 Auto-selección del comercio recién creado (flujo sin interrupciones)
+✅ Validación de duplicados con algoritmo inteligente (3 niveles)
+✅ Detección de nombres similares (Levenshtein distance)
+✅ Detección de direcciones cercanas con normalización
+✅ Tipos de comercio predefinidos: Supermercado, Hipermercado, Minimercado, Almacén, Verdulería, Carnicería, Panadería, Farmacia, Ferretería, Tienda de ropa, Librería, Perfumería, Juguetería, Electrónica, Mercado, Mayorista, Otro
+✅ Múltiples direcciones por comercio (agregar/eliminar)
+✅ Tarjetas expandibles con lista de direcciones
+✅ Búsqueda en tiempo real con filtrado
+✅ Selección múltiple con long-press (vibración háptica)
+✅ Eliminación múltiple con deshacer (5 segundos)
+✅ Sistema de uso reciente (ordenamiento inteligente)
+✅ Registro automático de uso al agregar precio
+✅ Diálogos de confirmación: coincidencias, misma ubicación, motivo eliminación
+
+C. Integración Comercios + Productos
+
+✅ Selectores de comercio y dirección en FormularioPrecio.vue
+✅ Autocompletado de comercios ordenados por uso reciente
+✅ Auto-selección de dirección más usada del comercio
+✅ 🆕 Botón "Agregar nuevo comercio" debajo del selector de dirección
+✅ Captura de texto escrito por usuario (nombre comercio + dirección)
+✅ Guardado de comercioId y direccionId en precios
+✅ Retrocompatibilidad con precios legacy (solo strings)
+✅ Registro de uso al guardar precio (actualiza orden)
+
+D. Preferencias de Usuario
+
+✅ Configuración de moneda preferida (UYU por defecto)
+✅ Configuración de unidad preferida (unidad por defecto)
+✅ Persistencia automática de preferencias en Capacitor Storage
+✅ Sincronización reactiva con toda la UI
+✅ Carga automática al abrir formularios
+
+E. Sistema de Almacenamiento
+
+✅ Patrón Strategy con adaptadores intercambiables
+✅ Implementación actual: CapacitorStorageAdapter (almacenamiento local)
+✅ Preparado para migración futura a Firebase/Firestore
+✅ Métodos estándar: obtenerTodos, obtenerPorId, crear, actualizar, eliminar, existe
+✅ Prefijos de clave organizados: producto_, comercio_, confirmaciones_, preferencias_
+✅ Manejo de errores consistente con logs detallados
+
+F. Sistema de Diseño (Design System)
+
+✅ Clases CSS globales centralizadas en app.css
+✅ Variables CSS custom en Variables.css
+✅ Contenedor de página reutilizable (.contenedor-pagina)
+✅ Headers estandarizados (.header-pagina, .titulo-pagina, .contador-items)
+✅ Buscador centrado estilo Google (.buscador-centrado)
+✅ Grid responsivo Quasar (4 breakpoints: xs, sm, md, xl)
+✅ Sistema de colores consistente (primary, secondary, accent, warning, info, negative)
+✅ Animaciones y transiciones estandarizadas
+✅ Componentes compartidos reutilizables (BarraSeleccion, BarraAccionesSeleccion)
+
+G. UX y Accesibilidad
+
+✅ Vibración háptica en interacciones clave (long-press, confirmaciones)
+✅ Notificaciones Quasar con feedback visual claro
+✅ Estados de carga con spinners
+✅ Estados vacíos con mensajes amigables
+✅ Botones deshabilitados con tooltips explicativos
+✅ Validaciones en tiempo real con mensajes de error
+✅ Confirmaciones con opción de deshacer (5 segundos)
+✅ Scroll automático al expandir tarjetas
+✅ Formato de números con separadores de miles
+✅ Formato de fechas en español uruguayo
+
+H. Arquitectura y Código
+
+✅ Composition API de Vue 3 en todos los componentes
+✅ State management con Pinia
+✅ Componentes modulares y reutilizables
+✅ Separation of concerns (servicios, stores, componentes)
+✅ Código limpio con nombres descriptivos en español
+✅ ESLint + Prettier configurados
+✅ Logs estructurados con emojis para debugging
+✅ Manejo de errores robusto con try-catch
+✅ Constantes centralizadas (evita duplicación)
 
 ---
 
