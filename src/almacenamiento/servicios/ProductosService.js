@@ -79,7 +79,7 @@ class ProductosService {
   /**
    * ➕ AGREGAR PRECIO A PRODUCTO
    * @param {number} productoId - ID del producto
-   * @param {Object} precio - Nuevo precio {comercio, nombreCompleto, direccion, valor, usuarioId}
+   * @param {Object} precio - Nuevo precio {comercioId, direccionId, valor, moneda, usuarioId}
    * @returns {Promise<Object|null>} - Producto actualizado o null
    *
    * 🔥 FIRESTORE EQUIVALENTE:
@@ -97,15 +97,29 @@ class ProductosService {
       }
 
       // Validar precio
-      if (!precio.comercio || !precio.valor || precio.valor <= 0) {
+      if (!precio.valor || precio.valor <= 0) {
         console.error('❌ Precio inválido:', precio)
         return null
+      }
+
+      // Validar comercioId y direccionId
+      if (!precio.comercioId || !precio.direccionId) {
+        console.warn('⚠️ Precio sin comercioId/direccionId (datos legacy)')
+        // Mantener compatibilidad con precios viejos
       }
 
       // Generar ID para el precio
       precio.id = precio.id || this._generarId()
       precio.fecha = precio.fecha || new Date().toISOString()
       precio.confirmaciones = precio.confirmaciones || 0
+
+      // Asegurar que tenga comercio y dirección (strings para compatibilidad)
+      if (!precio.comercio) {
+        precio.comercio = precio.nombreCompleto?.split(' - ')[0] || 'Desconocido'
+      }
+      if (!precio.direccion) {
+        precio.direccion = precio.nombreCompleto?.split(' - ')[1] || ''
+      }
 
       // Agregar a la lista de precios
       producto.precios = producto.precios || []

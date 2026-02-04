@@ -192,26 +192,49 @@ los datos ingresados por los usuarios.
 
 ═══════════════════════════════════════════════════════════════
 
-## ⏸️ FASE 5: INTEGRACIÓN CON PRECIOS 🔗 [PENDIENTE]
+## ✅ FASE 5: INTEGRACIÓN CON PRECIOS 🔗 [COMPLETADA]
 
 ### Modificar FormularioPrecio.vue
-[ ] Reemplazar q-input comercio por q-select
-[ ] Configurar q-select con use-input
-[ ] Implementar @filter para búsqueda en tiempo real
-[ ] Cargar comercios desde comerciosStore
-[ ] Ordenar por últimos usados
-[ ] Agregar opción "➕ Agregar nuevo comercio"
-[ ] Abrir DialogoAgregarComercio si elige "nuevo"
-[ ] Actualizar al agregar comercio nuevo
-[ ] Implementar autocompletado de dirección
-[ ] Filtrar direcciones según comercio seleccionado
-[ ] Ordenar direcciones por últimas usadas
-[ ] Registrar uso al guardar precio (ComerciosService)
+[x] Reemplazar q-input comercio por q-select
+[x] Configurar q-select con use-input
+[x] Implementar @filter para búsqueda
+[x] Cargar comercios desde comerciosStore.comerciosPorUso
+[x] Mostrar cantidad de direcciones en cada opción
+[x] Agregar opción "Agregar nuevo comercio"
+[x] Reemplazar q-input dirección por q-select
+[x] Cargar direcciones del comercio seleccionado
+[x] Auto-seleccionar dirección más usada
+[x] Detectar cuando usuario escribe dirección nueva
+[x] Abrir DialogoDireccionNueva cuando no coincide
+[x] Emitir comercioId y direccionId adicionales
 
-### Modificar ProductosService.js
-[ ] Actualizar estructura de precios
-[ ] Guardar comercioId en lugar de string
-[ ] Mantener compatibilidad con datos viejos (si los hay)
+### Crear DialogoDireccionNueva.vue
+[x] Crear componente de diálogo
+[x] Mostrar comercio y dirección escrita
+[x] Botón: "Agregar a comercio existente"
+[x] Botón: "Crear comercio nuevo"
+[x] Botón: "Cancelar"
+[x] Emitir eventos correspondientes
+[x] Lógica de agregar dirección a existente
+[x] Lógica de crear comercio nuevo
+
+### Actualizar ProductosService.js
+[x] Modificar agregarPrecio() para aceptar comercioId/direccionId
+[x] Mantener compatibilidad con strings comercio/direccion
+[x] Validar nuevos campos
+[x] Fallback para datos legacy
+
+### Integrar en DialogoAgregarProducto.vue
+[x] Importar comerciosStore
+[x] Registrar uso con comerciosStore.registrarUso()
+[x] Llamar después de guardar producto existente
+[x] Llamar después de guardar producto nuevo
+[x] Validar que tenga comercioId y direccionId
+
+### Estilos globales
+[x] Agregar variables CSS en Variables.css
+[x] Agregar clases en app.css
+[x] Aplicar en formularios
 
 ═══════════════════════════════════════════════════════════════
 
@@ -393,19 +416,19 @@ los datos ingresados por los usuarios.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 75% COMPLETADO
+## 📊 PROGRESO GENERAL: 83% COMPLETADO
 
 ✅ Fase 1: 100%
 ✅ Fase 2: 100%
 ✅ Fase 3: 100%
 ✅ Fase 4: 100%
-⏸️ Fase 5: 0%
+✅ Fase 5: 100%
 ⏸️ Fase 6: 0%
 ✅ Fase 7: 100%
-✅ Fase 7.5: 100% (nueva fase - Sistema de Diseño)
+✅ Fase 7.5: 100%
 🚧 Fase 8: 50%
 ⏸️ Fase 9: 20%
 
 ═══════════════════════════════════════════════════════════════
 
-**ÚLTIMA ACTUALIZACIÓN:** 03 de Febrero 2026 - Sistema de Diseño implementado
+**ÚLTIMA ACTUALIZACIÓN:** 04 de Febrero 2026 - Fase 5 completada

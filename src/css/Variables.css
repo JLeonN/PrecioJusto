@@ -48,4 +48,25 @@
   --espaciado-md: 16px;
   --espaciado-lg: 24px;
   --espaciado-xl: 32px;
+
+  /* ===========================
+     VARIABLES DE FORMULARIOS
+     =========================== */
+
+  /* Inputs y selects */
+  --input-border-radius: 8px;
+  --input-font-size: 14px;
+
+  /* Formularios */
+  --form-gap: 16px;
+  --form-max-width: 500px;
+
+  /* Selectores */
+  --select-dropdown-max-height: 250px;
+
+  /* Diálogos */
+  --dialogo-padding: 16px;
+  --dialogo-border-radius: 12px;
+  --dialogo-min-width: 350px;
+  --dialogo-max-width: 500px;
 }

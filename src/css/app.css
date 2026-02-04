@@ -59,3 +59,27 @@ body {
   background-color: var(--color-secundario);
   color: var(--texto-sobre-primario);
 }
+/* ===========================
+   CLASES DE FORMULARIOS
+   =========================== */
+
+/* Contenedor de formulario */
+.formulario-contenedor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--form-gap);
+  max-width: var(--form-max-width);
+}
+/* Inputs con iconos */
+.input-con-prepend .q-field__prepend {
+  padding-right: 8px;
+}
+/* Selectores con autocompletado */
+.selector-autocompletar .q-field__control {
+  cursor: pointer;
+}
+/* Diálogos responsivos */
+.dialogo-responsive {
+  min-width: var(--dialogo-min-width);
+  max-width: var(--dialogo-max-width);
+}

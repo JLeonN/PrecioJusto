@@ -68,6 +68,7 @@ import FormularioProducto from '../FormularioProducto.vue'
 import FormularioPrecio from '../FormularioPrecio.vue'
 import DialogoResultadosBusqueda from './DialogoResultadosBusqueda.vue'
 import { useProductosStore } from '../../../almacenamiento/stores/productosStore.js'
+import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.js'
 import productosService from '../../../almacenamiento/servicios/ProductosService.js'
 import openFoodFactsService from '../../../almacenamiento/servicios/OpenFoodFactsService.js'
 import preferenciasService from '../../../almacenamiento/servicios/PreferenciasService.js'
@@ -87,6 +88,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'producto-guardado'])
 
 const productosStore = useProductosStore()
+const comerciosStore = useComerciStore()
 const $q = useQuasar()
 
 // Estado del diálogo
@@ -115,6 +117,9 @@ const datosPrecio = ref({
   direccion: '',
   valor: null,
   moneda: 'UYU',
+  comercioId: null,
+  direccionId: null,
+  nombreCompleto: '',
 })
 
 // Estados de búsqueda API
@@ -136,51 +141,47 @@ const formularioValido = computed(() => {
       datosProducto.value.nombre.trim() !== '' &&
       datosProducto.value.marca.trim() !== '' &&
       datosProducto.value.codigoBarras.trim() !== '' &&
-      datosProducto.value.cantidad > 0 &&
-      datosProducto.value.unidad !== '' &&
-      datosProducto.value.categoria.trim() !== '' &&
       datosPrecio.value.comercio.trim() !== '' &&
-      datosPrecio.value.direccion.trim() !== '' &&
+      datosPrecio.value.valor !== null &&
       datosPrecio.value.valor > 0
     )
-  } else {
-    // Modo local: solo verificar que tenga algo mínimo
-    return (
-      datosProducto.value.nombre.trim() !== '' ||
-      datosProducto.value.marca.trim() !== '' ||
-      datosPrecio.value.comercio.trim() !== ''
-    )
   }
+
+  // Modo local: solo nombre obligatorio
+  return datosProducto.value.nombre.trim() !== ''
 })
 
-// Cargar preferencias al abrir el diálogo
-watch(dialogoAbierto, async (nuevoValor) => {
-  if (nuevoValor) {
-    const preferencias = await preferenciasService.obtenerPreferencias()
-    datosProducto.value.unidad = preferencias.unidad
-    datosPrecio.value.moneda = preferencias.moneda
-  }
-})
+// Watchers para sincronizar datos
+watch(
+  () => datosProducto.value,
+  () => {
+    console.log('📝 Datos producto actualizados:', datosProducto.value)
+  },
+  { deep: true },
+)
 
-// Buscar por código de barras
+watch(
+  () => datosPrecio.value,
+  () => {
+    console.log('💰 Datos precio actualizados:', datosPrecio.value)
+  },
+  { deep: true },
+)
+
+// Buscar por código de barras en OpenFoodFacts
 async function buscarPorCodigo(codigo, callbackFinalizar) {
   try {
-    console.log(`🔍 Buscando código: ${codigo}`)
+    console.log(`🔍 Buscando producto por código: ${codigo}`)
 
     const producto = await openFoodFactsService.buscarPorCodigoBarras(codigo)
 
     if (producto) {
-      autoCompletarFormulario(producto)
-      $q.notify({
-        type: 'positive',
-        message: 'Producto encontrado',
-        position: 'top',
-        icon: 'check_circle',
-      })
+      resultadosBusqueda.value = [producto]
+      dialogoResultadosAbierto.value = true
     } else {
       $q.notify({
         type: 'warning',
-        message: 'Producto no encontrado, completa manualmente',
+        message: 'No se encontró el producto',
         position: 'top',
       })
     }
@@ -196,10 +197,10 @@ async function buscarPorCodigo(codigo, callbackFinalizar) {
   }
 }
 
-// Buscar por nombre/texto
+// Buscar por nombre en OpenFoodFacts
 async function buscarPorNombre(texto, callbackFinalizar) {
   try {
-    console.log(`🔍 Buscando texto: ${texto}`)
+    console.log(`🔍 Buscando productos por nombre: ${texto}`)
 
     const resultados = await openFoodFactsService.buscarPorTexto(texto)
 
@@ -245,10 +246,6 @@ async function guardarProducto() {
   guardando.value = true
 
   try {
-    // ========================================
-    // 🔍 PASO 1: BUSCAR PRODUCTO EXISTENTE POR CÓDIGO
-    // ========================================
-
     let productoExistente = null
 
     // Solo buscar si hay código de barras
@@ -258,19 +255,18 @@ async function guardarProducto() {
       )
     }
 
-    // ========================================
-    // 🎯 CASO 1: PRODUCTO YA EXISTE (mismo código)
-    // ========================================
-
     if (productoExistente) {
       console.log(`🎯 Producto existente encontrado: ${productoExistente.nombre}`)
 
-      // Construir nuevo precio
-      const nombreCompleto = datosPrecio.value.direccion.trim()
-        ? `${datosPrecio.value.comercio.trim()} - ${datosPrecio.value.direccion.trim()}`
-        : datosPrecio.value.comercio.trim()
+      const nombreCompleto =
+        datosPrecio.value.nombreCompleto ||
+        (datosPrecio.value.direccion.trim()
+          ? `${datosPrecio.value.comercio.trim()} - ${datosPrecio.value.direccion.trim()}`
+          : datosPrecio.value.comercio.trim())
 
       const nuevoPrecio = {
+        comercioId: datosPrecio.value.comercioId || null,
+        direccionId: datosPrecio.value.direccionId || null,
         comercio: datosPrecio.value.comercio.trim() || 'Sin comercio',
         nombreCompleto: nombreCompleto || 'Sin datos',
         direccion: datosPrecio.value.direccion.trim() || '',
@@ -281,13 +277,16 @@ async function guardarProducto() {
         usuarioId: 'user_actual_123',
       }
 
-      // Agregar precio al producto existente
       const productoActualizado = await productosStore.agregarPrecioAProducto(
         productoExistente.id,
         nuevoPrecio,
       )
 
       if (productoActualizado) {
+        if (nuevoPrecio.comercioId && nuevoPrecio.direccionId) {
+          await comerciosStore.registrarUso(nuevoPrecio.comercioId, nuevoPrecio.direccionId)
+        }
+
         $q.notify({
           type: 'positive',
           message: `Precio agregado a "${productoExistente.nombre}"`,
@@ -304,18 +303,12 @@ async function guardarProducto() {
         throw new Error('No se pudo agregar el precio al producto existente')
       }
 
-      return // Terminar aquí
+      return
     }
-
-    // ========================================
-    // 🆕 CASO 2: PRODUCTO NUEVO
-    // ========================================
 
     console.log('🆕 Creando producto nuevo...')
 
-    // Construir objeto completo del producto
     const nuevoProducto = {
-      // Datos del producto
       nombre: datosProducto.value.nombre.trim() || 'Sin nombre',
       marca: datosProducto.value.marca.trim() || '',
       codigoBarras: datosProducto.value.codigoBarras.trim() || '',
@@ -323,18 +316,19 @@ async function guardarProducto() {
       unidad: datosProducto.value.unidad || 'unidad',
       categoria: datosProducto.value.categoria.trim() || '',
       imagen: datosProducto.value.imagen || null,
-
-      // Array de precios (con el primer precio)
       precios: [],
     }
 
-    // Si hay datos de precio, agregarlo
     if (datosPrecio.value.comercio.trim() !== '' || datosPrecio.value.valor !== null) {
-      const nombreCompleto = datosPrecio.value.direccion.trim()
-        ? `${datosPrecio.value.comercio.trim()} - ${datosPrecio.value.direccion.trim()}`
-        : datosPrecio.value.comercio.trim()
+      const nombreCompleto =
+        datosPrecio.value.nombreCompleto ||
+        (datosPrecio.value.direccion.trim()
+          ? `${datosPrecio.value.comercio.trim()} - ${datosPrecio.value.direccion.trim()}`
+          : datosPrecio.value.comercio.trim())
 
       nuevoProducto.precios.push({
+        comercioId: datosPrecio.value.comercioId || null,
+        direccionId: datosPrecio.value.direccionId || null,
         comercio: datosPrecio.value.comercio.trim() || 'Sin comercio',
         nombreCompleto: nombreCompleto || 'Sin datos',
         direccion: datosPrecio.value.direccion.trim() || '',
@@ -342,14 +336,24 @@ async function guardarProducto() {
         moneda: datosPrecio.value.moneda || 'UYU',
         fecha: new Date().toISOString(),
         confirmaciones: 0,
-        usuarioId: 'user_actual_123', // Temporal
+        usuarioId: 'user_actual_123',
       })
     }
 
-    // Guardar en el store
     const productoGuardado = await productosStore.agregarProducto(nuevoProducto)
 
     if (productoGuardado) {
+      if (
+        nuevoProducto.precios.length > 0 &&
+        nuevoProducto.precios[0].comercioId &&
+        nuevoProducto.precios[0].direccionId
+      ) {
+        await comerciosStore.registrarUso(
+          nuevoProducto.precios[0].comercioId,
+          nuevoProducto.precios[0].direccionId,
+        )
+      }
+
       $q.notify({
         type: 'positive',
         message: 'Producto agregado exitosamente',
@@ -388,7 +392,7 @@ async function limpiarFormulario() {
     marca: '',
     codigoBarras: '',
     cantidad: 1,
-    unidad: preferencias.unidad, // Mantener última unidad
+    unidad: preferencias.unidad,
     categoria: '',
     imagen: null,
   }
@@ -397,7 +401,10 @@ async function limpiarFormulario() {
     comercio: '',
     direccion: '',
     valor: null,
-    moneda: preferencias.moneda, // Mantener última moneda
+    moneda: preferencias.moneda,
+    comercioId: null,
+    direccionId: null,
+    nombreCompleto: '',
   }
 }
 
@@ -423,7 +430,6 @@ function cerrarDialogo() {
   min-width: 350px;
   max-width: 500px;
 }
-/* Modo landscape (horizontal) en móvil */
 .dialogo-landscape {
   max-width: 90vw;
   max-height: 90vh;
@@ -432,7 +438,6 @@ function cerrarDialogo() {
   max-height: 60vh;
   overflow-y: auto;
 }
-/* En landscape, reducir altura */
 .dialogo-landscape .contenido-scroll {
   max-height: 50vh;
 }
@@ -452,7 +457,6 @@ function cerrarDialogo() {
   color: var(--color-primario);
   margin-bottom: 8px;
 }
-/* Transiciones suaves */
 .dialogo-agregar {
   transition: all 0.3s ease;
 }
