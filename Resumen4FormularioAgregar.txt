@@ -66,6 +66,30 @@ unidad, litro, mililitro, kilo, gramo, metro, pack
   - Eventos: @comercio-creado
   - Totalmente independiente y reutilizable
 
+  ## FORMULARIO PRECIO - MEJORAS RECIENTES
+
+### Selector de Comercio con Persistencia Visual
+- `:display-value` con control de foco para evitar borrado de texto
+- Refs separadas: `comercioEscrito` (guardado) y `textoTemporalComercio` (durante escritura)
+- Eventos `@focus` y `@blur` gestionan visibilidad del texto
+- Sin duplicación visual durante escritura
+
+### Selector de Dirección Condicional
+- Se habilita al escribir ≥1 caracter en nombre de comercio
+- Hint dinámico según estado del comercio
+- Misma lógica de persistencia visual que comercio
+
+### Pre-llenado Automático de Modal
+- `DialogoAgregarComercioRapido` recibe `nombreInicial` y `direccionInicial`
+- Props pobladas desde refs `comercioEscrito` y `direccionEscrita`
+- Usuario puede escribir comercio+dirección antes de abrir modal
+
+### Implementación Técnica
+- Computed properties: `textoVisibleComercio` y `textoVisibleDireccion`
+- Flags de foco: `comercioTieneFoco` y `direccionTieneFoco`
+- Display value = `undefined` durante foco (no interferir con q-select)
+- Display value = texto guardado cuando no tiene foco
+
 ## ETAPAS DE DESARROLLO
 ✅ ETAPA 1: Formulario manual básico
 ✅ ETAPA 1.5: Integración con comercios
