@@ -4,6 +4,7 @@
     <q-select
       v-model="comercioSeleccionado"
       :options="comerciosFiltrados"
+      :display-value="textoVisibleComercio"
       option-label="nombre"
       label="Comercio"
       outlined
@@ -14,6 +15,8 @@
       @filter="filtrarComercios"
       @update:model-value="alSeleccionarComercio"
       @input-value="alEscribirComercio"
+      @focus="alEnfocarComercio"
+      @blur="guardarComercioEscrito"
     >
       <template #prepend>
         <q-icon name="store" />
@@ -44,21 +47,26 @@
     <q-select
       v-model="direccionSeleccionada"
       :options="direccionesDisponibles"
+      :display-value="textoVisibleDireccion"
       option-label="nombreCompleto"
       label="Dirección / Sucursal"
       outlined
       dense
       use-input
       clearable
-      :disable="!comercioSeleccionado"
+      :disable="!tieneComercioValido"
       :hint="
-        !comercioSeleccionado
-          ? 'Seleccioná primero un comercio'
-          : 'Opcional: ayuda a identificar la sucursal específica'
+        !tieneComercioValido
+          ? 'Escribí al menos 1 caracter en el nombre del comercio'
+          : esComercioExistente
+            ? 'Opcional: ayuda a identificar la sucursal específica'
+            : 'Escribí una dirección para este comercio nuevo'
       "
       :rules="modo === 'comunidad' ? [requerido] : []"
       @update:model-value="alSeleccionarDireccion"
       @input-value="alEscribirDireccion"
+      @focus="alEnfocarDireccion"
+      @blur="guardarDireccionEscrita"
     >
       <template #prepend>
         <q-icon name="place" />
@@ -67,7 +75,13 @@
       <!-- Sin resultados -->
       <template #no-option>
         <q-item>
-          <q-item-section class="text-grey"> No hay direcciones para este comercio </q-item-section>
+          <q-item-section class="text-grey">
+            {{
+              esComercioExistente
+                ? 'No hay direcciones para este comercio'
+                : 'Escribí una dirección para el comercio nuevo'
+            }}
+          </q-item-section>
         </q-item>
       </template>
     </q-select>
@@ -170,12 +184,16 @@ const datosInternos = ref({
 const comercioSeleccionado = ref(null)
 const comerciosFiltrados = ref([])
 const comercioId = ref(null)
-const comercioEscrito = ref('') // Lo que el usuario escribe en el input
+const comercioEscrito = ref('') // Texto que el usuario escribió
+const textoTemporalComercio = ref('') // Texto mientras escribe
+const comercioTieneFoco = ref(false) // Si el input tiene foco
 
 // Estado del selector de direcciones
 const direccionSeleccionada = ref(null)
 const direccionId = ref(null)
-const direccionEscrita = ref('') // Lo que el usuario escribe en el input
+const direccionEscrita = ref('') // Texto que el usuario escribió
+const textoTemporalDireccion = ref('') // Texto mientras escribe
+const direccionTieneFoco = ref(false) // Si el input tiene foco
 
 // Estado del diálogo de nuevo comercio
 const dialogoNuevoComercioAbierto = ref(false)
@@ -183,11 +201,82 @@ const dialogoNuevoComercioAbierto = ref(false)
 // Flag para detectar si es comercio nuevo
 const esComercioNuevo = ref(false)
 
-// Direcciones disponibles según comercio seleccionado
+// ========================================
+// COMPUTED PROPERTIES
+// ========================================
+
+/**
+ * Verificar si el comercio seleccionado es un objeto existente
+ */
+const esComercioExistente = computed(() => {
+  return comercioSeleccionado.value !== null && typeof comercioSeleccionado.value === 'object'
+})
+
+/**
+ * Verificar si hay un comercio válido
+ */
+const tieneComercioValido = computed(() => {
+  if (esComercioExistente.value) return true
+  if (comercioEscrito.value.length >= 1) return true
+  if (textoTemporalComercio.value.length >= 1) return true
+  return false
+})
+
+/**
+ * Direcciones disponibles según comercio seleccionado
+ */
 const direccionesDisponibles = computed(() => {
-  if (!comercioSeleccionado.value) return []
+  if (!esComercioExistente.value) return []
   return comercioSeleccionado.value.direcciones || []
 })
+
+/**
+ * Texto visible en el selector de comercio
+ */
+const textoVisibleComercio = computed(() => {
+  // Si está escribiendo (tiene foco), dejar que q-select maneje el display
+  if (comercioTieneFoco.value) {
+    return undefined // No interferir con el input del q-select
+  }
+
+  // Si hay comercio seleccionado (objeto)
+  if (esComercioExistente.value) {
+    return comercioSeleccionado.value.nombre
+  }
+
+  // Si hay texto guardado (escrito anteriormente)
+  if (comercioEscrito.value) {
+    return comercioEscrito.value
+  }
+
+  return ''
+})
+
+/**
+ * Texto visible en el selector de dirección
+ */
+const textoVisibleDireccion = computed(() => {
+  // Si está escribiendo (tiene foco), dejar que q-select maneje el display
+  if (direccionTieneFoco.value) {
+    return undefined // No interferir con el input del q-select
+  }
+
+  // Si hay dirección seleccionada (objeto)
+  if (typeof direccionSeleccionada.value === 'object' && direccionSeleccionada.value !== null) {
+    return direccionSeleccionada.value.nombreCompleto || direccionSeleccionada.value.calle
+  }
+
+  // Si hay texto guardado
+  if (direccionEscrita.value) {
+    return direccionEscrita.value
+  }
+
+  return ''
+})
+
+// ========================================
+// LIFECYCLE
+// ========================================
 
 // Cargar moneda guardada al montar
 onMounted(async () => {
@@ -198,6 +287,10 @@ onMounted(async () => {
   // Cargar comercios
   await comerciosStore.cargarComercios()
 })
+
+// ========================================
+// FUNCIONES
+// ========================================
 
 /**
  * Filtrar comercios mientras el usuario escribe
@@ -216,17 +309,53 @@ function filtrarComercios(val, update) {
 }
 
 /**
- * Capturar lo que el usuario escribe en el selector de comercio
+ * Cuando el input de comercio recibe foco
  */
-function alEscribirComercio(val) {
-  comercioEscrito.value = val || ''
+function alEnfocarComercio() {
+  comercioTieneFoco.value = true
 }
 
 /**
- * Capturar lo que el usuario escribe en el selector de dirección
+ * Capturar lo que el usuario escribe en el selector de comercio (mientras escribe)
+ */
+function alEscribirComercio(val) {
+  textoTemporalComercio.value = val || ''
+}
+
+/**
+ * Guardar el texto cuando el usuario sale del input de comercio
+ */
+function guardarComercioEscrito() {
+  comercioTieneFoco.value = false
+  if (textoTemporalComercio.value && !comercioSeleccionado.value) {
+    comercioEscrito.value = textoTemporalComercio.value
+    console.log('💾 Comercio guardado:', comercioEscrito.value)
+  }
+}
+
+/**
+ * Cuando el input de dirección recibe foco
+ */
+function alEnfocarDireccion() {
+  direccionTieneFoco.value = true
+}
+
+/**
+ * Capturar lo que el usuario escribe en el selector de dirección (mientras escribe)
  */
 function alEscribirDireccion(val) {
-  direccionEscrita.value = val || ''
+  textoTemporalDireccion.value = val || ''
+}
+
+/**
+ * Guardar el texto cuando el usuario sale del input de dirección
+ */
+function guardarDireccionEscrita() {
+  direccionTieneFoco.value = false
+  if (textoTemporalDireccion.value && !direccionSeleccionada.value) {
+    direccionEscrita.value = textoTemporalDireccion.value
+    console.log('💾 Dirección guardada:', direccionEscrita.value)
+  }
 }
 
 /**
@@ -240,6 +369,8 @@ function alSeleccionarComercio(comercio) {
     direccionSeleccionada.value = null
     direccionId.value = null
     esComercioNuevo.value = false
+    comercioEscrito.value = ''
+    textoTemporalComercio.value = ''
     emitirCambios()
     return
   }
@@ -248,6 +379,8 @@ function alSeleccionarComercio(comercio) {
   comercioId.value = comercio.id
   comercioSeleccionado.value = comercio
   esComercioNuevo.value = false
+  comercioEscrito.value = '' // Limpiar texto escrito
+  textoTemporalComercio.value = ''
 
   // Auto-seleccionar dirección más usada si existe
   if (comercio.direcciones && comercio.direcciones.length > 0) {
@@ -275,12 +408,18 @@ function alSeleccionarDireccion(direccion) {
   if (!direccion) {
     // Usuario borró la selección
     direccionId.value = null
+    direccionSeleccionada.value = null
+    direccionEscrita.value = ''
+    textoTemporalDireccion.value = ''
     emitirCambios()
     return
   }
 
   // Guardar dirección seleccionada
   direccionId.value = direccion.id
+  direccionSeleccionada.value = direccion
+  direccionEscrita.value = '' // Limpiar texto escrito
+  textoTemporalDireccion.value = ''
   emitirCambios()
 }
 
@@ -288,6 +427,8 @@ function alSeleccionarDireccion(direccion) {
  * Abrir diálogo de nuevo comercio con datos pre-llenados
  */
 function abrirDialogoNuevoComercio() {
+  console.log('🔍 Nombre:', comercioEscrito.value)
+  console.log('🔍 Dirección:', direccionEscrita.value)
   dialogoNuevoComercioAbierto.value = true
 }
 
@@ -298,6 +439,12 @@ function alCrearComercio(comercioCreado) {
   // Auto-seleccionar el comercio recién creado
   comercioSeleccionado.value = comercioCreado
   comercioId.value = comercioCreado.id
+
+  // Limpiar textos escritos
+  comercioEscrito.value = ''
+  textoTemporalComercio.value = ''
+  direccionEscrita.value = ''
+  textoTemporalDireccion.value = ''
 
   // Auto-seleccionar la primera dirección (si se agregó)
   if (comercioCreado.direcciones && comercioCreado.direcciones.length > 0) {
@@ -333,13 +480,27 @@ watch(
 
 // Emitir cambios al padre
 function emitirCambios() {
+  const nombreComercio = esComercioExistente.value
+    ? comercioSeleccionado.value.nombre
+    : comercioEscrito.value
+
+  const nombreDireccion =
+    typeof direccionSeleccionada.value === 'object' && direccionSeleccionada.value !== null
+      ? direccionSeleccionada.value.calle
+      : direccionEscrita.value
+
+  const nombreCompleto =
+    typeof direccionSeleccionada.value === 'object' && direccionSeleccionada.value !== null
+      ? direccionSeleccionada.value.nombreCompleto
+      : ''
+
   emit('update:modelValue', {
     ...datosInternos.value,
     comercioId: comercioId.value,
     direccionId: direccionId.value,
-    comercio: comercioSeleccionado.value?.nombre || '',
-    direccion: direccionSeleccionada.value?.calle || '',
-    nombreCompleto: direccionSeleccionada.value?.nombreCompleto || '',
+    comercio: nombreComercio,
+    direccion: nombreDireccion,
+    nombreCompleto: nombreCompleto,
   })
 }
 
