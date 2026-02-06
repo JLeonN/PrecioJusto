@@ -41,17 +41,30 @@
           label="Especifica el motivo"
           placeholder="Ej: Cambió de nombre, ya no existe..."
           class="q-mb-md"
+          :rules="[
+            (val) => (val && val.trim().length > 0) || 'Debes especificar un motivo',
+            (val) => (val && val.length <= 100) || 'Máximo 100 caracteres',
+          ]"
         />
 
         <!-- ADVERTENCIA SOBRE PRODUCTOS AFECTADOS -->
-        <q-banner v-if="cantidadProductosAfectados > 0" dense class="bg-warning text-white" rounded>
+        <q-banner
+          v-if="cantidadProductosAfectados > 0"
+          dense
+          class="bg-warning text-white q-mb-md"
+          rounded
+        >
           <template #avatar>
             <q-icon name="warning" />
           </template>
           <div class="text-body2">
-            <strong>{{ cantidadProductosAfectados }} productos afectados</strong>
+            <strong
+              >{{ cantidadProductosAfectados }}
+              {{ cantidadProductosAfectados === 1 ? 'producto tiene' : 'productos tienen' }}
+              precios asociados</strong
+            >
             <p class="q-mb-none q-mt-xs text-caption">
-              Los precios de estos productos mantendrán el nombre del comercio como texto.
+              {{ mensajeSegunMotivo }}
             </p>
           </div>
         </q-banner>
@@ -61,7 +74,10 @@
           <template #avatar>
             <q-icon name="info" color="primary" />
           </template>
-          <div class="text-caption">Los datos históricos se conservarán para referencia.</div>
+          <div class="text-caption">
+            Los precios se mantendrán con un indicador de "comercio cerrado" para conservar el
+            historial.
+          </div>
         </q-banner>
 
         <q-banner v-if="motivoSeleccionado === 'duplicado'" dense class="bg-grey-2 q-mt-md" rounded>
@@ -69,7 +85,17 @@
             <q-icon name="info" color="primary" />
           </template>
           <div class="text-caption">
-            Los precios asociados se mantendrán con el nombre original del comercio.
+            Los precios se convertirán a formato de texto simple y ya no estarán vinculados al
+            comercio.
+          </div>
+        </q-banner>
+
+        <q-banner v-if="motivoSeleccionado === 'otro'" dense class="bg-grey-2 q-mt-md" rounded>
+          <template #avatar>
+            <q-icon name="info" color="primary" />
+          </template>
+          <div class="text-caption">
+            Los precios se mantendrán como texto simple con el nombre original del comercio.
           </div>
         </q-banner>
       </q-card-section>
@@ -135,10 +161,24 @@ const opcionesMotivo = [
   },
 ]
 
+// Mensaje dinámico según motivo seleccionado
+const mensajeSegunMotivo = computed(() => {
+  switch (motivoSeleccionado.value) {
+    case 'cerro':
+      return 'Los precios se conservarán con un indicador de "cerrado" para mantener el historial.'
+    case 'duplicado':
+      return 'Los precios se convertirán a texto y ya no estarán vinculados.'
+    case 'otro':
+      return 'Los precios se mantendrán como texto con el nombre original del comercio.'
+    default:
+      return 'Los precios se actualizarán según el motivo seleccionado.'
+  }
+})
+
 // Validación
 const motivoValido = computed(() => {
   if (motivoSeleccionado.value === 'otro') {
-    return otroMotivo.value.trim().length > 0
+    return otroMotivo.value.trim().length > 0 && otroMotivo.value.length <= 100
   }
   return motivoSeleccionado.value !== ''
 })

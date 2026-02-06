@@ -99,35 +99,14 @@
       @comercio-guardado="onComercioGuardado"
     />
 
-    <!-- DIÁLOGO CONFIRMACIÓN ELIMINACIÓN -->
-    <q-dialog v-model="dialogoConfirmacionAbierto" persistent>
-      <q-card>
-        <q-card-section class="row items-center">
-          <q-icon name="warning" color="warning" size="32px" class="q-mr-md" />
-          <div>
-            <div class="text-h6">Confirmar eliminación</div>
-            <div class="text-body2 text-grey-7 q-mt-xs">
-              ¿Estás seguro de eliminar {{ seleccion.cantidadSeleccionados.value }}
-              {{ seleccion.cantidadSeleccionados.value === 1 ? 'comercio' : 'comercios' }}?
-            </div>
-            <div class="text-caption text-grey-6 q-mt-xs">
-              Los precios asociados mantendrán el nombre del comercio
-            </div>
-          </div>
-        </q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn flat label="Cancelar" color="grey-7" @click="dialogoConfirmacionAbierto = false" />
-          <q-btn
-            unelevated
-            label="Eliminar"
-            color="negative"
-            :loading="eliminando"
-            @click="eliminarSeleccionados"
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    <!-- DIÁLOGO MOTIVO ELIMINACIÓN -->
+    <DialogoMotivoEliminacion
+      v-model="dialogoMotivoAbierto"
+      :cantidad-comercios="seleccion.cantidadSeleccionados.value"
+      :cantidad-productos-afectados="productosAfectados"
+      @confirmar="eliminarSeleccionados"
+      @cancelar="dialogoMotivoAbierto = false"
+    />
   </q-page>
 </template>
 
@@ -135,13 +114,16 @@
 import { ref, computed, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
+import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
 import { useSeleccionMultiple } from '../composables/useSeleccionMultiple.js'
 import DialogoAgregarComercio from '../components/Formularios/Dialogos/DialogoAgregarComercio.vue'
+import DialogoMotivoEliminacion from '../components/Formularios/Dialogos/DialogoMotivoEliminacion.vue'
 import ListaComercios from '../components/Comercios/ListaComercios.vue'
 import BarraSeleccion from '../components/Compartidos/BarraSeleccion.vue'
 import BarraAccionesSeleccion from '../components/Compartidos/BarraAccionesSeleccion.vue'
 
 const comerciosStore = useComerciStore()
+const productosStore = useProductosStore()
 const $q = useQuasar()
 
 // Estado de búsqueda
@@ -149,16 +131,17 @@ const textoBusqueda = ref('')
 
 // Estado de diálogos
 const dialogoAgregarAbierto = ref(false)
-const dialogoConfirmacionAbierto = ref(false)
+const dialogoMotivoAbierto = ref(false)
 
 // Estado de eliminación
 const eliminando = ref(false)
+const productosAfectados = ref(0)
 
 // Composable de selección múltiple
 const seleccion = useSeleccionMultiple()
 
-// Comercios eliminados (para deshacer)
-const comerciosEliminadosParaDeshacer = ref([])
+// Comercios y productos eliminados (para deshacer)
+const datosParaDeshacer = ref(null)
 
 // Comercios filtrados por búsqueda
 const comerciosFiltrados = computed(() => {
@@ -183,6 +166,7 @@ const comerciosFiltrados = computed(() => {
  */
 async function cargarComercios() {
   await comerciosStore.cargarComercios()
+  await productosStore.cargarProductos()
   seleccion.actualizarItems(comerciosStore.comercios)
 }
 
@@ -209,11 +193,39 @@ function activarSeleccionConItem(comercioId) {
 }
 
 /**
+ * Cuenta cuántos productos tienen precios asociados a los comercios seleccionados
+ */
+function contarProductosAfectados() {
+  const idsComerciosSeleccionados = seleccion.arraySeleccionados.value
+  let contadorProductos = 0
+
+  // Recorrer todos los productos
+  productosStore.productos.forEach((producto) => {
+    // Verificar si algún precio del producto está asociado a los comercios seleccionados
+    const tienePrecios = producto.precios.some((precio) =>
+      idsComerciosSeleccionados.includes(precio.comercioId),
+    )
+
+    if (tienePrecios) {
+      contadorProductos++
+    }
+  })
+
+  return contadorProductos
+}
+
+/**
  * Confirmar eliminación de comercios
+ * Cuenta productos afectados y abre diálogo de motivo
  */
 function confirmarEliminacion() {
   if (!seleccion.haySeleccionados.value) return
-  dialogoConfirmacionAbierto.value = true
+
+  // Contar productos afectados
+  productosAfectados.value = contarProductosAfectados()
+
+  // Abrir diálogo de motivo
+  dialogoMotivoAbierto.value = true
 }
 
 /**
@@ -237,26 +249,50 @@ function editarComercio(comercio) {
 }
 
 /**
- * Elimina comercios seleccionados
+ * Elimina comercios seleccionados según el motivo
  */
-async function eliminarSeleccionados() {
+async function eliminarSeleccionados(motivo) {
   eliminando.value = true
 
   try {
     const idsAEliminar = seleccion.arraySeleccionados.value
 
-    // Guardar comercios para deshacer
-    comerciosEliminadosParaDeshacer.value = idsAEliminar.map((id) =>
+    // Guardar comercios y productos afectados para deshacer
+    const comerciosEliminados = idsAEliminar.map((id) =>
       comerciosStore.comercios.find((c) => c.id === id),
     )
 
-    console.log(`🗑️ Eliminando ${idsAEliminar.length} comercios...`)
+    // Guardar productos afectados (para deshacer)
+    const productosAfectadosData = []
+    productosStore.productos.forEach((producto) => {
+      const preciosAfectados = producto.precios.filter((precio) =>
+        idsAEliminar.includes(precio.comercioId),
+      )
 
-    // Eliminar comercios
+      if (preciosAfectados.length > 0) {
+        productosAfectadosData.push({
+          productoId: producto.id,
+          preciosOriginales: preciosAfectados.map((p) => ({ ...p })), // Copia profunda
+        })
+      }
+    })
+
+    datosParaDeshacer.value = {
+      comercios: comerciosEliminados,
+      productos: productosAfectadosData,
+      motivo: motivo,
+    }
+
+    console.log(`🗑️ Eliminando ${idsAEliminar.length} comercios con motivo: ${motivo.tipo}`)
+
+    // APLICAR LÓGICA SEGÚN MOTIVO
+    await aplicarLogicaSegunMotivo(idsAEliminar, motivo)
+
+    // Eliminar comercios del store
     const resultado = await comerciosStore.eliminarComercios(idsAEliminar)
 
     // Cerrar diálogo
-    dialogoConfirmacionAbierto.value = false
+    dialogoMotivoAbierto.value = false
 
     // Desactivar modo selección
     seleccion.limpiarDespuesDeEliminar()
@@ -265,19 +301,23 @@ async function eliminarSeleccionados() {
     $q.notify({
       type: 'positive',
       message: `${resultado.exitosos.length} ${resultado.exitosos.length === 1 ? 'comercio eliminado' : 'comercios eliminados'}`,
-      position: 'top',
-      icon: 'delete',
       timeout: 5000,
+      position: 'bottom',
       actions: [
         {
           label: 'Deshacer',
           color: 'white',
-          handler: () => {
-            deshacerEliminacion()
-          },
+          handler: () => deshacerEliminacion(),
         },
       ],
     })
+
+    // Después de 5 segundos, limpiar datos de deshacer
+    setTimeout(() => {
+      if (datosParaDeshacer.value) {
+        datosParaDeshacer.value = null
+      }
+    }, 5000)
   } catch (error) {
     console.error('❌ Error al eliminar comercios:', error)
     $q.notify({
@@ -291,35 +331,125 @@ async function eliminarSeleccionados() {
 }
 
 /**
+ * Aplica la lógica de eliminación según el motivo seleccionado
+ */
+async function aplicarLogicaSegunMotivo(idsComerciosEliminar, motivo) {
+  // Obtener nombres de los comercios para los casos que lo necesiten
+  const nombresComerciosMap = {}
+  idsComerciosEliminar.forEach((id) => {
+    const comercio = comerciosStore.comercios.find((c) => c.id === id)
+    if (comercio) {
+      nombresComerciosMap[id] = comercio.nombre
+    }
+  })
+
+  // Recorrer todos los productos y sus precios
+  for (const producto of productosStore.productos) {
+    let preciosModificados = false
+
+    producto.precios = producto.precios.map((precio) => {
+      // Si este precio pertenece a uno de los comercios a eliminar
+      if (idsComerciosEliminar.includes(precio.comercioId)) {
+        preciosModificados = true
+
+        switch (motivo.tipo) {
+          case 'cerro':
+            // MOTIVO: CERRÓ - Marcar con flag pero mantener linkeo
+            return {
+              ...precio,
+              comercioCerrado: true,
+            }
+
+          case 'duplicado':
+            // MOTIVO: DUPLICADO - Convertir a legacy (deslinkeado)
+            return {
+              ...precio,
+              comercioId: undefined,
+              direccionId: undefined,
+              comercio: precio.comercio || nombresComerciosMap[precio.comercioId] || 'Desconocido',
+              direccion: precio.direccion || 'Sin dirección',
+            }
+
+          case 'otro':
+            // MOTIVO: OTRO - Convertir a legacy (deslinkeado)
+            return {
+              ...precio,
+              comercioId: undefined,
+              direccionId: undefined,
+              comercio: precio.comercio || nombresComerciosMap[precio.comercioId] || 'Desconocido',
+              direccion: precio.direccion || 'Sin dirección',
+            }
+
+          default:
+            return precio
+        }
+      }
+
+      return precio
+    })
+
+    // Si se modificaron precios, actualizar el producto
+    if (preciosModificados) {
+      await productosStore.actualizarProducto(producto.id, {
+        precios: producto.precios,
+      })
+    }
+  }
+}
+
+/**
  * Deshacer eliminación de comercios
  */
 async function deshacerEliminacion() {
-  if (comerciosEliminadosParaDeshacer.value.length === 0) return
+  if (!datosParaDeshacer.value) return
 
-  console.log('↩️ Deshaciendo eliminación...')
+  try {
+    console.log('↩️ Deshaciendo eliminación...')
 
-  let restauradosExitosos = 0
-
-  for (const comercio of comerciosEliminadosParaDeshacer.value) {
-    const resultado = await comerciosStore.agregarComercio(comercio)
-    if (resultado.exito) {
-      restauradosExitosos++
+    // 1. Restaurar comercios
+    for (const comercio of datosParaDeshacer.value.comercios) {
+      await comerciosStore.agregarComercio(comercio)
     }
+
+    // 2. Restaurar precios modificados en productos
+    for (const productoAfectado of datosParaDeshacer.value.productos) {
+      const producto = productosStore.productos.find((p) => p.id === productoAfectado.productoId)
+
+      if (producto) {
+        // Reemplazar los precios afectados con sus versiones originales
+        producto.precios = producto.precios.map((precio) => {
+          const precioOriginal = productoAfectado.preciosOriginales.find(
+            (po) => po.id === precio.id,
+          )
+          return precioOriginal || precio
+        })
+
+        await productosStore.actualizarProducto(producto.id, {
+          precios: producto.precios,
+        })
+      }
+    }
+
+    // Limpiar datos de deshacer
+    datosParaDeshacer.value = null
+
+    $q.notify({
+      type: 'info',
+      message: 'Eliminación revertida',
+      position: 'top',
+    })
+  } catch (error) {
+    console.error('❌ Error al deshacer eliminación:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Error al restaurar datos',
+      position: 'top',
+    })
   }
-
-  // Limpiar comercios guardados
-  comerciosEliminadosParaDeshacer.value = []
-
-  // Notificación
-  $q.notify({
-    type: 'info',
-    message: `${restauradosExitosos} ${restauradosExitosos === 1 ? 'comercio restaurado' : 'comercios restaurados'}`,
-    position: 'top',
-    icon: 'undo',
-  })
 }
 
-onMounted(async () => {
-  await cargarComercios()
+// Cargar datos al montar
+onMounted(() => {
+  cargarComercios()
 })
 </script>

@@ -240,13 +240,13 @@ los datos ingresados por los usuarios.
 
 ## ⏸️ FASE 6: ELIMINACIÓN MÚLTIPLE ✅ [PENDIENTE]
 
-### Integrar selección múltiple
-[ ] Verificar useSeleccionMultiple.js funciona
-[ ] Importar en ComerciosPage
-[ ] Implementar handleLongPress
-[ ] Implementar handleToggleSeleccion
-[ ] Implementar seleccionarTodos
-[ ] Implementar cancelarSeleccion
+### Integrar selección múltiple ✅ [COMPLETADA]
+[x] Verificar useSeleccionMultiple.js funciona
+[x] Importar en ComerciosPage
+[x] Implementar handleLongPress
+[x] Implementar handleToggleSeleccion
+[x] Implementar seleccionarTodos
+[x] Implementar cancelarSeleccion
 
 ### Eliminar comercios con validación
 [ ] Abrir DialogoMotivoEliminacion
