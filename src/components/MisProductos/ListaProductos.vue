@@ -1,29 +1,31 @@
 <template>
-  <div>
-    <!-- LISTA DE PRODUCTOS - Sistema de Grilla Responsivo -->
-    <div class="row q-col-gutter-md">
-      <div
-        v-for="producto in productos"
-        :key="producto.id"
-        class="col-12 col-sm-6 col-md-4 col-xl-3"
-      >
-        <TarjetaProducto
-          :producto="producto"
-          :modo-seleccion="modoSeleccion"
-          :seleccionado="estaSeleccionado(producto.id)"
-          @menu-click="abrirMenuProducto(producto)"
-          @long-press="$emit('long-press', $event)"
-          @toggle-seleccion="$emit('toggle-seleccion', $event)"
-        />
+  <div class="row q-col-gutter-md">
+    <div v-for="producto in productos" :key="producto.id" class="col-12 col-sm-6 col-md-4 col-xl-3">
+      <TarjetaProductoYugioh
+        :producto="producto"
+        :modo-seleccion="modoSeleccion"
+        :seleccionado="seleccionados.has(producto.id)"
+        @long-press="$emit('long-press', producto.id)"
+        @toggle-seleccion="$emit('toggle-seleccion', producto.id)"
+        @agregar-precio="$emit('agregar-precio', producto.id)"
+        @ver-detalle="$emit('ver-detalle', producto.id)"
+      />
+    </div>
+    <div v-if="productos.length === 0" class="col-12">
+      <div class="text-center q-pa-xl">
+        <IconShoppingBag :size="64" class="text-grey-5 q-mb-md" />
+        <p class="text-h6 text-grey-6 q-mb-none">No hay productos registrados</p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import TarjetaProducto from '../Tarjetas/TarjetaProducto.vue'
+import TarjetaProductoYugioh from '../Tarjetas/TarjetaProductoYugioh.vue'
+import { IconShoppingBag } from '@tabler/icons-vue'
 
-const props = defineProps({
+/* Props del componente */
+defineProps({
   productos: {
     type: Array,
     required: true,
@@ -38,15 +40,6 @@ const props = defineProps({
   },
 })
 
-defineEmits(['long-press', 'toggle-seleccion'])
-
-// Verificar si un producto está seleccionado
-const estaSeleccionado = (productoId) => {
-  return props.seleccionados.has(productoId)
-}
-
-const abrirMenuProducto = (producto) => {
-  console.log('Abrir menú para:', producto.nombre)
-  // Acá después vas a poner la lógica del menú
-}
+/* Emits del componente */
+defineEmits(['long-press', 'toggle-seleccion', 'agregar-precio', 'ver-detalle'])
 </script>

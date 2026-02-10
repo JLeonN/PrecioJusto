@@ -69,4 +69,56 @@
   --dialogo-border-radius: 12px;
   --dialogo-min-width: 350px;
   --dialogo-max-width: 500px;
+
+  /* ===========================
+     VARIABLES TARJETAS YUGIOH
+     =========================== */
+
+  /* Colores de tarjeta (usando paleta existente) */
+  --color-carta-header-producto: var(--color-primario); /* Azul para productos */
+  --color-carta-header-comercio: var(--color-acento); /* Naranja para comercios */
+  --color-carta-borde: #d4d4d4; /* Borde suave grisáceo */
+  --color-carta-info-bg: #fafafa; /* Fondo zona inferior */
+
+  /* Degradados para efectos de profundidad */
+  --degradado-carta-header: linear-gradient(180deg, var(--color-primario) 0%, #1976d2 100%);
+  --degradado-carta-header-comercio: linear-gradient(180deg, var(--color-acento) 0%, #f57c00 100%);
+  --degradado-precio-overlay: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    transparent 100%
+  );
+
+  /* Sombras estilo carta */
+  --sombra-carta:
+    0 6px 12px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+  --sombra-carta-hover: 0 8px 16px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.15);
+
+  --sombra-interna-marco: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+
+  --sombra-boton-flotante: 0 4px 8px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  /* Bordes y radios de carta */
+  --borde-carta-radio: 12px; /* Bordes redondeados de carta */
+  --borde-carta-grosor: 2px; /* Grosor del borde */
+  --borde-marco-imagen: 3px; /* Marco más grueso para imagen */
+
+  /* Espaciados específicos de carta */
+  --carta-padding-header: 12px 16px; /* Padding del header (nombre) */
+  --carta-padding-info: 10px 14px; /* Padding zona info inferior */
+  --carta-padding-expandido: 16px; /* Padding contenido expandido */
+  --carta-gap-secciones: 2px; /* Separación entre secciones */
+
+  /* Tamaños de imagen según estado */
+  --carta-imagen-altura-cerrada: 180px; /* Altura imagen estado cerrado */
+  --carta-imagen-altura-abierta: 200px; /* Altura imagen estado abierto */
+
+  /* Animaciones */
+  --transicion-carta: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transicion-expansion: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  --transicion-boton-flotante:
+    width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
