@@ -48,34 +48,34 @@ incorrecta y confusa para los usuarios.
 
 ═══════════════════════════════════════════════════════════════
 
-## ⏸️ FASE 1: ARREGLAR LÓGICA PRECIO VIGENTE 🔧 [PENDIENTE]
+## ✅ FASE 1: ARREGLAR LÓGICA PRECIO VIGENTE 🔧 [COMPLETADA]
 
 ### Modificar ProductosService.js
-[ ] Abrir archivo src/almacenamiento/servicios/ProductosService.js
-[ ] Modificar método _calcularCamposAutomaticos()
-[ ] Implementar agrupación por comercio (nombreCompleto)
-[ ] Ordenar precios por fecha DESC dentro de cada grupo
-[ ] Tomar el precio MÁS RECIENTE de cada comercio
-[ ] De los precios vigentes, encontrar el más bajo
-[ ] Actualizar precioMejor con precio vigente (no histórico)
-[ ] Actualizar comercioMejor con comercio del precio vigente
-[ ] Marcar precio.esMejor correctamente
-[ ] Calcular diferenciaPrecio entre mejor y peor vigente
-[ ] Conservar método _calcularTendencia() existente
-[ ] Conservar método _calcularPorcentajeTendencia() existente
+[x] Abrir archivo src/almacenamiento/servicios/ProductosService.js
+[x] Modificar método _calcularCamposAutomaticos()
+[x] Implementar agrupación por comercio (nombreCompleto)
+[x] Ordenar precios por fecha DESC dentro de cada grupo
+[x] Tomar el precio MÁS RECIENTE de cada comercio
+[x] De los precios vigentes, encontrar el más bajo
+[x] Actualizar precioMejor con precio vigente (no histórico)
+[x] Actualizar comercioMejor con comercio del precio vigente
+[x] Marcar precio.esMejor correctamente
+[x] Calcular diferenciaPrecio entre mejor y peor vigente
+[x] Conservar método _calcularTendencia() existente
+[x] Conservar método _calcularPorcentajeTendencia() existente
 
 ### Validaciones
-[ ] Verificar que productos sin precios no rompen
-[ ] Verificar que productos con 1 solo precio funcionan
-[ ] Verificar que productos con múltiples comercios funcionan
-[ ] Verificar compatibilidad con datos legacy (sin nombreCompleto)
+[x] Verificar que productos sin precios no rompen
+[x] Verificar que productos con 1 solo precio funcionan
+[x] Verificar que productos con múltiples comercios funcionan
+[x] Verificar compatibilidad con datos legacy (sin nombreCompleto)
 
 ### Testing
-[ ] Cargar productos existentes y verificar recálculo
-[ ] Verificar que precioMejor cambia correctamente
-[ ] Verificar que comercioMejor cambia correctamente
-[ ] Verificar que tarjetas muestran precio vigente
-[ ] Verificar que detalle de producto sigue funcionando
+[x] Cargar productos existentes y verificar recálculo
+[x] Verificar que precioMejor cambia correctamente
+[x] Verificar que comercioMejor cambia correctamente
+[x] Verificar que tarjetas muestran precio vigente
+[x] Verificar que detalle de producto sigue funcionando
 
 ═══════════════════════════════════════════════════════════════
 

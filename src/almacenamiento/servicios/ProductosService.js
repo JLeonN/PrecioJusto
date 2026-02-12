@@ -279,12 +279,7 @@ class ProductosService {
   // ========================================
   // 🧮 CÁLCULOS Y TRANSFORMACIONES
   // ========================================
-
-  /**
-   * 🧮 CALCULAR CAMPOS AUTOMÁTICOS
-   * Recalcula precioMejor, comercioMejor, diferenciaPrecio, tendencia, etc.
-   * @private
-   */
+  /* Calcular campos automáticos del producto (precio vigente por comercio) */
   _calcularCamposAutomaticos(producto) {
     if (!producto.precios || producto.precios.length === 0) {
       producto.precioMejor = 0
@@ -295,24 +290,44 @@ class ProductosService {
       return producto
     }
 
-    // Ordenar precios por valor (menor a mayor)
-    const preciosOrdenados = [...producto.precios].sort((a, b) => a.valor - b.valor)
+    /* 1. Agrupar precios por comercio (nombreCompleto) */
+    const preciosPorComercio = {}
 
-    // Mejor precio (más bajo)
-    const mejorPrecio = preciosOrdenados[0]
-    producto.precioMejor = mejorPrecio.valor
-    producto.comercioMejor = mejorPrecio.nombreCompleto || mejorPrecio.comercio
-
-    // Marcar el mejor precio
     producto.precios.forEach((precio) => {
-      precio.esMejor = precio.id === mejorPrecio.id
+      const clave = precio.nombreCompleto || precio.comercio || 'Sin comercio'
+
+      if (!preciosPorComercio[clave]) {
+        preciosPorComercio[clave] = []
+      }
+
+      preciosPorComercio[clave].push(precio)
     })
 
-    // Diferencia entre el mejor y el peor precio
-    const peorPrecio = preciosOrdenados[preciosOrdenados.length - 1]
-    producto.diferenciaPrecio = peorPrecio.valor - mejorPrecio.valor
+    /* 2. Tomar el precio MÁS RECIENTE de cada comercio (precio vigente) */
+    const preciosVigentes = Object.values(preciosPorComercio).map((preciosDelComercio) => {
+      const ordenadosPorFecha = [...preciosDelComercio].sort(
+        (a, b) => new Date(b.fecha) - new Date(a.fecha),
+      )
+      return ordenadosPorFecha[0]
+    })
 
-    // Calcular tendencia (últimos 30 días vs promedio histórico)
+    /* 3. De los precios vigentes, encontrar el más bajo */
+    const vigentesOrdenados = [...preciosVigentes].sort((a, b) => a.valor - b.valor)
+    const mejorPrecioVigente = vigentesOrdenados[0]
+
+    producto.precioMejor = mejorPrecioVigente.valor
+    producto.comercioMejor = mejorPrecioVigente.nombreCompleto || mejorPrecioVigente.comercio
+
+    /* 4. Marcar cuál es el mejor precio vigente */
+    producto.precios.forEach((precio) => {
+      precio.esMejor = precio.id === mejorPrecioVigente.id
+    })
+
+    /* 5. Diferencia entre mejor y peor precio VIGENTE */
+    const peorPrecioVigente = vigentesOrdenados[vigentesOrdenados.length - 1]
+    producto.diferenciaPrecio = peorPrecioVigente.valor - mejorPrecioVigente.valor
+
+    /* 6. Tendencia y porcentaje (conservar lógica existente) */
     producto.tendenciaGeneral = this._calcularTendencia(producto.precios)
     producto.porcentajeTendencia = this._calcularPorcentajeTendencia(producto.precios)
 
