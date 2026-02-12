@@ -1,0 +1,432 @@
+# PLAN DE TRABAJO - ACTUALIZACIÓN DE PRECIOS VIGENTES
+Proyecto: Precio Justo
+Fecha inicio: 12 de Febrero 2026
+Responsable: Leo + CH
+
+═══════════════════════════════════════════════════════════════
+
+## 📖 DESCRIPCIÓN DEL PLAN
+
+Este plan detalla la corrección crítica del sistema de precios en la aplicación
+Precio Justo. El problema actual es que la app muestra el precio MÁS BAJO 
+HISTÓRICO en lugar del precio MÁS RECIENTE/VIGENTE, lo que genera información
+incorrecta y confusa para los usuarios.
+
+### PROBLEMA ACTUAL:
+- Sistema muestra siempre el precio más bajo de toda la historia
+- Ignora la fecha del precio (no considera si es actual o antiguo)
+- Ejemplo: Si un producto costaba $600 hace 3 meses y ahora cuesta $610,
+  la app sigue mostrando $600 como "mejor precio" (dato obsoleto)
+- TOP 3 puede mostrar el mismo comercio 2-3 veces con precios históricos
+  diferentes, lo que confunde al usuario
+
+### OBJETIVOS PRINCIPALES:
+- Mostrar precios VIGENTES (más recientes) en lugar de históricos
+- Agrupar precios por comercio → tomar el más reciente de cada uno
+- TOP 3 debe mostrar máximo 3 COMERCIOS DISTINTOS (no duplicados)
+- Agregar indicador de frescura (>60 días = badge de advertencia)
+- Crear modal rápido para agregar precios sin formulario completo
+- Pre-seleccionar último comercio usado para cada producto específico
+
+### CARACTERÍSTICAS CLAVE:
+- Lógica de precio vigente por comercio (no histórico global)
+- Badge visual de "Desactualizado" para precios >60 días
+- Modal "Agregar Precio" con:
+  - Título con nombre del producto
+  - Input pre-seleccionado con precio actual
+  - Selector inteligente de comercios (último usado)
+  - Integración con DialogoAgregarComercioRapido
+- TOP 3 con comercios únicos (filtrar duplicados por nombreCompleto)
+- Cambio de texto UI: "Top 3 mejores precios" → "Top 3 precios actuales"
+
+### TECNOLOGÍAS:
+- Vue.js 3 + Composition API
+- Quasar Framework (q-dialog, q-input, q-select)
+- Pinia (productosStore, comerciosStore)
+- Capacitor Storage
+- Tabler Icons
+
+═══════════════════════════════════════════════════════════════
+
+## ⏸️ FASE 1: ARREGLAR LÓGICA PRECIO VIGENTE 🔧 [PENDIENTE]
+
+### Modificar ProductosService.js
+[ ] Abrir archivo src/almacenamiento/servicios/ProductosService.js
+[ ] Modificar método _calcularCamposAutomaticos()
+[ ] Implementar agrupación por comercio (nombreCompleto)
+[ ] Ordenar precios por fecha DESC dentro de cada grupo
+[ ] Tomar el precio MÁS RECIENTE de cada comercio
+[ ] De los precios vigentes, encontrar el más bajo
+[ ] Actualizar precioMejor con precio vigente (no histórico)
+[ ] Actualizar comercioMejor con comercio del precio vigente
+[ ] Marcar precio.esMejor correctamente
+[ ] Calcular diferenciaPrecio entre mejor y peor vigente
+[ ] Conservar método _calcularTendencia() existente
+[ ] Conservar método _calcularPorcentajeTendencia() existente
+
+### Validaciones
+[ ] Verificar que productos sin precios no rompen
+[ ] Verificar que productos con 1 solo precio funcionan
+[ ] Verificar que productos con múltiples comercios funcionan
+[ ] Verificar compatibilidad con datos legacy (sin nombreCompleto)
+
+### Testing
+[ ] Cargar productos existentes y verificar recálculo
+[ ] Verificar que precioMejor cambia correctamente
+[ ] Verificar que comercioMejor cambia correctamente
+[ ] Verificar que tarjetas muestran precio vigente
+[ ] Verificar que detalle de producto sigue funcionando
+
+═══════════════════════════════════════════════════════════════
+
+## ⏸️ FASE 2: TOP 3 ÚNICO + BADGE FRESCURA 🎨 [PENDIENTE]
+
+### Modificar TarjetaProducto.vue
+[ ] Abrir archivo src/components/Tarjetas/TarjetaProducto.vue
+[ ] Cambiar título: "Top 3 mejores precios" → "Top 3 precios actuales"
+[ ] Modificar computed top3Precios
+[ ] Agrupar precios por nombreCompleto
+[ ] Tomar precio más reciente de cada comercio
+[ ] Ordenar por valor ASC
+[ ] Tomar primeros 3 comercios distintos
+[ ] Máximo 3 resultados (no repetir comercios)
+
+### Agregar badge de frescura
+[ ] Crear computed calcularDiasPrecio(fechaISO)
+[ ] Calcular días transcurridos desde fecha
+[ ] Si >60 días: mostrar badge "⚠️ Hace X meses"
+[ ] Color: --color-acento (naranja #FF9800)
+[ ] Posición: debajo de nombre del comercio
+[ ] Solo visible en precios >60 días
+
+### Estilos del badge
+[ ] Crear clase .badge-desactualizado
+[ ] Font-size: 10px
+[ ] Padding: 2px 6px
+[ ] Border-radius: 4px
+[ ] Background: var(--color-acento) con opacity 0.2
+[ ] Color texto: var(--color-acento)
+[ ] Display: inline-flex con ícono
+
+### Testing
+[ ] Verificar TOP 3 no muestra comercios duplicados
+[ ] Verificar badge aparece en precios >60 días
+[ ] Verificar badge NO aparece en precios recientes
+[ ] Verificar texto "Top 3 precios actuales" visible
+[ ] Verificar responsividad en móvil/tablet/PC
+
+═══════════════════════════════════════════════════════════════
+
+## ⏸️ FASE 3: MODAL AGREGAR PRECIO 🚀 [PENDIENTE]
+
+### Crear DialogoAgregarPrecio.vue
+[ ] Crear archivo src/components/Formularios/Dialogos/DialogoAgregarPrecio.vue
+[ ] Estructura básica q-dialog con persistent y maximized
+[ ] Importar useQuasar, useProductosStore, useComerciStore
+[ ] Props: modelValue (Boolean), productoId (String, required)
+[ ] Emits: 'update:modelValue', 'precio-guardado'
+
+### Header del modal
+[ ] q-card-section con clase "row items-center"
+[ ] Título dinámico: producto.nombre
+[ ] Subtítulo: "Precio actual: $XXX"
+[ ] Botón cerrar (q-btn flat round dense icon="close")
+
+### Formulario principal
+[ ] Input precio (q-input type="number")
+[ ] Valor por defecto: producto.precioMejor
+[ ] Input pre-seleccionado (select all on focus)
+[ ] Validación: requerido, número positivo
+[ ] Placeholder: "Ingresá el nuevo precio"
+
+### Selector de comercios
+[ ] q-select con use-input para búsqueda
+[ ] Opciones: comerciosStore.comerciosPorUso
+[ ] Formato opción: "Nombre Comercio - Dirección"
+[ ] Pre-selección inteligente: último comercio usado en este producto
+[ ] Filtrado en tiempo real con @filter
+[ ] Buscador tipo Google (centrado, auto-focus)
+
+### Selector de direcciones
+[ ] q-select dependiente del comercio seleccionado
+[ ] Cargar direcciones del comercio elegido
+[ ] Auto-seleccionar dirección más usada
+[ ] Actualizar cuando cambia comercio
+[ ] Deshabilitado si no hay comercio seleccionado
+
+### Sección expandible "Agregar comercio nuevo"
+[ ] Botón expandir: "🔽 Agregar nuevo comercio"
+[ ] q-expansion-item para mostrar/ocultar
+[ ] Al expandir: abrir DialogoAgregarComercioRapido
+[ ] Pasar datos pre-llenados si usuario escribió algo
+[ ] Al guardar comercio: auto-seleccionar en selector
+[ ] Al guardar comercio: colapsar expansión
+[ ] Flujo: crear → seleccionar → listo para guardar precio
+
+### Botones de acción
+[ ] q-card-actions align="right"
+[ ] Botón "Cancelar" (q-btn flat)
+[ ] Botón "Guardar precio" (q-btn color="primary" :loading="guardando")
+[ ] Validar formulario antes de guardar
+[ ] Deshabilitar guardar si faltan datos
+
+### Lógica de guardado
+[ ] Construir objeto precio con todos los campos
+[ ] Incluir: comercioId, direccionId, nombreCompleto
+[ ] Llamar productosStore.agregarPrecio(productoId, precio)
+[ ] Llamar comerciosStore.registrarUso(comercioId, direccionId)
+[ ] Notificación success con Quasar Notify
+[ ] Emit 'precio-guardado' con producto actualizado
+[ ] Cerrar modal automáticamente
+
+### Integración con DialogoAgregarComercioRapido
+[ ] Importar DialogoAgregarComercioRapido.vue
+[ ] Estado: dialogoComercioRapidoAbierto (ref)
+[ ] Pre-llenar nombre si usuario escribió en selector
+[ ] Escuchar evento @comercio-guardado
+[ ] Actualizar selector con nuevo comercio
+[ ] Auto-seleccionar nuevo comercio
+[ ] Cerrar diálogo de comercio rápido
+
+### Testing del modal
+[ ] Abrir modal desde botón "+ Agregar precio"
+[ ] Verificar título muestra nombre producto correcto
+[ ] Verificar precio actual visible
+[ ] Verificar input precio pre-seleccionado
+[ ] Verificar último comercio pre-seleccionado
+[ ] Verificar creación de comercio nuevo funciona
+[ ] Verificar guardado de precio funciona
+[ ] Verificar notificación aparece
+[ ] Verificar modal cierra correctamente
+
+═══════════════════════════════════════════════════════════════
+
+## ⏸️ FASE 4: INTEGRACIÓN CON TARJETAS 🔗 [PENDIENTE]
+
+### Modificar TarjetaProducto.vue
+[ ] Agregar evento @click en botón "Agregar precio"
+[ ] Emit 'agregar-precio' con producto.id
+[ ] Verificar stop propagation funciona
+
+### Modificar MisProductosPage.vue
+[ ] Importar DialogoAgregarPrecio.vue
+[ ] Estado: dialogoPrecioAbierto (ref false)
+[ ] Estado: productoSeleccionadoId (ref null)
+[ ] Método manejarAgregarPrecio(productoId)
+[ ] Abrir DialogoAgregarPrecio con productoId
+[ ] Escuchar evento @precio-guardado
+[ ] Recargar productos después de guardar
+[ ] Mostrar notificación de éxito
+
+### Testing de integración
+[ ] Click en botón "+ Agregar precio" en tarjeta
+[ ] Verificar modal abre con datos correctos
+[ ] Guardar precio y verificar tarjeta actualiza
+[ ] Verificar precio vigente se recalcula
+[ ] Verificar TOP 3 actualiza correctamente
+[ ] Verificar badge de frescura funciona
+
+═══════════════════════════════════════════════════════════════
+
+## ⏸️ FASE 5: TESTING Y AJUSTES 🧪 [PENDIENTE]
+
+### Testing funcional completo
+[ ] Crear producto nuevo con 1 precio
+[ ] Agregar segundo precio mismo comercio (más caro)
+[ ] Verificar que muestra el más reciente (no el más barato)
+[ ] Agregar tercer precio distinto comercio
+[ ] Verificar TOP 3 muestra comercios únicos
+[ ] Agregar precio >60 días en el pasado (manual)
+[ ] Verificar badge "Desactualizado" aparece
+[ ] Verificar pre-selección de último comercio usado
+
+### Testing de escenarios edge case
+[ ] Producto con 1 solo precio (no rompe)
+[ ] Producto con 5+ precios mismo comercio (toma más reciente)
+[ ] Producto con 10+ comercios (TOP 3 solo 3 distintos)
+[ ] Comercio con múltiples direcciones (cuenta como distintos)
+[ ] Precio sin nombreCompleto (compatibilidad legacy)
+[ ] Cambio rápido de comercio en modal
+
+### Testing responsivo
+[ ] Móvil (xs) - 360px
+[ ] Tablet (sm) - 768px
+[ ] Desktop (md) - 1024px
+[ ] Desktop XL (xl) - 1920px
+[ ] Badge frescura en todos los breakpoints
+[ ] Modal en móvil (fullscreen)
+[ ] Modal en desktop (centrado)
+
+### Testing de UX
+[ ] Input precio se selecciona al hacer focus
+[ ] Buscador de comercios funciona fluido
+[ ] Crear comercio nuevo no rompe flujo
+[ ] Notificaciones aparecen correctamente
+[ ] Feedback visual al guardar (loading)
+[ ] Animaciones suaves y sin lag
+
+### Optimizaciones
+[ ] Verificar performance con 100+ productos
+[ ] Verificar re-renders innecesarios
+[ ] Optimizar computed properties
+[ ] Verificar memoria (no memory leaks)
+[ ] Lazy loading si es necesario
+
+═══════════════════════════════════════════════════════════════
+
+## ⏸️ FASE 6: DOCUMENTACIÓN 📚 [PENDIENTE]
+
+### Actualizar archivos de documentación
+[ ] Actualizar Resumen1General.txt
+  [ ] Agregar feature "Sistema de precios vigentes"
+  [ ] Agregar feature "Modal agregar precio rápido"
+  [ ] Agregar feature "Badge de frescura de precios"
+  [ ] Actualizar descripción de TOP 3
+
+[ ] Actualizar Resumen2Tarjetas.txt
+  [ ] Documentar cambio de título TOP 3
+  [ ] Documentar badge de frescura
+  [ ] Documentar lógica de comercios únicos
+  [ ] Documentar evento 'agregar-precio'
+
+[ ] Actualizar Resumen4FormularioAgregar.txt
+  [ ] Documentar DialogoAgregarPrecio.vue
+  [ ] Documentar flujo de agregar precio rápido
+  [ ] Documentar pre-selección inteligente
+  [ ] Documentar integración con comercio rápido
+
+[ ] Actualizar Resumen7LocalStorage.txt
+  [ ] Documentar cambio en _calcularCamposAutomaticos()
+  [ ] Documentar nuevo método de agrupación por comercio
+  [ ] Documentar lógica de precio vigente vs histórico
+
+[ ] Actualizar PlanTrabajoActualizacionPrecios.txt
+  [ ] Marcar fases completadas
+  [ ] Agregar notas de implementación
+  [ ] Documentar decisiones técnicas
+  [ ] Actualizar progreso general
+
+### Comentarios en código
+[ ] Documentar función agruparPorComercio()
+[ ] Documentar función obtenerPrecioMasReciente()
+[ ] Documentar computed top3PreciosUnicos
+[ ] Documentar computed calcularDiasPrecio()
+[ ] Agregar JSDoc en métodos principales
+[ ] Comentar algoritmos complejos
+
+### README y guías
+[ ] Crear guía de uso: "Cómo agregar precios rápidamente"
+[ ] Crear guía técnica: "Sistema de precios vigentes"
+[ ] Documentar diferencia entre precio histórico y vigente
+[ ] Crear diagrama de flujo de agregar precio
+
+═══════════════════════════════════════════════════════════════
+
+## NOTAS IMPORTANTES 📌
+
+### Compatibilidad con datos existentes
+- Sistema debe funcionar con productos que ya tienen precios guardados
+- Recalcular automáticamente al actualizar ProductosService.js
+- No requiere migración de datos
+- Mantener compatibilidad con precios sin nombreCompleto
+
+### Cambios en UI/UX
+- "Top 3 mejores precios" → "Top 3 precios actuales"
+- Badge "Desactualizado" solo si >60 días
+- Pre-selección inteligente de comercios
+- Input precio pre-seleccionado (mejor UX)
+
+### Integración con sistemas existentes
+- Reutilizar DialogoAgregarComercioRapido
+- Reutilizar selectores de comercios/direcciones
+- Reutilizar sistema de notificaciones Quasar
+- Reutilizar comerciosStore.registrarUso()
+
+### Flujo de trabajo
+- Fase 1 es CRÍTICA (arregla lógica de base)
+- Fase 2 mejora visualización (TOP 3 + badge)
+- Fase 3 mejora UX (modal rápido)
+- Fase 4 integra todo el sistema
+- Fase 5 asegura calidad
+- Fase 6 documenta todo
+
+### Testing
+- Probar cada fase antes de seguir a la siguiente
+- Guardar progreso con commits frecuentes
+- Verificar en móvil real (no solo emulador)
+- Validar con datos de prueba y datos reales
+
+### Prioridades
+1. ✅ Arreglar lógica precio vigente (funcionalidad)
+2. ✅ Arreglar TOP 3 comercios únicos (claridad)
+3. ✅ Modal agregar precio (UX)
+4. Testing completo (calidad)
+5. Documentación (mantenibilidad)
+
+═══════════════════════════════════════════════════════════════
+
+## DECISIONES TÉCNICAS 🤔
+
+### ¿Por qué precio vigente y no histórico?
+- Usuario necesita información ACTUAL para tomar decisiones
+- Mostrar $600 histórico cuando ahora cuesta $610 es engañoso
+- Historial completo sigue disponible en detalle de producto
+- Precio vigente = precio más reciente de cada comercio
+
+### ¿Por qué 60 días para badge de frescura?
+- Compromiso entre actualidad y utilidad
+- 30 días sería muy estricto
+- 90 días sería muy permisivo
+- 60 días da margen razonable para precios estables
+
+### ¿Por qué pre-seleccionar último comercio usado?
+- Usuario suele comprar en los mismos lugares
+- Ahorra tiempo y clicks
+- Mejora UX significativamente
+- Reducción de fricción en el flujo
+
+### ¿Por qué modal rápido y no formulario completo?
+- Agregar precio es acción frecuente
+- Formulario completo es pesado
+- Modal enfoca solo lo esencial
+- Integración con comercio rápido mantiene flexibilidad
+
+### ¿Por qué TOP 3 con comercios únicos?
+- Confunde ver mismo comercio 2-3 veces
+- Usuario busca comparar entre LUGARES diferentes
+- Si quiere ver historial de un comercio → detalle producto
+- TOP 3 debe ser panorama rápido de opciones
+
+═══════════════════════════════════════════════════════════════
+
+## MEJORAS FUTURAS (POST-MVP) 🚀
+
+[ ] Notificación si precio subió/bajó significativamente
+[ ] Sugerencia automática de comercio más cercano (geolocalización)
+[ ] Compartir precios con otros usuarios
+[ ] Gráfico de evolución de precios por comercio
+[ ] Predicción de tendencia de precios (ML)
+[ ] Alertas de precios (notificar si baja de X monto)
+[ ] Comparador de productos similares
+[ ] Lista de compras inteligente (suma precios)
+[ ] Exportar reporte de precios a PDF
+[ ] Widget de precio en home screen
+[ ] Integración con programas de fidelidad
+[ ] Sistema de cupones y descuentos
+
+═══════════════════════════════════════════════════════════════
+
+## 📊 PROGRESO GENERAL: 0% COMPLETADO
+
+⏸️ Fase 1: 0% (Arreglar lógica precio vigente)
+⏸️ Fase 2: 0% (TOP 3 único + badge frescura)
+⏸️ Fase 3: 0% (Modal agregar precio)
+⏸️ Fase 4: 0% (Integración con tarjetas)
+⏸️ Fase 5: 0% (Testing y ajustes)
+⏸️ Fase 6: 0% (Documentación)
+
+═══════════════════════════════════════════════════════════════
+
+**ÚLTIMA ACTUALIZACIÓN:** 12 de Febrero 2026 - Plan creado
+**PRÓXIMO PASO:** Fase 1 - Arreglar lógica de precio vigente en ProductosService.js
+**ESTADO:** Listo para comenzar implementación
