@@ -34,21 +34,25 @@
     <template #expandido-header>
       <div class="expandido-titulo">
         <IconCurrencyDollar :size="18" />
-        <span>TOP 3 MEJORES PRECIOS</span>
+        <span>TOP 3 PRECIOS ACTUALES</span>
       </div>
     </template>
     <template #expandido-contenido>
       <div class="lista-precios">
-        <div v-for="(precio, index) in top3Precios" :key="precio.id" class="item-precio">
+        <div v-for="(precio, index) in top3PreciosUnicos" :key="precio.id" class="item-precio">
           <div class="item-precio__posicion">{{ index + 1 }}</div>
           <div class="item-precio__info">
             <div class="item-precio__valor">{{ formatearPrecio(precio.valor) }}</div>
             <div class="item-precio__comercio">
               <IconMapPin :size="14" />
-              {{ precio.comercio }}
+              {{ precio.nombreCompleto || precio.comercio }}
             </div>
             <div class="item-precio__fecha">
               {{ formatearFecha(precio.fecha) }}
+            </div>
+            <div v-if="calcularDiasPrecio(precio.fecha) > 60" class="badge-desactualizado">
+              <IconAlertTriangle :size="12" />
+              <span>Hace {{ calcularMesesPrecio(precio.fecha) }}</span>
             </div>
           </div>
           <div v-if="precio.esMejor" class="item-precio__badge">
@@ -85,6 +89,7 @@ import {
   IconBarcode,
   IconCurrencyDollar,
   IconAlertCircle,
+  IconAlertTriangle,
 } from '@tabler/icons-vue'
 
 /* Props del componente */
@@ -117,10 +122,49 @@ defineEmits(['long-press', 'toggle-seleccion', 'agregar-precio'])
 /* Quasar */
 const $q = useQuasar()
 
-/* Top 3 precios más bajos */
-const top3Precios = computed(() => {
-  return [...props.producto.precios].sort((a, b) => a.valor - b.valor).slice(0, 3)
+/* TOP 3 precios actuales con comercios únicos */
+const top3PreciosUnicos = computed(() => {
+  if (!props.producto.precios || props.producto.precios.length === 0) return []
+
+  /* 1. Agrupar por comercio */
+  const preciosPorComercio = {}
+
+  props.producto.precios.forEach((precio) => {
+    const clave = precio.nombreCompleto || precio.comercio || 'Sin comercio'
+
+    if (!preciosPorComercio[clave]) {
+      preciosPorComercio[clave] = []
+    }
+
+    preciosPorComercio[clave].push(precio)
+  })
+
+  /* 2. Tomar el más reciente de cada comercio */
+  const preciosVigentes = Object.values(preciosPorComercio).map((preciosDelComercio) => {
+    const ordenadosPorFecha = [...preciosDelComercio].sort(
+      (a, b) => new Date(b.fecha) - new Date(a.fecha),
+    )
+    return ordenadosPorFecha[0]
+  })
+
+  /* 3. Ordenar por valor ASC y tomar máximo 3 */
+  return [...preciosVigentes].sort((a, b) => a.valor - b.valor).slice(0, 3)
 })
+
+/* Calcular días transcurridos desde una fecha */
+const calcularDiasPrecio = (fechaISO) => {
+  const fecha = new Date(fechaISO)
+  const ahora = new Date()
+  return Math.floor((ahora - fecha) / (1000 * 60 * 60 * 24))
+}
+
+/* Calcular meses en texto legible */
+const calcularMesesPrecio = (fechaISO) => {
+  const dias = calcularDiasPrecio(fechaISO)
+  const meses = Math.floor(dias / 30)
+  if (meses <= 1) return '2 meses'
+  return `${meses} meses`
+}
 
 /* Formatear precio */
 const formatearPrecio = (valor) => {
@@ -275,5 +319,17 @@ const manejarExpansion = (expandido) => {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+.badge-desactualizado {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  background: rgba(255, 152, 0, 0.15);
+  color: var(--color-acento, #ff9800);
 }
 </style>
