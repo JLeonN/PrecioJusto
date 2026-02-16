@@ -35,7 +35,11 @@
         </q-btn>
 
         <!-- Cabecera del producto -->
-        <InfoProducto :producto="productoActual" class="q-mb-lg" />
+        <InfoProducto
+          :producto="productoActual"
+          class="q-mb-lg"
+          @agregar-precio="abrirModalPrecio(productoActual.id)"
+        />
 
         <!-- Estadísticas en cards -->
         <EstadisticasProducto :producto="productoActual" class="q-mb-lg" />
@@ -58,19 +62,35 @@
         />
       </template>
     </div>
+
+    <!-- BOTÓN FLOTANTE AGREGAR PRECIO -->
+    <q-page-sticky v-if="productoActual && !cargando" position="bottom-right" :offset="[18, 18]">
+      <q-btn fab color="primary" size="lg" @click="abrirModalPrecio(productoActual.id)">
+        <IconPlus :size="28" />
+      </q-btn>
+    </q-page-sticky>
+
+    <!-- MODAL AGREGAR PRECIO -->
+    <DialogoAgregarPrecio
+      v-model="dialogoPrecioAbierto"
+      :producto-id="productoParaPrecioId"
+      @precio-guardado="alGuardarPrecioDetalle"
+    />
   </q-page>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { IconArrowLeft } from '@tabler/icons-vue'
+import { IconArrowLeft, IconPlus } from '@tabler/icons-vue'
 import InfoProducto from '../components/DetalleProducto/InfoProducto.vue'
 import EstadisticasProducto from '../components/DetalleProducto/EstadisticasProducto.vue'
 import FiltrosHistorial from '../components/DetalleProducto/FiltrosHistorial.vue'
 import HistorialPrecios from '../components/DetalleProducto/HistorialPrecios.vue'
+import DialogoAgregarPrecio from '../components/Formularios/Dialogos/DialogoAgregarPrecio.vue'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
 import { useConfirmacionesStore } from '../almacenamiento/stores/confirmacionesStore.js'
+import { useDialogoAgregarPrecio } from '../composables/useDialogoAgregarPrecio.js'
 import { useQuasar } from 'quasar'
 
 // ========================================
@@ -83,6 +103,23 @@ const route = useRoute()
 const $q = useQuasar()
 
 // ========================================
+// 💰 COMPOSABLE AGREGAR PRECIO
+// ========================================
+
+const { dialogoPrecioAbierto, productoParaPrecioId, abrirModalPrecio, alGuardarPrecio } =
+  useDialogoAgregarPrecio()
+
+/* Wrapper que recarga el store Y actualiza el producto local */
+async function alGuardarPrecioDetalle() {
+  await alGuardarPrecio()
+  /* Refrescar producto local con datos actualizados del store */
+  const productoActualizado = productosStore.obtenerProductoPorId(route.params.id)
+  if (productoActualizado) {
+    productoActual.value = productoActualizado
+  }
+}
+
+// ========================================
 // 📊 ESTADO
 // ========================================
 
@@ -90,7 +127,7 @@ const cargando = ref(false)
 const error = ref(null)
 const productoActual = ref(null)
 
-// Filtros
+/* Filtros */
 const filtroComercio = ref('todos')
 const filtroPeriodo = ref('30')
 const ordenSeleccionado = ref('reciente')
@@ -99,25 +136,25 @@ const ordenSeleccionado = ref('reciente')
 // 🧮 COMPUTED
 // ========================================
 
-// Comercios únicos disponibles para el filtro
+/* Comercios únicos disponibles para el filtro */
 const comerciosDisponibles = computed(() => {
   if (!productoActual.value?.precios) return []
   const comercios = [...new Set(productoActual.value.precios.map((p) => p.nombreCompleto))]
   return comercios.sort()
 })
 
-// Precios filtrados según los filtros activos
+/* Precios filtrados según los filtros activos */
 const preciosFiltrados = computed(() => {
   if (!productoActual.value?.precios) return []
 
   let precios = [...productoActual.value.precios]
 
-  // Filtrar por comercio
+  /* Filtrar por comercio */
   if (filtroComercio.value !== 'todos') {
     precios = precios.filter((p) => p.nombreCompleto === filtroComercio.value)
   }
 
-  // Filtrar por período
+  /* Filtrar por período */
   const ahora = new Date()
   const diasAtras = parseInt(filtroPeriodo.value)
   if (diasAtras !== 0) {
@@ -125,7 +162,7 @@ const preciosFiltrados = computed(() => {
     precios = precios.filter((p) => new Date(p.fecha) >= fechaLimite)
   }
 
-  // Ordenar
+  /* Ordenar */
   if (ordenSeleccionado.value === 'reciente') {
     precios.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
   } else if (ordenSeleccionado.value === 'antiguo') {
@@ -145,9 +182,7 @@ const preciosFiltrados = computed(() => {
 // 🔄 FUNCIONES
 // ========================================
 
-/**
- * 📥 CARGAR PRODUCTO
- */
+/* Cargar producto desde el store */
 async function cargarProducto() {
   cargando.value = true
   error.value = null
@@ -162,7 +197,6 @@ async function cargarProducto() {
 
     console.log(`📥 Cargando producto ${productoId}...`)
 
-    // Buscar en el store (ya cargado en MisProductosPage)
     const producto = productosStore.obtenerProductoPorId(productoId)
 
     if (!producto) {
@@ -180,15 +214,12 @@ async function cargarProducto() {
   }
 }
 
-/**
- * 👍 CONFIRMAR PRECIO
- */
+/* Confirmar precio */
 async function confirmarPrecio(precioId) {
   if (!productoActual.value) return
 
   console.log(`👍 Confirmando precio ${precioId}...`)
 
-  // Verificación local rápida
   if (confirmacionesStore.precioEstaConfirmado(precioId)) {
     $q.notify({
       type: 'warning',
@@ -198,11 +229,9 @@ async function confirmarPrecio(precioId) {
     return
   }
 
-  // Confirmar usando el store
   const resultado = await confirmacionesStore.confirmarPrecio(productoActual.value.id, precioId)
 
   if (resultado.exito) {
-    // Actualizar producto local con los nuevos datos
     productoActual.value = resultado.producto
 
     $q.notify({
@@ -224,14 +253,8 @@ async function confirmarPrecio(precioId) {
 // ⚡ LIFECYCLE HOOKS
 // ========================================
 
-/**
- * Al montar el componente
- */
 onMounted(async () => {
-  // Cargar confirmaciones del usuario
   await confirmacionesStore.cargarConfirmaciones()
-
-  // Cargar producto
   await cargarProducto()
 })
 </script>

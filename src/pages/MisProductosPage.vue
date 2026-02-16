@@ -123,6 +123,7 @@ import BarraSeleccion from '../components/Compartidos/BarraSeleccion.vue'
 import BarraAccionesSeleccion from '../components/Compartidos/BarraAccionesSeleccion.vue'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
 import { useSeleccionMultiple } from '../composables/useSeleccionMultiple.js'
+import { useDialogoAgregarPrecio } from '../composables/useDialogoAgregarPrecio.js'
 import { useQuasar } from 'quasar'
 
 const productosStore = useProductosStore()
@@ -143,18 +144,9 @@ const seleccion = useSeleccionMultiple()
 /* Productos eliminados (para deshacer) */
 const productosEliminadosParaDeshacer = ref([])
 
-/* Modal agregar precio */
-const dialogoPrecioAbierto = ref(false)
-const productoParaPrecioId = ref(null)
-
-function abrirModalPrecio(productoId) {
-  productoParaPrecioId.value = productoId
-  dialogoPrecioAbierto.value = true
-}
-
-function alGuardarPrecio() {
-  cargarProductos()
-}
+/* Composable agregar precio (reemplaza lógica manual) */
+const { dialogoPrecioAbierto, productoParaPrecioId, abrirModalPrecio, alGuardarPrecio } =
+  useDialogoAgregarPrecio()
 
 async function cargarProductos() {
   await productosStore.cargarProductos()

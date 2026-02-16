@@ -409,3 +409,13 @@ incorrecta y confusa para los usuarios.
 **ÚLTIMA ACTUALIZACIÓN:** 16 de Febrero 2026 - Fases 1-4 completadas
 **PRÓXIMO PASO:** Fase 5 - Testing completo y ajustes
 **ESTADO:** Funcionalidad principal implementada, pendiente testing y documentación
+Mira el archivo PlanTrabajoActualizacionPrecios.txt xq estamos trabajando ahi
+
+como puedes ver se agregaron funciones a el boton de agregar precio 
+
+bueno esas mismas cosas las quiero agregear a otro boton que funcionaria exactamente igual asi que tendriamos que enlasar los botones para no duplicar codigo 
+
+Cuando en algun articulo entra en el boton ver historial hay tenemos el mismo boton de agregar precio a ese boton me re fiero de enlasar todo 
+
+me gustaria que primero hablemos del tema y que despues me des codigo quiero saver si me explique bien y si entiendes el trabajo 
+tambien quiero tu opiñon y posibles mejoras

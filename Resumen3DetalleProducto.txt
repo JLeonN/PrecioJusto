@@ -12,7 +12,7 @@
 - FiltrosHistorial.vue (filtros)
 - HistorialPrecios.vue (contenedor y agrupador)
 - ItemComercioHistorial.vue (comercio expandible)
-- ItemPrecioHistorial.vue (precio individual)
+- DialogoAgregarPrecio.vue (modal rápido para agregar precio, reutilizado vía composable)
 
 ## ESTRUCTURA DE DATOS AMPLIADA
 Cada precio requiere:
@@ -104,3 +104,10 @@ Cada precio requiere:
 5. Servicio registra confirmación del usuario
 6. Store actualiza estado local
 7. UI muestra notificación y actualiza contador
+
+## AGREGAR PRECIO DESDE HISTORIAL
+- Botón "Agregar precio" en InfoProducto.vue emite 'agregar-precio'
+- FAB flotante (IconPlus) también disponible abajo a la derecha
+- Ambos abren DialogoAgregarPrecio.vue mediante composable useDialogoAgregarPrecio
+- Al guardar, se refresca el producto local y el store
+- Mismo modal usado en MisProductosPage (cero duplicación de código)

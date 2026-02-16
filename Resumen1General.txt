@@ -118,7 +118,7 @@ src/
 │   │   └── Dialogos/                        # Diálogos modales
 │   │       ├── DialogoAgregarProducto.vue           # Modal para agregar producto + precio
 │   │       ├── DialogoAgregarComercio.vue           # Modal para agregar comercio completo
-│   │       ├── DialogoAgregarComercioRapido.vue     # 🆕 Modal comercio rápido (nombre + dirección opcional)
+│   │       ├── DialogoAgregarPrecio.vue             # Modal rápido para agregar precio a producto
 │   │       ├── DialogoResultadosBusqueda.vue        # Modal con resultados de Open Food Facts
 │   │       ├── DialogoCoincidencias.vue             # Alerta de comercios similares
 │   │       ├── DialogoMismaUbicacion.vue            # Alerta de misma dirección
@@ -128,11 +128,13 @@ src/
 │   │   └── ListaProductos.vue              # Contenedor con grid responsivo Quasar
 │   │
 │   └── Tarjetas/                            # Componentes de tarjetas
-│       └── TarjetaProducto.vue             # Tarjeta expandible de producto con precios
+│       ├── TarjetaBase.vue                 # Tarjeta base reutilizable estilo Yu-Gi-Oh
+│       ├── TarjetaProductoYugioh.vue       # Tarjeta de producto (usa TarjetaBase)
+│       └── TarjetaComercioYugioh.vue       # Tarjeta de comercio (usa TarjetaBase)
 │
 ├── composables/
-│   └── useSeleccionMultiple.js             # Lógica de selección múltiple reutilizable
-│
+│   ├── useSeleccionMultiple.js             # Lógica de selección múltiple reutilizable
+│   └── useDialogoAgregarPrecio.js          # Lógica reutilizable del modal agregar precio
 ├── css/
 │   ├── app.css                              # Clases CSS globales del Design System
 │   ├── quasar.variables.scss               # Variables de Quasar (colores, fuentes)

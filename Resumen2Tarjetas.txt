@@ -303,7 +303,7 @@ const manejarLongPress = () => {
 - ✅ Vibración háptica en móvil
 - ✅ Integración completa con Pinia stores
 - ✅ Sistema de grilla adaptativa
-- ✅ Eliminación múltiple con deshacer
+- ✅ Modal agregar precio reutilizable (composable useDialogoAgregarPrecio)
 
 ## FEATURES PLANIFICADAS
 - ⏳ Menú contextual (tres puntos)
