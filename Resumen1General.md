@@ -175,6 +175,8 @@ package-lock.json                            # Lock de versiones de dependencias
 quasar.config.js                             # Configuración principal de Quasar
 README.md                                    # Documentación del proyecto
 
+CLAUDE.md                                    # Instrucciones para Claude IA (carga automática)
+
 Resúmenes de Documentación/                  # En raíz del proyecto
 ├── Resumen1General.md                       # Documentación general del proyecto
 ├── Resumen2Tarjetas.md                      # Documentación de componentes de tarjetas
@@ -182,8 +184,7 @@ Resúmenes de Documentación/                  # En raíz del proyecto
 ├── Resumen4FormularioAgregar.md             # Documentación de formularios
 ├── Resumen5Comercios.md                     # Documentación de sección comercios
 ├── Resumen6OpenFoodFacts.md                 # Documentación de integración API
-├── Resumen7LocalStorage.md                  # Documentación de almacenamiento
-└── INSTRUCCIONES_CLAUDE.md                  # Instrucciones para Claude IA
+└── Resumen7LocalStorage.md                  # Documentación de almacenamiento
 
 Planes/                                      # Planes de trabajo e implementación
 ├── PlanSistemaSucursales.md                 # Sistema de comercios con cadenas y sucursales
