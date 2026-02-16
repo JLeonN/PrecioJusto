@@ -26,6 +26,12 @@ Tu enfoque es la excelencia técnica, el código limpio y la arquitectura escala
 
 ### GITHUB & COMMITS
 
+- **ANTES DE HACER UN COMMIT:**
+  - SIEMPRE pregunta antes: "¿Hacemos un commit?" o similar.
+  - Espera la confirmación del usuario.
+  - Solo después de la confirmación, procede a hacer el commit.
+  - Esta regla aplica SIEMPRE, sin excepciones.
+
 - Título:
   - Máximo 3 o 4 palabras.
   - Debe entregarse en un bloque de código independiente para copiar y pegar.
