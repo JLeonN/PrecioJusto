@@ -10,7 +10,7 @@ Sistema completo para gestión de comercios que permite registrar tiendas con m�
 
 ### COMPONENTES DE UI
 - ListaComercios.vue (src/components/Comercios/)
-- TarjetaComercio.vue (src/components/Comercios/)
+- TarjetaComercioYugioh.vue (src/components/Comercios/)
 
 ### FORMULARIOS
 - FormularioComercio.vue (src/components/Formularios/)
@@ -140,7 +140,7 @@ Componente contenedor que renderiza grid responsivo de TarjetaComercio
 - Texto: "No hay comercios registrados"
 - Solo visible si array está vacío
 
-## TARJETA COMERCIO (TarjetaComercio.vue)
+## TARJETA COMERCIO (TarjetaComercioYugioh.vue)
 
 ### Propósito
 Tarjeta expandible que muestra información del comercio con lista de direcciones

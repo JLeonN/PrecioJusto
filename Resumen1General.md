@@ -75,8 +75,8 @@ PrecioJusto/
 src/
 ├── almacenamiento/
 │   ├── adaptadores/
-│   │   ├── AdaptadorAlmacenamiento.js      # Interfaz común de almacenamiento
-│   │   ├── CapacitorStorageAdapter.js      # Implementación con Capacitor Storage
+│   │   ├── LocalStorageAdapter.js          # Implementación con localStorage (dev/testing)
+│   │   ├── CapacitorAdapter.js             # Implementación con Capacitor Preferences
 │   │   └── FirestoreAdapter.js             # Implementación con Firebase (futuro)
 │   │
 │   ├── constantes/                          # 🆕 Constantes globales
@@ -101,7 +101,7 @@ src/
 │   │
 │   ├── Comercios/                           # Componentes de comercios
 │   │   ├── ListaComercios.vue              # Contenedor con grid responsivo Quasar
-│   │   └── TarjetaComercio.vue             # Tarjeta expandible de comercio con direcciones
+│   │   └── TarjetaComercioYugioh.vue       # Tarjeta expandible de comercio con direcciones
 │   │
 │   ├── DetalleProducto/                     # Componentes de detalle de producto
 │   │   ├── InfoProducto.vue                # Cabecera con imagen, nombre, marca, código
@@ -128,13 +128,13 @@ src/
 │   │   └── ListaProductos.vue              # Contenedor con grid responsivo Quasar
 │   │
 │   └── Tarjetas/                            # Componentes de tarjetas
-│       ├── TarjetaBase.vue                 # Tarjeta base reutilizable estilo Yu-Gi-Oh
+│       ├── TarjetaBase.vue                 # 🆕 Tarjeta base reutilizable estilo Yu-Gi-Oh
 │       ├── TarjetaProductoYugioh.vue       # Tarjeta de producto (usa TarjetaBase)
 │       └── TarjetaComercioYugioh.vue       # Tarjeta de comercio (usa TarjetaBase)
 │
 ├── composables/
 │   ├── useSeleccionMultiple.js             # Lógica de selección múltiple reutilizable
-│   └── useDialogoAgregarPrecio.js          # Lógica reutilizable del modal agregar precio
+│   └── useDialogoAgregarPrecio.js          # 🆕 Lógica reutilizable del modal agregar precio
 ├── css/
 │   ├── app.css                              # Clases CSS globales del Design System
 │   ├── quasar.variables.scss               # Variables de Quasar (colores, fuentes)
@@ -175,16 +175,15 @@ package-lock.json                            # Lock de versiones de dependencias
 quasar.config.js                             # Configuración principal de Quasar
 README.md                                    # Documentación del proyecto
 
-Documentacion/                               # Documentación técnica del proyecto
-├── Resumen1General.txt                      # Documentación general del proyecto
-├── Resumen2Tarjetas.txt                     # Documentación de componentes de tarjetas
-├── Resumen3DetalleProducto.txt              # Documentación de detalle de producto
-├── Resumen4FormularioAgregar.txt            # Documentación de formularios
-├── Resumen5Comercios.txt                    # Documentación de sección comercios
-├── Resumen6OpenFoodFacts.txt                # Documentación de integración API
-├── Resumen7LocalStorage.txt                 # Documentación de almacenamiento
-├── PlanTrabajoComercio.txt                  # Plan de trabajo de comercios
-└── Instrucciones.txt                        # Instrucciones para IAs
+Resúmenes de Documentación/                  # En raíz del proyecto
+├── Resumen1General.md                       # Documentación general del proyecto
+├── Resumen2Tarjetas.md                      # Documentación de componentes de tarjetas
+├── Resumen3DetalleProducto.md               # Documentación de detalle de producto
+├── Resumen4FormularioAgregar.md             # Documentación de formularios
+├── Resumen5Comercios.md                     # Documentación de sección comercios
+├── Resumen6OpenFoodFacts.md                 # Documentación de integración API
+├── Resumen7LocalStorage.md                  # Documentación de almacenamiento
+└── INSTRUCCIONES_CLAUDE.md                  # Instrucciones para Claude IA
 ```
 
 ---
@@ -890,4 +889,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** Febrero 2026 (con Sistema de Diseño)
+**Última actualización:** Febrero 2026 (con TarjetaBase y ajustes UI)

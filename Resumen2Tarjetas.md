@@ -1,7 +1,12 @@
 # TARJETAS DE PRODUCTOS - DOCUMENTACIÓN TÉCNICA
 
+## ARQUITECTURA DE TARJETAS
+El sistema usa un componente base reutilizable `TarjetaBase.vue` que se especializa para productos y comercios.
+
 ## COMPONENTES RELACIONADOS
-- TarjetaProducto.vue (componente reutilizable en /components/Tarjetas/)
+- **TarjetaBase.vue** - Componente base reutilizable estilo Yu-Gi-Oh (en /components/Tarjetas/)
+- **TarjetaProductoYugioh.vue** - Especialización para productos (usa TarjetaBase)
+- **TarjetaComercioYugioh.vue** - Especialización para comercios (usa TarjetaBase)
 - ListaProductos.vue (contenedor en /components/MisProductos/)
 - BarraSeleccion.vue (barra sticky para modo selección en /components/Compartidos/)
 - BarraAccionesSeleccion.vue (barra fixed bottom en /components/Compartidos/)
