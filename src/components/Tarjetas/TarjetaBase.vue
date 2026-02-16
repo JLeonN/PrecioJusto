@@ -33,7 +33,7 @@
         :class="{ 'tarjeta-yugioh__boton-flotante--expandido': expandido }"
         @click.stop="$emit('agregar-precio')"
       >
-        <IconPlus :size="20" />
+        <IconPlus :size="16" />
         <transition name="fade-texto">
           <span v-if="expandido" class="tarjeta-yugioh__boton-texto"> Agregar precio </span>
         </transition>
@@ -300,8 +300,8 @@ const formatearPrecio = (valor) => {
    ======================================== */
 .tarjeta-yugioh__boton-flotante {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 10px;
+  right: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -318,8 +318,8 @@ const formatearPrecio = (valor) => {
   font-size: 14px;
   transition: var(--transicion-boton-flotante);
   /* Estado cerrado (solo ícono) */
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   padding: 0;
 }
