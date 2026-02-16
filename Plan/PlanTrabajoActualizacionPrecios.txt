@@ -81,20 +81,22 @@ incorrecta y confusa para los usuarios.
 
 ## ✅ FASE 2: TOP 3 ÚNICO + BADGE FRESCURA 🎨 [COMPLETADA]
 
-### Modificar TarjetaProducto.vue
+### Modificar TarjetaProductoYugioh.vue
 [x] Abrir archivo src/components/Tarjetas/TarjetaProductoYugioh.vue
 [x] Cambiar título: "Top 3 mejores precios" → "Top 3 precios actuales"
-[x] Modificar computed top3Precios
+[x] Modificar computed top3Precios → top3PreciosUnicos
 [x] Agrupar precios por nombreCompleto
 [x] Tomar precio más reciente de cada comercio
 [x] Ordenar por valor ASC
 [x] Tomar primeros 3 comercios distintos
 [x] Máximo 3 resultados (no repetir comercios)
+[x] Mostrar nombreCompleto del comercio (no solo comercio)
 
 ### Agregar badge de frescura
-[x] Crear computed calcularDiasPrecio(fechaISO)
+[x] Crear función calcularDiasPrecio(fechaISO)
+[x] Crear función calcularMesesPrecio(fechaISO)
 [x] Calcular días transcurridos desde fecha
-[x] Si >60 días: mostrar badge "⚠️ Hace X meses"
+[x] Si >60 días: mostrar badge con IconAlertTriangle + "Hace X meses"
 [x] Color: --color-acento (naranja #FF9800)
 [x] Posición: debajo de nombre del comercio
 [x] Solo visible en precios >60 días
@@ -104,9 +106,12 @@ incorrecta y confusa para los usuarios.
 [x] Font-size: 10px
 [x] Padding: 2px 6px
 [x] Border-radius: 4px
-[x] Background: var(--color-acento) con opacity 0.2
+[x] Background: var(--color-acento) con opacity 0.15
 [x] Color texto: var(--color-acento)
 [x] Display: inline-flex con ícono
+
+### Limpieza
+[x] Eliminar TarjetaProducto.vue (reemplazada por TarjetaProductoYugioh)
 
 ### Testing
 [x] Verificar TOP 3 no muestra comercios duplicados
@@ -117,114 +122,87 @@ incorrecta y confusa para los usuarios.
 
 ═══════════════════════════════════════════════════════════════
 
-## ⏸️ FASE 3: MODAL AGREGAR PRECIO 🚀 [PENDIENTE]
+## ✅ FASE 3: MODAL AGREGAR PRECIO 🚀 [COMPLETADA]
 
 ### Crear DialogoAgregarPrecio.vue
-[ ] Crear archivo src/components/Formularios/Dialogos/DialogoAgregarPrecio.vue
-[ ] Estructura básica q-dialog con persistent y maximized
-[ ] Importar useQuasar, useProductosStore, useComerciStore
-[ ] Props: modelValue (Boolean), productoId (String, required)
-[ ] Emits: 'update:modelValue', 'precio-guardado'
+[x] Crear archivo src/components/Formularios/Dialogos/DialogoAgregarPrecio.vue
+[x] Props: modelValue (Boolean), productoId (Number|String)
+[x] Emit: 'update:modelValue', 'precio-guardado'
 
-### Header del modal
-[ ] q-card-section con clase "row items-center"
-[ ] Título dinámico: producto.nombre
-[ ] Subtítulo: "Precio actual: $XXX"
-[ ] Botón cerrar (q-btn flat round dense icon="close")
+### UI del modal
+[x] Header con ícono + nombre del producto
+[x] Mostrar precio actual más bajo como referencia
+[x] Input precio nuevo con pre-selección al focus
+[x] Selector de moneda (importado desde constantes)
+[x] Selector de comercio con buscador inteligente
+[x] Selector de dirección (auto-selecciona la más usada)
+[x] Botón "+ Agregar nuevo comercio"
+[x] Botones Cancelar y Guardar precio
 
-### Formulario principal
-[ ] Input precio (q-input type="number")
-[ ] Valor por defecto: producto.precioMejor
-[ ] Input pre-seleccionado (select all on focus)
-[ ] Validación: requerido, número positivo
-[ ] Placeholder: "Ingresá el nuevo precio"
+### Lógica del modal
+[x] Cargar comercios desde comerciosStore al abrir
+[x] Pre-llenar precio con precioMejor del producto
+[x] Pre-seleccionar último comercio usado para ESE producto
+[x] Pre-seleccionar dirección más usada del comercio seleccionado
+[x] Filtrar comercios y direcciones en buscadores
+[x] Capturar texto escrito para pre-llenar comercio rápido
 
-### Selector de comercios
-[ ] q-select con use-input para búsqueda
-[ ] Opciones: comerciosStore.comerciosPorUso
-[ ] Formato opción: "Nombre Comercio - Dirección"
-[ ] Pre-selección inteligente: último comercio usado en este producto
-[ ] Filtrado en tiempo real con @filter
-[ ] Buscador tipo Google (centrado, auto-focus)
-
-### Selector de direcciones
-[ ] q-select dependiente del comercio seleccionado
-[ ] Cargar direcciones del comercio elegido
-[ ] Auto-seleccionar dirección más usada
-[ ] Actualizar cuando cambia comercio
-[ ] Deshabilitado si no hay comercio seleccionado
-
-### Sección expandible "Agregar comercio nuevo"
-[ ] Botón expandir: "🔽 Agregar nuevo comercio"
-[ ] q-expansion-item para mostrar/ocultar
-[ ] Al expandir: abrir DialogoAgregarComercioRapido
-[ ] Pasar datos pre-llenados si usuario escribió algo
-[ ] Al guardar comercio: auto-seleccionar en selector
-[ ] Al guardar comercio: colapsar expansión
-[ ] Flujo: crear → seleccionar → listo para guardar precio
-
-### Botones de acción
-[ ] q-card-actions align="right"
-[ ] Botón "Cancelar" (q-btn flat)
-[ ] Botón "Guardar precio" (q-btn color="primary" :loading="guardando")
-[ ] Validar formulario antes de guardar
-[ ] Deshabilitar guardar si faltan datos
-
-### Lógica de guardado
-[ ] Construir objeto precio con todos los campos
-[ ] Incluir: comercioId, direccionId, nombreCompleto
-[ ] Llamar productosStore.agregarPrecio(productoId, precio)
-[ ] Llamar comerciosStore.registrarUso(comercioId, direccionId)
-[ ] Notificación success con Quasar Notify
-[ ] Emit 'precio-guardado' con producto actualizado
-[ ] Cerrar modal automáticamente
+### Guardado
+[x] Construir objeto precio con comercioId, direccionId, nombreCompleto
+[x] Llamar productosStore.agregarPrecioAProducto(productoId, precio)
+[x] Llamar comerciosStore.registrarUso(comercioId, direccionId)
+[x] Notificación success con Quasar Notify
+[x] Emit 'precio-guardado' con producto actualizado
+[x] Cerrar modal automáticamente
 
 ### Integración con DialogoAgregarComercioRapido
-[ ] Importar DialogoAgregarComercioRapido.vue
-[ ] Estado: dialogoComercioRapidoAbierto (ref)
-[ ] Pre-llenar nombre si usuario escribió en selector
-[ ] Escuchar evento @comercio-guardado
-[ ] Actualizar selector con nuevo comercio
-[ ] Auto-seleccionar nuevo comercio
-[ ] Cerrar diálogo de comercio rápido
+[x] Importar DialogoAgregarComercioRapido.vue
+[x] Estado: dialogoComercioRapidoAbierto (ref)
+[x] Pre-llenar nombre si usuario escribió en selector
+[x] Escuchar evento @comercio-creado
+[x] Auto-seleccionar nuevo comercio creado
+[x] Cerrar diálogo de comercio rápido
 
 ### Testing del modal
-[ ] Abrir modal desde botón "+ Agregar precio"
-[ ] Verificar título muestra nombre producto correcto
-[ ] Verificar precio actual visible
-[ ] Verificar input precio pre-seleccionado
-[ ] Verificar último comercio pre-seleccionado
-[ ] Verificar creación de comercio nuevo funciona
-[ ] Verificar guardado de precio funciona
-[ ] Verificar notificación aparece
-[ ] Verificar modal cierra correctamente
+[x] Abrir modal desde botón "+ Agregar precio"
+[x] Verificar título muestra nombre producto correcto
+[x] Verificar precio actual visible
+[x] Verificar input precio pre-seleccionado
+[x] Verificar último comercio pre-seleccionado
+[x] Verificar creación de comercio nuevo funciona
+[x] Verificar guardado de precio funciona
+[x] Verificar notificación aparece
+[x] Verificar modal cierra correctamente
 
 ═══════════════════════════════════════════════════════════════
 
-## ⏸️ FASE 4: INTEGRACIÓN CON TARJETAS 🔗 [PENDIENTE]
+## ✅ FASE 4: INTEGRACIÓN CON TARJETAS 🔗 [COMPLETADA]
 
-### Modificar TarjetaProducto.vue
-[ ] Agregar evento @click en botón "Agregar precio"
-[ ] Emit 'agregar-precio' con producto.id
-[ ] Verificar stop propagation funciona
+### TarjetaProductoYugioh.vue (ya existente)
+[x] Evento @agregar-precio ya emitido con producto.id
+[x] Stop propagation ya funciona
+
+### ListaProductos.vue (ya existente)
+[x] Propagación @agregar-precio="$emit('agregar-precio', producto.id)" ya existente
+[x] defineEmits incluye 'agregar-precio'
 
 ### Modificar MisProductosPage.vue
-[ ] Importar DialogoAgregarPrecio.vue
-[ ] Estado: dialogoPrecioAbierto (ref false)
-[ ] Estado: productoSeleccionadoId (ref null)
-[ ] Método manejarAgregarPrecio(productoId)
-[ ] Abrir DialogoAgregarPrecio con productoId
-[ ] Escuchar evento @precio-guardado
-[ ] Recargar productos después de guardar
-[ ] Mostrar notificación de éxito
+[x] Importar DialogoAgregarPrecio.vue
+[x] Estado: dialogoPrecioAbierto (ref false)
+[x] Estado: productoParaPrecioId (ref null)
+[x] Método abrirModalPrecio(productoId)
+[x] Abrir DialogoAgregarPrecio con productoId
+[x] Escuchar evento @precio-guardado
+[x] Recargar productos después de guardar (alGuardarPrecio)
+[x] Agregar @agregar-precio="abrirModalPrecio" en ListaProductos
 
 ### Testing de integración
-[ ] Click en botón "+ Agregar precio" en tarjeta
-[ ] Verificar modal abre con datos correctos
-[ ] Guardar precio y verificar tarjeta actualiza
-[ ] Verificar precio vigente se recalcula
-[ ] Verificar TOP 3 actualiza correctamente
-[ ] Verificar badge de frescura funciona
+[x] Click en botón "+ Agregar precio" en tarjeta
+[x] Verificar modal abre con datos correctos
+[x] Guardar precio y verificar tarjeta actualiza
+[x] Verificar precio vigente se recalcula
+[x] Verificar TOP 3 actualiza correctamente
+[x] Verificar badge de frescura funciona
 
 ═══════════════════════════════════════════════════════════════
 
@@ -360,8 +338,9 @@ incorrecta y confusa para los usuarios.
 1. ✅ Arreglar lógica precio vigente (funcionalidad)
 2. ✅ Arreglar TOP 3 comercios únicos (claridad)
 3. ✅ Modal agregar precio (UX)
-4. Testing completo (calidad)
-5. Documentación (mantenibilidad)
+4. ✅ Integración con tarjetas (conectar todo)
+5. Testing completo (calidad)
+6. Documentación (mantenibilidad)
 
 ═══════════════════════════════════════════════════════════════
 
@@ -416,17 +395,17 @@ incorrecta y confusa para los usuarios.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 0% COMPLETADO
+## 📊 PROGRESO GENERAL: 67% COMPLETADO
 
-⏸️ Fase 1: 0% (Arreglar lógica precio vigente)
-⏸️ Fase 2: 0% (TOP 3 único + badge frescura)
-⏸️ Fase 3: 0% (Modal agregar precio)
-⏸️ Fase 4: 0% (Integración con tarjetas)
+✅ Fase 1: 100% (Arreglar lógica precio vigente)
+✅ Fase 2: 100% (TOP 3 único + badge frescura)
+✅ Fase 3: 100% (Modal agregar precio)
+✅ Fase 4: 100% (Integración con tarjetas)
 ⏸️ Fase 5: 0% (Testing y ajustes)
 ⏸️ Fase 6: 0% (Documentación)
 
 ═══════════════════════════════════════════════════════════════
 
-**ÚLTIMA ACTUALIZACIÓN:** 12 de Febrero 2026 - Plan creado
-**PRÓXIMO PASO:** Fase 1 - Arreglar lógica de precio vigente en ProductosService.js
-**ESTADO:** Listo para comenzar implementación
+**ÚLTIMA ACTUALIZACIÓN:** 16 de Febrero 2026 - Fases 1-4 completadas
+**PRÓXIMO PASO:** Fase 5 - Testing completo y ajustes
+**ESTADO:** Funcionalidad principal implementada, pendiente testing y documentación

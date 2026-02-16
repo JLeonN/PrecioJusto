@@ -49,6 +49,7 @@
         :seleccionados="seleccion.seleccionados.value"
         @long-press="activarSeleccionConItem"
         @toggle-seleccion="seleccion.toggleSeleccion($event)"
+        @agregar-precio="abrirModalPrecio"
       />
     </div>
 
@@ -73,6 +74,13 @@
       v-model="dialogoAgregarAbierto"
       modo="local"
       @producto-guardado="onProductoGuardado"
+    />
+
+    <!-- MODAL AGREGAR PRECIO -->
+    <DialogoAgregarPrecio
+      v-model="dialogoPrecioAbierto"
+      :producto-id="productoParaPrecioId"
+      @precio-guardado="alGuardarPrecio"
     />
 
     <!-- DIÁLOGO CONFIRMACIÓN ELIMINACIÓN -->
@@ -110,6 +118,7 @@ import { ref, onMounted, watch } from 'vue'
 import { IconPlus } from '@tabler/icons-vue'
 import ListaProductos from '../components/MisProductos/ListaProductos.vue'
 import DialogoAgregarProducto from '../components/Formularios/Dialogos/DialogoAgregarProducto.vue'
+import DialogoAgregarPrecio from '../components/Formularios/Dialogos/DialogoAgregarPrecio.vue'
 import BarraSeleccion from '../components/Compartidos/BarraSeleccion.vue'
 import BarraAccionesSeleccion from '../components/Compartidos/BarraAccionesSeleccion.vue'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
@@ -119,20 +128,33 @@ import { useQuasar } from 'quasar'
 const productosStore = useProductosStore()
 const $q = useQuasar()
 
-// Estado del diálogo agregar
+/* Estado del diálogo agregar */
 const dialogoAgregarAbierto = ref(false)
 
-// Estado del diálogo confirmación
+/* Estado del diálogo confirmación */
 const dialogoConfirmacionAbierto = ref(false)
 
-// Estado de eliminación
+/* Estado de eliminación */
 const eliminando = ref(false)
 
-// Composable de selección múltiple
+/* Composable de selección múltiple */
 const seleccion = useSeleccionMultiple()
 
-// Productos eliminados (para deshacer)
+/* Productos eliminados (para deshacer) */
 const productosEliminadosParaDeshacer = ref([])
+
+/* Modal agregar precio */
+const dialogoPrecioAbierto = ref(false)
+const productoParaPrecioId = ref(null)
+
+function abrirModalPrecio(productoId) {
+  productoParaPrecioId.value = productoId
+  dialogoPrecioAbierto.value = true
+}
+
+function alGuardarPrecio() {
+  cargarProductos()
+}
 
 async function cargarProductos() {
   await productosStore.cargarProductos()
@@ -143,36 +165,33 @@ function abrirDialogoAgregar() {
 }
 
 function onProductoGuardado() {
-  // Recargar productos después de guardar uno nuevo
   cargarProductos()
 }
 
-// Activar modo selección con un item inicial
+/* Activar modo selección con un item inicial */
 function activarSeleccionConItem(productoId) {
   seleccion.activarModoSeleccion(productoId)
 }
 
-// Confirmar eliminación
+/* Confirmar eliminación */
 function confirmarEliminacion() {
   if (!seleccion.haySeleccionados.value) return
   dialogoConfirmacionAbierto.value = true
 }
 
-// Eliminar productos seleccionados
+/* Eliminar productos seleccionados */
 async function eliminarSeleccionados() {
   eliminando.value = true
 
   try {
     const idsAEliminar = seleccion.arraySeleccionados.value
 
-    // Guardar productos eliminados para deshacer
     productosEliminadosParaDeshacer.value = idsAEliminar.map((id) =>
       productosStore.productos.find((p) => p.id === id),
     )
 
     console.log(`🗑️ Eliminando ${idsAEliminar.length} productos...`)
 
-    // Eliminar cada producto
     let eliminadosExitosos = 0
     for (const id of idsAEliminar) {
       const eliminado = await productosStore.eliminarProducto(id)
@@ -181,13 +200,9 @@ async function eliminarSeleccionados() {
       }
     }
 
-    // Cerrar diálogo
     dialogoConfirmacionAbierto.value = false
-
-    // Desactivar modo selección
     seleccion.limpiarDespuesDeEliminar()
 
-    // Notificación con botón deshacer
     $q.notify({
       type: 'positive',
       message: `${eliminadosExitosos} ${eliminadosExitosos === 1 ? 'producto eliminado' : 'productos eliminados'}`,
@@ -216,7 +231,7 @@ async function eliminarSeleccionados() {
   }
 }
 
-// Deshacer eliminación
+/* Deshacer eliminación */
 async function deshacerEliminacion() {
   if (productosEliminadosParaDeshacer.value.length === 0) return
 
@@ -231,10 +246,8 @@ async function deshacerEliminacion() {
     }
   }
 
-  // Limpiar productos guardados para deshacer
   productosEliminadosParaDeshacer.value = []
 
-  // Notificación
   $q.notify({
     type: 'info',
     message: `${restauradosExitosos} ${restauradosExitosos === 1 ? 'producto restaurado' : 'productos restaurados'}`,
@@ -243,7 +256,7 @@ async function deshacerEliminacion() {
   })
 }
 
-// Actualizar items disponibles cuando cambien los productos
+/* Actualizar items disponibles cuando cambien los productos */
 watch(
   () => productosStore.productos,
   (nuevosProductos) => {
@@ -254,8 +267,6 @@ watch(
 
 onMounted(async () => {
   await cargarProductos()
-
-  // Inicializar items disponibles
   seleccion.actualizarItems(productosStore.productos)
 })
 </script>
