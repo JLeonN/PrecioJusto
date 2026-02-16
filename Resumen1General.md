@@ -184,6 +184,11 @@ Resúmenes de Documentación/                  # En raíz del proyecto
 ├── Resumen6OpenFoodFacts.md                 # Documentación de integración API
 ├── Resumen7LocalStorage.md                  # Documentación de almacenamiento
 └── INSTRUCCIONES_CLAUDE.md                  # Instrucciones para Claude IA
+
+Planes/                                      # Planes de trabajo e implementación
+├── PLAN_MEJORAS_COMERCIOS_SUCURSALES.md     # Sistema de comercios con cadenas y sucursales
+├── PlanTrabajoActualizacionPrecios.md       # Plan de actualización de precios
+└── PlanTrabajoComercio.md                   # Plan de trabajo de comercios
 ```
 
 ---
@@ -889,4 +894,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** Febrero 2026 (con TarjetaBase y ajustes UI)
+**Última actualización:** Febrero 16, 2026 (con estructura de Planes y mejoras de comercios)
