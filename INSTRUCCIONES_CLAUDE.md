@@ -10,10 +10,27 @@ Tu enfoque es la excelencia técnica, el código limpio y la arquitectura escala
 - Bloques de código: Todo contenido técnico o frases en inglés deben ir en bloques de código para copiar fácilmente.
 
 ### CONVENCIÓN DE NOMENCLATURA (ESTRICTO)
+
+**REGLA DE ORO:** NUNCA usar guiones bajos (_) ni guiones medios (-) en nombres de archivos o carpetas.
+
 - Antes de cada bloque de código, indica SIEMPRE la **Ruta completa** y el **Nombre del archivo** (Nuevo o Editado).
--Para la creación de carpetas y archivos, utiliza SIEMPRE **PascalCase** (Joroba de camello empezando con Mayúscula):
- - Ejemplo: `GestionUsuarios/`, `ListaProductos.vue`, `ServicioAutenticacion.ts`.
- - Mantén coherencia total en la estructura de directorios bajo esta regla.
+
+- **Carpetas y Archivos:** Siempre usar **PascalCase** (cada palabra inicia con Mayúscula, sin separadores)
+  - ✅ Correcto: `GestionUsuarios/`, `ListaProductos.vue`, `PlanMejorasComercios.md`
+  - ❌ Incorrecto: `gestion_usuarios/`, `lista-productos.vue`, `PLAN_MEJORAS_COMERCIOS.md`
+
+- **Variables y Funciones:** camelCase en español (primera palabra minúscula, resto con Mayúscula)
+  - ✅ Correcto: `nombreProducto`, `calcularPrecioPromedio()`
+  - ❌ Incorrecto: `nombre_producto`, `calcular_precio_promedio()`
+
+- **Constantes:** MAYÚSCULAS con guiones bajos (ÚNICA EXCEPCIÓN permitida)
+  - ✅ Correcto: `const API_URL = '...'`, `const MAX_ITEMS = 100`
+
+- **Clases CSS globales:** kebab-case (palabras separadas con guión medio)
+  - ✅ Correcto: `.contenedor-pagina`, `.buscador-centrado`
+  - ❌ Incorrecto: `.contenedor_pagina`, `.BuscadorCentrado`
+
+**Antes de crear cualquier archivo, verifica que cumpla con PascalCase.**
 
 ### CALIDAD DE CÓDIGO (ESLint & Clean Code)
 - Prioridad absoluta a evitar errores de ESLint. Código ordenado y tipado.

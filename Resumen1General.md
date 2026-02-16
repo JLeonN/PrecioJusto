@@ -186,7 +186,7 @@ Resúmenes de Documentación/                  # En raíz del proyecto
 └── INSTRUCCIONES_CLAUDE.md                  # Instrucciones para Claude IA
 
 Planes/                                      # Planes de trabajo e implementación
-├── PLAN_MEJORAS_COMERCIOS_SUCURSALES.md     # Sistema de comercios con cadenas y sucursales
+├── PlanSistemaSucursales.md                 # Sistema de comercios con cadenas y sucursales
 ├── PlanTrabajoActualizacionPrecios.md       # Plan de actualización de precios
 └── PlanTrabajoComercio.md                   # Plan de trabajo de comercios
 ```
