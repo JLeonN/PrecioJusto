@@ -58,6 +58,82 @@ export const useComerciStore = defineStore('comercios', {
       })
       return agrupados
     },
+
+    /**
+     * Agrupa comercios en cadenas (mismo nombre, diferentes direcciones)
+     * Ordena direcciones por uso reciente y calcula dirección principal
+     * @returns {Array} Comercios agrupados con información de cadenas
+     */
+    comerciosAgrupados: (state) => {
+      const agrupados = new Map()
+
+      // Agrupar comercios por nombre normalizado
+      state.comercios.forEach((comercio) => {
+        const nombreNormalizado = ComerciosService.normalizar(comercio.nombre)
+
+        if (!agrupados.has(nombreNormalizado)) {
+          // Primer comercio con este nombre
+          agrupados.set(nombreNormalizado, {
+            id: comercio.id,
+            nombre: comercio.nombre,
+            tipo: comercio.tipo,
+            foto: null,
+            esCadena: false,
+            totalSucursales: 1,
+            direcciones: [...comercio.direcciones],
+            fechaUltimoUso: comercio.fechaUltimoUso,
+            cantidadUsos: comercio.cantidadUsos,
+            comerciosOriginales: [comercio], // Para referencia
+          })
+        } else {
+          // Agregar sucursal a la cadena existente
+          const grupo = agrupados.get(nombreNormalizado)
+          grupo.esCadena = true
+          grupo.totalSucursales++
+          grupo.direcciones.push(...comercio.direcciones)
+          grupo.comerciosOriginales.push(comercio)
+
+          // Actualizar fecha si es más reciente
+          if (new Date(comercio.fechaUltimoUso) > new Date(grupo.fechaUltimoUso)) {
+            grupo.fechaUltimoUso = comercio.fechaUltimoUso
+          }
+
+          // Sumar usos totales
+          grupo.cantidadUsos += comercio.cantidadUsos
+        }
+      })
+
+      // Procesar cada grupo
+      const resultado = Array.from(agrupados.values()).map((grupo) => {
+        // Ordenar direcciones por uso reciente
+        grupo.direcciones.sort((a, b) => {
+          const fechaA = new Date(a.fechaUltimoUso || 0)
+          const fechaB = new Date(b.fechaUltimoUso || 0)
+          return fechaB - fechaA
+        })
+
+        // Top 3 direcciones más recientes
+        grupo.direccionesTop3 = grupo.direcciones.slice(0, 3)
+
+        // Dirección principal (más reciente)
+        grupo.direccionPrincipal = grupo.direcciones[0]
+
+        // Foto de la sucursal más reciente
+        const comercioMasReciente = grupo.comerciosOriginales.sort(
+          (a, b) => new Date(b.fechaUltimoUso) - new Date(a.fechaUltimoUso),
+        )[0]
+        grupo.foto = comercioMasReciente.foto
+
+        return grupo
+      })
+
+      // Ordenar por uso reciente
+      return resultado.sort((a, b) => {
+        const fechaA = new Date(a.fechaUltimoUso)
+        const fechaB = new Date(b.fechaUltimoUso)
+        return fechaB - fechaA
+      })
+    },
   },
 
   // ═══════════════════════════════════════════════════════════

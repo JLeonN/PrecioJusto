@@ -18,13 +18,12 @@
     <!-- TIPO DE COMERCIO -->
     <q-select
       v-model="datosInternos.tipo"
-      label="Tipo de comercio *"
+      label="Tipo de comercio (opcional)"
       outlined
       dense
       :options="opcionesTipo"
       emit-value
       map-options
-      :rules="[requerido]"
       @update:model-value="emitirCambios"
     >
       <template #prepend>

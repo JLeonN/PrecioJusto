@@ -44,6 +44,15 @@
     @confirmar="continuarConNuevo"
     @cancelar="dialogoMismaUbicacionAbierto = false"
   />
+
+  <!-- DIÁLOGO DUPLICADO EXACTO -->
+  <DialogoDuplicadoExacto
+    v-model="dialogoDuplicadoExactoAbierto"
+    :comercio-existente="comercioDuplicadoExacto"
+    :datos-nuevos="datosComercio"
+    @continuar="forzarCrearDuplicado"
+    @cancelar="dialogoDuplicadoExactoAbierto = false"
+  />
 </template>
 
 <script setup>
@@ -52,6 +61,7 @@ import { useQuasar } from 'quasar'
 import FormularioComercio from '../FormularioComercio.vue'
 import DialogoCoincidencias from './DialogoCoincidencias.vue'
 import DialogoMismaUbicacion from './DialogoMismaUbicacion.vue'
+import DialogoDuplicadoExacto from './DialogoDuplicadoExacto.vue'
 import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.js'
 import ComerciosService from '../../../almacenamiento/servicios/ComerciosService.js'
 
@@ -74,6 +84,7 @@ const comerciosStore = useComerciStore()
 const guardando = ref(false)
 const dialogoCoincidenciasAbierto = ref(false)
 const dialogoMismaUbicacionAbierto = ref(false)
+const dialogoDuplicadoExactoAbierto = ref(false)
 
 // Datos del comercio
 const datosComercio = ref({
@@ -91,6 +102,9 @@ const nivelValidacion = ref(1)
 // Comercios en misma ubicación (para diálogo de ubicación)
 const comerciosEnMismaUbicacion = ref([])
 
+// Comercio duplicado exacto (para diálogo de confirmación)
+const comercioDuplicadoExacto = ref(null)
+
 // ════════════════════════════════════════════════════════════
 // COMPUTED
 // ════════════════════════════════════════════════════════════
@@ -103,7 +117,6 @@ const dialogoAbierto = computed({
 const formularioValido = computed(() => {
   return (
     datosComercio.value.nombre.trim() !== '' &&
-    datosComercio.value.tipo.trim() !== '' &&
     datosComercio.value.calle.trim() !== ''
   )
 })
@@ -131,7 +144,11 @@ async function validarDuplicados() {
       // Hay duplicados - mostrar diálogo correspondiente
       nivelValidacion.value = resultado.nivel
 
-      if (resultado.nivel === 2) {
+      if (resultado.nivel === 1) {
+        // Duplicado exacto - mostrar confirmación
+        comercioDuplicadoExacto.value = resultado.comercio
+        dialogoDuplicadoExactoAbierto.value = true
+      } else if (resultado.nivel === 2) {
         // Nombres similares
         comerciosSimilares.value = resultado.comercios
         dialogoCoincidenciasAbierto.value = true
@@ -251,6 +268,15 @@ function usarComercioExistente(comercio) {
 
   limpiarFormulario()
   cerrarDialogo()
+}
+
+/**
+ * Forzar creación de duplicado (usuario confirmó)
+ */
+async function forzarCrearDuplicado() {
+  console.log('⚠️ Usuario confirmó crear duplicado')
+  dialogoDuplicadoExactoAbierto.value = false
+  await continuarConNuevo()
 }
 
 // ════════════════════════════════════════════════════════════

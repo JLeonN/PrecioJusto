@@ -191,7 +191,8 @@ async function validarDuplicados(nuevoComercio) {
       nivel: 1,
       tipo: 'exacto',
       comercio: duplicadoExacto,
-      mensaje: 'Ya existe un comercio con el mismo nombre y dirección',
+      mensaje: 'Ya existe este comercio en esta ubicación',
+      permitirContinuar: true, // ⭐ NUEVO: Permitir confirmar y crear duplicado
     }
   }
 
