@@ -113,6 +113,7 @@
 <script setup>
 import TarjetaBase from './TarjetaBase.vue'
 import { IconBuilding, IconMapPin, IconShoppingCart, IconAlertCircle } from '@tabler/icons-vue'
+import { formatearUltimoUso as formatearUltimoUsoFecha } from '../../composables/useFechaRelativa.js'
 
 /* Props del componente */
 const props = defineProps({
@@ -154,23 +155,8 @@ const obtenerUsosActuales = () => {
   return comercioOriginal?.cantidadUsos || 0
 }
 
-/* Formatear último uso de dirección */
-const formatearUltimoUso = (direccion) => {
-  if (!direccion.fechaUltimoUso) {
-    return 'Sin uso registrado'
-  }
-
-  const fecha = new Date(direccion.fechaUltimoUso)
-  const ahora = new Date()
-  const diferencia = Math.floor((ahora - fecha) / 1000)
-
-  if (diferencia < 60) return 'Última vez: Hace un momento'
-  if (diferencia < 3600) return `Última vez: Hace ${Math.floor(diferencia / 60)} minutos`
-  if (diferencia < 86400) return `Última vez: Hace ${Math.floor(diferencia / 3600)} horas`
-  if (diferencia < 604800) return `Última vez: Hace ${Math.floor(diferencia / 86400)} días`
-  if (diferencia < 2592000) return `Última vez: Hace ${Math.floor(diferencia / 604800)} semanas`
-  return `Última vez: Hace ${Math.floor(diferencia / 2592000)} meses`
-}
+// Formatea último uso usando composable compartido
+const formatearUltimoUso = (direccion) => formatearUltimoUsoFecha(direccion.fechaUltimoUso)
 
 /* Manejar expansión */
 const manejarExpansion = (expandido) => {

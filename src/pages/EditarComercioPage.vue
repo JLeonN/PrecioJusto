@@ -240,7 +240,18 @@
           </template>
         </div>
 
-        <!-- Placeholder para fase 7h -->
+        <!-- SECCIÓN: ESTADÍSTICAS -->
+        <div class="seccion-campos q-mb-lg">
+          <div class="seccion-titulo q-mb-sm">
+            <IconChartBar :size="18" class="text-orange" />
+            <span>Estadísticas</span>
+          </div>
+          <EstadisticasComercio
+            :comercio="comercioActual"
+            :total-productos="productosAsociados.length"
+            :ultimo-precio-fecha="ultimoPrecioFecha"
+          />
+        </div>
       </template>
     </div>
 
@@ -270,6 +281,7 @@ import {
   IconTrash,
   IconShoppingBag,
   IconGitMerge,
+  IconChartBar,
 } from '@tabler/icons-vue'
 import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
@@ -278,6 +290,8 @@ import SelectorSucursales from '../components/EditarComercio/SelectorSucursales.
 import CampoEditable from '../components/EditarComercio/CampoEditable.vue'
 import DialogoAgregarSucursal from '../components/Formularios/Dialogos/DialogoAgregarSucursal.vue'
 import ListaProductosComercio from '../components/EditarComercio/ListaProductosComercio.vue'
+import EstadisticasComercio from '../components/EditarComercio/EstadisticasComercio.vue'
+import { formatearFechaRelativa } from '../composables/useFechaRelativa.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -333,7 +347,7 @@ const productosConPrecio = computed(() => {
 
     const ultimoPrecio = preciosComercio[0]
     const textoUltimoPrecio = ultimoPrecio
-      ? `$${ultimoPrecio.valor} - ${formatearFechaSimple(ultimoPrecio.fecha)}`
+      ? `$${ultimoPrecio.valor} - ${formatearFechaRelativa(ultimoPrecio.fecha)}`
       : 'Sin precio'
 
     return {
@@ -344,18 +358,20 @@ const productosConPrecio = computed(() => {
   })
 })
 
-// Formato de fecha simple
-function formatearFechaSimple(fecha) {
-  if (!fecha) return ''
-  const d = new Date(fecha)
-  const ahora = new Date()
-  const diff = Math.floor((ahora - d) / 86400000)
-  if (diff === 0) return 'Hoy'
-  if (diff === 1) return 'Ayer'
-  if (diff < 7) return `Hace ${diff} días`
-  if (diff < 30) return `Hace ${Math.floor(diff / 7)} semanas`
-  return `Hace ${Math.floor(diff / 30)} meses`
-}
+// Fecha del último precio registrado en este comercio
+const ultimoPrecioFecha = computed(() => {
+  let fechaMasReciente = null
+  for (const producto of productosAsociados.value) {
+    const precios = producto.precios
+      ?.filter((p) => idsComerciosOriginales.value.includes(p.comercioId))
+    for (const precio of (precios || [])) {
+      if (precio.fecha && (!fechaMasReciente || new Date(precio.fecha) > new Date(fechaMasReciente))) {
+        fechaMasReciente = precio.fecha
+      }
+    }
+  }
+  return fechaMasReciente
+})
 
 // Estado de diálogos
 const dialogoSucursalAbierto = ref(false)
