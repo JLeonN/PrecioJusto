@@ -14,7 +14,15 @@
       <!-- HEADER DE LA PÁGINA -->
       <div class="header-pagina">
         <h5 class="titulo-pagina">Mis Comercios</h5>
-        <p class="contador-items">{{ comerciosStore.comercios.length }} comercios guardados</p>
+        <p class="contador-items">
+          {{ comerciosStore.comerciosAgrupados.length }} comercios
+          <span
+            v-if="comerciosStore.totalDirecciones > comerciosStore.comercios.length"
+            class="text-grey-6"
+          >
+            ({{ comerciosStore.totalDirecciones }} sucursales)
+          </span>
+        </p>
       </div>
 
       <!-- BARRA DE BÚSQUEDA CENTRADA -->
@@ -145,17 +153,19 @@ const datosParaDeshacer = ref(null)
 
 // Comercios filtrados por búsqueda
 const comerciosFiltrados = computed(() => {
+  const comercios = comerciosStore.comerciosAgrupados
+
   if (!textoBusqueda.value) {
-    return comerciosStore.comerciosPorUso
+    return comercios
   }
 
   const textoNormalizado = textoBusqueda.value.toLowerCase()
-  return comerciosStore.comerciosPorUso.filter((comercio) => {
+  return comercios.filter((comercio) => {
     return (
       comercio.nombre.toLowerCase().includes(textoNormalizado) ||
       comercio.tipo.toLowerCase().includes(textoNormalizado) ||
       comercio.direcciones.some((dir) =>
-        dir.nombreCompleto.toLowerCase().includes(textoNormalizado),
+        dir.nombreCompleto?.toLowerCase().includes(textoNormalizado),
       )
     )
   })

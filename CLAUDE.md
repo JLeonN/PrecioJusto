@@ -48,6 +48,7 @@ Tu enfoque es la excelencia técnica, el código limpio y la arquitectura escala
 **Ejemplos:**
 
 ❌ **NO hacer:**
+
 ```javascript
 /**
  * Obtiene total de direcciones
@@ -56,12 +57,14 @@ const total = comercios.length
 ```
 
 ✅ **SÍ hacer:**
+
 ```javascript
 // Obtiene total de direcciones
 const total = comercios.length
 ```
 
 **Excepción:** JSDoc solo para funciones exportadas o muy complejas:
+
 ```javascript
 /**
  * Calcula similitud entre textos usando Levenshtein
@@ -80,6 +83,7 @@ function similitudTexto(texto1, texto2) { ... }
 **Ejemplos:**
 
 ❌ **NO hacer:**
+
 ```css
 .dialogo-duplicado-exacto {
   min-width: 350px;
@@ -95,6 +99,7 @@ function similitudTexto(texto1, texto2) { ... }
 ```
 
 ✅ **SÍ hacer:**
+
 ```css
 .dialogo-duplicado-exacto {
   min-width: 350px;
@@ -106,11 +111,6 @@ function similitudTexto(texto1, texto2) { ... }
   transition: background-color 0.2s ease;
 }
 ```
-
-<!-- ### FLUJO DE TRABAJO CON ARCHIVOS
-1. Entrega de archivos: Si son 2 o más, entrégalos de uno en uno. Espera mi "sigamos" para el siguiente.
-2. Ediciones pequeñas: Muestra el bloque de código completo donde ocurre el cambio.
-3. Ediciones grandes: Si cambias más de 2 bloques, entrega el archivo/componente completo. -->
 
 ### GITHUB & COMMITS
 

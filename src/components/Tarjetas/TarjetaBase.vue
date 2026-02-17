@@ -58,11 +58,9 @@
           <q-img v-else :src="imagen" class="tarjeta-yugioh__imagen" fit="cover" />
         </slot>
 
-        <!-- Overlay de precio (solo productos) -->
-        <div v-if="tipo === 'producto' && precio" class="tarjeta-yugioh__precio-overlay">
-          <div class="tarjeta-yugioh__precio-valor">
-            <slot name="precio">{{ formatearPrecio(precio) }}</slot>
-          </div>
+        <!-- Overlay de info (precio/dirección) -->
+        <div v-if="$slots['overlay-info']" class="tarjeta-yugioh__info-overlay">
+          <slot name="overlay-info"></slot>
         </div>
       </div>
     </div>
@@ -138,12 +136,6 @@ const props = defineProps({
     default: null,
   },
 
-  /* Precio (solo productos) */
-  precio: {
-    type: Number,
-    default: null,
-  },
-
   /* Permite expansión */
   permiteExpansion: {
     type: Boolean,
@@ -202,11 +194,6 @@ const manejarLongPress = () => {
   if (!props.modoSeleccion) {
     emit('long-press')
   }
-}
-
-/* Formatear precio */
-const formatearPrecio = (valor) => {
-  return `$${valor.toLocaleString('es-UY')}`
 }
 </script>
 
@@ -385,9 +372,9 @@ const formatearPrecio = (valor) => {
   background: var(--color-primario-claro);
 }
 /* ========================================
-   OVERLAY DE PRECIO
+   OVERLAY DE INFO (Precio/Dirección)
    ======================================== */
-.tarjeta-yugioh__precio-overlay {
+.tarjeta-yugioh__info-overlay {
   position: absolute;
   bottom: 0;
   right: 0;
@@ -397,12 +384,6 @@ const formatearPrecio = (valor) => {
   display: flex;
   justify-content: flex-end;
   align-items: flex-end;
-}
-.tarjeta-yugioh__precio-valor {
-  color: white;
-  font-size: 24px;
-  font-weight: bold;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
 }
 /* ========================================
    INFO INFERIOR

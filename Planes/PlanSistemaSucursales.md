@@ -832,13 +832,13 @@ graph TD
   - [x] Agregar estilos CSS nuevos
   - [x] Probar con datos reales
 
-### Fase 4: Integración en Página
+### Fase 4: Integración en Página ✅
 
-- [ ] **ComerciosPage.vue**
-  - [ ] Cambiar `comerciosPorUso` a `comerciosAgrupados`
-  - [ ] Actualizar filtrado de búsqueda
-  - [ ] Actualizar contador de página
-  - [ ] Probar que la búsqueda funcione correctamente
+- [x] **ComerciosPage.vue**
+  - [x] Cambiar `comerciosPorUso` a `comerciosAgrupados`
+  - [x] Actualizar filtrado de búsqueda
+  - [x] Actualizar contador de página
+  - [x] Probar que la búsqueda funcione correctamente
 
 ### Fase 5: Testing y Ajustes
 

@@ -19,18 +19,20 @@
     <template #placeholder-icono>
       <IconBuilding :size="48" class="text-grey-5" />
     </template>
-    <template #info-inferior>
-      <!-- Dirección principal -->
-      <div v-if="comercio.direccionPrincipal" class="direccion-principal">
-        <IconMapPin :size="14" class="text-grey-6" />
-        <span class="texto-direccion">
-          {{ comercio.direccionPrincipal.calle }}
-          <span v-if="comercio.direccionPrincipal.barrio">
-            , {{ comercio.direccionPrincipal.barrio }}
-          </span>
-        </span>
+    <template #overlay-info>
+      <div v-if="comercio.direccionPrincipal" class="direccion-overlay">
+        <div class="direccion-overlay__icono">
+          <IconMapPin :size="16" />
+        </div>
+        <div class="direccion-overlay__texto">
+          <div class="direccion-overlay__calle">{{ comercio.direccionPrincipal.calle }}</div>
+          <div v-if="comercio.direccionPrincipal.barrio" class="direccion-overlay__barrio">
+            {{ comercio.direccionPrincipal.barrio }}
+          </div>
+        </div>
       </div>
-
+    </template>
+    <template #info-inferior>
       <!-- Info comercio -->
       <div class="info-comercio">
         <div class="info-item">
@@ -181,20 +183,32 @@ const manejarExpansion = (expandido) => {
   display: flex;
   align-items: center;
 }
-.direccion-principal {
+.direccion-overlay {
   display: flex;
   align-items: flex-start;
-  gap: 6px;
-  padding: 8px 0;
-  border-top: 1px solid var(--borde-suave);
-  margin-top: 8px;
-  padding-top: 8px;
-  font-size: 13px;
-  color: var(--texto-secundario);
+  gap: 8px;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
 }
-.texto-direccion {
+.direccion-overlay__icono {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.direccion-overlay__texto {
   flex: 1;
-  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.direccion-overlay__calle {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.direccion-overlay__barrio {
+  font-size: 12px;
+  opacity: 0.9;
+  line-height: 1.3;
 }
 .info-comercio {
   display: flex;

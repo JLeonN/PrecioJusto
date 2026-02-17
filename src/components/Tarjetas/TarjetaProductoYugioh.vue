@@ -3,7 +3,6 @@
     tipo="producto"
     :nombre="producto.nombre"
     :imagen="producto.imagen"
-    :precio="producto.precioMejor"
     :modo-seleccion="modoSeleccion"
     :seleccionado="seleccionado"
     @toggle-expansion="manejarExpansion"
@@ -19,6 +18,9 @@
     </template>
     <template #placeholder-icono>
       <IconShoppingBag :size="48" class="text-grey-5" />
+    </template>
+    <template #overlay-info>
+      <div class="precio-valor">{{ formatearPrecio(producto.precioMejor) }}</div>
     </template>
     <template #info-inferior>
       <div v-if="producto.codigoBarras" class="codigo-barras" @click.stop="copiarCodigoBarras">
@@ -213,6 +215,12 @@ const manejarExpansion = (expandido) => {
 </script>
 
 <style scoped>
+.precio-valor {
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
 .tipo-direccion {
   display: flex;
   align-items: center;
