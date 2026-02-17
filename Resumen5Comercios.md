@@ -1,7 +1,7 @@
 # SECCIÓN COMERCIOS - DOCUMENTACIÓN TÉCNICA
 
 ## PROPÓSITO
-Sistema completo para gestión de comercios que permite registrar tiendas con múltiples direcciones, validar duplicados, y seleccionar comercios al agregar precios a productos. Diseñado para evitar duplicados mediante validación inteligente de similitud.
+Sistema completo para gestión de comercios y sucursales que permite registrar tiendas con múltiples direcciones, validar duplicados, agrupar cadenas automáticamente, y seleccionar comercios al agregar precios a productos. Diseñado para evitar duplicados mediante validación inteligente de similitud y agrupación por nombre normalizado.
 
 ## COMPONENTES PRINCIPALES
 
@@ -16,6 +16,7 @@ Sistema completo para gestión de comercios que permite registrar tiendas con m�
 - FormularioComercio.vue (src/components/Formularios/)
 - DialogoAgregarComercio.vue (src/components/Formularios/Dialogos/)
 - DialogoCoincidencias.vue (src/components/Formularios/Dialogos/)
+- DialogoDuplicadoExacto.vue (src/components/Formularios/Dialogos/) ← NUEVO
 - DialogoMismaUbicacion.vue (src/components/Formularios/Dialogos/)
 - DialogoMotivoEliminacion.vue (src/components/Formularios/Dialogos/)
 
@@ -29,12 +30,12 @@ Sistema completo para gestión de comercios que permite registrar tiendas con m�
 
 ## ESTRUCTURA DE DATOS DE COMERCIO
 
-### Objeto Comercio Completo
+### Objeto Comercio Individual (Storage)
 ```javascript
 {
   id: string,                    // ID único generado
   nombre: string,                // Nombre del comercio
-  tipo: string,                  // Tipo de comercio
+  tipo: string,                  // Tipo de comercio (opcional)
   direcciones: [                 // Array de direcciones
     {
       id: string,
@@ -49,6 +50,25 @@ Sistema completo para gestión de comercios que permite registrar tiendas con m�
   fechaCreacion: string,         // ISO 8601
   fechaUltimoUso: string,        // ISO 8601
   cantidadUsos: number           // Contador de veces usado
+}
+```
+
+### Objeto Comercio Agrupado (Computed en Store)
+Generado por el getter `comerciosAgrupados`. Agrupa comercios con el mismo nombre normalizado en una sola entidad.
+```javascript
+{
+  id: string,                    // ID del primer comercio del grupo
+  nombre: string,                // Nombre del comercio/cadena
+  tipo: string,                  // Tipo de comercio
+  esCadena: boolean,             // true si tiene múltiples sucursales
+  totalSucursales: number,       // Cantidad de sucursales
+  direcciones: Array,            // Todas las direcciones de todas las sucursales
+  direccionesTop3: Array,        // Top 3 direcciones más recientes
+  direccionPrincipal: Object,    // Dirección más recientemente usada
+  foto: string | null,           // Foto del comercio más reciente
+  fechaUltimoUso: string,        // Fecha más reciente entre todas las sucursales
+  cantidadUsos: number,          // Suma de usos de todas las sucursales
+  comerciosOriginales: Array     // Referencias a comercios individuales originales
 }
 ```
 
@@ -143,12 +163,12 @@ Componente contenedor que renderiza grid responsivo de TarjetaComercio
 ## TARJETA COMERCIO (TarjetaComercioYugioh.vue)
 
 ### Propósito
-Tarjeta expandible que muestra información del comercio con lista de direcciones
+Tarjeta expandible que muestra información del comercio/cadena con lista de sucursales. Usa TarjetaBase.vue como componente base con sistema de slots genéricos.
 
 ### Props
 ```javascript
 {
-  comercio: Object (required),
+  comercio: Object (required),   // Acepta comercio individual o agrupado
   modoSeleccion: Boolean,
   seleccionado: Boolean
 }
@@ -163,19 +183,22 @@ Tarjeta expandible que muestra información del comercio con lista de direccione
 
 #### Estado Colapsado (default)
 - Foto/placeholder (aspect ratio 16:9)
+- Overlay con dirección principal (posicionada a la derecha, dentro de la imagen)
 - Nombre del comercio (bold, 18px)
 - Badge con tipo de comercio
 - Estadísticas rápidas:
-  - Cantidad de direcciones
+  - Cantidad de sucursales (no "direcciones")
+  - Usos de sucursal actual + total si es cadena
   - Última vez usado (formato relativo)
-- Ícono chevron-down
+- Ícono chevron-down (posicionado a la derecha)
 
 #### Estado Expandido
 - Todo lo del estado colapsado
-- Sección "Direcciones" (fondo gris)
-- Lista de direcciones con ícono location
+- Sección "SUCURSALES" o "DIRECCIONES" (condicional según esCadena)
+- Lista de top 3 direcciones más recientes
+- Indicador "Y X sucursales más..." si hay más de 3
 - Botón "Editar" (full width)
-- Ícono chevron-up
+- Ícono chevron-up (posicionado al centro)
 
 ### Modo Selección
 - Checkbox circular (esquina superior derecha)
@@ -227,7 +250,6 @@ Formulario para ingresar datos de nuevo comercio con validación en tiempo real
 
 ### Eventos Emitidos
 - 'update:modelValue': Sincronización bidireccional
-- 'validar': Trigger para validación de duplicados
 
 ### Campos del Formulario
 
@@ -235,12 +257,12 @@ Formulario para ingresar datos de nuevo comercio con validación en tiempo real
 - Tipo: q-input
 - Validación: requerido, mínimo 2 caracteres
 - Placeholder: "Ej: Ta-Ta, Disco, Farmashop"
-- @blur: emit('validar') para buscar duplicados
 
-#### Tipo (obligatorio)
+#### Tipo (opcional)
 - Tipo: q-select
 - Opciones: Supermercado, Almacén, Mayorista, Farmacia, Kiosco, Online, Otro
-- Default: "Supermercado"
+- Placeholder: "Tipo de comercio (opcional)"
+- No tiene valor por defecto
 
 #### Calle y número (obligatorio)
 - Tipo: q-input
@@ -265,8 +287,10 @@ Formulario para ingresar datos de nuevo comercio con validación en tiempo real
 ### Validaciones en Tiempo Real
 - Nombre: required, min 2 chars
 - Calle: required
+- Tipo: opcional (sin validación)
 - Feedback visual con colores (rojo/verde)
 - Mensajes de error debajo de inputs
+- La validación de duplicados NO se dispara al escribir, solo al hacer click en "Guardar"
 
 ### Métodos Expuestos
 - limpiarFormulario(): Reset todos los campos
@@ -291,38 +315,46 @@ Modal que contiene FormularioComercio y maneja el flujo completo de guardado con
 ### Flujo de Guardado Completo
 
 #### 1. Usuario completa formulario
-- Ingresa nombre, tipo, dirección
+- Ingresa nombre, tipo (opcional), dirección
 - Validaciones en tiempo real
 
-#### 2. Al escribir nombre o dirección
-- Se dispara @blur en inputs
-- emit('validar') desde FormularioComercio
+#### 2. Al hacer click en "Guardar"
 - DialogoAgregarComercio llama validarDuplicados()
+- Usa `comerciosStore.comerciosAgrupados` como datos de referencia (evita duplicados en modal)
 
-#### 3. Validación de Duplicados
+#### 3. Validación de Duplicados (3 niveles)
 ```javascript
 async validarDuplicados() {
-  const similares = await ComerciosService.buscarSimilares(
-    nombre,
-    calle
+  const resultado = await ComerciosService.validarDuplicados(
+    datosComercio.value,
+    comerciosStore.comerciosAgrupados // Datos agrupados para evitar duplicados
   )
-  
-  if (similares.length > 0) {
-    // Abrir DialogoCoincidencias
-    comerciosSimilares.value = similares
-    dialogoCoincidenciasAbierto.value = true
+
+  if (resultado.esDuplicado) {
+    if (resultado.nivel === 1) {
+      // Duplicado exacto → DialogoDuplicadoExacto
+    } else if (resultado.nivel === 2) {
+      // Nombres similares → DialogoCoincidencias
+    } else if (resultado.nivel === 3) {
+      // Misma ubicación → DialogoMismaUbicacion
+    }
   }
 }
 ```
 
 #### 4. Usuario decide
-**Opción A:** Click en comercio similar
-- emit('usar-existente', comercio)
-- Se cierra diálogo sin crear nuevo
+**Nivel 1 (Duplicado exacto):**
+- DialogoDuplicadoExacto muestra confirmación
+- Puede cancelar o forzar creación del duplicado
 
-**Opción B:** Click en "No, es nuevo"
-- Continuar con guardado
-- Crear comercio nuevo
+**Nivel 2 (Nombres similares):**
+- DialogoCoincidencias muestra comercios similares
+- Click en comercio: `agregarSucursal()` → crea nueva sucursal
+- Click en "No, es nuevo": continúa con guardado normal
+
+**Nivel 3 (Misma ubicación):**
+- DialogoMismaUbicacion informa que hay comercios en la misma dirección
+- Puede continuar o cancelar
 
 #### 5. Guardar Comercio Nuevo
 ```javascript
@@ -377,7 +409,7 @@ async guardarComercio() {
 ## DIÁLOGO COINCIDENCIAS (DialogoCoincidencias.vue)
 
 ### Propósito
-Mostrar comercios similares detectados y permitir al usuario elegir si usar existente o crear nuevo
+Mostrar comercios similares detectados y permitir al usuario agregar una nueva sucursal o crear un comercio nuevo
 
 ### Props
 ```javascript
@@ -390,7 +422,7 @@ Mostrar comercios similares detectados y permitir al usuario elegir si usar exis
 
 ### Eventos Emitidos
 - 'update:modelValue': Sincronizar apertura
-- 'usar-existente': Usuario eligió comercio existente
+- 'agregar-sucursal': Usuario eligió comercio existente (crea nueva sucursal)
 - 'continuar-nuevo': Usuario confirmó que es nuevo
 
 ### Estructura Visual
@@ -398,34 +430,43 @@ Mostrar comercios similares detectados y permitir al usuario elegir si usar exis
 #### Header (fondo warning)
 - Ícono warning grande
 - Título: "Comercios similares encontrados"
-- Subtítulo: "Verifica si es alguno de estos"
+- Botón cerrar (posición absoluta, top: 8px, right: 8px)
+
+#### Texto informativo
+- "¿Es una nueva sucursal de alguno de estos comercios?"
 
 #### Lista de Comercios Similares
-```
-┌─────────────────────────────────────┐
-│  [Avatar] Nombre Comercio           │
-│           Tipo                 95%  │
-│           X direcciones      similar│
-├─────────────────────────────────────┤
-│  [Avatar] Otro Comercio             │
-│           Tipo                 87%  │
-│           X direcciones      similar│
-└─────────────────────────────────────┘
-```
-
-#### Items Clickeables
-- Click en item: emit('usar-existente', comercio)
+- Click en item: emit('agregar-sucursal', comercio) → crea nueva sucursal
 - Ripple effect al tocar
-- Feedback visual claro
 
 #### Acciones
-- Botón: "No, es nuevo" (primary, flat)
-- emit('continuar-nuevo')
+- Botón: "No, es nuevo" (primary, flat) → emit('continuar-nuevo')
+- El diálogo NO es persistent (se puede cerrar con click afuera o botón X)
 
-#### Nota Informativa
-- Banner gris con ícono info
-- Texto explicativo sobre duplicados
-- Ayuda contextual
+## DIÁLOGO DUPLICADO EXACTO (DialogoDuplicadoExacto.vue)
+
+### Propósito
+Confirmación cuando el usuario intenta agregar un comercio con nombre y dirección idénticos a uno existente
+
+### Props
+```javascript
+{
+  modelValue: Boolean,
+  comercioExistente: Object,     // Comercio que ya existe
+  datosNuevos: Object            // Datos que el usuario intenta agregar
+}
+```
+
+### Eventos Emitidos
+- 'update:modelValue': Sincronizar apertura
+- 'continuar': Usuario confirma crear duplicado
+- 'cancelar': Usuario cancela
+
+### Estructura Visual
+- Header con ícono warning naranja + "Comercio Duplicado"
+- Muestra nombre y dirección del comercio existente
+- Pregunta de confirmación
+- Botones: "Cancelar" (flat) y "Sí, crear duplicado" (naranja)
 
 ### Algoritmo de Similitud (desde ComerciosService)
 - Levenshtein distance < 3: Similar
@@ -526,7 +567,7 @@ Solicitar motivo de eliminación y advertir sobre productos afectados
 ## COMERCIOS SERVICE (ComerciosService.js)
 
 ### Propósito
-Lógica de negocio para CRUD de comercios y validación de duplicados
+Lógica de negocio para CRUD de comercios, validación de duplicados y agrupación de cadenas
 
 ### Constructor
 ```javascript
@@ -640,6 +681,16 @@ async buscarSimilares(nombre, direccion) {
 - Incrementa cantidadUsos
 - Actualiza fechaUltimoUso del comercio
 - Actualiza fechaUltimoUso de la dirección
+
+#### validarDuplicados(nuevoComercio, comerciosParaValidar?)
+- Acepta segundo parámetro opcional con comercios para validar (evita queries innecesarias)
+- Si no se pasa, usa `obtenerTodos()` internamente
+- Retorna objeto con `esDuplicado`, `nivel`, `tipo`, `comercio/comercios`, `mensaje`
+- 3 niveles de validación: exacto (1), similar (2), misma ubicación (3)
+
+#### agruparPorCadena(comercios)
+- Agrupa comercios por nombre normalizado
+- Retorna array con comercios agrupados (`esCadena`, `sucursales`)
 
 ### Algoritmos de Validación
 
@@ -769,6 +820,19 @@ comerciosPorUso: (state) => {
 }
 ```
 
+#### comerciosAgrupados (NUEVO - Sistema de Sucursales)
+Agrupa comercios con el mismo nombre normalizado en una sola entidad. Usado por ComerciosPage para mostrar cadenas como una sola tarjeta y por la validación de duplicados.
+```javascript
+// Lógica resumida:
+// 1. Agrupa por nombre normalizado (Map)
+// 2. Marca esCadena: true si tiene múltiples comercios
+// 3. Combina todas las direcciones
+// 4. Calcula direccionesTop3 (las 3 más recientes)
+// 5. Calcula direccionPrincipal (la más reciente)
+// 6. Suma cantidadUsos de todas las sucursales
+// 7. Ordena resultado por fechaUltimoUso descendente
+```
+
 #### totalComercios
 - Retorna: state.comercios.length
 
@@ -848,23 +912,28 @@ const {
 
 ### ✅ Completadas
 - CRUD completo de comercios
-- Validación de duplicados (nombre + dirección)
-- Tarjetas expandibles con direcciones
-- Formulario con validaciones
-- Diálogos de coincidencias y ubicación
-- Búsqueda en tiempo real
+- Validación de duplicados (nombre + dirección) con 3 niveles
+- Sistema de sucursales: agrupación automática de cadenas por nombre
+- Getter `comerciosAgrupados` con dirección principal, top 3, contadores
+- Diálogo de duplicado exacto con confirmación
+- Diálogo de coincidencias con opción "agregar sucursal"
+- Overlay de dirección principal dentro de la imagen (posición derecha)
+- Tarjetas expandibles con sucursales (top 3 + indicador "más...")
+- Botón expandir: derecha cuando cerrado, centro cuando abierto
+- TarjetaBase con sistema de slots genéricos (#overlay-info)
+- Tipo de comercio como campo opcional
+- Formulario sin auto-validación (solo al guardar)
+- Búsqueda en tiempo real con datos agrupados
 - Modo selección múltiple
 - Grid responsivo
 - Formato de fechas relativo
 - Vibración háptica
-- Tipos de comercio predefinidos
 - Componentes compartidos (barras)
 
 ### ⏳ Pendientes
 - Subir foto de comercio (cámara)
 - Edición de comercios
 - Eliminación con motivo
-- Integración con FormularioPrecio
 - Geolocalización
 - Mapa de comercios cercanos
 - Compartir entre usuarios
@@ -912,15 +981,15 @@ const {
 8. comerciosStore (estado global)
 
 ### Estado actual:
-- Fases 1-4: 100% completadas
-- Fase 5: 0% (integración con precios)
-- Fase 6: 0% (eliminación múltiple)
-- Fase 7: 50% (router configurado)
-- Progreso general: ~60% completado
+- Sistema de sucursales: 100% completado (Fases 1-5 del PlanSistemaSucursales.md)
+- Agrupación de cadenas: Implementado y testeado
+- Integración con precios: Completada (FormularioPrecio usa comerciosStore)
+- Progreso general: ~85% completado
 
 ### Diferencias con Productos:
-- Comercios tienen múltiples direcciones
-- Validación de duplicados más compleja
-- Diálogos adicionales (coincidencias, ubicación)
+- Comercios tienen múltiples direcciones (sucursales)
+- Validación de duplicados más compleja (3 niveles)
+- Diálogos adicionales (coincidencias, duplicado exacto, ubicación)
+- Agrupación automática por nombre normalizado (cadenas)
 - No tiene "precios" asociados directamente
 - Usado como referencia en productos

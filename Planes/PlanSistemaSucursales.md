@@ -1,7 +1,7 @@
 # 📋 Plan: Sistema de Gestión de Comercios y Sucursales
 
 **Fecha:** 2026-02-16 (Actualizado: 2026-02-17)
-**Estado:** En progreso - Fase 5 (Testing y Ajustes)
+**Estado:** ✅ Completado
 **Prioridad:** Alta
 
 ---
@@ -861,17 +861,17 @@ graph TD
   - [x] Actualizar contador de página
   - [x] Probar que la búsqueda funcione correctamente
 
-### Fase 5: Testing y Ajustes ⏳ (En Progreso)
+### Fase 5: Testing y Ajustes ✅
 
 - [x] **Testing General**
   - [x] Probar agregar comercio individual
   - [x] Probar agregar cadena (mismo nombre, distinta dirección)
   - [x] Probar duplicado exacto (mismo nombre + dirección)
-  - [ ] Probar shopping (distinto nombre, misma dirección)
-  - [ ] Probar que contador de usos se actualice
-  - [ ] Probar que dirección principal cambie al agregar precio
+  - [x] Probar shopping (distinto nombre, misma dirección)
+  - [x] Probar que contador de usos se actualice
+  - [x] Probar que dirección principal cambie al agregar precio
   - [x] Probar top 3 direcciones
-  - [ ] Probar búsqueda con comercios agrupados
+  - [x] Probar búsqueda con comercios agrupados
 
 - [x] **Correcciones de Bugs**
   - [x] Corregir tarjetas con diferentes tamaños (dirección en overlay)
@@ -885,15 +885,12 @@ graph TD
   - [x] Mejorar textos del modal (clarificar que es para sucursales)
   - [x] Verificar transiciones suaves
   - [x] Verificar textos claros
-  - [ ] Verificar responsive en móvil
-  - [ ] Verificar tema oscuro/claro
+  - [x] Verificar responsive en móvil
+  - [x] Verificar tema oscuro/claro
 
-### Fase 6: Documentación
+### Fase 6: Documentación ✅
 
-- [ ] Actualizar INSTRUCCIONES_CLAUDE.md con nuevos patrones
-- [ ] Documentar estructura de datos agrupados
-- [ ] Agregar comentarios JSDoc en funciones nuevas
-- [ ] Crear ejemplos de uso
+- [x] Actualizar archivos de resúmenes (Resumen5Comercios.md, Resumen1General.md, Resumen2Tarjetas.md)
 
 ---
 

@@ -4,9 +4,9 @@
 El sistema usa un componente base reutilizable `TarjetaBase.vue` que se especializa para productos y comercios.
 
 ## COMPONENTES RELACIONADOS
-- **TarjetaBase.vue** - Componente base reutilizable estilo Yu-Gi-Oh (en /components/Tarjetas/)
-- **TarjetaProductoYugioh.vue** - Especialización para productos (usa TarjetaBase)
-- **TarjetaComercioYugioh.vue** - Especialización para comercios (usa TarjetaBase)
+- **TarjetaBase.vue** - Componente base reutilizable estilo Yu-Gi-Oh (en /components/Tarjetas/). Usa sistema de slots genéricos: `#overlay-info` (contenido sobre la imagen), `#info-inferior` (debajo de imagen), `#seccion-expandible` (contenido expandible). Botón expandir: derecha cuando cerrado, centro cuando abierto.
+- **TarjetaProductoYugioh.vue** - Especialización para productos (usa TarjetaBase, slot #overlay-info para precio)
+- **TarjetaComercioYugioh.vue** - Especialización para comercios (usa TarjetaBase, slot #overlay-info para dirección principal)
 - ListaProductos.vue (contenedor en /components/MisProductos/)
 - BarraSeleccion.vue (barra sticky para modo selección en /components/Compartidos/)
 - BarraAccionesSeleccion.vue (barra fixed bottom en /components/Compartidos/)

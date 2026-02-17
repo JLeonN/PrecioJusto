@@ -120,7 +120,8 @@ src/
 │   │       ├── DialogoAgregarComercio.vue           # Modal para agregar comercio completo
 │   │       ├── DialogoAgregarPrecio.vue             # Modal rápido para agregar precio a producto
 │   │       ├── DialogoResultadosBusqueda.vue        # Modal con resultados de Open Food Facts
-│   │       ├── DialogoCoincidencias.vue             # Alerta de comercios similares
+│   │       ├── DialogoCoincidencias.vue             # Alerta de comercios similares (agregar sucursal)
+│   │       ├── DialogoDuplicadoExacto.vue           # 🆕 Confirmación de duplicado exacto
 │   │       ├── DialogoMismaUbicacion.vue            # Alerta de misma dirección
 │   │       └── DialogoMotivoEliminacion.vue         # Confirmación con motivo de eliminación
 │   │
@@ -377,9 +378,9 @@ A. Gestión de Productos
 ✅ Confirmaciones de precios con validación de usuario único
 ✅ Estadísticas: precio promedio, tendencia, total de comercios
 
-B. Gestión de Comercios
+B. Gestión de Comercios y Sucursales
 
-✅ Registro de comercios con formulario completo (nombre, tipo, dirección, barrio, ciudad)
+✅ Registro de comercios con formulario completo (nombre, tipo opcional, dirección, barrio, ciudad)
 ✅ 🆕 Creación rápida de comercios desde formulario de precio (solo nombre obligatorio)
 ✅ 🆕 Diálogo reutilizable DialogoAgregarComercioRapido.vue
 ✅ 🆕 Pre-llenado de datos escritos por el usuario en diálogo rápido
@@ -387,15 +388,22 @@ B. Gestión de Comercios
 ✅ Validación de duplicados con algoritmo inteligente (3 niveles)
 ✅ Detección de nombres similares (Levenshtein distance)
 ✅ Detección de direcciones cercanas con normalización
-✅ Tipos de comercio predefinidos: Supermercado, Hipermercado, Minimercado, Almacén, Verdulería, Carnicería, Panadería, Farmacia, Ferretería, Tienda de ropa, Librería, Perfumería, Juguetería, Electrónica, Mercado, Mayorista, Otro
+✅ 🆕 Sistema de sucursales: agrupación automática de cadenas por nombre normalizado
+✅ 🆕 Getter `comerciosAgrupados` con dirección principal, top 3, contadores
+✅ 🆕 Diálogo de duplicado exacto con confirmación (DialogoDuplicadoExacto.vue)
+✅ 🆕 Diálogo de coincidencias con opción "agregar sucursal"
+✅ 🆕 Overlay de dirección principal dentro de la imagen de tarjeta
+✅ 🆕 TarjetaBase con sistema de slots genéricos (#overlay-info)
+✅ 🆕 Botón expandir: derecha cuando cerrado, centro cuando abierto
+✅ Tipos de comercio predefinidos (campo opcional)
 ✅ Múltiples direcciones por comercio (agregar/eliminar)
-✅ Tarjetas expandibles con lista de direcciones
-✅ Búsqueda en tiempo real con filtrado
+✅ Tarjetas expandibles con sucursales (top 3 + indicador "más...")
+✅ Búsqueda en tiempo real con datos agrupados
 ✅ Selección múltiple con long-press (vibración háptica)
 ✅ Eliminación múltiple con deshacer (5 segundos)
 ✅ Sistema de uso reciente (ordenamiento inteligente)
 ✅ Registro automático de uso al agregar precio
-✅ Diálogos de confirmación: coincidencias, misma ubicación, motivo eliminación
+✅ Diálogos de confirmación: coincidencias, duplicado exacto, misma ubicación, motivo eliminación
 
 C. Integración Comercios + Productos
 
@@ -503,6 +511,7 @@ H. Arquitectura y Código
 **Getters:**
 - `comerciosOrdenados`: Comercios ordenados alfabéticamente
 - `comerciosPorUso`: Comercios ordenados por uso reciente
+- `comerciosAgrupados`: 🆕 Comercios agrupados por nombre (cadenas como una sola tarjeta)
 - `obtenerComercioPorId(id)`: Busca comercio por ID
 - `totalComercios`: Cantidad total de comercios
 - `totalDirecciones`: Suma de todas las direcciones
@@ -561,10 +570,12 @@ H. Arquitectura y Código
 ### ComerciosService.js
 **Responsabilidades:**
 - CRUD completo de comercios
-- Validación de duplicados con algoritmo de similitud
+- Validación de duplicados con algoritmo de similitud (3 niveles)
 - Detección de nombres similares (Levenshtein distance < 3)
 - Detección de direcciones cercanas (similitud > 80%)
+- Agrupación de cadenas por nombre normalizado
 - Gestión de múltiples direcciones por comercio
+- Acepta comercios opcionales en validación (evita queries innecesarias)
 - Integración con comerciosStore
 
 **Métodos principales:**
@@ -869,9 +880,10 @@ H. Arquitectura y Código
 6. **Sistema de Diseño Centralizado:** Clases CSS globales en app.css
 
 ### Estado Actual
-- **Versión:** MVP funcional (~75% completado)
+- **Versión:** MVP funcional (~85% completado)
 - **Almacenamiento:** Local (Capacitor Storage)
-- **Próximo Milestone:** Integración de comercios con FormularioPrecio
+- **Sistema de sucursales:** Completado (agrupación automática de cadenas)
+- **Próximo Milestone:** Edición de comercios, foto de comercio
 - **Preparación:** Lista para migración a Firebase
 
 ---
@@ -895,4 +907,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** Febrero 16, 2026 (con estructura de Planes y mejoras de comercios)
+**Última actualización:** Febrero 17, 2026 (con sistema de sucursales y agrupación de cadenas)
