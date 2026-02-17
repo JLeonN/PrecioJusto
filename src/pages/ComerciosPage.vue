@@ -120,6 +120,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
@@ -129,7 +130,9 @@ import DialogoMotivoEliminacion from '../components/Formularios/Dialogos/Dialogo
 import ListaComercios from '../components/Comercios/ListaComercios.vue'
 import BarraSeleccion from '../components/Compartidos/BarraSeleccion.vue'
 import BarraAccionesSeleccion from '../components/Compartidos/BarraAccionesSeleccion.vue'
+import ComerciosService from '../almacenamiento/servicios/ComerciosService.js'
 
+const router = useRouter()
 const comerciosStore = useComerciStore()
 const productosStore = useProductosStore()
 const $q = useQuasar()
@@ -245,17 +248,15 @@ function onComercioGuardado() {
   cargarComercios()
 }
 
-/**
- * Editar comercio
- */
-function editarComercio(comercio) {
-  console.log('Editar comercio:', comercio)
-  // TODO: Implementar edición en fase futura
-  $q.notify({
-    type: 'info',
-    message: 'Función de edición próximamente',
-    position: 'top',
-  })
+// Navega a la página de edición del comercio
+function editarComercio(comercioId) {
+  const comercioAgrupado = comerciosStore.comerciosAgrupados.find(
+    (c) => c.comerciosOriginales.some((co) => co.id === comercioId) || c.id === comercioId,
+  )
+  if (comercioAgrupado) {
+    const nombreNormalizado = ComerciosService.normalizar(comercioAgrupado.nombre)
+    router.push(`/comercios/${encodeURIComponent(nombreNormalizado)}`)
+  }
 }
 
 /**

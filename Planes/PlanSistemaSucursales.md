@@ -1,7 +1,7 @@
 # 📋 Plan: Sistema de Gestión de Comercios y Sucursales
 
 **Fecha:** 2026-02-16 (Actualizado: 2026-02-17)
-**Estado:** ✅ Completado
+**Estado:** 🔄 En progreso (Fases 1-6 completadas, Fases 7-9 en desarrollo)
 **Prioridad:** Alta
 
 ---
@@ -894,6 +894,210 @@ graph TD
 
 ---
 
+### Fase 7: Página de Edición de Comercio ✅
+
+**Objetivo:** Implementar página completa de edición de comercio accesible desde el botón "Editar" de las tarjetas. Incluye edición inline de campos, gestión de sucursales, fusión, y productos asociados.
+
+#### Fase 7a: Ruta, Página Base y Navegación ✅
+
+- [x] **`src/router/routes.js`** (Editado)
+  - [x] Agregar ruta `comercios/:nombre` → `EditarComercioPage.vue`
+  - [x] Usar nombre normalizado como parámetro (URLs legibles)
+
+- [x] **`src/pages/EditarComercioPage.vue`** (Nuevo - 660 líneas)
+  - [x] Estructura base: spinner carga, banner error, botón volver
+  - [x] `comercioActual` como computed derivado de `comerciosAgrupados` (reactivo)
+  - [x] Busca por `ComerciosService.normalizar(c.nombre) === params.nombre`
+  - [x] Cargar stores si están vacíos en `onMounted`
+
+- [x] **`src/pages/ComerciosPage.vue`** (Editado)
+  - [x] Cambiar `editarComercio(comercioId)` para navegar con `router.push`
+  - [x] Buscar comercio agrupado → normalizar nombre → navegar a `/comercios/:nombre`
+
+#### Fase 7b: Selector de Sucursales (Cadenas) ✅
+
+- [x] **`src/components/EditarComercio/SelectorSucursales.vue`** (Nuevo - 107 líneas)
+  - [x] Props: `direcciones`, `direccionSeleccionada`, `esCadena`
+  - [x] Emit: `seleccionar`
+  - [x] Si `esCadena`: chips horizontales scrollables con `calle` + `barrio`
+  - [x] Si no es cadena: dirección estática con ícono
+  - [x] Chip naranja para seleccionada, gris para las demás
+
+- [x] **`src/pages/EditarComercioPage.vue`** (Editado)
+  - [x] `direccionSeleccionada` ref inicializada a `direcciones[0]`
+  - [x] `comercioOriginalActual` computed: comercio original que contiene la dirección seleccionada
+  - [x] Watch sobre `comercioActual` para inicializar dirección
+
+#### Fase 7c: Edición Inline de Campos ✅
+
+- [x] **`src/components/EditarComercio/CampoEditable.vue`** (Nuevo - 185 líneas)
+  - [x] Props: `etiqueta`, `valor`, `icono` (componente), `tipo` ('text'|'select'), `opciones`, `requerido`, `sinValorTexto`
+  - [x] Emit: `guardar(nuevoValor)`
+  - [x] Modo lectura: texto + ícono lápiz → click para editar
+  - [x] Modo edición: q-input o q-select + botón check/X
+  - [x] Validación: deshabilita guardar si `requerido` y vacío, o si valor no cambió
+  - [x] Atajos: Enter para guardar, Escape para cancelar
+
+- [x] **`src/almacenamiento/servicios/ComerciosService.js`** (Editado)
+  - [x] Nuevo método `editarDireccion(comercioId, direccionId, datosDireccion)`
+  - [x] Usa `Object.assign()` para aplicar cambios
+  - [x] Recalcula `nombreCompleto` automáticamente
+  - [x] Exportado en el objeto default
+
+- [x] **`src/almacenamiento/stores/comerciosStore.js`** (Editado)
+  - [x] Nueva action `editarDireccion(comercioId, direccionId, datos)`
+  - [x] Llama a `ComerciosService.editarDireccion()` y actualiza state local
+
+- [x] **`src/pages/EditarComercioPage.vue`** (Editado)
+  - [x] 5 campos editables: nombre, categoría, dirección, barrio, ciudad
+  - [x] `guardarCampo(campo, valor)`: edita TODOS los `comerciosOriginales` si es nombre/tipo (mantiene agrupación de cadena)
+  - [x] `guardarCampoDireccion(campo, valor)`: edita solo la dirección seleccionada
+  - [x] Si se edita nombre → `router.replace()` a nueva URL normalizada
+  - [x] Foto: placeholder deshabilitado ("próximamente")
+
+#### Fase 7d: Diálogo Agregar Sucursal ✅
+
+- [x] **`src/components/Formularios/Dialogos/DialogoAgregarSucursal.vue`** (Nuevo - 163 líneas)
+  - [x] Props: `modelValue`, `comercioNombre`, `comercioTipo`
+  - [x] Emit: `update:modelValue`, `sucursal-guardada`
+  - [x] Campos: calle (obligatorio), barrio (opcional), ciudad (opcional)
+  - [x] Categoría: solo visible si `!comercioTipo` (si ya tiene, muestra info heredada)
+  - [x] Al guardar: `ComerciosService.agregarComercio({ nombre, tipo, calle, barrio, ciudad })` → se agrupa automáticamente por nombre normalizado
+  - [x] Mismas `opcionesTipo` que FormularioComercio
+  - [x] Función `limpiar()` al cerrar
+
+- [x] **`src/pages/EditarComercioPage.vue`** (Editado)
+  - [x] Botón "Agregar sucursal" con ícono `add_location`
+  - [x] Integrar diálogo con v-model
+  - [x] `onSucursalGuardada()`: resetear dirección seleccionada + notify
+
+#### Fase 7e: Eliminar Sucursal Individual ✅
+
+- [x] **`src/pages/EditarComercioPage.vue`** (Editado)
+  - [x] Botón "Eliminar sucursal: [calle]" visible solo si `direcciones.length > 1`
+  - [x] `confirmarEliminarSucursal()`:
+    - [x] `$q.dialog()` con confirmación
+    - [x] Si comercio original tiene 1 dirección → `eliminarComercio()` (elimina comercio completo)
+    - [x] Si tiene múltiples → `eliminarDireccion()` (elimina solo la dirección)
+  - [x] Si se eliminan todas las sucursales del grupo → `router.back()`
+  - [x] Resetear `direccionSeleccionada` después de eliminar
+
+#### Fase 7f: Lista de Productos Asociados ✅
+
+- [x] **`src/components/EditarComercio/ListaProductosComercio.vue`** (Nuevo - 93 líneas)
+  - [x] Props: `productos` (Array filtrado), `limite` (Number, default 3)
+  - [x] Emit: `ver-producto(id)`
+  - [x] Cada item: avatar naranja, nombre producto, último precio + fecha
+  - [x] Botón "Ver todos (X)" / "Mostrar menos" si hay más de `limite`
+  - [x] Estado vacío: ícono + texto "No hay productos registrados"
+
+- [x] **`src/pages/EditarComercioPage.vue`** (Editado)
+  - [x] Computed `idsComerciosOriginales`: array de ids de comercios originales del grupo
+  - [x] Computed `productosAsociados`: productos donde algún precio tiene `comercioId` en `idsComerciosOriginales`
+  - [x] Computed `productosConPrecio`: mapeo con nombre, último precio, fecha formateada
+  - [x] Función `formatearFechaSimple()`: Hoy, Ayer, Hace X días/semanas/meses
+  - [x] Al click producto → `router.push('/producto/' + id)`
+
+#### Fase 7g: Fusionar Sucursales ✅
+
+- [x] **`src/pages/EditarComercioPage.vue`** (Editado)
+  - [x] Sección visible solo si `esCadena && direcciones.length >= 2`
+  - [x] Estado: `modoFusion`, `fusionSeleccionadas` (array max 2), `fusionando`
+  - [x] Botón "Iniciar fusión" → activa modo selección
+  - [x] Lista de sucursales con checkboxes seleccionables (max 2)
+  - [x] Badges: "Destino" (verde) en primera seleccionada, "Eliminar" (rojo) en segunda
+  - [x] `toggleFusionSeleccion(direccionId)`: agrega/quita de selección
+  - [x] `confirmarFusion()`: cuenta precios a mover, muestra diálogo de confirmación
+  - [x] `ejecutarFusion(destinoId, origenId)`:
+    1. [x] Encuentra comercios originales de cada dirección
+    2. [x] Recorre `productosStore.productos`, actualiza `comercioId`/`direccionId`/`nombreCompleto` de precios del origen
+    3. [x] Persiste cambios con `actualizarProducto()`
+    4. [x] Elimina sucursal origen (`eliminarComercio` o `eliminarDireccion`)
+    5. [x] Resetea estado de fusión
+  - [x] `encontrarComercioOriginalPorDireccion()`: helper reutilizable
+  - [x] `cancelarFusion()`: limpia estado
+
+#### Fase 7h: Estadísticas y Fechas ⏳
+
+- [ ] **`src/composables/useFechaRelativa.js`** (Nuevo)
+  - [ ] Extraer lógica de `TarjetaComercioYugioh.formatearUltimoUso()` a composable reutilizable
+  - [ ] Exportar `formatearFechaRelativa(fecha)`
+  - [ ] Reutilizar en EditarComercioPage (reemplazar `formatearFechaSimple`)
+
+- [ ] **`src/components/EditarComercio/EstadisticasComercio.vue`** (Nuevo)
+  - [ ] Props: `comercio`, `totalProductos`, `ultimoPrecioFecha`
+  - [ ] Grid de mini-cards con:
+    - [ ] Registrado: fecha creación más antigua de `comerciosOriginales`
+    - [ ] Último uso: `comercio.fechaUltimoUso`
+    - [ ] Último precio: fecha del precio más reciente
+    - [ ] Productos: total de productos asociados
+    - [ ] Sucursales: `comercio.totalSucursales`
+
+- [ ] **`src/components/Tarjetas/TarjetaComercioYugioh.vue`** (Editar)
+  - [ ] Reemplazar `formatearUltimoUso` local por import de `useFechaRelativa`
+
+- [ ] **`src/pages/EditarComercioPage.vue`** (Editar)
+  - [ ] Integrar `EstadisticasComercio` reemplazando el placeholder de fase 7h
+
+---
+
+### Fase 8: Testing y Verificación ⏳
+
+**Objetivo:** Verificar que todas las funcionalidades implementadas en la Fase 7 funcionan correctamente.
+
+- [ ] **Testing Manual**
+  - [ ] Navegar desde tarjeta de comercio individual → página de edición
+  - [ ] Navegar desde tarjeta de cadena → página de edición
+  - [ ] Editar nombre inline → verificar que cambia en todos los originales de la cadena
+  - [ ] Editar categoría inline → verificar actualización
+  - [ ] Editar dirección/barrio/ciudad inline → verificar solo afecta la sucursal seleccionada
+  - [ ] Cambiar nombre → verificar redirección a nueva URL
+  - [ ] Agregar sucursal con modal → verificar que aparece en selector
+  - [ ] Eliminar sucursal → verificar que desaparece y se selecciona otra
+  - [ ] Eliminar última sucursal → verificar que navega atrás
+  - [ ] Ver productos asociados → verificar datos correctos
+  - [ ] Click en producto → verificar navegación a detalle
+  - [ ] Fusionar 2 sucursales → verificar que precios se transfieren
+  - [ ] Fusionar → verificar que sucursal origen se elimina
+  - [ ] Verificar responsive en móvil
+  - [ ] Verificar tema oscuro/claro
+  - [ ] Verificar que el botón "Volver" funciona
+
+- [ ] **Correcciones de Bugs** (si se encuentran)
+
+---
+
+### Fase 9: Documentación ⏳
+
+**Objetivo:** Actualizar archivos de resúmenes con la nueva funcionalidad.
+
+- [ ] Actualizar `Resumenes/Resumen5Comercios.md` con la página de edición
+- [ ] Actualizar `Resumenes/Resumen1General.md` con nuevos archivos y rutas
+- [ ] Documentar nuevos componentes en `EditarComercio/`
+- [ ] Documentar nueva ruta `/comercios/:nombre`
+- [ ] Documentar nuevos métodos en `ComerciosService.js` y `comerciosStore.js`
+
+---
+
+## 📊 Resumen de Archivos por Fase (7-9)
+
+| Fase | Archivos Nuevos | Archivos Editados |
+|------|----------------|-------------------|
+| 7a | `EditarComercioPage.vue` | `routes.js`, `ComerciosPage.vue` |
+| 7b | `SelectorSucursales.vue` | `EditarComercioPage.vue` |
+| 7c | `CampoEditable.vue` | `EditarComercioPage.vue`, `ComerciosService.js`, `comerciosStore.js` |
+| 7d | `DialogoAgregarSucursal.vue` | `EditarComercioPage.vue` |
+| 7e | (ninguno) | `EditarComercioPage.vue` |
+| 7f | `ListaProductosComercio.vue` | `EditarComercioPage.vue` |
+| 7g | (ninguno) | `EditarComercioPage.vue` |
+| 7h | `useFechaRelativa.js`, `EstadisticasComercio.vue` | `EditarComercioPage.vue`, `TarjetaComercioYugioh.vue` |
+| 8 | (ninguno) | (correcciones si aplica) |
+| 9 | (ninguno) | Archivos de resúmenes |
+
+**Total Fase 7: 6 archivos nuevos, 4 archivos editados**
+
+---
+
 ## 🚀 Orden de Implementación Recomendado
 
 1. **Día 1: Lógica de negocio**
@@ -918,12 +1122,12 @@ graph TD
 
 ## 🔮 Mejoras Futuras (Fuera de Alcance)
 
-1. **Gestión de Cadenas**
-   - Permitir vincular/desvincular comercios manualmente
-   - Editar nombre de cadena centralizado
-   - Transferir productos entre sucursales
+1. **Fotos por Sucursal**
+   - Captura con cámara del dispositivo
+   - Foto independiente por sucursal
+   - Galería de fotos del comercio
 
-2. **Estadísticas**
+2. **Estadísticas Avanzadas**
    - Gráfico de uso por sucursal
    - Comparación de precios entre sucursales
    - Sucursal más barata/más cara
@@ -933,9 +1137,9 @@ graph TD
    - Calcular distancia a sucursales
    - Ruta óptima de compras
 
-4. **Fotos**
-   - Foto independiente por sucursal
-   - Galería de fotos del comercio
+4. **Gestión Avanzada de Cadenas**
+   - Vincular/desvincular comercios manualmente
+   - Transferir productos entre sucursales individualmente
 
 ---
 
@@ -962,7 +1166,7 @@ graph TD
 
 ## 🎯 Criterios de Éxito
 
-✅ **El plan está completo cuando:**
+✅ **Fases 1-6 completadas cuando:**
 1. Usuario puede agregar comercios con tipo opcional
 2. Sistema detecta y agrupa cadenas automáticamente
 3. Tarjetas muestran dirección principal visible
@@ -972,6 +1176,17 @@ graph TD
 7. Shopping centers no se agrupan erróneamente
 8. Todo funciona sin romper datos existentes
 
+⏳ **Fases 7-9 completadas cuando:**
+9. Botón "Editar" navega a página de edición funcional
+10. Edición inline funciona para nombre, categoría, dirección, barrio, ciudad
+11. Selector de sucursales permite cambiar entre direcciones de cadenas
+12. Modal permite agregar nuevas sucursales
+13. Se puede eliminar sucursales individuales
+14. Productos asociados se muestran con último precio
+15. Fusión de sucursales transfiere precios correctamente
+16. Estadísticas muestran fechas y contadores
+17. Documentación actualizada
+
 ---
 
 ## 📞 Preguntas Pendientes para el Usuario
@@ -980,6 +1195,6 @@ Ninguna - todas las preguntas fueron respondidas. ✅
 
 ---
 
-**Elaborado por:** Claude Sonnet 4.5
+**Elaborado por:** Claude Sonnet 4.5 / Claude Opus 4.6
 **Revisión:** Pendiente
 **Aprobación:** Pendiente

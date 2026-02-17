@@ -352,6 +352,32 @@ async function agregarDireccion(comercioId, datosDireccion) {
 }
 
 /**
+ * Edita una dirección específica de un comercio
+ * @param {string} comercioId - ID del comercio
+ * @param {string} direccionId - ID de la dirección
+ * @param {Object} datosDireccion - Datos a actualizar (calle, barrio, ciudad)
+ * @returns {Promise<Object|null>} Comercio actualizado o null
+ */
+async function editarDireccion(comercioId, direccionId, datosDireccion) {
+  const comercios = await obtenerTodos()
+  const comercio = comercios.find((c) => c.id === comercioId)
+
+  if (!comercio) return null
+
+  const direccion = comercio.direcciones.find((d) => d.id === direccionId)
+  if (!direccion) return null
+
+  // Aplicar cambios
+  Object.assign(direccion, datosDireccion)
+
+  // Recalcular nombreCompleto
+  direccion.nombreCompleto = `${comercio.nombre} - ${direccion.calle}`
+
+  await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  return comercio
+}
+
+/**
  * Elimina una dirección de un comercio
  * @param {string} comercioId - ID del comercio
  * @param {string} direccionId - ID de la dirección
@@ -426,6 +452,7 @@ export default {
   editarComercio,
   eliminarComercio,
   agregarDireccion,
+  editarDireccion,
   eliminarDireccion,
   validarDuplicados,
   registrarUsoComercio,

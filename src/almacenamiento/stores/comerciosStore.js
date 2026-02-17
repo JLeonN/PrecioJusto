@@ -350,6 +350,36 @@ export const useComerciStore = defineStore('comercios', {
     },
 
     /**
+     * Edita una dirección específica de un comercio
+     * @param {string} comercioId - ID del comercio
+     * @param {string} direccionId - ID de la dirección
+     * @param {Object} datosDireccion - Datos a actualizar
+     * @returns {Promise<Object|null>} Comercio actualizado o null
+     */
+    async editarDireccion(comercioId, direccionId, datosDireccion) {
+      try {
+        const comercioActualizado = await ComerciosService.editarDireccion(
+          comercioId,
+          direccionId,
+          datosDireccion,
+        )
+
+        if (comercioActualizado) {
+          const indice = this.comercios.findIndex((c) => c.id === comercioId)
+          if (indice !== -1) {
+            this.comercios[indice] = comercioActualizado
+          }
+        }
+
+        return comercioActualizado
+      } catch (error) {
+        console.error('Error al editar dirección:', error)
+        this.error = 'No se pudo editar la dirección'
+        throw error
+      }
+    },
+
+    /**
      * Elimina una dirección de un comercio
      * @param {string} comercioId - ID del comercio
      * @param {string} direccionId - ID de la dirección

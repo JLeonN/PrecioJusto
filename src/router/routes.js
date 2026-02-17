@@ -11,6 +11,9 @@ const routes = [
 
       // Página de comercios - Gestión de comercios
       { path: 'comercios', component: () => import('pages/ComerciosPage.vue') },
+
+      // Página de edición de comercio
+      { path: 'comercios/:nombre', component: () => import('pages/EditarComercioPage.vue') },
     ],
   },
 
