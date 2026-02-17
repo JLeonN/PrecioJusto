@@ -782,42 +782,42 @@ graph TD
 
 ## ✅ Checklist de Implementación
 
-### Fase 1: Validaciones y Lógica de Negocio
+### Fase 1: Validaciones y Lógica de Negocio ✅
 
-- [ ] **ComerciosService.js**
-  - [ ] Ajustar `validarDuplicados()` nivel 1 para permitir continuar
-  - [ ] Crear función `agruparPorCadena()`
-  - [ ] Exportar nueva función
+- [x] **ComerciosService.js**
+  - [x] Ajustar `validarDuplicados()` nivel 1 para permitir continuar
+  - [x] Crear función `agruparPorCadena()`
+  - [x] Exportar nueva función
   - [ ] Escribir tests unitarios
 
-- [ ] **comerciosStore.js**
-  - [ ] Crear getter `comerciosAgrupados`
-  - [ ] Implementar lógica de agrupación por nombre
-  - [ ] Implementar ordenamiento de direcciones
-  - [ ] Calcular dirección principal
-  - [ ] Calcular top 3 direcciones
+- [x] **comerciosStore.js**
+  - [x] Crear getter `comerciosAgrupados`
+  - [x] Implementar lógica de agrupación por nombre
+  - [x] Implementar ordenamiento de direcciones
+  - [x] Calcular dirección principal
+  - [x] Calcular top 3 direcciones
   - [ ] Escribir tests
 
-### Fase 2: Formularios y Validación UI
+### Fase 2: Formularios y Validación UI ✅
 
-- [ ] **FormularioComercio.vue**
-  - [ ] Remover `required` del campo tipo
-  - [ ] Actualizar placeholder a "Tipo de comercio (opcional)"
-  - [ ] Probar que valide correctamente
+- [x] **FormularioComercio.vue**
+  - [x] Remover `required` del campo tipo
+  - [x] Actualizar placeholder a "Tipo de comercio (opcional)"
+  - [x] Probar que valide correctamente
 
-- [ ] **DialogoAgregarComercio.vue**
-  - [ ] Agregar estado `dialogoDuplicadoExactoAbierto`
-  - [ ] Agregar estado `comercioDuplicadoExacto`
-  - [ ] Modificar `validarDuplicados()` para manejar nivel 1
-  - [ ] Agregar referencia a `DialogoDuplicadoExacto`
-  - [ ] Implementar función `forzarCrearDuplicado()`
+- [x] **DialogoAgregarComercio.vue**
+  - [x] Agregar estado `dialogoDuplicadoExactoAbierto`
+  - [x] Agregar estado `comercioDuplicadoExacto`
+  - [x] Modificar `validarDuplicados()` para manejar nivel 1
+  - [x] Agregar referencia a `DialogoDuplicadoExacto`
+  - [x] Implementar función `forzarCrearDuplicado()`
 
-- [ ] **DialogoDuplicadoExacto.vue** (NUEVO)
-  - [ ] Crear componente desde cero
-  - [ ] Diseñar UI siguiendo patrón de otros diálogos
-  - [ ] Implementar props y emits
-  - [ ] Agregar estilos
-  - [ ] Probar flujo completo
+- [x] **DialogoDuplicadoExacto.vue** (NUEVO)
+  - [x] Crear componente desde cero
+  - [x] Diseñar UI siguiendo patrón de otros diálogos
+  - [x] Implementar props y emits
+  - [x] Agregar estilos
+  - [x] Probar flujo completo
 
 ### Fase 3: Visualización en Tarjetas
 
