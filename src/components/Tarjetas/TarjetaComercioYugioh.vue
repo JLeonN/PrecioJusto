@@ -20,39 +20,74 @@
       <IconBuilding :size="48" class="text-grey-5" />
     </template>
     <template #info-inferior>
+      <!-- Dirección principal -->
+      <div v-if="comercio.direccionPrincipal" class="direccion-principal">
+        <IconMapPin :size="14" class="text-grey-6" />
+        <span class="texto-direccion">
+          {{ comercio.direccionPrincipal.calle }}
+          <span v-if="comercio.direccionPrincipal.barrio">
+            , {{ comercio.direccionPrincipal.barrio }}
+          </span>
+        </span>
+      </div>
+
+      <!-- Info comercio -->
       <div class="info-comercio">
         <div class="info-item">
           <IconMapPin :size="16" class="text-grey-6" />
           <span>
-            {{ comercio.direcciones.length }}
-            {{ comercio.direcciones.length === 1 ? 'dirección' : 'direcciones' }}
+            {{ comercio.totalSucursales || comercio.direcciones.length }}
+            {{
+              (comercio.totalSucursales || comercio.direcciones.length) === 1
+                ? 'sucursal'
+                : 'sucursales'
+            }}
           </span>
         </div>
         <div v-if="comercio.cantidadUsos > 0" class="info-item">
           <IconShoppingCart :size="16" class="text-grey-6" />
-          <span>{{ comercio.cantidadUsos }} usos</span>
+          <span>
+            {{ obtenerUsosActuales() }} usos
+            <span v-if="comercio.esCadena" class="text-grey-5">
+              ({{ comercio.cantidadUsos }} total)
+            </span>
+          </span>
         </div>
       </div>
     </template>
     <template #expandido-header>
       <div class="expandido-titulo">
         <IconMapPin :size="18" />
-        <span>DIRECCIONES</span>
+        <span>{{ comercio.esCadena ? 'SUCURSALES' : 'DIRECCIONES' }}</span>
       </div>
     </template>
     <template #expandido-contenido>
       <div class="lista-direcciones">
-        <div v-for="direccion in comercio.direcciones" :key="direccion.id" class="item-direccion">
+        <div
+          v-for="direccion in comercio.direccionesTop3 || comercio.direcciones"
+          :key="direccion.id"
+          class="item-direccion"
+        >
           <div class="item-direccion__icono">
             <IconMapPin :size="20" class="text-orange" />
           </div>
           <div class="item-direccion__info">
-            <div class="item-direccion__texto">{{ direccion.direccion }}</div>
+            <div class="item-direccion__texto">{{ direccion.calle }}</div>
+            <div v-if="direccion.barrio" class="item-direccion__barrio">
+              {{ direccion.barrio }}
+            </div>
             <div class="item-direccion__fecha">
               {{ formatearUltimoUso(direccion) }}
             </div>
           </div>
         </div>
+
+        <!-- Indicador de más sucursales -->
+        <div v-if="comercio.direcciones.length > 3" class="mas-direcciones">
+          <IconAlertCircle :size="16" class="text-orange" />
+          <span>Y {{ comercio.direcciones.length - 3 }} sucursales más...</span>
+        </div>
+
         <div v-if="comercio.direcciones.length === 0" class="sin-direcciones">
           <IconAlertCircle :size="20" class="text-grey-5" />
           <span class="text-grey-6">No hay direcciones registradas</span>
@@ -78,7 +113,7 @@ import TarjetaBase from './TarjetaBase.vue'
 import { IconBuilding, IconMapPin, IconShoppingCart, IconAlertCircle } from '@tabler/icons-vue'
 
 /* Props del componente */
-defineProps({
+const props = defineProps({
   comercio: {
     type: Object,
     required: true,
@@ -99,13 +134,31 @@ defineProps({
 /* Emits del componente */
 defineEmits(['long-press', 'toggle-seleccion', 'editar'])
 
+/* Obtener usos de la sucursal actual */
+const obtenerUsosActuales = () => {
+  if (!props.comercio.esCadena) {
+    return props.comercio.cantidadUsos
+  }
+
+  // Si es cadena, obtener usos de la sucursal principal
+  const direccionPrincipal = props.comercio.direccionPrincipal
+  if (!direccionPrincipal) return props.comercio.cantidadUsos
+
+  // Buscar comercio original de esta dirección
+  const comercioOriginal = props.comercio.comerciosOriginales?.find((c) =>
+    c.direcciones.some((d) => d.id === direccionPrincipal.id),
+  )
+
+  return comercioOriginal?.cantidadUsos || 0
+}
+
 /* Formatear último uso de dirección */
 const formatearUltimoUso = (direccion) => {
-  if (!direccion.ultimoUso) {
+  if (!direccion.fechaUltimoUso) {
     return 'Sin uso registrado'
   }
 
-  const fecha = new Date(direccion.ultimoUso)
+  const fecha = new Date(direccion.fechaUltimoUso)
   const ahora = new Date()
   const diferencia = Math.floor((ahora - fecha) / 1000)
 
@@ -127,6 +180,21 @@ const manejarExpansion = (expandido) => {
 .tipo-badge {
   display: flex;
   align-items: center;
+}
+.direccion-principal {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 8px 0;
+  border-top: 1px solid var(--borde-suave);
+  margin-top: 8px;
+  padding-top: 8px;
+  font-size: 13px;
+  color: var(--texto-secundario);
+}
+.texto-direccion {
+  flex: 1;
+  line-height: 1.4;
 }
 .info-comercio {
   display: flex;
@@ -182,9 +250,25 @@ const manejarExpansion = (expandido) => {
   color: var(--texto-primario);
   line-height: 1.4;
 }
+.item-direccion__barrio {
+  font-size: 12px;
+  color: var(--texto-secundario);
+}
 .item-direccion__fecha {
   font-size: 11px;
   color: var(--texto-deshabilitado);
+}
+.mas-direcciones {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: var(--fondo-drawer);
+  border-radius: 8px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--texto-secundario);
+  font-style: italic;
 }
 .sin-direcciones {
   display: flex;

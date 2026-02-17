@@ -819,18 +819,18 @@ graph TD
   - [x] Agregar estilos
   - [x] Probar flujo completo
 
-### Fase 3: Visualización en Tarjetas
+### Fase 3: Visualización en Tarjetas ✅
 
-- [ ] **TarjetaComercioYugioh.vue**
-  - [ ] Agregar sección de dirección principal
-  - [ ] Cambiar "dirección/direcciones" a "sucursal/sucursales"
-  - [ ] Cambiar "DIRECCIONES" a "SUCURSALES" (condicional)
-  - [ ] Modificar contador de usos (mostrar total)
-  - [ ] Implementar función `obtenerUsosActuales()`
-  - [ ] Usar `direccionesTop3` en lugar de todas
-  - [ ] Agregar indicador "Y X sucursales más..."
-  - [ ] Agregar estilos CSS nuevos
-  - [ ] Probar con datos reales
+- [x] **TarjetaComercioYugioh.vue**
+  - [x] Agregar sección de dirección principal
+  - [x] Cambiar "dirección/direcciones" a "sucursal/sucursales"
+  - [x] Cambiar "DIRECCIONES" a "SUCURSALES" (condicional)
+  - [x] Modificar contador de usos (mostrar total)
+  - [x] Implementar función `obtenerUsosActuales()`
+  - [x] Usar `direccionesTop3` en lugar de todas
+  - [x] Agregar indicador "Y X sucursales más..."
+  - [x] Agregar estilos CSS nuevos
+  - [x] Probar con datos reales
 
 ### Fase 4: Integración en Página
 
