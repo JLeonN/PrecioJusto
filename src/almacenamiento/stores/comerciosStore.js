@@ -192,8 +192,11 @@ export const useComerciStore = defineStore('comercios', {
       this.error = null
 
       try {
-        // Validar duplicados antes de agregar
-        const validacion = await ComerciosService.validarDuplicados(datosComercio)
+        // Validar duplicados antes de agregar (usa comercios agrupados)
+        const validacion = await ComerciosService.validarDuplicados(
+          datosComercio,
+          this.comerciosAgrupados,
+        )
 
         if (validacion.esDuplicado) {
           // Retornar validación para que el componente maneje el diálogo
@@ -405,13 +408,13 @@ export const useComerciStore = defineStore('comercios', {
     },
 
     /**
-     * Valida si un comercio es duplicado
+     * Valida si un comercio es duplicado (usa comercios agrupados)
      * @param {Object} datosComercio - Datos del comercio a validar
      * @returns {Promise<Object>} Resultado de validación
      */
     async validarDuplicados(datosComercio) {
       try {
-        return await ComerciosService.validarDuplicados(datosComercio)
+        return await ComerciosService.validarDuplicados(datosComercio, this.comerciosAgrupados)
       } catch (error) {
         console.error('Error al validar duplicados:', error)
         return {

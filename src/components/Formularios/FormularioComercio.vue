@@ -178,11 +178,6 @@ watch(
 // Emitir cambios al padre
 function emitirCambios() {
   emit('update:modelValue', { ...datosInternos.value })
-
-  // Emitir evento para validar duplicados (debounce podría agregarse)
-  if (datosInternos.value.nombre && datosInternos.value.calle) {
-    emit('validar', datosInternos.value)
-  }
 }
 
 // Reglas de validación

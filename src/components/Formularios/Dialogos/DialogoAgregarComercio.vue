@@ -10,7 +10,7 @@
 
       <!-- CONTENIDO DEL FORMULARIO -->
       <q-card-section class="q-pt-md contenido-scroll">
-        <FormularioComercio v-model="datosComercio" @validar="validarDuplicados" />
+        <FormularioComercio v-model="datosComercio" />
       </q-card-section>
 
       <!-- ACCIONES -->
@@ -33,7 +33,7 @@
     v-model="dialogoCoincidenciasAbierto"
     :comercios-similares="comerciosSimilares"
     :nivel-validacion="nivelValidacion"
-    @usar-existente="usarComercioExistente"
+    @agregar-sucursal="agregarSucursal"
     @continuar-nuevo="continuarConNuevo"
   />
 
@@ -133,12 +133,16 @@ const clasesResponsivas = computed(() => {
 
 /**
  * Valida si hay duplicados antes de guardar
+ * Usa comercios agrupados para evitar mostrar cadenas duplicadas
  */
 async function validarDuplicados() {
   if (!formularioValido.value) return
 
   try {
-    const resultado = await ComerciosService.validarDuplicados(datosComercio.value)
+    const resultado = await ComerciosService.validarDuplicados(
+      datosComercio.value,
+      comerciosStore.comerciosAgrupados,
+    )
 
     if (resultado.esDuplicado) {
       // Hay duplicados - mostrar diálogo correspondiente
@@ -251,23 +255,15 @@ async function continuarConNuevo() {
 }
 
 /**
- * Usuario elige usar un comercio existente
+ * Usuario elige agregar como nueva sucursal
  */
-function usarComercioExistente(comercio) {
-  console.log('📍 Usuario eligió comercio existente:', comercio.nombre)
+async function agregarSucursal(comercio) {
+  console.log('📍 Agregando nueva sucursal de:', comercio.nombre)
 
   dialogoCoincidenciasAbierto.value = false
 
-  $q.notify({
-    type: 'info',
-    message: 'Comercio existente seleccionado',
-    caption: comercio.nombre,
-    position: 'top',
-    icon: 'info',
-  })
-
-  limpiarFormulario()
-  cerrarDialogo()
+  // Crear el nuevo comercio (se agrupará automáticamente como sucursal)
+  await continuarConNuevo()
 }
 
 /**

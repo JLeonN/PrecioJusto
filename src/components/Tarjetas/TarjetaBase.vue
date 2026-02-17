@@ -442,8 +442,7 @@ const manejarLongPress = () => {
 .tarjeta-yugioh__icono-expandir {
   position: absolute;
   bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
+  right: 8px;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 50%;
   width: 32px;
@@ -453,6 +452,13 @@ const manejarLongPress = () => {
   justify-content: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
   z-index: 2;
+  transition: left 0.3s ease, right 0.3s ease, transform 0.3s ease;
+}
+/* Cuando está expandida, centrar el botón */
+.tarjeta-yugioh--expandida .tarjeta-yugioh__icono-expandir {
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
 }
 /* ========================================
    ANIMACIONES

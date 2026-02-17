@@ -165,10 +165,11 @@ async function buscarPorId(id) {
 /**
  * Valida si un comercio es duplicado (3 niveles)
  * @param {Object} nuevoComercio - Comercio a validar
+ * @param {Array} comerciosParaValidar - Comercios a usar (opcional, usa agrupados si no se pasa)
  * @returns {Promise<Object>} Resultado de validación
  */
-async function validarDuplicados(nuevoComercio) {
-  const comercios = await obtenerTodos()
+async function validarDuplicados(nuevoComercio, comerciosParaValidar = null) {
+  const comercios = comerciosParaValidar || (await obtenerTodos())
 
   const nombreNuevo = normalizar(nuevoComercio.nombre)
   const direccionNueva = normalizar(

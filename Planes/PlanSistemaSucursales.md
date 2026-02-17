@@ -1,7 +1,7 @@
 # 📋 Plan: Sistema de Gestión de Comercios y Sucursales
 
-**Fecha:** 2026-02-16
-**Estado:** En revisión
+**Fecha:** 2026-02-16 (Actualizado: 2026-02-17)
+**Estado:** En progreso - Fase 5 (Testing y Ajustes)
 **Prioridad:** Alta
 
 ---
@@ -786,6 +786,7 @@ graph TD
 
 - [x] **ComerciosService.js**
   - [x] Ajustar `validarDuplicados()` nivel 1 para permitir continuar
+  - [x] Modificar `validarDuplicados()` para aceptar comercios opcionales (evitar queries innecesarias)
   - [x] Crear función `agruparPorCadena()`
   - [x] Exportar nueva función
   - [ ] Escribir tests unitarios
@@ -796,6 +797,7 @@ graph TD
   - [x] Implementar ordenamiento de direcciones
   - [x] Calcular dirección principal
   - [x] Calcular top 3 direcciones
+  - [x] Usar datos agrupados en ambas validaciones (action `agregarComercio` y `validarDuplicados`)
   - [ ] Escribir tests
 
 ### Fase 2: Formularios y Validación UI ✅
@@ -803,6 +805,7 @@ graph TD
 - [x] **FormularioComercio.vue**
   - [x] Remover `required` del campo tipo
   - [x] Actualizar placeholder a "Tipo de comercio (opcional)"
+  - [x] Remover auto-validación en evento `@update:model-value`
   - [x] Probar que valide correctamente
 
 - [x] **DialogoAgregarComercio.vue**
@@ -811,6 +814,15 @@ graph TD
   - [x] Modificar `validarDuplicados()` para manejar nivel 1
   - [x] Agregar referencia a `DialogoDuplicadoExacto`
   - [x] Implementar función `forzarCrearDuplicado()`
+  - [x] Pasar datos agrupados a validación (evitar duplicados en modal)
+  - [x] Renombrar evento a `@agregar-sucursal` para claridad
+  - [x] Implementar función `agregarSucursal()` que crea nueva sucursal
+
+- [x] **DialogoCoincidencias.vue**
+  - [x] Agregar botón cerrar con posicionamiento absoluto
+  - [x] Cambiar textos para clarificar que es para agregar sucursales
+  - [x] Renombrar evento de `usar-existente` a `agregar-sucursal`
+  - [x] Remover `persistent` del diálogo (permitir cerrar)
 
 - [x] **DialogoDuplicadoExacto.vue** (NUEVO)
   - [x] Crear componente desde cero
@@ -821,8 +833,17 @@ graph TD
 
 ### Fase 3: Visualización en Tarjetas ✅
 
+- [x] **TarjetaBase.vue**
+  - [x] Refactorizar sistema de overlay a slots genéricos
+  - [x] Remover props específicas de precio
+  - [x] Ajustar posicionamiento del botón expandir (derecha cuando cerrado, centro cuando abierto)
+
+- [x] **TarjetaProductoYugioh.vue**
+  - [x] Adaptar a usar slot `#overlay-info` para precio
+
 - [x] **TarjetaComercioYugioh.vue**
-  - [x] Agregar sección de dirección principal
+  - [x] Agregar sección de dirección principal en overlay (dentro de imagen)
+  - [x] Posicionar dirección a la derecha del overlay
   - [x] Cambiar "dirección/direcciones" a "sucursal/sucursales"
   - [x] Cambiar "DIRECCIONES" a "SUCURSALES" (condicional)
   - [x] Modificar contador de usos (mostrar total)
@@ -840,21 +861,30 @@ graph TD
   - [x] Actualizar contador de página
   - [x] Probar que la búsqueda funcione correctamente
 
-### Fase 5: Testing y Ajustes
+### Fase 5: Testing y Ajustes ⏳ (En Progreso)
 
-- [ ] **Testing General**
-  - [ ] Probar agregar comercio individual
-  - [ ] Probar agregar cadena (mismo nombre, distinta dirección)
-  - [ ] Probar duplicado exacto (mismo nombre + dirección)
+- [x] **Testing General**
+  - [x] Probar agregar comercio individual
+  - [x] Probar agregar cadena (mismo nombre, distinta dirección)
+  - [x] Probar duplicado exacto (mismo nombre + dirección)
   - [ ] Probar shopping (distinto nombre, misma dirección)
   - [ ] Probar que contador de usos se actualice
   - [ ] Probar que dirección principal cambie al agregar precio
-  - [ ] Probar top 3 direcciones
+  - [x] Probar top 3 direcciones
   - [ ] Probar búsqueda con comercios agrupados
 
-- [ ] **UX y Polish**
-  - [ ] Verificar transiciones suaves
-  - [ ] Verificar textos claros
+- [x] **Correcciones de Bugs**
+  - [x] Corregir tarjetas con diferentes tamaños (dirección en overlay)
+  - [x] Corregir modal mostrando duplicados de TATA (usar datos agrupados en validación)
+  - [x] Corregir auto-guardado al escribir en formulario (remover emit de validación)
+  - [x] Corregir flujo para crear nueva sucursal (renombrar eventos y funciones)
+  - [x] Ajustar posicionamiento del botón expandir
+
+- [x] **UX y Polish**
+  - [x] Agregar botón cerrar/cancelar al modal de coincidencias
+  - [x] Mejorar textos del modal (clarificar que es para sucursales)
+  - [x] Verificar transiciones suaves
+  - [x] Verificar textos claros
   - [ ] Verificar responsive en móvil
   - [ ] Verificar tema oscuro/claro
 
