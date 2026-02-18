@@ -20,6 +20,17 @@ Sistema completo para gestión de comercios y sucursales que permite registrar t
 - DialogoMismaUbicacion.vue (src/components/Formularios/Dialogos/)
 - DialogoMotivoEliminacion.vue (src/components/Formularios/Dialogos/)
 
+### PÁGINA DE EDICIÓN
+- EditarComercioPage.vue (src/pages/)
+- SelectorSucursales.vue (src/components/EditarComercio/)
+- CampoEditable.vue (src/components/EditarComercio/)
+- EstadisticasComercio.vue (src/components/EditarComercio/)
+- ListaProductosComercio.vue (src/components/EditarComercio/)
+- DialogoAgregarSucursal.vue (src/components/Formularios/Dialogos/)
+
+### COMPOSABLES
+- useFechaRelativa.js (src/composables/) - formatearFechaRelativa, formatearUltimoUso, formatearFechaCorta
+
 ### COMPONENTES COMPARTIDOS
 - BarraSeleccion.vue (src/components/Compartidos/)
 - BarraAccionesSeleccion.vue (src/components/Compartidos/)
@@ -677,6 +688,12 @@ async buscarSimilares(nombre, direccion) {
 - Elimina dirección específica
 - Valida que no sea la última
 
+#### editarDireccion(comercioId, direccionId, datosDireccion)
+- Busca comercio y dirección
+- Aplica cambios con Object.assign
+- Recalcula nombreCompleto
+- Persiste en storage
+
 #### registrarUso(comercioId, direccionId)
 - Incrementa cantidadUsos
 - Actualiza fechaUltimoUso del comercio
@@ -803,6 +820,10 @@ async cargarComercios() {
 - Llama ComerciosService.eliminarDireccion()
 - Actualiza comercio en array local
 
+#### editarDireccion(comercioId, direccionId, datos)
+- Llama ComerciosService.editarDireccion()
+- Actualiza comercio en array local
+
 #### registrarUso(comercioId, direccionId)
 - Llama ComerciosService.registrarUso()
 - Actualiza comercio en array local
@@ -926,13 +947,20 @@ const {
 - Búsqueda en tiempo real con datos agrupados
 - Modo selección múltiple
 - Grid responsivo
-- Formato de fechas relativo
+- Formato de fechas relativo (composable reutilizable)
 - Vibración háptica
 - Componentes compartidos (barras)
+- Página de edición de comercio (`/comercios/:nombre`)
+- Edición inline de campos (nombre, categoría, dirección, barrio, ciudad)
+- Selector de sucursales con chips horizontales
+- Agregar sucursal desde página de edición
+- Eliminar sucursal individual con confirmación
+- Fusionar sucursales (transferir precios entre sucursales)
+- Lista de productos asociados con último precio
+- Estadísticas del comercio (registro, último uso, último precio, productos, sucursales)
 
 ### ⏳ Pendientes
 - Subir foto de comercio (cámara)
-- Edición de comercios
 - Eliminación con motivo
 - Geolocalización
 - Mapa de comercios cercanos
@@ -949,7 +977,6 @@ const {
 - Negative (#C10015): Eliminación
 
 ## LIMITACIONES ACTUALES
-- Sin edición de comercios implementada
 - Foto es placeholder (botón deshabilitado)
 - Sin geolocalización
 - Sin validación de direcciones con API
@@ -957,16 +984,11 @@ const {
 - No hay base de datos precargada de comercios
 
 ## ROADMAP POST-MVP
-1. Implementar plugin de cámara
-2. Subir y guardar fotos
-3. Integrar con FormularioPrecio
-4. Edición completa de comercios
-5. Eliminación con validación de productos
-6. Geolocalización
-7. Mapa interactivo
-8. Compartir comercios
-9. Sistema de reportes
-10. Verificación comunitaria (badges)
+1. Implementar plugin de cámara y fotos
+2. Eliminación con validación de productos (motivo)
+3. Geolocalización y mapa interactivo
+4. Compartir comercios entre usuarios
+5. Sistema de reportes y verificación comunitaria
 
 ## NOTAS PARA IAS
 
@@ -981,10 +1003,11 @@ const {
 8. comerciosStore (estado global)
 
 ### Estado actual:
-- Sistema de sucursales: 100% completado (Fases 1-5 del PlanSistemaSucursales.md)
+- Sistema de sucursales: 100% completado (Fases 1-6 del PlanSistemaSucursales.md)
+- Página de edición de comercio: 100% completada (Fase 7)
 - Agrupación de cadenas: Implementado y testeado
 - Integración con precios: Completada (FormularioPrecio usa comerciosStore)
-- Progreso general: ~85% completado
+- Progreso general: ~90% completado
 
 ### Diferencias con Productos:
 - Comercios tienen múltiples direcciones (sucursales)

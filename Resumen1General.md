@@ -121,12 +121,19 @@ src/
 │   │       ├── DialogoAgregarPrecio.vue             # Modal rápido para agregar precio a producto
 │   │       ├── DialogoResultadosBusqueda.vue        # Modal con resultados de Open Food Facts
 │   │       ├── DialogoCoincidencias.vue             # Alerta de comercios similares (agregar sucursal)
-│   │       ├── DialogoDuplicadoExacto.vue           # 🆕 Confirmación de duplicado exacto
+│   │       ├── DialogoDuplicadoExacto.vue           # Confirmación de duplicado exacto
+│   │       ├── DialogoAgregarSucursal.vue           # 🆕 Modal para agregar sucursal a comercio
 │   │       ├── DialogoMismaUbicacion.vue            # Alerta de misma dirección
 │   │       └── DialogoMotivoEliminacion.vue         # Confirmación con motivo de eliminación
 │   │
 │   ├── MisProductos/                        # Componentes de productos
 │   │   └── ListaProductos.vue              # Contenedor con grid responsivo Quasar
+│   │
+│   ├── EditarComercio/                     # 🆕 Componentes de edición de comercio
+│   │   ├── SelectorSucursales.vue         # Chips horizontales para seleccionar sucursal
+│   │   ├── CampoEditable.vue              # Campo inline editable (texto + lápiz → input)
+│   │   ├── EstadisticasComercio.vue       # Grid de mini-cards con estadísticas
+│   │   └── ListaProductosComercio.vue     # Lista de productos asociados al comercio
 │   │
 │   └── Tarjetas/                            # Componentes de tarjetas
 │       ├── TarjetaBase.vue                 # 🆕 Tarjeta base reutilizable estilo Yu-Gi-Oh
@@ -135,7 +142,8 @@ src/
 │
 ├── composables/
 │   ├── useSeleccionMultiple.js             # Lógica de selección múltiple reutilizable
-│   └── useDialogoAgregarPrecio.js          # 🆕 Lógica reutilizable del modal agregar precio
+│   ├── useDialogoAgregarPrecio.js          # Lógica reutilizable del modal agregar precio
+│   └── useFechaRelativa.js                 # 🆕 Formato de fechas relativas y cortas
 ├── css/
 │   ├── app.css                              # Clases CSS globales del Design System
 │   ├── quasar.variables.scss               # Variables de Quasar (colores, fuentes)
@@ -146,12 +154,13 @@ src/
 │
 ├── pages/
 │   ├── ComerciosPage.vue                    # Página de gestión de comercios
+│   ├── EditarComercioPage.vue               # 🆕 Página de edición de comercio individual
 │   ├── DetalleProductoPage.vue              # Página de detalle individual de producto
 │   └── MisProductosPage.vue                 # Página principal de productos
 │
 ├── router/
 │   ├── index.js                             # Configuración del router de Vue
-│   └── routes.js                            # Definición de rutas (/, /comercios, /detalle/:id)
+│   └── routes.js                            # Definición de rutas (/, /comercios, /comercios/:nombre, /producto/:id)
 │
 ├── App.vue                                  # Componente raíz de Vue
 └── main.js                                  # Punto de entrada de la aplicación
@@ -404,6 +413,13 @@ B. Gestión de Comercios y Sucursales
 ✅ Sistema de uso reciente (ordenamiento inteligente)
 ✅ Registro automático de uso al agregar precio
 ✅ Diálogos de confirmación: coincidencias, duplicado exacto, misma ubicación, motivo eliminación
+✅ 🆕 Página de edición de comercio con edición inline de campos
+✅ 🆕 Selector de sucursales con chips horizontales
+✅ 🆕 Agregar/eliminar sucursales desde página de edición
+✅ 🆕 Fusionar sucursales (transferir precios entre sucursales)
+✅ 🆕 Estadísticas del comercio (registro, último uso, productos, sucursales)
+✅ 🆕 Lista de productos asociados con último precio
+✅ 🆕 Composable reutilizable de fechas relativas (useFechaRelativa.js)
 
 C. Integración Comercios + Productos
 
@@ -507,6 +523,7 @@ H. Arquitectura y Código
 - `eliminarComercios(ids)`: Elimina múltiples comercios
 - `agregarDireccion(comercioId, direccion)`: Agrega dirección a comercio
 - `eliminarDireccion(comercioId, direccionId)`: Elimina dirección de comercio
+- `editarDireccion(comercioId, direccionId, datos)`: 🆕 Edita dirección existente
 
 **Getters:**
 - `comerciosOrdenados`: Comercios ordenados alfabéticamente
@@ -767,7 +784,8 @@ H. Arquitectura y Código
     children: [
       { path: '', component: MisProductosPage },
       { path: 'producto/:id', component: DetalleProductoPage },
-      { path: 'comercios', component: ComerciosPage }
+      { path: 'comercios', component: ComerciosPage },
+      { path: 'comercios/:nombre', component: EditarComercioPage }
     ]
   },
   {
@@ -880,10 +898,11 @@ H. Arquitectura y Código
 6. **Sistema de Diseño Centralizado:** Clases CSS globales en app.css
 
 ### Estado Actual
-- **Versión:** MVP funcional (~85% completado)
+- **Versión:** MVP funcional (~90% completado)
 - **Almacenamiento:** Local (Capacitor Storage)
 - **Sistema de sucursales:** Completado (agrupación automática de cadenas)
-- **Próximo Milestone:** Edición de comercios, foto de comercio
+- **Edición de comercios:** Completada (página completa con edición inline, fusión, estadísticas)
+- **Próximo Milestone:** Foto de comercio, eliminación con motivo
 - **Preparación:** Lista para migración a Firebase
 
 ---
@@ -907,4 +926,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** Febrero 17, 2026 (con sistema de sucursales y agrupación de cadenas)
+**Última actualización:** Febrero 18, 2026 (con página de edición de comercios y sistema de sucursales)

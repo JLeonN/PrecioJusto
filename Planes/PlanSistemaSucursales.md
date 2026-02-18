@@ -15,6 +15,7 @@ Mejorar el sistema de gestión de comercios para soportar cadenas de comercios c
 ## 📝 Resumen Ejecutivo
 
 ### Problemas Actuales
+
 1. El campo "tipo de comercio" es obligatorio pero debería ser opcional
 2. No se detectan cadenas de comercios (mismo nombre, diferentes direcciones)
 3. Las tarjetas de comercios no agrupan sucursales de una misma cadena
@@ -23,7 +24,9 @@ Mejorar el sistema de gestión de comercios para soportar cadenas de comercios c
 6. El contador de usos no distingue entre sucursal específica y cadena completa
 
 ### Solución Propuesta
+
 Sistema inteligente que:
+
 - Valida duplicados considerando nombre + dirección
 - Agrupa comercios de cadenas en una sola tarjeta
 - Muestra la sucursal más reciente automáticamente
@@ -35,6 +38,7 @@ Sistema inteligente que:
 ## 🔍 Análisis de Casos de Uso
 
 ### Caso 1: Cadena de Supermercados
+
 **Escenario:** Usuario agrega TATA en 3 ubicaciones diferentes
 
 ```
@@ -51,6 +55,7 @@ Resultado esperado:
 ```
 
 ### Caso 2: Shopping Center
+
 **Escenario:** Usuario agrega comercios en mismo shopping
 
 ```
@@ -66,6 +71,7 @@ Resultado esperado:
 ```
 
 ### Caso 3: Duplicado Exacto
+
 **Escenario:** Usuario intenta agregar comercio existente
 
 ```
@@ -85,9 +91,11 @@ Resultado esperado:
 ### 📂 Archivos a Modificar
 
 #### 1. **FormularioComercio.vue**
+
 **Ubicación:** `src/components/Formularios/FormularioComercio.vue`
 
 **Cambios necesarios:**
+
 - Remover validación obligatoria (`required`) del campo `tipo`
 - Mantener el campo visible pero opcional
 - Actualizar placeholder para indicar que es opcional
@@ -97,14 +105,17 @@ Resultado esperado:
 ---
 
 #### 2. **ComerciosService.js**
+
 **Ubicación:** `src/almacenamiento/servicios/ComerciosService.js`
 
 **Estado actual:**
+
 - ✅ Ya tiene `validarDuplicados()` con 3 niveles
 - ✅ Ya tiene `normalizar()` para comparar textos
 - ✅ Ya tiene `similitudTexto()` para detectar similares
 
 **Cambios necesarios:**
+
 - ✅ REUTILIZAR función `validarDuplicados()` existente
 - ✅ REUTILIZAR función `normalizar()` existente
 - ⚠️ Ajustar lógica de validación NIVEL 1 (duplicado exacto):
@@ -112,6 +123,7 @@ Resultado esperado:
   - Nuevo: Mostrar diálogo de confirmación (permitir continuar)
 
 **Código a modificar:**
+
 ```javascript
 // ANTES (líneas 178-196):
 if (duplicadoExacto) {
@@ -132,12 +144,13 @@ if (duplicadoExacto) {
     tipo: 'exacto',
     comercio: duplicadoExacto,
     mensaje: 'Ya existe este comercio en esta ubicación',
-    permitirContinuar: true,  // ⭐ NUEVO: Permitir confirmar
+    permitirContinuar: true, // ⭐ NUEVO: Permitir confirmar
   }
 }
 ```
 
 **Nueva funcionalidad a agregar:**
+
 ```javascript
 /**
  * Agrupa comercios por nombre (detecta cadenas)
@@ -147,14 +160,14 @@ if (duplicadoExacto) {
 function agruparPorCadena(comercios) {
   const agrupados = new Map()
 
-  comercios.forEach(comercio => {
+  comercios.forEach((comercio) => {
     const nombreNormalizado = normalizar(comercio.nombre)
 
     if (!agrupados.has(nombreNormalizado)) {
       agrupados.set(nombreNormalizado, {
         ...comercio,
         esCadena: false,
-        sucursales: [comercio]
+        sucursales: [comercio],
       })
     } else {
       // Es una cadena (mismo nombre)
@@ -173,13 +186,16 @@ function agruparPorCadena(comercios) {
 ---
 
 #### 3. **comerciosStore.js**
+
 **Ubicación:** `src/almacenamiento/stores/comerciosStore.js`
 
 **Estado actual:**
+
 - ✅ Ya tiene getter `comerciosPorUso` (ordena por uso reciente)
 - ✅ Ya tiene actions para agregar/editar/eliminar
 
 **Nuevos getters a agregar:**
+
 ```javascript
 getters: {
   // ... getters existentes ...
@@ -191,7 +207,7 @@ getters: {
   comerciosAgrupados: (state) => {
     const agrupados = new Map()
 
-    state.comercios.forEach(comercio => {
+    state.comercios.forEach((comercio) => {
       const nombreNormalizado = ComerciosService.normalizar(comercio.nombre)
 
       if (!agrupados.has(nombreNormalizado)) {
@@ -205,7 +221,7 @@ getters: {
           direcciones: [...comercio.direcciones],
           fechaUltimoUso: comercio.fechaUltimoUso,
           cantidadUsos: comercio.cantidadUsos,
-          comerciosOriginales: [comercio] // Para referencia
+          comerciosOriginales: [comercio], // Para referencia
         })
       } else {
         // Agregar sucursal a la cadena
@@ -226,7 +242,7 @@ getters: {
     })
 
     // Procesar cada grupo
-    const resultado = Array.from(agrupados.values()).map(grupo => {
+    const resultado = Array.from(agrupados.values()).map((grupo) => {
       // Ordenar direcciones por uso reciente
       grupo.direcciones.sort((a, b) => {
         const fechaA = new Date(a.fechaUltimoUso || 0)
@@ -241,8 +257,9 @@ getters: {
       grupo.direccionPrincipal = grupo.direcciones[0]
 
       // Foto de la sucursal más reciente
-      const comercioMasReciente = grupo.comerciosOriginales
-        .sort((a, b) => new Date(b.fechaUltimoUso) - new Date(a.fechaUltimoUso))[0]
+      const comercioMasReciente = grupo.comerciosOriginales.sort(
+        (a, b) => new Date(b.fechaUltimoUso) - new Date(a.fechaUltimoUso),
+      )[0]
       grupo.foto = comercioMasReciente.foto
 
       return grupo
@@ -263,9 +280,11 @@ getters: {
 ---
 
 #### 4. **TarjetaComercioYugioh.vue**
+
 **Ubicación:** `src/components/Tarjetas/TarjetaComercioYugioh.vue`
 
 **Estado actual:**
+
 - ✅ Ya muestra contador de direcciones (línea 27-28)
 - ✅ Ya tiene lista expandible de direcciones (líneas 44-60)
 - ✅ Ya formatea último uso (líneas 103-118)
@@ -273,6 +292,7 @@ getters: {
 **Cambios necesarios:**
 
 1. **Actualizar contador de direcciones:**
+
 ```vue
 <!-- ANTES (línea 27-28): -->
 <span>
@@ -288,6 +308,7 @@ getters: {
 ```
 
 2. **Cambiar título del expandible:**
+
 ```vue
 <!-- ANTES (línea 40): -->
 <span>DIRECCIONES</span>
@@ -297,6 +318,7 @@ getters: {
 ```
 
 3. **Mostrar contador de usos por sucursal:**
+
 ```vue
 <!-- ANTES (línea 31-34): -->
 <div v-if="comercio.cantidadUsos > 0" class="info-item">
@@ -317,6 +339,7 @@ getters: {
 ```
 
 4. **Agregar dirección principal debajo de la imagen:**
+
 ```vue
 <!-- NUEVO: Agregar en template slot #info-inferior -->
 <template #info-inferior>
@@ -339,6 +362,7 @@ getters: {
 ```
 
 5. **Mostrar solo top 3 direcciones en expandible:**
+
 ```vue
 <!-- ANTES (línea 44): -->
 <div v-for="direccion in comercio.direcciones" :key="direccion.id">
@@ -354,6 +378,7 @@ getters: {
 ```
 
 6. **Nuevo método para calcular usos de sucursal actual:**
+
 ```javascript
 // Agregar en script setup
 const obtenerUsosActuales = () => {
@@ -366,8 +391,8 @@ const obtenerUsosActuales = () => {
   if (!direccionPrincipal) return props.comercio.cantidadUsos
 
   // Buscar comercio original de esta dirección
-  const comercioOriginal = props.comercio.comerciosOriginales?.find(c =>
-    c.direcciones.some(d => d.id === direccionPrincipal.id)
+  const comercioOriginal = props.comercio.comerciosOriginales?.find((c) =>
+    c.direcciones.some((d) => d.id === direccionPrincipal.id),
   )
 
   return comercioOriginal?.cantidadUsos || 0
@@ -375,6 +400,7 @@ const obtenerUsosActuales = () => {
 ```
 
 **Estilos nuevos:**
+
 ```css
 .direccion-principal {
   display: flex;
@@ -412,15 +438,18 @@ const obtenerUsosActuales = () => {
 ---
 
 #### 5. **DialogoAgregarComercio.vue**
+
 **Ubicación:** `src/components/Formularios/Dialogos/DialogoAgregarComercio.vue`
 
 **Estado actual:**
+
 - ✅ Ya usa `validarDuplicados()` (línea 124)
 - ✅ Ya tiene diálogos de coincidencias (líneas 32-38)
 
 **Cambios necesarios:**
 
 1. **Manejar nivel 1 (duplicado exacto) con confirmación:**
+
 ```javascript
 // Modificar función validarDuplicados() (líneas 124-152)
 async function validarDuplicados() {
@@ -458,6 +487,7 @@ async function validarDuplicados() {
 ```
 
 2. **Agregar nuevo diálogo de duplicado exacto:**
+
 ```vue
 <!-- Agregar en template -->
 <DialogoDuplicadoExacto
@@ -474,16 +504,19 @@ async function validarDuplicados() {
 ---
 
 #### 6. **NUEVO: DialogoDuplicadoExacto.vue**
+
 **Ubicación:** `src/components/Formularios/Dialogos/DialogoDuplicadoExacto.vue`
 
 **Propósito:** Mostrar confirmación cuando nombre + dirección son idénticos
 
 **Props:**
+
 - `modelValue` (Boolean): Controla visibilidad
 - `comercioExistente` (Object): Comercio que ya existe
 - `datosNuevos` (Object): Datos que el usuario intenta agregar
 
 **Template:**
+
 ```vue
 <template>
   <q-dialog v-model="dialogoAbierto">
@@ -496,9 +529,7 @@ async function validarDuplicados() {
       </q-card-section>
 
       <q-card-section>
-        <p class="text-body2">
-          Ya existe un comercio con este nombre y dirección:
-        </p>
+        <p class="text-body2">Ya existe un comercio con este nombre y dirección:</p>
 
         <div class="comercio-existente q-mt-md">
           <div class="comercio-nombre">
@@ -509,26 +540,22 @@ async function validarDuplicados() {
             <q-icon name="location_on" color="grey-6" size="18px" />
             <span>{{ comercioExistente?.direcciones[0]?.calle }}</span>
           </div>
-          <div v-if="comercioExistente?.direcciones[0]?.barrio" class="text-grey-6 q-ml-md text-caption">
+          <div
+            v-if="comercioExistente?.direcciones[0]?.barrio"
+            class="text-grey-6 q-ml-md text-caption"
+          >
             {{ comercioExistente?.direcciones[0]?.barrio }}
           </div>
         </div>
 
         <q-separator class="q-my-md" />
 
-        <p class="text-body2 text-grey-8">
-          ¿Estás seguro que quieres crear un comercio duplicado?
-        </p>
+        <p class="text-body2 text-grey-8">¿Estás seguro que quieres crear un comercio duplicado?</p>
       </q-card-section>
 
       <q-card-actions align="right">
         <q-btn flat label="Cancelar" color="grey-7" @click="cancelar" />
-        <q-btn
-          unelevated
-          label="Sí, crear duplicado"
-          color="orange"
-          @click="continuar"
-        />
+        <q-btn unelevated label="Sí, crear duplicado" color="orange" @click="continuar" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -540,15 +567,18 @@ async function validarDuplicados() {
 ---
 
 #### 7. **ComerciosPage.vue**
+
 **Ubicación:** `src/pages/ComerciosPage.vue`
 
 **Estado actual:**
+
 - ✅ Ya carga comercios con `comerciosStore.comerciosPorUso` (línea 149)
 - ✅ Ya tiene búsqueda implementada
 
 **Cambios necesarios:**
 
 1. **Usar comercios agrupados en lugar de comercios normales:**
+
 ```javascript
 // ANTES (líneas 147-162):
 const comerciosFiltrados = computed(() => {
@@ -580,6 +610,7 @@ const comerciosFiltrados = computed(() => {
 ```
 
 2. **Actualizar contador de página:**
+
 ```vue
 <!-- ANTES (línea 17): -->
 <p class="contador-items">{{ comerciosStore.comercios.length }} comercios guardados</p>
@@ -651,6 +682,7 @@ graph TD
 ## 📊 Estructura de Datos
 
 ### Comercio Individual (Storage)
+
 ```javascript
 {
   id: "1708123456789abc",
@@ -674,6 +706,7 @@ graph TD
 ```
 
 ### Comercio Agrupado (Store - Computed)
+
 ```javascript
 {
   id: "grupo_tata",
@@ -722,6 +755,7 @@ graph TD
 ## 🎨 Cambios Visuales en Tarjeta
 
 ### Estado Actual
+
 ```
 ┌─────────────────────────────────┐
 │ TATA                            │
@@ -737,6 +771,7 @@ graph TD
 ```
 
 ### Estado Nuevo (Comercio Individual)
+
 ```
 ┌─────────────────────────────────┐
 │ Farmacia AAAL                   │
@@ -756,6 +791,7 @@ graph TD
 ```
 
 ### Estado Nuevo (Cadena de Comercios)
+
 ```
 ┌─────────────────────────────────┐
 │ TATA                            │
@@ -961,9 +997,8 @@ graph TD
   - [x] Props: `modelValue`, `comercioNombre`, `comercioTipo`
   - [x] Emit: `update:modelValue`, `sucursal-guardada`
   - [x] Campos: calle (obligatorio), barrio (opcional), ciudad (opcional)
-  - [x] Categoría: solo visible si `!comercioTipo` (si ya tiene, muestra info heredada)
+  - [x] Categoría: siempre heredada del comercio padre (selector eliminado)
   - [x] Al guardar: `ComerciosService.agregarComercio({ nombre, tipo, calle, barrio, ciudad })` → se agrupa automáticamente por nombre normalizado
-  - [x] Mismas `opcionesTipo` que FormularioComercio
   - [x] Función `limpiar()` al cerrar
 
 - [x] **`src/pages/EditarComercioPage.vue`** (Editado)
@@ -1017,27 +1052,28 @@ graph TD
   - [x] `encontrarComercioOriginalPorDireccion()`: helper reutilizable
   - [x] `cancelarFusion()`: limpia estado
 
-#### Fase 7h: Estadísticas y Fechas ⏳
+#### Fase 7h: Estadísticas y Fechas ✅
 
-- [ ] **`src/composables/useFechaRelativa.js`** (Nuevo)
-  - [ ] Extraer lógica de `TarjetaComercioYugioh.formatearUltimoUso()` a composable reutilizable
-  - [ ] Exportar `formatearFechaRelativa(fecha)`
-  - [ ] Reutilizar en EditarComercioPage (reemplazar `formatearFechaSimple`)
+- [x] **`src/composables/useFechaRelativa.js`** (Nuevo)
+  - [x] Extraer lógica de `TarjetaComercioYugioh.formatearUltimoUso()` a composable reutilizable
+  - [x] Exportar `formatearFechaRelativa(fecha)`, `formatearUltimoUso(fecha)`, `formatearFechaCorta(fecha)`
+  - [x] Reutilizar en EditarComercioPage (reemplazar `formatearFechaSimple`)
 
-- [ ] **`src/components/EditarComercio/EstadisticasComercio.vue`** (Nuevo)
-  - [ ] Props: `comercio`, `totalProductos`, `ultimoPrecioFecha`
-  - [ ] Grid de mini-cards con:
-    - [ ] Registrado: fecha creación más antigua de `comerciosOriginales`
-    - [ ] Último uso: `comercio.fechaUltimoUso`
-    - [ ] Último precio: fecha del precio más reciente
-    - [ ] Productos: total de productos asociados
-    - [ ] Sucursales: `comercio.totalSucursales`
+- [x] **`src/components/EditarComercio/EstadisticasComercio.vue`** (Nuevo)
+  - [x] Props: `comercio`, `totalProductos`, `ultimoPrecioFecha`
+  - [x] Grid de mini-cards con:
+    - [x] Registrado: fecha creación más antigua de `comerciosOriginales`
+    - [x] Último uso: `comercio.fechaUltimoUso`
+    - [x] Último precio: fecha del precio más reciente
+    - [x] Productos: total de productos asociados
+    - [x] Sucursales: `comercio.totalSucursales`
 
-- [ ] **`src/components/Tarjetas/TarjetaComercioYugioh.vue`** (Editar)
-  - [ ] Reemplazar `formatearUltimoUso` local por import de `useFechaRelativa`
+- [x] **`src/components/Tarjetas/TarjetaComercioYugioh.vue`** (Editar)
+  - [x] Reemplazar `formatearUltimoUso` local por import de `useFechaRelativa`
 
-- [ ] **`src/pages/EditarComercioPage.vue`** (Editar)
-  - [ ] Integrar `EstadisticasComercio` reemplazando el placeholder de fase 7h
+- [x] **`src/pages/EditarComercioPage.vue`** (Editar)
+  - [x] Integrar `EstadisticasComercio` reemplazando el placeholder de fase 7h
+  - [x] Computed `ultimoPrecioFecha` para calcular fecha del precio más reciente
 
 ---
 
@@ -1045,25 +1081,82 @@ graph TD
 
 **Objetivo:** Verificar que todas las funcionalidades implementadas en la Fase 7 funcionan correctamente.
 
-- [ ] **Testing Manual**
-  - [ ] Navegar desde tarjeta de comercio individual → página de edición
-  - [ ] Navegar desde tarjeta de cadena → página de edición
-  - [ ] Editar nombre inline → verificar que cambia en todos los originales de la cadena
-  - [ ] Editar categoría inline → verificar actualización
-  - [ ] Editar dirección/barrio/ciudad inline → verificar solo afecta la sucursal seleccionada
-  - [ ] Cambiar nombre → verificar redirección a nueva URL
-  - [ ] Agregar sucursal con modal → verificar que aparece en selector
-  - [ ] Eliminar sucursal → verificar que desaparece y se selecciona otra
-  - [ ] Eliminar última sucursal → verificar que navega atrás
-  - [ ] Ver productos asociados → verificar datos correctos
-  - [ ] Click en producto → verificar navegación a detalle
-  - [ ] Fusionar 2 sucursales → verificar que precios se transfieren
-  - [ ] Fusionar → verificar que sucursal origen se elimina
-  - [ ] Verificar responsive en móvil
-  - [ ] Verificar tema oscuro/claro
-  - [ ] Verificar que el botón "Volver" funciona
+#### Navegación
 
-- [ ] **Correcciones de Bugs** (si se encuentran)
+- [x] Click "Editar" en tarjeta de comercio individual → abre página de edición
+- [x] Click "Editar" en tarjeta de cadena → abre página de edición
+- [x] Botón "Volver" → regresa a lista de comercios
+- [x] URL muestra nombre normalizado (`/comercios/tata`)
+
+#### Selector de Sucursales
+
+- [x] Comercio individual → muestra dirección estática (sin chips)
+- [x] Cadena → muestra chips horizontales scrollables
+- [x] Click en chip → cambia sucursal seleccionada (chip naranja)
+- [x] Los campos dirección/barrio/ciudad cambian al seleccionar otra sucursal
+
+#### Edición Inline
+
+- [x] Click en campo → aparece input editable
+- [x] Enter → guarda el cambio
+- [x] Escape → cancela la edición
+- [x] No permite guardar si el valor no cambió
+- [x] Campo "Nombre" requerido → no permite guardar vacío
+- [x] Editar nombre → actualiza URL automáticamente
+- [x] Editar nombre en cadena → cambia en TODAS las sucursales
+- [x] Editar categoría (select) → funciona el dropdown
+- [x] Editar dirección/barrio/ciudad → solo afecta la sucursal seleccionada
+
+#### Agregar Sucursal
+
+- [x] Botón "Agregar sucursal" → abre modal
+- [x] Calle obligatoria, barrio/ciudad opcionales
+- [x] Si comercio ya tiene categoría → muestra "Categoría heredada"
+- [x] Categoría siempre se hereda (todo comercio tiene categoría, selector eliminado)
+- [x] Guardar → aparece nueva sucursal en chips
+- [x] Cancelar → cierra sin cambios
+
+#### Eliminar Sucursal
+
+- [x] Botón eliminar visible solo si hay 2+ sucursales
+- [x] Click → diálogo de confirmación (fix: plugin Dialog agregado)
+- [x] Confirmar → sucursal desaparece, selecciona otra
+- [x] Si se elimina la última del grupo → navega atrás
+
+#### Productos Asociados
+
+- [x] Muestra hasta 3 productos con precio y fecha
+- [x] Botón "Ver todos (X)" si hay más de 3
+- [x] Click en producto → navega a detalle del producto
+- [x] Sin productos → muestra mensaje vacío
+
+#### Fusionar Sucursales
+
+- [x] Sección visible solo en cadenas con 2+ sucursales
+- [x] "Iniciar fusión" → aparecen checkboxes
+- [x] Seleccionar 2 → badge "Destino" y "Eliminar"
+- [x] No permite seleccionar más de 2
+- [x] Confirmar → diálogo muestra cantidad de precios a mover (fix: plugin Dialog agregado)
+- [x] Ejecutar → precios se transfieren, sucursal origen desaparece
+- [x] Cancelar → limpia selección
+
+#### Estadísticas
+
+- [x] Muestra 5 cards: Registrado, Último uso, Último precio, Productos, Sucursales
+- [x] Fechas se muestran correctamente (relativas o cortas)
+- [x] Sin datos → muestra "Sin dato" / "Sin uso" / "Sin precios"
+
+#### General
+
+- [x] Responsive en móvil
+- [ ] Tema oscuro/claro
+- [ ] No hay errores en consola
+
+#### Correcciones de Bugs
+
+- [x] `$q.dialog is not a function` → Agregado plugin `Dialog` en `quasar.config.js`
+- [x] Selector de categoría en agregar sucursal → Eliminado (categoría siempre se hereda)
+- [x] Limpieza de variables y opciones no usadas en `DialogoAgregarSucursal.vue`
 
 ---
 
@@ -1081,18 +1174,18 @@ graph TD
 
 ## 📊 Resumen de Archivos por Fase (7-9)
 
-| Fase | Archivos Nuevos | Archivos Editados |
-|------|----------------|-------------------|
-| 7a | `EditarComercioPage.vue` | `routes.js`, `ComerciosPage.vue` |
-| 7b | `SelectorSucursales.vue` | `EditarComercioPage.vue` |
-| 7c | `CampoEditable.vue` | `EditarComercioPage.vue`, `ComerciosService.js`, `comerciosStore.js` |
-| 7d | `DialogoAgregarSucursal.vue` | `EditarComercioPage.vue` |
-| 7e | (ninguno) | `EditarComercioPage.vue` |
-| 7f | `ListaProductosComercio.vue` | `EditarComercioPage.vue` |
-| 7g | (ninguno) | `EditarComercioPage.vue` |
-| 7h | `useFechaRelativa.js`, `EstadisticasComercio.vue` | `EditarComercioPage.vue`, `TarjetaComercioYugioh.vue` |
-| 8 | (ninguno) | (correcciones si aplica) |
-| 9 | (ninguno) | Archivos de resúmenes |
+| Fase | Archivos Nuevos                                   | Archivos Editados                                                    |
+| ---- | ------------------------------------------------- | -------------------------------------------------------------------- |
+| 7a   | `EditarComercioPage.vue`                          | `routes.js`, `ComerciosPage.vue`                                     |
+| 7b   | `SelectorSucursales.vue`                          | `EditarComercioPage.vue`                                             |
+| 7c   | `CampoEditable.vue`                               | `EditarComercioPage.vue`, `ComerciosService.js`, `comerciosStore.js` |
+| 7d   | `DialogoAgregarSucursal.vue`                      | `EditarComercioPage.vue`                                             |
+| 7e   | (ninguno)                                         | `EditarComercioPage.vue`                                             |
+| 7f   | `ListaProductosComercio.vue`                      | `EditarComercioPage.vue`                                             |
+| 7g   | (ninguno)                                         | `EditarComercioPage.vue`                                             |
+| 7h   | `useFechaRelativa.js`, `EstadisticasComercio.vue` | `EditarComercioPage.vue`, `TarjetaComercioYugioh.vue`                |
+| 8    | (ninguno)                                         | (correcciones si aplica)                                             |
+| 9    | (ninguno)                                         | Archivos de resúmenes                                                |
 
 **Total Fase 7: 6 archivos nuevos, 4 archivos editados**
 
@@ -1146,17 +1239,20 @@ graph TD
 ## 📌 Notas Importantes
 
 ### Mantenimiento de Compatibilidad
+
 - ✅ No se rompe estructura de datos existente
 - ✅ Comercios antiguos siguen funcionando
 - ✅ Migración no es necesaria
 - ✅ Todo es retrocompatible
 
 ### Rendimiento
+
 - ⚠️ Agrupación es computed (reactivo pero puede ser costoso con muchos comercios)
 - 💡 Considerar memoización si hay +100 comercios
 - ✅ Top 3 direcciones evita renderizar todas
 
 ### Reutilización
+
 - ✅ 90% del código ya existe
 - ✅ Patrón de diálogos ya establecido
 - ✅ Funciones de normalización reutilizables
@@ -1167,6 +1263,7 @@ graph TD
 ## 🎯 Criterios de Éxito
 
 ✅ **Fases 1-6 completadas cuando:**
+
 1. Usuario puede agregar comercios con tipo opcional
 2. Sistema detecta y agrupa cadenas automáticamente
 3. Tarjetas muestran dirección principal visible
@@ -1176,16 +1273,7 @@ graph TD
 7. Shopping centers no se agrupan erróneamente
 8. Todo funciona sin romper datos existentes
 
-⏳ **Fases 7-9 completadas cuando:**
-9. Botón "Editar" navega a página de edición funcional
-10. Edición inline funciona para nombre, categoría, dirección, barrio, ciudad
-11. Selector de sucursales permite cambiar entre direcciones de cadenas
-12. Modal permite agregar nuevas sucursales
-13. Se puede eliminar sucursales individuales
-14. Productos asociados se muestran con último precio
-15. Fusión de sucursales transfiere precios correctamente
-16. Estadísticas muestran fechas y contadores
-17. Documentación actualizada
+⏳ **Fases 7-9 completadas cuando:** 9. Botón "Editar" navega a página de edición funcional 10. Edición inline funciona para nombre, categoría, dirección, barrio, ciudad 11. Selector de sucursales permite cambiar entre direcciones de cadenas 12. Modal permite agregar nuevas sucursales 13. Se puede eliminar sucursales individuales 14. Productos asociados se muestran con último precio 15. Fusión de sucursales transfiere precios correctamente 16. Estadísticas muestran fechas y contadores 17. Documentación actualizada
 
 ---
 

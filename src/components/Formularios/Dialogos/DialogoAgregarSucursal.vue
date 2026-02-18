@@ -40,21 +40,8 @@
           placeholder="Ej: Montevideo"
         />
 
-        <!-- Categoría (solo si el comercio no tiene) -->
-        <q-select
-          v-if="!comercioTipo"
-          v-model="datos.tipo"
-          label="Categoría (opcional)"
-          outlined
-          dense
-          :options="opcionesTipo"
-          emit-value
-          map-options
-          clearable
-        />
-
         <!-- Info de categoría heredada -->
-        <div v-else class="text-caption text-grey-6">
+        <div class="text-caption text-grey-6">
           <q-icon name="info" size="14px" class="q-mr-xs" />
           Categoría heredada: {{ comercioTipo }}
         </div>
@@ -99,26 +86,17 @@ const emit = defineEmits(['update:modelValue', 'sucursal-guardada'])
 
 const comerciosStore = useComerciStore()
 
-const opcionesTipo = [
-  'Supermercado', 'Hipermercado', 'Minimercado', 'Almacén',
-  'Verdulería', 'Carnicería', 'Panadería', 'Farmacia',
-  'Ferretería', 'Tienda de ropa', 'Librería', 'Perfumería',
-  'Juguetería', 'Electrónica', 'Mercado', 'Mayorista', 'Otro',
-]
-
 const guardando = ref(false)
 const datos = reactive({
   calle: '',
   barrio: '',
   ciudad: '',
-  tipo: '',
 })
 
 function limpiar() {
   datos.calle = ''
   datos.barrio = ''
   datos.ciudad = ''
-  datos.tipo = ''
 }
 
 function cerrar() {
@@ -134,7 +112,7 @@ async function guardar() {
   try {
     const nuevoComercio = {
       nombre: props.comercioNombre,
-      tipo: props.comercioTipo || datos.tipo || 'Otro',
+      tipo: props.comercioTipo || 'Supermercado',
       calle: datos.calle.trim(),
       barrio: datos.barrio?.trim() || '',
       ciudad: datos.ciudad?.trim() || '',
