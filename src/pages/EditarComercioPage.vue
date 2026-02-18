@@ -353,6 +353,7 @@ const productosConPrecio = computed(() => {
     return {
       id: producto.id,
       nombre: producto.nombre,
+      imagen: producto.imagen || null,
       ultimoPrecioTexto: textoUltimoPrecio,
     }
   })

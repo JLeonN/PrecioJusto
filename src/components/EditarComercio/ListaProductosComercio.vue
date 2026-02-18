@@ -18,7 +18,8 @@
       >
         <q-item-section avatar>
           <q-avatar color="orange-1" text-color="orange">
-            <IconShoppingBag :size="20" />
+            <q-img v-if="producto.imagen" :src="producto.imagen" fit="cover" />
+            <IconShoppingBag v-else :size="20" />
           </q-avatar>
         </q-item-section>
         <q-item-section>
