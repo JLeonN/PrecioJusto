@@ -266,10 +266,12 @@ async function agregarComercio(datosComercio) {
     direcciones: [
       {
         id: `${Date.now()}${Math.random().toString(36).substring(2, 9)}`,
-        calle: datosComercio.calle.trim(),
+        calle: datosComercio.calle?.trim() || '',
         barrio: datosComercio.barrio?.trim() || '',
         ciudad: datosComercio.ciudad?.trim() || '',
-        nombreCompleto: `${datosComercio.nombre.trim()} - ${datosComercio.calle.trim()}`,
+        nombreCompleto: datosComercio.calle?.trim()
+          ? `${datosComercio.nombre.trim()} - ${datosComercio.calle.trim()}`
+          : datosComercio.nombre.trim(),
         fechaUltimoUso: new Date().toISOString(),
       },
     ],

@@ -84,26 +84,29 @@ del branch padre. Se resuelve con `resolverComercioId()` que busca en `comercios
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 2: BOTÓN "AGREGAR COMERCIO RÁPIDO" 🔧 [PENDIENTE]
+## 📋 FASE 2: BOTÓN "AGREGAR COMERCIO RÁPIDO" 🔧 [✅ COMPLETADA]
 
 ### Objetivo
 - Renombrar el botón en FormularioPrecio.vue de "Agregar nuevo comercio" a "Agregar comercio rápido"
 - Verificar que el flujo completo del diálogo funciona correctamente
 
 ### Archivos a modificar
-[ ] src/components/Formularios/FormularioPrecio.vue (solo el label del botón)
+[x] src/components/Formularios/FormularioPrecio.vue (label del botón — hecho en Fase 1)
+[x] src/almacenamiento/servicios/ComerciosService.js (fix nombreCompleto)
 
 ### Verificaciones en DialogoAgregarComercioRapido.vue
-[ ] Verificar que el diálogo se abre correctamente con datos pre-llenados del comercio escrito
-[ ] Verificar que `resultado.exito` y `resultado.validacion` coinciden con lo que retorna `comerciosStore.agregarComercio()`
-      — El código espera `{ exito, validacion, comercio }` pero hay que confirmar el formato real del store
-[ ] Verificar que al guardar, el nuevo comercio aparece **auto-seleccionado** en el selector de FormularioPrecio
-[ ] Verificar que la dirección ingresada en el diálogo se auto-selecciona también
-[ ] Verificar notificaciones de éxito y error
+[x] Diálogo se abre correctamente con datos pre-llenados del comercio escrito ✓
+[x] `resultado.exito` y `resultado.validacion` coinciden con el store ✓
+      El store retorna `{ exito: false, validacion }` (duplicado) o `{ exito: true, comercio }` (ok)
+[x] Al guardar, el nuevo comercio aparece auto-seleccionado en el selector ✓
+[x] La dirección ingresada se auto-selecciona también ✓
+[x] Notificaciones de éxito y error correctas ✓
 
-### Ajuste si hay bug en el formato de respuesta
-[ ] Si `comerciosStore.agregarComercio()` retorna un formato diferente, adaptar la lógica en `guardar()`
-[ ] No cambiar el store — adaptar el diálogo al formato actual del store
+### Bug encontrado y corregido
+[x] `ComerciosService.agregarComercio`: cuando `calle` es vacío (dirección opcional),
+      `nombreCompleto` quedaba "NombreComercio - " (con " - " colgante) → corregido:
+      si `calle` vacío → `nombreCompleto = nombre` (sin " - ")
+[x] Además: `calle.trim()` fallaba si `calle` llegaba `undefined` → corregido con `?.trim()`
 
 ═══════════════════════════════════════════════════════════════
 
@@ -351,10 +354,10 @@ ese cambio debe verse reflejado en el historial de precios del producto.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 11% (1/9 fases completadas)
+## 📊 PROGRESO GENERAL: 22% (2/9 fases completadas)
 
 ✅ Fase 1: Selector de comercio agrupado (fix)
-⏳ Fase 2: Botón "Agregar comercio rápido" (fix + verificación)
+✅ Fase 2: Botón "Agregar comercio rápido" (fix + verificación)
 ⏳ Fase 3: Categoría del producto (nueva función)
 ⏳ Fase 4: Buscador inteligente de productos (nueva función)
 ⏳ Fase 5: Registrar última interacción (soporte para Fase 4)
