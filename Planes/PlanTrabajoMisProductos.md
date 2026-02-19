@@ -110,7 +110,7 @@ del branch padre. Se resuelve con `resolverComercioId()` que busca en `comercios
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 3: CATEGORÍA DEL PRODUCTO 🏷️ [PENDIENTE]
+## 📋 FASE 3: CATEGORÍA DEL PRODUCTO 🏷️ [✅ COMPLETADA]
 
 ### Objetivo
 Agregar un campo `categoria` al producto que:
@@ -120,24 +120,20 @@ Agregar un campo `categoria` al producto que:
 
 ### 3.1 — Verificar que la API ya guarda la categoría
 **Archivo:** src/almacenamiento/servicios/OpenFoodFactsService.js
-[ ] Confirmar que `_mapearProducto()` ya incluye el campo `categoria` en el objeto mapeado ✓
-      (Según documentación, ya mapea: `categoria: _extraerPrimeraCategoria(categorias)`)
-[ ] Confirmar que `autoCompletarFormulario()` en DialogoAgregarProducto.vue incluye `categoria`
-[ ] Si no está siendo guardado en el producto, agregarlo al objeto que se persiste en ProductosService
+[x] `_mapearProducto()` ya incluye `categoria: _extraerPrimeraCategoria(categorias)` ✓
+[x] `autoCompletarFormulario()` en DialogoAgregarProducto.vue incluye `categoria` ✓
+[x] `ProductosService.guardarProducto()` persiste el objeto completo — `categoria` se guarda ✓
 
 ### 3.2 — Editor de categoría en DetalleProductoPage
 **Archivo:** src/components/DetalleProducto/InfoProducto.vue
-[ ] Agregar campo de categoría debajo del nombre o del código de barras
-[ ] Estilo: similar a CampoEditable.vue (texto visible + ícono lápiz → se convierte en input)
-      Reutilizar CampoEditable.vue si es posible (ya existe en EditarComercio/)
-[ ] Si `producto.categoria` existe: mostrar el valor
-[ ] Si no existe: mostrar texto tenue "Sin categoría" o simplemente vacío (a definir con Leo)
-[ ] Al editar y guardar: llamar a `productosStore.actualizarProducto(id, { categoria: nuevaCategoria })`
+[x] Campo categoría agregado debajo del código de barras
+[x] Reutiliza `CampoEditable.vue` (existente en EditarComercio/) — texto + ícono lápiz → input
+[x] Si `producto.categoria` existe: muestra el valor
+[x] Si no existe: muestra texto tenue "Sin categoría" (via prop `sin-valor-texto`)
+[x] Al guardar llama `productosStore.actualizarProducto(id, { categoria })` con notify de éxito/error
 
 ### 3.3 — Categorías sugeridas
-[ ] Las categorías vienen de la API como texto libre (ej: "Bebidas", "Lácteos")
-[ ] No crear una lista fija de categorías por ahora — dejar campo de texto libre
-[ ] El usuario escribe la que quiera
+[x] Campo de texto libre (sin lista fija) — el usuario escribe lo que quiera ✓
 
 ### ⚠️ Nota
 No agregar el campo al formulario de crear producto. Solo editable desde el detalle.
@@ -354,11 +350,11 @@ ese cambio debe verse reflejado en el historial de precios del producto.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 22% (2/9 fases completadas)
+## 📊 PROGRESO GENERAL: 33% (3/9 fases completadas)
 
 ✅ Fase 1: Selector de comercio agrupado (fix)
 ✅ Fase 2: Botón "Agregar comercio rápido" (fix + verificación)
-⏳ Fase 3: Categoría del producto (nueva función)
+✅ Fase 3: Categoría del producto (nueva función)
 ⏳ Fase 4: Buscador inteligente de productos (nueva función)
 ⏳ Fase 5: Registrar última interacción (soporte para Fase 4)
 ⏳ Fase 6: Integrar buscador en Mis Productos

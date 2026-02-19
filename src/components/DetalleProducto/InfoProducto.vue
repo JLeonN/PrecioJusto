@@ -25,6 +25,16 @@
           <q-tooltip>Click para copiar</q-tooltip>
         </div>
 
+        <!-- Categoría (editable) -->
+        <CampoEditable
+          etiqueta="Categoría"
+          :valor="producto.categoria || ''"
+          :icono="IconTag"
+          sin-valor-texto="Sin categoría"
+          class="q-mb-xs"
+          @guardar="actualizarCategoria"
+        />
+
         <!-- Precio más bajo actual -->
         <div class="precio-principal q-mt-sm">
           <div class="text-h4 text-weight-bold text-primary">${{ producto.precioMejor }}</div>
@@ -58,10 +68,13 @@
 
 <script setup>
 import { computed } from 'vue'
-import { IconShoppingBag, IconMapPin, IconPlus, IconBarcode } from '@tabler/icons-vue'
+import { IconShoppingBag, IconMapPin, IconPlus, IconBarcode, IconTag } from '@tabler/icons-vue'
 import { useQuasar } from 'quasar'
+import CampoEditable from '../EditarComercio/CampoEditable.vue'
+import { useProductosStore } from '../../almacenamiento/stores/productosStore.js'
 
 const $q = useQuasar()
+const productosStore = useProductosStore()
 
 const props = defineProps({
   producto: {
@@ -97,6 +110,17 @@ const textoTendencia = computed(() => {
   }
   return 'Precio estable (últimos 30 días)'
 })
+
+// Guardar nueva categoría en el store
+async function actualizarCategoria(nuevaCategoria) {
+  try {
+    await productosStore.actualizarProducto(props.producto.id, { categoria: nuevaCategoria })
+    $q.notify({ type: 'positive', message: 'Categoría actualizada', position: 'top', timeout: 1500 })
+  } catch (error) {
+    console.error('Error al actualizar categoría:', error)
+    $q.notify({ type: 'negative', message: 'No se pudo guardar la categoría', position: 'top' })
+  }
+}
 
 // Copiar código de barras al portapapeles
 const copiarCodigoBarras = async (codigo) => {
