@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import ComerciosService from '../servicios/ComerciosService'
+import { useProductosStore } from './productosStore.js'
 
 /**
  * COMERCIOS STORE
@@ -241,6 +242,11 @@ export const useComerciStore = defineStore('comercios', {
           if (indice !== -1) {
             this.comercios[indice] = comercioActualizado
           }
+
+          // Sincronizar nombre en el historial de precios si cambió el nombre
+          if (datosActualizados.nombre) {
+            await this._sincronizarNombreEnPrecios(id, datosActualizados.nombre)
+          }
         }
 
         return comercioActualizado
@@ -250,6 +256,33 @@ export const useComerciStore = defineStore('comercios', {
         throw error
       } finally {
         this.cargando = false
+      }
+    },
+
+    // Actualiza comercio/nombreCompleto en todos los precios que referencian este comercioId
+    async _sincronizarNombreEnPrecios(comercioId, nuevoNombre) {
+      try {
+        const productosStore = useProductosStore()
+        for (const producto of productosStore.productos) {
+          const tienePrecios = producto.precios?.some((p) => p.comercioId === comercioId)
+          if (!tienePrecios) continue
+
+          const preciosActualizados = producto.precios.map((precio) => {
+            if (precio.comercioId !== comercioId) return precio
+            const nuevaDireccion = precio.direccion || ''
+            return {
+              ...precio,
+              comercio: nuevoNombre,
+              nombreCompleto: nuevaDireccion
+                ? `${nuevoNombre} - ${nuevaDireccion}`
+                : nuevoNombre,
+            }
+          })
+
+          await productosStore.actualizarProducto(producto.id, { precios: preciosActualizados })
+        }
+      } catch (err) {
+        console.error('Error al sincronizar nombre en precios:', err)
       }
     },
 

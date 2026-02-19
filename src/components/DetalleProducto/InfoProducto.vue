@@ -152,7 +152,7 @@ const copiarCodigoBarras = async (codigo) => {
 }
 .info-contenido {
   display: grid;
-  grid-template-columns: 120px 1fr;
+  grid-template-columns: 180px 1fr;
   gap: 24px;
   align-items: start;
 }
@@ -163,8 +163,8 @@ const copiarCodigoBarras = async (codigo) => {
     gap: 16px;
   }
   .info-imagen {
-    max-width: 140px;
-    width: 35vw;
+    max-width: 180px;
+    width: 45vw;
     height: auto;
     aspect-ratio: 1/1;
     margin: 0 auto;
@@ -172,7 +172,7 @@ const copiarCodigoBarras = async (codigo) => {
 }
 .info-imagen {
   width: 100%;
-  height: 120px;
+  height: 180px;
 }
 .placeholder-imagen {
   width: 100%;

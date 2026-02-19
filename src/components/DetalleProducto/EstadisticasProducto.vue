@@ -56,10 +56,10 @@ const precioPromedio = computed(() => {
   return Math.round(suma / props.producto.precios.length)
 })
 
-// Total de comercios únicos
+// Total de comercios únicos (comercioId cuando existe, p.comercio como fallback para datos legacy)
 const totalComercios = computed(() => {
   if (!props.producto.precios) return 0
-  const comerciosUnicos = new Set(props.producto.precios.map((p) => p.comercio))
+  const comerciosUnicos = new Set(props.producto.precios.map((p) => p.comercioId || p.comercio))
   return comerciosUnicos.size
 })
 

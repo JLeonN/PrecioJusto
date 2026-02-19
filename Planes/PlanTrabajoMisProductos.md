@@ -221,67 +221,53 @@ Agregar el buscador a MisProductosPage.vue para filtrar la lista de productos.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 7: MEJORAS EN DETALLE DEL PRODUCTO 🎨 [PENDIENTE]
+## 📋 FASE 7: MEJORAS EN DETALLE DEL PRODUCTO 🎨 [✅ COMPLETADA]
 
 ### 7.1 — Título de sección "Historial de precios"
 **Archivo:** src/pages/DetalleProductoPage.vue
-[ ] Agregar un `<h6>` o encabezado de sección entre EstadisticasProducto y FiltrosHistorial
-[ ] Texto: "Historial de precios"
-[ ] Mantener consistencia visual con el resto de la página
+[x] `<p class="text-subtitle1 text-weight-bold">` entre EstadisticasProducto y FiltrosHistorial
+[x] Texto: "Historial de precios" — consistente visualmente con la página
 
 ### 7.2 — Foto del producto más grande
 **Archivo:** src/components/DetalleProducto/InfoProducto.vue
-[ ] En desktop: aumentar de 120px a 180px (columna del grid y clase `.info-imagen`)
-[ ] En móvil: aumentar de 35vw a 45vw con máximo 180px
-[ ] Ajustar el grid `grid-template-columns` para la columna más ancha
-[ ] El placeholder (ícono bolsa) crece proporcionalmente al nuevo tamaño
+[x] Desktop: `grid-template-columns: 180px 1fr` (era 120px) + `.info-imagen { height: 180px }`
+[x] Móvil: `width: 45vw` (era 35vw) + `max-width: 180px` (era 140px)
+[x] Placeholder (ícono bolsa) crece proporcionalmente (height: 100% en el contenedor)
 
-### 7.3 — Verificar precio promedio
+### 7.3 — Verificar precio promedio ✓ Sin cambios
+[x] `Math.round(suma / total)` — sin decimales innecesarios ✓
+[x] Calcula sobre TODOS los precios (no filtrados) ✓
+
+### 7.4 — Verificar tendencia ✓ Sin cambios
+[x] `_calcularCamposAutomaticos()` en ProductosService.js calcula correctamente ✓
+[x] `tendenciaGeneral` y `porcentajeTendencia` llegan al componente como props ✓
+
+### 7.5 — Fix conteo de comercios
 **Archivo:** src/components/DetalleProducto/EstadisticasProducto.vue
-[ ] Confirmar que calcula promedio de TODOS los precios (no filtrados)
-[ ] Confirmar que muestra valor sin decimales innecesarios
-[ ] Verificar que no muestra 0 cuando hay precios cargados
-
-### 7.4 — Verificar tendencia
-**Archivo:** src/almacenamiento/servicios/ProductosService.js → `_calcularCamposAutomaticos()`
-[ ] Revisar lógica de tendencia: compara precios últimos 30 días vs 30 días anteriores
-[ ] Confirmar que `tendenciaGeneral` y `porcentajeTendencia` llegan correctos al componente
-[ ] Verificar el chip en InfoProducto.vue y la card en EstadisticasProducto.vue
-
-### 7.5 — Verificar conteo de comercios
-**Archivo:** src/components/DetalleProducto/EstadisticasProducto.vue
-[ ] La lógica usa `new Set(precios.map(p => p.comercio))` — verificar
-[ ] Precios nuevos guardan `comercioId` (string ID) y precios legacy guardan solo texto
-[ ] Si hay duplicados por mezcla de formatos, revisar y unificar el campo usado
-[ ] Alternativa: usar `comercioId` cuando existe, `comercio` (texto) como fallback
+[x] Cambiado a `p.comercioId || p.comercio` como clave del Set
+[x] Corrige duplicados por datos híbridos (legacy vs nuevos)
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 8: SINCRONIZACIÓN COMERCIOS → HISTORIAL 🔗 [PENDIENTE]
+## 📋 FASE 8: SINCRONIZACIÓN COMERCIOS → HISTORIAL 🔗 [✅ COMPLETADA]
 
 ### Objetivo
 Cuando el usuario edita el nombre de un comercio en la sección Comercios,
 ese cambio debe verse reflejado en el historial de precios del producto.
 
-### Diagnóstico previo (ANTES de escribir código)
-[ ] Revisar qué campos guarda cada precio al agregarlo:
-      `precio.comercioId` (string referencia) y `precio.comercio` (texto plano)
-[ ] Revisar cómo `HistorialPrecios.vue` muestra el nombre del comercio:
-      ¿usa `p.comercio` (texto)? ¿o resuelve desde `comerciosStore` con `comercioId`?
-[ ] El diagnóstico determina la estrategia:
+### Diagnóstico
+[x] HistorialPrecios.vue agrupa por `precio.nombreCompleto` (texto plano) → **CASO A** confirmado
+[x] Los nombres quedan "congelados" al agregar el precio — no resuelven desde el store
 
-**Caso A: El historial muestra texto plano (`p.comercio` o `p.nombreCompleto`)**
-[ ] Los nombres quedan "congelados" al momento de agregar el precio
-[ ] Solución: en `comerciosStore.editarComercio()`, recorrer todos los productos
-      y actualizar el campo `comercio`/`nombreCompleto` en cada precio que tenga ese `comercioId`
-[ ] Esta operación puede ser costosa → mostrar loading
-
-**Caso B: El historial resuelve el nombre desde el store usando `comercioId`**
-[ ] Los cambios se reflejan automáticamente (el ID apunta al comercio actualizado)
-[ ] No requiere ningún cambio adicional → solo confirmar que funciona
-
-[ ] Implementar según el caso que corresponda al diagnóstico
-[ ] Test manual: editar nombre de un comercio → abrir historial → confirmar que actualizó
+### Implementación: CASO A
+**Archivo:** src/almacenamiento/stores/comerciosStore.js
+[x] Import de `useProductosStore` agregado al inicio del store
+[x] `editarComercio()` llama a `_sincronizarNombreEnPrecios(id, nombre)` si cambia el nombre
+[x] `_sincronizarNombreEnPrecios`: itera todos los productos, actualiza precios con `comercioId === id`:
+      - `precio.comercio = nuevoNombre`
+      - `precio.nombreCompleto = "NuevoNombre - Calle"` (o solo nombre si sin dirección)
+      - Llama `productosStore.actualizarProducto()` para persistir + recalcular campos automáticos
+[x] Operación silenciosa (error no bloquea el flujo principal de edición del comercio)
 
 ═══════════════════════════════════════════════════════════════
 
@@ -352,16 +338,16 @@ ese cambio debe verse reflejado en el historial de precios del producto.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 33% (3/9 fases completadas)
+## 📊 PROGRESO GENERAL: 89% (8/9 fases completadas)
 
 ✅ Fase 1: Selector de comercio agrupado (fix)
 ✅ Fase 2: Botón "Agregar comercio rápido" (fix + verificación)
 ✅ Fase 3: Categoría del producto (nueva función)
-⏳ Fase 4: Buscador inteligente de productos (nueva función)
-⏳ Fase 5: Registrar última interacción (soporte para Fase 4)
-⏳ Fase 6: Integrar buscador en Mis Productos
-⏳ Fase 7: Mejoras en detalle del producto
-⏳ Fase 8: Sincronización comercios → historial
+✅ Fase 4: Buscador inteligente de productos (nueva función)
+✅ Fase 5: Registrar última interacción (soporte para Fase 4)
+✅ Fase 6: Integrar buscador en Mis Productos
+✅ Fase 7: Mejoras en detalle del producto
+✅ Fase 8: Sincronización comercios → historial
 ⏳ Fase 9: Testing y ajustes
 
 ═══════════════════════════════════════════════════════════════

@@ -42,7 +42,10 @@
         />
 
         <!-- Estadísticas en cards -->
-        <EstadisticasProducto :producto="productoActual" class="q-mb-lg" />
+        <EstadisticasProducto :producto="productoActual" class="q-mb-md" />
+
+        <!-- Título de sección historial -->
+        <p class="text-subtitle1 text-weight-bold q-mt-md q-mb-xs">Historial de precios</p>
 
         <!-- Filtros del historial -->
         <FiltrosHistorial
