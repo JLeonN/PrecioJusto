@@ -22,14 +22,17 @@
         <q-icon name="store" />
       </template>
 
-      <!-- Opciones personalizadas con cantidad de direcciones -->
+      <!-- Opciones personalizadas: muestra sucursales si es cadena, direcciones si no -->
       <template #option="{ itemProps, opt }">
         <q-item v-bind="itemProps">
           <q-item-section>
             <q-item-label>{{ opt.nombre }}</q-item-label>
             <q-item-label caption>
-              {{ opt.direcciones.length }}
-              {{ opt.direcciones.length === 1 ? 'dirección' : 'direcciones' }}
+              {{
+                opt.esCadena
+                  ? opt.totalSucursales + ' sucursales'
+                  : opt.direcciones.length + ' ' + (opt.direcciones.length === 1 ? 'dirección' : 'direcciones')
+              }}
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -93,7 +96,7 @@
       no-caps
       color="primary"
       icon="add_circle"
-      label="Agregar nuevo comercio"
+      label="Agregar comercio rápido"
       class="q-mt-xs"
       style="margin-top: -8px"
       @click="abrirDialogoNuevoComercio"
@@ -293,15 +296,31 @@ onMounted(async () => {
 // ========================================
 
 /**
+ * Resuelve el comercioId del branch al que pertenece una dirección.
+ * Necesario cuando el comercio seleccionado es un grupo (cadena) con varios branches.
+ * @param {Object} comercioOGrupo - Objeto comercio individual o grupo agrupado
+ * @param {string} idDireccion - ID de la dirección seleccionada
+ * @returns {string} ID del branch dueño de la dirección, o ID del grupo como fallback
+ */
+function resolverComercioId(comercioOGrupo, idDireccion) {
+  if (!comercioOGrupo.comerciosOriginales) return comercioOGrupo.id
+  const sucursal = comercioOGrupo.comerciosOriginales.find((c) =>
+    c.direcciones.some((d) => d.id === idDireccion),
+  )
+  return sucursal ? sucursal.id : comercioOGrupo.id
+}
+
+/**
  * Filtrar comercios mientras el usuario escribe
  */
 function filtrarComercios(val, update) {
   update(() => {
     if (val === '') {
-      comerciosFiltrados.value = comerciosStore.comerciosPorUso
+      // Solo top 3 más recientes para no abrumar al usuario
+      comerciosFiltrados.value = comerciosStore.comerciosAgrupados.slice(0, 3)
     } else {
       const needle = val.toLowerCase()
-      comerciosFiltrados.value = comerciosStore.comerciosPorUso.filter(
+      comerciosFiltrados.value = comerciosStore.comerciosAgrupados.filter(
         (c) => c.nombre.toLowerCase().indexOf(needle) > -1,
       )
     }
@@ -375,27 +394,22 @@ function alSeleccionarComercio(comercio) {
     return
   }
 
-  // Guardar comercio seleccionado
-  comercioId.value = comercio.id
   comercioSeleccionado.value = comercio
   esComercioNuevo.value = false
-  comercioEscrito.value = '' // Limpiar texto escrito
+  comercioEscrito.value = ''
   textoTemporalComercio.value = ''
 
-  // Auto-seleccionar dirección más usada si existe
+  // Auto-seleccionar la dirección principal (ya ordenada por uso reciente en el getter)
   if (comercio.direcciones && comercio.direcciones.length > 0) {
-    // Ordenar por ultimoUso y tomar la primera
-    const direccionesOrdenadas = [...comercio.direcciones].sort((a, b) => {
-      const fechaA = a.ultimoUso ? new Date(a.ultimoUso) : new Date(0)
-      const fechaB = b.ultimoUso ? new Date(b.ultimoUso) : new Date(0)
-      return fechaB - fechaA
-    })
-
-    direccionSeleccionada.value = direccionesOrdenadas[0]
-    direccionId.value = direccionesOrdenadas[0].id
+    const direccionAuto = comercio.direccionPrincipal || comercio.direcciones[0]
+    direccionSeleccionada.value = direccionAuto
+    direccionId.value = direccionAuto.id
+    // Resolver el branch dueño de esta dirección para guardar el comercioId correcto
+    comercioId.value = resolverComercioId(comercio, direccionAuto.id)
   } else {
     direccionSeleccionada.value = null
     direccionId.value = null
+    comercioId.value = comercio.id
   }
 
   emitirCambios()
@@ -415,11 +429,16 @@ function alSeleccionarDireccion(direccion) {
     return
   }
 
-  // Guardar dirección seleccionada
   direccionId.value = direccion.id
   direccionSeleccionada.value = direccion
-  direccionEscrita.value = '' // Limpiar texto escrito
+  direccionEscrita.value = ''
   textoTemporalDireccion.value = ''
+
+  // Actualizar comercioId al branch dueño de esta dirección (por si es una cadena)
+  if (esComercioExistente.value) {
+    comercioId.value = resolverComercioId(comercioSeleccionado.value, direccion.id)
+  }
+
   emitirCambios()
 }
 

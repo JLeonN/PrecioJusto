@@ -43,7 +43,7 @@ primero se corrigen los problemas actuales, luego se agregan las funcionalidades
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 1: SELECTOR DE COMERCIO AGRUPADO 🏪 [PENDIENTE]
+## 📋 FASE 1: SELECTOR DE COMERCIO AGRUPADO 🏪 [✅ COMPLETADA]
 
 ### Objetivo
 Corregir el selector de comercio en FormularioPrecio.vue para que:
@@ -52,33 +52,35 @@ Corregir el selector de comercio en FormularioPrecio.vue para que:
 3. Al seleccionar "Tata", el selector de direcciones muestre **todas las sucursales** de Tata
 
 ### Archivo a modificar
-[ ] src/components/Formularios/FormularioPrecio.vue
+[x] src/components/Formularios/FormularioPrecio.vue
 
 ### Cambios en `filtrarComercios(val, update)`
-[ ] Cambiar la fuente de datos de `comerciosPorUso` a `comerciosAgrupados`
-[ ] Cuando `val === ''`: mostrar solo los 3 primeros de `comerciosAgrupados` (top 3 recientes)
-[ ] Cuando `val !== ''`: filtrar `comerciosAgrupados` por nombre (substring)
-[ ] `comerciosAgrupados` ya tiene formato agrupado con todas las sucursales dentro
+[x] Cambiar la fuente de datos de `comerciosPorUso` a `comerciosAgrupados`
+[x] Cuando `val === ''`: mostrar solo los 3 primeros de `comerciosAgrupados` (top 3 recientes)
+[x] Cuando `val !== ''`: filtrar `comerciosAgrupados` por nombre (substring)
+[x] `comerciosAgrupados` ya tiene formato agrupado con todas las sucursales dentro
 
 ### Cambios en el selector de direcciones
-[ ] El objeto seleccionado del dropdown es ahora un "grupo" con N sucursales
-[ ] `direccionesDisponibles` debe retornar las direcciones de **todas** las sucursales del grupo
-      Combinar `grupo.sucursales.flatMap(s => s.direcciones)` o equivalente según estructura
-[ ] Mostrar en cada opción de dirección: calle + barrio para identificar la sucursal
+[x] El objeto seleccionado del dropdown es ahora un "grupo" con N sucursales
+[x] `direccionesDisponibles` retorna las direcciones de **todas** las sucursales del grupo
+      (el getter `comerciosAgrupados` ya combina todas las direcciones en `.direcciones[]`)
+[x] Dirección auto-seleccionada: `grupo.direccionPrincipal` (la más reciente, ya calculada)
 
 ### Cambios en `alSeleccionarComercio(comercio)`
-[ ] Al seleccionar el grupo, guardar el `comercioId` de la sucursal con la dirección más usada
-      (igual que antes, pero ahora eligiendo entre todas las sucursales del grupo)
-[ ] Auto-seleccionar la dirección más recientemente usada de todo el grupo
+[x] Al seleccionar el grupo, se usa `resolverComercioId()` para obtener el branch correcto
+[x] Auto-seleccionar la dirección principal del grupo (más recientemente usada)
+
+### Cambios en `alSeleccionarDireccion(direccion)`
+[x] Al cambiar la dirección manual, se re-calcula el `comercioId` al branch correspondiente
 
 ### Cambios en las opciones visuales del dropdown
-[ ] Mostrar nombre del grupo (ej: "Tata")
-[ ] En el caption: mostrar cantidad total de sucursales (ej: "3 sucursales")
-[ ] Si tiene 1 sola sucursal: mostrar dirección principal en el caption
+[x] Mostrar nombre del grupo (ej: "Tata")
+[x] En el caption: "3 sucursales" si es cadena, "1 dirección"/"N direcciones" si no
+[x] Agregar helper `resolverComercioId(comercioOGrupo, idDireccion)` para resolver branch
 
-### ⚠️ Punto delicado
-Revisar la estructura exacta de `comerciosAgrupados` en comerciosStore.js
-para entender qué propiedades tiene cada grupo antes de tocar el código.
+### ⚠️ Punto delicado (resuelto)
+`comerciosAgrupados.direcciones[]` combina todos los branches PERO no trae el `comercioId`
+del branch padre. Se resuelve con `resolverComercioId()` que busca en `comerciosOriginales`.
 
 ═══════════════════════════════════════════════════════════════
 
@@ -349,9 +351,9 @@ ese cambio debe verse reflejado en el historial de precios del producto.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 0% INICIADO
+## 📊 PROGRESO GENERAL: 11% (1/9 fases completadas)
 
-⏳ Fase 1: Selector de comercio agrupado (fix)
+✅ Fase 1: Selector de comercio agrupado (fix)
 ⏳ Fase 2: Botón "Agregar comercio rápido" (fix + verificación)
 ⏳ Fase 3: Categoría del producto (nueva función)
 ⏳ Fase 4: Buscador inteligente de productos (nueva función)
