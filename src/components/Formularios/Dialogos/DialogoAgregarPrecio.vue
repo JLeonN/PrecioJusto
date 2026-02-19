@@ -49,23 +49,42 @@
           </div>
         </div>
 
-        <!-- Selector de comercio -->
+        <!-- Selector de comercio (agrupado por cadenas) -->
         <q-select
           v-model="comercioSeleccionado"
           label="Comercio"
           outlined
           dense
           use-input
+          clearable
           input-debounce="200"
           :options="opcionesComercios"
-          option-label="label"
-          option-value="value"
+          option-label="nombre"
           :display-value="textoVisibleComercio"
           class="q-mb-md"
           @filter="filtrarComercios"
           @update:model-value="alSeleccionarComercio"
           @input-value="alEscribirComercio"
+          @focus="comercioTieneFoco = true"
+          @blur="comercioTieneFoco = false"
         >
+          <!-- Opciones: muestra sucursales si es cadena, direcciones si es individual -->
+          <template #option="{ itemProps, opt }">
+            <q-item v-bind="itemProps">
+              <q-item-section>
+                <q-item-label>{{ opt.nombre }}</q-item-label>
+                <q-item-label caption>
+                  {{
+                    opt.esCadena
+                      ? opt.totalSucursales + ' sucursales'
+                      : opt.direcciones.length +
+                        ' ' +
+                        (opt.direcciones.length === 1 ? 'dirección' : 'direcciones')
+                  }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </template>
           <template #no-option>
             <q-item>
               <q-item-section class="text-grey">Sin resultados</q-item-section>
@@ -96,14 +115,15 @@
           </template>
         </q-select>
 
-        <!-- Botón agregar comercio nuevo -->
+        <!-- Botón agregar comercio rápido -->
         <div class="text-center q-mt-sm">
           <q-btn
             flat
             dense
             no-caps
             color="primary"
-            label="+ Agregar nuevo comercio"
+            icon="add_circle"
+            label="Agregar comercio rápido"
             @click="abrirDialogoComercioRapido"
           />
         </div>
@@ -168,9 +188,10 @@ const dialogoAbierto = computed({
 const inputPrecioRef = ref(null)
 const precioNuevo = ref(null)
 const monedaSeleccionada = ref(MONEDA_DEFAULT)
-const comercioSeleccionado = ref(null)
-const direccionSeleccionada = ref(null)
+const comercioSeleccionado = ref(null) // objeto agrupado completo
+const direccionSeleccionada = ref(null) // { label, value, direccion }
 const textoComercioEscrito = ref('')
+const comercioTieneFoco = ref(false)
 const guardando = ref(false)
 const dialogoComercioRapidoAbierto = ref(false)
 
@@ -183,26 +204,16 @@ const productoActual = computed(() => {
   return productosStore.obtenerProductoPorId(props.productoId)
 })
 
-/* Opciones de comercios para el selector */
-const opcionesComerciosBase = computed(() => {
-  return comerciosStore.comerciosPorUso.map((comercio) => ({
-    label: `${comercio.nombre} (${comercio.direcciones?.length || 0} dir.)`,
-    value: comercio.id,
-    comercio: comercio,
-  }))
-})
+/* Comercios agrupados (cadenas + individuales, ordenados por uso reciente) */
+const opcionesComerciosBase = computed(() => comerciosStore.comerciosAgrupados)
 
 const opcionesComercios = ref([])
 
-/* Opciones de direcciones del comercio seleccionado */
+/* Direcciones del comercio seleccionado como { label, value, direccion } */
 const opcionesDireccionesBase = computed(() => {
   if (!comercioSeleccionado.value) return []
-
-  const comercio = comerciosStore.obtenerComercioPorId(comercioSeleccionado.value.value)
-  if (!comercio || !comercio.direcciones) return []
-
-  return comercio.direcciones.map((dir) => ({
-    label: dir.calle || dir.nombreCompleto || 'Sin dirección',
+  return (comercioSeleccionado.value.direcciones || []).map((dir) => ({
+    label: dir.nombreCompleto || dir.calle || 'Sin dirección',
     value: dir.id,
     direccion: dir,
   }))
@@ -212,9 +223,9 @@ const opcionesDirecciones = ref([])
 
 /* Texto visible en selector comercio */
 const textoVisibleComercio = computed(() => {
-  if (comercioSeleccionado.value) {
-    return comercioSeleccionado.value.label
-  }
+  // Si tiene foco, dejar que q-select maneje el display mientras el usuario escribe
+  if (comercioTieneFoco.value) return undefined
+  if (comercioSeleccionado.value) return comercioSeleccionado.value.nombre
   return textoComercioEscrito.value || ''
 })
 
@@ -226,9 +237,16 @@ const hintDireccion = computed(() => {
 })
 
 /* Validación para guardar */
-const puedeGuardar = computed(() => {
-  return precioNuevo.value > 0
-})
+const puedeGuardar = computed(() => precioNuevo.value > 0)
+
+/* Resuelve el comercioId del branch dueño de una dirección (necesario para cadenas) */
+function resolverComercioId(comercioOGrupo, idDireccion) {
+  if (!comercioOGrupo?.comerciosOriginales) return comercioOGrupo?.id
+  const sucursal = comercioOGrupo.comerciosOriginales.find((c) =>
+    c.direcciones.some((d) => d.id === idDireccion),
+  )
+  return sucursal ? sucursal.id : comercioOGrupo.id
+}
 
 /* Obtener último comercio usado en este producto */
 const obtenerUltimoComercioUsado = () => {
@@ -241,22 +259,21 @@ const obtenerUltimoComercioUsado = () => {
   const ultimoPrecio = preciosOrdenados[0]
   if (!ultimoPrecio.comercioId) return null
 
-  const opcion = opcionesComerciosBase.value.find((op) => op.value === ultimoPrecio.comercioId)
-
-  return opcion || null
+  // Buscar en agrupados por ID directo o por branch (para cadenas)
+  return (
+    opcionesComerciosBase.value.find(
+      (op) =>
+        op.id === ultimoPrecio.comercioId ||
+        op.comerciosOriginales?.some((c) => c.id === ultimoPrecio.comercioId),
+    ) || null
+  )
 }
 
 /* Obtener dirección más usada del comercio seleccionado */
 const obtenerDireccionMasUsada = () => {
   if (opcionesDireccionesBase.value.length === 0) return null
-
-  const direccionesOrdenadas = [...opcionesDireccionesBase.value].sort((a, b) => {
-    const fechaA = new Date(a.direccion.fechaUltimoUso || '2000-01-01')
-    const fechaB = new Date(b.direccion.fechaUltimoUso || '2000-01-01')
-    return fechaB - fechaA
-  })
-
-  return direccionesOrdenadas[0]
+  // Las direcciones ya vienen ordenadas por uso desde comerciosAgrupados
+  return opcionesDireccionesBase.value[0]
 }
 
 /* Watch: al abrir el diálogo, pre-llenar datos */
@@ -295,11 +312,12 @@ watch(
 function filtrarComercios(val, update) {
   update(() => {
     if (!val) {
-      opcionesComercios.value = opcionesComerciosBase.value
+      // Sin texto: top 3 más recientes (igual que FormularioPrecio)
+      opcionesComercios.value = opcionesComerciosBase.value.slice(0, 3)
     } else {
       const busqueda = val.toLowerCase()
       opcionesComercios.value = opcionesComerciosBase.value.filter((op) =>
-        op.label.toLowerCase().includes(busqueda),
+        op.nombre.toLowerCase().includes(busqueda),
       )
     }
   })
@@ -319,13 +337,12 @@ function filtrarDirecciones(val, update) {
   })
 }
 
-/* Al seleccionar un comercio, auto-seleccionar dirección */
+/* Al seleccionar un comercio, auto-seleccionar dirección principal */
 async function alSeleccionarComercio(opcion) {
   if (!opcion) {
     direccionSeleccionada.value = null
     return
   }
-
   await nextTick()
   direccionSeleccionada.value = obtenerDireccionMasUsada()
 }
@@ -333,15 +350,18 @@ async function alSeleccionarComercio(opcion) {
 /* Capturar texto escrito en comercio */
 function alEscribirComercio(val) {
   textoComercioEscrito.value = val
+  // Si el usuario escribe algo nuevo, limpiar la selección anterior
+  if (val && comercioSeleccionado.value) {
+    comercioSeleccionado.value = null
+    direccionSeleccionada.value = null
+  }
 }
 
 /* Seleccionar texto del input precio al hacer focus */
 function seleccionarTextoPrecio() {
   nextTick(() => {
     const input = inputPrecioRef.value?.$el?.querySelector('input')
-    if (input) {
-      input.select()
-    }
+    if (input) input.select()
   })
 }
 
@@ -352,16 +372,23 @@ function abrirDialogoComercioRapido() {
 
 /* Al crear comercio nuevo desde diálogo rápido */
 function alCrearComercioNuevo(comercioCreado) {
-  /* Auto-seleccionar el comercio recién creado */
-  const nuevaOpcion = {
-    label: `${comercioCreado.nombre} (${comercioCreado.direcciones?.length || 0} dir.)`,
-    value: comercioCreado.id,
-    comercio: comercioCreado,
-  }
+  // Buscar el comercio recién creado en los agrupados (store ya actualizado)
+  const opcion =
+    comerciosStore.comerciosAgrupados.find((c) =>
+      c.comerciosOriginales?.some((o) => o.id === comercioCreado.id),
+    ) || {
+      // Fallback si el store aún no actualizó
+      id: comercioCreado.id,
+      nombre: comercioCreado.nombre,
+      esCadena: false,
+      totalSucursales: 1,
+      direcciones: comercioCreado.direcciones || [],
+      comerciosOriginales: [comercioCreado],
+      direccionPrincipal: comercioCreado.direcciones?.[0] || null,
+    }
 
-  comercioSeleccionado.value = nuevaOpcion
+  comercioSeleccionado.value = opcion
 
-  /* Auto-seleccionar primera dirección si existe */
   nextTick(() => {
     direccionSeleccionada.value = obtenerDireccionMasUsada()
   })
@@ -374,17 +401,20 @@ async function guardarPrecio() {
   guardando.value = true
 
   try {
-    /* Construir datos del precio */
-    const comercio = comercioSeleccionado.value?.comercio || null
+    const comercio = comercioSeleccionado.value || null
     const direccion = direccionSeleccionada.value?.direccion || null
 
     const nombreComercio = comercio?.nombre || textoComercioEscrito.value.trim() || 'Sin comercio'
     const calleDireccion = direccion?.calle || ''
     const nombreCompleto = calleDireccion ? `${nombreComercio} - ${calleDireccion}` : nombreComercio
 
+    // Resolver el branch correcto para cadenas
+    const idDireccion = direccionSeleccionada.value?.value || null
+    const comercioId = comercio ? resolverComercioId(comercio, idDireccion) : null
+
     const nuevoPrecio = {
-      comercioId: comercioSeleccionado.value?.value || null,
-      direccionId: direccionSeleccionada.value?.value || null,
+      comercioId: comercioId,
+      direccionId: idDireccion,
       comercio: nombreComercio,
       nombreCompleto: nombreCompleto,
       direccion: calleDireccion,
