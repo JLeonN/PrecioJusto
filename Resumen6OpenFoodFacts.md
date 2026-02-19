@@ -407,8 +407,59 @@ $q.notify({
 - "leche" → ~200+ resultados
 - "pan" → ~300+ resultados
 
+## CAMPOS DISPONIBLES EN LA API (NO UTILIZADOS AÚN)
+
+Investigación realizada el 18 de Febrero 2026 con producto real (Nutella, código 3017620422003).
+Estos campos están disponibles en la API pero no están siendo mapeados actualmente en `_mapearProducto()`.
+
+### Campos de alta prioridad para PrecioJusto
+
+| Campo API | Descripción | Ejemplo | Estado |
+|-----------|-------------|---------|--------|
+| `nutrition_grades` | Nutri-Score letra A–E | `"e"` | ⏳ Pendiente |
+| `allergens` | Alérgenos del producto | `"leche, nueces, soja"` | ⏳ Pendiente |
+| `labels` | Etiquetas especiales del producto | `"Vegano, Sin gluten, Orgánico"` | ⏳ Pendiente |
+
+### Campos de prioridad media (para versión futura)
+
+| Campo API | Descripción | Ejemplo | Estado |
+|-----------|-------------|---------|--------|
+| `ingredients_text` | Lista completa de ingredientes | `"Azúcar, aceite de palma, avellanas..."` | 🔮 Futuro |
+| `serving_size` | Tamaño de porción | `"15 g"` | 🔮 Futuro (precio/porción) |
+| `nutriments` | Tabla nutricional completa | `{energy, fat, carbohydrates, protein, salt}` | 🔮 Futuro |
+
+### Campos descartados (no útiles para esta app)
+
+| Campo API | Motivo del descarte |
+|-----------|---------------------|
+| `countries` | Irrelevante para contexto local uruguayo |
+| `packaging` | No aporta valor para comparar precios |
+| `origins` | Campo raramente completado en la API |
+| `stores` | Chocaría con el sistema propio de comercios de la app |
+
+### Cómo agregar un campo nuevo a la app
+
+Cuando se decida implementar alguno de estos campos:
+1. Agregar el campo al objeto `return` de `_mapearProducto()` en OpenFoodFactsService.js
+2. Incluirlo en `autoCompletarFormulario()` en DialogoAgregarProducto.vue
+3. Asegurar que `ProductosService.guardarProducto()` lo persiste
+4. Mostrarlo en el componente correspondiente (InfoProducto.vue o donde aplique)
+
+### Ejemplo de request optimizado (usando parámetro `fields`)
+
+Para no recibir toda la respuesta (que puede ser muy grande), se puede usar:
+```
+GET https://world.openfoodfacts.org/api/v2/product/{codigo}?fields=product_name,brands,code,quantity,categories,image_url,nutrition_grades,allergens,labels
+```
+
+---
+
 ## DOCUMENTACIÓN OFICIAL
 - Sitio: https://world.openfoodfacts.org
 - API Docs: https://world.openfoodfacts.org/data
 - GitHub: https://github.com/openfoodfacts
 - Wiki: https://wiki.openfoodfacts.org
+- API v2 Reference: https://openfoodfacts.github.io/openfoodfacts-server/api/ref-v2/
+- API CheatSheet: https://openfoodfacts.github.io/openfoodfacts-server/api/ref-cheatsheet/
+
+**Última actualización:** 18 de Febrero 2026
