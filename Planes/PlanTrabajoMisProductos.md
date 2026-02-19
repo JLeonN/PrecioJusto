@@ -8,209 +8,315 @@ Responsable: Leo + CH
 ## 📖 DESCRIPCIÓN DEL PLAN
 
 Este plan detalla las mejoras a la sección "MIS PRODUCTOS" de la aplicación Precio Justo.
-El objetivo es mejorar la experiencia de búsqueda de productos con un buscador inteligente
-reutilizable, y pulir la página de detalle/historial del producto para que sea más clara,
-funcional y visualmente agradable.
+Cubre correcciones de bugs existentes, nuevas funcionalidades de búsqueda y mejoras de UX
+en el detalle/historial del producto.
+
+Las fases están ordenadas para que cada una construya sobre la anterior:
+primero se corrigen los problemas actuales, luego se agregan las funcionalidades nuevas.
 
 ### OBJETIVOS PRINCIPALES:
-- Crear un buscador inteligente con sugerencias (nombre, código de barras, marca)
-- Hacer el buscador reutilizable como componente compartido
-- Registrar última interacción por producto para ordenar sugerencias
-- Mejorar la página de detalle: título, foto más grande, funciones verificadas
+- Corregir el selector de comercio: mostrar top 3 agrupados, no todos individualmente
+- Renombrar botón y verificar el flujo de "Agregar comercio rápido"
+- Agregar categoría editable al producto (heredada de API, modificable por usuario)
+- Crear buscador inteligente de productos (nombre, código de barras, marca)
+- Mejorar la página de historial: título, foto más grande, funciones verificadas
 - Asegurar que los cambios en comercios se reflejen en el historial de precios
 
 ### ESTADO ACTUAL (pre-plan):
-- MisProductosPage.vue: lista de productos sin buscador
-- DetalleProductoPage.vue: tiene historial, estadísticas y filtros, pero falta título y foto pequeña
-- InfoProducto.vue: imagen fija a 120px de alto, puede ser más grande
-- productosStore.js: tiene `buscarProductos()` pero solo por nombre exacto
-- EstadisticasProducto.vue: precio promedio y comercios calculados correctamente
-- Los precios guardan `p.comercio` (texto) y `p.nombreCompleto` — no ID referenciado
+- FormularioPrecio.vue: selector de comercio muestra TODOS al abrir (excesivo)
+  - Usa `comerciosPorUso` (individuales), no `comerciosAgrupados` (cadenas unificadas)
+  - 3 sucursales de Tata aparecen como 3 opciones separadas
+  - El selector de direcciones solo muestra las de la sucursal elegida (no todas)
+- Botón "Agregar nuevo comercio" → el diálogo ya dice "Agregar comercio rápido" (inconsistente)
+- Campo `categoria` fue eliminado del formulario, pero la API de OpenFoodFacts ya lo devuelve
+- MisProductosPage.vue: sin buscador
+- DetalleProductoPage.vue: sin título de sección, foto pequeña, funciones a verificar
+- Los precios guardan `comercioId` (referencia) + `comercio` (texto) — datos híbridos
 
 ### TECNOLOGÍAS:
 - Vue.js 3 + Composition API
-- Quasar Framework (q-input, q-list, q-item, q-img)
-- Pinia (productosStore)
-- Capacitor Storage (via ProductosService)
+- Quasar Framework
+- Pinia (productosStore, comerciosStore)
+- Capacitor Storage
+- Open Food Facts API
 - Tabler Icons
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 1: BUSCADOR INTELIGENTE DE PRODUCTOS 🔍 [PENDIENTE]
+## 📋 FASE 1: SELECTOR DE COMERCIO AGRUPADO 🏪 [PENDIENTE]
+
+### Objetivo
+Corregir el selector de comercio en FormularioPrecio.vue para que:
+1. Al abrir sin escribir nada, muestre los **3 comercios (agrupados) más recientemente usados**
+2. Use `comerciosAgrupados` para que cadenas como "Tata" aparezcan como una sola opción
+3. Al seleccionar "Tata", el selector de direcciones muestre **todas las sucursales** de Tata
+
+### Archivo a modificar
+[ ] src/components/Formularios/FormularioPrecio.vue
+
+### Cambios en `filtrarComercios(val, update)`
+[ ] Cambiar la fuente de datos de `comerciosPorUso` a `comerciosAgrupados`
+[ ] Cuando `val === ''`: mostrar solo los 3 primeros de `comerciosAgrupados` (top 3 recientes)
+[ ] Cuando `val !== ''`: filtrar `comerciosAgrupados` por nombre (substring)
+[ ] `comerciosAgrupados` ya tiene formato agrupado con todas las sucursales dentro
+
+### Cambios en el selector de direcciones
+[ ] El objeto seleccionado del dropdown es ahora un "grupo" con N sucursales
+[ ] `direccionesDisponibles` debe retornar las direcciones de **todas** las sucursales del grupo
+      Combinar `grupo.sucursales.flatMap(s => s.direcciones)` o equivalente según estructura
+[ ] Mostrar en cada opción de dirección: calle + barrio para identificar la sucursal
+
+### Cambios en `alSeleccionarComercio(comercio)`
+[ ] Al seleccionar el grupo, guardar el `comercioId` de la sucursal con la dirección más usada
+      (igual que antes, pero ahora eligiendo entre todas las sucursales del grupo)
+[ ] Auto-seleccionar la dirección más recientemente usada de todo el grupo
+
+### Cambios en las opciones visuales del dropdown
+[ ] Mostrar nombre del grupo (ej: "Tata")
+[ ] En el caption: mostrar cantidad total de sucursales (ej: "3 sucursales")
+[ ] Si tiene 1 sola sucursal: mostrar dirección principal en el caption
+
+### ⚠️ Punto delicado
+Revisar la estructura exacta de `comerciosAgrupados` en comerciosStore.js
+para entender qué propiedades tiene cada grupo antes de tocar el código.
+
+═══════════════════════════════════════════════════════════════
+
+## 📋 FASE 2: BOTÓN "AGREGAR COMERCIO RÁPIDO" 🔧 [PENDIENTE]
+
+### Objetivo
+- Renombrar el botón en FormularioPrecio.vue de "Agregar nuevo comercio" a "Agregar comercio rápido"
+- Verificar que el flujo completo del diálogo funciona correctamente
+
+### Archivos a modificar
+[ ] src/components/Formularios/FormularioPrecio.vue (solo el label del botón)
+
+### Verificaciones en DialogoAgregarComercioRapido.vue
+[ ] Verificar que el diálogo se abre correctamente con datos pre-llenados del comercio escrito
+[ ] Verificar que `resultado.exito` y `resultado.validacion` coinciden con lo que retorna `comerciosStore.agregarComercio()`
+      — El código espera `{ exito, validacion, comercio }` pero hay que confirmar el formato real del store
+[ ] Verificar que al guardar, el nuevo comercio aparece **auto-seleccionado** en el selector de FormularioPrecio
+[ ] Verificar que la dirección ingresada en el diálogo se auto-selecciona también
+[ ] Verificar notificaciones de éxito y error
+
+### Ajuste si hay bug en el formato de respuesta
+[ ] Si `comerciosStore.agregarComercio()` retorna un formato diferente, adaptar la lógica en `guardar()`
+[ ] No cambiar el store — adaptar el diálogo al formato actual del store
+
+═══════════════════════════════════════════════════════════════
+
+## 📋 FASE 3: CATEGORÍA DEL PRODUCTO 🏷️ [PENDIENTE]
+
+### Objetivo
+Agregar un campo `categoria` al producto que:
+- Se hereda automáticamente de la API de OpenFoodFacts al agregar el producto
+- Se puede editar desde la página de detalle (ver historial)
+- Si no hay categoría, no mostrar nada (sin mensajes de error, campo vacío)
+
+### 3.1 — Verificar que la API ya guarda la categoría
+**Archivo:** src/almacenamiento/servicios/OpenFoodFactsService.js
+[ ] Confirmar que `_mapearProducto()` ya incluye el campo `categoria` en el objeto mapeado ✓
+      (Según documentación, ya mapea: `categoria: _extraerPrimeraCategoria(categorias)`)
+[ ] Confirmar que `autoCompletarFormulario()` en DialogoAgregarProducto.vue incluye `categoria`
+[ ] Si no está siendo guardado en el producto, agregarlo al objeto que se persiste en ProductosService
+
+### 3.2 — Editor de categoría en DetalleProductoPage
+**Archivo:** src/components/DetalleProducto/InfoProducto.vue
+[ ] Agregar campo de categoría debajo del nombre o del código de barras
+[ ] Estilo: similar a CampoEditable.vue (texto visible + ícono lápiz → se convierte en input)
+      Reutilizar CampoEditable.vue si es posible (ya existe en EditarComercio/)
+[ ] Si `producto.categoria` existe: mostrar el valor
+[ ] Si no existe: mostrar texto tenue "Sin categoría" o simplemente vacío (a definir con Leo)
+[ ] Al editar y guardar: llamar a `productosStore.actualizarProducto(id, { categoria: nuevaCategoria })`
+
+### 3.3 — Categorías sugeridas
+[ ] Las categorías vienen de la API como texto libre (ej: "Bebidas", "Lácteos")
+[ ] No crear una lista fija de categorías por ahora — dejar campo de texto libre
+[ ] El usuario escribe la que quiera
+
+### ⚠️ Nota
+No agregar el campo al formulario de crear producto. Solo editable desde el detalle.
+La API lo puebla al crear, el usuario lo ajusta si quiere.
+
+═══════════════════════════════════════════════════════════════
+
+## 📋 FASE 4: BUSCADOR INTELIGENTE DE PRODUCTOS 🔍 [PENDIENTE]
 
 ### Objetivo
 Crear un componente `BuscadorProductos.vue` que muestre sugerencias dinámicas
 al escribir 3+ caracteres, buscando por nombre (en cualquier orden), código de barras
 y marca. Las sugerencias se ordenan por última interacción (más reciente primero).
 
-### Archivos a crear
-[ ] Crear src/components/MisProductos/BuscadorProductos.vue
-
-### Archivos a modificar
-[ ] productosStore.js — agregar campo `ultimaInteraccion` y getter `productosPorInteraccion`
-[ ] productosStore.js — mejorar `buscarProductos()` con búsqueda multi-campo y substring
+### Archivo a crear
+[ ] src/components/MisProductos/BuscadorProductos.vue
 
 ### Lógica del buscador
 [ ] Activar sugerencias solo cuando el usuario escribe >= 3 caracteres
 [ ] Mostrar máximo 3 sugerencias en una lista desplegable bajo el input
-[ ] Ordenar sugerencias por `ultimaInteraccion` (más reciente → más antigua)
-[ ] Buscar por nombre: dividir texto en palabras y verificar que todas estén en el nombre
-      Ejemplo: "COLA" encuentra "Coca Cola", "cola diet" encuentra "Coca Cola Diet"
-[ ] Buscar por código de barras: coincidencia exacta o parcial del inicio
-[ ] Buscar por marca: si el producto tiene campo `marca`, buscar substring
-[ ] Al seleccionar una sugerencia: navegar al detalle del producto
-[ ] Al presionar Enter sin seleccionar: filtrar lista con todos los resultados
-[ ] Al limpiar el campo: mostrar lista completa nuevamente
+[ ] Ordenar sugerencias por `ultimaInteraccion` desc (requiere Fase 5)
+[ ] Algoritmo de búsqueda por nombre: dividir término en palabras → verificar que cada palabra
+      esté contenida en el nombre del producto (case insensitive, sin tildes)
+      Ejemplo: "COLA" encuentra "Coca Cola" / "diet col" encuentra "Coca Cola Diet"
+[ ] Búsqueda por código de barras: si el término es numérico, comparar contra `codigoBarras`
+[ ] Búsqueda por marca: buscar el término en el campo `marca` del producto
+[ ] Al seleccionar una sugerencia: emitir `@seleccionar` con el producto
+[ ] Al presionar Enter sin seleccionar: emitir `@buscar` con el texto para filtrar la lista
+[ ] Al limpiar: emitir `@limpiar`
 
 ### UX del componente
-[ ] Mostrar ícono de búsqueda en el prepend del input
+[ ] Ícono de búsqueda en prepend del input
 [ ] Placeholder: "Buscar por nombre, marca o código..."
-[ ] Chip o etiqueta pequeña en cada sugerencia indicando tipo de coincidencia
-      (por nombre / por código / por marca)
-[ ] Resaltar el texto coincidente en la sugerencia (bold)
-[ ] Si no hay resultados con 3+ caracteres: mostrar mensaje "Sin coincidencias"
+[ ] Chip pequeño en cada sugerencia indicando el tipo de coincidencia (nombre / código / marca)
+[ ] Si no hay resultados con 3+ caracteres: mensaje "Sin coincidencias"
+[ ] Cerrar sugerencias al hacer click afuera o al seleccionar
 
-### Reutilización
-[ ] El componente recibe `productos` como prop (no accede directo al store)
-[ ] Emite evento `@seleccionar` con el producto elegido
-[ ] Emite evento `@buscar` con el texto para filtrar la lista completa
-[ ] Emite evento `@limpiar` para resetear el filtro
-[ ] Esto permite usarlo también en otras páginas en el futuro
+### Reutilización (diseño)
+[ ] El componente recibe `productos` como prop (no accede al store directamente)
+[ ] Emits: `@seleccionar`, `@buscar`, `@limpiar`
+[ ] Usa clase CSS global `.buscador-centrado` del sistema de diseño
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 2: REGISTRAR ÚLTIMA INTERACCIÓN POR PRODUCTO ⏱️ [PENDIENTE]
+## 📋 FASE 5: REGISTRAR ÚLTIMA INTERACCIÓN 🕐 [PENDIENTE]
 
 ### Objetivo
-Para que las sugerencias del buscador se ordenen por "más recientemente usado",
+Para ordenar las sugerencias del buscador por "más recientemente usado",
 necesitamos guardar cuándo fue la última vez que el usuario interactuó con cada producto.
+Esta fase se implementa junto con o inmediatamente antes de la Fase 4.
 
 ### Archivos a modificar
-[ ] productosStore.js — agregar acción `registrarInteraccion(productoId)`
-[ ] ProductosService.js — persistir `ultimaInteraccion` en el adaptador
+[ ] src/almacenamiento/stores/productosStore.js
+[ ] src/almacenamiento/servicios/ProductosService.js
 
 ### Lógica
-[ ] `registrarInteraccion(productoId)`: actualiza el campo `ultimaInteraccion = new Date().toISOString()`
-[ ] Llamar a `registrarInteraccion` cuando el usuario:
-      - Abre el detalle de un producto (DetalleProductoPage)
-      - Agrega un precio a un producto (DialogoAgregarPrecio)
-[ ] Agregar getter `productosPorInteraccion` en el store:
-      Ordena por `ultimaInteraccion` desc, con fallback a `fechaActualizacion`
+[ ] Agregar acción `registrarInteraccion(productoId)` en productosStore:
+      Actualiza `producto.ultimaInteraccion = new Date().toISOString()`
+      Persiste el cambio con ProductosService
+[ ] Agregar getter `productosPorInteraccion`:
+      Ordena por `ultimaInteraccion` desc, fallback a `fechaActualizacion`
+[ ] Llamar a `registrarInteraccion` en:
+      - DetalleProductoPage.vue → `onMounted()` (usuario abrió el detalle)
+      - DialogoAgregarPrecio.vue → después de guardar precio exitosamente
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 3: INTEGRAR BUSCADOR EN MIS PRODUCTOS 🔌 [PENDIENTE]
+## 📋 FASE 6: INTEGRAR BUSCADOR EN MIS PRODUCTOS 🔌 [PENDIENTE]
 
 ### Objetivo
-Agregar el buscador a MisProductosPage.vue para que el usuario pueda filtrar
-su lista de productos con las sugerencias inteligentes.
+Agregar el buscador a MisProductosPage.vue para filtrar la lista de productos.
 
-### Archivos a modificar
-[ ] MisProductosPage.vue — importar y usar BuscadorProductos
+### Archivo a modificar
+[ ] src/pages/MisProductosPage.vue
 
 ### Lógica
-[ ] Agregar `BuscadorProductos` debajo del header (igual que el buscador de ComerciosPage)
-[ ] Usar clase CSS existente `buscador-centrado` (del sistema de diseño)
-[ ] Manejar evento `@buscar`: filtrar `productosOrdenadosPorFecha` localmente (sin ir al store)
-[ ] Manejar evento `@seleccionar`: navegar a `/producto/:id`
-[ ] Manejar evento `@limpiar`: mostrar todos los productos nuevamente
-[ ] La lista filtrada reemplaza temporalmente `productosOrdenadosPorFecha` en el template
+[ ] Importar y agregar `BuscadorProductos` debajo del header (igual que ComerciosPage)
+[ ] Usar clase CSS `.buscador-centrado` del sistema de diseño (ya existe)
+[ ] Manejar `@buscar`: filtrar `productosOrdenadosPorFecha` localmente con computed
+[ ] Manejar `@seleccionar`: navegar a `/producto/:id` con `$router.push()`
+[ ] Manejar `@limpiar`: volver a mostrar todos los productos
+[ ] La búsqueda filtra en memoria (sin llamadas al store ni al servicio)
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 4: MEJORAS EN DETALLE DEL PRODUCTO 🎨 [PENDIENTE]
+## 📋 FASE 7: MEJORAS EN DETALLE DEL PRODUCTO 🎨 [PENDIENTE]
 
-### Objetivo
-Mejorar la página DetalleProductoPage y el componente InfoProducto:
-agregar título claro, foto más grande, y verificar que todo funcione.
-
-### 4.1 — Título de historial
-**Archivo:** DetalleProductoPage.vue
-[ ] Agregar un título "Historial de precios" visible entre EstadisticasProducto y FiltrosHistorial
-[ ] El título puede ir como `<h6>` con separador o como encabezado de sección
+### 7.1 — Título de sección "Historial de precios"
+**Archivo:** src/pages/DetalleProductoPage.vue
+[ ] Agregar un `<h6>` o encabezado de sección entre EstadisticasProducto y FiltrosHistorial
+[ ] Texto: "Historial de precios"
 [ ] Mantener consistencia visual con el resto de la página
 
-### 4.2 — Foto del producto más grande
-**Archivo:** InfoProducto.vue
-[ ] En desktop: aumentar la imagen de 120px a 180px (columna del grid)
-[ ] En móvil: aumentar de 35vw a 45vw con máximo de 180px
-[ ] Ajustar el grid `grid-template-columns` para acomodar la nueva columna
-[ ] El placeholder (ícono de bolsa) también debe crecer proporcionalmente
+### 7.2 — Foto del producto más grande
+**Archivo:** src/components/DetalleProducto/InfoProducto.vue
+[ ] En desktop: aumentar de 120px a 180px (columna del grid y clase `.info-imagen`)
+[ ] En móvil: aumentar de 35vw a 45vw con máximo 180px
+[ ] Ajustar el grid `grid-template-columns` para la columna más ancha
+[ ] El placeholder (ícono bolsa) crece proporcionalmente al nuevo tamaño
 
-### 4.3 — Verificar precio promedio
-**Archivo:** EstadisticasProducto.vue
-[ ] Confirmar que calcula el promedio de TODOS los precios (no solo filtrados)
-[ ] Confirmar que muestra el valor correctamente formateado (sin decimales si es entero)
-[ ] Verificar que `precioPromedio` no muestre 0 cuando hay precios
+### 7.3 — Verificar precio promedio
+**Archivo:** src/components/DetalleProducto/EstadisticasProducto.vue
+[ ] Confirmar que calcula promedio de TODOS los precios (no filtrados)
+[ ] Confirmar que muestra valor sin decimales innecesarios
+[ ] Verificar que no muestra 0 cuando hay precios cargados
 
-### 4.4 — Verificar tendencia
-**Archivo:** InfoProducto.vue + EstadisticasProducto.vue
-[ ] Confirmar que `tendenciaGeneral` y `porcentajeTendencia` llegan calculados del store
-[ ] Verificar lógica en `ProductosService._calcularCamposAutomaticos()`
-      (compara precios últimos 30 días vs 30 días anteriores)
-[ ] Confirmar que el chip de tendencia en InfoProducto muestra el valor correcto
-[ ] Confirmar que la card de tendencia en EstadisticasProducto muestra igual
+### 7.4 — Verificar tendencia
+**Archivo:** src/almacenamiento/servicios/ProductosService.js → `_calcularCamposAutomaticos()`
+[ ] Revisar lógica de tendencia: compara precios últimos 30 días vs 30 días anteriores
+[ ] Confirmar que `tendenciaGeneral` y `porcentajeTendencia` llegan correctos al componente
+[ ] Verificar el chip en InfoProducto.vue y la card en EstadisticasProducto.vue
 
-### 4.5 — Verificar conteo de comercios
-**Archivo:** EstadisticasProducto.vue
-[ ] La lógica actual usa `new Set(precios.map(p => p.comercio))` — verificar
-[ ] Si se usa `comercioId` en precios nuevos y `comercio` (texto) en precios legacy,
-      el Set puede duplicar. Revisar y unificar el campo usado.
+### 7.5 — Verificar conteo de comercios
+**Archivo:** src/components/DetalleProducto/EstadisticasProducto.vue
+[ ] La lógica usa `new Set(precios.map(p => p.comercio))` — verificar
+[ ] Precios nuevos guardan `comercioId` (string ID) y precios legacy guardan solo texto
+[ ] Si hay duplicados por mezcla de formatos, revisar y unificar el campo usado
+[ ] Alternativa: usar `comercioId` cuando existe, `comercio` (texto) como fallback
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 5: SINCRONIZACIÓN COMERCIOS → HISTORIAL 🔗 [PENDIENTE]
+## 📋 FASE 8: SINCRONIZACIÓN COMERCIOS → HISTORIAL 🔗 [PENDIENTE]
 
 ### Objetivo
 Cuando el usuario edita el nombre de un comercio en la sección Comercios,
 ese cambio debe verse reflejado en el historial de precios del producto.
 
-### Diagnóstico previo necesario
-[ ] Verificar qué campos guarda cada precio:
-      `p.comercio` (texto plano) vs `p.comercioId` (referencia)
-[ ] Si los precios guardan SOLO texto plano → hay que actualizar todos los precios al editar el comercio
-[ ] Si los precios guardan `comercioId` → la sincronización es automática al resolver el nombre
+### Diagnóstico previo (ANTES de escribir código)
+[ ] Revisar qué campos guarda cada precio al agregarlo:
+      `precio.comercioId` (string referencia) y `precio.comercio` (texto plano)
+[ ] Revisar cómo `HistorialPrecios.vue` muestra el nombre del comercio:
+      ¿usa `p.comercio` (texto)? ¿o resuelve desde `comerciosStore` con `comercioId`?
+[ ] El diagnóstico determina la estrategia:
 
-### Estrategia según el diagnóstico:
-**Caso A: Solo texto plano (p.comercio)**
-[ ] En ComerciosService.editarComercio(): buscar todos los productos que tengan ese texto
-[ ] Actualizar `p.comercio` y `p.nombreCompleto` en cada precio que coincida
+**Caso A: El historial muestra texto plano (`p.comercio` o `p.nombreCompleto`)**
+[ ] Los nombres quedan "congelados" al momento de agregar el precio
+[ ] Solución: en `comerciosStore.editarComercio()`, recorrer todos los productos
+      y actualizar el campo `comercio`/`nombreCompleto` en cada precio que tenga ese `comercioId`
 [ ] Esta operación puede ser costosa → mostrar loading
 
-**Caso B: Tienen comercioId**
-[ ] En DetalleProductoPage: resolver el nombre del comercio desde `comerciosStore`
-      usando el `comercioId` de cada precio al momento de mostrar
-[ ] Los cambios en ComerciosStore se reflejan automáticamente
+**Caso B: El historial resuelve el nombre desde el store usando `comercioId`**
+[ ] Los cambios se reflejan automáticamente (el ID apunta al comercio actualizado)
+[ ] No requiere ningún cambio adicional → solo confirmar que funciona
 
-[ ] Implementar la estrategia que corresponda según el diagnóstico
-[ ] Agregar test manual: editar un comercio y verificar que el historial se actualiza
+[ ] Implementar según el caso que corresponda al diagnóstico
+[ ] Test manual: editar nombre de un comercio → abrir historial → confirmar que actualizó
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 6: TESTING Y AJUSTES 🧪 [PENDIENTE]
+## 📋 FASE 9: TESTING Y AJUSTES 🧪 [PENDIENTE]
 
-### Testing del buscador
-[ ] Buscar por nombre parcial: "COLA" → "Coca Cola" ✓
-[ ] Buscar por palabras en diferente orden: "cola coca" → "Coca Cola" ✓
-[ ] Buscar por código de barras completo ✓
-[ ] Buscar por código de barras parcial ✓
-[ ] Buscar por marca ✓
-[ ] Verificar orden de sugerencias (más reciente primero) ✓
-[ ] Verificar que con < 3 caracteres no muestra sugerencias ✓
-[ ] Verificar limpieza del input ✓
-[ ] Verificar que seleccionar una sugerencia navega correctamente ✓
+### Testing Fase 1 (Selector de comercio)
+[ ] Abrir el modal de agregar producto → solo 3 comercios recientes aparecen al inicio ✓
+[ ] "Tata" aparece como 1 sola opción (no 3 sucursales separadas) ✓
+[ ] Al seleccionar "Tata", el selector de direcciones muestra TODAS las sucursales ✓
+[ ] Al escribir texto, filtra correctamente los comercios agrupados ✓
 
-### Testing de detalle del producto
-[ ] Foto más grande se ve bien en móvil y desktop ✓
-[ ] Título "Historial de precios" visible y bien ubicado ✓
+### Testing Fase 2 (Agregar comercio rápido)
+[ ] Botón muestra "Agregar comercio rápido" ✓
+[ ] Al escribir "Disco" en comercio y click en botón → diálogo se abre con "Disco" pre-llenado ✓
+[ ] Al guardar → el nuevo comercio queda seleccionado automáticamente ✓
+[ ] Si hay duplicado similar → muestra advertencia y cierra correctamente ✓
+
+### Testing Fase 3 (Categoría)
+[ ] Buscar producto por código de barras → categoría de la API se guarda ✓
+[ ] Editar categoría desde el detalle → se guarda y persiste ✓
+[ ] Si no tiene categoría → campo vacío o texto tenue, no rompe nada ✓
+
+### Testing Fase 4-6 (Buscador)
+[ ] "COLA" → sugiere "Coca Cola" ✓
+[ ] "cola coca" → sugiere "Coca Cola Diet" ✓
+[ ] Código de barras parcial → sugiere el producto ✓
+[ ] Marca parcial → sugiere productos de esa marca ✓
+[ ] Menos de 3 caracteres → no muestra sugerencias ✓
+[ ] Seleccionar sugerencia → navega al detalle ✓
+[ ] Limpiar → lista completa visible ✓
+[ ] Orden de sugerencias: más reciente primero ✓
+
+### Testing Fase 7 (Detalle)
+[ ] Título "Historial de precios" visible ✓
+[ ] Foto más grande en desktop y móvil ✓
 [ ] Precio promedio correcto ✓
 [ ] Tendencia refleja precios recientes ✓
 [ ] Conteo de comercios sin duplicados ✓
-
-### Testing de sincronización
-[ ] Editar nombre de un comercio en la sección Comercios ✓
-[ ] Ir al historial de un producto que usa ese comercio ✓
-[ ] Confirmar que el nombre actualizado aparece en el historial ✓
 
 ### Testing responsivo
 [ ] Móvil (xs) - 360px ✓
@@ -221,35 +327,42 @@ ese cambio debe verse reflejado en el historial de precios del producto.
 
 ## NOTAS IMPORTANTES 📌
 
-- El buscador NO reemplaza el componente de comercios, es nuevo y específico para productos
-- Prioridad: Fase 1 y 2 (buscador) → Fase 4 (mejoras detalle) → Fase 5 (sincronización)
-- La Fase 5 requiere diagnóstico previo antes de escribir código
-- No cambiar el sistema de diseño CSS existente (reutilizar `.buscador-centrado`, `.contenedor-pagina`)
-- Registrar interacción también sirve como base para analytics futuras
-- Los campos `marca` en los productos pueden no existir en datos legacy → manejar con optional chaining
+- Orden lógico de implementación: Fase 1 → 2 → 3 (fixes/quick wins) → 4+5 → 6 → 7 → 8 → 9
+- La Fase 5 puede implementarse junto con la Fase 4 (son dependientes)
+- La Fase 8 SIEMPRE requiere el diagnóstico antes de escribir código
+- No cambiar el sistema de diseño CSS (reutilizar clases existentes)
+- No agregar categoría al formulario de crear producto, solo al detalle
+- El buscador filtra en memoria (no hace peticiones al store/servicio)
+- La categoría es texto libre (no lista predefinida en esta versión)
 
 ═══════════════════════════════════════════════════════════════
 
 ## PRÓXIMAS MEJORAS (POST-MVP) 🚀
 
-[ ] Filtros avanzados en Mis Productos (por categoría, por precio, por comercio)
+[ ] Filtros avanzados en Mis Productos (por categoría, precio, comercio)
 [ ] Ordenar la lista de productos (A-Z, más reciente, más barato)
 [ ] Foto del producto desde la cámara
+[ ] Lista fija de categorías con iconos
 [ ] Compartir historial de precios
 [ ] Exportar historial a CSV/PDF
+[ ] Gráfico de evolución de precios en el historial
 
 ═══════════════════════════════════════════════════════════════
 
 ## 📊 PROGRESO GENERAL: 0% INICIADO
 
-⏳ Fase 1: Buscador inteligente
-⏳ Fase 2: Registrar última interacción
-⏳ Fase 3: Integrar buscador en Mis Productos
-⏳ Fase 4: Mejoras en detalle del producto
-⏳ Fase 5: Sincronización comercios → historial
-⏳ Fase 6: Testing y ajustes
+⏳ Fase 1: Selector de comercio agrupado (fix)
+⏳ Fase 2: Botón "Agregar comercio rápido" (fix + verificación)
+⏳ Fase 3: Categoría del producto (nueva función)
+⏳ Fase 4: Buscador inteligente de productos (nueva función)
+⏳ Fase 5: Registrar última interacción (soporte para Fase 4)
+⏳ Fase 6: Integrar buscador en Mis Productos
+⏳ Fase 7: Mejoras en detalle del producto
+⏳ Fase 8: Sincronización comercios → historial
+⏳ Fase 9: Testing y ajustes
 
 ═══════════════════════════════════════════════════════════════
 
 **CREADO:** 18 de Febrero 2026
+**ÚLTIMA ACTUALIZACIÓN:** 18 de Febrero 2026
 **ESTADO:** ⏳ EN PLANIFICACIÓN
