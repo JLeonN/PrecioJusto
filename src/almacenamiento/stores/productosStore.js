@@ -94,6 +94,15 @@ export const useProductosStore = defineStore('productos', () => {
    */
   const tieneProductos = computed(() => productos.value.length > 0)
 
+  // Productos ordenados por última interacción (para sugerencias del buscador)
+  const productosPorInteraccion = computed(() => {
+    return [...productos.value].sort((a, b) => {
+      const fechaA = a.ultimaInteraccion || a.fechaActualizacion || 0
+      const fechaB = b.ultimaInteraccion || b.fechaActualizacion || 0
+      return new Date(fechaB) - new Date(fechaA)
+    })
+  })
+
   // ========================================
   // 🔄 ACCIONES (CARGAR DATOS)
   // ========================================
@@ -308,6 +317,26 @@ export const useProductosStore = defineStore('productos', () => {
   }
 
   // ========================================
+  // 🕐 ACCIONES (INTERACCIÓN)
+  // ========================================
+
+  // Registra que el usuario interactuó con el producto (para ordenar búsquedas)
+  async function registrarInteraccion(productoId) {
+    try {
+      const productoActual = productos.value.find((p) => p.id === productoId)
+      if (!productoActual) return
+      const productoActualizado = { ...productoActual, ultimaInteraccion: new Date().toISOString() }
+      const guardado = await productosService.guardarProducto(productoActualizado)
+      if (guardado) {
+        const index = productos.value.findIndex((p) => p.id === productoId)
+        if (index !== -1) productos.value[index] = guardado
+      }
+    } catch (err) {
+      console.error('❌ Error al registrar interacción:', err)
+    }
+  }
+
+  // ========================================
   // 🔍 ACCIONES (BUSCAR)
   // ========================================
 
@@ -390,6 +419,7 @@ export const useProductosStore = defineStore('productos', () => {
     totalProductos,
     productosOrdenadosPorNombre,
     productosOrdenadosPorFecha,
+    productosPorInteraccion,
     obtenerProductoPorId,
     tieneProductos,
 
@@ -400,6 +430,7 @@ export const useProductosStore = defineStore('productos', () => {
     agregarPrecioAProducto,
     actualizarProducto,
     eliminarProducto,
+    registrarInteraccion,
     buscarProductos,
     obtenerEstadisticas,
     limpiarEstado,

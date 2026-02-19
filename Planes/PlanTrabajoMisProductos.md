@@ -141,7 +141,7 @@ La API lo puebla al crear, el usuario lo ajusta si quiere.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 4: BUSCADOR INTELIGENTE DE PRODUCTOS 🔍 [PENDIENTE]
+## 📋 FASE 4: BUSCADOR INTELIGENTE DE PRODUCTOS 🔍 [✅ COMPLETADA]
 
 ### Objetivo
 Crear un componente `BuscadorProductos.vue` que muestre sugerencias dinámicas
@@ -149,36 +149,36 @@ al escribir 3+ caracteres, buscando por nombre (en cualquier orden), código de 
 y marca. Las sugerencias se ordenan por última interacción (más reciente primero).
 
 ### Archivo a crear
-[ ] src/components/MisProductos/BuscadorProductos.vue
+[x] src/components/MisProductos/BuscadorProductos.vue
 
 ### Lógica del buscador
-[ ] Activar sugerencias solo cuando el usuario escribe >= 3 caracteres
-[ ] Mostrar máximo 3 sugerencias en una lista desplegable bajo el input
-[ ] Ordenar sugerencias por `ultimaInteraccion` desc (requiere Fase 5)
-[ ] Algoritmo de búsqueda por nombre: dividir término en palabras → verificar que cada palabra
+[x] Activar sugerencias solo cuando el usuario escribe >= 3 caracteres
+[x] Mostrar máximo 3 sugerencias en una lista desplegable bajo el input
+[x] Ordenar sugerencias por `ultimaInteraccion` desc (fallback a `fechaActualizacion`)
+[x] Algoritmo de búsqueda por nombre: dividir término en palabras → verificar que cada palabra
       esté contenida en el nombre del producto (case insensitive, sin tildes)
       Ejemplo: "COLA" encuentra "Coca Cola" / "diet col" encuentra "Coca Cola Diet"
-[ ] Búsqueda por código de barras: si el término es numérico, comparar contra `codigoBarras`
-[ ] Búsqueda por marca: buscar el término en el campo `marca` del producto
-[ ] Al seleccionar una sugerencia: emitir `@seleccionar` con el producto
-[ ] Al presionar Enter sin seleccionar: emitir `@buscar` con el texto para filtrar la lista
-[ ] Al limpiar: emitir `@limpiar`
+[x] Búsqueda por código de barras: si el término es numérico, comparar contra `codigoBarras`
+[x] Búsqueda por marca: buscar el término en el campo `marca` del producto
+[x] Al seleccionar una sugerencia: emitir `@seleccionar` con el producto
+[x] Al presionar Enter sin seleccionar: emitir `@buscar` con el texto para filtrar la lista
+[x] Al limpiar: emitir `@limpiar`
 
 ### UX del componente
-[ ] Ícono de búsqueda en prepend del input
-[ ] Placeholder: "Buscar por nombre, marca o código..."
-[ ] Chip pequeño en cada sugerencia indicando el tipo de coincidencia (nombre / código / marca)
-[ ] Si no hay resultados con 3+ caracteres: mensaje "Sin coincidencias"
-[ ] Cerrar sugerencias al hacer click afuera o al seleccionar
+[x] Ícono de búsqueda en prepend del input
+[x] Placeholder: "Buscar por nombre, marca o código..."
+[x] Chip pequeño en cada sugerencia indicando el tipo de coincidencia (nombre / código / marca)
+[x] Si no hay resultados con 3+ caracteres: mensaje "Sin coincidencias"
+[x] Cerrar sugerencias al hacer click afuera o al seleccionar (blur + mousedown.prevent)
 
 ### Reutilización (diseño)
-[ ] El componente recibe `productos` como prop (no accede al store directamente)
-[ ] Emits: `@seleccionar`, `@buscar`, `@limpiar`
-[ ] Usa clase CSS global `.buscador-centrado` del sistema de diseño
+[x] El componente recibe `productos` como prop (no accede al store directamente)
+[x] Emits: `@seleccionar`, `@buscar`, `@limpiar`
+[x] Usa clase CSS global `.buscador-centrado` del sistema de diseño
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 5: REGISTRAR ÚLTIMA INTERACCIÓN 🕐 [PENDIENTE]
+## 📋 FASE 5: REGISTRAR ÚLTIMA INTERACCIÓN 🕐 [✅ COMPLETADA]
 
 ### Objetivo
 Para ordenar las sugerencias del buscador por "más recientemente usado",
@@ -186,36 +186,38 @@ necesitamos guardar cuándo fue la última vez que el usuario interactuó con ca
 Esta fase se implementa junto con o inmediatamente antes de la Fase 4.
 
 ### Archivos a modificar
-[ ] src/almacenamiento/stores/productosStore.js
-[ ] src/almacenamiento/servicios/ProductosService.js
+[x] src/almacenamiento/stores/productosStore.js
+[x] ProductosService.js no requirió cambios (guardarProducto persiste el objeto completo)
 
 ### Lógica
-[ ] Agregar acción `registrarInteraccion(productoId)` en productosStore:
+[x] Agregar acción `registrarInteraccion(productoId)` en productosStore:
       Actualiza `producto.ultimaInteraccion = new Date().toISOString()`
-      Persiste el cambio con ProductosService
-[ ] Agregar getter `productosPorInteraccion`:
+      Persiste el cambio con ProductosService (sin setear cargando — operación silenciosa)
+[x] Agregar getter `productosPorInteraccion`:
       Ordena por `ultimaInteraccion` desc, fallback a `fechaActualizacion`
-[ ] Llamar a `registrarInteraccion` en:
+[x] Llamar a `registrarInteraccion` en:
       - DetalleProductoPage.vue → `onMounted()` (usuario abrió el detalle)
       - DialogoAgregarPrecio.vue → después de guardar precio exitosamente
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 6: INTEGRAR BUSCADOR EN MIS PRODUCTOS 🔌 [PENDIENTE]
+## 📋 FASE 6: INTEGRAR BUSCADOR EN MIS PRODUCTOS 🔌 [✅ COMPLETADA]
 
 ### Objetivo
 Agregar el buscador a MisProductosPage.vue para filtrar la lista de productos.
 
 ### Archivo a modificar
-[ ] src/pages/MisProductosPage.vue
+[x] src/pages/MisProductosPage.vue
 
 ### Lógica
-[ ] Importar y agregar `BuscadorProductos` debajo del header (igual que ComerciosPage)
-[ ] Usar clase CSS `.buscador-centrado` del sistema de diseño (ya existe)
-[ ] Manejar `@buscar`: filtrar `productosOrdenadosPorFecha` localmente con computed
-[ ] Manejar `@seleccionar`: navegar a `/producto/:id` con `$router.push()`
-[ ] Manejar `@limpiar`: volver a mostrar todos los productos
-[ ] La búsqueda filtra en memoria (sin llamadas al store ni al servicio)
+[x] Importar y agregar `BuscadorProductos` dentro del bloque v-else (hay productos), antes de la lista
+[x] Usa `.buscador-centrado` del sistema de diseño (lo aplica el propio componente)
+[x] Manejar `@buscar`: actualiza `textoBusqueda` → `productosFiltrados` computed filtra en memoria
+[x] Manejar `@seleccionar`: navega a `/producto/:id` con `router.push()`
+[x] Manejar `@limpiar`: limpia `textoBusqueda` → muestra todos los productos
+[x] La búsqueda filtra en memoria (sin llamadas al store ni al servicio)
+[x] Lista usa `productosFiltrados` (ordenado por interacción + filtrado por texto)
+[x] Mensaje "Sin resultados" cuando filtro activo no tiene coincidencias
 
 ═══════════════════════════════════════════════════════════════
 

@@ -256,6 +256,8 @@ async function confirmarPrecio(precioId) {
 onMounted(async () => {
   await confirmacionesStore.cargarConfirmaciones()
   await cargarProducto()
+  // Registrar visita para ordenar sugerencias del buscador por interacción reciente
+  if (route.params.id) productosStore.registrarInteraccion(route.params.id)
 })
 </script>
 

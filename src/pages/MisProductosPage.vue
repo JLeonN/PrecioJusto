@@ -41,16 +41,33 @@
         <p class="text-grey-6">Presiona el botón + para agregar tu primer producto</p>
       </div>
 
-      <!-- LISTA DE PRODUCTOS -->
-      <ListaProductos
-        v-else
-        :productos="productosStore.productosOrdenadosPorFecha"
-        :modo-seleccion="seleccion.modoSeleccion.value"
-        :seleccionados="seleccion.seleccionados.value"
-        @long-press="activarSeleccionConItem"
-        @toggle-seleccion="seleccion.toggleSeleccion($event)"
-        @agregar-precio="abrirModalPrecio"
-      />
+      <!-- BUSCADOR + LISTA (cuando hay productos) -->
+      <template v-else>
+        <BuscadorProductos
+          :productos="productosStore.productosPorInteraccion"
+          class="q-mb-md"
+          @seleccionar="alSeleccionarProducto"
+          @buscar="alBuscarProducto"
+          @limpiar="alLimpiarBusqueda"
+        />
+
+        <!-- Sin resultados de búsqueda -->
+        <div v-if="productosFiltrados.length === 0" class="text-center q-pa-xl">
+          <q-icon name="search_off" size="64px" color="grey-5" />
+          <p class="text-h6 text-grey-7 q-mt-md">Sin resultados</p>
+          <p class="text-grey-6">No hay productos para "{{ textoBusqueda }}"</p>
+        </div>
+
+        <ListaProductos
+          v-else
+          :productos="productosFiltrados"
+          :modo-seleccion="seleccion.modoSeleccion.value"
+          :seleccionados="seleccion.seleccionados.value"
+          @long-press="activarSeleccionConItem"
+          @toggle-seleccion="seleccion.toggleSeleccion($event)"
+          @agregar-precio="abrirModalPrecio"
+        />
+      </template>
     </div>
 
     <!-- BOTÓN FLOTANTE AGREGAR (oculto en modo selección) -->
@@ -114,9 +131,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { IconPlus } from '@tabler/icons-vue'
 import ListaProductos from '../components/MisProductos/ListaProductos.vue'
+import BuscadorProductos from '../components/MisProductos/BuscadorProductos.vue'
 import DialogoAgregarProducto from '../components/Formularios/Dialogos/DialogoAgregarProducto.vue'
 import DialogoAgregarPrecio from '../components/Formularios/Dialogos/DialogoAgregarPrecio.vue'
 import BarraSeleccion from '../components/Compartidos/BarraSeleccion.vue'
@@ -128,6 +147,27 @@ import { useQuasar } from 'quasar'
 
 const productosStore = useProductosStore()
 const $q = useQuasar()
+const router = useRouter()
+
+/* Texto de búsqueda activo */
+const textoBusqueda = ref('')
+
+/* Normaliza texto: minúsculas + sin tildes */
+function normalizarTexto(texto) {
+  return texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+
+/* Productos filtrados por texto (o todos, ordenados por última interacción) */
+const productosFiltrados = computed(() => {
+  const base = productosStore.productosPorInteraccion
+  if (!textoBusqueda.value) return base
+  const textoNorm = normalizarTexto(textoBusqueda.value)
+  const palabras = textoNorm.split(/\s+/).filter(Boolean)
+  return base.filter((p) => {
+    const nombreNorm = normalizarTexto(p.nombre || '')
+    return palabras.every((palabra) => nombreNorm.includes(palabra))
+  })
+})
 
 /* Estado del diálogo agregar */
 const dialogoAgregarAbierto = ref(false)
@@ -147,6 +187,18 @@ const productosEliminadosParaDeshacer = ref([])
 /* Composable agregar precio (reemplaza lógica manual) */
 const { dialogoPrecioAbierto, productoParaPrecioId, abrirModalPrecio, alGuardarPrecio } =
   useDialogoAgregarPrecio()
+
+function alSeleccionarProducto(producto) {
+  router.push(`/producto/${producto.id}`)
+}
+
+function alBuscarProducto(texto) {
+  textoBusqueda.value = texto
+}
+
+function alLimpiarBusqueda() {
+  textoBusqueda.value = ''
+}
 
 async function cargarProductos() {
   await productosStore.cargarProductos()

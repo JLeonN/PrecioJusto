@@ -415,6 +415,8 @@ async function guardarPrecio() {
         timeout: 3000,
       })
 
+      // Registrar interacción con el producto
+      productosStore.registrarInteraccion(productoActual.value.id)
       emit('precio-guardado', productoActualizado)
       cerrar()
     } else {
