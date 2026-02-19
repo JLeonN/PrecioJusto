@@ -43,12 +43,10 @@
 
       <!-- BUSCADOR + LISTA (cuando hay productos) -->
       <template v-else>
-        <BuscadorProductos
-          :productos="productosStore.productosPorInteraccion"
+        <InputBusqueda
+          v-model="textoBusqueda"
+          placeholder="Buscar por nombre, marca, categoría o código..."
           class="q-mb-md"
-          @seleccionar="alSeleccionarProducto"
-          @buscar="alBuscarProducto"
-          @limpiar="alLimpiarBusqueda"
         />
 
         <!-- Sin resultados de búsqueda -->
@@ -132,10 +130,9 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import { IconPlus } from '@tabler/icons-vue'
 import ListaProductos from '../components/MisProductos/ListaProductos.vue'
-import BuscadorProductos from '../components/MisProductos/BuscadorProductos.vue'
+import InputBusqueda from '../components/Compartidos/InputBusqueda.vue'
 import DialogoAgregarProducto from '../components/Formularios/Dialogos/DialogoAgregarProducto.vue'
 import DialogoAgregarPrecio from '../components/Formularios/Dialogos/DialogoAgregarPrecio.vue'
 import BarraSeleccion from '../components/Compartidos/BarraSeleccion.vue'
@@ -147,7 +144,6 @@ import { useQuasar } from 'quasar'
 
 const productosStore = useProductosStore()
 const $q = useQuasar()
-const router = useRouter()
 
 /* Texto de búsqueda activo */
 const textoBusqueda = ref('')
@@ -160,12 +156,20 @@ function normalizarTexto(texto) {
 /* Productos filtrados por texto (o todos, ordenados por última interacción) */
 const productosFiltrados = computed(() => {
   const base = productosStore.productosPorInteraccion
-  if (!textoBusqueda.value) return base
-  const textoNorm = normalizarTexto(textoBusqueda.value)
+  const texto = textoBusqueda.value?.trim() || ''
+  if (!texto) return base
+  const textoNorm = normalizarTexto(texto)
   const palabras = textoNorm.split(/\s+/).filter(Boolean)
+  const esNumerico = /^\d+$/.test(texto)
   return base.filter((p) => {
+    if (esNumerico && p.codigoBarras?.includes(texto)) return true
     const nombreNorm = normalizarTexto(p.nombre || '')
-    return palabras.every((palabra) => nombreNorm.includes(palabra))
+    if (palabras.every((palabra) => nombreNorm.includes(palabra))) return true
+    const marcaNorm = normalizarTexto(p.marca || '')
+    if (marcaNorm && marcaNorm.includes(textoNorm)) return true
+    const categoriaNorm = normalizarTexto(p.categoria || '')
+    if (categoriaNorm && categoriaNorm.includes(textoNorm)) return true
+    return false
   })
 })
 
@@ -187,18 +191,6 @@ const productosEliminadosParaDeshacer = ref([])
 /* Composable agregar precio (reemplaza lógica manual) */
 const { dialogoPrecioAbierto, productoParaPrecioId, abrirModalPrecio, alGuardarPrecio } =
   useDialogoAgregarPrecio()
-
-function alSeleccionarProducto(producto) {
-  router.push(`/producto/${producto.id}`)
-}
-
-function alBuscarProducto(texto) {
-  textoBusqueda.value = texto
-}
-
-function alLimpiarBusqueda() {
-  textoBusqueda.value = ''
-}
 
 async function cargarProductos() {
   await productosStore.cargarProductos()

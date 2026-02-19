@@ -83,7 +83,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { IconArrowLeft, IconPlus } from '@tabler/icons-vue'
 import InfoProducto from '../components/DetalleProducto/InfoProducto.vue'
@@ -129,6 +129,14 @@ async function alGuardarPrecioDetalle() {
 const cargando = ref(false)
 const error = ref(null)
 const productoActual = ref(null)
+
+// Sincronizar productoActual cuando el store actualiza el producto (ej: edición de categoría)
+watch(
+  () => productosStore.productos.find((p) => p.id == route.params.id),
+  (productoActualizado) => {
+    if (productoActualizado) productoActual.value = productoActualizado
+  },
+)
 
 /* Filtros */
 const filtroComercio = ref('todos')

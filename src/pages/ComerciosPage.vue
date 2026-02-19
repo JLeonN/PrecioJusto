@@ -27,18 +27,7 @@
 
       <!-- BARRA DE BÚSQUEDA CENTRADA -->
       <div class="buscador-centrado">
-        <q-input
-          v-model="textoBusqueda"
-          outlined
-          dense
-          placeholder="Buscar comercio..."
-          clearable
-          @update:model-value="buscarComercios"
-        >
-          <template #prepend>
-            <q-icon name="search" />
-          </template>
-        </q-input>
+        <InputBusqueda v-model="textoBusqueda" placeholder="Buscar comercio..." color="orange" />
       </div>
 
       <!-- INDICADOR DE CARGA -->
@@ -125,6 +114,7 @@ import { useQuasar } from 'quasar'
 import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
 import { useSeleccionMultiple } from '../composables/useSeleccionMultiple.js'
+import InputBusqueda from '../components/Compartidos/InputBusqueda.vue'
 import DialogoAgregarComercio from '../components/Formularios/Dialogos/DialogoAgregarComercio.vue'
 import DialogoMotivoEliminacion from '../components/Formularios/Dialogos/DialogoMotivoEliminacion.vue'
 import ListaComercios from '../components/Comercios/ListaComercios.vue'
@@ -181,14 +171,6 @@ async function cargarComercios() {
   await comerciosStore.cargarComercios()
   await productosStore.cargarProductos()
   seleccion.actualizarItems(comerciosStore.comercios)
-}
-
-/**
- * Busca comercios (debounce podría agregarse aquí)
- */
-function buscarComercios() {
-  // Por ahora la búsqueda es reactiva con el computed
-  // En el futuro se podría agregar debounce
 }
 
 /**

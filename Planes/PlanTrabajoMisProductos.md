@@ -1,4 +1,5 @@
 # PLAN DE TRABAJO - SECCIÓN MIS PRODUCTOS
+
 Proyecto: Precio Justo
 Fecha inicio: 18 de Febrero 2026
 Responsable: Leo + CH
@@ -15,6 +16,7 @@ Las fases están ordenadas para que cada una construya sobre la anterior:
 primero se corrigen los problemas actuales, luego se agregan las funcionalidades nuevas.
 
 ### OBJETIVOS PRINCIPALES:
+
 - Corregir el selector de comercio: mostrar top 3 agrupados, no todos individualmente
 - Renombrar botón y verificar el flujo de "Agregar comercio rápido"
 - Agregar categoría editable al producto (heredada de API, modificable por usuario)
@@ -23,6 +25,7 @@ primero se corrigen los problemas actuales, luego se agregan las funcionalidades
 - Asegurar que los cambios en comercios se reflejen en el historial de precios
 
 ### ESTADO ACTUAL (pre-plan):
+
 - FormularioPrecio.vue: selector de comercio muestra TODOS al abrir (excesivo)
   - Usa `comerciosPorUso` (individuales), no `comerciosAgrupados` (cadenas unificadas)
   - 3 sucursales de Tata aparecen como 3 opciones separadas
@@ -34,6 +37,7 @@ primero se corrigen los problemas actuales, luego se agregan las funcionalidades
 - Los precios guardan `comercioId` (referencia) + `comercio` (texto) — datos híbridos
 
 ### TECNOLOGÍAS:
+
 - Vue.js 3 + Composition API
 - Quasar Framework
 - Pinia (productosStore, comerciosStore)
@@ -46,39 +50,48 @@ primero se corrigen los problemas actuales, luego se agregan las funcionalidades
 ## 📋 FASE 1: SELECTOR DE COMERCIO AGRUPADO 🏪 [✅ COMPLETADA]
 
 ### Objetivo
+
 Corregir el selector de comercio en FormularioPrecio.vue para que:
+
 1. Al abrir sin escribir nada, muestre los **3 comercios (agrupados) más recientemente usados**
 2. Use `comerciosAgrupados` para que cadenas como "Tata" aparezcan como una sola opción
 3. Al seleccionar "Tata", el selector de direcciones muestre **todas las sucursales** de Tata
 
 ### Archivo a modificar
+
 [x] src/components/Formularios/FormularioPrecio.vue
 
 ### Cambios en `filtrarComercios(val, update)`
+
 [x] Cambiar la fuente de datos de `comerciosPorUso` a `comerciosAgrupados`
 [x] Cuando `val === ''`: mostrar solo los 3 primeros de `comerciosAgrupados` (top 3 recientes)
 [x] Cuando `val !== ''`: filtrar `comerciosAgrupados` por nombre (substring)
 [x] `comerciosAgrupados` ya tiene formato agrupado con todas las sucursales dentro
 
 ### Cambios en el selector de direcciones
+
 [x] El objeto seleccionado del dropdown es ahora un "grupo" con N sucursales
 [x] `direccionesDisponibles` retorna las direcciones de **todas** las sucursales del grupo
-      (el getter `comerciosAgrupados` ya combina todas las direcciones en `.direcciones[]`)
+(el getter `comerciosAgrupados` ya combina todas las direcciones en `.direcciones[]`)
 [x] Dirección auto-seleccionada: `grupo.direccionPrincipal` (la más reciente, ya calculada)
 
 ### Cambios en `alSeleccionarComercio(comercio)`
+
 [x] Al seleccionar el grupo, se usa `resolverComercioId()` para obtener el branch correcto
 [x] Auto-seleccionar la dirección principal del grupo (más recientemente usada)
 
 ### Cambios en `alSeleccionarDireccion(direccion)`
+
 [x] Al cambiar la dirección manual, se re-calcula el `comercioId` al branch correspondiente
 
 ### Cambios en las opciones visuales del dropdown
+
 [x] Mostrar nombre del grupo (ej: "Tata")
 [x] En el caption: "3 sucursales" si es cadena, "1 dirección"/"N direcciones" si no
 [x] Agregar helper `resolverComercioId(comercioOGrupo, idDireccion)` para resolver branch
 
 ### ⚠️ Punto delicado (resuelto)
+
 `comerciosAgrupados.direcciones[]` combina todos los branches PERO no trae el `comercioId`
 del branch padre. Se resuelve con `resolverComercioId()` que busca en `comerciosOriginales`.
 
@@ -87,25 +100,29 @@ del branch padre. Se resuelve con `resolverComercioId()` que busca en `comercios
 ## 📋 FASE 2: BOTÓN "AGREGAR COMERCIO RÁPIDO" 🔧 [✅ COMPLETADA]
 
 ### Objetivo
+
 - Renombrar el botón en FormularioPrecio.vue de "Agregar nuevo comercio" a "Agregar comercio rápido"
 - Verificar que el flujo completo del diálogo funciona correctamente
 
 ### Archivos a modificar
+
 [x] src/components/Formularios/FormularioPrecio.vue (label del botón — hecho en Fase 1)
 [x] src/almacenamiento/servicios/ComerciosService.js (fix nombreCompleto)
 
 ### Verificaciones en DialogoAgregarComercioRapido.vue
+
 [x] Diálogo se abre correctamente con datos pre-llenados del comercio escrito ✓
 [x] `resultado.exito` y `resultado.validacion` coinciden con el store ✓
-      El store retorna `{ exito: false, validacion }` (duplicado) o `{ exito: true, comercio }` (ok)
+El store retorna `{ exito: false, validacion }` (duplicado) o `{ exito: true, comercio }` (ok)
 [x] Al guardar, el nuevo comercio aparece auto-seleccionado en el selector ✓
 [x] La dirección ingresada se auto-selecciona también ✓
 [x] Notificaciones de éxito y error correctas ✓
 
 ### Bug encontrado y corregido
+
 [x] `ComerciosService.agregarComercio`: cuando `calle` es vacío (dirección opcional),
-      `nombreCompleto` quedaba "NombreComercio - " (con " - " colgante) → corregido:
-      si `calle` vacío → `nombreCompleto = nombre` (sin " - ")
+`nombreCompleto` quedaba "NombreComercio - " (con " - " colgante) → corregido:
+si `calle` vacío → `nombreCompleto = nombre` (sin " - ")
 [x] Además: `calle.trim()` fallaba si `calle` llegaba `undefined` → corregido con `?.trim()`
 
 ═══════════════════════════════════════════════════════════════
@@ -113,18 +130,22 @@ del branch padre. Se resuelve con `resolverComercioId()` que busca en `comercios
 ## 📋 FASE 3: CATEGORÍA DEL PRODUCTO 🏷️ [✅ COMPLETADA]
 
 ### Objetivo
+
 Agregar un campo `categoria` al producto que:
+
 - Se hereda automáticamente de la API de OpenFoodFacts al agregar el producto
 - Se puede editar desde la página de detalle (ver historial)
 - Si no hay categoría, no mostrar nada (sin mensajes de error, campo vacío)
 
 ### 3.1 — Verificar que la API ya guarda la categoría
+
 **Archivo:** src/almacenamiento/servicios/OpenFoodFactsService.js
 [x] `_mapearProducto()` ya incluye `categoria: _extraerPrimeraCategoria(categorias)` ✓
 [x] `autoCompletarFormulario()` en DialogoAgregarProducto.vue incluye `categoria` ✓
 [x] `ProductosService.guardarProducto()` persiste el objeto completo — `categoria` se guarda ✓
 
 ### 3.2 — Editor de categoría en DetalleProductoPage
+
 **Archivo:** src/components/DetalleProducto/InfoProducto.vue
 [x] Campo categoría agregado debajo del código de barras
 [x] Reutiliza `CampoEditable.vue` (existente en EditarComercio/) — texto + ícono lápiz → input
@@ -133,9 +154,11 @@ Agregar un campo `categoria` al producto que:
 [x] Al guardar llama `productosStore.actualizarProducto(id, { categoria })` con notify de éxito/error
 
 ### 3.3 — Categorías sugeridas
+
 [x] Campo de texto libre (sin lista fija) — el usuario escribe lo que quiera ✓
 
 ### ⚠️ Nota
+
 No agregar el campo al formulario de crear producto. Solo editable desde el detalle.
 La API lo puebla al crear, el usuario lo ajusta si quiere.
 
@@ -144,20 +167,23 @@ La API lo puebla al crear, el usuario lo ajusta si quiere.
 ## 📋 FASE 4: BUSCADOR INTELIGENTE DE PRODUCTOS 🔍 [✅ COMPLETADA]
 
 ### Objetivo
+
 Crear un componente `BuscadorProductos.vue` que muestre sugerencias dinámicas
 al escribir 3+ caracteres, buscando por nombre (en cualquier orden), código de barras
 y marca. Las sugerencias se ordenan por última interacción (más reciente primero).
 
 ### Archivo a crear
+
 [x] src/components/MisProductos/BuscadorProductos.vue
 
 ### Lógica del buscador
+
 [x] Activar sugerencias solo cuando el usuario escribe >= 3 caracteres
 [x] Mostrar máximo 3 sugerencias en una lista desplegable bajo el input
 [x] Ordenar sugerencias por `ultimaInteraccion` desc (fallback a `fechaActualizacion`)
 [x] Algoritmo de búsqueda por nombre: dividir término en palabras → verificar que cada palabra
-      esté contenida en el nombre del producto (case insensitive, sin tildes)
-      Ejemplo: "COLA" encuentra "Coca Cola" / "diet col" encuentra "Coca Cola Diet"
+esté contenida en el nombre del producto (case insensitive, sin tildes)
+Ejemplo: "COLA" encuentra "Coca Cola" / "diet col" encuentra "Coca Cola Diet"
 [x] Búsqueda por código de barras: si el término es numérico, comparar contra `codigoBarras`
 [x] Búsqueda por marca: buscar el término en el campo `marca` del producto
 [x] Al seleccionar una sugerencia: emitir `@seleccionar` con el producto
@@ -165,6 +191,7 @@ y marca. Las sugerencias se ordenan por última interacción (más reciente prim
 [x] Al limpiar: emitir `@limpiar`
 
 ### UX del componente
+
 [x] Ícono de búsqueda en prepend del input
 [x] Placeholder: "Buscar por nombre, marca o código..."
 [x] Chip pequeño en cada sugerencia indicando el tipo de coincidencia (nombre / código / marca)
@@ -172,6 +199,7 @@ y marca. Las sugerencias se ordenan por última interacción (más reciente prim
 [x] Cerrar sugerencias al hacer click afuera o al seleccionar (blur + mousedown.prevent)
 
 ### Reutilización (diseño)
+
 [x] El componente recibe `productos` como prop (no accede al store directamente)
 [x] Emits: `@seleccionar`, `@buscar`, `@limpiar`
 [x] Usa clase CSS global `.buscador-centrado` del sistema de diseño
@@ -181,35 +209,39 @@ y marca. Las sugerencias se ordenan por última interacción (más reciente prim
 ## 📋 FASE 5: REGISTRAR ÚLTIMA INTERACCIÓN 🕐 [✅ COMPLETADA]
 
 ### Objetivo
+
 Para ordenar las sugerencias del buscador por "más recientemente usado",
 necesitamos guardar cuándo fue la última vez que el usuario interactuó con cada producto.
 Esta fase se implementa junto con o inmediatamente antes de la Fase 4.
 
 ### Archivos a modificar
+
 [x] src/almacenamiento/stores/productosStore.js
 [x] ProductosService.js no requirió cambios (guardarProducto persiste el objeto completo)
 
 ### Lógica
+
 [x] Agregar acción `registrarInteraccion(productoId)` en productosStore:
-      Actualiza `producto.ultimaInteraccion = new Date().toISOString()`
-      Persiste el cambio con ProductosService (sin setear cargando — operación silenciosa)
+Actualiza `producto.ultimaInteraccion = new Date().toISOString()`
+Persiste el cambio con ProductosService (sin setear cargando — operación silenciosa)
 [x] Agregar getter `productosPorInteraccion`:
-      Ordena por `ultimaInteraccion` desc, fallback a `fechaActualizacion`
-[x] Llamar a `registrarInteraccion` en:
-      - DetalleProductoPage.vue → `onMounted()` (usuario abrió el detalle)
-      - DialogoAgregarPrecio.vue → después de guardar precio exitosamente
+Ordena por `ultimaInteraccion` desc, fallback a `fechaActualizacion`
+[x] Llamar a `registrarInteraccion` en: - DetalleProductoPage.vue → `onMounted()` (usuario abrió el detalle) - DialogoAgregarPrecio.vue → después de guardar precio exitosamente
 
 ═══════════════════════════════════════════════════════════════
 
 ## 📋 FASE 6: INTEGRAR BUSCADOR EN MIS PRODUCTOS 🔌 [✅ COMPLETADA]
 
 ### Objetivo
+
 Agregar el buscador a MisProductosPage.vue para filtrar la lista de productos.
 
 ### Archivo a modificar
+
 [x] src/pages/MisProductosPage.vue
 
 ### Lógica
+
 [x] Importar y agregar `BuscadorProductos` dentro del bloque v-else (hay productos), antes de la lista
 [x] Usa `.buscador-centrado` del sistema de diseño (lo aplica el propio componente)
 [x] Manejar `@buscar`: actualiza `textoBusqueda` → `productosFiltrados` computed filtra en memoria
@@ -224,25 +256,30 @@ Agregar el buscador a MisProductosPage.vue para filtrar la lista de productos.
 ## 📋 FASE 7: MEJORAS EN DETALLE DEL PRODUCTO 🎨 [✅ COMPLETADA]
 
 ### 7.1 — Título de sección "Historial de precios"
+
 **Archivo:** src/pages/DetalleProductoPage.vue
 [x] `<p class="text-subtitle1 text-weight-bold">` entre EstadisticasProducto y FiltrosHistorial
 [x] Texto: "Historial de precios" — consistente visualmente con la página
 
 ### 7.2 — Foto del producto más grande
+
 **Archivo:** src/components/DetalleProducto/InfoProducto.vue
 [x] Desktop: `grid-template-columns: 180px 1fr` (era 120px) + `.info-imagen { height: 180px }`
 [x] Móvil: `width: 45vw` (era 35vw) + `max-width: 180px` (era 140px)
 [x] Placeholder (ícono bolsa) crece proporcionalmente (height: 100% en el contenedor)
 
 ### 7.3 — Verificar precio promedio ✓ Sin cambios
+
 [x] `Math.round(suma / total)` — sin decimales innecesarios ✓
 [x] Calcula sobre TODOS los precios (no filtrados) ✓
 
 ### 7.4 — Verificar tendencia ✓ Sin cambios
+
 [x] `_calcularCamposAutomaticos()` en ProductosService.js calcula correctamente ✓
 [x] `tendenciaGeneral` y `porcentajeTendencia` llegan al componente como props ✓
 
 ### 7.5 — Fix conteo de comercios
+
 **Archivo:** src/components/DetalleProducto/EstadisticasProducto.vue
 [x] Cambiado a `p.comercioId || p.comercio` como clave del Set
 [x] Corrige duplicados por datos híbridos (legacy vs nuevos)
@@ -252,21 +289,21 @@ Agregar el buscador a MisProductosPage.vue para filtrar la lista de productos.
 ## 📋 FASE 8: SINCRONIZACIÓN COMERCIOS → HISTORIAL 🔗 [✅ COMPLETADA]
 
 ### Objetivo
+
 Cuando el usuario edita el nombre de un comercio en la sección Comercios,
 ese cambio debe verse reflejado en el historial de precios del producto.
 
 ### Diagnóstico
+
 [x] HistorialPrecios.vue agrupa por `precio.nombreCompleto` (texto plano) → **CASO A** confirmado
 [x] Los nombres quedan "congelados" al agregar el precio — no resuelven desde el store
 
 ### Implementación: CASO A
+
 **Archivo:** src/almacenamiento/stores/comerciosStore.js
 [x] Import de `useProductosStore` agregado al inicio del store
 [x] `editarComercio()` llama a `_sincronizarNombreEnPrecios(id, nombre)` si cambia el nombre
-[x] `_sincronizarNombreEnPrecios`: itera todos los productos, actualiza precios con `comercioId === id`:
-      - `precio.comercio = nuevoNombre`
-      - `precio.nombreCompleto = "NuevoNombre - Calle"` (o solo nombre si sin dirección)
-      - Llama `productosStore.actualizarProducto()` para persistir + recalcular campos automáticos
+[x] `_sincronizarNombreEnPrecios`: itera todos los productos, actualiza precios con `comercioId === id`: - `precio.comercio = nuevoNombre` - `precio.nombreCompleto = "NuevoNombre - Calle"` (o solo nombre si sin dirección) - Llama `productosStore.actualizarProducto()` para persistir + recalcular campos automáticos
 [x] Operación silenciosa (error no bloquea el flujo principal de edición del comercio)
 
 ═══════════════════════════════════════════════════════════════
@@ -274,43 +311,49 @@ ese cambio debe verse reflejado en el historial de precios del producto.
 ## 📋 FASE 9: TESTING Y AJUSTES 🧪 [PENDIENTE]
 
 ### Testing Fase 1 (Selector de comercio)
-[ ] Abrir el modal de agregar producto → solo 3 comercios recientes aparecen al inicio ✓
-[ ] "Tata" aparece como 1 sola opción (no 3 sucursales separadas) ✓
-[ ] Al seleccionar "Tata", el selector de direcciones muestra TODAS las sucursales ✓
-[ ] Al escribir texto, filtra correctamente los comercios agrupados ✓
+
+[x] Abrir el modal de agregar producto → solo 3 comercios recientes aparecen al inicio ✓
+[x] "Tata" aparece como 1 sola opción (no 3 sucursales separadas) ✓
+[x] Al seleccionar "Tata", el selector de direcciones muestra TODAS las sucursales ✓
+[x] Al escribir texto, filtra correctamente los comercios agrupados ✓
 
 ### Testing Fase 2 (Agregar comercio rápido)
-[ ] Botón muestra "Agregar comercio rápido" ✓
-[ ] Al escribir "Disco" en comercio y click en botón → diálogo se abre con "Disco" pre-llenado ✓
+
+[x] Botón muestra "Agregar comercio rápido" ✓
+[x] Al escribir "Disco" en comercio y click en botón → diálogo se abre con "Disco" pre-llenado ✓
 [ ] Al guardar → el nuevo comercio queda seleccionado automáticamente ✓
 [ ] Si hay duplicado similar → muestra advertencia y cierra correctamente ✓
 
 ### Testing Fase 3 (Categoría)
-[ ] Buscar producto por código de barras → categoría de la API se guarda ✓
-[ ] Editar categoría desde el detalle → se guarda y persiste ✓
-[ ] Si no tiene categoría → campo vacío o texto tenue, no rompe nada ✓
+
+[x] Buscar producto por código de barras → categoría de la API se guarda ✓
+[x] Editar categoría desde el detalle → se guarda y persiste ✓
+[x] Si no tiene categoría → campo vacío o texto tenue, no rompe nada ✓
 
 ### Testing Fase 4-6 (Buscador)
-[ ] "COLA" → sugiere "Coca Cola" ✓
-[ ] "cola coca" → sugiere "Coca Cola Diet" ✓
-[ ] Código de barras parcial → sugiere el producto ✓
-[ ] Marca parcial → sugiere productos de esa marca ✓
-[ ] Menos de 3 caracteres → no muestra sugerencias ✓
-[ ] Seleccionar sugerencia → navega al detalle ✓
-[ ] Limpiar → lista completa visible ✓
-[ ] Orden de sugerencias: más reciente primero ✓
+
+[x] "COLA" → sugiere "Coca Cola" ✓
+[x "cola coca" → sugiere "Coca Cola Diet" ✓
+[x] Código de barras parcial → sugiere el producto ✓
+[x] Marca parcial → sugiere productos de esa marca ✓
+[x] Menos de 3 caracteres → no muestra sugerencias ✓
+[x] Seleccionar sugerencia → navega al detalle ✓
+[x] Limpiar → lista completa visible ✓
+[x] Orden de sugerencias: más reciente primero ✓
 
 ### Testing Fase 7 (Detalle)
-[ ] Título "Historial de precios" visible ✓
-[ ] Foto más grande en desktop y móvil ✓
-[ ] Precio promedio correcto ✓
-[ ] Tendencia refleja precios recientes ✓
-[ ] Conteo de comercios sin duplicados ✓
+
+[x] Título "Historial de precios" visible ✓
+[x] Foto más grande en desktop y móvil ✓
+[x] Precio promedio correcto ✓
+[x] Tendencia refleja precios recientes ✓
+[x] Conteo de comercios sin duplicados ✓
 
 ### Testing responsivo
-[ ] Móvil (xs) - 360px ✓
-[ ] Tablet (sm) - 768px ✓
-[ ] Desktop (md) - 1024px ✓
+
+[x] Móvil (xs) - 360px ✓
+[x] Tablet (sm) - 768px ✓
+[x] Desktop (md) - 1024px ✓
 
 ═══════════════════════════════════════════════════════════════
 
