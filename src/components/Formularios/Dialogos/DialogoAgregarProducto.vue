@@ -138,17 +138,17 @@ const formularioValido = computed(() => {
   if (props.modo === 'comunidad') {
     // Modo comunidad: todos los campos obligatorios
     return (
-      datosProducto.value.nombre.trim() !== '' &&
-      datosProducto.value.marca.trim() !== '' &&
-      datosProducto.value.codigoBarras.trim() !== '' &&
-      datosPrecio.value.comercio.trim() !== '' &&
+      (datosProducto.value.nombre || '').trim() !== '' &&
+      (datosProducto.value.marca || '').trim() !== '' &&
+      (datosProducto.value.codigoBarras || '').trim() !== '' &&
+      (datosPrecio.value.comercio || '').trim() !== '' &&
       datosPrecio.value.valor !== null &&
       datosPrecio.value.valor > 0
     )
   }
 
   // Modo local: solo nombre obligatorio
-  return datosProducto.value.nombre.trim() !== ''
+  return (datosProducto.value.nombre || '').trim() !== ''
 })
 
 // Watchers para sincronizar datos
@@ -249,9 +249,9 @@ async function guardarProducto() {
     let productoExistente = null
 
     // Solo buscar si hay código de barras
-    if (datosProducto.value.codigoBarras.trim() !== '') {
+    if ((datosProducto.value.codigoBarras || '').trim() !== '') {
       productoExistente = await productosService.buscarPorCodigoBarras(
-        datosProducto.value.codigoBarras.trim(),
+        (datosProducto.value.codigoBarras || '').trim(),
       )
     }
 
@@ -260,16 +260,16 @@ async function guardarProducto() {
 
       const nombreCompleto =
         datosPrecio.value.nombreCompleto ||
-        (datosPrecio.value.direccion.trim()
-          ? `${datosPrecio.value.comercio.trim()} - ${datosPrecio.value.direccion.trim()}`
-          : datosPrecio.value.comercio.trim())
+        (datosPrecio.value.direccion?.trim()
+          ? `${datosPrecio.value.comercio?.trim()} - ${datosPrecio.value.direccion?.trim()}`
+          : datosPrecio.value.comercio?.trim())
 
       const nuevoPrecio = {
         comercioId: datosPrecio.value.comercioId || null,
         direccionId: datosPrecio.value.direccionId || null,
-        comercio: datosPrecio.value.comercio.trim() || 'Sin comercio',
+        comercio: datosPrecio.value.comercio?.trim() || 'Sin comercio',
         nombreCompleto: nombreCompleto || 'Sin datos',
-        direccion: datosPrecio.value.direccion.trim() || '',
+        direccion: datosPrecio.value.direccion?.trim() || '',
         valor: datosPrecio.value.valor || 0,
         moneda: datosPrecio.value.moneda || 'UYU',
         fecha: new Date().toISOString(),
@@ -309,29 +309,29 @@ async function guardarProducto() {
     console.log('🆕 Creando producto nuevo...')
 
     const nuevoProducto = {
-      nombre: datosProducto.value.nombre.trim() || 'Sin nombre',
-      marca: datosProducto.value.marca.trim() || '',
-      codigoBarras: datosProducto.value.codigoBarras.trim() || '',
+      nombre: datosProducto.value.nombre?.trim() || 'Sin nombre',
+      marca: datosProducto.value.marca?.trim() || '',
+      codigoBarras: datosProducto.value.codigoBarras?.trim() || '',
       cantidad: datosProducto.value.cantidad || 1,
       unidad: datosProducto.value.unidad || 'unidad',
-      categoria: datosProducto.value.categoria.trim() || '',
+      categoria: datosProducto.value.categoria?.trim() || '',
       imagen: datosProducto.value.imagen || null,
       precios: [],
     }
 
-    if (datosPrecio.value.comercio.trim() !== '' || datosPrecio.value.valor !== null) {
+    if ((datosPrecio.value.comercio || '').trim() !== '' || datosPrecio.value.valor !== null) {
       const nombreCompleto =
         datosPrecio.value.nombreCompleto ||
-        (datosPrecio.value.direccion.trim()
-          ? `${datosPrecio.value.comercio.trim()} - ${datosPrecio.value.direccion.trim()}`
-          : datosPrecio.value.comercio.trim())
+        (datosPrecio.value.direccion?.trim()
+          ? `${datosPrecio.value.comercio?.trim()} - ${datosPrecio.value.direccion?.trim()}`
+          : datosPrecio.value.comercio?.trim())
 
       nuevoProducto.precios.push({
         comercioId: datosPrecio.value.comercioId || null,
         direccionId: datosPrecio.value.direccionId || null,
-        comercio: datosPrecio.value.comercio.trim() || 'Sin comercio',
+        comercio: datosPrecio.value.comercio?.trim() || 'Sin comercio',
         nombreCompleto: nombreCompleto || 'Sin datos',
-        direccion: datosPrecio.value.direccion.trim() || '',
+        direccion: datosPrecio.value.direccion?.trim() || '',
         valor: datosPrecio.value.valor || 0,
         moneda: datosPrecio.value.moneda || 'UYU',
         fecha: new Date().toISOString(),
