@@ -97,7 +97,8 @@ src/
 ├── components/
 │   ├── Compartidos/                         # Componentes reutilizables entre secciones
 │   │   ├── BarraSeleccion.vue              # Barra sticky con contador de seleccionados
-│   │   └── BarraAccionesSeleccion.vue      # Barra fixed bottom con botones (eliminar, cancelar)
+│   │   ├── BarraAccionesSeleccion.vue      # Barra fixed bottom con botones (eliminar, cancelar)
+│   │   └── InputBusqueda.vue              # 🆕 Input de búsqueda reutilizable con prop color
 │   │
 │   ├── Comercios/                           # Componentes de comercios
 │   │   ├── ListaComercios.vue              # Contenedor con grid responsivo Quasar
@@ -130,7 +131,7 @@ src/
 │   │   └── ListaProductos.vue              # Contenedor con grid responsivo Quasar
 │   │
 │   ├── EditarComercio/                     # 🆕 Componentes de edición de comercio
-│   │   ├── SelectorSucursales.vue         # Chips horizontales para seleccionar sucursal
+│   │   ├── SelectorSucursales.vue         # 🆕 Mini-tarjetas con calle, barrio, artículos por sucursal
 │   │   ├── CampoEditable.vue              # Campo inline editable (texto + lápiz → input)
 │   │   ├── EstadisticasComercio.vue       # Grid de mini-cards con estadísticas
 │   │   └── ListaProductosComercio.vue     # Lista de productos asociados al comercio
@@ -261,15 +262,13 @@ src/css/
 #### **BUSCADORES**
 ```css
 .buscador-centrado {
-  max-width: 500px;
-  margin: 0 auto;
   margin-top: 24px;
   margin-bottom: 24px;
 }
 ```
-**Uso:** Buscadores estilo Google (centrados, ancho máximo)
-**Aplicado en:** ComerciosPage.vue
-**Futuro:** MisProductosPage.vue (cuando se implemente búsqueda)
+**Uso:** Input de búsqueda reutilizable (sin max-width, ocupa ancho completo)
+**Implementado via:** `InputBusqueda.vue` (componente compartido, prop `color`)
+**Aplicado en:** MisProductosPage.vue (color default) y ComerciosPage.vue (color="orange")
 
 #### **TARJETAS**
 ```css
@@ -386,6 +385,11 @@ A. Gestión de Productos
 ✅ Filtros de historial (comercio, período, orden precio/fecha)
 ✅ Confirmaciones de precios con validación de usuario único
 ✅ Estadísticas: precio promedio, tendencia, total de comercios
+✅ 🆕 Buscador inline en Mis Productos (por nombre, marca, categoría, código de barras)
+✅ 🆕 Categoría editable en detalle del producto (heredada de API, editable con CampoEditable)
+✅ 🆕 Foto del producto más grande en detalle (desktop: 180px, móvil: 45vw)
+✅ 🆕 Registro de última interacción por producto (registrarInteraccion + productosPorInteraccion)
+✅ 🆕 Título "Historial de precios" visible en DetalleProductoPage
 
 B. Gestión de Comercios y Sucursales
 
@@ -414,19 +418,20 @@ B. Gestión de Comercios y Sucursales
 ✅ Registro automático de uso al agregar precio
 ✅ Diálogos de confirmación: coincidencias, duplicado exacto, misma ubicación, motivo eliminación
 ✅ 🆕 Página de edición de comercio con edición inline de campos
-✅ 🆕 Selector de sucursales con chips horizontales
+✅ 🆕 Selector de sucursales como mini-tarjetas (calle, barrio/ciudad, artículos registrados)
 ✅ 🆕 Agregar/eliminar sucursales desde página de edición
 ✅ 🆕 Fusionar sucursales (transferir precios entre sucursales)
 ✅ 🆕 Estadísticas del comercio (registro, último uso, productos, sucursales)
-✅ 🆕 Lista de productos asociados con último precio
+✅ 🆕 Lista de productos asociados con último precio, filtrada por sucursal seleccionada
 ✅ 🆕 Composable reutilizable de fechas relativas (useFechaRelativa.js)
+✅ 🆕 Conteo de usos calculado desde productos reales (no desde cantidadUsos del store)
 
 C. Integración Comercios + Productos
 
 ✅ Selectores de comercio y dirección en FormularioPrecio.vue
 ✅ Autocompletado de comercios ordenados por uso reciente
 ✅ Auto-selección de dirección más usada del comercio
-✅ 🆕 Botón "Agregar nuevo comercio" debajo del selector de dirección
+✅ 🆕 Botón "Agregar comercio rápido" debajo del selector de dirección (FormularioPrecio y DialogoAgregarPrecio)
 ✅ Captura de texto escrito por usuario (nombre comercio + dirección)
 ✅ Guardado de comercioId y direccionId en precios
 ✅ Retrocompatibilidad con precios legacy (solo strings)
@@ -898,10 +903,11 @@ H. Arquitectura y Código
 6. **Sistema de Diseño Centralizado:** Clases CSS globales en app.css
 
 ### Estado Actual
-- **Versión:** MVP funcional (~90% completado)
+- **Versión:** MVP funcional (~95% completado)
 - **Almacenamiento:** Local (Capacitor Storage)
-- **Sistema de sucursales:** Completado (agrupación automática de cadenas)
-- **Edición de comercios:** Completada (página completa con edición inline, fusión, estadísticas)
+- **Sistema de sucursales:** Completado (agrupación automática de cadenas, mini-tarjetas)
+- **Edición de comercios:** Completada (página completa con edición inline, fusión, estadísticas, filtro por sucursal)
+- **Sección Mis Productos:** Completada (buscador inline, categoría editable, historial mejorado)
 - **Próximo Milestone:** Foto de comercio, eliminación con motivo
 - **Preparación:** Lista para migración a Firebase
 
@@ -926,4 +932,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** Febrero 18, 2026 (con página de edición de comercios y sistema de sucursales)
+**Última actualización:** Febrero 19, 2026 (buscador inline, mini-tarjetas sucursales, filtro por sucursal, usos reales)

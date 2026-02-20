@@ -54,6 +54,7 @@
           :direcciones="comercioActual.direcciones"
           :direccion-seleccionada="direccionSeleccionada"
           :es-cadena="comercioActual.esCadena"
+          :articulos-por-direccion="articulosPorDireccion"
           class="q-mb-lg"
           @seleccionar="seleccionarDireccion"
         />
@@ -328,21 +329,27 @@ const idsComerciosOriginales = computed(() =>
   comercioActual.value?.comerciosOriginales?.map((c) => c.id) || [],
 )
 
-// Productos que tienen precios en este comercio
+// Filtra precios de un producto según la sucursal seleccionada
+const filtrarPreciosPorSucursal = (precios) => {
+  const idDireccion = direccionSeleccionada.value?.id || null
+  if (!precios) return []
+  if (idDireccion) {
+    return precios.filter((p) => p.direccionId === idDireccion)
+  }
+  return precios.filter((p) => idsComerciosOriginales.value.includes(p.comercioId))
+}
+
+// Productos que tienen precios en la sucursal seleccionada (o en todo el comercio si no hay selección)
 const productosAsociados = computed(() => {
   return productosStore.productos.filter((producto) =>
-    producto.precios?.some((precio) =>
-      idsComerciosOriginales.value.includes(precio.comercioId),
-    ),
+    filtrarPreciosPorSucursal(producto.precios).length > 0,
   )
 })
 
 // Productos con info de último precio para el listado
 const productosConPrecio = computed(() => {
   return productosAsociados.value.map((producto) => {
-    // Buscar el precio más reciente en este comercio
-    const preciosComercio = producto.precios
-      .filter((p) => idsComerciosOriginales.value.includes(p.comercioId))
+    const preciosComercio = filtrarPreciosPorSucursal(producto.precios)
       .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
 
     const ultimoPrecio = preciosComercio[0]
@@ -359,19 +366,30 @@ const productosConPrecio = computed(() => {
   })
 })
 
-// Fecha del último precio registrado en este comercio
+// Fecha del último precio registrado en la sucursal seleccionada
 const ultimoPrecioFecha = computed(() => {
   let fechaMasReciente = null
   for (const producto of productosAsociados.value) {
-    const precios = producto.precios
-      ?.filter((p) => idsComerciosOriginales.value.includes(p.comercioId))
-    for (const precio of (precios || [])) {
+    for (const precio of filtrarPreciosPorSucursal(producto.precios)) {
       if (precio.fecha && (!fechaMasReciente || new Date(precio.fecha) > new Date(fechaMasReciente))) {
         fechaMasReciente = precio.fecha
       }
     }
   }
   return fechaMasReciente
+})
+
+// Cantidad de artículos registrados por dirección (para mini-tarjetas)
+const articulosPorDireccion = computed(() => {
+  const conteo = {}
+  productosStore.productos.forEach((producto) => {
+    ;(producto.precios || []).forEach((precio) => {
+      if (precio.direccionId) {
+        conteo[precio.direccionId] = (conteo[precio.direccionId] || 0) + 1
+      }
+    })
+  })
+  return conteo
 })
 
 // Estado de diálogos

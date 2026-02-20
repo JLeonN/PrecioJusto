@@ -308,7 +308,7 @@ ese cambio debe verse reflejado en el historial de precios del producto.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 9: TESTING Y AJUSTES 🧪 [PENDIENTE]
+## 📋 FASE 9: TESTING Y AJUSTES 🧪 [✅ COMPLETADA]
 
 ### Testing Fase 1 (Selector de comercio)
 
@@ -321,8 +321,8 @@ ese cambio debe verse reflejado en el historial de precios del producto.
 
 [x] Botón muestra "Agregar comercio rápido" ✓
 [x] Al escribir "Disco" en comercio y click en botón → diálogo se abre con "Disco" pre-llenado ✓
-[ ] Al guardar → el nuevo comercio queda seleccionado automáticamente ✓
-[ ] Si hay duplicado similar → muestra advertencia y cierra correctamente ✓
+[x] Al guardar → el nuevo comercio queda seleccionado automáticamente ✓
+[x] Si hay duplicado similar → muestra advertencia y cierra correctamente ✓
 
 ### Testing Fase 3 (Categoría)
 
@@ -333,7 +333,7 @@ ese cambio debe verse reflejado en el historial de precios del producto.
 ### Testing Fase 4-6 (Buscador)
 
 [x] "COLA" → sugiere "Coca Cola" ✓
-[x "cola coca" → sugiere "Coca Cola Diet" ✓
+[x] "cola coca" → sugiere "Coca Cola Diet" ✓
 [x] Código de barras parcial → sugiere el producto ✓
 [x] Marca parcial → sugiere productos de esa marca ✓
 [x] Menos de 3 caracteres → no muestra sugerencias ✓
@@ -357,15 +357,69 @@ ese cambio debe verse reflejado en el historial de precios del producto.
 
 ═══════════════════════════════════════════════════════════════
 
+## 📋 FASE 10: MEJORAS POST-PLAN (19 de Febrero 2026) [✅ COMPLETADA]
+
+### 10.1 — Buscador unificado inline
+
+[x] Eliminado `BuscadorProductos.vue` (dropdown con sugerencias) → reemplazado por filtro inline
+[x] Creado `src/components/Compartidos/InputBusqueda.vue`: q-input reutilizable con prop `color`
+[x] `MisProductosPage.vue`: usa `InputBusqueda` con `productosFiltrados` computed inline
+  - Búsqueda por palabras en cualquier orden (split por espacios, todas deben estar en nombre)
+  - Búsqueda por marca y categoría (substring)
+  - Búsqueda por código de barras (solo cuando input es numérico)
+  - Normalización: lowercase + sin tildes (NFD)
+[x] `ComerciosPage.vue`: usa `InputBusqueda` con `color="orange"` (distinción visual sutil)
+[x] `app.css`: clase `.buscador-centrado` sin max-width (ambos inputs ocupan el ancho completo)
+[x] Input: `font-size: 15px`, `font-weight: 600`, icon 22px, sin `dense`
+
+### 10.2 — DialogoAgregarPrecio: selector agrupado
+
+[x] Migrado de `comerciosPorUso` (plano) → `comerciosAgrupados` (cadenas unificadas)
+[x] Slot `#option` custom: "N sucursales" para cadenas, "N direcciones" para individuales
+[x] Top 3 sin texto (igual que FormularioPrecio)
+[x] `resolverComercioId()`: guarda el branch correcto al guardar precio en una cadena
+[x] `obtenerUltimoComercioUsado()`: busca en `comerciosOriginales` (para cadenas)
+[x] Focus: `textoVisibleComercio` devuelve `undefined` → Quasar controla el input al escribir
+[x] Al escribir: limpia `comercioSeleccionado` → permite cambiar sin tener que borrar primero
+[x] `clearable`: botón X explícito para limpiar selección
+[x] Botón: "Agregar nuevo comercio" → "Agregar comercio rápido" + ícono `add_circle`
+
+### 10.3 — Conteo de usos reales en ComerciosPage
+
+[x] `cantidadUsos` del comercio se acumulaba sin decrementar al borrar productos
+[x] Nuevo computed `comerciosConUsosReales`: calcula usos desde `productosStore.productos`
+  - Cuenta entradas de `precio.comercioId` por branch
+  - Sobrescribe `cantidadUsos` del agrupado y de cada `comercioOriginal`
+[x] `comerciosFiltrados` consume `comerciosConUsosReales` → TarjetaComercioYugioh siempre exacta
+[x] Bug resuelto: borrar todos los productos → contadores bajan a 0
+
+### 10.4 — EditarComercioPage: filtrar por sucursal seleccionada
+
+[x] `filtrarPreciosPorSucursal(precios)`: helper que filtra por `precio.direccionId === idDireccion`
+[x] `productosAsociados`, `productosConPrecio`, `ultimoPrecioFecha`: usan el helper
+[x] Seleccionar una sucursal → muestra solo sus productos (no todos del comercio)
+[x] Nuevo computed `articulosPorDireccion`: cuenta artículos por `direccionId` desde productos
+
+### 10.5 — SelectorSucursales: mini-tarjetas
+
+[x] Chips reemplazados por mini-tarjetas con scroll horizontal
+[x] Cada tarjeta muestra: calle (bold), barrio + ciudad, N artículos
+[x] Seleccionada: borde naranja + fondo `#fff3e0`
+[x] Prop `articulosPorDireccion: Object` recibido desde EditarComercioPage
+[x] Agrega `IconShoppingBag` de `@tabler/icons-vue`
+
+═══════════════════════════════════════════════════════════════
+
 ## NOTAS IMPORTANTES 📌
 
-- Orden lógico de implementación: Fase 1 → 2 → 3 (fixes/quick wins) → 4+5 → 6 → 7 → 8 → 9
+- Orden lógico de implementación: Fase 1 → 2 → 3 (fixes/quick wins) → 4+5 → 6 → 7 → 8 → 9 → 10
 - La Fase 5 puede implementarse junto con la Fase 4 (son dependientes)
 - La Fase 8 SIEMPRE requiere el diagnóstico antes de escribir código
 - No cambiar el sistema de diseño CSS (reutilizar clases existentes)
 - No agregar categoría al formulario de crear producto, solo al detalle
 - El buscador filtra en memoria (no hace peticiones al store/servicio)
 - La categoría es texto libre (no lista predefinida en esta versión)
+- `cantidadUsos` en comercios NO es confiable (solo incrementa) → siempre recalcular desde productos
 
 ═══════════════════════════════════════════════════════════════
 
@@ -381,7 +435,7 @@ ese cambio debe verse reflejado en el historial de precios del producto.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 89% (8/9 fases completadas)
+## 📊 PROGRESO GENERAL: 100% (10/10 fases completadas)
 
 ✅ Fase 1: Selector de comercio agrupado (fix)
 ✅ Fase 2: Botón "Agregar comercio rápido" (fix + verificación)
@@ -391,10 +445,11 @@ ese cambio debe verse reflejado en el historial de precios del producto.
 ✅ Fase 6: Integrar buscador en Mis Productos
 ✅ Fase 7: Mejoras en detalle del producto
 ✅ Fase 8: Sincronización comercios → historial
-⏳ Fase 9: Testing y ajustes
+✅ Fase 9: Testing y ajustes
+✅ Fase 10: Mejoras post-plan (buscador inline, modal precio, usos reales, mini-tarjetas)
 
 ═══════════════════════════════════════════════════════════════
 
 **CREADO:** 18 de Febrero 2026
-**ÚLTIMA ACTUALIZACIÓN:** 18 de Febrero 2026
-**ESTADO:** ⏳ EN PLANIFICACIÓN
+**ÚLTIMA ACTUALIZACIÓN:** 19 de Febrero 2026
+**ESTADO:** ✅ COMPLETADO

@@ -111,3 +111,24 @@ Cada precio requiere:
 - Ambos abren DialogoAgregarPrecio.vue mediante composable useDialogoAgregarPrecio
 - Al guardar, se refresca el producto local y el store
 - Mismo modal usado en MisProductosPage (cero duplicación de código)
+- DialogoAgregarPrecio usa `comerciosAgrupados` (cadenas unificadas, top 3 recientes, clearable)
+
+## MEJORAS RECIENTES (Fase 7 + Fase 10)
+
+### InfoProducto.vue — Categoría editable
+- Campo `categoria` mostrado debajo del código de barras
+- Reutiliza `CampoEditable.vue` (texto + ícono lápiz → input inline)
+- Si tiene categoría: muestra el valor; si no: texto tenue "Sin categoría"
+- Al guardar llama `productosStore.actualizarProducto(id, { categoria })`
+- La categoría viene auto-completada desde Open Food Facts API al agregar el producto
+
+### InfoProducto.vue — Foto más grande
+- Desktop: `grid-template-columns: 180px 1fr` (era 120px), altura 180px
+- Móvil: `width: 45vw`, `max-width: 180px` (era 35vw / 140px)
+
+### DetalleProductoPage.vue — Título de sección
+- Texto "Historial de precios" visible entre EstadisticasProducto y FiltrosHistorial
+
+### DetalleProductoPage.vue — registrarInteraccion
+- `onMounted()` llama `productosStore.registrarInteraccion(id)` → actualiza `ultimaInteraccion`
+- Permite ordenar sugerencias del buscador por "más recientemente visitado"

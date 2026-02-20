@@ -952,12 +952,15 @@ const {
 - Componentes compartidos (barras)
 - Página de edición de comercio (`/comercios/:nombre`)
 - Edición inline de campos (nombre, categoría, dirección, barrio, ciudad)
-- Selector de sucursales con chips horizontales
+- Selector de sucursales como mini-tarjetas (calle, barrio/ciudad, artículos por sucursal)
+- Filtro de productos por sucursal seleccionada (precio.direccionId)
+- Conteo de artículos por sucursal (articulosPorDireccion computed)
 - Agregar sucursal desde página de edición
 - Eliminar sucursal individual con confirmación
 - Fusionar sucursales (transferir precios entre sucursales)
-- Lista de productos asociados con último precio
+- Lista de productos asociados con último precio (filtrada por sucursal)
 - Estadísticas del comercio (registro, último uso, último precio, productos, sucursales)
+- Conteo de usos reales calculado desde productos (comerciosConUsosReales computed en ComerciosPage)
 
 ### ⏳ Pendientes
 - Subir foto de comercio (cámara)
@@ -1003,11 +1006,12 @@ const {
 8. comerciosStore (estado global)
 
 ### Estado actual:
-- Sistema de sucursales: 100% completado (Fases 1-6 del PlanSistemaSucursales.md)
-- Página de edición de comercio: 100% completada (Fase 7)
+- Sistema de sucursales: 100% completado (mini-tarjetas, filtro por sucursal, artículos por sucursal)
+- Página de edición de comercio: 100% completada (edición inline, fusión, estadísticas, filtro sucursal)
 - Agrupación de cadenas: Implementado y testeado
-- Integración con precios: Completada (FormularioPrecio usa comerciosStore)
-- Progreso general: ~90% completado
+- Integración con precios: Completada (FormularioPrecio Y DialogoAgregarPrecio usan comerciosAgrupados)
+- Usos reales: ComerciosPage calcula cantidadUsos desde productos, no desde cantidadUsos del store
+- Progreso general: ~95% completado
 
 ### Diferencias con Productos:
 - Comercios tienen múltiples direcciones (sucursales)

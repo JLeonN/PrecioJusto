@@ -25,7 +25,7 @@
 
 ## NUEVO FLUJO: AGREGAR COMERCIO RÁPIDO
 1. Usuario escribe nombre comercio/dirección en selectores
-2. Click en "Agregar nuevo comercio" (debajo de selector dirección)
+2. Click en "Agregar comercio rápido" (debajo de selector dirección)
 3. Abre DialogoAgregarComercioRapido con datos pre-llenados
 4. Solo nombre obligatorio, dirección opcional
 5. Se crea comercio con tipo "Otro" y datos mínimos
@@ -93,6 +93,20 @@ unidad, litro, mililitro, kilo, gramo, metro, pack
 ## ETAPAS DE DESARROLLO
 ✅ ETAPA 1: Formulario manual básico
 ✅ ETAPA 1.5: Integración con comercios
-🚧 ETAPA 2: API Open Food Facts (próximo)
-⏳ ETAPA 3: Búsqueda inteligente local
-⏳ ETAPA 4: Escaneo código de barras
+✅ ETAPA 2: API Open Food Facts (completada)
+✅ ETAPA 3: Búsqueda inteligente local (buscador inline en MisProductosPage)
+⏳ ETAPA 4: Escaneo código de barras (pendiente)
+
+## DIALOGO AGREGAR PRECIO (DialogoAgregarPrecio.vue)
+Modal rápido para agregar precio a un producto ya existente. Accesible desde TarjetaProducto y DetalleProductoPage.
+
+### Misma lógica que FormularioPrecio:
+- Usa `comerciosAgrupados` (cadenas unificadas, NO lista plana)
+- Top 3 más recientes sin texto, filtro completo al escribir
+- Slot `#option` custom: "N sucursales" para cadenas, "N direcciones" para individuales
+- `resolverComercioId()`: guarda el branch correcto al guardar en una cadena
+- Focus tracking: `textoVisibleComercio` devuelve `undefined` al escribir → Quasar controla el input
+- Al escribir: limpia `comercioSeleccionado` → permite cambiar sin borrar manualmente
+- `clearable`: botón X explícito para limpiar selección
+- Pre-selecciona último comercio usado + dirección más usada al abrir
+- Botón "Agregar comercio rápido" + ícono `add_circle`

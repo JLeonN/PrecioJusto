@@ -144,9 +144,35 @@ const seleccion = useSeleccionMultiple()
 // Comercios y productos eliminados (para deshacer)
 const datosParaDeshacer = ref(null)
 
+// Recalcula cantidadUsos desde los productos reales (no del dato guardado en el comercio)
+const comerciosConUsosReales = computed(() => {
+  return comerciosStore.comerciosAgrupados.map((comercio) => {
+    const idsOriginales = new Set((comercio.comerciosOriginales || []).map((c) => c.id))
+    // Contar precios por branch
+    const usosPorBranch = {}
+    productosStore.productos.forEach((producto) => {
+      ;(producto.precios || []).forEach((precio) => {
+        if (precio.comercioId && idsOriginales.has(precio.comercioId)) {
+          usosPorBranch[precio.comercioId] = (usosPorBranch[precio.comercioId] || 0) + 1
+        }
+      })
+    })
+    const totalUsos = Object.values(usosPorBranch).reduce((a, b) => a + b, 0)
+    return {
+      ...comercio,
+      cantidadUsos: totalUsos,
+      // Actualizar también cada branch para que TarjetaComercioYugioh lo lea bien
+      comerciosOriginales: (comercio.comerciosOriginales || []).map((c) => ({
+        ...c,
+        cantidadUsos: usosPorBranch[c.id] || 0,
+      })),
+    }
+  })
+})
+
 // Comercios filtrados por búsqueda
 const comerciosFiltrados = computed(() => {
-  const comercios = comerciosStore.comerciosAgrupados
+  const comercios = comerciosConUsosReales.value
 
   if (!textoBusqueda.value) {
     return comercios
