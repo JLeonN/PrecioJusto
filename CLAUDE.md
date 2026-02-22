@@ -1,3 +1,20 @@
+### SCRIPT MÓVIL (ANDROID)
+
+Script estándar para compilar y abrir en Android Studio:
+
+```json
+"cel": "quasar build && npx cap sync android && npx cap open android"
+```
+
+Pasos que ejecuta:
+1. `quasar build` — compila la app para producción
+2. `npx cap sync android` — sincroniza con el proyecto Android (Capacitor)
+3. `npx cap open android` — abre Android Studio
+
+Uso: `npm run cel`
+
+---
+
 ### ROL Y EXPERIENCIA
 
 Actúa como un programador Senior Fullstack experto en JavaScript, Vue.js y Quasar (+10 años de experiencia).

@@ -13,7 +13,7 @@
     "dev": "quasar dev",
     "build": "quasar build",
     "postinstall": "quasar prepare",
-    "generar-apk": "quasar build && npx cap sync android && npx cap open android"
+    "cel": "quasar build && npx cap sync android && npx cap open android"
   },
   "dependencies": {
     "@capacitor/android": "^8.0.0",
