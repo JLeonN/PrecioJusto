@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">precio-justo</string>
-    <string name="title_activity_main">precio-justo</string>
+    <string name="app_name">Precio Justo</string>
+    <string name="title_activity_main">Precio Justo</string>
     <string name="package_name">com.preciojusto.app</string>
     <string name="custom_url_scheme">com.preciojusto.app</string>
 </resources>
