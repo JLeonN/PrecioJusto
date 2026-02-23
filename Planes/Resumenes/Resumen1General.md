@@ -149,7 +149,8 @@ src/
 ├── composables/
 │   ├── useSeleccionMultiple.js             # Lógica de selección múltiple reutilizable
 │   ├── useDialogoAgregarPrecio.js          # Lógica reutilizable del modal agregar precio
-│   └── useFechaRelativa.js                 # 🆕 Formato de fechas relativas y cortas
+│   ├── useFechaRelativa.js                 # Formato de fechas relativas y cortas
+│   └── useBotonAtras.js                   # 🆕 Botón back nativo Android (drawer/detalle/salir)
 ├── css/
 │   ├── app.css                              # Clases CSS globales del Design System
 │   ├── quasar.variables.scss               # Variables de Quasar (colores, fuentes)
@@ -921,7 +922,8 @@ H. Arquitectura y Código
   .fab-agregar { bottom: calc(18px + var(--safe-area-bottom)) !important; }
   ```
 
-**Botón back nativo** → ver `src/composables/useBotonAtras.js` (Fase 3 del plan)
+**Botón back nativo** → `src/composables/useBotonAtras.js` (integrado en `MainLayout.vue`)
+- Requiere `@capacitor/app`. Solo activo en `Capacitor.isNativePlatform()`
 
 ### Estado Actual
 - **Versión:** MVP funcional (~95% completado)
