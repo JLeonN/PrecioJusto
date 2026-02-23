@@ -145,7 +145,7 @@ Esto garantiza que Quasar mida correctamente la altura total del header.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 3: BOTÓN BACK NATIVO DE ANDROID 🔙 [ PENDIENTE ]
+## 📋 FASE 3: BOTÓN BACK NATIVO DE ANDROID 🔙 [✅ COMPLETADA]
 
 ### Objetivo
 
@@ -164,31 +164,30 @@ navegue correctamente en lugar de cerrarse abruptamente.
 
 ### Dependencia a instalar
 
-[ ] `npm install @capacitor/app`
-[ ] `npx cap sync android`
+[x] `npm install @capacitor/app` → instalado como `^8.0.1`
+[ ] `npx cap sync android` — pendiente antes del build
 
 ### Archivos a crear/modificar
 
-[ ] `src/composables/useBotonAtras.js` — nueva composable con toda la lógica
-[ ] `src/layouts/MainLayout.vue` — integrar la composable
+[x] `src/composables/useBotonAtras.js` — creada con toda la lógica
+[x] `src/layouts/MainLayout.vue` — composable integrada
 
 ### useBotonAtras.js — estructura de la lógica
 
-[ ] Parámetros recibidos: `{ drawerAbierto, router, route }`
+[x] Parámetros recibidos: `{ drawerAbierto, router, route }`
     `drawerAbierto` es el `ref` del estado del drawer (pasado desde MainLayout)
 
-[ ] Registrar listener en `onMounted` y limpiar en `onUnmounted`:
+[x] Registrar listener en `onMounted` y limpiar en `onUnmounted`:
     `App.addListener('backButton', manejadorBack)`
 
-[ ] Lógica del manejador:
+[x] Lógica del manejador:
     - `drawerAbierto.value === true` → `drawerAbierto.value = false`, return
     - `route.path !== '/' && route.path !== '/comercios'` → `router.back()`, return
-    - Página raíz → lógica de doble toque para salir (descripción arriba)
+    - Página raíz → lógica de doble toque para salir
 
-[ ] Usar Quasar `useQuasar()` dentro del composable para el notify del doble toque
+[x] Usar Quasar `useQuasar()` dentro del composable para el notify del doble toque
 
-[ ] El listener de `@capacitor/app` solo aplica en entorno Capacitor.
-    Detectar con: `Capacitor.isNativePlatform()` para no registrar en web dev.
+[x] Protegido con `Capacitor.isNativePlatform()` → no registra listener en web dev
 
 ### ⚠️ Puntos a verificar
 
@@ -244,15 +243,15 @@ navegue correctamente en lugar de cerrarse abruptamente.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 50% (2/4 fases completadas)
+## 📊 PROGRESO GENERAL: 75% (3/4 fases completadas)
 
 [x] Fase 1: Íconos de la app
 [x] Fase 2: Safe Area (bordes del sistema)
-[ ] Fase 3: Botón back nativo de Android
+[x] Fase 3: Botón back nativo de Android
 [ ] Fase 4: Testing y ajustes
 
 ═══════════════════════════════════════════════════════════════
 
 CREADO: 23 de Febrero 2026
-ÚLTIMA ACTUALIZACIÓN: 23 de Febrero 2026 (Fases 1 y 2 completadas)
+ÚLTIMA ACTUALIZACIÓN: 23 de Febrero 2026 (Fases 1, 2 y 3 completadas)
 ESTADO: 🔄 En progreso

@@ -108,6 +108,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import {
   IconSearch,
   IconShoppingCart,
@@ -117,10 +118,15 @@ import {
   IconSettings,
   IconInfoCircle,
 } from '@tabler/icons-vue'
+import { useBotonAtras } from '../composables/useBotonAtras.js'
 
+const router = useRouter()
+const route = useRoute()
 const drawerAbierto = ref(false)
 
 const toggleDrawer = () => {
   drawerAbierto.value = !drawerAbierto.value
 }
+
+useBotonAtras({ drawerAbierto, router, route })
 </script>
