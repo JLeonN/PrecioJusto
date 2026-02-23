@@ -1,5 +1,11 @@
 @import './variables.css';
 /* ===========================
+   SAFE AREA (Android 15+ edge-to-edge)
+   =========================== */
+.q-header {
+  padding-top: var(--safe-area-top);
+}
+/* ===========================
    ESTILOS GENERALES
    =========================== */
 body {

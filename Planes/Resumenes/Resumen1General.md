@@ -69,8 +69,13 @@ La app está desarrollada con **Vue.js 3**, **Quasar Framework** y **Capacitor**
 PrecioJusto/
 │
 ├── public/                                 # Archivos públicos estáticos
-│   ├── favicon.ico
+│   ├── favicon.ico                        # Ícono oficial (generado con @quasar/icongenie)
 │   └── icons/                             # Iconos de la app
+│       ├── PrecioJusto-Icono.png          # Fuente original PNG (alta resolución)
+│       ├── favicon-128x128.png            # Generados con: npx @quasar/icongenie generate
+│       ├── favicon-96x96.png              #   -i public/icons/PrecioJusto-Icono.png -m spa
+│       ├── favicon-32x32.png
+│       └── favicon-16x16.png
 │
 src/
 ├── almacenamiento/
@@ -902,13 +907,30 @@ H. Arquitectura y Código
 5. **Commits Incrementales:** Desarrollo paso a paso con control de versiones
 6. **Sistema de Diseño Centralizado:** Clases CSS globales en app.css
 
+### Patrones de integración Android (Capacitor)
+
+**Safe Area (Android 15+ edge-to-edge)**
+- Variables en `Variables.css`: `--safe-area-top` y `--safe-area-bottom`
+- Header: `.q-header { padding-top: var(--safe-area-top) }` en `app.css` (global, sin tocar)
+- `BarraAccionesSeleccion.vue` ya tiene `padding-bottom: calc(12px + env(safe-area-inset-bottom))`
+- ⚠️ **Toda página nueva que use `q-page-sticky` con FAB** debe incluir:
+  ```html
+  <q-page-sticky ... class="fab-agregar">
+  ```
+  ```css
+  .fab-agregar { bottom: calc(18px + var(--safe-area-bottom)) !important; }
+  ```
+
+**Botón back nativo** → ver `src/composables/useBotonAtras.js` (Fase 3 del plan)
+
 ### Estado Actual
 - **Versión:** MVP funcional (~95% completado)
 - **Almacenamiento:** Local (Capacitor Storage)
 - **Sistema de sucursales:** Completado (agrupación automática de cadenas, mini-tarjetas)
 - **Edición de comercios:** Completada (página completa con edición inline, fusión, estadísticas, filtro por sucursal)
 - **Sección Mis Productos:** Completada (buscador inline, categoría editable, historial mejorado)
-- **Próximo Milestone:** Foto de comercio, eliminación con motivo
+- **Safe area:** Completada (Android 15+ edge-to-edge, variables CSS centralizadas)
+- **Próximo Milestone:** Botón back nativo, foto de comercio
 - **Preparación:** Lista para migración a Firebase
 
 ---

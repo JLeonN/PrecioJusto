@@ -67,7 +67,7 @@
     </div>
 
     <!-- BOTÓN FLOTANTE AGREGAR PRECIO -->
-    <q-page-sticky v-if="productoActual && !cargando" position="bottom-right" :offset="[18, 18]">
+    <q-page-sticky v-if="productoActual && !cargando" position="bottom-right" :offset="[18, 18]" class="fab-agregar">
       <q-btn fab color="primary" size="lg" @click="abrirModalPrecio(productoActual.id)">
         <IconPlus :size="28" />
       </q-btn>
@@ -277,5 +277,8 @@ onMounted(async () => {
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
+}
+.fab-agregar {
+  bottom: calc(18px + var(--safe-area-bottom)) !important;
 }
 </style>

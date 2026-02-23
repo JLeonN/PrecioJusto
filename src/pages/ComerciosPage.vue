@@ -77,7 +77,7 @@
     </div>
 
     <!-- BOTÓN FLOTANTE AGREGAR (oculto en modo selección) -->
-    <q-page-sticky v-if="!seleccion.modoSeleccion.value" position="bottom-right" :offset="[18, 18]">
+    <q-page-sticky v-if="!seleccion.modoSeleccion.value" position="bottom-right" :offset="[18, 18]" class="fab-agregar">
       <q-btn fab color="primary" icon="add" size="lg" @click="abrirDialogoAgregar" />
     </q-page-sticky>
 
@@ -472,3 +472,9 @@ onMounted(() => {
   cargarComercios()
 })
 </script>
+
+<style scoped>
+.fab-agregar {
+  bottom: calc(18px + var(--safe-area-bottom)) !important;
+}
+</style>

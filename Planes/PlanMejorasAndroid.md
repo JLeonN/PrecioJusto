@@ -80,7 +80,7 @@ El archivo `public/icons/PrecioJusto-Icono.png` se mantiene como fuente/referenc
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 2: SAFE AREA (BORDES DEL SISTEMA) 📱 [ PENDIENTE ]
+## 📋 FASE 2: SAFE AREA (BORDES DEL SISTEMA) 📱 [✅ COMPLETADA]
 
 ### Objetivo
 
@@ -101,14 +101,14 @@ En Android < 15 y en web, las variables valen `0px` → no hay efecto secundario
 
 ### Archivos a modificar
 
-[ ] `src/css/Variables.css` — agregar variables CSS de safe area
-[ ] `src/css/app.css` — regla global para el header de Quasar
-[ ] `src/layouts/MainLayout.vue` — sin cambios en template, la regla CSS aplica sola
-[ ] `src/components/Compartidos/BarraAccionesSeleccion.vue` — ajuste bottom fijo
-[ ] `src/pages/MisProductosPage.vue` — ajuste del FAB
-[ ] `src/pages/ComerciosPage.vue` — ajuste del FAB
-[ ] `src/pages/DetalleProductoPage.vue` — verificar si tiene elementos fijos en el bottom
-[ ] `src/pages/EditarComercioPage.vue` — verificar si tiene elementos fijos en el bottom
+[x] `src/css/Variables.css` — variables `--safe-area-top` y `--safe-area-bottom` agregadas
+[x] `src/css/app.css` — regla `.q-header { padding-top: var(--safe-area-top) }` agregada
+[x] `src/layouts/MainLayout.vue` — sin cambios (la regla CSS aplica sola) ✓
+[x] `src/components/Compartidos/BarraAccionesSeleccion.vue` — ya tenía safe area desde antes ✓
+[x] `src/pages/MisProductosPage.vue` — clase `fab-agregar` + CSS `bottom: calc(18px + var(--safe-area-bottom))`
+[x] `src/pages/ComerciosPage.vue` — clase `fab-agregar` + CSS `bottom: calc(18px + var(--safe-area-bottom))`
+[x] `src/pages/DetalleProductoPage.vue` — clase `fab-agregar` + CSS `bottom: calc(18px + var(--safe-area-bottom))`
+[x] `src/pages/EditarComercioPage.vue` — sin elementos fijos en el bottom, no requiere cambios ✓
 
 ### Lógica de implementación
 
@@ -244,15 +244,15 @@ navegue correctamente en lugar de cerrarse abruptamente.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 25% (1/4 fases completadas)
+## 📊 PROGRESO GENERAL: 50% (2/4 fases completadas)
 
 [x] Fase 1: Íconos de la app
-[ ] Fase 2: Safe Area (bordes del sistema)
+[x] Fase 2: Safe Area (bordes del sistema)
 [ ] Fase 3: Botón back nativo de Android
 [ ] Fase 4: Testing y ajustes
 
 ═══════════════════════════════════════════════════════════════
 
 CREADO: 23 de Febrero 2026
-ÚLTIMA ACTUALIZACIÓN: 23 de Febrero 2026 (Fase 1 completada)
+ÚLTIMA ACTUALIZACIÓN: 23 de Febrero 2026 (Fases 1 y 2 completadas)
 ESTADO: 🔄 En progreso
