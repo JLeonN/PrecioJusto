@@ -58,13 +58,13 @@ usando el ícono oficial `PrecioJusto-Icono.png` como fuente.
   - `icons/favicon-16x16.png`
   - `favicon.ico`
 - El ícono fuente está en: `public/icons/PrecioJusto-Icono.png` (PNG original, alta res)
-- Los íconos del Android nativo (mipmap-*) ya están correctos, no requieren cambios
+- Los íconos del Android nativo (mipmap-\*) ya están correctos, no requieren cambios
 
 ### Herramienta
 
 [x] Usar `@quasar/icongenie` (herramienta oficial de Quasar para generar íconos):
-    `npx @quasar/icongenie generate -i public/icons/PrecioJusto-Icono.png -m spa`
-    Genera automáticamente todos los tamaños necesarios en `public/icons/`
+`npx @quasar/icongenie generate -i public/icons/PrecioJusto-Icono.png -m spa`
+Genera automáticamente todos los tamaños necesarios en `public/icons/`
 
 ### Archivos generados
 
@@ -93,7 +93,7 @@ Android 15 forzó el modo edge-to-edge en todas las apps. La app renderiza
 debajo de las barras del sistema. En versiones anteriores, Android reservaba
 espacio automáticamente (por eso el problema es inconsistente entre celulares).
 
-### Solución: CSS env(safe-area-inset-*)
+### Solución: CSS env(safe-area-inset-\*)
 
 Sin dependencias adicionales. `viewport-fit=cover` ya está activo en builds
 Capacitor (confirmado en `index.html`). Solo se necesitan las reglas CSS.
@@ -113,19 +113,19 @@ En Android < 15 y en web, las variables valen `0px` → no hay efecto secundario
 ### Lógica de implementación
 
 [ ] En `Variables.css`: definir variables centralizadas:
-    `--safe-area-top: env(safe-area-inset-top, 0px)`
-    `--safe-area-bottom: env(safe-area-inset-bottom, 0px)`
+`--safe-area-top: env(safe-area-inset-top, 0px)`
+`--safe-area-bottom: env(safe-area-inset-bottom, 0px)`
 
 [ ] En `app.css`: regla para el header de Quasar:
-    `.q-header { padding-top: var(--safe-area-top) }`
-    Quasar detecta el cambio de altura via ResizeObserver y ajusta
-    el `q-page-container` automáticamente.
+`.q-header { padding-top: var(--safe-area-top) }`
+Quasar detecta el cambio de altura via ResizeObserver y ajusta
+el `q-page-container` automáticamente.
 
 [ ] FABs (q-fab / q-btn fixed): cambiar bottom de `16px` a:
-    `bottom: calc(16px + var(--safe-area-bottom))`
+`bottom: calc(16px + var(--safe-area-bottom))`
 
 [ ] `BarraAccionesSeleccion.vue` (fixed bottom): agregar:
-    `padding-bottom: var(--safe-area-bottom)`
+`padding-bottom: var(--safe-area-bottom)`
 
 ### ⚠️ Punto a verificar en testing
 
@@ -158,7 +158,7 @@ navegue correctamente en lugar de cerrarse abruptamente.
 2. Si estamos en página de detalle (`/producto/:id`, `/comercios/:nombre`) → `router.back()`
 3. Si estamos en página raíz (`/`, `/comercios`):
    - Primera presión → mostrar notify: "Presioná de nuevo para salir"
-                       guardar timestamp del toque
+     guardar timestamp del toque
    - Segunda presión dentro de 2000ms → `App.exitApp()`
    - Si pasan más de 2000ms → resetear contador (la siguiente presión vuelve a ser "primera vez")
 
@@ -175,15 +175,12 @@ navegue correctamente en lugar de cerrarse abruptamente.
 ### useBotonAtras.js — estructura de la lógica
 
 [x] Parámetros recibidos: `{ drawerAbierto, router, route }`
-    `drawerAbierto` es el `ref` del estado del drawer (pasado desde MainLayout)
+`drawerAbierto` es el `ref` del estado del drawer (pasado desde MainLayout)
 
 [x] Registrar listener en `onMounted` y limpiar en `onUnmounted`:
-    `App.addListener('backButton', manejadorBack)`
+`App.addListener('backButton', manejadorBack)`
 
-[x] Lógica del manejador:
-    - `drawerAbierto.value === true` → `drawerAbierto.value = false`, return
-    - `route.path !== '/' && route.path !== '/comercios'` → `router.back()`, return
-    - Página raíz → lógica de doble toque para salir
+[x] Lógica del manejador: - `drawerAbierto.value === true` → `drawerAbierto.value = false`, return - `route.path !== '/' && route.path !== '/comercios'` → `router.back()`, return - Página raíz → lógica de doble toque para salir
 
 [x] Usar Quasar `useQuasar()` dentro del composable para el notify del doble toque
 
@@ -198,34 +195,34 @@ navegue correctamente en lugar de cerrarse abruptamente.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 4: TESTING Y AJUSTES 🧪 [ PENDIENTE ]
+## 📋 FASE 4: TESTING Y AJUSTES 🧪 [✅ COMPLETADA]
 
 ### Testing Fase 1 (Íconos)
 
-[ ] Favicon visible en pestaña del navegador con el ícono oficial de Precio Justo ✓
-[ ] Sin el ícono genérico de Quasar (Q azul)
-[ ] Todos los tamaños referenciados en `index.html` existen en `public/icons/` ✓
-[ ] `quasar build` sin errores por archivos faltantes ✓
+[x] Favicon visible en pestaña del navegador con el ícono oficial de Precio Justo ✓
+[x] Sin el ícono genérico de Quasar (Q azul)
+[x] Todos los tamaños referenciados en `index.html` existen en `public/icons/` ✓
+[x] `quasar build` sin errores por archivos faltantes ✓
 
 ### Testing Fase 2 (Safe Area)
 
-[ ] En celular con Android 15: header no se superpone con la barra de estado ✓
-[ ] En celular con Android 15: FAB no queda tapado por la barra de navegación ✓
-[ ] En celular con Android < 15: app se ve igual que antes (sin padding extra) ✓
-[ ] `BarraAccionesSeleccion` completamente visible al activar modo selección ✓
-[ ] Páginas de detalle (DetalleProducto, EditarComercio) sin solapamiento en el bottom ✓
-[ ] El contenido de las páginas no queda tapado por el header (verificar q-page-container) ✓
+[x] En celular con Android 15: header no se superpone con la barra de estado ✓
+[x] En celular con Android 15: FAB no queda tapado por la barra de navegación ✓
+[x] En celular con Android < 15: app se ve igual que antes (sin padding extra) ✓
+[x] `BarraAccionesSeleccion` completamente visible al activar modo selección ✓
+[x] Páginas de detalle (DetalleProducto, EditarComercio) sin solapamiento en el bottom ✓
+[x] El contenido de las páginas no queda tapado por el header (verificar q-page-container) ✓
 
 ### Testing Fase 3 (Botón Back)
 
-[ ] Drawer abierto → back → drawer se cierra, no navega ✓
-[ ] DetalleProducto → back → vuelve a MisProductos ✓
-[ ] EditarComercio → back → vuelve a Comercios ✓
-[ ] MisProductos → back → toast "Presioná de nuevo para salir" ✓
-[ ] MisProductos → back dos veces en < 2s → app se cierra ✓
-[ ] MisProductos → back, esperar > 2s, back de nuevo → toast nuevamente (no cierra) ✓
-[ ] Comercios → mismo comportamiento que MisProductos ✓
-[ ] En `quasar dev` (web): no hay errores por el listener de Capacitor ✓
+[x] Drawer abierto → back → drawer se cierra, no navega ✓
+[x] DetalleProducto → back → vuelve a MisProductos ✓
+[x] EditarComercio → back → vuelve a Comercios ✓
+[x] MisProductos → back → toast "Presioná de nuevo para salir" ✓
+[x] MisProductos → back dos veces en < 2s → app se cierra ✓
+[x] MisProductos → back, esperar > 2s, back de nuevo → toast nuevamente (no cierra) ✓
+[x] Comercios → mismo comportamiento que MisProductos ✓
+[x] En `quasar dev` (web): no hay errores por el listener de Capacitor ✓
 
 ═══════════════════════════════════════════════════════════════
 
@@ -243,15 +240,15 @@ navegue correctamente en lugar de cerrarse abruptamente.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 75% (3/4 fases completadas)
+## 📊 PROGRESO GENERAL: 100% (4/4 fases completadas)
 
 [x] Fase 1: Íconos de la app
 [x] Fase 2: Safe Area (bordes del sistema)
 [x] Fase 3: Botón back nativo de Android
-[ ] Fase 4: Testing y ajustes
+[x] Fase 4: Testing y ajustes
 
 ═══════════════════════════════════════════════════════════════
 
 CREADO: 23 de Febrero 2026
-ÚLTIMA ACTUALIZACIÓN: 23 de Febrero 2026 (Fases 1, 2 y 3 completadas)
-ESTADO: 🔄 En progreso
+ÚLTIMA ACTUALIZACIÓN: 23 de Febrero 2026
+ESTADO: ✅ COMPLETADO
