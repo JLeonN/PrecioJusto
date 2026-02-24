@@ -70,12 +70,18 @@ PrecioJusto/
 │
 ├── public/                                 # Archivos públicos estáticos
 │   ├── favicon.ico                        # Ícono oficial (generado con @quasar/icongenie)
-│   └── icons/                             # Iconos de la app
-│       ├── PrecioJusto-Icono.png          # Fuente original PNG (alta resolución)
-│       ├── favicon-128x128.png            # Generados con: npx @quasar/icongenie generate
-│       ├── favicon-96x96.png              #   -i public/icons/PrecioJusto-Icono.png -m spa
-│       ├── favicon-32x32.png
-│       └── favicon-16x16.png
+│   ├── icons/                             # Iconos de la app
+│   │   ├── PrecioJusto-Icono.png          # Fuente original PNG (alta resolución)
+│   │   ├── favicon-128x128.png            # Generados con: npx @quasar/icongenie generate
+│   │   ├── favicon-96x96.png              #   -i public/icons/PrecioJusto-Icono.png -m spa
+│   │   ├── favicon-32x32.png
+│   │   └── favicon-16x16.png
+│   └── Splash/                            # Fondos de splash screen (patrones decorativos)
+│       ├── PrecioJustoFondo-1.jpg         # 784×1168 portrait
+│       ├── PrecioJustoFondo-2.png         # 1536×1024 landscape
+│       ├── PrecioJustoFondo-3.png         # 1536×1024 landscape
+│       ├── PrecioJustoFondo-4.jpg         # 784×1168 portrait
+│       └── PrecioJustoFondo-6.png         # 1024×1024 square
 │
 src/
 ├── almacenamiento/
@@ -103,7 +109,8 @@ src/
 │   ├── Compartidos/                         # Componentes reutilizables entre secciones
 │   │   ├── BarraSeleccion.vue              # Barra sticky con contador de seleccionados
 │   │   ├── BarraAccionesSeleccion.vue      # Barra fixed bottom con botones (eliminar, cancelar)
-│   │   └── InputBusqueda.vue              # 🆕 Input de búsqueda reutilizable con prop color
+│   │   ├── InputBusqueda.vue              # Input de búsqueda reutilizable con prop color
+│   │   └── PantallaSplash.vue             # 🆕 Splash screen con imagen aleatoria al iniciar
 │   │
 │   ├── Comercios/                           # Componentes de comercios
 │   │   ├── ListaComercios.vue              # Contenedor con grid responsivo Quasar
@@ -925,14 +932,21 @@ H. Arquitectura y Código
 **Botón back nativo** → `src/composables/useBotonAtras.js` (integrado en `MainLayout.vue`)
 - Requiere `@capacitor/app`. Solo activo en `Capacitor.isNativePlatform()`
 
+**Splash Screen**
+- Componente: `src/components/Compartidos/PantallaSplash.vue` (integrado en `App.vue`)
+- Imagen aleatoria de `public/Splash/` con `object-fit: cover` + `object-position` aleatorio
+- Duración: `max(2000ms, tiempo real de carga)` + fade-out de 400ms
+- Señal "app lista" vía `nextTick()` en `App.vue`
+
 ### Estado Actual
-- **Versión:** MVP funcional (~95% completado)
+- **Versión:** 0.0.5
 - **Almacenamiento:** Local (Capacitor Storage)
-- **Sistema de sucursales:** Completado (agrupación automática de cadenas, mini-tarjetas)
-- **Edición de comercios:** Completada (página completa con edición inline, fusión, estadísticas, filtro por sucursal)
-- **Sección Mis Productos:** Completada (buscador inline, categoría editable, historial mejorado)
-- **Safe area:** Completada (Android 15+ edge-to-edge, variables CSS centralizadas)
-- **Próximo Milestone:** Botón back nativo, foto de comercio
+- **Sistema de sucursales:** Completado
+- **Edición de comercios:** Completada
+- **Sección Mis Productos:** Completada
+- **Safe area:** Completada (Android 15+ edge-to-edge)
+- **Botón back nativo:** Completado
+- **Splash screen:** Completada (imagen aleatoria, sin distorsión)
 - **Preparación:** Lista para migración a Firebase
 
 ---
@@ -956,4 +970,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** Febrero 19, 2026 (buscador inline, mini-tarjetas sucursales, filtro por sucursal, usos reales)
+**Última actualización:** Febrero 24, 2026 (splash screen aleatoria, safe area Android 15, botón back nativo, íconos oficiales)

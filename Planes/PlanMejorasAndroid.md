@@ -195,7 +195,57 @@ navegue correctamente en lugar de cerrarse abruptamente.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 4: TESTING Y AJUSTES 🧪 [✅ COMPLETADA]
+## 📋 FASE 4: SPLASH SCREEN 🖼️ [✅ COMPLETADA]
+
+### Objetivo
+
+Mostrar una imagen decorativa aleatoria al iniciar la app, durante al menos 2 segundos
+o hasta que la app termine de cargar (lo que sea mayor).
+
+### Comportamiento
+
+- Al iniciar, una pantalla cubre la app completa con una imagen de fondo aleatoria
+- La imagen se elige al azar entre las 5 disponibles en `public/Splash/`
+- Sin distorsión: `object-fit: cover` + `object-position` aleatorio
+  (las imágenes son patrones repetitivos → cualquier crop se ve bien)
+- Tiempo de visibilidad: `max(tiempo real de carga, 2000ms)`
+- Al cerrarse: fade-out de 400ms
+
+### Imágenes disponibles
+
+- `public/Splash/PrecioJustoFondo-1.jpg` (784×1168 — portrait)
+- `public/Splash/PrecioJustoFondo-2.png` (1536×1024 — landscape)
+- `public/Splash/PrecioJustoFondo-3.png` (1536×1024 — landscape)
+- `public/Splash/PrecioJustoFondo-4.jpg` (784×1168 — portrait)
+- `public/Splash/PrecioJustoFondo-6.png` (1024×1024 — square)
+
+### Archivos a crear/modificar
+
+[x] `src/components/Compartidos/PantallaSplash.vue` — componente de splash creado
+[x] `src/App.vue` — `PantallaSplash` integrada + señal `appLista` vía `nextTick`
+
+### Lógica de temporización
+
+- `tiempoInicio`: registrado cuando `PantallaSplash` monta
+- `appLista` prop (Boolean): señal enviada desde `App.vue` cuando app termina de inicializar
+- `tiempoRestante = Math.max(0, 2000 - (Date.now() - tiempoInicio))`
+- Cuando `appLista === true`: esperar `tiempoRestante` ms → activar fade → ocultar
+
+### Lógica de imagen
+
+- Array con los 5 paths de imágenes
+- `Math.floor(Math.random() * IMAGENES.length)` al montar el componente
+- `posX` y `posY` aleatorios (0–100%) → `object-position: ${posX}% ${posY}%`
+
+### ⚠️ Puntos a verificar
+
+- En `quasar dev` (web): la splash debe funcionar igual (no es exclusiva de Capacitor)
+- El fade-out no debe interrumpirse si la señal llega antes de los 2000ms
+- El componente debe cubrir la pantalla completa incluyendo la safe area
+
+═══════════════════════════════════════════════════════════════
+
+## 📋 FASE DE TESTING 🧪
 
 ### Testing Fase 1 (Íconos)
 
@@ -224,6 +274,16 @@ navegue correctamente en lugar de cerrarse abruptamente.
 [x] Comercios → mismo comportamiento que MisProductos ✓
 [x] En `quasar dev` (web): no hay errores por el listener de Capacitor ✓
 
+### Testing Fase 4 (Splash Screen)
+
+[x] Splash visible al iniciar en `quasar dev` ✓
+[x] La imagen cubre toda la pantalla sin distorsión ni franjas ✓
+[x] Cada inicio muestra una imagen diferente (aleatoria) ✓
+[ ] En Android: splash visible durante la carga de la app
+[ ] En Android: splash dura al menos 2 segundos
+[ ] Fade-out suave de 400ms al cerrar
+[ ] No interfiere con la navegación ni el botón back
+
 ═══════════════════════════════════════════════════════════════
 
 ## NOTAS IMPORTANTES 📌
@@ -245,10 +305,10 @@ navegue correctamente en lugar de cerrarse abruptamente.
 [x] Fase 1: Íconos de la app
 [x] Fase 2: Safe Area (bordes del sistema)
 [x] Fase 3: Botón back nativo de Android
-[x] Fase 4: Testing y ajustes
+[x] Fase 4: Splash Screen
 
 ═══════════════════════════════════════════════════════════════
 
 CREADO: 23 de Febrero 2026
-ÚLTIMA ACTUALIZACIÓN: 23 de Febrero 2026
+ÚLTIMA ACTUALIZACIÓN: 24 de Febrero 2026
 ESTADO: ✅ COMPLETADO
