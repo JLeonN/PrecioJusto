@@ -7,6 +7,7 @@ Script estándar para compilar y abrir en Android Studio:
 ```
 
 Pasos que ejecuta:
+
 1. `quasar build` — compila la app para producción
 2. `npx cap sync android` — sincroniza con el proyecto Android (Capacitor)
 3. `npx cap open android` — abre Android Studio
@@ -151,17 +152,9 @@ function similitudTexto(texto1, texto2) { ... }
 
 ### NOTAS DE PARCHE (USER-FACING)
 
-- Flujo: Antes de redactar, pregunta "¿Qué deben incluir las notas de parche de esta versión?".
+- Flujo: Antes de redactar, pregunta "¿Qué deben incluir las notas de parche de esta versión?" y sugiere contenido basado en lo último en lo que estuvimos trabajando.
 - Formato: Solo texto simple, sin tecnicismos, orientado al usuario final.
 - Restricciones: Máximo 450 caracteres. Incluir emojis.
 - Idiomas: Generar dos versiones (<es-419> y <en-US>) con estructura idéntica.
+- Etiquetas: Siempre entregar cada versión dentro de sus etiquetas correspondientes: <es-419> </es-419> y <en-US> </en-US>.
 - Entrega: Ambas versiones dentro de un único bloque de código para copiar.
-
-[Seguir el estilo visual del ejemplo]: en-US
-
-🎮 NEW: FEATURE NAME
-
-- Description point
-  ✨ Also includes:
-- Minor fix
-  </en-US>
