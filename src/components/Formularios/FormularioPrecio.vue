@@ -106,6 +106,7 @@
     <div class="row q-col-gutter-md">
       <div class="col-8">
         <q-input
+          ref="qInputPrecioRef"
           v-model.number="datosInternos.valor"
           label="Precio"
           outlined
@@ -114,8 +115,10 @@
           min="0"
           step="0.01"
           placeholder="0.00"
+          :error="!!errorPrecioMsg"
+          :error-message="errorPrecioMsg"
           :rules="modo === 'comunidad' ? [requerido, precioValido] : [precioValido]"
-          @update:model-value="emitirCambios"
+          @update:model-value="alCambiarPrecio"
         />
       </div>
 
@@ -197,6 +200,11 @@ const direccionId = ref(null)
 const direccionEscrita = ref('') // Texto que el usuario escribió
 const textoTemporalDireccion = ref('') // Texto mientras escribe
 const direccionTieneFoco = ref(false) // Si el input tiene foco
+
+// Ref del input de precio (para validación programática)
+const qInputPrecioRef = ref(null)
+// Mensaje de error manual del precio (para casos que las rules no cubren, ej: valor null)
+const errorPrecioMsg = ref('')
 
 // Estado del diálogo de nuevo comercio
 const dialogoNuevoComercioAbierto = ref(false)
@@ -522,6 +530,47 @@ function emitirCambios() {
     nombreCompleto: nombreCompleto,
   })
 }
+
+// Desplaza el input de precio a la vista y lo enfoca
+function enfocarYNavegar() {
+  const el = qInputPrecioRef.value?.$el
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  qInputPrecioRef.value?.focus()
+}
+
+// Al cambiar el precio: limpiar error manual y emitir
+function alCambiarPrecio() {
+  errorPrecioMsg.value = ''
+  emitirCambios()
+}
+
+/**
+ * Valida el precio programáticamente (llamado desde el padre al intentar guardar).
+ * Muestra error en rojo y enfoca el campo si el precio es inválido.
+ * @returns {boolean} true si el precio es válido
+ */
+function validarPrecio() {
+  const val = datosInternos.value.valor
+  errorPrecioMsg.value = ''
+
+  // Precio vacío/nulo → error manual (las rules no lo capturan en modo local)
+  if (val === null || val === undefined || val === '') {
+    errorPrecioMsg.value = 'Ingresá el precio del producto'
+    enfocarYNavegar()
+    return false
+  }
+
+  // Precio 0 o negativo → dejar que las rules de Quasar muestren el error
+  const resultado = qInputPrecioRef.value?.validate()
+  if (!resultado) {
+    enfocarYNavegar()
+    return false
+  }
+
+  return true
+}
+
+defineExpose({ validarPrecio })
 
 // Reglas de validación
 function requerido(val) {

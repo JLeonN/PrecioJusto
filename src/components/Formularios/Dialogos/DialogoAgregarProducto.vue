@@ -33,7 +33,7 @@
               <q-icon name="store" size="20px" class="q-mr-xs" />
               <span>Datos del Comercio</span>
             </div>
-            <FormularioPrecio v-model="datosPrecio" :modo="modo" />
+            <FormularioPrecio ref="refFormularioPrecio" v-model="datosPrecio" :modo="modo" />
           </div>
         </div>
       </q-card-section>
@@ -96,6 +96,9 @@ const dialogoAbierto = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value),
 })
+
+// Ref al formulario de precio (para validación programática)
+const refFormularioPrecio = ref(null)
 
 // Estado de carga
 const guardando = ref(false)
@@ -244,6 +247,16 @@ function autoCompletarFormulario(producto) {
 // Guardar producto
 async function guardarProducto() {
   guardando.value = true
+
+  // Validar precio: si hay comercio o se ingresó un valor, debe ser > 0
+  const valorPrecio = datosPrecio.value.valor
+  const hayComercio = (datosPrecio.value.comercio || '').trim() !== ''
+  const hayDatosPrecio = hayComercio || valorPrecio !== null
+  if (hayDatosPrecio && !(valorPrecio > 0)) {
+    refFormularioPrecio.value?.validarPrecio()
+    guardando.value = false
+    return
+  }
 
   try {
     let productoExistente = null
