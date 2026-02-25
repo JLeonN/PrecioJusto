@@ -24,31 +24,65 @@
           autofocus
           placeholder="Ej: Disco ABC"
           :rules="[requerido]"
+          :disable="!!validacionPendiente"
           class="q-mb-md"
         />
 
-        <!-- Dirección (opcional) -->
+        <!-- Dirección (obligatoria) -->
         <q-input
           v-model="direccionInterna"
-          label="Dirección"
+          label="Dirección *"
           outlined
           dense
-          placeholder="Ej: Av. Italia 1234 (opcional)"
-          hint="Opcional: podés agregarlo después"
+          placeholder="Ej: Av. Italia 1234"
+          :rules="[requerido]"
+          :disable="!!validacionPendiente"
         />
+      </q-card-section>
+
+      <!-- Confirmación inline de validación -->
+      <q-card-section v-if="validacionPendiente" class="q-pt-none">
+        <q-banner dense rounded class="bg-orange-1 text-dark">
+          <template #avatar>
+            <q-icon name="warning" color="orange-8" />
+          </template>
+          <span v-if="validacionPendiente.nivel === 2">
+            Ya existe un comercio con nombre similar
+            <strong>({{ comercioSimilarNombre }})</strong>.
+            ¿Querés agregarlo como nueva sucursal?
+          </span>
+          <span v-else-if="validacionPendiente.nivel === 3">
+            Ya hay otros comercios en esta dirección. ¿Querés agregar este comercio igual?
+          </span>
+        </q-banner>
       </q-card-section>
 
       <!-- Acciones -->
       <q-card-actions align="right" class="q-px-md q-pb-md">
         <q-btn flat label="Cancelar" color="grey-7" @click="cerrar" />
+
+        <!-- Estado normal: botón guardar -->
         <q-btn
+          v-if="!validacionPendiente"
           unelevated
           label="Guardar"
           color="primary"
           :loading="guardando"
-          :disable="!nombreInterno.trim()"
+          :disable="!nombreInterno.trim() || !direccionInterna.trim()"
           @click="guardar"
         />
+
+        <!-- Estado con validación pendiente: volver o confirmar -->
+        <template v-else>
+          <q-btn flat label="Volver" color="grey-7" @click="validacionPendiente = null" />
+          <q-btn
+            unelevated
+            :label="validacionPendiente.nivel === 2 ? 'Sí, agregar sucursal' : 'Sí, agregar'"
+            color="primary"
+            :loading="guardando"
+            @click="confirmarCrear"
+          />
+        </template>
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -58,6 +92,7 @@
 import { ref, computed, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.js'
+import ComerciosService from '../../../almacenamiento/servicios/ComerciosService.js'
 
 const props = defineProps({
   modelValue: {
@@ -76,111 +111,129 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'comercio-creado'])
 
-// Quasar
 const $q = useQuasar()
-
-// Store
 const comerciosStore = useComerciStore()
 
-// Estado del diálogo
 const dialogoAbierto = computed({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val),
 })
 
-// Datos internos del formulario
 const nombreInterno = ref('')
 const direccionInterna = ref('')
 const guardando = ref(false)
+const validacionPendiente = ref(null)
+
+// Nombre del comercio similar encontrado (para mostrar en el mensaje)
+const comercioSimilarNombre = computed(() => {
+  if (!validacionPendiente.value?.comercios?.length) return ''
+  return validacionPendiente.value.comercios[0]?.comercio?.nombre || ''
+})
 
 // Pre-llenar datos cuando se abra el diálogo
 watch(
   () => props.modelValue,
   (nuevoValor) => {
     if (nuevoValor) {
-      // Diálogo se abrió -> pre-llenar con valores iniciales
       nombreInterno.value = props.nombreInicial || ''
       direccionInterna.value = props.direccionInicial || ''
+      validacionPendiente.value = null
     }
   },
 )
 
 /**
- * Guardar nuevo comercio
+ * Intenta guardar el comercio validando duplicados primero
  */
 async function guardar() {
-  if (!nombreInterno.value.trim()) {
-    $q.notify({
-      type: 'warning',
-      message: 'El nombre del comercio es obligatorio',
-      position: 'top',
-    })
+  if (!nombreInterno.value.trim() || !direccionInterna.value.trim()) {
+    $q.notify({ type: 'warning', message: 'El nombre y la dirección son obligatorios', position: 'top' })
     return
   }
 
   guardando.value = true
 
   try {
-    // Crear comercio con datos mínimos
-    const resultado = await comerciosStore.agregarComercio({
-      nombre: nombreInterno.value.trim(),
-      tipo: 'Otro',
-      calle: direccionInterna.value.trim() || '',
-      barrio: '',
-      ciudad: '',
-    })
+    const datos = construirDatos()
+    const validacion = await ComerciosService.validarDuplicados(
+      datos,
+      comerciosStore.comerciosAgrupados,
+    )
 
-    // Si hubo validación de duplicados
-    if (!resultado.exito && resultado.validacion) {
-      $q.notify({
-        type: 'warning',
-        message: 'Ya existe un comercio similar. Usá el selector para encontrarlo.',
-        position: 'top',
-        timeout: 3000,
-      })
-      cerrar()
+    if (validacion.esDuplicado) {
+      if (validacion.nivel === 1) {
+        // Duplicado exacto: bloquear sin opción
+        $q.notify({
+          type: 'warning',
+          message: 'Este comercio ya existe en esa dirección exacta.',
+          position: 'top',
+          timeout: 3000,
+        })
+        return
+      }
+      // Nivel 2 (nombre similar) o Nivel 3 (misma dirección): pedir confirmación
+      validacionPendiente.value = validacion
       return
     }
 
-    // Comercio creado exitosamente
-    const comercioCreado = resultado.comercio
-
-    // Notificación de éxito
-    $q.notify({
-      type: 'positive',
-      message: `Comercio "${comercioCreado.nombre}" agregado correctamente`,
-      position: 'top',
-    })
-
-    // Emitir evento con el comercio creado
-    emit('comercio-creado', comercioCreado)
-
-    // Cerrar diálogo
-    cerrar()
+    await crearComercio(datos)
   } catch (error) {
-    console.error('Error al crear comercio:', error)
-    $q.notify({
-      type: 'negative',
-      message: 'Error al crear el comercio',
-      position: 'top',
-    })
+    console.error('Error al guardar comercio:', error)
+    $q.notify({ type: 'negative', message: 'Error al crear el comercio', position: 'top' })
   } finally {
     guardando.value = false
   }
 }
 
 /**
- * Cerrar diálogo y limpiar formulario
+ * Usuario confirma crear el comercio pese a la advertencia
  */
+async function confirmarCrear() {
+  guardando.value = true
+  try {
+    await crearComercio(construirDatos())
+  } catch (error) {
+    console.error('Error al confirmar comercio:', error)
+    $q.notify({ type: 'negative', message: 'Error al crear el comercio', position: 'top' })
+  } finally {
+    guardando.value = false
+  }
+}
+
+/**
+ * Crea el comercio directamente en el servicio y actualiza el store
+ */
+async function crearComercio(datos) {
+  const nuevoComercio = await ComerciosService.agregarComercio(datos)
+  comerciosStore.comercios.push(nuevoComercio)
+
+  $q.notify({
+    type: 'positive',
+    message: `Comercio "${nuevoComercio.nombre}" agregado correctamente`,
+    position: 'top',
+  })
+
+  emit('comercio-creado', nuevoComercio)
+  cerrar()
+}
+
+function construirDatos() {
+  return {
+    nombre: nombreInterno.value.trim(),
+    tipo: 'Otro',
+    calle: direccionInterna.value.trim() || '',
+    barrio: '',
+    ciudad: '',
+  }
+}
+
 function cerrar() {
   dialogoAbierto.value = false
   nombreInterno.value = ''
   direccionInterna.value = ''
+  validacionPendiente.value = null
 }
 
-/**
- * Validación: campo requerido
- */
 function requerido(val) {
   return (val && val.trim().length > 0) || 'Este campo es requerido'
 }

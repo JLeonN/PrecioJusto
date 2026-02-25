@@ -372,8 +372,10 @@ async function editarDireccion(comercioId, direccionId, datosDireccion) {
   // Aplicar cambios
   Object.assign(direccion, datosDireccion)
 
-  // Recalcular nombreCompleto
-  direccion.nombreCompleto = `${comercio.nombre} - ${direccion.calle}`
+  // Recalcular nombreCompleto (calle puede estar vacía)
+  direccion.nombreCompleto = direccion.calle
+    ? `${comercio.nombre} - ${direccion.calle}`
+    : comercio.nombre
 
   await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
   return comercio
