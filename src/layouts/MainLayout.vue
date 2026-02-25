@@ -32,7 +32,7 @@
       class="bg-grey-1"
     >
       <q-scroll-area class="fit">
-        <q-list padding>
+        <q-list padding class="drawer-lista">
           <!-- Header del drawer -->
           <q-item class="q-mb-md">
             <q-item-section avatar>
@@ -130,3 +130,9 @@ const toggleDrawer = () => {
 
 useBotonAtras({ drawerAbierto, router, route })
 </script>
+
+<style scoped>
+.drawer-lista {
+  padding-top: calc(8px + var(--safe-area-top)) !important;
+}
+</style>

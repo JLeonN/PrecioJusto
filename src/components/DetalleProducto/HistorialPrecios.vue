@@ -121,5 +121,6 @@ const totalRegistros = computed(() => {
 .lista-comercios {
   display: flex;
   flex-direction: column;
+  padding-bottom: calc(16px + var(--safe-area-bottom));
 }
 </style>
