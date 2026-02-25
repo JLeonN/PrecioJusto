@@ -107,7 +107,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   IconSearch,
@@ -119,14 +119,21 @@ import {
   IconInfoCircle,
 } from '@tabler/icons-vue'
 import { useBotonAtras } from '../composables/useBotonAtras.js'
+import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
 
 const router = useRouter()
 const route = useRoute()
 const drawerAbierto = ref(false)
+const sesionEscaneoStore = useSesionEscaneoStore()
 
 const toggleDrawer = () => {
   drawerAbierto.value = !drawerAbierto.value
 }
+
+// Carga la bandeja de borradores persistida al iniciar la app
+onMounted(async () => {
+  await sesionEscaneoStore.cargarSesion()
+})
 
 useBotonAtras({ drawerAbierto, router, route })
 </script>
