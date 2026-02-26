@@ -3,15 +3,15 @@
     <!-- HEADER -->
     <q-header elevated class="bg-white text-primary">
       <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleDrawer"
-          color="primary"
-        />
+        <q-btn flat dense round aria-label="Menu" @click="toggleDrawer" color="primary">
+          <q-icon name="menu" />
+          <q-badge
+            v-if="sesionEscaneoStore.tieneItemsPendientes"
+            floating
+            color="negative"
+            :label="sesionEscaneoStore.cantidadItems"
+          />
+        </q-btn>
 
         <q-toolbar-title class="text-weight-bold"> Precio Justo </q-toolbar-title>
 
@@ -76,6 +76,27 @@
             </q-item-section>
           </q-item>
 
+          <!-- Bandeja de borradores (solo visible con items pendientes) -->
+          <q-item
+            v-if="sesionEscaneoStore.tieneItemsPendientes"
+            clickable
+            v-ripple
+            class="bandeja-drawer-item"
+            @click="abrirBandeja"
+          >
+            <q-item-section avatar>
+              <IconClipboardList :size="24" color="primary" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label class="text-primary text-weight-medium">Bandeja de borradores</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-chip color="primary" text-color="white" dense>
+                {{ sesionEscaneoStore.cantidadItems }}
+              </q-chip>
+            </q-item-section>
+          </q-item>
+
           <q-separator class="q-my-md" />
 
           <q-item clickable v-ripple>
@@ -103,6 +124,9 @@
     <q-page-container>
       <router-view />
     </q-page-container>
+
+    <!-- BANDEJA DE BORRADORES (global, accesible desde el drawer) -->
+    <BandejaBorradores v-model="bandejaBorradoresAbierta" />
   </q-layout>
 </template>
 
@@ -117,17 +141,26 @@ import {
   IconMapPin,
   IconSettings,
   IconInfoCircle,
+  IconClipboardList,
 } from '@tabler/icons-vue'
 import { useBotonAtras } from '../composables/useBotonAtras.js'
 import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
+import BandejaBorradores from '../components/Scanner/BandejaBorradores.vue'
 
 const router = useRouter()
 const route = useRoute()
 const drawerAbierto = ref(false)
+const bandejaBorradoresAbierta = ref(false)
 const sesionEscaneoStore = useSesionEscaneoStore()
 
 const toggleDrawer = () => {
   drawerAbierto.value = !drawerAbierto.value
+}
+
+// Cierra el drawer y abre la bandeja de borradores
+function abrirBandeja() {
+  drawerAbierto.value = false
+  bandejaBorradoresAbierta.value = true
 }
 
 // Carga la bandeja de borradores persistida al iniciar la app
@@ -141,5 +174,10 @@ useBotonAtras({ drawerAbierto, router, route })
 <style scoped>
 .drawer-lista {
   padding-top: calc(8px + var(--safe-area-top)) !important;
+}
+.bandeja-drawer-item {
+  background: color-mix(in srgb, var(--color-primario) 8%, transparent);
+  border-radius: 8px;
+  margin: 0 8px;
 }
 </style>
