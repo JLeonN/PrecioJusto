@@ -77,16 +77,15 @@
           </template>
         </div>
 
-        <!-- Código de barras -->
-        <div
-          v-if="producto.codigoBarras"
-          class="codigo-barras"
-          @click.stop="copiarCodigoBarras(producto.codigoBarras)"
-        >
-          <IconBarcode :size="16" class="text-grey-6" />
-          <span class="text-caption text-grey-6">{{ producto.codigoBarras }}</span>
-          <q-tooltip>Click para copiar</q-tooltip>
-        </div>
+        <!-- Marca (editable) -->
+        <CampoEditable
+          etiqueta="Marca"
+          :valor="producto.marca || ''"
+          :icono="IconBuildingStore"
+          sin-valor-texto="Sin marca"
+          class="q-mb-xs"
+          @guardar="actualizarMarca"
+        />
 
         <!-- Categoría (editable) -->
         <CampoEditable
@@ -97,6 +96,17 @@
           class="q-mb-xs"
           @guardar="actualizarCategoria"
         />
+
+        <!-- Código de barras -->
+        <div
+          v-if="producto.codigoBarras"
+          class="codigo-barras"
+          @click.stop="copiarCodigoBarras(producto.codigoBarras)"
+        >
+          <IconBarcode :size="16" class="text-grey-6" />
+          <span class="text-caption text-grey-6">{{ producto.codigoBarras }}</span>
+          <q-tooltip>Click para copiar</q-tooltip>
+        </div>
 
         <!-- Precio más bajo actual -->
         <div class="precio-principal q-mt-sm">
@@ -139,6 +149,7 @@ import {
   IconPlus,
   IconBarcode,
   IconTag,
+  IconBuildingStore,
   IconPencil,
   IconCheck,
   IconX,
@@ -242,6 +253,17 @@ async function quitarFoto() {
     $q.notify({ type: 'positive', message: 'Foto eliminada', position: 'top', timeout: 1500 })
   } catch {
     $q.notify({ type: 'negative', message: 'No se pudo quitar la foto', position: 'top' })
+  }
+}
+
+// ── Marca editable ───────────────────────────────────────
+
+async function actualizarMarca(nuevaMarca) {
+  try {
+    await productosStore.actualizarProducto(props.producto.id, { marca: nuevaMarca })
+    $q.notify({ type: 'positive', message: 'Marca actualizada', position: 'top', timeout: 1500 })
+  } catch {
+    $q.notify({ type: 'negative', message: 'No se pudo guardar la marca', position: 'top' })
   }
 }
 

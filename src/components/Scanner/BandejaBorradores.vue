@@ -47,6 +47,7 @@
             <q-item-section>
               <q-item-label class="text-weight-medium ellipsis">{{ item.nombre }}</q-item-label>
               <q-item-label v-if="item.marca" caption>{{ item.marca }}</q-item-label>
+              <q-item-label v-if="item.categoria" caption class="text-grey-5">{{ item.categoria }}</q-item-label>
               <!-- Precio editable inline -->
               <div class="row items-center q-mt-xs">
                 <template v-if="editandoId === item.id">
@@ -80,8 +81,11 @@
               </div>
             </q-item-section>
 
-            <!-- Botón eliminar -->
-            <q-item-section side>
+            <!-- Botones por item -->
+            <q-item-section side class="acciones-item">
+              <q-btn flat round dense color="grey-6" size="sm" @click="abrirEditar(item)">
+                <IconPencil :size="18" />
+              </q-btn>
               <q-btn flat round dense color="negative" size="sm" @click="sesionEscaneoStore.eliminarItem(item.id)">
                 <IconTrash :size="18" />
               </q-btn>
@@ -125,15 +129,23 @@
 
     </q-card>
   </q-dialog>
+
+  <!-- Diálogo edición extendida por item -->
+  <DialogoEditarItemBandeja
+    v-model="dialogoEditarAbierto"
+    :item="itemEditando"
+    @guardar="alGuardarEdicion"
+  />
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import { useQuasar } from 'quasar'
-import { IconPackage, IconTrash, IconCheck } from '@tabler/icons-vue'
+import { IconPackage, IconTrash, IconCheck, IconPencil } from '@tabler/icons-vue'
 import { useSesionEscaneoStore } from '../../almacenamiento/stores/sesionEscaneoStore.js'
 import { useProductosStore } from '../../almacenamiento/stores/productosStore.js'
 import { useComerciStore } from '../../almacenamiento/stores/comerciosStore.js'
+import DialogoEditarItemBandeja from './DialogoEditarItemBandeja.vue'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -152,6 +164,22 @@ const abierta = computed({
 })
 
 const guardando = ref(false)
+
+// Edición extendida (nombre, marca, categoría)
+const dialogoEditarAbierto = ref(false)
+const itemEditando = ref(null)
+
+function abrirEditar(item) {
+  itemEditando.value = item
+  dialogoEditarAbierto.value = true
+}
+
+function alGuardarEdicion(cambios) {
+  if (itemEditando.value) {
+    sesionEscaneoStore.actualizarItem(itemEditando.value.id, cambios)
+    itemEditando.value = null
+  }
+}
 
 // Edición inline de precio
 const editandoId = ref(null)
@@ -286,6 +314,12 @@ async function guardarTodo() {
 }
 .bandeja-vacia {
   padding: 40px 0;
+}
+.acciones-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
 }
 .bandeja-footer {
   padding: 10px 16px 14px;
