@@ -1,7 +1,24 @@
 # PLAN DE TRABAJO — ESCANEO DE PRODUCTOS CON CÁMARA
 
 **Fecha:** 25 de Febrero 2026
-**Estado:** Planificado
+**Estado:** En progreso
+
+---
+
+## PRINCIPIOS TRANSVERSALES
+
+### Responsividad
+- Nunca usar `px` fijos en contenedores — usar `min()`, `clamp()`, `%`, `vw/vh`
+- Los diálogos usan `min-width` + `max-width` para adaptarse a cualquier pantalla
+- Botones de acción siempre en footer fijo del dialog (nunca quedan cortados)
+- Imágenes con `object-fit: cover` y dimensiones relativas
+
+### Reutilización de componentes
+- `EscaneadorCodigo.vue` es **100% reutilizable**: solo props + emits, sin lógica de negocio interna
+  - Usos actuales: flujo de escaneo de productos
+  - Usos futuros previstos: sección de Comercios (escanear QR o código de producto para buscar comercio), edición de foto de producto
+- `FormularioEscaneo.vue` recibe los datos del item por props y emite eventos — no accede al store directamente
+- Los componentes UI no conocen el store; el orquestador (padre) conecta store ↔ UI
 
 ---
 
@@ -116,6 +133,8 @@ Implementar un flujo de escaneo rápido de productos mediante código de barras,
 ### Consideraciones:
 - Solo disponible en Android (en web mostrar input manual como fallback)
 - Pedir permiso de cámara la primera vez con flujo amigable
+- ✅ **Responsivo:** ventana de escaneo usa `min(280px, 80vw)` y `min(180px, 45vw)`
+- ♻️ **Reutilizable en:** escaneo de productos, Comercios (futuro), edición de fotos (futuro)
 
 ---
 
@@ -144,6 +163,8 @@ Implementar un flujo de escaneo rápido de productos mediante código de barras,
 ### Validación mínima:
 - Precio > 0 obligatorio
 - Nombre obligatorio solo si no vino de API
+- ✅ **Responsivo:** componente dentro de `q-dialog` con `min-width` + `max-width`, campos al 100% del ancho disponible, botones en footer fijo
+- ♻️ **Reutilizable:** recibe datos por props, comunica por emits — sin acceso directo al store
 
 ---
 
@@ -197,6 +218,7 @@ async function procesarCodigoEscaneado(codigo) {
 ### Badge en DRAWER:
 - Mostrar número de items pendientes junto al ítem del DRAWER
 - Desaparece cuando la bandeja está vacía
+- ✅ **Responsivo:** lista con scroll, imagen de item con tamaño fijo relativo, footer con botones al 100% del ancho del DRAWER
 
 ### Comportamiento al guardar ("Agregar todos"):
 - Itera cada item del store
@@ -223,6 +245,8 @@ async function procesarCodigoEscaneado(codigo) {
 ### Consideraciones:
 - `@capacitor/camera` ya podría estar instalado — verificar antes de instalar
 - La foto se guarda como base64 en localStorage (igual que el resto de datos)
+- ♻️ **Reutiliza `EscaneadorCodigo.vue`** para la captura de foto (mismo componente, distinto uso)
+- ✅ **Responsivo:** imagen editable se muestra con tamaño fijo relativo, botones accesibles en mobile
 
 ---
 
@@ -233,10 +257,10 @@ async function procesarCodigoEscaneado(codigo) {
 | `OpenFoodFactsService.js` | ✅ Existe | Búsqueda por código de barras lista |
 | `productosStore.agregarProducto()` | ✅ Existe | Lógica de guardado completa |
 | `comerciosStore` | ✅ Existe | Selector de comercio reutilizable |
-| `@capacitor-mlkit/barcode-scanning` | ⏳ Instalar | Fase 1 |
+| `@capacitor-mlkit/barcode-scanning` | ✅ Instalado | v8.0.1 — Fase 1 completa |
 | `@capacitor/camera` | ⚠️ Verificar | Para fotos en Fase 7 |
-| `sesionEscaneoStore.js` | ⏳ Crear | Fase 2 |
-| `EscaneadorCodigo.vue` | ⏳ Crear | Fase 3 |
+| `sesionEscaneoStore.js` | ✅ Creado | Fase 2 completa |
+| `EscaneadorCodigo.vue` | ✅ Creado | Fase 3 completa — ♻️ reutilizable |
 | `FormularioEscaneo.vue` | ⏳ Crear | Fase 4 |
 | `BandejaBorradores.vue` | ⏳ Crear | Fase 6 |
 

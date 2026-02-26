@@ -87,3 +87,11 @@ body {
   min-width: var(--dialogo-min-width);
   max-width: var(--dialogo-max-width);
 }
+/* ===========================
+   SCANNER DE CÁMARA
+   =========================== */
+/* Hace el webview transparente para que la cámara nativa se vea detrás */
+body.scanner-activo,
+body.scanner-activo #q-app {
+  background: transparent !important;
+}
