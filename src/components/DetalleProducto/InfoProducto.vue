@@ -1,18 +1,81 @@
 <template>
   <q-card class="info-producto">
     <q-card-section class="info-contenido">
-      <!-- IMAGEN DEL PRODUCTO -->
+
+      <!-- IMAGEN DEL PRODUCTO (editable) -->
       <div class="info-imagen">
         <q-img v-if="producto.imagen" :src="producto.imagen" :ratio="1" class="rounded-borders" />
         <div v-else class="placeholder-imagen">
           <IconShoppingBag :size="64" class="text-grey-5" />
         </div>
+        <!-- Overlay botón editar foto -->
+        <div class="imagen-overlay">
+          <q-btn round color="white" text-color="grey-7" size="sm" class="btn-editar-imagen">
+            <IconCamera :size="16" />
+            <q-tooltip>Editar foto</q-tooltip>
+            <q-menu anchor="bottom right" self="top right">
+              <q-list style="min-width: 160px">
+                <q-item clickable v-close-popup @click="tomarFoto">
+                  <q-item-section avatar>
+                    <IconCamera :size="18" />
+                  </q-item-section>
+                  <q-item-section>Tomar foto</q-item-section>
+                </q-item>
+                <q-item v-if="producto.imagen" clickable v-close-popup @click="quitarFoto">
+                  <q-item-section avatar>
+                    <IconTrash :size="18" class="text-negative" />
+                  </q-item-section>
+                  <q-item-section class="text-negative">Quitar foto</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
+        </div>
+        <!-- Input file oculto para fallback web -->
+        <input
+          ref="inputArchivoRef"
+          type="file"
+          accept="image/*"
+          class="input-archivo-oculto"
+          @change="alSeleccionarArchivo"
+        />
       </div>
 
       <!-- INFORMACIÓN PRINCIPAL -->
       <div class="info-detalles">
-        <!-- Nombre del producto -->
-        <h5 class="q-my-none text-weight-bold">{{ producto.nombre }}</h5>
+
+        <!-- Nombre del producto (editable inline) -->
+        <div class="nombre-row">
+          <template v-if="!editandoNombre">
+            <h5 class="q-my-none text-weight-bold nombre-texto">{{ producto.nombre }}</h5>
+            <q-btn flat dense round size="sm" color="grey-6" class="q-ml-xs" @click="iniciarEdicionNombre">
+              <IconPencil :size="16" />
+              <q-tooltip>Editar nombre</q-tooltip>
+            </q-btn>
+          </template>
+          <template v-else>
+            <q-input
+              v-model="nombreTemporal"
+              dense
+              outlined
+              autofocus
+              class="nombre-input"
+              @keyup.enter="guardarNombre"
+              @keyup.esc="cancelarEdicionNombre"
+            />
+            <q-btn
+              flat dense round size="sm" color="positive"
+              class="q-ml-xs"
+              :disable="!nombreTemporal.trim() || nombreTemporal === producto.nombre"
+              @click="guardarNombre"
+            >
+              <IconCheck :size="18" />
+            </q-btn>
+            <q-btn flat dense round size="sm" color="grey-6" @click="cancelarEdicionNombre">
+              <IconX :size="18" />
+            </q-btn>
+          </template>
+        </div>
 
         <!-- Código de barras -->
         <div
@@ -67,8 +130,21 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { IconShoppingBag, IconMapPin, IconPlus, IconBarcode, IconTag } from '@tabler/icons-vue'
+import { ref, computed } from 'vue'
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
+import { Capacitor } from '@capacitor/core'
+import {
+  IconShoppingBag,
+  IconMapPin,
+  IconPlus,
+  IconBarcode,
+  IconTag,
+  IconPencil,
+  IconCheck,
+  IconX,
+  IconCamera,
+  IconTrash,
+} from '@tabler/icons-vue'
 import { useQuasar } from 'quasar'
 import CampoEditable from '../EditarComercio/CampoEditable.vue'
 import { useProductosStore } from '../../almacenamiento/stores/productosStore.js'
@@ -85,44 +161,124 @@ const props = defineProps({
 
 defineEmits(['agregar-precio'])
 
-// Color del chip según tendencia
+// ── Nombre editable ──────────────────────────────────────
+
+const editandoNombre = ref(false)
+const nombreTemporal = ref('')
+
+function iniciarEdicionNombre() {
+  nombreTemporal.value = props.producto.nombre
+  editandoNombre.value = true
+}
+
+async function guardarNombre() {
+  const nombre = nombreTemporal.value.trim()
+  if (!nombre || nombre === props.producto.nombre) {
+    cancelarEdicionNombre()
+    return
+  }
+  try {
+    await productosStore.actualizarProducto(props.producto.id, { nombre })
+    $q.notify({ type: 'positive', message: 'Nombre actualizado', position: 'top', timeout: 1500 })
+  } catch {
+    $q.notify({ type: 'negative', message: 'No se pudo guardar el nombre', position: 'top' })
+  }
+  editandoNombre.value = false
+}
+
+function cancelarEdicionNombre() {
+  editandoNombre.value = false
+  nombreTemporal.value = ''
+}
+
+// ── Foto editable ────────────────────────────────────────
+
+const inputArchivoRef = ref(null)
+
+async function tomarFoto() {
+  try {
+    if (Capacitor.isNativePlatform()) {
+      const foto = await Camera.getPhoto({
+        quality: 70,
+        allowEditing: false,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Camera,
+      })
+      await actualizarFoto(`data:image/jpeg;base64,${foto.base64String}`)
+    } else {
+      // Fallback web: selector de archivo
+      inputArchivoRef.value?.click()
+    }
+  } catch (error) {
+    if (!error.message?.toLowerCase().includes('cancel')) {
+      $q.notify({ type: 'negative', message: 'No se pudo tomar la foto', position: 'top' })
+    }
+  }
+}
+
+async function alSeleccionarArchivo(event) {
+  const archivo = event.target.files?.[0]
+  if (!archivo) return
+  const reader = new FileReader()
+  reader.onload = async (e) => {
+    await actualizarFoto(e.target.result)
+  }
+  reader.readAsDataURL(archivo)
+  event.target.value = ''
+}
+
+async function actualizarFoto(base64) {
+  try {
+    await productosStore.actualizarProducto(props.producto.id, { imagen: base64 })
+    $q.notify({ type: 'positive', message: 'Foto actualizada', position: 'top', timeout: 1500 })
+  } catch {
+    $q.notify({ type: 'negative', message: 'No se pudo guardar la foto', position: 'top' })
+  }
+}
+
+async function quitarFoto() {
+  try {
+    await productosStore.actualizarProducto(props.producto.id, { imagen: null })
+    $q.notify({ type: 'positive', message: 'Foto eliminada', position: 'top', timeout: 1500 })
+  } catch {
+    $q.notify({ type: 'negative', message: 'No se pudo quitar la foto', position: 'top' })
+  }
+}
+
+// ── Categoría editable (ya existía) ─────────────────────
+
+async function actualizarCategoria(nuevaCategoria) {
+  try {
+    await productosStore.actualizarProducto(props.producto.id, { categoria: nuevaCategoria })
+    $q.notify({ type: 'positive', message: 'Categoría actualizada', position: 'top', timeout: 1500 })
+  } catch {
+    $q.notify({ type: 'negative', message: 'No se pudo guardar la categoría', position: 'top' })
+  }
+}
+
+// ── Tendencia ────────────────────────────────────────────
+
 const colorTendencia = computed(() => {
   if (props.producto.tendenciaGeneral === 'bajando') return 'positive'
   if (props.producto.tendenciaGeneral === 'subiendo') return 'negative'
   return 'grey-6'
 })
 
-// Ícono según tendencia
 const iconoTendencia = computed(() => {
   if (props.producto.tendenciaGeneral === 'bajando') return 'arrow_downward'
   if (props.producto.tendenciaGeneral === 'subiendo') return 'arrow_upward'
   return 'remove'
 })
 
-// Texto descriptivo de la tendencia
 const textoTendencia = computed(() => {
   const porcentaje = Math.abs(props.producto.porcentajeTendencia)
-  if (props.producto.tendenciaGeneral === 'bajando') {
-    return `Bajando ${porcentaje}% (últimos 30 días)`
-  }
-  if (props.producto.tendenciaGeneral === 'subiendo') {
-    return `Subiendo ${porcentaje}% (últimos 30 días)`
-  }
+  if (props.producto.tendenciaGeneral === 'bajando') return `Bajando ${porcentaje}% (últimos 30 días)`
+  if (props.producto.tendenciaGeneral === 'subiendo') return `Subiendo ${porcentaje}% (últimos 30 días)`
   return 'Precio estable (últimos 30 días)'
 })
 
-// Guardar nueva categoría en el store
-async function actualizarCategoria(nuevaCategoria) {
-  try {
-    await productosStore.actualizarProducto(props.producto.id, { categoria: nuevaCategoria })
-    $q.notify({ type: 'positive', message: 'Categoría actualizada', position: 'top', timeout: 1500 })
-  } catch (error) {
-    console.error('Error al actualizar categoría:', error)
-    $q.notify({ type: 'negative', message: 'No se pudo guardar la categoría', position: 'top' })
-  }
-}
+// ── Copiar código de barras ──────────────────────────────
 
-// Copiar código de barras al portapapeles
 const copiarCodigoBarras = async (codigo) => {
   try {
     await navigator.clipboard.writeText(codigo)
@@ -134,14 +290,8 @@ const copiarCodigoBarras = async (codigo) => {
       timeout: 1500,
       icon: 'content_copy',
     })
-  } catch (error) {
-    console.error('Error al copiar:', error)
-    $q.notify({
-      type: 'negative',
-      message: 'No se pudo copiar el código',
-      position: 'top',
-      timeout: 1500,
-    })
+  } catch {
+    $q.notify({ type: 'negative', message: 'No se pudo copiar el código', position: 'top', timeout: 1500 })
   }
 }
 </script>
@@ -156,7 +306,6 @@ const copiarCodigoBarras = async (codigo) => {
   gap: 24px;
   align-items: start;
 }
-/* Responsive móvil */
 @media (max-width: 599px) {
   .info-contenido {
     grid-template-columns: 1fr;
@@ -173,6 +322,7 @@ const copiarCodigoBarras = async (codigo) => {
 .info-imagen {
   width: 100%;
   height: 180px;
+  position: relative;
 }
 .placeholder-imagen {
   width: 100%;
@@ -183,9 +333,34 @@ const copiarCodigoBarras = async (codigo) => {
   align-items: center;
   justify-content: center;
 }
+.imagen-overlay {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+}
+.btn-editar-imagen {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+.input-archivo-oculto {
+  display: none;
+}
 .info-detalles {
   display: flex;
   flex-direction: column;
+}
+.nombre-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 40px;
+}
+.nombre-texto {
+  flex: 1;
+  font-size: clamp(16px, 4vw, 22px);
+  line-height: 1.3;
+}
+.nombre-input {
+  flex: 1;
 }
 .precio-principal {
   display: flex;
@@ -199,7 +374,6 @@ const copiarCodigoBarras = async (codigo) => {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/* Código de barras */
 .codigo-barras {
   display: flex;
   align-items: center;
