@@ -22,6 +22,7 @@
               :modo="modo"
               @buscar-codigo="buscarPorCodigo"
               @buscar-nombre="buscarPorNombre"
+              @iniciar-escaneo="alIniciarEscaneo"
             />
           </div>
 
@@ -85,7 +86,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:modelValue', 'producto-guardado'])
+const emit = defineEmits(['update:modelValue', 'producto-guardado', 'iniciar-escaneo'])
 
 const productosStore = useProductosStore()
 const comerciosStore = useComerciStore()
@@ -435,6 +436,12 @@ async function alCerrar() {
 // Cerrar diálogo
 function cerrarDialogo() {
   dialogoAbierto.value = false
+}
+
+// Cierra el dialog y propaga el evento al padre para iniciar el flujo de escaneo
+function alIniciarEscaneo() {
+  cerrarDialogo()
+  emit('iniciar-escaneo')
 }
 </script>
 

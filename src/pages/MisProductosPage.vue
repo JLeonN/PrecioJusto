@@ -89,6 +89,74 @@
       v-model="dialogoAgregarAbierto"
       modo="local"
       @producto-guardado="onProductoGuardado"
+      @iniciar-escaneo="abrirSelectorComercio"
+    />
+
+    <!-- SELECTOR DE COMERCIO PARA SESIÓN DE ESCANEO -->
+    <q-dialog v-model="selectorComercioAbierto" position="bottom">
+      <q-card class="selector-comercio-card">
+        <q-card-section>
+          <div class="text-subtitle1 text-weight-bold">¿Dónde estás comprando?</div>
+          <div class="text-caption text-grey-6">Seleccioná el comercio antes de escanear</div>
+        </q-card-section>
+        <q-card-section class="q-pt-none">
+          <q-select
+            v-model="comercioSesion"
+            :options="comerciosStore.comerciosAgrupados"
+            option-label="nombre"
+            label="Comercio"
+            outlined
+            dense
+            use-input
+            @filter="filtrarComerciosSesion"
+            @update:model-value="alSeleccionarComercioSesion"
+          >
+            <template #no-option>
+              <q-item>
+                <q-item-section class="text-grey">Sin comercios. Agregá uno primero.</q-item-section>
+              </q-item>
+            </template>
+          </q-select>
+          <q-select
+            v-if="direccionesSesion.length > 0"
+            v-model="direccionSesion"
+            :options="direccionesSesion"
+            option-label="nombreCompleto"
+            label="Sucursal / Dirección"
+            outlined
+            dense
+            clearable
+            class="q-mt-sm"
+          />
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Cancelar" @click="selectorComercioAbierto = false" />
+          <q-btn
+            color="primary"
+            no-caps
+            label="Empezar a escanear"
+            :disable="!comercioSesion"
+            @click="iniciarSesionEscaneo"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- ESCANEADOR DE CÓDIGO DE BARRAS -->
+    <EscaneadorCodigo
+      :activo="scannerActivo"
+      @codigo-detectado="procesarCodigoEscaneado"
+      @cerrar="alCerrarScanner"
+    />
+
+    <!-- FORMULARIO POST-ESCANEO -->
+    <FormularioEscaneo
+      v-model="formularioEscaneoAbierto"
+      :item="itemActual"
+      :cantidad-en-bandeja="sesionEscaneoStore.cantidadItems"
+      @siguiente="alSiguiente"
+      @enviar-a-bandeja="alEnviarABandeja"
+      @descartar="alDescartarItem"
     />
 
     <!-- MODAL AGREGAR PRECIO -->
@@ -137,13 +205,172 @@ import DialogoAgregarProducto from '../components/Formularios/Dialogos/DialogoAg
 import DialogoAgregarPrecio from '../components/Formularios/Dialogos/DialogoAgregarPrecio.vue'
 import BarraSeleccion from '../components/Compartidos/BarraSeleccion.vue'
 import BarraAccionesSeleccion from '../components/Compartidos/BarraAccionesSeleccion.vue'
+import EscaneadorCodigo from '../components/Scanner/EscaneadorCodigo.vue'
+import FormularioEscaneo from '../components/Scanner/FormularioEscaneo.vue'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
+import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
+import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
 import { useSeleccionMultiple } from '../composables/useSeleccionMultiple.js'
 import { useDialogoAgregarPrecio } from '../composables/useDialogoAgregarPrecio.js'
+import openFoodFactsService from '../almacenamiento/servicios/OpenFoodFactsService.js'
+import productosService from '../almacenamiento/servicios/ProductosService.js'
 import { useQuasar } from 'quasar'
 
 const productosStore = useProductosStore()
+const comerciosStore = useComerciStore()
+const sesionEscaneoStore = useSesionEscaneoStore()
 const $q = useQuasar()
+
+// ========================================
+// ESTADO DEL FLUJO DE ESCANEO
+// ========================================
+
+// Controla si el scanner de cámara está activo
+const scannerActivo = ref(false)
+// Controla si el formulario post-escaneo está abierto
+const formularioEscaneoAbierto = ref(false)
+// Item actual siendo procesado tras un escaneo
+const itemActual = ref(null)
+
+// Selector de comercio antes de iniciar el escaneo
+const selectorComercioAbierto = ref(false)
+const comercioSesion = ref(null)
+const direccionSesion = ref(null)
+const comerciosFiltradosSesion = ref([])
+
+// Direcciones disponibles según el comercio elegido
+const direccionesSesion = computed(() => comercioSesion.value?.direcciones || [])
+
+// Filtra la lista de comercios mientras el usuario escribe
+function filtrarComerciosSesion(val, update) {
+  update(() => {
+    if (!val) {
+      comerciosFiltradosSesion.value = comerciosStore.comerciosAgrupados.slice(0, 5)
+    } else {
+      const needle = val.toLowerCase()
+      comerciosFiltradosSesion.value = comerciosStore.comerciosAgrupados.filter((c) =>
+        c.nombre.toLowerCase().includes(needle),
+      )
+    }
+  })
+}
+
+// Limpia la dirección al cambiar de comercio
+function alSeleccionarComercioSesion() {
+  direccionSesion.value = null
+}
+
+// Abre el selector de comercio (punto de entrada al flujo de escaneo)
+async function abrirSelectorComercio() {
+  await comerciosStore.cargarComercios()
+  if (comerciosStore.comerciosAgrupados.length === 0) {
+    $q.notify({
+      type: 'warning',
+      message: 'Primero agregá un comercio en la sección Comercios',
+      position: 'top',
+    })
+    return
+  }
+  // Pre-seleccionar el comercio de la sesión activa si existe
+  if (sesionEscaneoStore.comercioActivo) {
+    const encontrado = comerciosStore.comerciosAgrupados.find(
+      (c) => c.id === sesionEscaneoStore.comercioActivo.id,
+    )
+    comercioSesion.value = encontrado || null
+  }
+  selectorComercioAbierto.value = true
+}
+
+// Inicia la sesión de escaneo con el comercio elegido
+function iniciarSesionEscaneo() {
+  if (!comercioSesion.value) return
+
+  const dir = direccionSesion.value || comercioSesion.value.direcciones?.[0] || null
+
+  sesionEscaneoStore.iniciarSesion({
+    id: comercioSesion.value.id,
+    nombre: comercioSesion.value.nombre,
+    direccionId: dir?.id || null,
+    direccionNombre: dir?.calle || null,
+  })
+
+  selectorComercioAbierto.value = false
+  scannerActivo.value = true
+}
+
+// Procesa el código escaneado: busca en app local y en la API
+async function procesarCodigoEscaneado(codigo) {
+  scannerActivo.value = false
+
+  // Detectar si ya se escaneó este código en la sesión actual
+  const yaEnBandeja = sesionEscaneoStore.items.some((i) => i.codigoBarras === codigo)
+  if (yaEnBandeja) {
+    $q.notify({
+      type: 'warning',
+      message: 'Este producto ya está en tu bandeja',
+      position: 'top',
+      timeout: 2000,
+    })
+    scannerActivo.value = true
+    return
+  }
+
+  // Buscar si el producto ya existe en Mis Productos
+  const existente = await productosService.buscarPorCodigoBarras(codigo)
+
+  // Buscar en Open Food Facts
+  const productoApi = await openFoodFactsService.buscarPorCodigoBarras(codigo)
+
+  itemActual.value = {
+    codigoBarras: codigo,
+    productoExistenteId: existente?.id || null,
+    nombre: productoApi?.nombre || existente?.nombre || '',
+    marca: productoApi?.marca || existente?.marca || null,
+    cantidad: productoApi?.cantidad || existente?.cantidad || 1,
+    unidad: productoApi?.unidad || existente?.unidad || 'unidad',
+    imagen: productoApi?.imagen || existente?.imagen || null,
+    precio: null,
+    moneda: 'UYU',
+    origenApi: !!productoApi,
+  }
+
+  formularioEscaneoAbierto.value = true
+}
+
+// Guarda el item en la bandeja y reactiva el scanner para el siguiente
+function alSiguiente(itemActualizado) {
+  sesionEscaneoStore.agregarItem(itemActualizado)
+  formularioEscaneoAbierto.value = false
+  itemActual.value = null
+  scannerActivo.value = true
+}
+
+// Guarda el item en la bandeja y cierra el flujo de escaneo
+function alEnviarABandeja(itemActualizado) {
+  sesionEscaneoStore.agregarItem(itemActualizado)
+  formularioEscaneoAbierto.value = false
+  itemActual.value = null
+  scannerActivo.value = false
+  $q.notify({
+    type: 'positive',
+    message: `${sesionEscaneoStore.cantidadItems} ${sesionEscaneoStore.cantidadItems === 1 ? 'producto' : 'productos'} en tu bandeja`,
+    position: 'top',
+    timeout: 2500,
+  })
+}
+
+// Descarta el item actual y vuelve al scanner
+function alDescartarItem() {
+  formularioEscaneoAbierto.value = false
+  itemActual.value = null
+  scannerActivo.value = true
+}
+
+// El usuario cerró el scanner manualmente
+function alCerrarScanner() {
+  scannerActivo.value = false
+  itemActual.value = null
+}
 
 /* Texto de búsqueda activo */
 const textoBusqueda = ref('')
@@ -310,5 +537,11 @@ onMounted(async () => {
 <style scoped>
 .fab-agregar {
   bottom: calc(18px + var(--safe-area-bottom)) !important;
+}
+.selector-comercio-card {
+  border-radius: 16px 16px 0 0;
+  width: 100%;
+  max-width: 100vw;
+  padding-bottom: var(--safe-area-bottom);
 }
 </style>

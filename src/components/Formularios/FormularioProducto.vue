@@ -53,8 +53,9 @@
       @update:model-value="emitirCambios"
     >
       <template #append>
-        <q-btn flat round dense icon="photo_camera" color="grey-6" size="sm" disable>
-          <q-tooltip>Escanear código (próximamente)</q-tooltip>
+        <q-btn flat round dense color="primary" size="sm" @click="iniciarEscaneo">
+          <IconCamera :size="18" />
+          <q-tooltip>Escanear con cámara</q-tooltip>
         </q-btn>
         <q-btn
           flat
@@ -108,7 +109,7 @@
 
 <script setup>
 import { ref, watch, computed, onMounted } from 'vue'
-import { IconSearch } from '@tabler/icons-vue'
+import { IconSearch, IconCamera } from '@tabler/icons-vue'
 import preferenciasService from '../../almacenamiento/servicios/PreferenciasService.js'
 
 const props = defineProps({
@@ -129,7 +130,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:modelValue', 'buscar-codigo', 'buscar-nombre'])
+const emit = defineEmits(['update:modelValue', 'buscar-codigo', 'buscar-nombre', 'iniciar-escaneo'])
 
 // Opciones de unidades
 const opcionesUnidades = [
@@ -200,6 +201,11 @@ function buscarPorCodigo() {
   emit('buscar-codigo', datosInternos.value.codigoBarras, () => {
     buscandoCodigo.value = false
   })
+}
+
+// Emite evento al padre para iniciar el flujo de escaneo con cámara
+function iniciarEscaneo() {
+  emit('iniciar-escaneo')
 }
 
 function buscarPorNombre() {
