@@ -250,6 +250,49 @@ async function procesarCodigoEscaneado(codigo) {
 
 ---
 
+## FASE 8 — MARCA EDITABLE Y EDICIÓN EXTENDIDA EN BANDEJA
+
+### Parte A — Marca editable en página de detalle
+
+**Archivo a editar:** `src/components/DetalleProducto/InfoProducto.vue`
+
+#### Cambios en el layout de campos (nuevo orden):
+1. Nombre *(editable inline — Fase 7)*
+2. **Marca** *(nueva, editable con `CampoEditable`)*
+3. Categoría *(editable con `CampoEditable` — ya existe)*
+4. Código de barras *(movido debajo de categoría)*
+5. Precio + comercio
+6. Chip tendencia
+7. Botón "Agregar precio"
+
+#### Implementación:
+- Agregar `CampoEditable` para `marca` con `IconBuildingStore` (o similar)
+- Guardar con `productosStore.actualizarProducto(id, { marca })`
+- Mover el bloque del código de barras debajo de `CampoEditable` de categoría
+
+---
+
+### Parte B — Edición extendida en BandejaBorradores
+
+**Archivos a editar/crear:**
+- `src/components/Scanner/BandejaBorradores.vue` *(editar)*
+- `src/components/Scanner/DialogoEditarItemBandeja.vue` *(nuevo)*
+
+#### Cambios en la lista de items:
+- Mostrar `categoría` del item (si tiene) en la descripción
+- Agregar botón lápiz por item que abre `DialogoEditarItemBandeja`
+
+#### DialogoEditarItemBandeja (nuevo, dialog pequeño):
+- Campos editables:
+  - **Nombre** *(requerido)*
+  - **Marca** *(opcional)*
+  - **Categoría** *(opcional)*
+- Botones: Cancelar / Guardar
+- Guarda con `sesionEscaneoStore.actualizarItem(id, { nombre, marca, categoria })`
+- ✅ **Responsivo:** dialog centrado con `min-width: 300px; max-width: 90vw`
+
+---
+
 ## DEPENDENCIAS Y SERVICIOS REUTILIZABLES
 
 | Elemento | Estado | Notas |
@@ -258,11 +301,12 @@ async function procesarCodigoEscaneado(codigo) {
 | `productosStore.agregarProducto()` | ✅ Existe | Lógica de guardado completa |
 | `comerciosStore` | ✅ Existe | Selector de comercio reutilizable |
 | `@capacitor-mlkit/barcode-scanning` | ✅ Instalado | v8.0.1 — Fase 1 completa |
-| `@capacitor/camera` | ⚠️ Verificar | Para fotos en Fase 7 |
+| `@capacitor/camera` | ✅ Instalado | v8.x — Fase 7 completa |
 | `sesionEscaneoStore.js` | ✅ Creado | Fase 2 completa |
 | `EscaneadorCodigo.vue` | ✅ Creado | Fase 3 completa — ♻️ reutilizable |
-| `FormularioEscaneo.vue` | ⏳ Crear | Fase 4 |
-| `BandejaBorradores.vue` | ⏳ Crear | Fase 6 |
+| `FormularioEscaneo.vue` | ✅ Creado | Fase 4 completa |
+| `BandejaBorradores.vue` | ✅ Creado | Fase 6 completa |
+| `DialogoEditarItemBandeja.vue` | ⏳ Crear | Fase 8 parte B |
 
 ---
 
@@ -272,13 +316,13 @@ async function procesarCodigoEscaneado(codigo) {
 src/
   almacenamiento/
     stores/
-      sesionEscaneoStore.js           (NUEVO)
+      sesionEscaneoStore.js           (NUEVO — ✅ Fase 2)
   components/
     Scanner/
-      EscaneadorCodigo.vue            (NUEVO)
-      FormularioEscaneo.vue           (NUEVO)
-    Bandeja/
-      BandejaBorradores.vue           (NUEVO)
+      EscaneadorCodigo.vue            (NUEVO — ✅ Fase 3)
+      FormularioEscaneo.vue           (NUEVO — ✅ Fase 4)
+      BandejaBorradores.vue           (NUEVO — ✅ Fase 6)
+      DialogoEditarItemBandeja.vue    (NUEVO — ⏳ Fase 8B)
 ```
 
 ## ARCHIVOS EDITADOS
@@ -288,10 +332,13 @@ src/
   components/
     Formularios/
       Dialogos/
-        DialogoAgregarProducto.vue    (EDITAR - activar ícono cámara)
+        DialogoAgregarProducto.vue    (EDITAR — ✅ Fase 5)
+    DetalleProducto/
+      InfoProducto.vue                (EDITAR — ✅ Fase 7 / ⏳ Fase 8A)
+    Scanner/
+      BandejaBorradores.vue           (EDITAR — ⏳ Fase 8B)
   layouts/
-    MainLayout.vue                    (EDITAR - agregar bandeja + badge en drawer)
-  [historial de precios]              (EDITAR - agregar edición nombre/foto)
+    MainLayout.vue                    (EDITAR — ✅ Fase 6)
 ```
 
 ---
@@ -364,6 +411,18 @@ src/
 - [ ] Cambio de foto desde Open Food Facts a foto propia: funciona sin conflictos
 - [ ] Cancelar edición: no guarda cambios no confirmados
 
+### T.J Marca editable y edición extendida en bandeja (Fase 8)
+- [ ] Marca visible en `InfoProducto` (página de detalle)
+- [ ] Marca editable con `CampoEditable`: guardar y persistir correctamente
+- [ ] Código de barras aparece debajo de categoría (nuevo orden de campos)
+- [ ] Botón lápiz por item en `BandejaBorradores` abre `DialogoEditarItemBandeja`
+- [ ] Editar nombre en bandeja: cambio se refleja inmediatamente en la lista
+- [ ] Editar marca en bandeja: se guarda correctamente en el store
+- [ ] Editar categoría en bandeja: se muestra en la tarjeta del item
+- [ ] Categoría visible en la lista de items de la bandeja
+- [ ] Cancelar edición en diálogo: no guarda ningún cambio
+- [ ] Guardar con nombre vacío: botón deshabilitado
+
 ### T.I Casos extremos (edge cases)
 - [ ] Bandeja con 20+ items: no hay lag visible al scrollear
 - [ ] Foto de producto muy grande: no rompe localStorage ni crashea la app
@@ -375,11 +434,12 @@ src/
 
 ## ORDEN DE IMPLEMENTACIÓN SUGERIDO
 
-1. **Fase 1** — Instalar plugin y verificar permisos Android
-2. **Fase 2** — Crear `sesionEscaneoStore` con persistencia
-3. **Fase 3** — Componente `EscaneadorCodigo` (solo la cámara)
-4. **Fase 4** — Componente `FormularioEscaneo` (rápido/mínimo)
-5. **Fase 5** — Conectar todo desde `DialogoAgregarProducto`
-6. **Fase 6** — `BandejaBorradores` + badge en DRAWER
-7. **Fase 7** — Edición nombre/foto en historial (independiente, se puede hacer en paralelo)
-8. **Fase Testing** — Testing completo según checklist
+1. **Fase 1** — Instalar plugin y verificar permisos Android ✅
+2. **Fase 2** — Crear `sesionEscaneoStore` con persistencia ✅
+3. **Fase 3** — Componente `EscaneadorCodigo` (solo la cámara) ✅
+4. **Fase 4** — Componente `FormularioEscaneo` (rápido/mínimo) ✅
+5. **Fase 5** — Conectar todo desde `DialogoAgregarProducto` ✅
+6. **Fase 6** — `BandejaBorradores` + badge en DRAWER ✅
+7. **Fase 7** — Edición nombre/foto en historial ✅
+8. **Fase 8** — Marca editable en detalle + edición extendida en bandeja ⏳
+9. **Fase Testing** — Testing completo según checklist
