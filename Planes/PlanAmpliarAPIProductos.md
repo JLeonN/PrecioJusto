@@ -236,7 +236,7 @@ const FUENTES = {
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 5: INTEGRAR ORQUESTADOR EN COMPONENTES 🔌 [ ] PENDIENTE
+## 📋 FASE 5: INTEGRAR ORQUESTADOR EN COMPONENTES 🔌 [x] COMPLETA
 
 ### Objetivo
 
@@ -247,7 +247,7 @@ en todos los lugares donde se busca por código de barras.
 
 **Archivo editado:** `src/almacenamiento/stores/sesionEscaneoStore.js`
 
-[ ] Agregar campo `fuenteDato: string | null` en la estructura de `ItemBorrador`
+[x] Agregar campo `fuenteDato: string | null` en la estructura de `ItemBorrador`
 
 ```javascript
 // Antes
@@ -261,30 +261,35 @@ en todos los lugares donde se busca por código de barras.
 
 **Archivo editado:** `src/components/Formularios/DialogoAgregarProducto.vue`
 
-[ ] Reemplazar import de `openFoodFactsService` por `buscadorProductosService`
-[ ] En `procesarCodigoEscaneado(codigo)`:
+[x] Reemplazar import de `openFoodFactsService` por `buscadorProductosService`
+[x] En `procesarCodigoEscaneado(codigo)`:
   - Antes: `const producto = await openFoodFactsService.buscarPorCodigoBarras(codigo)`
   - Después: `const resultado = await buscadorProductosService.buscarPorCodigo(codigo)`
-[ ] Extraer `producto` y `fuenteDato` del resultado
-[ ] Pasar `fuenteDato` al `ItemBorrador` que se guarda en el store
+[x] Extraer `producto` y `fuenteDato` del resultado
+[x] Pasar `fuenteDato` al `ItemBorrador` que se guarda en el store
 
 ### 5.3 — BandejaBorradores.vue
 
 **Archivo editado:** `src/components/Scanner/BandejaBorradores.vue`
 
-[ ] Reemplazar import de `openFoodFactsService` por `buscadorProductosService`
-[ ] En `buscarActualizacionesApi()` (auto-fetch al reconectar):
+[x] Reemplazar import de `openFoodFactsService` por `buscadorProductosService`
+[x] En `buscarActualizacionesApi()` (auto-fetch al reconectar):
   - Usar `buscadorProductosService.buscarPorCodigo(codigo)` en lugar del servicio anterior
   - Actualizar `fuenteDato` del item junto con los otros campos
-[ ] En `guardarTodos()`: pasar `fuenteDato` al producto cuando se crea en `productosStore`
+[x] En `guardarTodos()`: pasar `fuenteDato` al producto cuando se crea en `productosStore`
 
 ### 5.4 — InfoProducto.vue (restaurar desde API)
 
 **Archivo editado:** `src/components/DetalleProducto/InfoProducto.vue`
 
-[ ] Reemplazar import de `openFoodFactsService` por `buscadorProductosService`
-[ ] En `restaurarDesdeApi()`: usar `buscadorProductosService.buscarPorCodigo(codigoBarras)`
-[ ] Actualizar `fuenteDato` del producto junto con los otros campos al restaurar
+[x] Reemplazar import de `openFoodFactsService` por `buscadorProductosService`
+[x] En `restaurarDesdeApi()`: usar `buscadorProductosService.buscarPorCodigo(codigoBarras)`
+[x] Actualizar `fuenteDato` del producto junto con los otros campos al restaurar
+
+### 5.5 — MisProductosPage.vue + DialogoEditarItemBandeja.vue (extra)
+
+[x] `MisProductosPage.vue`: usar orquestador en flujo de escaneo, agregar `fuenteDato` al item
+[x] `DialogoEditarItemBandeja.vue`: usar orquestador en `restaurarDesdeApi()`
 
 ═══════════════════════════════════════════════════════════════
 
@@ -423,13 +428,13 @@ src/
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 67% (4/6 fases completadas)
+## 📊 PROGRESO GENERAL: 83% (5/6 fases completadas)
 
 [x] Fase 1: Servicios Open Facts adicionales (Beauty, Pet Food, Products)
 [x] Fase 2: Servicios de libros (Open Library + Google Books)
 [x] Fase 3: Servicio UPCitemdb
 [x] Fase 4: Servicio orquestador (BuscadorProductosService)
-[ ] Fase 5: Integrar orquestador en componentes existentes
+[x] Fase 5: Integrar orquestador en componentes existentes
 [ ] Fase 6: Atribución de fuente en UI (InfoProducto)
 [ ] Fase Testing: Testing completo
 

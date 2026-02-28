@@ -148,7 +148,7 @@ import { useSesionEscaneoStore } from '../../almacenamiento/stores/sesionEscaneo
 import { useProductosStore } from '../../almacenamiento/stores/productosStore.js'
 import { useComerciStore } from '../../almacenamiento/stores/comerciosStore.js'
 import DialogoEditarItemBandeja from './DialogoEditarItemBandeja.vue'
-import openFoodFactsService from '../../almacenamiento/servicios/OpenFoodFactsService.js'
+import buscadorProductosService from '../../almacenamiento/servicios/BuscadorProductosService.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -212,14 +212,15 @@ async function buscarActualizacionesApi() {
   if (pendientes.length === 0) return
   let actualizados = 0
   for (const item of pendientes) {
-    const resultado = await openFoodFactsService.buscarPorCodigoBarras(item.codigoBarras)
+    const resultado = await buscadorProductosService.buscarPorCodigo(item.codigoBarras)
     if (resultado) {
       sesionEscaneoStore.actualizarItem(item.id, {
-        nombre: resultado.nombre || item.nombre,
-        marca: resultado.marca || item.marca,
-        categoria: resultado.categoria || item.categoria,
-        imagen: resultado.imagen || item.imagen,
+        nombre: resultado.producto.nombre || item.nombre,
+        marca: resultado.producto.marca || item.marca,
+        categoria: resultado.producto.categoria || item.categoria,
+        imagen: resultado.producto.imagen || item.imagen,
         origenApi: true,
+        fuenteDato: resultado.fuenteDato,
       })
       actualizados++
     }
@@ -300,6 +301,7 @@ async function guardarTodo() {
           unidad: item.unidad || 'unidad',
           categoria: '',
           imagen: item.imagen || null,
+          fuenteDato: item.fuenteDato || null,
           precios: [datoPrecio],
         })
       }

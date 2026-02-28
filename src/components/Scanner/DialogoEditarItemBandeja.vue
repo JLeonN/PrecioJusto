@@ -70,7 +70,7 @@
 import { ref, computed, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import { IconRefresh } from '@tabler/icons-vue'
-import openFoodFactsService from '../../almacenamiento/servicios/OpenFoodFactsService.js'
+import buscadorProductosService from '../../almacenamiento/servicios/BuscadorProductosService.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -111,11 +111,12 @@ async function restaurarDesdeApi() {
   if (!props.item?.codigoBarras) return
   restaurandoApi.value = true
   try {
-    const resultado = await openFoodFactsService.buscarPorCodigoBarras(props.item.codigoBarras)
-    if (!resultado) {
+    const resultadoApi = await buscadorProductosService.buscarPorCodigo(props.item.codigoBarras)
+    if (!resultadoApi) {
       $q.notify({ type: 'warning', message: 'No se encontró el producto en la API', position: 'top' })
       return
     }
+    const resultado = resultadoApi.producto
     // Solo rellena los campos si hay datos nuevos distintos al valor actual
     let huboCambios = false
     if (resultado.nombre && resultado.nombre !== nombreLocal.value) { nombreLocal.value = resultado.nombre; huboCambios = true }

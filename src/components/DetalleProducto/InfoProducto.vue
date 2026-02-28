@@ -165,7 +165,7 @@ import {
   IconTrash,
   IconRefresh,
 } from '@tabler/icons-vue'
-import openFoodFactsService from '../../almacenamiento/servicios/OpenFoodFactsService.js'
+import buscadorProductosService from '../../almacenamiento/servicios/BuscadorProductosService.js'
 import { useQuasar } from 'quasar'
 import CampoEditable from '../EditarComercio/CampoEditable.vue'
 import { useProductosStore } from '../../almacenamiento/stores/productosStore.js'
@@ -220,16 +220,18 @@ async function restaurarDesdeApi() {
   if (!props.producto.codigoBarras) return
   restaurandoApi.value = true
   try {
-    const resultado = await openFoodFactsService.buscarPorCodigoBarras(props.producto.codigoBarras)
-    if (!resultado) {
+    const resultadoApi = await buscadorProductosService.buscarPorCodigo(props.producto.codigoBarras)
+    if (!resultadoApi) {
       $q.notify({ type: 'warning', message: 'No se encontró el producto en la API', position: 'top' })
       return
     }
+    const resultado = resultadoApi.producto
     await productosStore.actualizarProducto(props.producto.id, {
       nombre: resultado.nombre || props.producto.nombre,
       marca: resultado.marca || props.producto.marca,
       categoria: resultado.categoria || props.producto.categoria,
       imagen: resultado.imagen || props.producto.imagen,
+      fuenteDato: resultadoApi.fuenteDato,
     })
     $q.notify({ type: 'positive', message: 'Datos restaurados desde la API', position: 'top', timeout: 2000 })
   } catch {

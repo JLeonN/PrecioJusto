@@ -212,7 +212,7 @@ import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
 import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
 import { useSeleccionMultiple } from '../composables/useSeleccionMultiple.js'
 import { useDialogoAgregarPrecio } from '../composables/useDialogoAgregarPrecio.js'
-import openFoodFactsService from '../almacenamiento/servicios/OpenFoodFactsService.js'
+import buscadorProductosService from '../almacenamiento/servicios/BuscadorProductosService.js'
 import productosService from '../almacenamiento/servicios/ProductosService.js'
 import { useQuasar } from 'quasar'
 
@@ -321,8 +321,9 @@ async function procesarCodigoEscaneado(codigo) {
   // Buscar si el producto ya existe en Mis Productos
   const existente = await productosService.buscarPorCodigoBarras(codigo)
 
-  // Buscar en Open Food Facts
-  const productoApi = await openFoodFactsService.buscarPorCodigoBarras(codigo)
+  // Buscar en todas las APIs disponibles (orquestador)
+  const resultadoApi = await buscadorProductosService.buscarPorCodigo(codigo)
+  const productoApi = resultadoApi?.producto || null
 
   itemActual.value = {
     codigoBarras: codigo,
@@ -335,6 +336,7 @@ async function procesarCodigoEscaneado(codigo) {
     precio: null,
     moneda: 'UYU',
     origenApi: !!productoApi,
+    fuenteDato: resultadoApi?.fuenteDato || null,
   }
 
   formularioEscaneoAbierto.value = true

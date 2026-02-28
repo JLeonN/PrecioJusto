@@ -89,6 +89,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
       precio: item.precio || 0,
       moneda: item.moneda || 'UYU',
       origenApi: item.origenApi || false,
+      fuenteDato: item.fuenteDato || null,
       productoExistenteId: item.productoExistenteId || null,
     })
   }

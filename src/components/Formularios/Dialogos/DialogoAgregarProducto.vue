@@ -71,6 +71,7 @@ import DialogoResultadosBusqueda from './DialogoResultadosBusqueda.vue'
 import { useProductosStore } from '../../../almacenamiento/stores/productosStore.js'
 import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.js'
 import productosService from '../../../almacenamiento/servicios/ProductosService.js'
+import buscadorProductosService from '../../../almacenamiento/servicios/BuscadorProductosService.js'
 import openFoodFactsService from '../../../almacenamiento/servicios/OpenFoodFactsService.js'
 import preferenciasService from '../../../almacenamiento/servicios/PreferenciasService.js'
 
@@ -129,6 +130,7 @@ const datosPrecio = ref({
 // Estados de búsqueda API
 const dialogoResultadosAbierto = ref(false)
 const resultadosBusqueda = ref([])
+const fuenteDatoActual = ref(null)
 
 // Clases responsivas
 const clasesResponsivas = computed(() => {
@@ -172,15 +174,15 @@ watch(
   { deep: true },
 )
 
-// Buscar por código de barras en OpenFoodFacts
+// Buscar por código de barras usando el orquestador de APIs
 async function buscarPorCodigo(codigo, callbackFinalizar) {
   try {
     console.log(`🔍 Buscando producto por código: ${codigo}`)
 
-    const producto = await openFoodFactsService.buscarPorCodigoBarras(codigo)
+    const resultado = await buscadorProductosService.buscarPorCodigo(codigo)
 
-    if (producto) {
-      resultadosBusqueda.value = [producto]
+    if (resultado) {
+      resultadosBusqueda.value = [{ ...resultado.producto, fuenteDato: resultado.fuenteDato }]
       dialogoResultadosAbierto.value = true
     } else {
       $q.notify({
@@ -241,7 +243,7 @@ function autoCompletarFormulario(producto) {
     categoria: producto.categoria || datosProducto.value.categoria,
     imagen: producto.imagen || datosProducto.value.imagen,
   }
-
+  fuenteDatoActual.value = producto.fuenteDato || null
   console.log('✅ Formulario auto-completado')
 }
 
@@ -330,6 +332,7 @@ async function guardarProducto() {
       unidad: datosProducto.value.unidad || 'unidad',
       categoria: datosProducto.value.categoria?.trim() || '',
       imagen: datosProducto.value.imagen || null,
+      fuenteDato: fuenteDatoActual.value || null,
       precios: [],
     }
 
@@ -410,6 +413,7 @@ async function limpiarFormulario() {
     categoria: '',
     imagen: null,
   }
+  fuenteDatoActual.value = null
 
   datosPrecio.value = {
     comercio: '',
