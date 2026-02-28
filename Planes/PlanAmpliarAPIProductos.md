@@ -293,7 +293,7 @@ en todos los lugares donde se busca por código de barras.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 6: ATRIBUCIÓN DE FUENTE EN UI 🏷️ [ ] PENDIENTE
+## 📋 FASE 6: ATRIBUCIÓN DE FUENTE EN UI 🏷️ [x] COMPLETA
 
 ### Objetivo
 
@@ -304,7 +304,7 @@ Texto pequeño, discreto, al pie del componente de información del producto.
 
 **Archivo editado:** `src/components/DetalleProducto/InfoProducto.vue`
 
-[ ] Al pie de la sección de información del producto, agregar:
+[x] Al pie de la sección de información del producto, agregar:
 
 ```html
 <!-- Solo visible si el producto tiene fuenteDato -->
@@ -313,7 +313,7 @@ Texto pequeño, discreto, al pie del componente de información del producto.
 </p>
 ```
 
-[ ] CSS:
+[x] CSS:
 
 ```css
 .fuente-dato-texto {
@@ -324,8 +324,8 @@ Texto pequeño, discreto, al pie del componente de información del producto.
 }
 ```
 
-[ ] No mostrar nada si `producto.fuenteDato` está vacío o es `null`
-[ ] No mostrar enlace ni ícono — solo texto plano en gris claro
+[x] No mostrar nada si `producto.fuenteDato` está vacío o es `null`
+[x] No mostrar enlace ni ícono — solo texto plano en gris claro
 
 ═══════════════════════════════════════════════════════════════
 
@@ -428,18 +428,18 @@ src/
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 83% (5/6 fases completadas)
+## 📊 PROGRESO GENERAL: 100% (6/6 fases completadas) ✅
 
 [x] Fase 1: Servicios Open Facts adicionales (Beauty, Pet Food, Products)
 [x] Fase 2: Servicios de libros (Open Library + Google Books)
 [x] Fase 3: Servicio UPCitemdb
 [x] Fase 4: Servicio orquestador (BuscadorProductosService)
 [x] Fase 5: Integrar orquestador en componentes existentes
-[ ] Fase 6: Atribución de fuente en UI (InfoProducto)
+[x] Fase 6: Atribución de fuente en UI (InfoProducto)
 [ ] Fase Testing: Testing completo
 
 ═══════════════════════════════════════════════════════════════
 
 **CREADO:** 28 de Febrero 2026
 **ÚLTIMA ACTUALIZACIÓN:** 28 de Febrero 2026
-**ESTADO:** 🔲 PENDIENTE
+**ESTADO:** ✅ IMPLEMENTACIÓN COMPLETA — pendiente testing

@@ -142,6 +142,11 @@
         >
           <IconPlus :size="20" class="q-mr-xs" />
         </q-btn>
+
+        <!-- Fuente del dato (API de origen) -->
+        <p v-if="producto.fuenteDato" class="fuente-dato-texto">
+          Datos de {{ producto.fuenteDato }}
+        </p>
       </div>
     </q-card-section>
   </q-card>
@@ -463,5 +468,11 @@ const copiarCodigoBarras = async (codigo) => {
   line-height: 1;
   letter-spacing: 0.5px;
   font-family: 'Courier New', monospace;
+}
+.fuente-dato-texto {
+  font-size: 11px;
+  color: #9e9e9e;
+  margin: 8px 0 0 0;
+  text-align: center;
 }
 </style>
