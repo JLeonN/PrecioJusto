@@ -8,6 +8,14 @@
         <div v-else class="placeholder-imagen">
           <IconShoppingBag :size="64" class="text-grey-5" />
         </div>
+        <!-- Overlay botón restaurar desde API (solo si tiene código de barras) -->
+        <div v-if="producto.codigoBarras" class="imagen-overlay-izquierda">
+          <q-btn round color="white" text-color="grey-7" size="sm" class="btn-restaurar-api" :loading="restaurandoApi" @click="restaurarDesdeApi">
+            <IconRefresh :size="16" />
+            <q-tooltip>Restaurar datos desde la API</q-tooltip>
+          </q-btn>
+        </div>
+
         <!-- Overlay botón editar foto -->
         <div class="imagen-overlay">
           <q-btn round color="white" text-color="grey-7" size="sm" class="btn-editar-imagen">
@@ -155,7 +163,9 @@ import {
   IconX,
   IconCamera,
   IconTrash,
+  IconRefresh,
 } from '@tabler/icons-vue'
+import openFoodFactsService from '../../almacenamiento/servicios/OpenFoodFactsService.js'
 import { useQuasar } from 'quasar'
 import CampoEditable from '../EditarComercio/CampoEditable.vue'
 import { useProductosStore } from '../../almacenamiento/stores/productosStore.js'
@@ -200,6 +210,33 @@ async function guardarNombre() {
 function cancelarEdicionNombre() {
   editandoNombre.value = false
   nombreTemporal.value = ''
+}
+
+// ── Restaurar desde API ──────────────────────────────────
+
+const restaurandoApi = ref(false)
+
+async function restaurarDesdeApi() {
+  if (!props.producto.codigoBarras) return
+  restaurandoApi.value = true
+  try {
+    const resultado = await openFoodFactsService.buscarPorCodigoBarras(props.producto.codigoBarras)
+    if (!resultado) {
+      $q.notify({ type: 'warning', message: 'No se encontró el producto en la API', position: 'top' })
+      return
+    }
+    await productosStore.actualizarProducto(props.producto.id, {
+      nombre: resultado.nombre || props.producto.nombre,
+      marca: resultado.marca || props.producto.marca,
+      categoria: resultado.categoria || props.producto.categoria,
+      imagen: resultado.imagen || props.producto.imagen,
+    })
+    $q.notify({ type: 'positive', message: 'Datos restaurados desde la API', position: 'top', timeout: 2000 })
+  } catch {
+    $q.notify({ type: 'negative', message: 'Sin conexión. Intentá de nuevo más tarde.', position: 'top' })
+  } finally {
+    restaurandoApi.value = false
+  }
 }
 
 // ── Foto editable ────────────────────────────────────────
@@ -359,6 +396,11 @@ const copiarCodigoBarras = async (codigo) => {
   position: absolute;
   bottom: 8px;
   right: 8px;
+}
+.imagen-overlay-izquierda {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
 }
 .btn-editar-imagen {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);

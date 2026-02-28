@@ -139,13 +139,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useQuasar } from 'quasar'
 import { IconPackage, IconTrash, IconCheck, IconPencil } from '@tabler/icons-vue'
 import { useSesionEscaneoStore } from '../../almacenamiento/stores/sesionEscaneoStore.js'
 import { useProductosStore } from '../../almacenamiento/stores/productosStore.js'
 import { useComerciStore } from '../../almacenamiento/stores/comerciosStore.js'
 import DialogoEditarItemBandeja from './DialogoEditarItemBandeja.vue'
+import openFoodFactsService from '../../almacenamiento/servicios/OpenFoodFactsService.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -202,6 +203,38 @@ function cancelarEdicion() {
   precioEditado.value = null
 }
 
+// ── Auto-fetch al reconectar ─────────────────────────────
+
+async function buscarActualizacionesApi() {
+  const pendientes = sesionEscaneoStore.items.filter((i) => !i.origenApi && i.codigoBarras)
+  if (pendientes.length === 0) return
+  let actualizados = 0
+  for (const item of pendientes) {
+    const resultado = await openFoodFactsService.buscarPorCodigoBarras(item.codigoBarras)
+    if (resultado) {
+      sesionEscaneoStore.actualizarItem(item.id, {
+        nombre: resultado.nombre || item.nombre,
+        marca: resultado.marca || item.marca,
+        categoria: resultado.categoria || item.categoria,
+        imagen: resultado.imagen || item.imagen,
+        origenApi: true,
+      })
+      actualizados++
+    }
+  }
+  if (actualizados > 0) {
+    $q.notify({
+      type: 'positive',
+      message: `${actualizados} ${actualizados === 1 ? 'producto actualizado' : 'productos actualizados'} desde la API`,
+      position: 'top',
+      timeout: 2500,
+    })
+  }
+}
+
+onMounted(() => window.addEventListener('online', buscarActualizacionesApi))
+onUnmounted(() => window.removeEventListener('online', buscarActualizacionesApi))
+
 async function limpiarTodo() {
   await sesionEscaneoStore.limpiarTodo()
   abierta.value = false
@@ -234,6 +267,12 @@ async function guardarTodo() {
 
       if (item.productoExistenteId) {
         await productosStore.agregarPrecioAProducto(item.productoExistenteId, datoPrecio)
+        // Propagar ediciones de nombre/marca/categoría al producto guardado
+        await productosStore.actualizarProducto(item.productoExistenteId, {
+          nombre: item.nombre,
+          marca: item.marca || '',
+          categoria: item.categoria || '',
+        })
       } else {
         await productosStore.agregarProducto({
           nombre: item.nombre,

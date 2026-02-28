@@ -36,7 +36,21 @@
         />
       </q-card-section>
 
-      <q-card-actions align="right" class="q-px-md q-pb-md">
+      <q-card-actions class="q-px-md q-pb-md">
+        <!-- Restaurar desde API solo si el item tiene código de barras -->
+        <q-btn
+          v-if="props.item?.codigoBarras"
+          flat
+          no-caps
+          color="grey-6"
+          size="sm"
+          :loading="restaurandoApi"
+          @click="restaurarDesdeApi"
+        >
+          <IconRefresh :size="16" class="q-mr-xs" />
+          Restaurar API
+        </q-btn>
+        <q-space />
         <q-btn flat no-caps label="Cancelar" color="grey-7" @click="cancelar" />
         <q-btn
           unelevated
@@ -54,6 +68,9 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { useQuasar } from 'quasar'
+import { IconRefresh } from '@tabler/icons-vue'
+import openFoodFactsService from '../../almacenamiento/servicios/OpenFoodFactsService.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -61,6 +78,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'guardar'])
+
+const $q = useQuasar()
 
 const abierto = computed({
   get: () => props.modelValue,
@@ -83,6 +102,31 @@ watch(
   },
   { immediate: true },
 )
+
+// ── Restaurar desde API ──────────────────────────────────
+
+const restaurandoApi = ref(false)
+
+async function restaurarDesdeApi() {
+  if (!props.item?.codigoBarras) return
+  restaurandoApi.value = true
+  try {
+    const resultado = await openFoodFactsService.buscarPorCodigoBarras(props.item.codigoBarras)
+    if (!resultado) {
+      $q.notify({ type: 'warning', message: 'No se encontró el producto en la API', position: 'top' })
+      return
+    }
+    // Solo rellena los campos del formulario — el usuario confirma con Guardar
+    if (resultado.nombre) nombreLocal.value = resultado.nombre
+    if (resultado.marca) marcaLocal.value = resultado.marca
+    if (resultado.categoria) categoriaLocal.value = resultado.categoria
+    $q.notify({ type: 'positive', message: 'Campos actualizados desde la API', position: 'top', timeout: 1800 })
+  } catch {
+    $q.notify({ type: 'negative', message: 'Sin conexión. Intentá de nuevo más tarde.', position: 'top' })
+  } finally {
+    restaurandoApi.value = false
+  }
+}
 
 function guardar() {
   if (!nombreLocal.value.trim()) return

@@ -197,7 +197,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { IconPlus } from '@tabler/icons-vue'
 import ListaProductos from '../components/MisProductos/ListaProductos.vue'
 import InputBusqueda from '../components/Compartidos/InputBusqueda.vue'
@@ -300,9 +300,7 @@ function iniciarSesionEscaneo() {
 
 // Procesa el código escaneado: busca en app local y en la API
 async function procesarCodigoEscaneado(codigo) {
-  scannerActivo.value = false
-
-  // Detectar si ya se escaneó este código en la sesión actual
+  // Verificar duplicado ANTES de detener el scanner
   const yaEnBandeja = sesionEscaneoStore.items.some((i) => i.codigoBarras === codigo)
   if (yaEnBandeja) {
     $q.notify({
@@ -311,9 +309,14 @@ async function procesarCodigoEscaneado(codigo) {
       position: 'top',
       timeout: 2000,
     })
+    // nextTick garantiza que el watcher de EscaneadorCodigo procese false y true por separado
+    scannerActivo.value = false
+    await nextTick()
     scannerActivo.value = true
     return
   }
+
+  scannerActivo.value = false
 
   // Buscar si el producto ya existe en Mis Productos
   const existente = await productosService.buscarPorCodigoBarras(codigo)
