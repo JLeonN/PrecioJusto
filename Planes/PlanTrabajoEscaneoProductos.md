@@ -422,16 +422,26 @@ npx cap sync android
 ### Implementación:
 
 ```javascript
+import { Capacitor } from '@capacitor/core'
 import { Network } from '@capacitor/network'
 
+// En nativo usamos @capacitor/network (más fiable que window 'online' en Android)
+let listenerRed = null
 onMounted(async () => {
-  await Network.addListener('networkStatusChange', (status) => {
-    if (status.connected) buscarActualizacionesApi()
-  })
+  if (Capacitor.isNativePlatform()) {
+    listenerRed = await Network.addListener('networkStatusChange', (estado) => {
+      if (estado.connected) buscarActualizacionesApi()
+    })
+  } else {
+    window.addEventListener('online', buscarActualizacionesApi)
+  }
 })
-
 onUnmounted(() => {
-  Network.removeAllListeners()
+  if (Capacitor.isNativePlatform()) {
+    listenerRed?.remove()
+  } else {
+    window.removeEventListener('online', buscarActualizacionesApi)
+  }
 })
 ```
 
@@ -456,7 +466,7 @@ antes de mostrar el toast. Si ningún campo cambió, no mostrar notificación.
 | `FormularioEscaneo.vue`             | ✅ Creado    | Fase 4 completa                     |
 | `BandejaBorradores.vue`             | ✅ Creado    | Fase 6 completa                     |
 | `DialogoEditarItemBandeja.vue`      | ✅ Creado    | Fase 8 parte B                      |
-| `@capacitor/network`                | ⏳ Instalar  | Fase 10 — fix auto-fetch Android    |
+| `@capacitor/network`                | ✅ Instalado | v8.0.1 — Fase 10 completa           |
 
 ---
 
@@ -484,10 +494,10 @@ src/
       Dialogos/
         DialogoAgregarProducto.vue    (EDITAR — ✅ Fase 5)
     DetalleProducto/
-      InfoProducto.vue                (EDITAR — ✅ Fase 7 / ✅ Fase 8A / ⏳ Fase 9B)
+      InfoProducto.vue                (EDITAR — ✅ Fase 7 / ✅ Fase 8A / ✅ Fase 9B)
     Scanner/
-      BandejaBorradores.vue           (EDITAR — ✅ Fase 8B / ⏳ Fase 9A / ⏳ Fase 9B)
-      DialogoEditarItemBandeja.vue    (EDITAR — ⏳ Fase 9B)
+      BandejaBorradores.vue           (EDITAR — ✅ Fase 8B / ✅ Fase 9A / ✅ Fase 9B / ✅ Fase 10)
+      DialogoEditarItemBandeja.vue    (EDITAR — ✅ Fase 9B / ✅ Fase 10)
   layouts/
     MainLayout.vue                    (EDITAR — ✅ Fase 6)
 ```
@@ -652,5 +662,5 @@ src/
 7. **Fase 7** — Edición nombre/foto en historial ✅
 8. **Fase 8** — Marca editable en detalle + edición extendida en bandeja ✅
 9. **Fase 9** — Mejoras post-testing (2 bugs + 2 features) ✅
-10. **Fase 10** — Fix auto-fetch con `@capacitor/network` + fix toast restaurar ⏳
+10. **Fase 10** — Fix auto-fetch con `@capacitor/network` + fix toast restaurar ✅
 11. **Fase Testing** — Testing completo según checklist

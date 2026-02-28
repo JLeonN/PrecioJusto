@@ -141,6 +141,8 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useQuasar } from 'quasar'
+import { Capacitor } from '@capacitor/core'
+import { Network } from '@capacitor/network'
 import { IconPackage, IconTrash, IconCheck, IconPencil } from '@tabler/icons-vue'
 import { useSesionEscaneoStore } from '../../almacenamiento/stores/sesionEscaneoStore.js'
 import { useProductosStore } from '../../almacenamiento/stores/productosStore.js'
@@ -232,8 +234,24 @@ async function buscarActualizacionesApi() {
   }
 }
 
-onMounted(() => window.addEventListener('online', buscarActualizacionesApi))
-onUnmounted(() => window.removeEventListener('online', buscarActualizacionesApi))
+// En nativo usamos @capacitor/network (más fiable que window 'online' en Android)
+let listenerRed = null
+onMounted(async () => {
+  if (Capacitor.isNativePlatform()) {
+    listenerRed = await Network.addListener('networkStatusChange', (estado) => {
+      if (estado.connected) buscarActualizacionesApi()
+    })
+  } else {
+    window.addEventListener('online', buscarActualizacionesApi)
+  }
+})
+onUnmounted(() => {
+  if (Capacitor.isNativePlatform()) {
+    listenerRed?.remove()
+  } else {
+    window.removeEventListener('online', buscarActualizacionesApi)
+  }
+})
 
 async function limpiarTodo() {
   await sesionEscaneoStore.limpiarTodo()

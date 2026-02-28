@@ -116,11 +116,16 @@ async function restaurarDesdeApi() {
       $q.notify({ type: 'warning', message: 'No se encontró el producto en la API', position: 'top' })
       return
     }
-    // Solo rellena los campos del formulario — el usuario confirma con Guardar
-    if (resultado.nombre) nombreLocal.value = resultado.nombre
-    if (resultado.marca) marcaLocal.value = resultado.marca
-    if (resultado.categoria) categoriaLocal.value = resultado.categoria
-    $q.notify({ type: 'positive', message: 'Campos actualizados desde la API', position: 'top', timeout: 1800 })
+    // Solo rellena los campos si hay datos nuevos distintos al valor actual
+    let huboCambios = false
+    if (resultado.nombre && resultado.nombre !== nombreLocal.value) { nombreLocal.value = resultado.nombre; huboCambios = true }
+    if (resultado.marca && resultado.marca !== marcaLocal.value) { marcaLocal.value = resultado.marca; huboCambios = true }
+    if (resultado.categoria && resultado.categoria !== categoriaLocal.value) { categoriaLocal.value = resultado.categoria; huboCambios = true }
+    if (huboCambios) {
+      $q.notify({ type: 'positive', message: 'Campos actualizados desde la API', position: 'top', timeout: 1800 })
+    } else {
+      $q.notify({ type: 'info', message: 'Los datos ya están actualizados', position: 'top', timeout: 1800 })
+    }
   } catch {
     $q.notify({ type: 'negative', message: 'Sin conexión. Intentá de nuevo más tarde.', position: 'top' })
   } finally {
