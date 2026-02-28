@@ -332,9 +332,11 @@ async function procesarCodigoEscaneado(codigo) {
 **Archivo a editar:** `src/components/Formularios/DialogoAgregarProducto.vue` (orquestador del flujo)
 
 #### Comportamiento actual:
+
 Cuando el usuario escanea un código que ya está en la bandeja, la app se detiene y no sigue escaneando.
 
 #### Comportamiento esperado:
+
 - Detectar el duplicado antes de abrir el formulario
 - Mostrar toast discreto: "Este producto ya está en la bandeja"
 - Continuar escaneando automáticamente sin interrumpir el flujo
@@ -346,11 +348,13 @@ Cuando el usuario escanea un código que ya está en la bandeja, la app se detie
 **Archivo a editar:** `src/components/Scanner/BandejaBorradores.vue`
 
 #### Comportamiento actual:
+
 Si el item tiene `productoExistenteId`, al guardar desde la bandeja se agrega el precio correctamente,
 pero los cambios de nombre/marca/categoría hechos en `DialogoEditarItemBandeja` no se propagan
 al producto guardado en `productosStore`.
 
 #### Solución:
+
 En `guardarTodos()`, si el item tiene `productoExistenteId`, también llamar
 `productosStore.actualizarProducto(id, { nombre, marca, categoria })` con los campos editados.
 
@@ -361,10 +365,12 @@ En `guardarTodos()`, si el item tiene `productoExistenteId`, también llamar
 **Archivo a editar:** `src/components/Scanner/BandejaBorradores.vue`
 
 #### Descripción:
+
 Cuando la app detecta que recuperó internet, busca automáticamente en la API los items de la bandeja
 que tienen `codigoBarras` pero `origenApi === false` (escaneados sin conexión).
 
 #### Implementación:
+
 - `window.addEventListener('online', handler)` en `onMounted` / `onUnmounted`
 - Filtra items donde `origenApi === false && codigoBarras !== null`
 - Llama `OpenFoodFactsService.buscarPorCodigoBarras()` por cada uno
@@ -378,6 +384,7 @@ que tienen `codigoBarras` pero `origenApi === false` (escaneados sin conexión).
 **Archivos a editar:** `src/components/DetalleProducto/InfoProducto.vue`, `src/components/Scanner/DialogoEditarItemBandeja.vue`
 
 #### Descripción:
+
 Si el producto tiene `codigoBarras`, mostrar un botón de restaurar que vuelve a buscar en la API
 y sobreescribe nombre/marca/categoría/imagen con los datos originales. No hace falta guardar
 nada adicional — con el código de barras alcanza para re-fetchear.
@@ -387,6 +394,51 @@ nada adicional — con el código de barras alcanza para re-fetchear.
 - En `DialogoEditarItemBandeja.vue`: botón "Restaurar desde API" en el footer
 - Llama `OpenFoodFactsService.buscarPorCodigoBarras(codigoBarras)` al presionar
 - Requiere conexión — mostrar error si no hay internet
+
+---
+
+---
+
+## FASE 10 — FIX AUTO-FETCH CON CAPACITOR NETWORK
+
+**Archivo a editar:** `src/components/Scanner/BandejaBorradores.vue`
+
+### Problema:
+
+`window.addEventListener('online')` implementado en Fase 9 no disparó en Android (confirmado en T.K).
+El WebView de Android no propaga ese evento de forma confiable.
+
+### Solución:
+
+Reemplazar el listener de `window` con `@capacitor/network`, que usa los eventos nativos del sistema operativo.
+
+### Instalación:
+
+```bash
+npm install @capacitor/network
+npx cap sync android
+```
+
+### Implementación:
+
+```javascript
+import { Network } from '@capacitor/network'
+
+onMounted(async () => {
+  await Network.addListener('networkStatusChange', (status) => {
+    if (status.connected) buscarActualizacionesApi()
+  })
+})
+
+onUnmounted(() => {
+  Network.removeAllListeners()
+})
+```
+
+### Fix adicional — toast "Campos actualizados desde la API":
+
+En `DialogoEditarItemBandeja.restaurarDesdeApi()`, comparar los valores de la API con los actuales
+antes de mostrar el toast. Si ningún campo cambió, no mostrar notificación.
 
 ---
 
@@ -404,6 +456,7 @@ nada adicional — con el código de barras alcanza para re-fetchear.
 | `FormularioEscaneo.vue`             | ✅ Creado    | Fase 4 completa                     |
 | `BandejaBorradores.vue`             | ✅ Creado    | Fase 6 completa                     |
 | `DialogoEditarItemBandeja.vue`      | ✅ Creado    | Fase 8 parte B                      |
+| `@capacitor/network`                | ⏳ Instalar  | Fase 10 — fix auto-fetch Android    |
 
 ---
 
@@ -492,8 +545,8 @@ src/
 - [x] Item sin imagen muestra placeholder visual
 - [x] Editar item: cambios se reflejan de inmediato en la lista
 - [x] Eliminar item individual: desaparece de la lista y badge se actualiza
-- [Donde?] Descartar todo: pide confirmación antes de vaciar
-- [Donde?] Descartar todo: cancela la confirmación → nada cambia
+- [¿Dónde?] Descartar todo: pide confirmación antes de vaciar
+- [¿Dónde?] Descartar todo: cancela la confirmación → nada cambia
 - [x] Bandeja vacía: muestra estado vacío con mensaje amigable
 
 ### T.G Guardar desde la bandeja ("Agregar todos a Mis Productos")
@@ -532,21 +585,21 @@ src/
 
 ### T.K Mejoras post-testing (Fase 9)
 
-- [ ] Scanner detecta duplicado: muestra aviso y continúa escaneando sin trabarse
-- [ ] Scanner detecta duplicado: NO abre el formulario para el código repetido
-- [ ] Al reconectar internet, los items sin datos de API se actualizan automáticamente
+- [x] Scanner detecta duplicado: muestra aviso y continúa escaneando sin trabarse
+- [x] Scanner detecta duplicado: NO abre el formulario para el código repetido
+- [no pasó] Al reconectar internet, los items sin datos de API se actualizan automáticamente — `window.addEventListener('online')` no es confiable en Android → fix planificado en Fase 10
 - [ ] El toast de "X productos actualizados" aparece solo si se actualizó al menos uno
-- [ ] Si todos los items ya tenían `origenApi: true`, no lanza requests innecesarios
-- [ ] Editar nombre/marca/categoría en bandeja de un producto existente: el cambio se refleja en Mis Productos al guardar
-- [ ] Botón "restaurar desde API" visible solo en productos con código de barras
-- [ ] Botón "restaurar desde API" sin internet: muestra error sin crashear
-- [ ] Restaurar datos sobreescribe correctamente nombre, marca, categoría e imagen
+- [ ] Si todos los items ya tenían `origenApi: true`, no lanza requests innecesarios — verificar que el filtro `!i.origenApi` descarte todos y la función salga sin hacer llamadas a la API
+- [x] Editar nombre/marca/categoría en bandeja de un producto existente: el cambio se refleja en Mis Productos al guardar
+- [x] Botón "restaurar desde API" visible solo en productos con código de barras
+- [x] Botón "restaurar desde API" sin internet: muestra error sin crashear
+- [x] Restaurar datos sobreescribe correctamente nombre, marca, categoría e imagen
 
 ### T.I Casos extremos (edge cases)
 
 - [ ] Bandeja con 20+ items: no hay lag visible al scrollear
 - [x] Foto de producto muy grande: no rompe localStorage ni crashea la app
-- [No me aparecio ningun mensaje] Iniciar flujo de escaneo sin internet: avisa antes de abrir el scanner
+- [No apareció ningún mensaje] Iniciar flujo de escaneo sin internet: avisa antes de abrir el scanner
 - [x] Cambiar orientación del dispositivo durante el escaneo: cámara no se congela
 - [x] Interrumpir escaneo con llamada telefónica: al volver, estado se recupera correctamente
 
@@ -579,6 +632,15 @@ src/
   Ubicaciones: en la foto (lado opuesto al ícono de cámara) y en el diálogo de edición de la bandeja.
   → **Planificado en Fase 9 — Feature B**
 
+- [ ] El toast "Campos actualizados desde la API" (botón Restaurar en `DialogoEditarItemBandeja`) aparece
+      incluso cuando los datos de la API son idénticos a los que ya estaban en los campos.
+      Debería mostrar el toast solo si al menos un campo cambió realmente.
+      → **Planificado en Fase 10**
+
+- [ ] Si todos los items ya tenían `origenApi: true`, la función `buscarActualizacionesApi()` no debería
+      hacer ninguna llamada a la API. El filtro `!i.origenApi` lo garantiza con un `return` anticipado
+      si el array de pendientes queda vacío. Confirmar que funciona correctamente.
+
 ## ORDEN DE IMPLEMENTACIÓN SUGERIDO
 
 1. **Fase 1** — Instalar plugin y verificar permisos Android ✅
@@ -589,5 +651,6 @@ src/
 6. **Fase 6** — `BandejaBorradores` + badge en DRAWER ✅
 7. **Fase 7** — Edición nombre/foto en historial ✅
 8. **Fase 8** — Marca editable en detalle + edición extendida en bandeja ✅
-9. **Fase 9** — Mejoras post-testing (2 bugs + 2 features) ⏳
-10. **Fase Testing** — Testing completo según checklist
+9. **Fase 9** — Mejoras post-testing (2 bugs + 2 features) ✅
+10. **Fase 10** — Fix auto-fetch con `@capacitor/network` + fix toast restaurar ⏳
+11. **Fase Testing** — Testing completo según checklist
