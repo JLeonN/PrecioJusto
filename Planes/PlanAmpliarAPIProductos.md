@@ -141,7 +141,7 @@ directamente en la respuesta, dejar `marca` vacío — no hacer un segundo reque
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 3: SERVICIO UPCITEMDB 🔍 [ ] PENDIENTE
+## 📋 FASE 3: SERVICIO UPCITEMDB 🔍 [x] COMPLETA
 
 ### Objetivo
 
@@ -152,19 +152,19 @@ cualquier categoría. El tier de prueba es gratuito (100 req/día, sin registro)
 
 **Archivo nuevo:** `src/almacenamiento/servicios/UpcItemDbService.js`
 
-[ ] Endpoint: `https://api.upcitemdb.com/prod/trial/lookup?upc={codigo}`
-[ ] Sin clave API (tier trial)
-[ ] Método público: `buscarPorCodigo(codigo)` → retorna producto mapeado o `null`
-[ ] `_mapearProducto(item)`:
+[x] Endpoint: `https://api.upcitemdb.com/prod/trial/lookup?upc={codigo}`
+[x] Sin clave API (tier trial)
+[x] Método público: `buscarPorCodigo(codigo)` → retorna producto mapeado o `null`
+[x] `_mapearProducto(item)`:
   - `nombre` ← `title`
   - `marca` ← `brand`
   - `codigoBarras` ← `ean` o `upc`
   - `cantidad` ← `1`, `unidad` ← `'unidad'`
   - `categoria` ← `category` (primer segmento si viene como breadcrumb separado por `>`)
   - `imagen` ← `images[0]` o `null`
-[ ] Si `items` está vacío o `code !== 'OK'` → retorna `null`
-[ ] Manejar error 429 (rate limit) → retorna `null` sin romper el flujo
-[ ] Exportar instancia singleton
+[x] Si `items` está vacío o `code !== 'OK'` → retorna `null`
+[x] Manejar error 429 (rate limit) → retorna `null` sin romper el flujo
+[x] Exportar instancia singleton
 
 ═══════════════════════════════════════════════════════════════
 
@@ -423,11 +423,11 @@ src/
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 33% (2/6 fases completadas)
+## 📊 PROGRESO GENERAL: 50% (3/6 fases completadas)
 
 [x] Fase 1: Servicios Open Facts adicionales (Beauty, Pet Food, Products)
 [x] Fase 2: Servicios de libros (Open Library + Google Books)
-[ ] Fase 3: Servicio UPCitemdb
+[x] Fase 3: Servicio UPCitemdb
 [ ] Fase 4: Servicio orquestador (BuscadorProductosService)
 [ ] Fase 5: Integrar orquestador en componentes existentes
 [ ] Fase 6: Atribución de fuente en UI (InfoProducto)
