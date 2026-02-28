@@ -168,7 +168,7 @@ cualquier categoría. El tier de prueba es gratuito (100 req/día, sin registro)
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 4: SERVICIO ORQUESTADOR 🎯 [ ] PENDIENTE
+## 📋 FASE 4: SERVICIO ORQUESTADOR 🎯 [x] COMPLETA
 
 ### Objetivo
 
@@ -179,9 +179,9 @@ en orden, retornando el primer resultado exitoso.
 
 **Archivo nuevo:** `src/almacenamiento/servicios/BuscadorProductosService.js`
 
-[ ] Importar todos los servicios de Fases 1, 2 y 3
-[ ] Importar `OpenFoodFactsService` ya existente
-[ ] Método público principal: `buscarPorCodigo(codigo)` → retorna `{ producto, fuenteDato }` o `null`
+[x] Importar todos los servicios de Fases 1, 2 y 3
+[x] Importar `OpenFoodFactsService` ya existente
+[x] Método público principal: `buscarPorCodigo(codigo)` → retorna `{ producto, fuenteDato }` o `null`
 
 ### Lógica de detección y cadena de búsqueda
 
@@ -215,8 +215,8 @@ async function _buscarProductoGeneral(codigo) {
 }
 ```
 
-[ ] Cada llamada está envuelta en try/catch — si una API falla, sigue con la siguiente
-[ ] El retorno siempre es `{ producto, fuenteDato }` o `null`
+[x] Cada llamada está envuelta en try/catch — si una API falla, sigue con la siguiente
+[x] El retorno siempre es `{ producto, fuenteDato }` o `null`
 
 ### Valores de `fuenteDato`
 
@@ -232,7 +232,7 @@ const FUENTES = {
 }
 ```
 
-[ ] Exportar instancia singleton del orquestador
+[x] Exportar instancia singleton del orquestador
 
 ═══════════════════════════════════════════════════════════════
 
@@ -423,12 +423,12 @@ src/
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 50% (3/6 fases completadas)
+## 📊 PROGRESO GENERAL: 67% (4/6 fases completadas)
 
 [x] Fase 1: Servicios Open Facts adicionales (Beauty, Pet Food, Products)
 [x] Fase 2: Servicios de libros (Open Library + Google Books)
 [x] Fase 3: Servicio UPCitemdb
-[ ] Fase 4: Servicio orquestador (BuscadorProductosService)
+[x] Fase 4: Servicio orquestador (BuscadorProductosService)
 [ ] Fase 5: Integrar orquestador en componentes existentes
 [ ] Fase 6: Atribución de fuente en UI (InfoProducto)
 [ ] Fase Testing: Testing completo
