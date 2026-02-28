@@ -47,7 +47,7 @@ Todas las APIs usadas son gratuitas y de código abierto.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 1: SERVICIOS OPEN FACTS ADICIONALES 🧴 [ ] PENDIENTE
+## 📋 FASE 1: SERVICIOS OPEN FACTS ADICIONALES 🧴 [x] COMPLETA
 
 ### Objetivo
 
@@ -58,23 +58,23 @@ Son casi idénticos a `OpenFoodFactsService.js` — solo cambia la base URL.
 
 **Archivo nuevo:** `src/almacenamiento/servicios/OpenBeautyFactsService.js`
 
-[ ] Copiar estructura de `OpenFoodFactsService.js`
-[ ] Cambiar `baseURL` a `https://world.openbeautyfacts.org/api/v2`
-[ ] Método público: `buscarPorCodigoBarras(codigo)` → retorna producto mapeado o `null`
-[ ] `_mapearProducto()` idéntico al de Open Food Facts (misma estructura de respuesta)
-[ ] Exportar instancia singleton
+[x] Copiar estructura de `OpenFoodFactsService.js`
+[x] Cambiar `baseURL` a `https://world.openbeautyfacts.org/api/v2`
+[x] Método público: `buscarPorCodigoBarras(codigo)` → retorna producto mapeado o `null`
+[x] `_mapearProducto()` idéntico al de Open Food Facts (misma estructura de respuesta)
+[x] Exportar instancia singleton
 
 ### 1.2 — OpenPetFoodFactsService.js
 
 **Archivo nuevo:** `src/almacenamiento/servicios/OpenPetFoodFactsService.js`
 
-[ ] Igual que 1.1 con `baseURL = 'https://world.openpetfoodfacts.org/api/v2'`
+[x] Igual que 1.1 con `baseURL = 'https://world.openpetfoodfacts.org/api/v2'`
 
 ### 1.3 — OpenProductsFactsService.js
 
 **Archivo nuevo:** `src/almacenamiento/servicios/OpenProductsFactsService.js`
 
-[ ] Igual que 1.1 con `baseURL = 'https://world.openproductsfacts.org/api/v2'`
+[x] Igual que 1.1 con `baseURL = 'https://world.openproductsfacts.org/api/v2'`
 
 ### Formato de retorno (igual para los 3)
 
@@ -423,9 +423,9 @@ src/
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 0% (0/6 fases completadas)
+## 📊 PROGRESO GENERAL: 17% (1/6 fases completadas)
 
-[ ] Fase 1: Servicios Open Facts adicionales (Beauty, Pet Food, Products)
+[x] Fase 1: Servicios Open Facts adicionales (Beauty, Pet Food, Products)
 [ ] Fase 2: Servicios de libros (Open Library + Google Books)
 [ ] Fase 3: Servicio UPCitemdb
 [ ] Fase 4: Servicio orquestador (BuscadorProductosService)
