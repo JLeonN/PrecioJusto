@@ -92,7 +92,7 @@ Son casi idénticos a `OpenFoodFactsService.js` — solo cambia la base URL.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 2: SERVICIOS DE LIBROS 📚 [ ] PENDIENTE
+## 📋 FASE 2: SERVICIOS DE LIBROS 📚 [x] COMPLETA
 
 ### Objetivo
 
@@ -103,18 +103,18 @@ Google Books (respaldo). Los ISBNs siempre empiezan con `978` o `979`.
 
 **Archivo nuevo:** `src/almacenamiento/servicios/OpenLibraryService.js`
 
-[ ] Endpoint: `https://openlibrary.org/isbn/{isbn}.json`
-[ ] Portada: `https://covers.openlibrary.org/b/isbn/{isbn}-M.jpg`
-[ ] Método público: `buscarPorIsbn(isbn)` → retorna producto mapeado o `null`
-[ ] `_mapearLibro(datos, isbn)`:
+[x] Endpoint: `https://openlibrary.org/isbn/{isbn}.json`
+[x] Portada: `https://covers.openlibrary.org/b/isbn/{isbn}-M.jpg`
+[x] Método público: `buscarPorIsbn(isbn)` → retorna producto mapeado o `null`
+[x] `_mapearLibro(datos, isbn)`:
   - `nombre` ← `title`
   - `marca` ← primer autor si existe (los autores vienen como array de refs a `/authors/OL...`)
   - `codigoBarras` ← isbn recibido como parámetro
   - `cantidad` ← `1`, `unidad` ← `'unidad'`
   - `categoria` ← `'Libro'`
   - `imagen` ← URL de portada (siempre construida desde el ISBN — verificar si retorna 404)
-[ ] Manejar 404 (libro no encontrado) → retorna `null`
-[ ] Exportar instancia singleton
+[x] Manejar 404 (libro no encontrado) → retorna `null`
+[x] Exportar instancia singleton
 
 ### ⚠️ Nota sobre autores
 
@@ -126,18 +126,18 @@ directamente en la respuesta, dejar `marca` vacío — no hacer un segundo reque
 
 **Archivo nuevo:** `src/almacenamiento/servicios/GoogleBooksService.js`
 
-[ ] Endpoint: `https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}`
-[ ] No requiere clave API para el tier gratuito (fair use por IP)
-[ ] Método público: `buscarPorIsbn(isbn)` → retorna producto mapeado o `null`
-[ ] `_mapearLibro(item)`:
+[x] Endpoint: `https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}`
+[x] No requiere clave API para el tier gratuito (fair use por IP)
+[x] Método público: `buscarPorIsbn(isbn)` → retorna producto mapeado o `null`
+[x] `_mapearLibro(item)`:
   - `nombre` ← `volumeInfo.title`
   - `marca` ← `volumeInfo.authors[0]` o `volumeInfo.publisher`
   - `codigoBarras` ← isbn recibido como parámetro
   - `cantidad` ← `1`, `unidad` ← `'unidad'`
   - `categoria` ← `'Libro'`
   - `imagen` ← `volumeInfo.imageLinks?.thumbnail` (reemplazar `http://` por `https://`)
-[ ] Si `totalItems === 0` → retorna `null`
-[ ] Exportar instancia singleton
+[x] Si `totalItems === 0` → retorna `null`
+[x] Exportar instancia singleton
 
 ═══════════════════════════════════════════════════════════════
 
@@ -423,10 +423,10 @@ src/
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 17% (1/6 fases completadas)
+## 📊 PROGRESO GENERAL: 33% (2/6 fases completadas)
 
 [x] Fase 1: Servicios Open Facts adicionales (Beauty, Pet Food, Products)
-[ ] Fase 2: Servicios de libros (Open Library + Google Books)
+[x] Fase 2: Servicios de libros (Open Library + Google Books)
 [ ] Fase 3: Servicio UPCitemdb
 [ ] Fase 4: Servicio orquestador (BuscadorProductosService)
 [ ] Fase 5: Integrar orquestador en componentes existentes
