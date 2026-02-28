@@ -95,7 +95,11 @@ unidad, litro, mililitro, kilo, gramo, metro, pack
 ✅ ETAPA 1.5: Integración con comercios
 ✅ ETAPA 2: API Open Food Facts (completada)
 ✅ ETAPA 3: Búsqueda inteligente local (buscador inline en MisProductosPage)
-⏳ ETAPA 4: Escaneo código de barras (pendiente)
+✅ ETAPA 4: Escaneo código de barras con cámara (completado — Fases 1-10)
+  - EscaneadorCodigo.vue: overlay nativo con @capacitor-mlkit/barcode-scanning, fallback web
+  - FormularioEscaneo.vue: modo rápido (solo precio) o mínimo (precio + nombre)
+  - BandejaBorradores.vue: bandeja persistente con edición, auto-fetch al reconectar
+  - Flujo orquestado desde MisProductosPage.vue con sesionEscaneoStore
 
 ## DIALOGO AGREGAR PRECIO (DialogoAgregarPrecio.vue)
 Modal rápido para agregar precio a un producto ya existente. Accesible desde TarjetaProducto y DetalleProductoPage.

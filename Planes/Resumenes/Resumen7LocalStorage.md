@@ -32,6 +32,7 @@ Sistema de almacenamiento modular basado en patrón Strategy que permite cambiar
 - src/almacenamiento/stores/comerciosStore.js
 - src/almacenamiento/stores/confirmacionesStore.js
 - src/almacenamiento/stores/preferenciaStore.js
+- src/almacenamiento/stores/sesionEscaneoStore.js — 🆕 borradores de escaneo (Pinia + persistencia en localStorage)
 
 ## ALMACENAMIENTO SERVICE (CEREBRO DEL SISTEMA)
 

@@ -113,7 +113,17 @@ Cada precio requiere:
 - Mismo modal usado en MisProductosPage (cero duplicación de código)
 - DialogoAgregarPrecio usa `comerciosAgrupados` (cadenas unificadas, top 3 recientes, clearable)
 
-## MEJORAS RECIENTES (Fase 7 + Fase 10)
+## MEJORAS RECIENTES (Fases 7–9)
+
+### InfoProducto.vue — Marca editable
+- Campo `marca` mostrado entre nombre y categoría, reutiliza `CampoEditable.vue` con `IconBuildingStore`
+- Guarda con `productosStore.actualizarProducto(id, { marca })`
+
+### InfoProducto.vue — Botón restaurar desde API
+- Solo visible si el producto tiene `codigoBarras`
+- Botón circular overlay en la esquina inferior izquierda de la imagen
+- Re-fetch a OpenFoodFacts → sobreescribe nombre/marca/categoría/imagen con datos originales
+- Muestra loading spinner mientras consulta
 
 ### InfoProducto.vue — Categoría editable
 - Campo `categoria` mostrado debajo del código de barras

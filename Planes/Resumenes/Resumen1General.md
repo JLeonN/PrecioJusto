@@ -26,6 +26,9 @@ La app está desarrollada con **Vue.js 3**, **Quasar Framework** y **Capacitor**
 ### Mobile
 - **Capacitor** (wrapper para Android)
 - **Capacitor Storage** (almacenamiento local)
+- **`@capacitor-mlkit/barcode-scanning`** (scanner de código de barras con ML Kit)
+- **`@capacitor/camera`** (captura de fotos)
+- **`@capacitor/network`** (detección nativa de conectividad)
 
 ### Estado y Datos
 - **Pinia** (gestión de estado global)
@@ -103,7 +106,8 @@ src/
 │   └── stores/
 │       ├── productosStore.js               # Estado global de productos (Pinia)
 │       ├── comerciosStore.js               # Estado global de comercios (Pinia)
-│       └── confirmacionesStore.js          # Estado global de confirmaciones (Pinia)
+│       ├── confirmacionesStore.js          # Estado global de confirmaciones (Pinia)
+│       └── sesionEscaneoStore.js           # 🆕 Borradores de escaneo con persistencia (Pinia)
 │
 ├── components/
 │   ├── Compartidos/                         # Componentes reutilizables entre secciones
@@ -138,6 +142,12 @@ src/
 │   │       ├── DialogoAgregarSucursal.vue           # 🆕 Modal para agregar sucursal a comercio
 │   │       ├── DialogoMismaUbicacion.vue            # Alerta de misma dirección
 │   │       └── DialogoMotivoEliminacion.vue         # Confirmación con motivo de eliminación
+│   │
+│   ├── Scanner/                             # 🆕 Flujo de escaneo de productos
+│   │   ├── EscaneadorCodigo.vue            # 🆕 Scanner de cámara (overlay nativo, fallback web)
+│   │   ├── FormularioEscaneo.vue           # 🆕 Formulario post-escaneo (modo rápido / mínimo)
+│   │   ├── BandejaBorradores.vue           # 🆕 Bandeja de items escaneados (bottom sheet)
+│   │   └── DialogoEditarItemBandeja.vue    # 🆕 Edición extendida de item (nombre, marca, categoría)
 │   │
 │   ├── MisProductos/                        # Componentes de productos
 │   │   └── ListaProductos.vue              # Contenedor con grid responsivo Quasar
@@ -403,6 +413,12 @@ A. Gestión de Productos
 ✅ 🆕 Foto del producto más grande en detalle (desktop: 180px, móvil: 45vw)
 ✅ 🆕 Registro de última interacción por producto (registrarInteraccion + productosPorInteraccion)
 ✅ 🆕 Título "Historial de precios" visible en DetalleProductoPage
+✅ 🆕 Marca editable en detalle del producto (CampoEditable con IconBuildingStore)
+✅ 🆕 Botón restaurar datos desde API en detalle del producto (re-fetch por código de barras)
+✅ 🆕 Flujo de escaneo rápido con cámara (EscaneadorCodigo + FormularioEscaneo)
+✅ 🆕 Bandeja de borradores persistente (sesionEscaneoStore + BandejaBorradores)
+✅ 🆕 Edición extendida de items en bandeja (nombre, marca, categoría + restaurar desde API)
+✅ 🆕 Auto-fetch al reconectar internet (@capacitor/network, nativo en Android)
 
 B. Gestión de Comercios y Sucursales
 
@@ -570,6 +586,22 @@ H. Arquitectura y Código
 - `totalConfirmaciones`: Cantidad de precios confirmados
 - `precioEstaConfirmado(precioId)`: Verifica si precio está confirmado
 - `listaConfirmaciones`: Array de IDs confirmados
+
+### sesionEscaneoStore.js
+**Estado:**
+- `comercioActivo`: Comercio seleccionado para la sesión de escaneo
+- `items`: Array de borradores escaneados (persistido en localStorage)
+
+**Acciones:**
+- `iniciarSesion(comercio)`: Setea el comercio activo
+- `agregarItem(item)`: Agrega un item a la bandeja
+- `actualizarItem(id, cambios)`: Edita un item existente
+- `eliminarItem(id)`: Elimina un item
+- `limpiarTodo()`: Vacía items y comercio
+
+**Getters:**
+- `cantidadItems`: Número de items (para badge)
+- `tieneItemsPendientes`: Boolean
 
 ### preferenciaStore.js
 **Estado:**
@@ -875,7 +907,7 @@ H. Arquitectura y Código
 - ✅ Validación de duplicados en comercios
 - ✅ Búsqueda local inteligente
 - ✅ Sistema de diseño centralizado
-- ⏳ Escaneo de código de barras con cámara (Pendiente - Stage 4)
+- ✅ Escaneo de código de barras con cámara (Completado - Fases 1-10)
 
 ### Fase 2: Funcionalidades Colaborativas (Futuro)
 - ⏳ Migración de CapacitorStorage a Firebase/Firestore
@@ -944,6 +976,7 @@ H. Arquitectura y Código
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
 - **Sección Mis Productos:** Completada
+- **Flujo de escaneo:** Completado (Fases 1-10, incluyendo bandeja, edición y auto-fetch)
 - **Safe area:** Completada (Android 15+ edge-to-edge)
 - **Botón back nativo:** Completado
 - **Splash screen:** Completada (imagen aleatoria, sin distorsión)
