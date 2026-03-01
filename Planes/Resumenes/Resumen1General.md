@@ -35,7 +35,11 @@ La app está desarrollada con **Vue.js 3**, **Quasar Framework** y **Capacitor**
 - **Patrón Strategy** (adaptadores de almacenamiento)
 
 ### APIs Externas
-- **Open Food Facts API** (información de productos por código de barras)
+- **BuscadorProductosService** (orquestador — único punto de entrada)
+- **Open Food Facts** (alimentos), **Open Beauty Facts** (cosméticos), **Open Pet Food Facts** (mascotas), **Open Products Facts** (general)
+- **Open Library + Google Books** (libros por ISBN 978/979)
+- **UPCitemdb** (comodín general, 100 req/día, solo APK — CORS en browser)
+- Ver detalles en Resumen6
 
 ### Iconos
 - **Tabler Icons** (sistema de iconos consistente)
@@ -101,7 +105,14 @@ src/
 │   │   ├── ComerciosService.js             # CRUD de comercios + validación duplicados
 │   │   ├── ConfirmacionesService.js        # Gestión de confirmaciones de precios
 │   │   ├── PreferenciasService.js          # Preferencias del usuario (moneda, unidad)
-│   │   └── OpenFoodFactsService.js         # Integración con API Open Food Facts
+│   │   ├── BuscadorProductosService.js     # 🆕 Orquestador multi-API (único punto de entrada)
+│   │   ├── OpenFoodFactsService.js         # Alimentos (Open Food Facts API)
+│   │   ├── OpenBeautyFactsService.js       # 🆕 Cosméticos y perfumes
+│   │   ├── OpenPetFoodFactsService.js      # 🆕 Alimentos para mascotas
+│   │   ├── OpenProductsFactsService.js     # 🆕 Productos generales (electrónica, hogar)
+│   │   ├── OpenLibraryService.js           # 🆕 Libros por ISBN (primario)
+│   │   ├── GoogleBooksService.js           # 🆕 Libros por ISBN (respaldo)
+│   │   └── UpcItemDbService.js             # 🆕 Comodín general (100 req/día, solo APK)
 │   │
 │   └── stores/
 │       ├── productosStore.js               # Estado global de productos (Pinia)
@@ -223,7 +234,8 @@ Resúmenes de Documentación/                  # En raíz del proyecto
 Planes/                                      # Planes de trabajo e implementación
 ├── PlanSistemaSucursales.md                 # Sistema de comercios con cadenas y sucursales
 ├── PlanTrabajoActualizacionPrecios.md       # Plan de actualización de precios
-└── PlanTrabajoComercio.md                   # Plan de trabajo de comercios
+├── PlanTrabajoComercio.md                   # Plan de trabajo de comercios
+└── PlanAmpliarAPIProductos.md               # 🆕 Búsqueda multi-API (6 fases completadas)
 ```
 
 ---
@@ -391,9 +403,11 @@ A. Gestión de Productos
 
 ✅ Registro manual de productos (nombre, marca, código de barras, cantidad, unidad)
 ✅ Campo categoría eliminado (simplificación del formulario)
-✅ Búsqueda por código de barras (Open Food Facts API)
+✅ Búsqueda por código de barras con 7 APIs en cadena (orquestador BuscadorProductosService)
+✅ Detección automática de ISBN (978/979) → flujo libros; resto → flujo productos
 ✅ Búsqueda por nombre y marca (Open Food Facts API)
-✅ Autocompletado de datos desde API (nombre, marca, imagen, cantidad, unidad)
+✅ Autocompletado de datos desde API (nombre, marca, imagen, cantidad, unidad, fuenteDato)
+✅ 🆕 Atribución de fuente visible en detalle del producto ("Datos de Open Food Facts", etc.)
 ✅ Registro de precios con múltiples monedas (20+ opciones: UYU, USD, EUR, ARS, BRL, etc.)
 ✅ Monedas centralizadas en constantes (fácil agregar nuevas)
 ✅ Validación de cantidades y unidades (kg, g, L, mL, unidades, pack, metro)
@@ -670,17 +684,23 @@ H. Arquitectura y Código
 - `cargarConfirmacionesUsuario(usuarioId)`: Carga Set de precios confirmados
 - `eliminarConfirmacion(usuarioId, productoId, precioId)`: Des-confirma precio
 
-### OpenFoodFactsService.js
+### BuscadorProductosService.js (orquestador)
 **Responsabilidades:**
-- Integración con Open Food Facts API
-- Búsqueda por código de barras
-- Búsqueda por nombre y marca
-- Transformación de datos de API a formato local
-- Manejo de múltiples resultados
+- Único punto de entrada para búsquedas por código de barras
+- Detecta ISBN (978/979) y enruta al flujo correcto
+- Prueba APIs en orden, retorna el primer resultado
 
-**Métodos principales:**
-- `buscarPorCodigoBarras(codigo)`: Busca producto por código de barras
-- `buscarPorTexto(texto, limite)`: Busca productos por texto
+**Retorna:** `{ producto, fuenteDato }` o `null`
+
+### OpenFoodFactsService.js y familia
+- `OpenFoodFactsService` — alimentos; también `buscarPorTexto(texto)`
+- `OpenBeautyFactsService` — cosméticos/perfumes
+- `OpenPetFoodFactsService` — alimentos mascotas
+- `OpenProductsFactsService` — productos generales
+- `OpenLibraryService` — libros (Books API, sin redirect)
+- `GoogleBooksService` — libros (respaldo)
+- `UpcItemDbService` — comodín general (CORS en browser, OK en APK)
+- Ver detalles técnicos en Resumen6
 
 ### PreferenciasService.js
 **Responsabilidades:**
@@ -971,12 +991,13 @@ H. Arquitectura y Código
 - Señal "app lista" vía `nextTick()` en `App.vue`
 
 ### Estado Actual
-- **Versión:** 0.0.5
+- **Versión:** 0.0.8
 - **Almacenamiento:** Local (Capacitor Storage)
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
 - **Sección Mis Productos:** Completada
 - **Flujo de escaneo:** Completado (Fases 1-10, incluyendo bandeja, edición y auto-fetch)
+- **APIs de búsqueda:** Completado (7 APIs orquestadas, libros por ISBN, fuenteDato en UI)
 - **Safe area:** Completada (Android 15+ edge-to-edge)
 - **Botón back nativo:** Completado
 - **Splash screen:** Completada (imagen aleatoria, sin distorsión)
@@ -1003,4 +1024,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** Febrero 24, 2026 (splash screen aleatoria, safe area Android 15, botón back nativo, íconos oficiales)
+**Última actualización:** 01 de Marzo 2026 (sistema multi-API: 7 servicios + orquestador, soporte libros, fuenteDato en UI)

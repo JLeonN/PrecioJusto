@@ -122,8 +122,14 @@ Cada precio requiere:
 ### InfoProducto.vue — Botón restaurar desde API
 - Solo visible si el producto tiene `codigoBarras`
 - Botón circular overlay en la esquina inferior izquierda de la imagen
-- Re-fetch a OpenFoodFacts → sobreescribe nombre/marca/categoría/imagen con datos originales
+- Usa `BuscadorProductosService` (orquestador multi-API, no solo OpenFoodFacts)
+- Sobreescribe nombre/marca/categoría/imagen/`fuenteDato` con datos de la API
 - Muestra loading spinner mientras consulta
+
+### InfoProducto.vue — Atribución de fuente (fuenteDato)
+- Texto pequeño discreto al pie del componente: `"Datos de Open Food Facts"`
+- Solo visible si `producto.fuenteDato` tiene valor (no aparece en productos manuales)
+- CSS: `font-size: 11px`, `color: #9e9e9e`, `text-align: center`
 
 ### InfoProducto.vue — Categoría editable
 - Campo `categoria` mostrado debajo del código de barras

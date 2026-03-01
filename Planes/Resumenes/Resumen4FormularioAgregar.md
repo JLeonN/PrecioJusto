@@ -10,6 +10,7 @@
 
 ### PRODUCTO
 - nombre, marca, codigoBarras, cantidad, unidad, imagen (null por defecto)
+- fuenteDato: string | null — origen de los datos (ej: 'Open Food Facts', 'Open Library')
 - ❌ CAMPO ELIMINADO: categoria (ya no se usa)
 
 ### PRECIO
@@ -93,7 +94,7 @@ unidad, litro, mililitro, kilo, gramo, metro, pack
 ## ETAPAS DE DESARROLLO
 ✅ ETAPA 1: Formulario manual básico
 ✅ ETAPA 1.5: Integración con comercios
-✅ ETAPA 2: API Open Food Facts (completada)
+✅ ETAPA 2: APIs multi-fuente (completada) — BuscadorProductosService orquesta 7 APIs (ver Resumen6)
 ✅ ETAPA 3: Búsqueda inteligente local (buscador inline en MisProductosPage)
 ✅ ETAPA 4: Escaneo código de barras con cámara (completado — Fases 1-10)
   - EscaneadorCodigo.vue: overlay nativo con @capacitor-mlkit/barcode-scanning, fallback web
