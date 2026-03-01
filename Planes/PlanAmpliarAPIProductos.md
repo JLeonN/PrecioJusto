@@ -329,7 +329,7 @@ Texto pequeño, discreto, al pie del componente de información del producto.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE TESTING 🧪 [ ] PENDIENTE
+## 📋 FASE TESTING 🧪 [~] EN PROGRESO
 
 ### T.A — Open Facts adicionales
 
@@ -341,12 +341,13 @@ Texto pequeño, discreto, al pie del componente de información del producto.
 
 ### T.B — Libros
 
-[ ] Código que empieza con 978 → va directamente al flujo de libros (no intenta Open Food Facts)
-[ ] ISBN válido encontrado en Open Library → datos correctos en el formulario
+[x] Código que empieza con 978 → va directamente al flujo de libros (confirmado por logcat: `valueType: "ISBN"` + routing correcto)
+[x] ISBN válido encontrado en Open Library → datos correctos en el formulario (probado con "Código Limpio" ISBN 9788441532106 ✅)
+[x] ISBN válido encontrado → datos correctos (probado con Death Note ISBN 9788419096425 ✅ — sin imagen, dato no disponible en DB)
 [ ] ISBN no encontrado en Open Library → intenta Google Books automáticamente
 [ ] ISBN no encontrado en ninguna → usuario llena manual (sin errores visibles)
-[ ] `categoria` = "Libro" en todos los libros encontrados
-[ ] `fuenteDato` = "Open Library" o "Google Books" según corresponda
+[x] `categoria` = "Libro" (hardcodeado en el servicio)
+[x] `fuenteDato` = "Open Library" o "Google Books" según corresponda (lógica correcta, pendiente confirmar visualmente en UI)
 
 ### T.C — UPCitemdb
 
@@ -354,12 +355,13 @@ Texto pequeño, discreto, al pie del componente de información del producto.
 [ ] UPCitemdb encuentra el producto → datos correctos (nombre, marca, categoría, imagen)
 [ ] Rate limit (429): la app no muestra error visible al usuario, solo pasa a manual
 [ ] `fuenteDato` = "UPCitemdb"
+> ⚠️ UPCitemdb tiene CORS en browser — probar exclusivamente desde el APK en el cel
 
 ### T.D — Cadena completa
 
 [ ] Alimento → Open Food Facts lo resuelve (sin cambio respecto al comportamiento actual)
 [ ] Producto raro → ninguna API lo tiene → formulario manual sin errores
-[ ] API lenta o sin internet → cada intento falla silenciosamente → llega a manual
+[x] Sin internet → cada intento falla silenciosamente → llega a manual (confirmado: errores 404 y Network Error no se propagan al usuario)
 [ ] Restaurar desde API en InfoProducto → usa el orquestador y actualiza `fuenteDato`
 
 ### T.E — UI de atribución
@@ -368,6 +370,13 @@ Texto pequeño, discreto, al pie del componente de información del producto.
 [ ] Texto correcto para cada fuente
 [ ] Producto ingresado manual (sin API): no muestra texto de fuente
 [ ] Texto discreto, no molesta visualmente
+
+### 🔧 Notas de debugging (01/03/2026)
+
+- Tag de logcat para ver logs JS en Android: `adb logcat -s Capacitor/Console`
+- Errores 404 en Open Facts son normales (producto no en esa DB) — ya silenciados en código
+- OpenLibrary endpoint migrado a Books API (`/api/books?bibkeys=...`) para evitar redirect 301 que fallaba en Android WebView
+- UPCitemdb falla con CORS en browser dev (`localhost:9000`) — funciona en APK nativo
 
 ═══════════════════════════════════════════════════════════════
 
@@ -441,5 +450,5 @@ src/
 ═══════════════════════════════════════════════════════════════
 
 **CREADO:** 28 de Febrero 2026
-**ÚLTIMA ACTUALIZACIÓN:** 28 de Febrero 2026
-**ESTADO:** ✅ IMPLEMENTACIÓN COMPLETA — pendiente testing
+**ÚLTIMA ACTUALIZACIÓN:** 01 de Marzo 2026
+**ESTADO:** 🧪 TESTING EN PROGRESO — libros ✅ confirmados, resto pendiente
