@@ -20,6 +20,7 @@ class UpcItemDbService {
         console.warn('⚠️ UPCitemdb: límite diario alcanzado (100 req/día)')
         return null
       }
+      if (error.code === 'ERR_NETWORK') return null // CORS en browser dev — OK en Android nativo
       console.error('❌ UPCitemdb error:', error)
       return null
     }

@@ -32,6 +32,7 @@ class OpenFoodFactsService {
       console.log('⚠️ Producto no encontrado')
       return null
     } catch (error) {
+      if (error.response?.status === 404) return null
       console.error('❌ Error al buscar código:', error)
       return null
     }

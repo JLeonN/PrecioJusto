@@ -18,6 +18,7 @@ class OpenProductsFactsService {
 
       return null
     } catch (error) {
+      if (error.response?.status === 404) return null
       console.error('❌ OpenProductsFacts error:', error)
       return null
     }

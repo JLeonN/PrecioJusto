@@ -18,6 +18,7 @@ class OpenPetFoodFactsService {
 
       return null
     } catch (error) {
+      if (error.response?.status === 404) return null
       console.error('❌ OpenPetFoodFacts error:', error)
       return null
     }

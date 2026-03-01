@@ -18,6 +18,7 @@ class OpenBeautyFactsService {
 
       return null
     } catch (error) {
+      if (error.response?.status === 404) return null
       console.error('❌ OpenBeautyFacts error:', error)
       return null
     }
