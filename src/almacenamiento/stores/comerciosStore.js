@@ -119,11 +119,8 @@ export const useComerciStore = defineStore('comercios', {
         // Dirección principal (más reciente)
         grupo.direccionPrincipal = grupo.direcciones[0]
 
-        // Foto de la sucursal más reciente
-        const comercioMasReciente = grupo.comerciosOriginales.sort(
-          (a, b) => new Date(b.fechaUltimoUso) - new Date(a.fechaUltimoUso),
-        )[0]
-        grupo.foto = comercioMasReciente.foto
+        // Foto de la dirección principal (más reciente)
+        grupo.foto = grupo.direccionPrincipal?.foto || null
 
         return grupo
       })
@@ -467,6 +464,24 @@ export const useComerciStore = defineStore('comercios', {
         }
       } catch (error) {
         console.error('Error al registrar uso:', error)
+      }
+    },
+
+    // Actualiza la foto de una dirección específica
+    async actualizarFotoDireccion(comercioId, direccionId, base64) {
+      try {
+        const guardado = await ComerciosService.actualizarFotoDireccion(comercioId, direccionId, base64)
+        if (guardado) {
+          const comercio = this.comercios.find((c) => c.id === comercioId)
+          if (comercio) {
+            const direccion = comercio.direcciones.find((d) => d.id === direccionId)
+            if (direccion) direccion.foto = base64 || null
+          }
+        }
+        return guardado
+      } catch (error) {
+        console.error('Error al actualizar foto de dirección:', error)
+        return false
       }
     },
 

@@ -44,21 +44,21 @@ cambiarla o eliminarla en cualquier momento desde la pantalla de edición.
 
 ═══════════════════════════════════════════════════════════════
 
-## ⏳ FASE 1: MODELO DE DATOS 📦 [PENDIENTE]
+## ✅ FASE 1: MODELO DE DATOS 📦 [COMPLETADA]
 
 ### ComerciosService.js
-[ ] Agregar campo `foto: null` dentro del objeto `direccion` al crear una dirección nueva
-[ ] Verificar que `guardarComercio()` persiste el campo `foto` correctamente
-[ ] Agregar método `actualizarFotoDireccion(comercioId, direccionId, base64)`:
-  [ ] - Busca el comercio por id
-  [ ] - Busca la dirección por direccionId dentro de `direcciones[]`
-  [ ] - Actualiza `direccion.foto` con el base64 recibido (o null para quitar)
-  [ ] - Persiste via AlmacenamientoService
+[x] Agregar campo `foto: null` dentro del objeto `direccion` al crear una dirección nueva
+[x] Verificar que `guardarComercio()` persiste el campo `foto` correctamente
+[x] Agregar método `actualizarFotoDireccion(comercioId, direccionId, base64)`:
+  [x] - Busca el comercio por id
+  [x] - Busca la dirección por direccionId dentro de `direcciones[]`
+  [x] - Actualiza `direccion.foto` con el base64 recibido (o null para quitar)
+  [x] - Persiste via AlmacenamientoService
 
 ### comerciosStore.js
-[ ] Agregar acción `actualizarFotoDireccion(comercioId, direccionId, base64)`
-[ ] Conectar con `ComerciosService.actualizarFotoDireccion()`
-[ ] Actualizar estado reactivo local tras guardar
+[x] Agregar acción `actualizarFotoDireccion(comercioId, direccionId, base64)`
+[x] Conectar con `ComerciosService.actualizarFotoDireccion()`
+[x] Actualizar estado reactivo local tras guardar
 
 ### Notas de modelo
 - El campo `foto` vive en: `comercio.direcciones[n].foto`
@@ -201,9 +201,9 @@ Contexto: el comercio ya existe — se guarda inmediatamente en el store
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 0% — EN DESARROLLO
+## 📊 PROGRESO GENERAL: 20% — EN DESARROLLO
 
-⏳ Fase 1: Modelo de datos
+✅ Fase 1: Modelo de datos
 ⏳ Fase 2: Composable de cámara
 ⏳ Fase 3: Dialogo agregar rápido
 ⏳ Fase 4: Formulario completo
@@ -212,5 +212,5 @@ Contexto: el comercio ya existe — se guarda inmediatamente en el store
 
 ═══════════════════════════════════════════════════════════════
 
-**ÚLTIMA ACTUALIZACIÓN:** Marzo 2026 - PLAN CREADO
-**ESTADO:** ⏳ PENDIENTE DE IMPLEMENTACIÓN
+**ÚLTIMA ACTUALIZACIÓN:** Marzo 2026 - Fase 1 completada
+**ESTADO:** 🚧 EN DESARROLLO

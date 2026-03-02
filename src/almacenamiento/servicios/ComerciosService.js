@@ -273,6 +273,7 @@ async function agregarComercio(datosComercio) {
           ? `${datosComercio.nombre.trim()} - ${datosComercio.calle.trim()}`
           : datosComercio.nombre.trim(),
         fechaUltimoUso: new Date().toISOString(),
+        foto: datosComercio.foto || null,
       },
     ],
     foto: null,
@@ -345,6 +346,7 @@ async function agregarDireccion(comercioId, datosDireccion) {
     ciudad: datosDireccion.ciudad?.trim() || '',
     nombreCompleto: `${comercio.nombre} - ${datosDireccion.calle.trim()}`,
     fechaUltimoUso: new Date().toISOString(),
+    foto: datosDireccion.foto || null,
   }
 
   comercio.direcciones.push(nuevaDireccion)
@@ -405,6 +407,24 @@ async function eliminarDireccion(comercioId, direccionId) {
 }
 
 /**
+ * Actualiza la foto de una dirección específica
+ * @param {string} comercioId - ID del comercio
+ * @param {string} direccionId - ID de la dirección
+ * @param {string|null} base64 - Foto en Base64 o null para quitar
+ * @returns {Promise<boolean>} true si se actualizó
+ */
+async function actualizarFotoDireccion(comercioId, direccionId, base64) {
+  const comercios = await obtenerTodos()
+  const comercio = comercios.find((c) => c.id === comercioId)
+  if (!comercio) return false
+  const direccion = comercio.direcciones.find((d) => d.id === direccionId)
+  if (!direccion) return false
+  direccion.foto = base64 || null
+  await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  return true
+}
+
+/**
  * Registra el uso de un comercio (para orden por últimos usados)
  * @param {string} comercioId - ID del comercio
  * @param {string} direccionId - ID de la dirección usada (opcional)
@@ -459,6 +479,7 @@ export default {
   editarDireccion,
   eliminarDireccion,
   validarDuplicados,
+  actualizarFotoDireccion,
   registrarUsoComercio,
   obtenerComercioPorUso,
   // Utilidades exportadas para uso en otros módulos
