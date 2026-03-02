@@ -144,6 +144,40 @@ Los siguientes archivos fueron creados para la exploración y deben eliminarse c
 
 ---
 
+## Foto del Local por Dirección
+
+**Idea:** Al cargar la dirección de un comercio, mostrar automáticamente una foto del lugar.
+
+### Opciones evaluadas (Marzo 2026)
+
+#### Opción 1 — Google Street View Static API ⭐ Recomendada
+- Pasás una dirección → devuelve imagen de cómo se ve el lugar desde la calle
+- URL de ejemplo:
+  ```
+  https://maps.googleapis.com/maps/api/streetview?size=400x300&location=Cno.Maldonado+5757&key=API_KEY
+  ```
+- **Pros:** Una sola llamada, muy simple de integrar, funciona bien en Android (sin CORS)
+- **Contras:** Requiere API key de Google, tiene costo (capa gratuita: $200/mes — alcanza para uso normal), la foto muestra la calle y no siempre enfoca el negocio
+
+#### Opción 2 — Google Places API (fotos del negocio)
+- Buscás por nombre + dirección → obtenés `place_id` → pedís las fotos del lugar
+- **Pros:** Fotos reales del negocio subidas por usuarios de Maps, mejor calidad visual
+- **Contras:** 2-3 llamadas encadenadas, más complejo, más costoso que Street View
+
+#### Opción 3 — Mapillary (gratuito, open-source)
+- Alternativa sin costo a Google Street View
+- **Contras:** Cobertura muy baja en Uruguay/Latinoamérica — no confiable para este caso
+
+### Preguntas pendientes para implementación
+- ¿Se tiene o se está dispuesto a crear una API key de Google?
+- ¿La foto es decorativa (mejorar UX) o crítica para el flujo?
+- ¿Se activa automáticamente al guardar la dirección, o el usuario la solicita manualmente?
+
+### Relación con geolocalización
+Si se implementa el flujo de geolocalización (Overpass/Photon), las coordenadas obtenidas podrían pasarse directamente a Street View en lugar de la dirección en texto, mejorando la precisión de la foto mostrada.
+
+---
+
 ## Resumen Ejecutivo
 
 | Aspecto | Estado |
