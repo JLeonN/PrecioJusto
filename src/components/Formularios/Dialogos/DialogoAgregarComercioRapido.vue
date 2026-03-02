@@ -38,6 +38,24 @@
           :rules="[requerido]"
           :disable="!!validacionPendiente"
         />
+
+        <!-- Foto del local (opcional, discreta) -->
+        <div class="seccion-foto-rapida q-mt-sm">
+          <div v-if="fotoTemporal" class="foto-miniatura-row">
+            <q-img :src="fotoTemporal" class="foto-miniatura" />
+            <q-btn flat dense size="sm" color="grey-7" @click="alClickarFoto">
+              <IconCamera :size="14" class="q-mr-xs" />
+              Cambiar foto
+            </q-btn>
+          </div>
+          <q-btn v-else flat dense size="sm" color="grey-6" @click="alClickarFoto">
+            <IconCamera :size="14" class="q-mr-xs" />
+            Foto del local (opcional)
+          </q-btn>
+          <p class="text-caption text-grey-5 q-mt-xs q-mb-none">
+            Podés cambiarla o quitarla después desde el detalle del comercio
+          </p>
+        </div>
       </q-card-section>
 
       <!-- Confirmación inline de validación -->
@@ -86,13 +104,17 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
+  <!-- Input oculto para fallback web (cámara) -->
+  <input ref="inputArchivoRef" type="file" accept="image/*" class="input-archivo-oculto" @change="alSeleccionarArchivo" />
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useQuasar } from 'quasar'
+import { IconCamera } from '@tabler/icons-vue'
 import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.js'
 import ComerciosService from '../../../almacenamiento/servicios/ComerciosService.js'
+import { useCamaraFoto } from '../../../composables/useCamaraFoto.js'
 
 const props = defineProps({
   modelValue: {
@@ -113,6 +135,7 @@ const emit = defineEmits(['update:modelValue', 'comercio-creado'])
 
 const $q = useQuasar()
 const comerciosStore = useComerciStore()
+const { inputArchivoRef, tomarFoto, leerArchivo } = useCamaraFoto()
 
 const dialogoAbierto = computed({
   get: () => props.modelValue,
@@ -121,6 +144,7 @@ const dialogoAbierto = computed({
 
 const nombreInterno = ref('')
 const direccionInterna = ref('')
+const fotoTemporal = ref(null)
 const guardando = ref(false)
 const validacionPendiente = ref(null)
 
@@ -138,6 +162,7 @@ watch(
       nombreInterno.value = props.nombreInicial || ''
       direccionInterna.value = props.direccionInicial || ''
       validacionPendiente.value = null
+      fotoTemporal.value = null
     }
   },
 )
@@ -217,6 +242,16 @@ async function crearComercio(datos) {
   cerrar()
 }
 
+async function alClickarFoto() {
+  const resultado = await tomarFoto()
+  if (resultado) fotoTemporal.value = resultado
+}
+
+async function alSeleccionarArchivo(event) {
+  const resultado = await leerArchivo(event)
+  if (resultado) fotoTemporal.value = resultado
+}
+
 function construirDatos() {
   return {
     nombre: nombreInterno.value.trim(),
@@ -224,6 +259,7 @@ function construirDatos() {
     calle: direccionInterna.value.trim() || '',
     barrio: '',
     ciudad: '',
+    foto: fotoTemporal.value,
   }
 }
 
@@ -231,6 +267,7 @@ function cerrar() {
   dialogoAbierto.value = false
   nombreInterno.value = ''
   direccionInterna.value = ''
+  fotoTemporal.value = null
   validacionPendiente.value = null
 }
 
@@ -242,5 +279,23 @@ function requerido(val) {
 <style scoped>
 .q-card {
   border-radius: 8px;
+}
+.seccion-foto-rapida {
+  display: flex;
+  flex-direction: column;
+}
+.foto-miniatura-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.foto-miniatura {
+  width: 64px;
+  height: 48px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+.input-archivo-oculto {
+  display: none;
 }
 </style>

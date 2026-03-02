@@ -82,20 +82,23 @@
       </template>
     </q-input>
 
-    <!-- PLACEHOLDER FOTO (deshabilitado) -->
+    <!-- FOTO DEL LOCAL -->
     <div class="seccion-foto">
+      <q-img v-if="datosInternos.foto" :src="datosInternos.foto" class="foto-preview" :ratio="16/9" />
       <q-btn
         outline
         color="grey-6"
-        label="Agregar foto"
-        icon="photo_camera"
         class="boton-foto"
-        disable
-      />
-      <p class="text-caption text-grey-6 q-mt-xs q-mb-none">
-        Próximamente: podrás agregar fotos del comercio
+        @click="alClickarFoto"
+      >
+        <IconCamera :size="18" class="q-mr-sm" />
+        {{ datosInternos.foto ? 'Cambiar foto del local' : 'Agregar foto del local' }}
+      </q-btn>
+      <p class="text-caption text-grey-5 q-mt-xs q-mb-none">
+        Opcional. Podés cambiarla o quitarla después desde el detalle del comercio
       </p>
     </div>
+    <input ref="inputArchivoRef" type="file" accept="image/*" class="input-archivo-oculto" @change="alSeleccionarArchivo" />
 
     <!-- FEEDBACK DE VALIDACIÓN -->
     <div v-if="mostrarFeedbackValidacion" class="feedback-validacion q-mt-md">
@@ -111,6 +114,8 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { IconCamera } from '@tabler/icons-vue'
+import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
 
 const props = defineProps({
   modelValue: {
@@ -121,6 +126,7 @@ const props = defineProps({
       calle: '',
       barrio: '',
       ciudad: '',
+      foto: null,
     }),
   },
 })
@@ -148,6 +154,8 @@ const opcionesTipo = [
   { label: 'Otro', value: 'Otro' },
 ]
 
+const { inputArchivoRef, tomarFoto, leerArchivo } = useCamaraFoto()
+
 // Estado interno
 const datosInternos = ref({
   nombre: props.modelValue.nombre || '',
@@ -155,6 +163,7 @@ const datosInternos = ref({
   calle: props.modelValue.calle || '',
   barrio: props.modelValue.barrio || '',
   ciudad: props.modelValue.ciudad || '',
+  foto: props.modelValue.foto || null,
 })
 
 // Feedback de validación
@@ -170,6 +179,7 @@ watch(
       calle: nuevoValor.calle || '',
       barrio: nuevoValor.barrio || '',
       ciudad: nuevoValor.ciudad || '',
+      foto: nuevoValor.foto || null,
     }
   },
   { deep: true },
@@ -178,6 +188,22 @@ watch(
 // Emitir cambios al padre
 function emitirCambios() {
   emit('update:modelValue', { ...datosInternos.value })
+}
+
+async function alClickarFoto() {
+  const resultado = await tomarFoto()
+  if (resultado) {
+    datosInternos.value.foto = resultado
+    emitirCambios()
+  }
+}
+
+async function alSeleccionarArchivo(event) {
+  const resultado = await leerArchivo(event)
+  if (resultado) {
+    datosInternos.value.foto = resultado
+    emitirCambios()
+  }
 }
 
 // Reglas de validación
@@ -208,9 +234,17 @@ function requerido(val) {
   padding: 12px;
   background-color: var(--fondo-drawer);
   border-radius: var(--borde-radio);
+  gap: 8px;
 }
 .boton-foto {
   width: 100%;
+}
+.foto-preview {
+  width: 100%;
+  border-radius: 8px;
+}
+.input-archivo-oculto {
+  display: none;
 }
 .feedback-validacion {
   animation: fadeIn 0.3s ease;

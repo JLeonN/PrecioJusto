@@ -59,13 +59,34 @@
           @seleccionar="seleccionarDireccion"
         />
 
-        <!-- SECCIÓN: FOTO (placeholder futuro) -->
+        <!-- SECCIÓN: FOTO DEL LOCAL -->
         <div class="seccion-foto q-mb-lg">
-          <div class="foto-placeholder">
+          <q-img
+            v-if="direccionSeleccionada?.foto"
+            :src="direccionSeleccionada.foto"
+            class="foto-comercio"
+            :ratio="16/9"
+          />
+          <div v-else class="foto-placeholder">
             <IconCamera :size="48" class="text-grey-4" />
-            <span class="text-grey-5 text-caption">Foto próximamente</span>
+            <span class="text-grey-5 text-caption">Sin foto</span>
+          </div>
+          <div class="foto-acciones q-mt-sm">
+            <q-btn outline size="sm" color="orange" @click="alClickarFoto">
+              <IconCamera :size="16" class="q-mr-xs" />
+              {{ direccionSeleccionada?.foto ? 'Cambiar foto' : 'Agregar foto' }}
+            </q-btn>
+            <q-btn
+              v-if="direccionSeleccionada?.foto"
+              flat size="sm" color="negative" class="q-ml-sm"
+              @click="quitarFotoComercio"
+            >
+              <IconTrash :size="16" class="q-mr-xs" />
+              Quitar foto
+            </q-btn>
           </div>
         </div>
+        <input ref="inputArchivoRef" type="file" accept="image/*" class="input-archivo-oculto" @change="alSeleccionarArchivo" />
 
         <!-- SECCIÓN: DATOS EDITABLES -->
         <div class="seccion-campos q-mb-lg">
@@ -271,6 +292,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
+import { useCamaraFoto } from '../composables/useCamaraFoto.js'
 import {
   IconArrowLeft,
   IconBuilding,
@@ -299,6 +321,7 @@ const router = useRouter()
 const $q = useQuasar()
 const comerciosStore = useComerciStore()
 const productosStore = useProductosStore()
+const { inputArchivoRef, tomarFoto, leerArchivo } = useCamaraFoto()
 
 // Opciones de tipo (mismas que FormularioComercio)
 const opcionesTipo = [
@@ -616,6 +639,46 @@ async function ejecutarFusion(destinoId, origenId) {
   }
 }
 
+// ── Foto del local ───────────────────────────────────────
+
+async function alClickarFoto() {
+  const resultado = await tomarFoto()
+  if (resultado) await guardarFotoComercio(resultado)
+}
+
+async function alSeleccionarArchivo(event) {
+  const resultado = await leerArchivo(event)
+  if (resultado) await guardarFotoComercio(resultado)
+}
+
+async function guardarFotoComercio(base64) {
+  if (!comercioOriginalActual.value || !direccionSeleccionada.value) return
+  const guardado = await comerciosStore.actualizarFotoDireccion(
+    comercioOriginalActual.value.id,
+    direccionSeleccionada.value.id,
+    base64,
+  )
+  if (guardado) {
+    direccionSeleccionada.value = { ...direccionSeleccionada.value, foto: base64 }
+    $q.notify({ type: 'positive', message: 'Foto guardada', position: 'top', timeout: 1500 })
+  } else {
+    $q.notify({ type: 'negative', message: 'No se pudo guardar la foto', position: 'top' })
+  }
+}
+
+async function quitarFotoComercio() {
+  if (!comercioOriginalActual.value || !direccionSeleccionada.value) return
+  const guardado = await comerciosStore.actualizarFotoDireccion(
+    comercioOriginalActual.value.id,
+    direccionSeleccionada.value.id,
+    null,
+  )
+  if (guardado) {
+    direccionSeleccionada.value = { ...direccionSeleccionada.value, foto: null }
+    $q.notify({ type: 'positive', message: 'Foto eliminada', position: 'top', timeout: 1500 })
+  }
+}
+
 // Inicializar dirección seleccionada cuando cambia el comercio
 watch(comercioActual, (nuevo) => {
   if (nuevo && nuevo.direcciones.length > 0 && !direccionSeleccionada.value) {
@@ -660,7 +723,13 @@ onMounted(async () => {
 }
 .seccion-foto {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+.foto-comercio {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 12px;
 }
 .foto-placeholder {
   width: 100%;
@@ -674,6 +743,13 @@ onMounted(async () => {
   justify-content: center;
   gap: 8px;
   border: 2px dashed var(--color-carta-borde, #ddd);
+}
+.foto-acciones {
+  display: flex;
+  align-items: center;
+}
+.input-archivo-oculto {
+  display: none;
 }
 .seccion-titulo {
   display: flex;

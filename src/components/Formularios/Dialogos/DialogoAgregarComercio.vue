@@ -93,6 +93,7 @@ const datosComercio = ref({
   calle: '',
   barrio: '',
   ciudad: '',
+  foto: null,
 })
 
 // Comercios similares encontrados (para diálogo de coincidencias)
@@ -289,6 +290,7 @@ function limpiarFormulario() {
     calle: '',
     barrio: '',
     ciudad: '',
+    foto: null,
   }
 }
 
