@@ -67,23 +67,23 @@ cambiarla o eliminarla en cualquier momento desde la pantalla de edición.
 
 ═══════════════════════════════════════════════════════════════
 
-## ⏳ FASE 2: COMPOSABLE DE CÁMARA 📷 [PENDIENTE]
+## ✅ FASE 2: COMPOSABLE DE CÁMARA 📷 [COMPLETADA]
 
 ### Crear src/composables/useCamaraFoto.js
-[ ] Extraer y adaptar lógica de cámara de `InfoProducto.vue`
-[ ] Importar `Camera`, `CameraResultType`, `CameraSource` de `@capacitor/camera`
-[ ] Importar `Capacitor` de `@capacitor/core`
-[ ] Exponer `inputArchivoRef` (ref para el input hidden del fallback web)
-[ ] Exponer función `tomarFoto()`:
-  [ ] - En plataforma nativa: usa `Camera.getPhoto()` con `quality: 70`, `resultType: Base64`
-  [ ] - En web: dispara click en `inputArchivoRef`
-  [ ] - Retorna `Promise<string|null>` — base64 o null si el usuario cancela
-  [ ] - Maneja el error de cancelación silenciosamente (no notificar)
-[ ] Exponer función `leerArchivo(event)`:
-  [ ] - Lee el archivo seleccionado via `FileReader`
-  [ ] - Retorna Promise con el base64 resultante
-  [ ] - Limpia el value del input para permitir reselección
-[ ] No tiene lógica de persistencia — solo captura y devuelve el base64
+[x] Extraer y adaptar lógica de cámara de `InfoProducto.vue`
+[x] Importar `Camera`, `CameraResultType`, `CameraSource` de `@capacitor/camera`
+[x] Importar `Capacitor` de `@capacitor/core`
+[x] Exponer `inputArchivoRef` (ref para el input hidden del fallback web)
+[x] Exponer función `tomarFoto()`:
+  [x] - En plataforma nativa: usa `Camera.getPhoto()` con `quality: 70`, `resultType: Base64`
+  [x] - En web: dispara click en `inputArchivoRef`
+  [x] - Retorna `Promise<string|null>` — base64 o null si el usuario cancela
+  [x] - Maneja el error de cancelación silenciosamente (no notificar)
+[x] Exponer función `leerArchivo(event)`:
+  [x] - Lee el archivo seleccionado via `FileReader`
+  [x] - Retorna Promise con el base64 resultante
+  [x] - Limpia el value del input para permitir reselección
+[x] No tiene lógica de persistencia — solo captura y devuelve el base64
 
 ═══════════════════════════════════════════════════════════════
 
@@ -201,10 +201,10 @@ Contexto: el comercio ya existe — se guarda inmediatamente en el store
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 20% — EN DESARROLLO
+## 📊 PROGRESO GENERAL: 40% — EN DESARROLLO
 
 ✅ Fase 1: Modelo de datos
-⏳ Fase 2: Composable de cámara
+✅ Fase 2: Composable de cámara
 ⏳ Fase 3: Dialogo agregar rápido
 ⏳ Fase 4: Formulario completo
 ⏳ Fase 5: Editar comercio
@@ -212,5 +212,5 @@ Contexto: el comercio ya existe — se guarda inmediatamente en el store
 
 ═══════════════════════════════════════════════════════════════
 
-**ÚLTIMA ACTUALIZACIÓN:** Marzo 2026 - Fase 1 completada
+**ÚLTIMA ACTUALIZACIÓN:** Marzo 2026 - Fase 2 completada
 **ESTADO:** 🚧 EN DESARROLLO
