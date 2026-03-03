@@ -91,6 +91,29 @@ unidad, litro, mililitro, kilo, gramo, metro, pack
 - Display value = `undefined` durante foco (no interferir con q-select)
 - Display value = texto guardado cuando no tiene foco
 
+## FORMULARIO PRODUCTO — FOTO (FormularioProducto.vue)
+
+### Fila compacta de foto
+- Ubicada debajo del bloque Cantidad/Unidad
+- Fila horizontal con icono + label "Foto" a la izquierda, miniatura + botón a la derecha
+- `foto-miniatura`: 40×40px, `object-fit: cover`, `border-radius: 6px`
+- Botón redondo discreto (flat, grey-6) abre `q-menu` con hasta 3 opciones:
+  - "Tomar foto" (`v-if="esNativo"`)
+  - "Desde galería"
+  - "Borrar foto" (`v-if="datosInternos.imagen"`)
+- Usa composable `useCamaraFoto`: `{ inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo }`
+- `imagen` incluido en `datosInternos` y sincronizado vía `watch(props.modelValue)`
+- Al cambiar foto: `emitirCambios()` propaga al padre (DialogoAgregarProducto)
+
+## DIALOGO AGREGAR COMERCIO RÁPIDO — FOTO
+
+### Comportamiento actual (funcional)
+- Botón "Foto del local (opcional)" / "Cambiar foto" abre `q-menu` con opciones
+- Sin foto: 2 opciones ("Tomar foto" si nativo, "Desde galería")
+- Con foto: miniatura 64×48px + 3 opciones (agrega "Borrar foto" → `fotoTemporal = null`)
+- Usa `useCamaraFoto`: `{ inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo }`
+- `fotoTemporal` (ref local) se incluye en `construirDatos()` → guardado con el comercio
+
 ## ETAPAS DE DESARROLLO
 ✅ ETAPA 1: Formulario manual básico
 ✅ ETAPA 1.5: Integración con comercios

@@ -142,6 +142,16 @@ Cada precio requiere:
 - Desktop: `grid-template-columns: 180px 1fr` (era 120px), altura 180px
 - Móvil: `width: 45vw`, `max-width: 180px` (era 35vw / 140px)
 
+### InfoProducto.vue — Gestión de fotos (useCamaraFoto)
+- Usa composable `useCamaraFoto` (elimina imports locales de `@capacitor/camera`)
+- Menú contextual `q-menu` con hasta 3 opciones:
+  - "Tomar foto" (`v-if="esNativo"` — solo Android/iOS)
+  - "Desde galería" (todas las plataformas, usa `input[type=file]`)
+  - "Quitar foto" (`v-if="producto.imagen"` — solo si hay foto)
+- `esNativo = Capacitor.isNativePlatform()` evaluado una vez al init (no reactivo)
+- `abrirGaleria()` activa el `input[type=file]` oculto en el template
+- Al seleccionar: llama `actualizarFoto(base64)` → guarda en `productosStore`
+
 ### DetalleProductoPage.vue — Título de sección
 - Texto "Historial de precios" visible entre EstadisticasProducto y FiltrosHistorial
 

@@ -43,14 +43,42 @@
         <div class="seccion-foto-rapida q-mt-sm">
           <div v-if="fotoTemporal" class="foto-miniatura-row">
             <q-img :src="fotoTemporal" class="foto-miniatura" />
-            <q-btn flat dense size="sm" color="grey-7" @click="alClickarFoto">
+            <q-btn flat dense size="sm" color="grey-7">
               <IconCamera :size="14" class="q-mr-xs" />
               Cambiar foto
+              <q-menu anchor="bottom left" self="top left">
+                <q-list style="min-width: 160px">
+                  <q-item v-if="esNativo" clickable v-close-popup @click="seleccionarCamara">
+                    <q-item-section avatar><IconCamera :size="18" /></q-item-section>
+                    <q-item-section>Tomar foto</q-item-section>
+                  </q-item>
+                  <q-item clickable v-close-popup @click="abrirGaleria">
+                    <q-item-section avatar><IconPhoto :size="18" /></q-item-section>
+                    <q-item-section>Desde galería</q-item-section>
+                  </q-item>
+                  <q-item clickable v-close-popup @click="fotoTemporal = null">
+                    <q-item-section avatar><IconTrash :size="18" class="text-negative" /></q-item-section>
+                    <q-item-section class="text-negative">Borrar foto</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
             </q-btn>
           </div>
-          <q-btn v-else flat dense size="sm" color="grey-6" @click="alClickarFoto">
+          <q-btn v-else flat dense size="sm" color="grey-6">
             <IconCamera :size="14" class="q-mr-xs" />
             Foto del local (opcional)
+            <q-menu anchor="bottom left" self="top left">
+              <q-list style="min-width: 160px">
+                <q-item v-if="esNativo" clickable v-close-popup @click="seleccionarCamara">
+                  <q-item-section avatar><IconCamera :size="18" /></q-item-section>
+                  <q-item-section>Tomar foto</q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup @click="abrirGaleria">
+                  <q-item-section avatar><IconPhoto :size="18" /></q-item-section>
+                  <q-item-section>Desde galería</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
           </q-btn>
           <p class="text-caption text-grey-5 q-mt-xs q-mb-none">
             Podés cambiarla o quitarla después desde el detalle del comercio
@@ -111,7 +139,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useQuasar } from 'quasar'
-import { IconCamera } from '@tabler/icons-vue'
+import { IconCamera, IconPhoto, IconTrash } from '@tabler/icons-vue'
 import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.js'
 import ComerciosService from '../../../almacenamiento/servicios/ComerciosService.js'
 import { useCamaraFoto } from '../../../composables/useCamaraFoto.js'
@@ -135,7 +163,7 @@ const emit = defineEmits(['update:modelValue', 'comercio-creado'])
 
 const $q = useQuasar()
 const comerciosStore = useComerciStore()
-const { inputArchivoRef, tomarFoto, leerArchivo } = useCamaraFoto()
+const { inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo } = useCamaraFoto()
 
 const dialogoAbierto = computed({
   get: () => props.modelValue,
@@ -242,8 +270,8 @@ async function crearComercio(datos) {
   cerrar()
 }
 
-async function alClickarFoto() {
-  const resultado = await tomarFoto()
+async function seleccionarCamara() {
+  const resultado = await abrirCamara()
   if (resultado) fotoTemporal.value = resultado
 }
 

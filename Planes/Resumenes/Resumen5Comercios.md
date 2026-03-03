@@ -30,6 +30,7 @@ Sistema completo para gestión de comercios y sucursales que permite registrar t
 
 ### COMPOSABLES
 - useFechaRelativa.js (src/composables/) - formatearFechaRelativa, formatearUltimoUso, formatearFechaCorta
+- useCamaraFoto.js (src/composables/) - `{ inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo }`
 
 ### COMPONENTES COMPARTIDOS
 - BarraSeleccion.vue (src/components/Compartidos/)
@@ -290,10 +291,14 @@ Formulario para ingresar datos de nuevo comercio con validación en tiempo real
 - Placeholder: "Ej: Montevideo"
 - Default: "Montevideo"
 
-#### Foto (placeholder - futuro)
-- Botón deshabilitado con ícono cámara
-- Tooltip: "Próximamente"
-- Color: grey-5
+#### Foto (funcional)
+- Botón "Agregar/Cambiar foto del local" abre `q-menu` con hasta 3 opciones:
+  - "Tomar foto" (`v-if="esNativo"` — solo Android/iOS)
+  - "Desde galería" (todas las plataformas)
+  - "Borrar foto" (`v-if="datosInternos.foto"`)
+- Preview de foto (aspect ratio 16:9) visible sobre el botón si hay imagen
+- Usa composable `useCamaraFoto`: `{ inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo }`
+- `foto` sincronizado vía `v-model` con el diálogo padre
 
 ### Validaciones en Tiempo Real
 - Nombre: required, min 2 chars
@@ -961,9 +966,9 @@ const {
 - Lista de productos asociados con último precio (filtrada por sucursal)
 - Estadísticas del comercio (registro, último uso, último precio, productos, sucursales)
 - Conteo de usos reales calculado desde productos (comerciosConUsosReales computed en ComerciosPage)
+- Fotos de comercios: q-menu contextual en FormularioComercio, EditarComercioPage y DialogoAgregarComercioRapido (composable useCamaraFoto)
 
 ### ⏳ Pendientes
-- Subir foto de comercio (cámara)
 - Eliminación con motivo
 - Geolocalización
 - Mapa de comercios cercanos
@@ -980,18 +985,16 @@ const {
 - Negative (#C10015): Eliminación
 
 ## LIMITACIONES ACTUALES
-- Foto es placeholder (botón deshabilitado)
 - Sin geolocalización
 - Sin validación de direcciones con API
 - Levenshtein distance puede dar falsos positivos
 - No hay base de datos precargada de comercios
 
 ## ROADMAP POST-MVP
-1. Implementar plugin de cámara y fotos
-2. Eliminación con validación de productos (motivo)
-3. Geolocalización y mapa interactivo
-4. Compartir comercios entre usuarios
-5. Sistema de reportes y verificación comunitaria
+1. Eliminación con validación de productos (motivo)
+2. Geolocalización y mapa interactivo
+3. Compartir comercios entre usuarios
+4. Sistema de reportes y verificación comunitaria
 
 ## NOTAS PARA IAS
 
@@ -1011,6 +1014,7 @@ const {
 - Agrupación de cadenas: Implementado y testeado
 - Integración con precios: Completada (FormularioPrecio Y DialogoAgregarPrecio usan comerciosAgrupados)
 - Usos reales: ComerciosPage calcula cantidadUsos desde productos, no desde cantidadUsos del store
+- Fotos de comercios: Completadas (q-menu, useCamaraFoto, FormularioComercio + EditarComercioPage + DialogoAgregarComercioRapido)
 - Progreso general: ~95% completado
 
 ### Diferencias con Productos:

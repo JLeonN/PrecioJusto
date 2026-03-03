@@ -187,9 +187,9 @@ como acciones independientes y para agregar foto a los productos.
 
 [x] Eliminar icono de papelera del overlay — la acción se mueve al menú
 [x] Icono de cámara (único) abre `q-menu` con 3 opciones:
-[x]   - "Tomar foto" (`v-if="esNativo"`) → `abrirCamara()`
-[x]   - "Desde galería" (siempre) → `abrirGaleria()`
-[x]   - "Borrar foto" (siempre) → `quitarFotoComercio()`
+[x] - "Tomar foto" (`v-if="esNativo"`) → `abrirCamara()`
+[x] - "Desde galería" (siempre) → `abrirGaleria()`
+[x] - "Borrar foto" (siempre) → `quitarFotoComercio()`
 [x] Placeholder también abre `q-menu` (sin "Borrar foto" porque no hay foto)
 [x] CSS: `justify-content: flex-end` en overlay, eliminar `.btn-overlay-papelera`
 [x] Agregar `IconPhoto` a los imports
@@ -209,65 +209,65 @@ como acciones independientes y para agregar foto a los productos.
 
 ### T.A — Composable useCamaraFoto (actualizado)
 
-[ ] `abrirCamara()`: abre la cámara nativa directamente (sin diálogo intermedio)
-[ ] `abrirGaleria()`: abre selector de archivos del sistema en APK y en web
-[ ] `esNativo` es `true` en APK y `false` en navegador desktop
-[ ] Cancelar la cámara no genera error ni notificación
-[ ] Retorna base64 válido en ambas plataformas
+[x] `abrirCamara()`: abre la cámara nativa directamente (sin diálogo intermedio)
+[x] `abrirGaleria()`: abre selector de archivos del sistema en APK y en web
+[x] `esNativo` es `true` en APK y `false` en navegador desktop
+[x] Cancelar la cámara no genera error ni notificación
+[x] Retorna base64 válido en ambas plataformas
 
 ### T.B — Agregar Comercio Rápido
 
-[ ] Botón de foto visible pero discreto en el flujo
-[ ] Al tocar botón: abre selector correctamente
-[ ] Miniatura se muestra tras seleccionar foto
-[ ] Al confirmar sin foto: el comercio se crea con `direccion.foto = null`
-[ ] Al confirmar con foto: el comercio se crea con la foto en `direccion.foto`
-[ ] Mensaje informativo visible debajo del botón
-[ ] Flujo de velocidad no se interrumpe si el usuario ignora la foto
+[x] Botón de foto visible pero discreto en el flujo
+[x] Al tocar botón: abre selector correctamente
+[x] Miniatura se muestra tras seleccionar foto
+[x] Al confirmar sin foto: el comercio se crea con `direccion.foto = null`
+[x] Al confirmar con foto: el comercio se crea con la foto en `direccion.foto`
+[x] Mensaje informativo visible debajo del botón
+[x] Flujo de velocidad no se interrumpe si el usuario ignora la foto
 
 ### T.C — Formulario Comercio Completo
 
-[ ] Botón activo (no deshabilitado)
-[ ] Al tocar botón: abre selector correctamente
-[ ] Miniatura visible tras selección
-[ ] Al guardar: foto incluida en `direccion.foto`
-[ ] Mensaje informativo visible
+[x] Botón activo (no deshabilitado)
+[x] Al tocar botón: abre selector correctamente
+[x] Miniatura visible tras selección
+[x] Al guardar: foto incluida en `direccion.foto`
+[x] Mensaje informativo visible
 
 ### T.D — Editar Comercio — Menú contextual
 
-[ ] Sin foto: placeholder visible y clickeable, abre menú con 2 opciones
-[ ] En web (sin nativo): opción "Tomar foto" NO aparece en el menú
-[ ] En APK: opción "Tomar foto" SÍ aparece en el menú
-[ ] "Desde galería": abre selector y guarda foto inmediatamente
-[ ] "Tomar foto" (APK): abre cámara y guarda foto inmediatamente
-[ ] Con foto: overlay muestra solo el ícono de cámara (sin papelera)
-[ ] Con foto: menú tiene 3 opciones (tomar, galería, borrar)
-[ ] "Borrar foto": foto desaparece, vuelve el placeholder, notificación correcta
-[ ] Imagen respeta proporciones originales (sin distorsión ni barras negras)
-[ ] Notificación de éxito al guardar
+[x] Sin foto: placeholder visible y clickeable, abre menú con 2 opciones
+[x] En web (sin nativo): opción "Tomar foto" NO aparece en el menú
+[x] En APK: opción "Tomar foto" SÍ aparece en el menú
+[x] "Desde galería": abre selector y guarda foto inmediatamente
+[x] "Tomar foto" (APK): abre cámara y guarda foto inmediatamente
+[x] Con foto: overlay muestra solo el ícono de cámara (sin papelera)
+[x] Con foto: menú tiene 3 opciones (tomar, galería, borrar)
+[x] "Borrar foto": foto desaparece, vuelve el placeholder, notificación correcta
+[x] Imagen respeta proporciones originales (sin distorsión ni barras negras)
+[x] Notificación de éxito al guardar
 
 ### T.E — Persistencia y datos
 
-[ ] La foto sobrevive a cerrar y reabrir la app
-[ ] Fotos de sucursales distintas son independientes (foto en sucursal A no afecta sucursal B)
-[ ] Comercios sin campo `foto` en datos legacy funcionan sin errores (tratados como null)
-[ ] El storage no supera límites con fotos en base64 (verificar tamaño aproximado)
+[X] La foto sobrevive a cerrar y reabrir la app
+[x] Fotos de sucursales distintas son independientes (foto en sucursal A no afecta sucursal B)
+[x] Comercios sin campo `foto` en datos legacy funcionan sin errores (tratados como null)
+[x] El storage no supera límites con fotos en base64 (verificar tamaño aproximado)
 
 ### T.F — FormularioProducto — Foto discreta
 
-[ ] Fila "Foto" visible debajo de Cantidad/Unidad
-[ ] Botón de cámara abre menú correctamente
-[ ] En web: "Tomar foto" no aparece en menú
-[ ] "Desde galería": selecciona imagen, miniatura aparece en la fila
-[ ] "Borrar foto": miniatura desaparece (solo visible si hay imagen)
-[ ] La imagen se incluye correctamente en el modelValue al guardar el producto
+[x] Fila "Foto" visible debajo de Cantidad/Unidad
+[x] Botón de cámara abre menú correctamente
+[x] En web: "Tomar foto" no aparece en menú
+[x] "Desde galería": selecciona imagen, miniatura aparece en la fila
+[X] "Borrar foto": miniatura desaparece (solo visible si hay imagen)
+[x] La imagen se incluye correctamente en el modelValue al guardar el producto
 
 ### T.G — InfoProducto — Galería
 
-[ ] Menú tiene opción "Desde galería" entre "Tomar foto" y "Quitar foto"
-[ ] "Tomar foto" solo visible en APK
-[ ] "Desde galería" funciona correctamente en APK y web
-[ ] "Quitar foto" sigue funcionando igual que antes
+[x] Menú tiene opción "Desde galería" entre "Tomar foto" y "Quitar foto"
+[x] "Tomar foto" solo visible en APK
+[x] "Desde galería" funciona correctamente en APK y web
+[x] "Quitar foto" sigue funcionando igual que antes
 
 ═══════════════════════════════════════════════════════════════
 

@@ -85,14 +85,25 @@
     <!-- FOTO DEL LOCAL -->
     <div class="seccion-foto">
       <q-img v-if="datosInternos.foto" :src="datosInternos.foto" class="foto-preview" :ratio="16/9" />
-      <q-btn
-        outline
-        color="grey-6"
-        class="boton-foto"
-        @click="alClickarFoto"
-      >
+      <q-btn outline color="grey-6" class="boton-foto">
         <IconCamera :size="18" class="q-mr-sm" />
         {{ datosInternos.foto ? 'Cambiar foto del local' : 'Agregar foto del local' }}
+        <q-menu anchor="bottom left" self="top left">
+          <q-list style="min-width: 160px">
+            <q-item v-if="esNativo" clickable v-close-popup @click="seleccionarCamara">
+              <q-item-section avatar><IconCamera :size="18" /></q-item-section>
+              <q-item-section>Tomar foto</q-item-section>
+            </q-item>
+            <q-item clickable v-close-popup @click="abrirGaleria">
+              <q-item-section avatar><IconPhoto :size="18" /></q-item-section>
+              <q-item-section>Desde galería</q-item-section>
+            </q-item>
+            <q-item v-if="datosInternos.foto" clickable v-close-popup @click="quitarFoto">
+              <q-item-section avatar><IconTrash :size="18" class="text-negative" /></q-item-section>
+              <q-item-section class="text-negative">Borrar foto</q-item-section>
+            </q-item>
+          </q-list>
+        </q-menu>
       </q-btn>
       <p class="text-caption text-grey-5 q-mt-xs q-mb-none">
         Opcional. Podés cambiarla o quitarla después desde el detalle del comercio
@@ -114,7 +125,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import { IconCamera } from '@tabler/icons-vue'
+import { IconCamera, IconPhoto, IconTrash } from '@tabler/icons-vue'
 import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
 
 const props = defineProps({
@@ -154,7 +165,7 @@ const opcionesTipo = [
   { label: 'Otro', value: 'Otro' },
 ]
 
-const { inputArchivoRef, tomarFoto, leerArchivo } = useCamaraFoto()
+const { inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo } = useCamaraFoto()
 
 // Estado interno
 const datosInternos = ref({
@@ -190,12 +201,17 @@ function emitirCambios() {
   emit('update:modelValue', { ...datosInternos.value })
 }
 
-async function alClickarFoto() {
-  const resultado = await tomarFoto()
+async function seleccionarCamara() {
+  const resultado = await abrirCamara()
   if (resultado) {
     datosInternos.value.foto = resultado
     emitirCambios()
   }
+}
+
+function quitarFoto() {
+  datosInternos.value.foto = null
+  emitirCambios()
 }
 
 async function alSeleccionarArchivo(event) {

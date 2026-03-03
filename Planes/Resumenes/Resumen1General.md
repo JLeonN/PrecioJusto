@@ -178,7 +178,8 @@ src/
 │   ├── useSeleccionMultiple.js             # Lógica de selección múltiple reutilizable
 │   ├── useDialogoAgregarPrecio.js          # Lógica reutilizable del modal agregar precio
 │   ├── useFechaRelativa.js                 # Formato de fechas relativas y cortas
-│   └── useBotonAtras.js                   # 🆕 Botón back nativo Android (drawer/detalle/salir)
+│   ├── useBotonAtras.js                   # Botón back nativo Android (drawer/detalle/salir)
+│   └── useCamaraFoto.js                   # 🆕 Captura de fotos: cámara nativa + galería (input file)
 ├── css/
 │   ├── app.css                              # Clases CSS globales del Design System
 │   ├── quasar.variables.scss               # Variables de Quasar (colores, fuentes)
@@ -433,6 +434,7 @@ A. Gestión de Productos
 ✅ 🆕 Bandeja de borradores persistente (sesionEscaneoStore + BandejaBorradores)
 ✅ 🆕 Edición extendida de items en bandeja (nombre, marca, categoría + restaurar desde API)
 ✅ 🆕 Auto-fetch al reconectar internet (@capacitor/network, nativo en Android)
+✅ 🆕 Gestión de fotos con composable `useCamaraFoto`: cámara nativa (solo Android) + galería (todas las plataformas). Menú contextual `q-menu` con 3 opciones (Tomar foto, Desde galería, Borrar foto). Integrado en InfoProducto, FormularioProducto, FormularioComercio, EditarComercioPage y DialogoAgregarComercioRapido.
 
 B. Gestión de Comercios y Sucursales
 
@@ -468,6 +470,7 @@ B. Gestión de Comercios y Sucursales
 ✅ 🆕 Lista de productos asociados con último precio, filtrada por sucursal seleccionada
 ✅ 🆕 Composable reutilizable de fechas relativas (useFechaRelativa.js)
 ✅ 🆕 Conteo de usos calculado desde productos reales (no desde cantidadUsos del store)
+✅ 🆕 Fotos de comercios funcionales: q-menu en FormularioComercio, EditarComercioPage y DialogoAgregarComercioRapido (reemplaza botón placeholder deshabilitado)
 
 C. Integración Comercios + Productos
 
@@ -1001,6 +1004,7 @@ H. Arquitectura y Código
 - **Safe area:** Completada (Android 15+ edge-to-edge)
 - **Botón back nativo:** Completado
 - **Splash screen:** Completada (imagen aleatoria, sin distorsión)
+- **Fotos de productos y comercios:** Completada (useCamaraFoto, q-menu contextual, 5 componentes)
 - **Preparación:** Lista para migración a Firebase
 
 ---
@@ -1024,4 +1028,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 01 de Marzo 2026 (sistema multi-API: 7 servicios + orquestador, soporte libros, fuenteDato en UI)
+**Última actualización:** 03 de Marzo 2026 (fotos de productos y comercios: composable useCamaraFoto, menú contextual q-menu en 5 componentes)
