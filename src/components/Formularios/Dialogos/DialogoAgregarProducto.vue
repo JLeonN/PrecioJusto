@@ -22,7 +22,7 @@
               :modo="modo"
               @buscar-codigo="buscarPorCodigo"
               @buscar-nombre="buscarPorNombre"
-              @iniciar-escaneo="alIniciarEscaneo"
+              @escanear-codigo="alEscanearCodigo"
             />
           </div>
 
@@ -60,6 +60,13 @@
     :resultados="resultadosBusqueda"
     @producto-seleccionado="autoCompletarFormulario"
   />
+
+  <!-- ESCÁNER UNITARIO (solo llena el campo código de barras) -->
+  <EscaneadorCodigo
+    :activo="escanerUnitarioActivo"
+    @codigo-detectado="alDetectarCodigo"
+    @cerrar="escanerUnitarioActivo = false"
+  />
 </template>
 
 <script setup>
@@ -68,6 +75,7 @@ import { useQuasar } from 'quasar'
 import FormularioProducto from '../FormularioProducto.vue'
 import FormularioPrecio from '../FormularioPrecio.vue'
 import DialogoResultadosBusqueda from './DialogoResultadosBusqueda.vue'
+import EscaneadorCodigo from '../../Scanner/EscaneadorCodigo.vue'
 import { useProductosStore } from '../../../almacenamiento/stores/productosStore.js'
 import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.js'
 import productosService from '../../../almacenamiento/servicios/ProductosService.js'
@@ -87,7 +95,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:modelValue', 'producto-guardado', 'iniciar-escaneo'])
+const emit = defineEmits(['update:modelValue', 'producto-guardado'])
 
 const productosStore = useProductosStore()
 const comerciosStore = useComerciStore()
@@ -104,6 +112,9 @@ const refFormularioPrecio = ref(null)
 
 // Estado de carga
 const guardando = ref(false)
+
+// Escáner unitario (solo llena el campo de código de barras)
+const escanerUnitarioActivo = ref(false)
 
 // Datos del formulario de producto
 const datosProducto = ref({
@@ -442,10 +453,16 @@ function cerrarDialogo() {
   dialogoAbierto.value = false
 }
 
-// Cierra el dialog y propaga el evento al padre para iniciar el flujo de escaneo
-function alIniciarEscaneo() {
-  cerrarDialogo()
-  emit('iniciar-escaneo')
+// Activa el escáner unitario (solo llena el campo de código de barras)
+function alEscanearCodigo() {
+  escanerUnitarioActivo.value = true
+}
+
+// Al detectar un código: llena el campo y dispara búsqueda API automáticamente
+async function alDetectarCodigo(codigo) {
+  escanerUnitarioActivo.value = false
+  datosProducto.value.codigoBarras = codigo
+  await buscarPorCodigo(codigo)
 }
 </script>
 

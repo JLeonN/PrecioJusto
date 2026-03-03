@@ -163,7 +163,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:modelValue', 'buscar-codigo', 'buscar-nombre', 'iniciar-escaneo'])
+const emit = defineEmits(['update:modelValue', 'buscar-codigo', 'buscar-nombre', 'escanear-codigo'])
 
 // Opciones de unidades
 const opcionesUnidades = [
@@ -260,9 +260,9 @@ function buscarPorCodigo() {
   })
 }
 
-// Emite evento al padre para iniciar el flujo de escaneo con cámara
+// Emite evento al padre para escanear un código (modo unitario, no sesión)
 function iniciarEscaneo() {
-  emit('iniciar-escaneo')
+  emit('escanear-codigo')
 }
 
 function buscarPorNombre() {

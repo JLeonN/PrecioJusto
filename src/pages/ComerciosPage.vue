@@ -77,9 +77,11 @@
     </div>
 
     <!-- BOTÓN FLOTANTE AGREGAR (oculto en modo selección) -->
-    <q-page-sticky v-if="!seleccion.modoSeleccion.value" position="bottom-right" :offset="[18, 18]" class="fab-agregar">
-      <q-btn fab color="primary" icon="add" size="lg" @click="abrirDialogoAgregar" />
-    </q-page-sticky>
+    <FabAcciones
+      v-if="!seleccion.modoSeleccion.value"
+      :acciones="accionFab"
+      color="primary"
+    />
 
     <!-- BARRA DE ACCIONES (fixed bottom en modo selección) -->
     <BarraAccionesSeleccion
@@ -114,7 +116,9 @@ import { useQuasar } from 'quasar'
 import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
 import { useSeleccionMultiple } from '../composables/useSeleccionMultiple.js'
+import { IconPlus } from '@tabler/icons-vue'
 import InputBusqueda from '../components/Compartidos/InputBusqueda.vue'
+import FabAcciones from '../components/Compartidos/FabAcciones.vue'
 import DialogoAgregarComercio from '../components/Formularios/Dialogos/DialogoAgregarComercio.vue'
 import DialogoMotivoEliminacion from '../components/Formularios/Dialogos/DialogoMotivoEliminacion.vue'
 import ListaComercios from '../components/Comercios/ListaComercios.vue'
@@ -199,12 +203,12 @@ async function cargarComercios() {
   seleccion.actualizarItems(comerciosStore.comercios)
 }
 
-/**
- * Abre diálogo para agregar comercio
- */
+// Abre diálogo para agregar comercio
 function abrirDialogoAgregar() {
   dialogoAgregarAbierto.value = true
 }
+
+const accionFab = [{ icono: IconPlus, label: 'Agregar comercio', color: 'primary', accion: abrirDialogoAgregar }]
 
 /**
  * Activa modo selección con un comercio inicial
@@ -474,7 +478,4 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.fab-agregar {
-  bottom: calc(18px + var(--safe-area-bottom)) !important;
-}
 </style>

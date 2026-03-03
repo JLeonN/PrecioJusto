@@ -67,11 +67,11 @@
     </div>
 
     <!-- BOTÓN FLOTANTE AGREGAR PRECIO -->
-    <q-page-sticky v-if="productoActual && !cargando" position="bottom-right" :offset="[18, 18]" class="fab-agregar">
-      <q-btn fab color="primary" size="lg" @click="abrirModalPrecio(productoActual.id)">
-        <IconPlus :size="28" />
-      </q-btn>
-    </q-page-sticky>
+    <FabAcciones
+      v-if="productoActual && !cargando"
+      :acciones="accionFab"
+      color="primary"
+    />
 
     <!-- MODAL AGREGAR PRECIO -->
     <DialogoAgregarPrecio
@@ -91,6 +91,7 @@ import EstadisticasProducto from '../components/DetalleProducto/EstadisticasProd
 import FiltrosHistorial from '../components/DetalleProducto/FiltrosHistorial.vue'
 import HistorialPrecios from '../components/DetalleProducto/HistorialPrecios.vue'
 import DialogoAgregarPrecio from '../components/Formularios/Dialogos/DialogoAgregarPrecio.vue'
+import FabAcciones from '../components/Compartidos/FabAcciones.vue'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
 import { useConfirmacionesStore } from '../almacenamiento/stores/confirmacionesStore.js'
 import { useDialogoAgregarPrecio } from '../composables/useDialogoAgregarPrecio.js'
@@ -129,6 +130,11 @@ async function alGuardarPrecioDetalle() {
 const cargando = ref(false)
 const error = ref(null)
 const productoActual = ref(null)
+
+// Acción del FAB para agregar precio al producto actual
+const accionFab = computed(() => [
+  { icono: IconPlus, label: 'Agregar precio', color: 'primary', accion: () => abrirModalPrecio(productoActual.value?.id) },
+])
 
 // Sincronizar productoActual cuando el store actualiza el producto (ej: edición de categoría)
 watch(
@@ -277,8 +283,5 @@ onMounted(async () => {
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
-}
-.fab-agregar {
-  bottom: calc(18px + var(--safe-area-bottom)) !important;
 }
 </style>

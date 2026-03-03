@@ -69,11 +69,11 @@
     </div>
 
     <!-- BOTÓN FLOTANTE AGREGAR (oculto en modo selección) -->
-    <q-page-sticky v-if="!seleccion.modoSeleccion.value" position="bottom-right" :offset="[18, 18]" class="fab-agregar">
-      <q-btn fab color="primary" icon="" size="lg" @click="abrirDialogoAgregar">
-        <IconPlus :size="28" />
-      </q-btn>
-    </q-page-sticky>
+    <FabAcciones
+      v-if="!seleccion.modoSeleccion.value"
+      :acciones="accionesFab"
+      color="primary"
+    />
 
     <!-- BARRA DE ACCIONES (fixed bottom en modo selección) -->
     <BarraAccionesSeleccion
@@ -89,7 +89,6 @@
       v-model="dialogoAgregarAbierto"
       modo="local"
       @producto-guardado="onProductoGuardado"
-      @iniciar-escaneo="abrirSelectorComercio"
     />
 
     <!-- SELECTOR DE COMERCIO PARA SESIÓN DE ESCANEO -->
@@ -198,13 +197,14 @@
 
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
-import { IconPlus } from '@tabler/icons-vue'
+import { IconPlus, IconScan } from '@tabler/icons-vue'
 import ListaProductos from '../components/MisProductos/ListaProductos.vue'
 import InputBusqueda from '../components/Compartidos/InputBusqueda.vue'
 import DialogoAgregarProducto from '../components/Formularios/Dialogos/DialogoAgregarProducto.vue'
 import DialogoAgregarPrecio from '../components/Formularios/Dialogos/DialogoAgregarPrecio.vue'
 import BarraSeleccion from '../components/Compartidos/BarraSeleccion.vue'
 import BarraAccionesSeleccion from '../components/Compartidos/BarraAccionesSeleccion.vue'
+import FabAcciones from '../components/Compartidos/FabAcciones.vue'
 import EscaneadorCodigo from '../components/Scanner/EscaneadorCodigo.vue'
 import FormularioEscaneo from '../components/Scanner/FormularioEscaneo.vue'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
@@ -432,6 +432,12 @@ function abrirDialogoAgregar() {
   dialogoAgregarAbierto.value = true
 }
 
+// Acciones del FAB expandible
+const accionesFab = [
+  { icono: IconScan, label: 'Escaneo rápido', color: 'secondary', accion: abrirSelectorComercio },
+  { icono: IconPlus, label: 'Agregar manual', color: 'primary', accion: abrirDialogoAgregar },
+]
+
 function onProductoGuardado() {
   cargarProductos()
 }
@@ -540,9 +546,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.fab-agregar {
-  bottom: calc(18px + var(--safe-area-bottom)) !important;
-}
 .selector-comercio-card {
   border-radius: 16px 16px 0 0;
   width: 100%;
