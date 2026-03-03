@@ -3,52 +3,52 @@ import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
 import { Capacitor } from '@capacitor/core'
 
 /**
- * Composable reutilizable para captura de fotos con cámara
- * Soporta cámara nativa (Android) y selector de archivo (web/desktop)
- * No persiste — solo captura y retorna el base64
+ * Composable reutilizable para captura de fotos.
+ * - abrirCamara(): solo en nativo (Android/iOS), abre la cámara directamente
+ * - abrirGaleria(): todas las plataformas, abre el selector de archivos del sistema
  *
  * Uso en template:
- *   <input ref="inputArchivoRef" type="file" accept="image/*" class="input-archivo-oculto" @change="leerArchivo">
+ *   <input ref="inputArchivoRef" type="file" accept="image/*" class="input-archivo-oculto" @change="alSeleccionarArchivo">
  *
- * @returns {{ inputArchivoRef, tomarFoto, leerArchivo }}
+ * @returns {{ inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo }}
  */
 export function useCamaraFoto() {
-  // Ref para el input oculto (fallback web)
   const inputArchivoRef = ref(null)
+  const esNativo = Capacitor.isNativePlatform()
 
   /**
-   * Captura una foto.
-   * - Nativo: abre la cámara y retorna base64
-   * - Web: dispara el selector de archivo y retorna null (el resultado llega via leerArchivo)
-   * @returns {Promise<string|null>} base64 con prefijo data URI, o null si cancela/web
+   * Abre la cámara nativa (solo Android/iOS).
+   * @returns {Promise<string|null>} base64 con prefijo data URI, o null si cancela
    */
-  async function tomarFoto() {
+  async function abrirCamara() {
     try {
-      if (Capacitor.isNativePlatform()) {
-        const foto = await Camera.getPhoto({
-          quality: 70,
-          allowEditing: false,
-          resultType: CameraResultType.Base64,
-          source: CameraSource.Camera,
-        })
-        return `data:image/jpeg;base64,${foto.base64String}`
-      } else {
-        // Fallback web: abre el selector de archivos
-        inputArchivoRef.value?.click()
-        return null
-      }
+      const foto = await Camera.getPhoto({
+        quality: 70,
+        allowEditing: false,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Camera,
+      })
+      return `data:image/jpeg;base64,${foto.base64String}`
     } catch (error) {
       // Cancelación silenciosa — no es un error real
       if (!error.message?.toLowerCase().includes('cancel')) {
-        console.error('Error al tomar foto:', error)
+        console.error('Error al abrir cámara:', error)
       }
       return null
     }
   }
 
   /**
-   * Lee el archivo seleccionado desde el input file (fallback web)
-   * Usar como handler del evento @change del input oculto
+   * Abre el selector de archivos del sistema.
+   * El resultado llega via leerArchivo (@change del input).
+   */
+  function abrirGaleria() {
+    inputArchivoRef.value?.click()
+  }
+
+  /**
+   * Lee el archivo seleccionado desde el input file.
+   * Usar como handler del evento @change del input oculto.
    * @param {Event} event - Evento change del input file
    * @returns {Promise<string|null>} base64 con prefijo data URI, o null si no hay archivo
    */
@@ -66,5 +66,5 @@ export function useCamaraFoto() {
     })
   }
 
-  return { inputArchivoRef, tomarFoto, leerArchivo }
+  return { inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo }
 }

@@ -23,11 +23,17 @@
             <q-tooltip>Editar foto</q-tooltip>
             <q-menu anchor="bottom right" self="top right">
               <q-list style="min-width: 160px">
-                <q-item clickable v-close-popup @click="tomarFoto">
+                <q-item v-if="esNativo" clickable v-close-popup @click="seleccionarCamara">
                   <q-item-section avatar>
                     <IconCamera :size="18" />
                   </q-item-section>
                   <q-item-section>Tomar foto</q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup @click="abrirGaleria">
+                  <q-item-section avatar>
+                    <IconPhoto :size="18" />
+                  </q-item-section>
+                  <q-item-section>Desde galería</q-item-section>
                 </q-item>
                 <q-item v-if="producto.imagen" clickable v-close-popup @click="quitarFoto">
                   <q-item-section avatar>
@@ -39,7 +45,6 @@
             </q-menu>
           </q-btn>
         </div>
-        <!-- Input file oculto para fallback web -->
         <input
           ref="inputArchivoRef"
           type="file"
@@ -154,8 +159,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
-import { Capacitor } from '@capacitor/core'
+import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
 import {
   IconShoppingBag,
   IconMapPin,
@@ -167,6 +171,7 @@ import {
   IconCheck,
   IconX,
   IconCamera,
+  IconPhoto,
   IconTrash,
   IconRefresh,
 } from '@tabler/icons-vue'
@@ -248,38 +253,16 @@ async function restaurarDesdeApi() {
 
 // ── Foto editable ────────────────────────────────────────
 
-const inputArchivoRef = ref(null)
+const { inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo } = useCamaraFoto()
 
-async function tomarFoto() {
-  try {
-    if (Capacitor.isNativePlatform()) {
-      const foto = await Camera.getPhoto({
-        quality: 70,
-        allowEditing: false,
-        resultType: CameraResultType.Base64,
-        source: CameraSource.Camera,
-      })
-      await actualizarFoto(`data:image/jpeg;base64,${foto.base64String}`)
-    } else {
-      // Fallback web: selector de archivo
-      inputArchivoRef.value?.click()
-    }
-  } catch (error) {
-    if (!error.message?.toLowerCase().includes('cancel')) {
-      $q.notify({ type: 'negative', message: 'No se pudo tomar la foto', position: 'top' })
-    }
-  }
+async function seleccionarCamara() {
+  const resultado = await abrirCamara()
+  if (resultado) await actualizarFoto(resultado)
 }
 
 async function alSeleccionarArchivo(event) {
-  const archivo = event.target.files?.[0]
-  if (!archivo) return
-  const reader = new FileReader()
-  reader.onload = async (e) => {
-    await actualizarFoto(e.target.result)
-  }
-  reader.readAsDataURL(archivo)
-  event.target.value = ''
+  const resultado = await leerArchivo(event)
+  if (resultado) await actualizarFoto(resultado)
 }
 
 async function actualizarFoto(base64) {

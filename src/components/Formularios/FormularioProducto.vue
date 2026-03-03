@@ -104,12 +104,45 @@
         />
       </div>
     </div>
+
+    <!-- FOTO DEL PRODUCTO (compacta) -->
+    <div class="foto-fila">
+      <div class="foto-fila__izquierda">
+        <IconPhoto :size="18" class="text-grey-6" />
+        <span class="text-caption text-grey-7 q-ml-xs">Foto</span>
+      </div>
+      <div class="foto-fila__derecha">
+        <img v-if="datosInternos.imagen" :src="datosInternos.imagen" class="foto-miniatura" />
+        <q-btn flat round dense size="sm" color="grey-6">
+          <IconCamera :size="18" />
+          <q-tooltip>Gestionar foto</q-tooltip>
+          <q-menu anchor="bottom right" self="top right">
+            <q-list style="min-width: 160px">
+              <q-item v-if="esNativo" clickable v-close-popup @click="seleccionarCamara">
+                <q-item-section avatar><IconCamera :size="18" /></q-item-section>
+                <q-item-section>Tomar foto</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click="abrirGaleria">
+                <q-item-section avatar><IconPhoto :size="18" /></q-item-section>
+                <q-item-section>Desde galería</q-item-section>
+              </q-item>
+              <q-item v-if="datosInternos.imagen" clickable v-close-popup @click="quitarFoto">
+                <q-item-section avatar><IconTrash :size="18" class="text-negative" /></q-item-section>
+                <q-item-section class="text-negative">Borrar foto</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
+      </div>
+    </div>
+    <input ref="inputArchivoRef" type="file" accept="image/*" class="input-archivo-oculto" @change="alSeleccionarArchivo" />
   </div>
 </template>
 
 <script setup>
 import { ref, watch, computed, onMounted } from 'vue'
-import { IconSearch, IconCamera } from '@tabler/icons-vue'
+import { IconSearch, IconCamera, IconPhoto, IconTrash } from '@tabler/icons-vue'
+import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
 import preferenciasService from '../../almacenamiento/servicios/PreferenciasService.js'
 
 const props = defineProps({
@@ -143,6 +176,8 @@ const opcionesUnidades = [
   { label: 'Pack', value: 'pack' },
 ]
 
+const { inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo } = useCamaraFoto()
+
 // Estado interno
 const datosInternos = ref({
   nombre: props.modelValue.nombre || '',
@@ -150,6 +185,7 @@ const datosInternos = ref({
   codigoBarras: props.modelValue.codigoBarras || '',
   cantidad: props.modelValue.cantidad || 1,
   unidad: props.modelValue.unidad || 'unidad',
+  imagen: props.modelValue.imagen || null,
 })
 
 // Estados de búsqueda
@@ -185,10 +221,31 @@ watch(
       codigoBarras: nuevoValor.codigoBarras || '',
       cantidad: nuevoValor.cantidad || 1,
       unidad: nuevoValor.unidad || 'unidad',
+      imagen: nuevoValor.imagen || null,
     }
   },
   { deep: true },
 )
+
+// ── Foto del producto ─────────────────────────────────────
+async function seleccionarCamara() {
+  const resultado = await abrirCamara()
+  if (resultado) {
+    datosInternos.value.imagen = resultado
+    emitirCambios()
+  }
+}
+async function alSeleccionarArchivo(event) {
+  const resultado = await leerArchivo(event)
+  if (resultado) {
+    datosInternos.value.imagen = resultado
+    emitirCambios()
+  }
+}
+function quitarFoto() {
+  datosInternos.value.imagen = null
+  emitirCambios()
+}
 
 // Emitir cambios al padre
 function emitirCambios() {
@@ -231,5 +288,32 @@ function cantidadValida(val) {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+.foto-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border: 1px solid var(--color-carta-borde, #ddd);
+  border-radius: 8px;
+  background: var(--fondo-tarjeta, white);
+}
+.foto-fila__izquierda {
+  display: flex;
+  align-items: center;
+}
+.foto-fila__derecha {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.foto-miniatura {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.input-archivo-oculto {
+  display: none;
 }
 </style>

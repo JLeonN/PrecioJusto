@@ -61,29 +61,45 @@
 
         <!-- SECCIÓN: FOTO DEL LOCAL -->
         <div class="seccion-foto q-mb-lg">
-          <q-img
-            v-if="direccionSeleccionada?.foto"
-            :src="direccionSeleccionada.foto"
-            class="foto-comercio"
-            :ratio="16/9"
-          />
+          <div v-if="direccionSeleccionada?.foto" class="foto-wrapper">
+            <img :src="direccionSeleccionada.foto" class="foto-comercio" />
+            <div class="foto-overlay">
+              <q-btn round flat dense class="btn-foto-overlay btn-overlay-camara">
+                <IconCamera :size="20" />
+                <q-menu anchor="bottom right" self="top right">
+                  <q-list style="min-width: 160px">
+                    <q-item v-if="esNativo" clickable v-close-popup @click="seleccionarCamara">
+                      <q-item-section avatar><IconCamera :size="18" /></q-item-section>
+                      <q-item-section>Tomar foto</q-item-section>
+                    </q-item>
+                    <q-item clickable v-close-popup @click="abrirGaleria">
+                      <q-item-section avatar><IconPhoto :size="18" /></q-item-section>
+                      <q-item-section>Desde galería</q-item-section>
+                    </q-item>
+                    <q-item clickable v-close-popup @click="quitarFotoComercio">
+                      <q-item-section avatar><IconTrash :size="18" class="text-negative" /></q-item-section>
+                      <q-item-section class="text-negative">Borrar foto</q-item-section>
+                    </q-item>
+                  </q-list>
+                </q-menu>
+              </q-btn>
+            </div>
+          </div>
           <div v-else class="foto-placeholder">
             <IconCamera :size="48" class="text-grey-4" />
             <span class="text-grey-5 text-caption">Sin foto</span>
-          </div>
-          <div class="foto-acciones q-mt-sm">
-            <q-btn outline size="sm" color="orange" @click="alClickarFoto">
-              <IconCamera :size="16" class="q-mr-xs" />
-              {{ direccionSeleccionada?.foto ? 'Cambiar foto' : 'Agregar foto' }}
-            </q-btn>
-            <q-btn
-              v-if="direccionSeleccionada?.foto"
-              flat size="sm" color="negative" class="q-ml-sm"
-              @click="quitarFotoComercio"
-            >
-              <IconTrash :size="16" class="q-mr-xs" />
-              Quitar foto
-            </q-btn>
+            <q-menu anchor="center middle" self="center middle">
+              <q-list style="min-width: 160px">
+                <q-item v-if="esNativo" clickable v-close-popup @click="seleccionarCamara">
+                  <q-item-section avatar><IconCamera :size="18" /></q-item-section>
+                  <q-item-section>Tomar foto</q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup @click="abrirGaleria">
+                  <q-item-section avatar><IconPhoto :size="18" /></q-item-section>
+                  <q-item-section>Desde galería</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
           </div>
         </div>
         <input ref="inputArchivoRef" type="file" accept="image/*" class="input-archivo-oculto" @change="alSeleccionarArchivo" />
@@ -297,6 +313,7 @@ import {
   IconArrowLeft,
   IconBuilding,
   IconCamera,
+  IconPhoto,
   IconEdit,
   IconTag,
   IconMapPin,
@@ -321,7 +338,7 @@ const router = useRouter()
 const $q = useQuasar()
 const comerciosStore = useComerciStore()
 const productosStore = useProductosStore()
-const { inputArchivoRef, tomarFoto, leerArchivo } = useCamaraFoto()
+const { inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo } = useCamaraFoto()
 
 // Opciones de tipo (mismas que FormularioComercio)
 const opcionesTipo = [
@@ -641,8 +658,8 @@ async function ejecutarFusion(destinoId, origenId) {
 
 // ── Foto del local ───────────────────────────────────────
 
-async function alClickarFoto() {
-  const resultado = await tomarFoto()
+async function seleccionarCamara() {
+  const resultado = await abrirCamara()
   if (resultado) await guardarFotoComercio(resultado)
 }
 
@@ -726,10 +743,35 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
 }
-.foto-comercio {
+.foto-wrapper {
+  position: relative;
   width: 100%;
   max-width: 400px;
   border-radius: 12px;
+  overflow: hidden;
+}
+.foto-comercio {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.foto-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.55), transparent);
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 8px 12px;
+}
+.btn-foto-overlay {
+  backdrop-filter: blur(2px);
+}
+.btn-overlay-camara {
+  color: var(--color-acento) !important;
 }
 .foto-placeholder {
   width: 100%;
@@ -743,10 +785,7 @@ onMounted(async () => {
   justify-content: center;
   gap: 8px;
   border: 2px dashed var(--color-carta-borde, #ddd);
-}
-.foto-acciones {
-  display: flex;
-  align-items: center;
+  cursor: pointer;
 }
 .input-archivo-oculto {
   display: none;

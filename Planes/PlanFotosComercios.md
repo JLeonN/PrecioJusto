@@ -158,20 +158,68 @@ Contexto: el comercio ya existe — se guarda inmediatamente en el store
 
 ═══════════════════════════════════════════════════════════════
 
+## ✅ FASE 6: MEJORAS UX — MENÚ CONTEXTUAL Y GALERÍA [COMPLETADA]
+
+### Motivación
+
+El diálogo nativo de Capacitor (`CameraSource.Prompt`) resultó visualmente inconsistente.
+Se reemplazó por un menú Quasar (`q-menu`) con opciones CSS-styled, igual al patrón
+ya existente en `InfoProducto.vue`. Además se aprovechó para separar cámara y galería
+como acciones independientes y para agregar foto a los productos.
+
+### useCamaraFoto.js — Refactorización
+
+[x] Separar en dos funciones: `abrirCamara()` y `abrirGaleria()`
+[x] `abrirCamara()`: nativo únicamente, usa `CameraSource.Camera`, retorna base64 o null
+[x] `abrirGaleria()`: todas las plataformas, dispara click en el input file oculto
+[x] Exportar `esNativo` (booleano) para renderizado condicional en templates
+[x] Mantener `leerArchivo(event)` sin cambios
+
+### InfoProducto.vue — Migración al composable + galería
+
+[x] Eliminar imports locales de Camera, CameraSource, CameraResultType, Capacitor
+[x] Usar `useCamaraFoto` en lugar de lógica local
+[x] Agregar opción "Desde galería" al `q-menu` existente
+[x] "Tomar foto" ahora usa `v-if="esNativo"` — se oculta en web automáticamente
+[x] `alSeleccionarArchivo` usa `leerArchivo()` del composable (DRY)
+
+### EditarComercioPage.vue — Overlay simplificado con menú
+
+[x] Eliminar icono de papelera del overlay — la acción se mueve al menú
+[x] Icono de cámara (único) abre `q-menu` con 3 opciones:
+[x]   - "Tomar foto" (`v-if="esNativo"`) → `abrirCamara()`
+[x]   - "Desde galería" (siempre) → `abrirGaleria()`
+[x]   - "Borrar foto" (siempre) → `quitarFotoComercio()`
+[x] Placeholder también abre `q-menu` (sin "Borrar foto" porque no hay foto)
+[x] CSS: `justify-content: flex-end` en overlay, eliminar `.btn-overlay-papelera`
+[x] Agregar `IconPhoto` a los imports
+
+### FormularioProducto.vue — Foto discreta en formulario de producto
+
+[x] Agregar fila compacta "Foto" debajo de Cantidad/Unidad
+[x] Lado izquierdo: ícono + label "Foto"
+[x] Lado derecho: miniatura (si hay imagen) + botón cámara con `q-menu`
+[x] Menú con 3 opciones: tomar foto (nativo), galería, borrar (si hay imagen)
+[x] Campo `imagen` sincronizado con `v-model` (incluye en modelValue emitido)
+[x] Usar `useCamaraFoto` composable
+
+═══════════════════════════════════════════════════════════════
+
 ## 🧪 FASE TESTING: PRUEBAS EN APK [PENDIENTE]
 
-### T.A — Composable useCamaraFoto
+### T.A — Composable useCamaraFoto (actualizado)
 
-[ ] Funciona en APK (cámara nativa se abre)
-[x] Funciona en navegador desktop (abre selector de archivos)
+[ ] `abrirCamara()`: abre la cámara nativa directamente (sin diálogo intermedio)
+[ ] `abrirGaleria()`: abre selector de archivos del sistema en APK y en web
+[ ] `esNativo` es `true` en APK y `false` en navegador desktop
 [ ] Cancelar la cámara no genera error ni notificación
 [ ] Retorna base64 válido en ambas plataformas
 
 ### T.B — Agregar Comercio Rápido
 
 [ ] Botón de foto visible pero discreto en el flujo
-[ ] Al tocar botón: abre cámara correctamente
-[ ] Miniatura se muestra tras tomar foto
+[ ] Al tocar botón: abre selector correctamente
+[ ] Miniatura se muestra tras seleccionar foto
 [ ] Al confirmar sin foto: el comercio se crea con `direccion.foto = null`
 [ ] Al confirmar con foto: el comercio se crea con la foto en `direccion.foto`
 [ ] Mensaje informativo visible debajo del botón
@@ -180,21 +228,23 @@ Contexto: el comercio ya existe — se guarda inmediatamente en el store
 ### T.C — Formulario Comercio Completo
 
 [ ] Botón activo (no deshabilitado)
-[ ] Al tocar botón: abre cámara correctamente
-[ ] Miniatura visible tras captura
+[ ] Al tocar botón: abre selector correctamente
+[ ] Miniatura visible tras selección
 [ ] Al guardar: foto incluida en `direccion.foto`
 [ ] Mensaje informativo visible
 
-### T.D — Editar Comercio
+### T.D — Editar Comercio — Menú contextual
 
-[ ] Placeholder reemplazado por UI real
-[ ] Si no hay foto: se muestra placeholder correcto
-[ ] Si hay foto: se muestra la imagen correctamente con q-img
-[ ] Botón "Tomar foto": abre cámara y guarda inmediatamente
+[ ] Sin foto: placeholder visible y clickeable, abre menú con 2 opciones
+[ ] En web (sin nativo): opción "Tomar foto" NO aparece en el menú
+[ ] En APK: opción "Tomar foto" SÍ aparece en el menú
+[ ] "Desde galería": abre selector y guarda foto inmediatamente
+[ ] "Tomar foto" (APK): abre cámara y guarda foto inmediatamente
+[ ] Con foto: overlay muestra solo el ícono de cámara (sin papelera)
+[ ] Con foto: menú tiene 3 opciones (tomar, galería, borrar)
+[ ] "Borrar foto": foto desaparece, vuelve el placeholder, notificación correcta
+[ ] Imagen respeta proporciones originales (sin distorsión ni barras negras)
 [ ] Notificación de éxito al guardar
-[ ] Botón "Quitar foto": solo visible si hay foto
-[ ] Al quitar foto: imagen desaparece, vuelve el placeholder
-[ ] Notificación de confirmación al quitar
 
 ### T.E — Persistencia y datos
 
@@ -203,32 +253,50 @@ Contexto: el comercio ya existe — se guarda inmediatamente en el store
 [ ] Comercios sin campo `foto` en datos legacy funcionan sin errores (tratados como null)
 [ ] El storage no supera límites con fotos en base64 (verificar tamaño aproximado)
 
+### T.F — FormularioProducto — Foto discreta
+
+[ ] Fila "Foto" visible debajo de Cantidad/Unidad
+[ ] Botón de cámara abre menú correctamente
+[ ] En web: "Tomar foto" no aparece en menú
+[ ] "Desde galería": selecciona imagen, miniatura aparece en la fila
+[ ] "Borrar foto": miniatura desaparece (solo visible si hay imagen)
+[ ] La imagen se incluye correctamente en el modelValue al guardar el producto
+
+### T.G — InfoProducto — Galería
+
+[ ] Menú tiene opción "Desde galería" entre "Tomar foto" y "Quitar foto"
+[ ] "Tomar foto" solo visible en APK
+[ ] "Desde galería" funciona correctamente en APK y web
+[ ] "Quitar foto" sigue funcionando igual que antes
+
 ═══════════════════════════════════════════════════════════════
 
 ## NOTAS IMPORTANTES 📌
 
 - La foto NO es obligatoria en ningún flujo
-- La lógica de cámara de `InfoProducto.vue` NO se modifica — sigue funcionando igual
-- `useCamaraFoto.js` es un composable nuevo, no reemplaza nada existente
+- `InfoProducto.vue` fue migrado para usar `useCamaraFoto` (DRY — antes tenía lógica duplicada)
+- `useCamaraFoto.js` reemplaza la lógica de cámara de `InfoProducto.vue`
 - En los formularios de creación la foto es temporal hasta confirmar
 - En edición la foto se guarda inmediatamente (el comercio ya existe)
 - El campo `foto` vive en `direccion`, no en el comercio raíz
 - Calidad de foto: 70 (igual que productos, buen equilibrio tamaño/calidad)
 - Probar tamaño promedio de foto Base64 antes de aprobar — si es muy grande, considerar
   reducir resolución máxima en Camera.getPhoto()
+- `esNativo` se evalúa una sola vez al iniciar el composable (no reactivo — correcto, no cambia en runtime)
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 90% — EN DESARROLLO
+## 📊 PROGRESO GENERAL: 95% — EN DESARROLLO
 
 ✅ Fase 1: Modelo de datos
 ✅ Fase 2: Composable de cámara
 ✅ Fase 3: Dialogo agregar rápido
 ✅ Fase 4: Formulario completo
 ✅ Fase 5: Editar comercio
+✅ Fase 6: Mejoras UX — menú contextual y galería
 ⏳ Fase Testing
 
 ═══════════════════════════════════════════════════════════════
 
-**ÚLTIMA ACTUALIZACIÓN:** Marzo 2026 - Fases 3, 4 y 5 completadas
+**ÚLTIMA ACTUALIZACIÓN:** Marzo 2026 - Fase 6 completada (menú contextual, galería, foto en productos)
 **ESTADO:** 🚧 EN DESARROLLO
