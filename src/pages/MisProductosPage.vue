@@ -91,56 +91,6 @@
       @producto-guardado="onProductoGuardado"
     />
 
-    <!-- SELECTOR DE COMERCIO PARA SESIÓN DE ESCANEO -->
-    <q-dialog v-model="selectorComercioAbierto" position="bottom">
-      <q-card class="selector-comercio-card">
-        <q-card-section>
-          <div class="text-subtitle1 text-weight-bold">¿Dónde estás comprando?</div>
-          <div class="text-caption text-grey-6">Seleccioná el comercio antes de escanear</div>
-        </q-card-section>
-        <q-card-section class="q-pt-none">
-          <q-select
-            v-model="comercioSesion"
-            :options="comerciosStore.comerciosAgrupados"
-            option-label="nombre"
-            label="Comercio"
-            outlined
-            dense
-            use-input
-            @filter="filtrarComerciosSesion"
-            @update:model-value="alSeleccionarComercioSesion"
-          >
-            <template #no-option>
-              <q-item>
-                <q-item-section class="text-grey">Sin comercios. Agregá uno primero.</q-item-section>
-              </q-item>
-            </template>
-          </q-select>
-          <q-select
-            v-if="direccionesSesion.length > 0"
-            v-model="direccionSesion"
-            :options="direccionesSesion"
-            option-label="nombreCompleto"
-            label="Sucursal / Dirección"
-            outlined
-            dense
-            clearable
-            class="q-mt-sm"
-          />
-        </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat label="Cancelar" @click="selectorComercioAbierto = false" />
-          <q-btn
-            color="primary"
-            no-caps
-            label="Empezar a escanear"
-            :disable="!comercioSesion"
-            @click="iniciarSesionEscaneo"
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
     <!-- ESCANEADOR DE CÓDIGO DE BARRAS -->
     <EscaneadorCodigo
       :activo="scannerActivo"
@@ -148,13 +98,12 @@
       @cerrar="alCerrarScanner"
     />
 
-    <!-- FORMULARIO POST-ESCANEO -->
-    <FormularioEscaneo
-      v-model="formularioEscaneoAbierto"
+    <!-- TARJETA POST-ESCANEO (solo modo A: escaneo rápido) -->
+    <TarjetaEscaneo
+      v-model="tarjetaEscaneoAbierta"
       :item="itemActual"
-      :cantidad-en-bandeja="sesionEscaneoStore.cantidadItems"
       @siguiente="alSiguiente"
-      @enviar-a-bandeja="alEnviarABandeja"
+      @ir-a-mesa="alIrAMesa"
       @descartar="alDescartarItem"
     />
 
@@ -197,7 +146,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
-import { IconPlus, IconScan } from '@tabler/icons-vue'
+import { IconPlus, IconScan, IconBolt } from '@tabler/icons-vue'
 import ListaProductos from '../components/MisProductos/ListaProductos.vue'
 import InputBusqueda from '../components/Compartidos/InputBusqueda.vue'
 import DialogoAgregarProducto from '../components/Formularios/Dialogos/DialogoAgregarProducto.vue'
@@ -206,9 +155,8 @@ import BarraSeleccion from '../components/Compartidos/BarraSeleccion.vue'
 import BarraAccionesSeleccion from '../components/Compartidos/BarraAccionesSeleccion.vue'
 import FabAcciones from '../components/Compartidos/FabAcciones.vue'
 import EscaneadorCodigo from '../components/Scanner/EscaneadorCodigo.vue'
-import FormularioEscaneo from '../components/Scanner/FormularioEscaneo.vue'
+import TarjetaEscaneo from '../components/Scanner/TarjetaEscaneo.vue'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
-import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
 import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
 import { useSeleccionMultiple } from '../composables/useSeleccionMultiple.js'
 import { useDialogoAgregarPrecio } from '../composables/useDialogoAgregarPrecio.js'
@@ -217,7 +165,6 @@ import productosService from '../almacenamiento/servicios/ProductosService.js'
 import { useQuasar } from 'quasar'
 
 const productosStore = useProductosStore()
-const comerciosStore = useComerciStore()
 const sesionEscaneoStore = useSesionEscaneoStore()
 const $q = useQuasar()
 
@@ -225,107 +172,48 @@ const $q = useQuasar()
 // ESTADO DEL FLUJO DE ESCANEO
 // ========================================
 
-// Controla si el scanner de cámara está activo
 const scannerActivo = ref(false)
-// Controla si el formulario post-escaneo está abierto
-const formularioEscaneoAbierto = ref(false)
-// Item actual siendo procesado tras un escaneo
+const modoEscaneo = ref(null) // 'rapido' | 'rafaga' | null
+const tarjetaEscaneoAbierta = ref(false)
 const itemActual = ref(null)
 
-// Selector de comercio antes de iniciar el escaneo
-const selectorComercioAbierto = ref(false)
-const comercioSesion = ref(null)
-const direccionSesion = ref(null)
-const comerciosFiltradosSesion = ref([])
-
-// Direcciones disponibles según el comercio elegido
-const direccionesSesion = computed(() => comercioSesion.value?.direcciones || [])
-
-// Filtra la lista de comercios mientras el usuario escribe
-function filtrarComerciosSesion(val, update) {
-  update(() => {
-    if (!val) {
-      comerciosFiltradosSesion.value = comerciosStore.comerciosAgrupados.slice(0, 5)
-    } else {
-      const needle = val.toLowerCase()
-      comerciosFiltradosSesion.value = comerciosStore.comerciosAgrupados.filter((c) =>
-        c.nombre.toLowerCase().includes(needle),
-      )
-    }
-  })
-}
-
-// Limpia la dirección al cambiar de comercio
-function alSeleccionarComercioSesion() {
-  direccionSesion.value = null
-}
-
-// Abre el selector de comercio (punto de entrada al flujo de escaneo)
-async function abrirSelectorComercio() {
-  await comerciosStore.cargarComercios()
-  if (comerciosStore.comerciosAgrupados.length === 0) {
-    $q.notify({
-      type: 'warning',
-      message: 'Primero agregá un comercio en la sección Comercios',
-      position: 'top',
-    })
-    return
-  }
-  // Pre-seleccionar el comercio de la sesión activa si existe
-  if (sesionEscaneoStore.comercioActivo) {
-    const encontrado = comerciosStore.comerciosAgrupados.find(
-      (c) => c.id === sesionEscaneoStore.comercioActivo.id,
-    )
-    comercioSesion.value = encontrado || null
-  }
-  selectorComercioAbierto.value = true
-}
-
-// Inicia la sesión de escaneo con el comercio elegido
-function iniciarSesionEscaneo() {
-  if (!comercioSesion.value) return
-
-  const dir = direccionSesion.value || comercioSesion.value.direcciones?.[0] || null
-
-  sesionEscaneoStore.iniciarSesion({
-    id: comercioSesion.value.id,
-    nombre: comercioSesion.value.nombre,
-    direccionId: dir?.id || null,
-    direccionNombre: dir?.calle || null,
-  })
-
-  selectorComercioAbierto.value = false
+function iniciarEscaneoRapido() {
+  modoEscaneo.value = 'rapido'
   scannerActivo.value = true
 }
 
-// Procesa el código escaneado: busca en app local y en la API
+function iniciarRafaga() {
+  modoEscaneo.value = 'rafaga'
+  scannerActivo.value = true
+}
+
+// Procesa el código escaneado según el modo activo
 async function procesarCodigoEscaneado(codigo) {
-  // Verificar duplicado ANTES de detener el scanner
-  const yaEnBandeja = sesionEscaneoStore.items.some((i) => i.codigoBarras === codigo)
-  if (yaEnBandeja) {
+  const yaEnSesion = sesionEscaneoStore.items.some((i) => i.codigoBarras === codigo)
+
+  if (yaEnSesion) {
+    const encontrado = sesionEscaneoStore.items.find((i) => i.codigoBarras === codigo)
     $q.notify({
       type: 'warning',
-      message: 'Este producto ya está en tu bandeja',
+      message: encontrado?.nombre ? `"${encontrado.nombre}" ya está en la mesa` : `Código ${codigo} ya está en la mesa`,
       position: 'top',
       timeout: 2000,
     })
-    // nextTick garantiza que el watcher de EscaneadorCodigo procese false y true por separado
-    scannerActivo.value = false
-    await nextTick()
-    scannerActivo.value = true
+    // En modo rápido: reiniciar scanner; en ráfaga: la cámara nunca se detuvo
+    if (modoEscaneo.value === 'rapido') {
+      scannerActivo.value = false
+      await nextTick()
+      scannerActivo.value = true
+    }
     return
   }
 
-  scannerActivo.value = false
-
-  // Buscar si el producto ya existe en Mis Productos
+  // Buscar en BD local y API
   const existente = await productosService.buscarPorCodigoBarras(codigo)
-
-  // Buscar en todas las APIs disponibles (orquestador)
   const resultadoApi = await buscadorProductosService.buscarPorCodigo(codigo)
   const productoApi = resultadoApi?.producto || null
 
-  itemActual.value = {
+  const nuevoItem = {
     codigoBarras: codigo,
     productoExistenteId: existente?.id || null,
     nombre: productoApi?.nombre || existente?.nombre || '',
@@ -339,42 +227,54 @@ async function procesarCodigoEscaneado(codigo) {
     fuenteDato: resultadoApi?.fuenteDato || null,
   }
 
-  formularioEscaneoAbierto.value = true
+  if (modoEscaneo.value === 'rafaga') {
+    // Modo B: agregar directo a la mesa, cámara sigue activa
+    sesionEscaneoStore.agregarItem(nuevoItem)
+    $q.notify({
+      message: nuevoItem.nombre || codigo,
+      caption: nuevoItem.nombre ? codigo : '',
+      color: 'grey-8',
+      position: 'top',
+      timeout: 1500,
+    })
+    return
+  }
+
+  // Modo A: pausar cámara y mostrar TarjetaEscaneo
+  scannerActivo.value = false
+  itemActual.value = nuevoItem
+  tarjetaEscaneoAbierta.value = true
 }
 
-// Guarda el item en la bandeja y reactiva el scanner para el siguiente
+// Guarda en la mesa y reactiva la cámara para el siguiente escaneo
 function alSiguiente(itemActualizado) {
   sesionEscaneoStore.agregarItem(itemActualizado)
-  formularioEscaneoAbierto.value = false
+  tarjetaEscaneoAbierta.value = false
   itemActual.value = null
   scannerActivo.value = true
 }
 
-// Guarda el item en la bandeja y cierra el flujo de escaneo
-function alEnviarABandeja(itemActualizado) {
+// Guarda en la mesa y cierra el flujo de escaneo
+function alIrAMesa(itemActualizado) {
   sesionEscaneoStore.agregarItem(itemActualizado)
-  formularioEscaneoAbierto.value = false
+  tarjetaEscaneoAbierta.value = false
   itemActual.value = null
   scannerActivo.value = false
-  $q.notify({
-    type: 'positive',
-    message: `${sesionEscaneoStore.cantidadItems} ${sesionEscaneoStore.cantidadItems === 1 ? 'producto' : 'productos'} en tu bandeja`,
-    position: 'top',
-    timeout: 2500,
-  })
+  modoEscaneo.value = null
 }
 
-// Descarta el item actual y vuelve al scanner
+// Descarta el item y vuelve a la cámara (solo en modo rápido)
 function alDescartarItem() {
-  formularioEscaneoAbierto.value = false
+  tarjetaEscaneoAbierta.value = false
   itemActual.value = null
-  scannerActivo.value = true
+  if (modoEscaneo.value === 'rapido') scannerActivo.value = true
 }
 
 // El usuario cerró el scanner manualmente
 function alCerrarScanner() {
   scannerActivo.value = false
   itemActual.value = null
+  modoEscaneo.value = null
 }
 
 /* Texto de búsqueda activo */
@@ -432,9 +332,10 @@ function abrirDialogoAgregar() {
   dialogoAgregarAbierto.value = true
 }
 
-// Acciones del FAB expandible
+// Acciones del FAB expandible (3 opciones)
 const accionesFab = [
-  { icono: IconScan, label: 'Escaneo rápido', color: 'secondary', accion: abrirSelectorComercio },
+  { icono: IconBolt, label: 'Ráfaga', color: 'orange', accion: iniciarRafaga },
+  { icono: IconScan, label: 'Escaneo rápido', color: 'secondary', accion: iniciarEscaneoRapido },
   { icono: IconPlus, label: 'Agregar manual', color: 'primary', accion: abrirDialogoAgregar },
 ]
 
@@ -546,10 +447,4 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.selector-comercio-card {
-  border-radius: 16px 16px 0 0;
-  width: 100%;
-  max-width: 100vw;
-  padding-bottom: var(--safe-area-bottom);
-}
 </style>

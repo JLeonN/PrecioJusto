@@ -10,11 +10,8 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
   // ESTADO
   // ========================================
 
-  // Comercio seleccionado para la sesión activa
-  // { id, nombre, direccionId, direccionNombre }
-  const comercioActivo = ref(null)
-
   // Items escaneados pendientes de guardar en Mis Productos
+  // Cada item tiene su propio { comercio } (null hasta asignarlo en la Mesa de trabajo)
   const items = ref([])
 
   // true mientras se cargan los datos del almacenamiento al iniciar
@@ -24,7 +21,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
   // GETTERS
   // ========================================
 
-  // Cantidad de items en la bandeja (para el badge del DRAWER)
+  // Cantidad de items en la mesa (para el badge del DRAWER)
   const cantidadItems = computed(() => items.value.length)
 
   // true si hay al menos un item pendiente
@@ -36,20 +33,11 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
 
   // Guarda el estado completo en el adaptador
   async function _persistir() {
-    await adaptadorActual.guardar(CLAVE_SESION, {
-      comercioActivo: comercioActivo.value,
-      items: items.value,
-    })
+    await adaptadorActual.guardar(CLAVE_SESION, { items: items.value })
   }
 
   // Observa cambios y guarda automáticamente
-  watch(
-    [comercioActivo, items],
-    () => {
-      _persistir()
-    },
-    { deep: true },
-  )
+  watch(items, () => { _persistir() }, { deep: true })
 
   // ========================================
   // ACCIONES
@@ -61,8 +49,11 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
     try {
       const datos = await adaptadorActual.obtener(CLAVE_SESION)
       if (datos) {
-        comercioActivo.value = datos.comercioActivo || null
-        items.value = datos.items || []
+        // Migración: ítems guardados sin campo `comercio` reciben comercio: null
+        items.value = (datos.items || []).map((item) => ({
+          ...item,
+          comercio: item.comercio ?? null,
+        }))
       }
     } catch (error) {
       console.error('Error al cargar sesión de escaneo:', error)
@@ -71,12 +62,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
     }
   }
 
-  // Establece el comercio de la sesión activa
-  function iniciarSesion(comercio) {
-    comercioActivo.value = comercio
-  }
-
-  // Agrega un item escaneado a la bandeja
+  // Agrega un item escaneado a la mesa de trabajo
   function agregarItem(item) {
     items.value.push({
       id: _generarId(),
@@ -91,6 +77,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
       origenApi: item.origenApi || false,
       fuenteDato: item.fuenteDato || null,
       productoExistenteId: item.productoExistenteId || null,
+      comercio: item.comercio ?? null, // { id, nombre, direccionId, direccionNombre } | null
     })
   }
 
@@ -102,14 +89,21 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
     }
   }
 
-  // Elimina un item de la bandeja por su id
+  // Asigna un comercio en bloque a los ítems indicados por sus IDs
+  function asignarComercio(ids, comercio) {
+    const conjuntoIds = new Set(ids)
+    items.value = items.value.map((item) =>
+      conjuntoIds.has(item.id) ? { ...item, comercio } : item,
+    )
+  }
+
+  // Elimina un item de la mesa por su id
   function eliminarItem(id) {
     items.value = items.value.filter((i) => i.id !== id)
   }
 
-  // Vacía la bandeja y reinicia el comercio activo
+  // Vacía la mesa de trabajo por completo
   async function limpiarTodo() {
-    comercioActivo.value = null
     items.value = []
     await adaptadorActual.eliminar(CLAVE_SESION)
   }
@@ -125,7 +119,6 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
 
   return {
     // Estado
-    comercioActivo,
     items,
     cargando,
     // Getters
@@ -133,9 +126,9 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
     tieneItemsPendientes,
     // Acciones
     cargarSesion,
-    iniciarSesion,
     agregarItem,
     actualizarItem,
+    asignarComercio,
     eliminarItem,
     limpiarTodo,
   }

@@ -76,19 +76,19 @@
             </q-item-section>
           </q-item>
 
-          <!-- Bandeja de borradores (solo visible con items pendientes) -->
+          <!-- Mesa de trabajo (solo visible con items pendientes) -->
           <q-item
             v-if="sesionEscaneoStore.tieneItemsPendientes"
             clickable
             v-ripple
             class="bandeja-drawer-item"
-            @click="abrirBandeja"
+            @click="abrirMesaTrabajo"
           >
             <q-item-section avatar>
               <IconClipboardList :size="24" color="primary" />
             </q-item-section>
             <q-item-section>
-              <q-item-label class="text-primary text-weight-medium">Bandeja de borradores</q-item-label>
+              <q-item-label class="text-primary text-weight-medium">Mesa de trabajo</q-item-label>
             </q-item-section>
             <q-item-section side>
               <q-chip color="primary" text-color="white" dense>
@@ -125,8 +125,8 @@
       <router-view />
     </q-page-container>
 
-    <!-- BANDEJA DE BORRADORES (global, accesible desde el drawer) -->
-    <BandejaBorradores v-model="bandejaBorradoresAbierta" />
+    <!-- MESA DE TRABAJO (global, accesible desde el drawer) -->
+    <MesaTrabajo v-model="mesaTrabajoAbierta" />
   </q-layout>
 </template>
 
@@ -145,22 +145,22 @@ import {
 } from '@tabler/icons-vue'
 import { useBotonAtras } from '../composables/useBotonAtras.js'
 import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
-import BandejaBorradores from '../components/Scanner/BandejaBorradores.vue'
+import MesaTrabajo from '../components/Scanner/MesaTrabajo.vue'
 
 const router = useRouter()
 const route = useRoute()
 const drawerAbierto = ref(false)
-const bandejaBorradoresAbierta = ref(false)
+const mesaTrabajoAbierta = ref(false)
 const sesionEscaneoStore = useSesionEscaneoStore()
 
 const toggleDrawer = () => {
   drawerAbierto.value = !drawerAbierto.value
 }
 
-// Cierra el drawer y abre la bandeja de borradores
-function abrirBandeja() {
+// Cierra el drawer y abre la mesa de trabajo
+function abrirMesaTrabajo() {
   drawerAbierto.value = false
-  bandejaBorradoresAbierta.value = true
+  mesaTrabajoAbierta.value = true
 }
 
 // Carga la bandeja de borradores persistida al iniciar la app
