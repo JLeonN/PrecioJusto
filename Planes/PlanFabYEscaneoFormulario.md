@@ -107,34 +107,135 @@ Dos universos que estaban mezclados se separan correctamente:
 
 ═══════════════════════════════════════════════════════════════
 
-## ⏳ FASE 3: REDISEÑO DEL ESCANEO RÁPIDO Y BANDEJA DE BORRADORES [PENDIENTE - SIN PLANIFICAR]
+## ⏳ FASE 3: REDISEÑO DEL ESCANEO RÁPIDO Y MESA DE TRABAJO [PENDIENTE]
 
-> Esta fase está en discusión. Antes de arrancar hay que hablar con Leo y definir
-> exactamente cómo se modifica el flujo de escaneo rápido y la bandeja.
+### Resumen del rediseño
 
-### Contexto del problema
+El flujo anterior pedía elegir el comercio antes de escanear y tenía un solo modo de escaneo.
+El nuevo sistema tiene dos modos de escaneo y el comercio se asigna al final en la Mesa de trabajo.
 
-El flujo actual de escaneo rápido (BandejaBorradores + sesionEscaneoStore) funciona bien,
-pero tiene aspectos que el usuario quiere revisar. Puntos en discusión:
+**Nombres definidos:**
 
-- Cómo empieza la sesión (selector de comercio antes de escanear)
-- Qué tan visible y accesible está la bandeja de borradores
-- La relación entre el "escaneo rápido" del FAB y la sesión con comercio activo
-- Si se puede tomar foto del producto mientras se escanea (foto rápida opcional)
+- `BandejaBorradores` → **Mesa de trabajo**
+- Modo escaneo con tarjeta → **Escaneo rápido**
+- Modo escaneo en ráfaga → **Ráfaga**
 
-### Ideas que surgieron en la discusión (sin confirmar)
+---
 
-- [ ] Revisar el flujo de inicio de sesión de escaneo (¿pedir comercio antes o después?)
-- [ ] Evaluar si la BandejaBorradores necesita ser más accesible o visible
-- [ ] Agregar opción de foto rápida en FormularioEscaneo (mientras se escanean productos)
-- [ ] Posibles cambios en sesionEscaneoStore según el nuevo flujo
+### FAB en MisProductosPage — 3 acciones
 
-### Archivos que probablemente se modifiquen
+El FAB pasa de 2 a 3 opciones:
 
-- `src/components/Scanner/FormularioEscaneo.vue`
-- `src/components/Scanner/BandejaBorradores.vue`
+| Acción         | Icono                | Color      |
+| -------------- | -------------------- | ---------- |
+| Agregar manual | IconPlus             | primary    |
+| Escaneo rápido | IconScan (tranquilo) | secondary  |
+| Ráfaga         | IconBolt (rayo)      | otro color |
+
+---
+
+### Modo A — Escaneo rápido (con tarjeta)
+
+**Flujo:**
+
+1. FAB → "Escaneo rápido" → cámara abre de una (sin elegir comercio)
+2. Escaneo detectado → cámara se pausa → aparece `TarjetaEscaneo`
+3. En segundo plano: busca en BD local del usuario primero, luego en API
+4. Toast de feedback con: nombre + código de barras + foto miniatura (si encontrado) o solo código (si no)
+5. `TarjetaEscaneo` muestra: nombre, código, foto (si tiene), campo precio (abajo a la derecha con gradiente, estilo Mis Productos)
+6. Precio obligatorio → botón "Siguiente" deshabilitado sin precio
+7. Foto opcional (botón cámara en la tarjeta)
+8. Edición inline disponible (lápiz)
+9. "Siguiente" → ítem va a la Mesa de trabajo → cámara se reabre
+10. Sin duplicados en la sesión: con la cámara activa aparece una tarjetita de aviso que indica
+    que el producto ya fue escaneado en esta sesión. Muestra: nombre + foto + código (si se encontró
+    en BD/API) o solo el código (si no se encontró)
+
+**Si el producto no se encuentra:** tarjeta vacía con solo el código visible, campos editables activos
+
+---
+
+### Modo B — Ráfaga (solo códigos)
+
+**Flujo:**
+
+1. FAB → "Ráfaga" → cámara abre de una (sin elegir comercio)
+2. Escaneo continuo sin pausas — la cámara nunca se detiene
+3. Por cada código detectado:
+   - Búsqueda en segundo plano (BD local → API)
+   - Toast con: nombre + código + foto (o solo código si no encontrado)
+4. Sin duplicados en la sesión: avisa sin interrumpir el escaneo
+5. Botón "Ver Mesa de trabajo" (o similar) para terminar y revisar todo
+
+---
+
+### Mesa de trabajo (reemplaza BandejaBorradores)
+
+**UI:**
+
+- Ítems mostrados como tarjetas
+- Indicador de progreso: `X / Y artículos listos para enviar`
+- Tap en tarjeta → se expande para editar
+- Long press → modo selección con checkboxes → asignar comercio en bloque a los seleccionados
+- Persistente: sobrevive cierre de la app
+
+**Ordenamiento:**
+
+- Por defecto: los ítems con más datos faltantes arriba, los completos abajo
+- El usuario puede cambiar el orden con un filtro:
+  - De menos completo a más (default)
+  - De más completo a menos
+  - Por comercio
+  - Sin comercio (solo los que no tienen comercio asignado)
+  - Alfabético
+
+**Campos obligatorios por ítem antes de poder enviar:**
+
+- Nombre
+- Precio
+- Comercio
+
+**Envío parcial:**
+
+- El botón "Enviar" tiene dos estados:
+  - En **color** → el ítem está completo y listo para enviar
+  - En **gris** → al ítem le faltan datos obligatorios
+- El usuario puede enviar solo los ítems completos sin esperar a completar el resto
+- Confirmación: "¿Guardar X artículos?" → guarda → vuelve a MisProductosPage
+- Los ítems incompletos permanecen en la Mesa de trabajo
+
+---
+
+### Arquitectura y reutilización
+
+**Store — `sesionEscaneoStore.js`:**
+
+- Reestructurar para que cada ítem tenga su propio `comercioId` (antes era uno por sesión)
+- Ítems sin comercio asignado hasta que el usuario los asigne en la Mesa de trabajo
+- Persistencia de la sesión (sobrevivir cierre de app)
+
+**Componentes a crear:**
+
+- `src/components/Scanner/TarjetaEscaneo.vue` — tarjeta post-escaneo del Modo A
+- `src/components/Scanner/MesaTrabajo.vue` — reemplaza `BandejaBorradores.vue`
+- `src/components/Scanner/TarjetaProductoBorrador.vue` — tarjeta expandible en la Mesa de trabajo
+
+**Componentes a reutilizar (sin modificar o con cambios mínimos):**
+
+- `EscaneadorCodigo.vue` — funciona en modo continuo para Ráfaga
+- `useCamaraFoto.js` — para la foto opcional en TarjetaEscaneo
+- `useSeleccionMultiple.js` — para la selección por long press en la Mesa de trabajo
+- `BuscadorProductosService` — para la búsqueda en API
+
+**Componentes a reemplazar:**
+
+- `FormularioEscaneo.vue` → reemplazado por `TarjetaEscaneo.vue`
+- `BandejaBorradores.vue` → reemplazado por `MesaTrabajo.vue`
+
+### Archivos a modificar
+
 - `src/almacenamiento/stores/sesionEscaneoStore.js`
-- `src/pages/MisProductosPage.vue` (flujo de inicio de sesión)
+- `src/pages/MisProductosPage.vue` (FAB con 3 acciones, nueva lógica de inicio)
 
 ═══════════════════════════════════════════════════════════════
 
@@ -142,8 +243,8 @@ pero tiene aspectos que el usuario quiere revisar. Puntos en discusión:
 
 ### T.A — Escaneo unitario en el formulario
 
-[ ] Abrir "Agregar Producto" (FAB → "Agregar manual")
-[ ] Hacer click en el ícono de cámara dentro del campo "Código de barras"
+[x] Abrir "Agregar Producto" (FAB → "Agregar manual")
+[x] Hacer click en el ícono de cámara dentro del campo "Código de barras"
 [ ] El overlay del escáner se abre (nativo o input manual en web)
 [ ] Escanear/ingresar un código de barras conocido
 [ ] Verificar que el campo se llena automáticamente con el código
@@ -155,9 +256,10 @@ pero tiene aspectos que el usuario quiere revisar. Puntos en discusión:
 ### T.B — FAB expandible en MisProductosPage
 
 [ ] En MisProductosPage: click en el FAB (+)
-[ ] Se expande mostrando 2 opciones con labels a la izquierda
-[ ] Opción "Escaneo rápido" (icono de escáner): abre el flujo de sesión de escaneo
-[ ] Opción "Agregar manual" (icono +): abre el formulario DialogoAgregarProducto
+[ ] Se expande mostrando 3 opciones con labels a la izquierda
+[ ] Opción "Agregar manual" (IconPlus): abre el formulario DialogoAgregarProducto
+[ ] Opción "Escaneo rápido" (IconScan): abre el modo A con tarjeta
+[ ] Opción "Ráfaga" (IconBolt): abre el modo B de escaneo continuo
 [ ] El FAB se cierra al hacer click en cualquier opción
 [ ] El icono + rota a X al expandir, y vuelve a + al colapsar
 [ ] En modo selección: el FAB se oculta correctamente
@@ -174,12 +276,36 @@ pero tiene aspectos que el usuario quiere revisar. Puntos en discusión:
 [ ] Se abre el diálogo de agregar precio directamente (sin expandir)
 [ ] El FAB solo aparece cuando el producto está cargado y sin loading
 
-### T.E — Regresión: flujo de escaneo rápido completo
+### T.E — Modo A: Escaneo rápido con tarjeta
 
-[ ] Desde MisProductosPage: FAB → "Escaneo rápido"
-[ ] El flujo de sesión con BandejaBorradores funciona igual que antes
-[ ] Escanear productos, agregar a la bandeja, confirmar guardado
-[ ] Los productos guardados aparecen en la lista correctamente
+[ ] FAB → "Escaneo rápido" → cámara abre sin pedir comercio
+[ ] Escanear producto conocido → cámara se pausa → aparece TarjetaEscaneo con datos
+[ ] Escanear producto desconocido → tarjeta vacía con solo el código, campos editables
+[ ] Botón "Siguiente" deshabilitado si no hay precio
+[ ] Ingresar precio → "Siguiente" → ítem va a la Mesa de trabajo → cámara se reabre
+[ ] Escanear el mismo código dos veces → aparece aviso de duplicado con nombre/foto/código
+[ ] El aviso de duplicado no detiene el escaneo
+[ ] La foto del producto es opcional y se puede tomar desde la tarjeta
+
+### T.E2 — Modo B: Ráfaga
+
+[ ] FAB → "Ráfaga" → cámara abre sin pedir comercio
+[ ] Escanear múltiples productos sin pausas
+[ ] Toast de feedback por cada escaneo con nombre + código + foto (o solo código)
+[ ] Escanear el mismo código dos veces → aviso sin interrumpir el escaneo
+[ ] "Ver Mesa de trabajo" lleva a la Mesa con todos los ítems escaneados
+
+### T.E3 — Mesa de trabajo
+
+[ ] Los ítems incompletos aparecen arriba, los completos abajo (orden por defecto)
+[ ] El filtro de ordenamiento funciona (las 5 opciones)
+[ ] Tap en tarjeta → se expande para editar
+[ ] Long press → modo selección con checkboxes
+[ ] Seleccionar varios ítems → asignar comercio en bloque → todos los seleccionados lo reciben
+[ ] Ítems completos: botón "Enviar" en color
+[ ] Ítems incompletos: botón "Enviar" en gris (no se puede enviar)
+[ ] Enviar solo los ítems completos → confirmación → se guardan → los incompletos permanecen
+[ ] La Mesa de trabajo persiste si se cierra y se vuelve a abrir la app
 
 ### T.F — Safe area (solo en dispositivo físico Android/iOS)
 
@@ -191,14 +317,17 @@ pero tiene aspectos que el usuario quiere revisar. Puntos en discusión:
 ## NOTAS TÉCNICAS
 
 ### EscaneadorCodigo en modo unitario
+
 - El componente ya soporta modo unitario de fábrica: escanea 1 código, emite `'codigo-detectado'`, se detiene solo
 - No fue necesario modificar EscaneadorCodigo.vue
 - En `DialogoAgregarProducto`, el `q-dialog` permanece abierto mientras el scanner está activo (el overlay lo tapa)
 
 ### FabAcciones.vue — Tabler Icons en q-fab-action
+
 - `q-fab-action` no acepta componentes Vue en el prop `icon` (solo strings Material)
 - La solución: slot default de `q-fab-action` renderiza el Tabler Icon vía `<component :is="accion.icono">`
 
 ### accionesFab en MisProductosPage
+
 - `const accionesFab = [...]` — array estático (no computed), las funciones son referencias estables
 - `abrirSelectorComercio` y `abrirDialogoAgregar` son function declarations (hoisted), disponibles en el array
