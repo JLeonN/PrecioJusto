@@ -125,7 +125,8 @@ src/
 │   │   ├── BarraSeleccion.vue              # Barra sticky con contador de seleccionados
 │   │   ├── BarraAccionesSeleccion.vue      # Barra fixed bottom con botones (eliminar, cancelar)
 │   │   ├── InputBusqueda.vue              # Input de búsqueda reutilizable con prop color
-│   │   └── PantallaSplash.vue             # 🆕 Splash screen con imagen aleatoria al iniciar
+│   │   ├── PantallaSplash.vue             # Splash screen con imagen aleatoria al iniciar
+│   │   └── FabAcciones.vue               # 🆕 FAB genérico reutilizable: Speed Dial multi-acción o botón directo
 │   │
 │   ├── Comercios/                           # Componentes de comercios
 │   │   ├── ListaComercios.vue              # Contenedor con grid responsivo Quasar
@@ -154,11 +155,11 @@ src/
 │   │       ├── DialogoMismaUbicacion.vue            # Alerta de misma dirección
 │   │       └── DialogoMotivoEliminacion.vue         # Confirmación con motivo de eliminación
 │   │
-│   ├── Scanner/                             # 🆕 Flujo de escaneo de productos
-│   │   ├── EscaneadorCodigo.vue            # 🆕 Scanner de cámara (overlay nativo, fallback web)
-│   │   ├── FormularioEscaneo.vue           # 🆕 Formulario post-escaneo (modo rápido / mínimo)
-│   │   ├── BandejaBorradores.vue           # 🆕 Bandeja de items escaneados (bottom sheet)
-│   │   └── DialogoEditarItemBandeja.vue    # 🆕 Edición extendida de item (nombre, marca, categoría)
+│   ├── Scanner/                             # Flujo de escaneo de productos
+│   │   ├── EscaneadorCodigo.vue            # Scanner nativo (overlay transparente) + fallback web; prop `continuo` para Ráfaga
+│   │   ├── TarjetaEscaneo.vue             # 🆕 Tarjeta post-escaneo del Modo A (bottom sheet q-dialog)
+│   │   ├── MesaTrabajo.vue               # 🆕 Diálogo full-screen con borradores; reemplaza BandejaBorradores
+│   │   └── TarjetaProductoBorrador.vue   # 🆕 Tarjeta expandible en Mesa de trabajo (chips de completitud)
 │   │
 │   ├── MisProductos/                        # Componentes de productos
 │   │   └── ListaProductos.vue              # Contenedor con grid responsivo Quasar
@@ -430,9 +431,12 @@ A. Gestión de Productos
 ✅ 🆕 Título "Historial de precios" visible en DetalleProductoPage
 ✅ 🆕 Marca editable en detalle del producto (CampoEditable con IconBuildingStore)
 ✅ 🆕 Botón restaurar datos desde API en detalle del producto (re-fetch por código de barras)
-✅ 🆕 Flujo de escaneo rápido con cámara (EscaneadorCodigo + FormularioEscaneo)
-✅ 🆕 Bandeja de borradores persistente (sesionEscaneoStore + BandejaBorradores)
-✅ 🆕 Edición extendida de items en bandeja (nombre, marca, categoría + restaurar desde API)
+✅ 🆕 FAB expandible reutilizable (FabAcciones.vue con q-fab Speed Dial + nextTick para Capacitor)
+✅ 🆕 Modo A — Escaneo rápido: cámara → pausa → TarjetaEscaneo (precio, foto, edición inline) → Mesa de trabajo → cámara reactiva
+✅ 🆕 Modo B — Ráfaga: cámara continua sin pausa (prop `continuo` en EscaneadorCodigo), búsqueda en background (fire-and-forget), tarjetita de aviso sobre la cámara
+✅ 🆕 Mesa de trabajo (MesaTrabajo.vue): reemplaza BandejaBorradores; ordenamiento por 5 criterios, selección múltiple por long-press, asignación de comercio en bloque, envío parcial
+✅ 🆕 Tarjetita de aviso sobre cámara: Teleport to="body" z-index 10000, visible durante escaneo activo (duplicado + éxito Ráfaga), botón X para cerrar
+✅ 🆕 Detección de duplicados en sesión sin interrumpir el escaneo (aviso sobre cámara)
 ✅ 🆕 Auto-fetch al reconectar internet (@capacitor/network, nativo en Android)
 ✅ 🆕 Gestión de fotos con composable `useCamaraFoto`: cámara nativa (solo Android) + galería (todas las plataformas). Menú contextual `q-menu` con 3 opciones (Tomar foto, Desde galería, Borrar foto). Integrado en InfoProducto, FormularioProducto, FormularioComercio, EditarComercioPage y DialogoAgregarComercioRapido.
 
@@ -605,19 +609,24 @@ H. Arquitectura y Código
 - `listaConfirmaciones`: Array de IDs confirmados
 
 ### sesionEscaneoStore.js
+**Propósito:** Mesa de trabajo del flujo de escaneo. Cada ítem tiene su propio comercio (no hay un comercio global de sesión). Se persiste en Capacitor Storage.
+
 **Estado:**
-- `comercioActivo`: Comercio seleccionado para la sesión de escaneo
-- `items`: Array de borradores escaneados (persistido en localStorage)
+- `items`: Array de ítems escaneados, cada uno con:
+  `{ id, codigoBarras, nombre, marca, cantidad, unidad, imagen, precio, moneda, origenApi, fuenteDato, productoExistenteId, comercio }`
+  - `comercio`: `null` por defecto → se asigna en la Mesa de trabajo (`{ id, nombre, direccionId, direccionNombre }`)
+- `cargando`: Boolean mientras se hidrata desde storage
 
 **Acciones:**
-- `iniciarSesion(comercio)`: Setea el comercio activo
-- `agregarItem(item)`: Agrega un item a la bandeja
-- `actualizarItem(id, cambios)`: Edita un item existente
-- `eliminarItem(id)`: Elimina un item
-- `limpiarTodo()`: Vacía items y comercio
+- `cargarSesion()`: Hidrata desde Capacitor Storage al iniciar (con migración automática para ítems sin `comercio`)
+- `agregarItem(item)`: Agrega ítem con `comercio: null`
+- `actualizarItem(id, cambios)`: Edita campos de un ítem existente
+- `asignarComercio(ids[], comercio)`: Asignación en bloque a múltiples ítems
+- `eliminarItem(id)`: Elimina un ítem por ID
+- `limpiarTodo()`: Vacía la mesa y elimina del storage
 
 **Getters:**
-- `cantidadItems`: Número de items (para badge)
+- `cantidadItems`: Cantidad de ítems (para badge en drawer)
 - `tieneItemsPendientes`: Boolean
 
 ### preferenciaStore.js
@@ -955,12 +964,13 @@ H. Arquitectura y Código
 - Diseñado para comprensión rápida del proyecto por parte de IAs
 - Proporciona visión de alto nivel
 - Para detalles técnicos específicos, consultar resúmenes por área:
-  - Resumen2Tarjetas.txt
-  - Resumen3DetalleProducto.txt
-  - Resumen4FormularioAgregar.txt
-  - Resumen5Comercios.txt
-  - Resumen6OpenFoodFacts.txt
-  - Resumen7LocalStorage.txt
+  - Resumen2Tarjetas.md — Componentes de tarjetas (TarjetaBase, TarjetaProducto, TarjetaComercio)
+  - Resumen3DetalleProducto.md — Página de detalle de producto
+  - Resumen4FormularioAgregar.md — Formulario agregar producto + precio
+  - Resumen5Comercios.md — Sistema de comercios y sucursales
+  - Resumen6OpenFoodFacts.md — APIs de búsqueda de productos
+  - Resumen7LocalStorage.md — Sistema de almacenamiento (adaptadores, stores)
+  - Resumen8Scanner.md — 🆕 Sistema de escaneo completo (Ráfaga, Escaneo rápido, Mesa de trabajo)
 
 ### Principios del Proyecto
 1. **Nomenclatura en Español:** Todo el código usa español descriptivo
@@ -999,13 +1009,17 @@ H. Arquitectura y Código
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
 - **Sección Mis Productos:** Completada
-- **Flujo de escaneo:** Completado (Fases 1-10, incluyendo bandeja, edición y auto-fetch)
+- **FAB reutilizable:** Completado (FabAcciones.vue — Speed Dial multi-acción o botón directo)
+- **Flujo de escaneo — Modo A (Escaneo rápido):** Completado (TarjetaEscaneo, foto, edición inline)
+- **Flujo de escaneo — Modo B (Ráfaga):** Completado (cámara continua, búsqueda background, aviso sobre cámara)
+- **Mesa de trabajo:** Completada (reemplaza BandejaBorradores; ordenamiento, selección, envío parcial)
 - **APIs de búsqueda:** Completado (7 APIs orquestadas, libros por ISBN, fuenteDato en UI)
 - **Safe area:** Completada (Android 15+ edge-to-edge)
 - **Botón back nativo:** Completado
 - **Splash screen:** Completada (imagen aleatoria, sin distorsión)
 - **Fotos de productos y comercios:** Completada (useCamaraFoto, q-menu contextual, 5 componentes)
 - **Preparación:** Lista para migración a Firebase
+- **Ver detalles del sistema de escaneo:** Resumen8Scanner.md
 
 ---
 

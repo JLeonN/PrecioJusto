@@ -6,6 +6,13 @@
 - DialogoAgregarProducto.vue (contenedor modal en /components/Formularios/Dialogos/)
 - DialogoAgregarComercioRapido.vue (diálogo para comercio rápido en /components/Formularios/Dialogos/)
 
+## ESCANEO UNITARIO EN FORMULARIO
+DialogoAgregarProducto.vue integra directamente EscaneadorCodigo.vue para escanear un código desde el campo "Código de barras":
+- `escanerUnitarioActivo = ref(false)` activa el overlay nativo
+- Al detectar código: `escanerUnitarioActivo = false` → `await nextTick()` → `buscarPorCodigo(codigo)`
+- El `nextTick()` es obligatorio en Capacitor/Android: el webview se restaura antes de abrir el diálogo de resultados
+- El formulario permanece abierto durante todo el flujo (el overlay nativo lo tapa temporalmente)
+
 ## ESTRUCTURA DE DATOS
 
 ### PRODUCTO
@@ -119,11 +126,11 @@ unidad, litro, mililitro, kilo, gramo, metro, pack
 ✅ ETAPA 1.5: Integración con comercios
 ✅ ETAPA 2: APIs multi-fuente (completada) — BuscadorProductosService orquesta 7 APIs (ver Resumen6)
 ✅ ETAPA 3: Búsqueda inteligente local (buscador inline en MisProductosPage)
-✅ ETAPA 4: Escaneo código de barras con cámara (completado — Fases 1-10)
-  - EscaneadorCodigo.vue: overlay nativo con @capacitor-mlkit/barcode-scanning, fallback web
-  - FormularioEscaneo.vue: modo rápido (solo precio) o mínimo (precio + nombre)
-  - BandejaBorradores.vue: bandeja persistente con edición, auto-fetch al reconectar
-  - Flujo orquestado desde MisProductosPage.vue con sesionEscaneoStore
+✅ ETAPA 4: Escaneo código de barras con cámara (completado — ver Resumen8Scanner.md para detalle completo)
+  - EscaneadorCodigo.vue: overlay nativo (@capacitor-mlkit/barcode-scanning), fallback web; prop `continuo` para Ráfaga
+  - TarjetaEscaneo.vue: tarjeta post-escaneo (Modo A); precio obligatorio, foto opcional, edición inline
+  - MesaTrabajo.vue: reemplaza BandejaBorradores; full-screen con ordenamiento, selección múltiple, envío parcial
+  - Flujo orquestado desde MisProductosPage.vue con sesionEscaneoStore (comercio por ítem, no global)
 
 ## DIALOGO AGREGAR PRECIO (DialogoAgregarPrecio.vue)
 Modal rápido para agregar precio a un producto ya existente. Accesible desde TarjetaProducto y DetalleProductoPage.
