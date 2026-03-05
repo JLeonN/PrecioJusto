@@ -16,10 +16,10 @@
         text-color="white"
         :label="accion.label"
         label-position="left"
+        label-class="fab-label"
+        padding="sm"
         @click="() => ejecutarAccion(accion.accion)"
-      >
-        <component :is="accion.icono" :size="20" style="color: white" />
-      </q-fab-action>
+      />
     </q-fab>
 
     <!-- Acción única: botón directo -->
@@ -60,5 +60,12 @@ defineProps({
 .fab-sticky {
   bottom: calc(18px + var(--safe-area-bottom, 0px)) !important;
   z-index: 2000;
+}
+</style>
+
+<style>
+.fab-label {
+  width: 150px;
+  text-align: left;
 }
 </style>
