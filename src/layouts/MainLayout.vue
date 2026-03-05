@@ -58,15 +58,6 @@
             </q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple>
-            <q-item-section avatar>
-              <IconChartLine :size="24" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Estadísticas</q-item-label>
-            </q-item-section>
-          </q-item>
-
           <q-item clickable v-ripple to="/comercios">
             <q-item-section avatar>
               <IconMapPin :size="24" />
@@ -97,25 +88,6 @@
             </q-item-section>
           </q-item>
 
-          <q-separator class="q-my-md" />
-
-          <q-item clickable v-ripple>
-            <q-item-section avatar>
-              <IconSettings :size="24" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Configuración</q-item-label>
-            </q-item-section>
-          </q-item>
-
-          <q-item clickable v-ripple>
-            <q-item-section avatar>
-              <IconInfoCircle :size="24" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Acerca de</q-item-label>
-            </q-item-section>
-          </q-item>
         </q-list>
       </q-scroll-area>
     </q-drawer>
@@ -137,10 +109,7 @@ import {
   IconSearch,
   IconShoppingCart,
   IconHome,
-  IconChartLine,
   IconMapPin,
-  IconSettings,
-  IconInfoCircle,
   IconClipboardList,
 } from '@tabler/icons-vue'
 import { useBotonAtras } from '../composables/useBotonAtras.js'

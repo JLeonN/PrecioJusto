@@ -14,6 +14,4 @@ Marcar con `[x]` cuando esté listo.
 
 - [ ] **Estrategia de búsqueda: local primero, APIs después:** En toda circunstancia donde se busque un producto (por nombre, código de barras, etc.), la app debe consultar primero la base de datos local del usuario y solo si no hay resultados suficientes, recurrir a las APIs externas. Revisar todos los puntos de búsqueda de la app y unificar este comportamiento.
 
-- [ ] **Drawer — Limpiar ítems sin uso:** Eliminar del drawer los ítems que aún no tienen funcionalidad real: Estadísticas, Configuración y Acerca de.
-
 - [ ] **Modales + Teclado Virtual (Android):** Cuando un input dentro de un modal recibe foco, el teclado virtual puede taparlo. El modal debe desplazarse automáticamente para que el input quede visible por encima del teclado. Hay que detectar bien esto porque los modales y los inputs varían mucho en tamaño y posición.
