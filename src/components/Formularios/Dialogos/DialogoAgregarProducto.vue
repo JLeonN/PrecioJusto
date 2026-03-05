@@ -70,7 +70,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useQuasar } from 'quasar'
 import FormularioProducto from '../FormularioProducto.vue'
 import FormularioPrecio from '../FormularioPrecio.vue'
@@ -458,10 +458,12 @@ function alEscanearCodigo() {
   escanerUnitarioActivo.value = true
 }
 
-// Al detectar un código: llena el campo y dispara búsqueda API automáticamente
+// Al detectar un código: llena el campo y dispara búsqueda API automáticamente.
+// nextTick espera que el webview se restaure antes de abrir el diálogo de resultados.
 async function alDetectarCodigo(codigo) {
   escanerUnitarioActivo.value = false
   datosProducto.value.codigoBarras = codigo
+  await nextTick()
   await buscarPorCodigo(codigo)
 }
 </script>

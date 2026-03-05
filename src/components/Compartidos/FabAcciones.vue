@@ -13,11 +13,12 @@
         v-for="accion in acciones"
         :key="accion.label"
         :color="accion.color || color"
+        text-color="white"
         :label="accion.label"
         label-position="left"
-        @click="accion.accion"
+        @click="() => ejecutarAccion(accion.accion)"
       >
-        <component :is="accion.icono" :size="20" />
+        <component :is="accion.icono" :size="20" style="color: white" />
       </q-fab-action>
     </q-fab>
 
@@ -35,6 +36,14 @@
 </template>
 
 <script setup>
+import { nextTick } from 'vue'
+
+// Espera que el FAB termine su animación de cierre antes de ejecutar la acción.
+// Sin esto, abrir un q-dialog en el mismo tick falla en Capacitor/Android.
+function ejecutarAccion(fn) {
+  nextTick(() => fn())
+}
+
 defineProps({
   acciones: {
     type: Array,
@@ -50,5 +59,6 @@ defineProps({
 <style scoped>
 .fab-sticky {
   bottom: calc(18px + var(--safe-area-bottom, 0px)) !important;
+  z-index: 2000;
 }
 </style>

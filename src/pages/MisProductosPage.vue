@@ -114,6 +114,28 @@
       @precio-guardado="alGuardarPrecio"
     />
 
+    <!-- TARJETITA SOBRE LA CÁMARA (duplicado + éxito Ráfaga) -->
+    <Teleport to="body">
+      <Transition name="aviso-deslizar">
+        <div v-if="avisoEscaneo.visible" class="aviso-escaneo">
+          <div
+            class="aviso-escaneo-card"
+            :class="avisoEscaneo.tipo === 'duplicado' ? 'aviso-escaneo-card--duplicado' : 'aviso-escaneo-card--exito'"
+          >
+            <img v-if="avisoEscaneo.imagen" :src="avisoEscaneo.imagen" class="aviso-escaneo-foto" />
+            <div v-else class="aviso-escaneo-foto aviso-escaneo-foto--vacia">
+              <IconShoppingBag :size="18" style="color: white" />
+            </div>
+            <div class="aviso-escaneo-texto">
+              <div class="aviso-escaneo-nombre ellipsis">{{ avisoEscaneo.nombre || avisoEscaneo.codigo }}</div>
+              <div v-if="avisoEscaneo.nombre" class="aviso-escaneo-codigo">{{ avisoEscaneo.codigo }}</div>
+              <div class="aviso-escaneo-etiqueta">{{ avisoEscaneo.tipo === 'duplicado' ? 'Ya en la mesa' : 'Agregado ✓' }}</div>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
     <!-- DIÁLOGO CONFIRMACIÓN ELIMINACIÓN -->
     <q-dialog v-model="dialogoConfirmacionAbierto" persistent>
       <q-card>
@@ -145,8 +167,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
-import { IconPlus, IconScan, IconBolt } from '@tabler/icons-vue'
+import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
+import { IconPlus, IconScan, IconBolt, IconShoppingBag } from '@tabler/icons-vue'
 import ListaProductos from '../components/MisProductos/ListaProductos.vue'
 import InputBusqueda from '../components/Compartidos/InputBusqueda.vue'
 import DialogoAgregarProducto from '../components/Formularios/Dialogos/DialogoAgregarProducto.vue'
@@ -177,6 +199,18 @@ const modoEscaneo = ref(null) // 'rapido' | 'rafaga' | null
 const tarjetaEscaneoAbierta = ref(false)
 const itemActual = ref(null)
 
+// Tarjetita de aviso sobre la cámara (duplicado + éxito en Ráfaga)
+const avisoEscaneo = reactive({ visible: false, tipo: 'exito', nombre: '', codigo: '', imagen: null })
+let timerAvisoId = null
+// Códigos en búsqueda background (previene doble escaneo del mismo código en Ráfaga)
+const codigosProcesando = new Set()
+
+function mostrarAvisoEscaneo(tipo, { nombre, codigo, imagen }) {
+  if (timerAvisoId) clearTimeout(timerAvisoId)
+  Object.assign(avisoEscaneo, { visible: true, tipo, nombre: nombre || '', codigo, imagen: imagen || null })
+  timerAvisoId = setTimeout(() => { avisoEscaneo.visible = false }, tipo === 'duplicado' ? 2500 : 1500)
+}
+
 function iniciarEscaneoRapido() {
   modoEscaneo.value = 'rapido'
   scannerActivo.value = true
@@ -187,33 +221,9 @@ function iniciarRafaga() {
   scannerActivo.value = true
 }
 
-// Procesa el código escaneado según el modo activo
-async function procesarCodigoEscaneado(codigo) {
-  const yaEnSesion = sesionEscaneoStore.items.some((i) => i.codigoBarras === codigo)
-
-  if (yaEnSesion) {
-    const encontrado = sesionEscaneoStore.items.find((i) => i.codigoBarras === codigo)
-    $q.notify({
-      type: 'warning',
-      message: encontrado?.nombre ? `"${encontrado.nombre}" ya está en la mesa` : `Código ${codigo} ya está en la mesa`,
-      position: 'top',
-      timeout: 2000,
-    })
-    // En modo rápido: reiniciar scanner; en ráfaga: la cámara nunca se detuvo
-    if (modoEscaneo.value === 'rapido') {
-      scannerActivo.value = false
-      await nextTick()
-      scannerActivo.value = true
-    }
-    return
-  }
-
-  // Buscar en BD local y API
-  const existente = await productosService.buscarPorCodigoBarras(codigo)
-  const resultadoApi = await buscadorProductosService.buscarPorCodigo(codigo)
-  const productoApi = resultadoApi?.producto || null
-
-  const nuevoItem = {
+// Construye el item a partir de los resultados de búsqueda
+function _construirItem(codigo, existente, productoApi, resultadoApi) {
+  return {
     codigoBarras: codigo,
     productoExistenteId: existente?.id || null,
     nombre: productoApi?.nombre || existente?.nombre || '',
@@ -226,21 +236,60 @@ async function procesarCodigoEscaneado(codigo) {
     origenApi: !!productoApi,
     fuenteDato: resultadoApi?.fuenteDato || null,
   }
+}
 
-  if (modoEscaneo.value === 'rafaga') {
-    // Modo B: agregar directo a la mesa, cámara sigue activa
+// Busca en BD local + API y devuelve el item construido
+async function _buscarProducto(codigo) {
+  const existente = await productosService.buscarPorCodigoBarras(codigo)
+  const resultadoApi = await buscadorProductosService.buscarPorCodigo(codigo)
+  return _construirItem(codigo, existente, resultadoApi?.producto || null, resultadoApi)
+}
+
+// Fire-and-forget: busca en background y agrega a la mesa cuando termina (solo Ráfaga)
+async function _buscarYAgregarRafaga(codigo) {
+  try {
+    const nuevoItem = await _buscarProducto(codigo)
     sesionEscaneoStore.agregarItem(nuevoItem)
-    $q.notify({
-      message: nuevoItem.nombre || codigo,
-      caption: nuevoItem.nombre ? codigo : '',
-      color: 'grey-8',
-      position: 'top',
-      timeout: 1500,
-    })
+    mostrarAvisoEscaneo('exito', { nombre: nuevoItem.nombre, codigo, imagen: nuevoItem.imagen })
+  } finally {
+    codigosProcesando.delete(codigo)
+  }
+}
+
+// Procesa el código escaneado según el modo activo
+async function procesarCodigoEscaneado(codigo) {
+  // Duplicado ya guardado en la mesa
+  const yaEnSesion = sesionEscaneoStore.items.some((i) => i.codigoBarras === codigo)
+  if (yaEnSesion) {
+    const encontrado = sesionEscaneoStore.items.find((i) => i.codigoBarras === codigo)
+    mostrarAvisoEscaneo('duplicado', { nombre: encontrado?.nombre || '', codigo, imagen: encontrado?.imagen || null })
+    scannerActivo.value = false
+    await nextTick()
+    scannerActivo.value = true
     return
   }
 
-  // Modo A: pausar cámara y mostrar TarjetaEscaneo
+  // Duplicado siendo buscado en background (Ráfaga)
+  if (codigosProcesando.has(codigo)) {
+    mostrarAvisoEscaneo('duplicado', { nombre: '', codigo, imagen: null })
+    scannerActivo.value = false
+    await nextTick()
+    scannerActivo.value = true
+    return
+  }
+
+  if (modoEscaneo.value === 'rafaga') {
+    // Ráfaga: reiniciar cámara INMEDIATAMENTE, buscar en background
+    codigosProcesando.add(codigo)
+    scannerActivo.value = false
+    await nextTick()
+    scannerActivo.value = true
+    _buscarYAgregarRafaga(codigo) // sin await → fire-and-forget
+    return
+  }
+
+  // Modo A: buscar y mostrar TarjetaEscaneo (cámara se pausa mientras busca)
+  const nuevoItem = await _buscarProducto(codigo)
   scannerActivo.value = false
   itemActual.value = nuevoItem
   tarjetaEscaneoAbierta.value = true
@@ -447,4 +496,72 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* Tarjetita de aviso sobre la cámara */
+.aviso-escaneo {
+  position: fixed;
+  top: calc(var(--safe-area-top, 0px) + 60px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  pointer-events: none;
+  width: max-content;
+  max-width: 85vw;
+}
+.aviso-escaneo-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+.aviso-escaneo-card--exito {
+  background: rgba(25, 135, 65, 0.93);
+}
+.aviso-escaneo-card--duplicado {
+  background: rgba(180, 105, 0, 0.93);
+}
+.aviso-escaneo-foto {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.aviso-escaneo-foto--vacia {
+  background: rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.aviso-escaneo-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.aviso-escaneo-nombre {
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  max-width: 200px;
+}
+.aviso-escaneo-codigo {
+  color: rgba(255,255,255,0.75);
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+}
+.aviso-escaneo-etiqueta {
+  color: rgba(255,255,255,0.85);
+  font-size: 11px;
+}
+/* Transición slide-down */
+.aviso-deslizar-enter-active,
+.aviso-deslizar-leave-active {
+  transition: all 0.25s ease;
+}
+.aviso-deslizar-enter-from,
+.aviso-deslizar-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-16px);
+}
 </style>

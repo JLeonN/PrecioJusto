@@ -245,72 +245,72 @@ El FAB pasa de 2 a 3 opciones:
 
 [x] Abrir "Agregar Producto" (FAB → "Agregar manual")
 [x] Hacer click en el ícono de cámara dentro del campo "Código de barras"
-[ ] El overlay del escáner se abre (nativo o input manual en web)
-[ ] Escanear/ingresar un código de barras conocido
-[ ] Verificar que el campo se llena automáticamente con el código
-[ ] Verificar que la búsqueda en la API se dispara automáticamente (sin click extra)
-[ ] Si el producto se encuentra: aparece el diálogo de resultados de búsqueda
-[ ] Si no se encuentra: aparece el notify de "No se encontró el producto"
-[ ] El formulario sigue abierto (no se cerró ni cambió de pantalla)
+[x] El overlay del escáner se abre (nativo o input manual en web)
+[x] Escanear/ingresar un código de barras conocido
+[x] Verificar que el campo se llena automáticamente con el código
+[x] Verificar que la búsqueda en la API se dispara automáticamente (sin click extra)
+[x] Si el producto se encuentra: aparece el diálogo de resultados de búsqueda
+[x] Si no se encuentra: aparece el notify de "No se encontró el producto"
+[x] El formulario sigue abierto (no se cerró ni cambió de pantalla)
 
 ### T.B — FAB expandible en MisProductosPage
 
-[ ] En MisProductosPage: click en el FAB (+)
-[ ] Se expande mostrando 3 opciones con labels a la izquierda
-[ ] Opción "Agregar manual" (IconPlus): abre el formulario DialogoAgregarProducto
-[ ] Opción "Escaneo rápido" (IconScan): abre el modo A con tarjeta
-[ ] Opción "Ráfaga" (IconBolt): abre el modo B de escaneo continuo
-[ ] El FAB se cierra al hacer click en cualquier opción
-[ ] El icono + rota a X al expandir, y vuelve a + al colapsar
-[ ] En modo selección: el FAB se oculta correctamente
+[x] En MisProductosPage: click en el FAB (+)
+[x] Se expande mostrando 3 opciones con labels a la izquierda
+[x] Opción "Agregar manual" (IconPlus): abre el formulario DialogoAgregarProducto
+[x] Opción "Escaneo rápido" (IconScan): abre el modo A con tarjeta
+[x] Opción "Ráfaga" (IconBolt): abre el modo B de escaneo continuo
+[x] El FAB se cierra al hacer click en cualquier opción
+[x] El icono + rota a X al expandir, y vuelve a + al colapsar
+[x] En modo selección: el FAB se oculta correctamente
 
 ### T.C — FAB en ComerciosPage
 
-[ ] En ComerciosPage: click en el FAB (+)
-[ ] Se abre el formulario de agregar comercio directamente (sin expandir)
-[ ] En modo selección: el FAB se oculta correctamente
+[x] En ComerciosPage: click en el FAB (+)
+[x] Se abre el formulario de agregar comercio directamente (sin expandir)
+[x] En modo selección: el FAB se oculta correctamente
 
 ### T.D — FAB en DetalleProductoPage
 
-[ ] En DetalleProductoPage: click en el FAB (+)
-[ ] Se abre el diálogo de agregar precio directamente (sin expandir)
-[ ] El FAB solo aparece cuando el producto está cargado y sin loading
+[x] En DetalleProductoPage: click en el FAB (+)
+[x] Se abre el diálogo de agregar precio directamente (sin expandir)
+[x] El FAB solo aparece cuando el producto está cargado y sin loading
 
 ### T.E — Modo A: Escaneo rápido con tarjeta
 
-[ ] FAB → "Escaneo rápido" → cámara abre sin pedir comercio
-[ ] Escanear producto conocido → cámara se pausa → aparece TarjetaEscaneo con datos
-[ ] Escanear producto desconocido → tarjeta vacía con solo el código, campos editables
-[ ] Botón "Siguiente" deshabilitado si no hay precio
-[ ] Ingresar precio → "Siguiente" → ítem va a la Mesa de trabajo → cámara se reabre
-[ ] Escanear el mismo código dos veces → aparece aviso de duplicado con nombre/foto/código
-[ ] El aviso de duplicado no detiene el escaneo
-[ ] La foto del producto es opcional y se puede tomar desde la tarjeta
+[x] FAB → "Escaneo rápido" → cámara abre sin pedir comercio
+[x] Escanear producto conocido → cámara se pausa → aparece TarjetaEscaneo con datos
+[x] Escanear producto desconocido → tarjeta vacía con solo el código, campos editables
+[x] Botón "Siguiente" deshabilitado si no hay precio
+[x] Ingresar precio → "Siguiente" → ítem va a la Mesa de trabajo → cámara se reabre
+[No] Escanear el mismo código dos veces → aparece aviso de duplicado con nombre/foto/código
+[No] El aviso de duplicado no detiene el escaneo
+[x Tiene que aparecet en tiempo real no despues de guardar en la mesa] La foto del producto es opcional y se puede tomar desde la tarjeta
 
 ### T.E2 — Modo B: Ráfaga
 
-[ ] FAB → "Ráfaga" → cámara abre sin pedir comercio
-[ ] Escanear múltiples productos sin pausas
-[ ] Toast de feedback por cada escaneo con nombre + código + foto (o solo código)
-[ ] Escanear el mismo código dos veces → aviso sin interrumpir el escaneo
-[ ] "Ver Mesa de trabajo" lleva a la Mesa con todos los ítems escaneados
+[x] FAB → "Ráfaga" → cámara abre sin pedir comercio
+[x] Escanear múltiples productos sin pausas
+[No] Toast de feedback por cada escaneo con nombre + código + foto (o solo código)
+[No] Escanear el mismo código dos veces → aviso sin interrumpir el escaneo
+[x] "Ver Mesa de trabajo" lleva a la Mesa con todos los ítems escaneados
 
 ### T.E3 — Mesa de trabajo
 
-[ ] Los ítems incompletos aparecen arriba, los completos abajo (orden por defecto)
-[ ] El filtro de ordenamiento funciona (las 5 opciones)
-[ ] Tap en tarjeta → se expande para editar
-[ ] Long press → modo selección con checkboxes
-[ ] Seleccionar varios ítems → asignar comercio en bloque → todos los seleccionados lo reciben
-[ ] Ítems completos: botón "Enviar" en color
-[ ] Ítems incompletos: botón "Enviar" en gris (no se puede enviar)
-[ ] Enviar solo los ítems completos → confirmación → se guardan → los incompletos permanecen
-[ ] La Mesa de trabajo persiste si se cierra y se vuelve a abrir la app
+[x] Los ítems incompletos aparecen arriba, los completos abajo (orden por defecto)
+[x] El filtro de ordenamiento funciona (las 5 opciones)
+[x] Tap en tarjeta → se expande para editar
+[x] Long press → modo selección con checkboxes
+[x] Seleccionar varios ítems → asignar comercio en bloque → todos los seleccionados lo reciben
+[x] Ítems completos: botón "Enviar" en color
+[x] Ítems incompletos: botón "Enviar" en gris (no se puede enviar)
+[x] Enviar solo los ítems completos → confirmación → se guardan → los incompletos permanecen
+[x] La Mesa de trabajo persiste si se cierra y se vuelve a abrir la app
 
 ### T.F — Safe area (solo en dispositivo físico Android/iOS)
 
-[ ] El FAB no queda tapado por la barra de navegación del sistema
-[ ] La posición es consistente en pantallas con notch y sin notch
+[x] El FAB no queda tapado por la barra de navegación del sistema
+[x] La posición es consistente en pantallas con notch y sin notch
 
 ═══════════════════════════════════════════════════════════════
 

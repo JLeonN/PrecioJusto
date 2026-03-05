@@ -5,8 +5,8 @@
       <!-- FOTO + NOMBRE (con gradiente) -->
       <div class="tarjeta-escaneo-portada">
         <img
-          v-if="item?.imagen"
-          :src="item.imagen"
+          v-if="datosForm.imagen"
+          :src="datosForm.imagen"
           class="tarjeta-escaneo-portada__imagen"
         />
         <div v-else class="tarjeta-escaneo-portada__placeholder">
@@ -238,12 +238,8 @@ const abierto = computed({
   set: (val) => emit('update:modelValue', val),
 })
 
-// Precio obligatorio; nombre obligatorio si no viene de API
-const formularioValido = computed(() => {
-  const precioOk = datosForm.value.precio > 0
-  const nombreOk = props.item?.origenApi || !!datosForm.value.nombre?.trim()
-  return precioOk && nombreOk
-})
+// Solo el precio es obligatorio para poder continuar
+const formularioValido = computed(() => datosForm.value.precio > 0)
 
 // Sincroniza el form cuando llega un nuevo item escaneado
 watch(
