@@ -131,6 +131,7 @@
               <div v-if="avisoEscaneo.nombre" class="aviso-escaneo-codigo">{{ avisoEscaneo.codigo }}</div>
               <div class="aviso-escaneo-etiqueta">{{ avisoEscaneo.tipo === 'duplicado' ? 'Ya en la mesa' : 'Agregado ✓' }}</div>
             </div>
+            <button class="aviso-escaneo-cerrar" @click="avisoEscaneo.visible = false">✕</button>
           </div>
         </div>
       </Transition>
@@ -201,14 +202,11 @@ const itemActual = ref(null)
 
 // Tarjetita de aviso sobre la cámara (duplicado + éxito en Ráfaga)
 const avisoEscaneo = reactive({ visible: false, tipo: 'exito', nombre: '', codigo: '', imagen: null })
-let timerAvisoId = null
 // Códigos en búsqueda background (previene doble escaneo del mismo código en Ráfaga)
 const codigosProcesando = new Set()
 
 function mostrarAvisoEscaneo(tipo, { nombre, codigo, imagen }) {
-  if (timerAvisoId) clearTimeout(timerAvisoId)
   Object.assign(avisoEscaneo, { visible: true, tipo, nombre: nombre || '', codigo, imagen: imagen || null })
-  timerAvisoId = setTimeout(() => { avisoEscaneo.visible = false }, tipo === 'duplicado' ? 2500 : 1500)
 }
 
 function iniciarEscaneoRapido() {
@@ -511,9 +509,26 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 14px;
+  padding: 10px 10px 10px 14px;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  pointer-events: auto;
+}
+.aviso-escaneo-cerrar {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  color: white;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: -2px;
 }
 .aviso-escaneo-card--exito {
   background: rgba(25, 135, 65, 0.93);
