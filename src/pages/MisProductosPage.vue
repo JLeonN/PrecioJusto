@@ -94,6 +94,7 @@
     <!-- ESCANEADOR DE CÓDIGO DE BARRAS -->
     <EscaneadorCodigo
       :activo="scannerActivo"
+      :continuo="modoEscaneo === 'rafaga'"
       @codigo-detectado="procesarCodigoEscaneado"
       @cerrar="alCerrarScanner"
     />
@@ -256,32 +257,31 @@ async function _buscarYAgregarRafaga(codigo) {
 
 // Procesa el código escaneado según el modo activo
 async function procesarCodigoEscaneado(codigo) {
+  const esRafaga = modoEscaneo.value === 'rafaga'
+
   // Duplicado ya guardado en la mesa
   const yaEnSesion = sesionEscaneoStore.items.some((i) => i.codigoBarras === codigo)
   if (yaEnSesion) {
     const encontrado = sesionEscaneoStore.items.find((i) => i.codigoBarras === codigo)
     mostrarAvisoEscaneo('duplicado', { nombre: encontrado?.nombre || '', codigo, imagen: encontrado?.imagen || null })
-    scannerActivo.value = false
-    await nextTick()
-    scannerActivo.value = true
+    if (!esRafaga) {
+      // En Ráfaga la cámara es continua → no hay que reiniciarla
+      scannerActivo.value = false
+      await nextTick()
+      scannerActivo.value = true
+    }
     return
   }
 
   // Duplicado siendo buscado en background (Ráfaga)
   if (codigosProcesando.has(codigo)) {
     mostrarAvisoEscaneo('duplicado', { nombre: '', codigo, imagen: null })
-    scannerActivo.value = false
-    await nextTick()
-    scannerActivo.value = true
-    return
+    return // en Ráfaga la cámara sigue activa; en modo A esto no debería ocurrir
   }
 
-  if (modoEscaneo.value === 'rafaga') {
-    // Ráfaga: reiniciar cámara INMEDIATAMENTE, buscar en background
+  if (esRafaga) {
+    // Ráfaga (continuo): cámara nunca para → solo lanzar búsqueda en background
     codigosProcesando.add(codigo)
-    scannerActivo.value = false
-    await nextTick()
-    scannerActivo.value = true
     _buscarYAgregarRafaga(codigo) // sin await → fire-and-forget
     return
   }

@@ -283,16 +283,16 @@ El FAB pasa de 2 a 3 opciones:
 [x] Escanear producto desconocido → tarjeta vacía con solo el código, campos editables
 [x] Botón "Siguiente" deshabilitado si no hay precio
 [x] Ingresar precio → "Siguiente" → ítem va a la Mesa de trabajo → cámara se reabre
-[No] Escanear el mismo código dos veces → aparece aviso de duplicado con nombre/foto/código
-[No] El aviso de duplicado no detiene el escaneo
+[x] Escanear el mismo código dos veces → aparece aviso de duplicado con nombre/foto/código
+[x] El aviso de duplicado no detiene el escaneo
 [x Tiene que aparecet en tiempo real no despues de guardar en la mesa] La foto del producto es opcional y se puede tomar desde la tarjeta
 
 ### T.E2 — Modo B: Ráfaga
 
 [x] FAB → "Ráfaga" → cámara abre sin pedir comercio
 [x] Escanear múltiples productos sin pausas
-[No] Toast de feedback por cada escaneo con nombre + código + foto (o solo código)
-[No] Escanear el mismo código dos veces → aviso sin interrumpir el escaneo
+[x] Toast de feedback por cada escaneo con nombre + código + foto (o solo código)
+[x] Escanear el mismo código dos veces → aviso sin interrumpir el escaneo
 [x] "Ver Mesa de trabajo" lleva a la Mesa con todos los ítems escaneados
 
 ### T.E3 — Mesa de trabajo

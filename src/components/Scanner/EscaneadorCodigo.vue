@@ -69,11 +69,13 @@ import { useQuasar } from 'quasar'
 import { IconX } from '@tabler/icons-vue'
 
 const props = defineProps({
-  activo: {
-    type: Boolean,
-    default: false,
-  },
+  activo: { type: Boolean, default: false },
+  // En modo continuo la cámara nunca se detiene: debounce por código para evitar dobles detecciones
+  continuo: { type: Boolean, default: false },
 })
+
+// Set de códigos en cooldown (solo modo continuo)
+const codigosEnCooldown = new Set()
 
 const emit = defineEmits(['codigo-detectado', 'cerrar'])
 
@@ -101,7 +103,16 @@ async function iniciarScaneo() {
 
   await BarcodeScanner.addListener('barcodeScanned', (resultado) => {
     const codigo = resultado.barcode?.rawValue
-    if (codigo) {
+    if (!codigo) return
+
+    if (props.continuo) {
+      // Modo continuo (Ráfaga): cámara no para, debounce 2s por código
+      if (codigosEnCooldown.has(codigo)) return
+      codigosEnCooldown.add(codigo)
+      setTimeout(() => codigosEnCooldown.delete(codigo), 2000)
+      emit('codigo-detectado', codigo)
+    } else {
+      // Modo unitario: para la cámara tras el primer código
       detenerScaneo()
       emit('codigo-detectado', codigo)
     }
@@ -112,6 +123,7 @@ async function iniciarScaneo() {
 
 async function detenerScaneo() {
   if (!esNativo) return
+  codigosEnCooldown.clear()
   document.body.classList.remove('scanner-activo')
   await BarcodeScanner.removeAllListeners()
   try {
