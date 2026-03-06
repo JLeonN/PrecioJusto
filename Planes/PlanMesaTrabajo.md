@@ -153,7 +153,158 @@ y se superpone al contenido del `info-inferior` cuando la tarjeta es angosta.
 
 ## 📋 FASE 3: MEJORAS EN TARJETAS — ESTADO EXPANDIDO 🃏 [PENDIENTE]
 
-> Contenido a definir. Ver discusión en chat.
+### Objetivo
+
+Corregir el bug de cierre al tocar inputs, agregar copia de código de barras,
+y asegurar que toda la tarjeta sea completamente responsive.
+
+---
+
+### 3.1 — Bug: tarjeta se cierra al tocar inputs/selects
+
+El click en inputs y selects dentro del área expandida burbujea hasta `q-card`,
+que tiene `@click="manejarClick"` y togglea la expansión.
+
+**Archivo:** `src/components/Tarjetas/TarjetaBase.vue`
+
+[ ] Agregar `@click.stop` al div `tarjeta-yugioh__expandido`:
+    `<div v-show="expandido && !modoSeleccion" class="tarjeta-yugioh__expandido" @click.stop>`
+[ ] Verificar que el botón "Enviar" y "Eliminar" en `#acciones` también usan `.stop`
+    (ya los tienen en TarjetaProductoBorrador, pero confirmar que no se rompió nada)
+
+---
+
+### 3.2 — Copiar código de barras
+
+**Archivo:** `src/components/Scanner/TarjetaProductoBorrador.vue`
+
+[ ] En el slot `#info-inferior`, hacer el área del código de barras clickeable (`@click.stop`)
+[ ] Al hacer click: copiar `item.codigoBarras` al portapapeles con `copyToClipboard` de Quasar
+[ ] Feedback: `$q.notify` con mensaje "Código copiado" (notify toast, consistente con el resto)
+[ ] Cursor: `cursor: pointer` al `.info-inferior-izq` cuando hay código de barras
+[ ] Si no hay código (`item.codigoBarras` es null): el click no hace nada
+
+---
+
+### 3.3 — Responsividad general
+
+Aplica a **todas las fases** de este plan. Todo debe funcionar correctamente en:
+- Móvil angosto (360px) — contexto principal de uso
+- Tablet (768px)
+- Desktop (1024px+)
+
+**Puntos críticos a verificar:**
+
+[ ] Fase 1 — MesaTrabajoPage: el estado vacío (mensaje + botones) se ve bien en móvil
+[ ] Fase 2 — Las 3 líneas del `#tipo` no se cortan ni desbordan en pantallas angostas
+[ ] Fase 2 — Los chips de completitud hacen wrap correctamente si no entran en una fila
+[ ] Fase 3 — El área expandida con los campos de edición no queda aplastada en móvil
+[ ] Fase 3 — El q-select de comercios abre correctamente en móvil (no queda tapado)
+[ ] El selector de ordenamiento de MesaTrabajoPage es usable en pantallas pequeñas
+
+═══════════════════════════════════════════════════════════════
+
+## 📋 FASE 4: MEJORAS EN TARJETA DE ESCANEO (TarjetaEscaneo) 📷 [PENDIENTE]
+
+### Objetivo
+
+Mejorar la `TarjetaEscaneo.vue` (bottom sheet del Modo A — Escaneo rápido):
+- Corregir desalineación del campo precio y selector de moneda
+- Agregar ícono y función de copiar en el código de barras
+- Quitar "Fuente: Open Food Facts" del área de info
+- Mover el botón de cámara dentro del div de la foto (overlay)
+- Agregar botón "recuperar foto" al lado de la cámara
+- Agregar botón "recuperar datos" dentro del área de edición
+- Responsividad en tablet: max-width + imagen visible
+
+---
+
+### 4.1 — Fix desalineación precio + moneda
+
+**Archivo:** `src/components/Scanner/TarjetaEscaneo.vue`
+
+[ ] El row de precio y moneda debe usar `items-stretch` o `items-center` consistente
+[ ] Verificar que ambos campos tengan el mismo `height` o `align-self: center`
+[ ] Resultado: precio e input de moneda visualmente al mismo nivel
+
+---
+
+### 4.2 — Código de barras: ícono + copiar
+
+**Archivo:** `src/components/Scanner/TarjetaEscaneo.vue`
+
+[ ] Agregar `IconBarcode` al lado del número (igual que en TarjetaProductoBorrador)
+[ ] Hacer el área del código clickeable (`@click.stop`)
+[ ] Al hacer click: copiar con `copyToClipboard` de Quasar + notify "Código copiado"
+[ ] `cursor: pointer` cuando hay código; sin efecto si no hay código
+
+---
+
+### 4.3 — Quitar "Fuente: Open Food Facts"
+
+**Archivo:** `src/components/Scanner/TarjetaEscaneo.vue`
+
+[ ] Eliminar la línea que muestra `item.fuenteDato` del template
+
+---
+
+### 4.4 — Guardar `datosOriginales` en el store
+
+Para poder recuperar foto y datos, el ítem debe guardar el estado original
+al momento de ser creado desde la API o la base de datos local.
+
+**Archivo:** `src/almacenamiento/stores/sesionEscaneoStore.js`
+
+[ ] Al crear un ítem desde API/BD: agregar campo `datosOriginales`:
+    ```javascript
+    datosOriginales: origenApi || productoExistenteId
+      ? { nombre, marca, cantidad, unidad, imagen }
+      : null
+    ```
+[ ] Si el ítem es nuevo (sin origen): `datosOriginales = null`
+[ ] `datosOriginales` es inmutable — nunca se modifica después de creado
+
+---
+
+### 4.5 — Botón cámara dentro de la foto + botón recuperar foto
+
+**Archivo:** `src/components/Scanner/TarjetaEscaneo.vue`
+
+[ ] Mover el botón de cámara (actual) al interior del div de la foto
+[ ] Posición: overlay esquina inferior derecha (`position: absolute; bottom: 8px; right: 8px`)
+[ ] Botón cámara: siempre visible (para agregar/cambiar foto)
+[ ] Botón recuperar foto: al lado izquierdo del botón cámara
+    `v-if="datosForm.datosOriginales?.imagen"`
+[ ] Click en recuperar foto: `datosForm.imagen = datosForm.datosOriginales.imagen`
+[ ] Ícono sugerido para recuperar foto: `IconPhotoSearch` o `IconRefresh` (Tabler)
+[ ] Ambos botones con fondo semitransparente para ser visibles sobre cualquier imagen
+[ ] Quitar el botón de cámara de su ubicación actual (fuera del div de foto)
+
+---
+
+### 4.6 — Botón recuperar datos (en área de edición)
+
+**Archivo:** `src/components/Scanner/TarjetaEscaneo.vue`
+
+[ ] Agregar botón "Recuperar datos" dentro del área de edición expandida
+    `v-if="datosForm.datosOriginales"`
+[ ] Click: restaura `nombre`, `marca`, `cantidad`, `unidad` desde `datosOriginales`
+    (NO modifica `precio`, `moneda`, `comercio`, ni `imagen`)
+[ ] Ícono sugerido: `IconArrowBackUp` (Tabler) — flecha de deshacer
+[ ] Posición: al final del área de edición, antes del separador con los botones principales
+
+---
+
+### 4.7 — Responsividad tablet
+
+**Archivo:** `src/components/Scanner/TarjetaEscaneo.vue`
+
+[ ] El `q-dialog` con `position="bottom"` en pantallas ≥ 768px:
+    - Agregar `max-width: 480px` al contenido del dialog
+    - Centrar horizontalmente (`margin: 0 auto`)
+[ ] Esto evita que la tarjeta ocupe todo el ancho en tablet y la imagen quede cortada
+[ ] Verificar que la imagen sea siempre visible (altura mínima del área de foto)
+[ ] Confirmar que los botones Descartar / Ir a mesa / Siguiente no se cortan en móvil
 
 ═══════════════════════════════════════════════════════════════
 
@@ -176,6 +327,35 @@ y se superpone al contenido del `info-inferior` cuando la tarjeta es angosta.
 [ ] Limpiar todo desde la Mesa → auto-navega a Mis Productos
 [ ] El watch no dispara navegación si los ítems se vacían desde otra página
 
+### T.B2 — Tarjeta expandida (bugs y nuevas funciones)
+
+[ ] Expandir tarjeta → tocar input de Nombre → se puede escribir sin que se cierre la tarjeta
+[ ] Expandir tarjeta → tocar q-select de Comercio → se abre sin cerrar la tarjeta
+[ ] Tocar código de barras (con código) → notify "Código copiado" + portapapeles contiene el código
+[ ] Tocar "Sin código" → no hace nada (sin crash)
+[ ] Botón Enviar y Eliminar siguen funcionando con `.stop`
+
+### T.B3 — Responsividad
+
+[ ] Móvil 360px: tarjeta colapsada se ve completa, chips hacen wrap si es necesario
+[ ] Móvil 360px: tarjeta expandida, todos los inputs son accesibles y usables
+[ ] Móvil 360px: estado vacío de la mesa se ve correctamente (mensaje + 2 botones)
+[ ] Las 3 líneas de info (chips, comercio, dirección) no desbordan en pantalla angosta
+[ ] Tablet y desktop: sin regresiones visuales
+
+### T.D — TarjetaEscaneo (Fase 4)
+
+[ ] Precio y moneda visualmente alineados al mismo nivel
+[ ] Código de barras muestra ícono + es clickeable → notify "Código copiado"
+[ ] "Fuente: Open Food Facts" ya no aparece
+[ ] Botón cámara dentro del div de foto, esquina inferior derecha
+[ ] Botón recuperar foto al lado del de cámara, solo cuando `datosOriginales.imagen` existe
+[ ] Click recuperar foto → imagen vuelve a la original de la API/BD
+[ ] Botón recuperar datos solo visible cuando `datosOriginales` existe
+[ ] Click recuperar datos → nombre, marca, cantidad, unidad vuelven al original (precio/moneda/comercio no cambian)
+[ ] Tablet 768px: tarjeta centrada con max-width, imagen visible sin cortarse
+[ ] Móvil: sin regresiones en el comportamiento existente
+
 ### T.C — Funcionalidad preservada
 
 [ ] Ordenamiento de ítems (5 opciones) funciona igual que antes
@@ -196,11 +376,12 @@ y se superpone al contenido del `info-inferior` cuando la tarjeta es angosta.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 0% (0/3 fases completadas)
+## 📊 PROGRESO GENERAL: 0% (0/4 fases completadas)
 
 ⏳ Fase 1: Mesa de Trabajo como página
 ⏳ Fase 2: Mejoras en tarjetas — estado colapsado
 ⏳ Fase 3: Mejoras en tarjetas — estado expandido
+⏳ Fase 4: Mejoras en TarjetaEscaneo (Modo A)
 
 ═══════════════════════════════════════════════════════════════
 
