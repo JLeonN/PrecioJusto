@@ -6,36 +6,50 @@
     :modo-seleccion="modoSeleccion"
     :seleccionado="seleccionado"
     :permite-expansion="true"
+    :mostrar-boton-agregar-precio="false"
     @long-press="$emit('long-press')"
     @toggle-seleccion="$emit('toggle-seleccion')"
   >
-    <!-- Chips de completitud -->
+    <!-- Chips de completitud + info de comercio/dirección -->
     <template #tipo>
-      <div class="chips-completitud">
-        <q-chip
-          dense
-          :color="!!item.nombre?.trim() ? 'positive' : 'grey-4'"
-          :text-color="!!item.nombre?.trim() ? 'white' : 'grey-6'"
-          size="sm"
-        >
-          Nombre
-        </q-chip>
-        <q-chip
-          dense
-          :color="item.precio > 0 ? 'positive' : 'grey-4'"
-          :text-color="item.precio > 0 ? 'white' : 'grey-6'"
-          size="sm"
-        >
-          Precio
-        </q-chip>
-        <q-chip
-          dense
-          :color="!!item.comercio ? 'positive' : 'grey-4'"
-          :text-color="!!item.comercio ? 'white' : 'grey-6'"
-          size="sm"
-        >
-          Comercio
-        </q-chip>
+      <div class="tipo-contenido">
+        <!-- Fila 1: chips de estado -->
+        <div class="chips-completitud">
+          <q-chip
+            dense
+            :color="!!item.nombre?.trim() ? 'positive' : 'grey-4'"
+            :text-color="!!item.nombre?.trim() ? 'white' : 'grey-6'"
+            size="sm"
+          >
+            Nombre
+          </q-chip>
+          <q-chip
+            dense
+            :color="item.precio > 0 ? 'positive' : 'grey-4'"
+            :text-color="item.precio > 0 ? 'white' : 'grey-6'"
+            size="sm"
+          >
+            Precio
+          </q-chip>
+          <q-chip
+            dense
+            :color="!!item.comercio ? 'positive' : 'grey-4'"
+            :text-color="!!item.comercio ? 'white' : 'grey-6'"
+            size="sm"
+          >
+            Comercio
+          </q-chip>
+        </div>
+        <!-- Fila 2: nombre del comercio -->
+        <div v-if="item.comercio" class="info-comercio">
+          <IconBuildingStore :size="14" class="info-icono" />
+          <span class="text-weight-medium ellipsis">{{ item.comercio.nombre }}</span>
+        </div>
+        <!-- Fila 3: dirección -->
+        <div v-if="item.comercio?.direccionNombre" class="info-direccion">
+          <IconMapPin :size="14" class="info-icono text-grey-6" />
+          <span class="text-grey-7 ellipsis">{{ item.comercio.direccionNombre }}</span>
+        </div>
       </div>
     </template>
 
@@ -49,18 +63,16 @@
       <div class="precio-overlay">{{ formatearPrecio(item.precio, item.moneda) }}</div>
     </template>
 
-    <!-- Info inferior: código + comercio -->
+    <!-- Info inferior: código de barras (clickeable para copiar) -->
     <template #info-inferior>
-      <div class="info-inferior-fila">
-        <div class="info-inferior-izq">
-          <IconBarcode :size="14" />
-          <span v-if="item.codigoBarras" class="codigo-barras-texto">{{ item.codigoBarras }}</span>
-          <span v-else class="text-grey-5">Sin código</span>
-        </div>
-        <div v-if="item.comercio" class="info-inferior-der">
-          <IconMapPin :size="14" />
-          <span class="text-caption text-grey-7 ellipsis">{{ item.comercio.nombre }}</span>
-        </div>
+      <div
+        class="info-inferior-fila"
+        :class="{ 'codigo-copiable': !!item.codigoBarras }"
+        @click.stop="copiarCodigo"
+      >
+        <IconBarcode :size="14" />
+        <span v-if="item.codigoBarras" class="codigo-barras-texto">{{ item.codigoBarras }}</span>
+        <span v-else class="text-grey-5">Sin código</span>
       </div>
     </template>
 
@@ -216,6 +228,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { useQuasar, copyToClipboard } from 'quasar'
 import TarjetaBase from '../Tarjetas/TarjetaBase.vue'
 import { MONEDAS } from '../../almacenamiento/constantes/Monedas.js'
 import { useComerciStore } from '../../almacenamiento/stores/comerciosStore.js'
@@ -224,6 +237,7 @@ import {
   IconShoppingBag,
   IconBarcode,
   IconMapPin,
+  IconBuildingStore,
   IconPencil,
   IconCamera,
   IconPhoto,
@@ -249,6 +263,7 @@ const props = defineProps({
 
 const emit = defineEmits(['long-press', 'toggle-seleccion', 'update:item', 'eliminar', 'enviar'])
 
+const $q = useQuasar()
 const comerciosStore = useComerciStore()
 const { inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo } = useCamaraFoto()
 
@@ -291,16 +306,42 @@ function filtrarComercios(val, update) {
   })
 }
 
+function copiarCodigo() {
+  if (!props.item.codigoBarras) return
+  copyToClipboard(props.item.codigoBarras).then(() => {
+    $q.notify({ type: 'positive', message: 'Código copiado', timeout: 1500 })
+  })
+}
+
 function formatearPrecio(valor, moneda) {
   return `$${valor.toLocaleString('es-UY')} ${moneda || 'UYU'}`
 }
 </script>
 
 <style scoped>
+.tipo-contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 .chips-completitud {
   display: flex;
   gap: 4px;
   flex-wrap: wrap;
+}
+.info-comercio,
+.info-direccion {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  min-width: 0;
+}
+.info-comercio {
+  color: var(--texto-primario, #1a1a1a);
+}
+.info-icono {
+  flex-shrink: 0;
 }
 .precio-overlay {
   color: white;
@@ -311,22 +352,11 @@ function formatearPrecio(valor, moneda) {
 .info-inferior-fila {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: 8px;
-}
-.info-inferior-izq {
-  display: flex;
-  align-items: center;
   gap: 6px;
   min-width: 0;
 }
-.info-inferior-der {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
-  max-width: 50%;
+.codigo-copiable {
+  cursor: pointer;
 }
 .codigo-barras-texto {
   font-family: 'Courier New', monospace;

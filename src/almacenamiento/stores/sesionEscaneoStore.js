@@ -78,6 +78,16 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
       fuenteDato: item.fuenteDato || null,
       productoExistenteId: item.productoExistenteId || null,
       comercio: item.comercio ?? null, // { id, nombre, direccionId, direccionNombre } | null
+      // Snapshot inmutable del estado original (para poder recuperar foto/datos)
+      datosOriginales: (item.origenApi || item.productoExistenteId)
+        ? {
+            nombre: item.nombre || '',
+            marca: item.marca || null,
+            cantidad: item.cantidad || 1,
+            unidad: item.unidad || 'unidad',
+            imagen: item.imagen || null,
+          }
+        : null,
     })
   }
 

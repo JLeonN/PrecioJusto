@@ -72,11 +72,11 @@
             v-if="sesionEscaneoStore.tieneItemsPendientes"
             clickable
             v-ripple
+            to="/mesa-trabajo"
             class="bandeja-drawer-item"
-            @click="abrirMesaTrabajo"
           >
             <q-item-section avatar>
-              <IconClipboardList :size="24" color="primary" />
+              <IconBriefcase :size="24" />
             </q-item-section>
             <q-item-section>
               <q-item-label class="text-primary text-weight-medium">Mesa de trabajo</q-item-label>
@@ -96,9 +96,6 @@
     <q-page-container>
       <router-view />
     </q-page-container>
-
-    <!-- MESA DE TRABAJO (global, accesible desde el drawer) -->
-    <MesaTrabajo v-model="mesaTrabajoAbierta" />
   </q-layout>
 </template>
 
@@ -110,26 +107,18 @@ import {
   IconShoppingCart,
   IconHome,
   IconMapPin,
-  IconClipboardList,
+  IconBriefcase,
 } from '@tabler/icons-vue'
 import { useBotonAtras } from '../composables/useBotonAtras.js'
 import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
-import MesaTrabajo from '../components/Scanner/MesaTrabajo.vue'
 
 const router = useRouter()
 const route = useRoute()
 const drawerAbierto = ref(false)
-const mesaTrabajoAbierta = ref(false)
 const sesionEscaneoStore = useSesionEscaneoStore()
 
 const toggleDrawer = () => {
   drawerAbierto.value = !drawerAbierto.value
-}
-
-// Cierra el drawer y abre la mesa de trabajo
-function abrirMesaTrabajo() {
-  drawerAbierto.value = false
-  mesaTrabajoAbierta.value = true
 }
 
 // Carga la bandeja de borradores persistida al iniciar la app

@@ -14,6 +14,9 @@ const routes = [
 
       // Página de edición de comercio
       { path: 'comercios/:nombre', component: () => import('pages/EditarComercioPage.vue') },
+
+      // Mesa de trabajo (solo accesible con ítems pendientes)
+      { path: 'mesa-trabajo', component: () => import('pages/MesaTrabajoPage.vue') },
     ],
   },
 

@@ -6,6 +6,7 @@
       'tarjeta-yugioh--comercio': tipo === 'comercio',
       'tarjeta-yugioh--expandida': expandido,
       'tarjeta-yugioh--seleccionada': seleccionado,
+      'tarjeta-yugioh--con-expansion': permiteExpansion,
     }"
     @click="manejarClick"
     v-touch-hold.mouse="manejarLongPress"
@@ -26,9 +27,9 @@
         <slot name="nombre">{{ nombre }}</slot>
       </div>
 
-      <!-- BOTÓN FLOTANTE (solo productos) -->
+      <!-- BOTÓN FLOTANTE (solo productos, ocultable para contextos sin precio) -->
       <button
-        v-if="tipo === 'producto' && !modoSeleccion"
+        v-if="tipo === 'producto' && !modoSeleccion && mostrarBotonAgregarPrecio"
         class="tarjeta-yugioh__boton-flotante"
         :class="{ 'tarjeta-yugioh__boton-flotante--expandido': expandido }"
         @click.stop="$emit('agregar-precio')"
@@ -74,7 +75,7 @@
 
     <!-- CONTENIDO EXPANDIDO (con transición) -->
     <transition name="expandir">
-      <div v-show="expandido && !modoSeleccion" class="tarjeta-yugioh__expandido">
+      <div v-show="expandido && !modoSeleccion" class="tarjeta-yugioh__expandido" @click.stop>
         <!-- Header de sección expandida -->
         <div class="tarjeta-yugioh__expandido-header">
           <slot name="expandido-header">
@@ -146,6 +147,12 @@ const props = defineProps({
   expandidoProp: {
     type: Boolean,
     default: null,
+  },
+
+  /* Muestra el botón flotante de agregar precio (desactivar en Mesa de trabajo) */
+  mostrarBotonAgregarPrecio: {
+    type: Boolean,
+    default: true,
   },
 
   /* Modo selección activo */
@@ -441,7 +448,7 @@ const manejarLongPress = () => {
    ======================================== */
 .tarjeta-yugioh__icono-expandir {
   position: absolute;
-  bottom: 8px;
+  bottom: 4px;
   right: 8px;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 50%;
@@ -450,9 +457,13 @@ const manejarLongPress = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
   z-index: 2;
   transition: left 0.3s ease, right 0.3s ease, transform 0.3s ease;
+}
+/* Reserva espacio para el chevron en tarjetas expandibles */
+.tarjeta-yugioh--con-expansion .tarjeta-yugioh__info-inferior {
+  padding-right: 44px;
 }
 /* Cuando está expandida, centrar el botón */
 .tarjeta-yugioh--expandida .tarjeta-yugioh__icono-expandir {

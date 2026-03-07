@@ -17,6 +17,38 @@
             {{ datosForm.nombre || 'Sin nombre' }}
           </div>
         </div>
+        <!-- Botones overlay: recuperar foto + cámara -->
+        <div class="portada-botones-foto">
+          <q-btn
+            v-if="item?.datosOriginales?.imagen"
+            round dense size="sm"
+            class="boton-foto-overlay"
+            @click.stop="datosForm.imagen = item.datosOriginales.imagen"
+          >
+            <IconRefresh :size="16" />
+            <q-tooltip>Recuperar foto original</q-tooltip>
+          </q-btn>
+          <q-btn round dense size="sm" class="boton-foto-overlay">
+            <IconCamera :size="16" />
+            <q-tooltip>Foto del producto</q-tooltip>
+            <q-menu anchor="top right" self="bottom right">
+              <q-list style="min-width: 140px">
+                <q-item v-if="esNativo" clickable v-close-popup @click="tomarFotoCamara">
+                  <q-item-section avatar><IconCamera :size="16" /></q-item-section>
+                  <q-item-section>Tomar foto</q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup @click="abrirGaleria">
+                  <q-item-section avatar><IconPhoto :size="16" /></q-item-section>
+                  <q-item-section>Galería</q-item-section>
+                </q-item>
+                <q-item v-if="datosForm.imagen" clickable v-close-popup @click="datosForm.imagen = null">
+                  <q-item-section avatar><IconTrash :size="16" class="text-negative" /></q-item-section>
+                  <q-item-section class="text-negative">Quitar foto</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
+        </div>
       </div>
 
       <!-- INFO DEL PRODUCTO -->
@@ -26,9 +58,15 @@
         <template v-if="!editando">
           <div class="tarjeta-escaneo-fila">
             <div class="tarjeta-escaneo-detalle">
-              <span v-if="item?.codigoBarras" class="codigo-barras-texto">
-                {{ item.codigoBarras }}
-              </span>
+              <!-- Código de barras (clickeable para copiar) -->
+              <div
+                v-if="item?.codigoBarras"
+                class="codigo-barras-fila"
+                @click="copiarCodigo"
+              >
+                <IconBarcode :size="14" class="text-grey-6" />
+                <span class="codigo-barras-texto">{{ item.codigoBarras }}</span>
+              </div>
               <span v-if="datosForm.marca" class="text-caption text-grey-7">
                 {{ datosForm.marca }}
               </span>
@@ -40,9 +78,6 @@
               <IconPencil :size="18" />
               <q-tooltip>Editar datos</q-tooltip>
             </q-btn>
-          </div>
-          <div v-if="item?.fuenteDato" class="text-caption text-grey-5 q-mt-xs">
-            Fuente: {{ item.fuenteDato }}
           </div>
         </template>
 
@@ -86,17 +121,28 @@
               />
             </div>
           </div>
-          <q-btn flat no-caps dense color="primary" label="Listo" @click="editando = false" />
+          <div class="row items-center justify-between q-mt-xs">
+            <q-btn flat no-caps dense color="primary" label="Listo" @click="editando = false" />
+            <!-- Recuperar datos originales de la API/BD -->
+            <q-btn
+              v-if="item?.datosOriginales"
+              flat no-caps dense size="sm" color="grey-7"
+              @click="recuperarDatos"
+            >
+              <IconArrowBackUp :size="16" class="q-mr-xs" />
+              Recuperar datos
+            </q-btn>
+          </div>
         </template>
 
       </q-card-section>
 
       <q-separator />
 
-      <!-- PRECIO + FOTO -->
+      <!-- PRECIO + MONEDA -->
       <q-card-section class="tarjeta-escaneo-precio">
-        <div class="row q-col-gutter-sm items-end">
-          <div class="col-7">
+        <div class="row q-col-gutter-sm items-center">
+          <div class="col-8">
             <q-input
               ref="inputPrecioRef"
               v-model.number="datosForm.precio"
@@ -109,9 +155,10 @@
               placeholder="0.00"
               :rules="[v => (v > 0) || 'Obligatorio']"
               lazy-rules
+              hide-bottom-space
             />
           </div>
-          <div class="col-3">
+          <div class="col-4">
             <q-select
               v-model="datosForm.moneda"
               outlined
@@ -120,28 +167,6 @@
               emit-value
               map-options
             />
-          </div>
-          <div class="col-2 flex flex-center">
-            <q-btn flat round dense color="grey-6" @click="abrirMenuFoto">
-              <IconCamera :size="22" />
-              <q-tooltip>Foto del producto</q-tooltip>
-              <q-menu anchor="top right" self="bottom right">
-                <q-list style="min-width: 140px">
-                  <q-item v-if="esNativo" clickable v-close-popup @click="tomarFotoCamara">
-                    <q-item-section avatar><IconCamera :size="16" /></q-item-section>
-                    <q-item-section>Tomar foto</q-item-section>
-                  </q-item>
-                  <q-item clickable v-close-popup @click="abrirGaleria">
-                    <q-item-section avatar><IconPhoto :size="16" /></q-item-section>
-                    <q-item-section>Galería</q-item-section>
-                  </q-item>
-                  <q-item v-if="datosForm.imagen" clickable v-close-popup @click="datosForm.imagen = null">
-                    <q-item-section avatar><IconTrash :size="16" class="text-negative" /></q-item-section>
-                    <q-item-section class="text-negative">Quitar foto</q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
-            </q-btn>
           </div>
         </div>
         <input
@@ -189,14 +214,18 @@
 
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
+import { useQuasar, copyToClipboard } from 'quasar'
 import { MONEDAS, MONEDA_DEFAULT } from '../../almacenamiento/constantes/Monedas.js'
 import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
 import {
   IconShoppingBag,
+  IconBarcode,
   IconPencil,
   IconCamera,
   IconPhoto,
   IconTrash,
+  IconRefresh,
+  IconArrowBackUp,
   IconArrowRight,
   IconClipboardList,
 } from '@tabler/icons-vue'
@@ -218,6 +247,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'siguiente', 'ir-a-mesa', 'descartar'])
 
+const $q = useQuasar()
 const inputPrecioRef = ref(null)
 const editando = ref(false)
 
@@ -269,6 +299,21 @@ function alCerrar() {
   editando.value = false
 }
 
+// Copiar código de barras al portapapeles
+function copiarCodigo() {
+  if (!props.item?.codigoBarras) return
+  copyToClipboard(props.item.codigoBarras).then(() => {
+    $q.notify({ type: 'positive', message: 'Código copiado', timeout: 1500 })
+  })
+}
+
+// Recupera nombre, marca, cantidad y unidad originales de la API/BD (NO toca imagen ni precio)
+function recuperarDatos() {
+  if (!props.item?.datosOriginales) return
+  const { nombre, marca, cantidad, unidad } = props.item.datosOriginales
+  datosForm.value = { ...datosForm.value, nombre, marca, cantidad, unidad }
+}
+
 // Foto
 async function tomarFotoCamara() {
   const resultado = await abrirCamara()
@@ -278,7 +323,6 @@ async function alSeleccionarArchivo(event) {
   const resultado = await leerArchivo(event)
   if (resultado) datosForm.value.imagen = resultado
 }
-function abrirMenuFoto() {}
 
 // Construye el item actualizado con los datos del form
 function _itemActualizado() {
@@ -317,6 +361,12 @@ function emitDescartar() {
   max-width: 100vw;
   padding-bottom: var(--safe-area-bottom);
 }
+@media (min-width: 768px) {
+  .tarjeta-escaneo-card {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+}
 .tarjeta-escaneo-portada {
   position: relative;
   width: 100%;
@@ -354,6 +404,27 @@ function emitDescartar() {
   font-weight: 600;
   text-shadow: 0 1px 3px rgba(0,0,0,0.5);
   line-height: 1.3;
+}
+.portada-botones-foto {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  gap: 6px;
+  z-index: 2;
+}
+.boton-foto-overlay {
+  background: rgba(0, 0, 0, 0.45);
+  color: white;
+}
+.boton-foto-overlay:hover {
+  background: rgba(0, 0, 0, 0.65);
+}
+.codigo-barras-fila {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
 }
 .tarjeta-escaneo-info {
   padding: 10px 16px 8px;
