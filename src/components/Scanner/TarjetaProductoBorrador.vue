@@ -121,25 +121,11 @@
             />
           </div>
         </div>
-        <!-- Comercio -->
-        <q-select
+        <!-- Comercio + Dirección -->
+        <SelectorComercioDireccion
           :model-value="datosEditando.comercio"
-          label="Comercio *"
-          outlined
-          dense
-          :options="comerciosStore.comerciosAgrupados"
-          option-label="nombre"
-          clearable
-          use-input
-          @filter="filtrarComercios"
-          @update:model-value="(v) => actualizar('comercio', v ? { id: v.id, nombre: v.nombre, direccionId: null, direccionNombre: null } : null)"
-        >
-          <template #no-option>
-            <q-item>
-              <q-item-section class="text-grey">Sin comercios</q-item-section>
-            </q-item>
-          </template>
-        </q-select>
+          @update:model-value="(v) => actualizar('comercio', v)"
+        />
         <!-- Cantidad + Unidad -->
         <div class="row q-col-gutter-sm">
           <div class="col-6">
@@ -230,8 +216,8 @@
 import { ref, computed, watch } from 'vue'
 import { useQuasar, copyToClipboard } from 'quasar'
 import TarjetaBase from '../Tarjetas/TarjetaBase.vue'
+import SelectorComercioDireccion from '../Compartidos/SelectorComercioDireccion.vue'
 import { MONEDAS } from '../../almacenamiento/constantes/Monedas.js'
-import { useComerciStore } from '../../almacenamiento/stores/comerciosStore.js'
 import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
 import {
   IconShoppingBag,
@@ -264,7 +250,6 @@ const props = defineProps({
 const emit = defineEmits(['long-press', 'toggle-seleccion', 'update:item', 'eliminar', 'enviar'])
 
 const $q = useQuasar()
-const comerciosStore = useComerciStore()
 const { inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo } = useCamaraFoto()
 
 // Copia local para edición
@@ -293,17 +278,6 @@ async function tomarFotoCamara() {
 async function alSeleccionarArchivo(event) {
   const res = await leerArchivo(event)
   if (res) actualizar('imagen', res)
-}
-
-// Filtro del q-select de comercios
-function filtrarComercios(val, update) {
-  update(() => {
-    if (!val) return
-    const needle = val.toLowerCase()
-    comerciosStore.comerciosAgrupados.filter((c) =>
-      c.nombre.toLowerCase().includes(needle),
-    )
-  })
 }
 
 function copiarCodigo() {

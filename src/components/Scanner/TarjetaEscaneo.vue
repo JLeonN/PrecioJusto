@@ -1,7 +1,6 @@
 <template>
   <q-dialog v-model="abierto" position="bottom" @show="alAbrir" @hide="alCerrar">
     <q-card class="tarjeta-escaneo-card">
-
       <!-- FOTO + NOMBRE (con gradiente) -->
       <div class="tarjeta-escaneo-portada">
         <img
@@ -21,7 +20,9 @@
         <div class="portada-botones-foto">
           <q-btn
             v-if="item?.datosOriginales?.imagen"
-            round dense size="sm"
+            round
+            dense
+            size="sm"
             class="boton-foto-overlay"
             @click.stop="datosForm.imagen = item.datosOriginales.imagen"
           >
@@ -41,8 +42,15 @@
                   <q-item-section avatar><IconPhoto :size="16" /></q-item-section>
                   <q-item-section>Galería</q-item-section>
                 </q-item>
-                <q-item v-if="datosForm.imagen" clickable v-close-popup @click="datosForm.imagen = null">
-                  <q-item-section avatar><IconTrash :size="16" class="text-negative" /></q-item-section>
+                <q-item
+                  v-if="datosForm.imagen"
+                  clickable
+                  v-close-popup
+                  @click="datosForm.imagen = null"
+                >
+                  <q-item-section avatar
+                    ><IconTrash :size="16" class="text-negative"
+                  /></q-item-section>
                   <q-item-section class="text-negative">Quitar foto</q-item-section>
                 </q-item>
               </q-list>
@@ -53,17 +61,12 @@
 
       <!-- INFO DEL PRODUCTO -->
       <q-card-section class="tarjeta-escaneo-info">
-
         <!-- Modo visualización -->
         <template v-if="!editando">
           <div class="tarjeta-escaneo-fila">
             <div class="tarjeta-escaneo-detalle">
               <!-- Código de barras (clickeable para copiar) -->
-              <div
-                v-if="item?.codigoBarras"
-                class="codigo-barras-fila"
-                @click="copiarCodigo"
-              >
+              <div v-if="item?.codigoBarras" class="codigo-barras-fila" @click="copiarCodigo">
                 <IconBarcode :size="14" class="text-grey-6" />
                 <span class="codigo-barras-texto">{{ item.codigoBarras }}</span>
               </div>
@@ -83,13 +86,7 @@
 
         <!-- Modo edición inline -->
         <template v-else>
-          <q-input
-            v-model="datosForm.nombre"
-            label="Nombre *"
-            outlined
-            dense
-            class="q-mb-sm"
-          />
+          <q-input v-model="datosForm.nombre" label="Nombre *" outlined dense class="q-mb-sm" />
           <q-input
             v-model="datosForm.marca"
             label="Marca"
@@ -126,7 +123,11 @@
             <!-- Recuperar datos originales de la API/BD -->
             <q-btn
               v-if="item?.datosOriginales"
-              flat no-caps dense size="sm" color="grey-7"
+              flat
+              no-caps
+              dense
+              size="sm"
+              color="grey-7"
               @click="recuperarDatos"
             >
               <IconArrowBackUp :size="16" class="q-mr-xs" />
@@ -134,7 +135,6 @@
             </q-btn>
           </div>
         </template>
-
       </q-card-section>
 
       <q-separator />
@@ -153,7 +153,7 @@
               min="0"
               step="0.01"
               placeholder="0.00"
-              :rules="[v => (v > 0) || 'Obligatorio']"
+              :rules="[(v) => v > 0 || 'Obligatorio']"
               lazy-rules
               hide-bottom-space
             />
@@ -181,17 +181,9 @@
       <!-- BOTONES DE ACCIÓN -->
       <q-card-section class="tarjeta-escaneo-footer">
         <div class="row items-center no-wrap q-gutter-xs">
-          <q-btn flat no-caps color="grey-7" @click="emitDescartar">
-            Descartar
-          </q-btn>
+          <q-btn flat no-caps color="grey-7" @click="emitDescartar"> Descartar </q-btn>
           <q-space />
-          <q-btn
-            outline
-            no-caps
-            color="primary"
-            :disable="!formularioValido"
-            @click="emitIrAMesa"
-          >
+          <q-btn outline no-caps color="primary" :disable="!formularioValido" @click="emitIrAMesa">
             <IconClipboardList :size="16" class="q-mr-xs" />
             Ir a mesa
           </q-btn>
@@ -207,7 +199,6 @@
           </q-btn>
         </div>
       </q-card-section>
-
     </q-card>
   </q-dialog>
 </template>
@@ -295,7 +286,15 @@ function alAbrir() {
 }
 
 function alCerrar() {
-  datosForm.value = { nombre: '', marca: null, cantidad: 1, unidad: 'unidad', imagen: null, precio: null, moneda: MONEDA_DEFAULT }
+  datosForm.value = {
+    nombre: '',
+    marca: null,
+    cantidad: 1,
+    unidad: 'unidad',
+    imagen: null,
+    precio: null,
+    moneda: MONEDA_DEFAULT,
+  }
   editando.value = false
 }
 
@@ -370,7 +369,7 @@ function emitDescartar() {
 .tarjeta-escaneo-portada {
   position: relative;
   width: 100%;
-  height: 180px;
+  height: 230px;
   overflow: hidden;
   border-radius: 16px 16px 0 0;
   background: var(--fondo-tarjeta, #f5f5f5);
@@ -396,13 +395,13 @@ function emitDescartar() {
   left: 0;
   right: 0;
   padding: 32px 14px 12px;
-  background: linear-gradient(transparent, rgba(0,0,0,0.65));
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.65));
 }
 .tarjeta-escaneo-portada__nombre {
   color: white;
   font-size: 16px;
   font-weight: 600;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
   line-height: 1.3;
 }
 .portada-botones-foto {

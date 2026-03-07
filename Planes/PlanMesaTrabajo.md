@@ -52,18 +52,15 @@ Convertir la Mesa de trabajo de un diálogo a una página propia de la app.
 [ ] Reemplazar por `q-page`
 [ ] El toolbar interno (título + botón X) → botón X cambia a `router.back()` o se elimina
 [ ] Agregar `watch` en `sesionEscaneoStore.tieneItemsPendientes`:
-    si pasa a `false` mientras el usuario está en la página → `router.push('/')`
-[ ] Agregar estado vacío (cuando se llega a la ruta con mesa vacía):
-    - Mensaje: "No hay artículos en la Mesa de trabajo"
-    - Botón primario: "Mis Productos" → `router.push('/')`
-    - Botón secundario: "Comercios" → `router.push('/comercios')`
+si pasa a `false` mientras el usuario está en la página → `router.push('/')`
+[ ] Agregar estado vacío (cuando se llega a la ruta con mesa vacía): - Mensaje: "No hay artículos en la Mesa de trabajo" - Botón primario: "Mis Productos" → `router.push('/')` - Botón secundario: "Comercios" → `router.push('/comercios')`
 
 ### 1.2 — Registrar la ruta
 
 **Archivo:** `src/router/routes.js`
 
 [ ] Agregar dentro del array `children`:
-    `{ path: 'mesa-trabajo', component: () => import('pages/MesaTrabajoPage.vue') }`
+`{ path: 'mesa-trabajo', component: () => import('pages/MesaTrabajoPage.vue') }`
 
 ### 1.3 — Limpiar MainLayout.vue
 
@@ -75,7 +72,7 @@ Convertir la Mesa de trabajo de un diálogo a una página propia de la app.
 [ ] Eliminar función `abrirMesaTrabajo()`
 [ ] Drawer item: cambiar `@click="abrirMesaTrabajo"` → `to="/mesa-trabajo"`
 [ ] Ícono: reemplazar `<IconClipboardList :size="24" color="primary" />` →
-    `<IconBriefcase :size="24" />`  (sin prop `color`)
+`<IconBriefcase :size="24" />` (sin prop `color`)
 [ ] Actualizar imports: quitar `IconClipboardList`, agregar `IconBriefcase`
 
 ### ⚠️ Puntos delicados
@@ -93,6 +90,7 @@ Convertir la Mesa de trabajo de un diálogo a una página propia de la app.
 ### Objetivo
 
 Adaptar `TarjetaProductoBorrador` para que en estado colapsado:
+
 - No muestre el botón "Agregar precio" (sin contexto en la mesa)
 - Muestre 3 líneas informativas claras: chips, comercio y dirección
 - El chevron no se solape con el contenido inferior
@@ -105,7 +103,7 @@ Adaptar `TarjetaProductoBorrador` para que en estado colapsado:
 
 [ ] Agregar prop `mostrarBotonAgregarPrecio: Boolean, default: true`
 [ ] Cambiar condición del botón flotante:
-    `v-if="tipo === 'producto' && !modoSeleccion && mostrarBotonAgregarPrecio"`
+`v-if="tipo === 'producto' && !modoSeleccion && mostrarBotonAgregarPrecio"`
 
 **Archivo:** `src/components/Scanner/TarjetaProductoBorrador.vue`
 
@@ -130,9 +128,9 @@ Fila 3: 📍 Nombre de la dirección       ← v-if="item.comercio?.direccionNom
 [ ] Ambas filas con `v-if` condicional (responsive: solo aparecen si hay dato)
 [ ] Importar `IconBuildingStore` desde `@tabler/icons-vue`
 [ ] Slot `#info-inferior`: eliminar la sección derecha con el nombre del comercio
-    (ya no es necesaria, la info se mueve a `#tipo`)
+(ya no es necesaria, la info se mueve a `#tipo`)
 [ ] Agregar estilos para las nuevas filas en `<style scoped>`:
-    `.info-comercio` y `.info-direccion`: flex + gap + font-size + color
+`.info-comercio` y `.info-direccion`: flex + gap + font-size + color
 
 ---
 
@@ -144,10 +142,10 @@ y se superpone al contenido del `info-inferior` cuando la tarjeta es angosta.
 **Archivo:** `src/components/Tarjetas/TarjetaBase.vue`
 
 [ ] Agregar clase modificadora al `q-card` cuando `permiteExpansion === true`:
-    `'tarjeta-yugioh--con-expansion': permiteExpansion`
+`'tarjeta-yugioh--con-expansion': permiteExpansion`
 [ ] Agregar CSS:
-    `.tarjeta-yugioh--con-expansion .tarjeta-yugioh__info-inferior { padding-right: 44px; }`
-    Esto reserva espacio para el chevron sin modificar otras instancias de TarjetaBase
+`.tarjeta-yugioh--con-expansion .tarjeta-yugioh__info-inferior { padding-right: 44px; }`
+Esto reserva espacio para el chevron sin modificar otras instancias de TarjetaBase
 
 ═══════════════════════════════════════════════════════════════
 
@@ -168,9 +166,9 @@ que tiene `@click="manejarClick"` y togglea la expansión.
 **Archivo:** `src/components/Tarjetas/TarjetaBase.vue`
 
 [ ] Agregar `@click.stop` al div `tarjeta-yugioh__expandido`:
-    `<div v-show="expandido && !modoSeleccion" class="tarjeta-yugioh__expandido" @click.stop>`
+`<div v-show="expandido && !modoSeleccion" class="tarjeta-yugioh__expandido" @click.stop>`
 [ ] Verificar que el botón "Enviar" y "Eliminar" en `#acciones` también usan `.stop`
-    (ya los tienen en TarjetaProductoBorrador, pero confirmar que no se rompió nada)
+(ya los tienen en TarjetaProductoBorrador, pero confirmar que no se rompió nada)
 
 ---
 
@@ -189,6 +187,7 @@ que tiene `@click="manejarClick"` y togglea la expansión.
 ### 3.3 — Responsividad general
 
 Aplica a **todas las fases** de este plan. Todo debe funcionar correctamente en:
+
 - Móvil angosto (360px) — contexto principal de uso
 - Tablet (768px)
 - Desktop (1024px+)
@@ -209,6 +208,7 @@ Aplica a **todas las fases** de este plan. Todo debe funcionar correctamente en:
 ### Objetivo
 
 Mejorar la `TarjetaEscaneo.vue` (bottom sheet del Modo A — Escaneo rápido):
+
 - Corregir desalineación del campo precio y selector de moneda
 - Agregar ícono y función de copiar en el código de barras
 - Quitar "Fuente: Open Food Facts" del área de info
@@ -256,11 +256,11 @@ al momento de ser creado desde la API o la base de datos local.
 **Archivo:** `src/almacenamiento/stores/sesionEscaneoStore.js`
 
 [ ] Al crear un ítem desde API/BD: agregar campo `datosOriginales`:
-    ```javascript
+`javascript
     datosOriginales: origenApi || productoExistenteId
       ? { nombre, marca, cantidad, unidad, imagen }
       : null
-    ```
+    `
 [ ] Si el ítem es nuevo (sin origen): `datosOriginales = null`
 [ ] `datosOriginales` es inmutable — nunca se modifica después de creado
 
@@ -274,7 +274,7 @@ al momento de ser creado desde la API o la base de datos local.
 [ ] Posición: overlay esquina inferior derecha (`position: absolute; bottom: 8px; right: 8px`)
 [ ] Botón cámara: siempre visible (para agregar/cambiar foto)
 [ ] Botón recuperar foto: al lado izquierdo del botón cámara
-    `v-if="datosForm.datosOriginales?.imagen"`
+`v-if="datosForm.datosOriginales?.imagen"`
 [ ] Click en recuperar foto: `datosForm.imagen = datosForm.datosOriginales.imagen`
 [ ] Ícono sugerido para recuperar foto: `IconPhotoSearch` o `IconRefresh` (Tabler)
 [ ] Ambos botones con fondo semitransparente para ser visibles sobre cualquier imagen
@@ -287,9 +287,9 @@ al momento de ser creado desde la API o la base de datos local.
 **Archivo:** `src/components/Scanner/TarjetaEscaneo.vue`
 
 [ ] Agregar botón "Recuperar datos" dentro del área de edición expandida
-    `v-if="datosForm.datosOriginales"`
+`v-if="datosForm.datosOriginales"`
 [ ] Click: restaura `nombre`, `marca`, `cantidad`, `unidad` desde `datosOriginales`
-    (NO modifica `precio`, `moneda`, `comercio`, ni `imagen`)
+(NO modifica `precio`, `moneda`, `comercio`, ni `imagen`)
 [ ] Ícono sugerido: `IconArrowBackUp` (Tabler) — flecha de deshacer
 [ ] Posición: al final del área de edición, antes del separador con los botones principales
 
@@ -299,9 +299,7 @@ al momento de ser creado desde la API o la base de datos local.
 
 **Archivo:** `src/components/Scanner/TarjetaEscaneo.vue`
 
-[ ] El `q-dialog` con `position="bottom"` en pantallas ≥ 768px:
-    - Agregar `max-width: 480px` al contenido del dialog
-    - Centrar horizontalmente (`margin: 0 auto`)
+[ ] El `q-dialog` con `position="bottom"` en pantallas ≥ 768px: - Agregar `max-width: 480px` al contenido del dialog - Centrar horizontalmente (`margin: 0 auto`)
 [ ] Esto evita que la tarjeta ocupe todo el ancho en tablet y la imagen quede cortada
 [ ] Verificar que la imagen sea siempre visible (altura mínima del área de foto)
 [ ] Confirmar que los botones Descartar / Ir a mesa / Siguiente no se cortan en móvil
@@ -312,49 +310,49 @@ al momento de ser creado desde la API o la base de datos local.
 
 ### T.A — Navegación y acceso
 
-[ ] Abrir drawer con ítems en la mesa → ítem "Mesa de trabajo" visible con badge
-[ ] Click en "Mesa de trabajo" → navega a `/mesa-trabajo` (no abre diálogo)
-[ ] El ítem del drawer muestra el ícono `IconBriefcase` claramente
-[ ] El ítem se marca como activo (estilo de ruta activa de Quasar) al estar en la página
-[ ] Abrir drawer sin ítems → ítem "Mesa de trabajo" NO aparece
-[ ] Navegar a `/mesa-trabajo` directamente (URL) sin ítems → aparece estado vacío
-[ ] Botón "Mis Productos" en estado vacío → navega a `/`
-[ ] Botón "Comercios" en estado vacío → navega a `/comercios`
+[x] Abrir drawer con ítems en la mesa → ítem "Mesa de trabajo" visible con badge
+[x] Click en "Mesa de trabajo" → navega a `/mesa-trabajo` (no abre diálogo)
+[x] El ítem del drawer muestra el ícono `IconBriefcase` claramente
+[x] El ítem se marca como activo (estilo de ruta activa de Quasar) al estar en la página
+[x] Abrir drawer sin ítems → ítem "Mesa de trabajo" NO aparece
+[x] Navegar a `/mesa-trabajo` directamente (URL) sin ítems → aparece estado vacío
+[x] Botón "Mis Productos" en estado vacío → navega a `/`
+[x] Botón "Comercios" en estado vacío → navega a `/comercios`
 
 ### T.B — Vaciado de la mesa
 
-[ ] Enviar todos los ítems desde la Mesa → auto-navega a Mis Productos
-[ ] Limpiar todo desde la Mesa → auto-navega a Mis Productos
-[ ] El watch no dispara navegación si los ítems se vacían desde otra página
+[x] Enviar todos los ítems desde la Mesa → auto-navega a Mis Productos
+[x] Limpiar todo desde la Mesa → auto-navega a Mis Productos
+[x] El watch no dispara navegación si los ítems se vacían desde otra página
 
 ### T.B2 — Tarjeta expandida (bugs y nuevas funciones)
 
-[ ] Expandir tarjeta → tocar input de Nombre → se puede escribir sin que se cierre la tarjeta
-[ ] Expandir tarjeta → tocar q-select de Comercio → se abre sin cerrar la tarjeta
-[ ] Tocar código de barras (con código) → notify "Código copiado" + portapapeles contiene el código
-[ ] Tocar "Sin código" → no hace nada (sin crash)
-[ ] Botón Enviar y Eliminar siguen funcionando con `.stop`
+[x] Expandir tarjeta → tocar input de Nombre → se puede escribir sin que se cierre la tarjeta
+[x] Expandir tarjeta → tocar q-select de Comercio → se abre sin cerrar la tarjeta
+[x] Tocar código de barras (con código) → notify "Código copiado" + portapapeles contiene el código
+[x] Tocar "Sin código" → no hace nada (sin crash)
+[x] Botón Enviar y Eliminar siguen funcionando con `.stop`
 
 ### T.B3 — Responsividad
 
-[ ] Móvil 360px: tarjeta colapsada se ve completa, chips hacen wrap si es necesario
-[ ] Móvil 360px: tarjeta expandida, todos los inputs son accesibles y usables
-[ ] Móvil 360px: estado vacío de la mesa se ve correctamente (mensaje + 2 botones)
-[ ] Las 3 líneas de info (chips, comercio, dirección) no desbordan en pantalla angosta
-[ ] Tablet y desktop: sin regresiones visuales
+[x] Móvil 360px: tarjeta colapsada se ve completa, chips hacen wrap si es necesario
+[x] Móvil 360px: tarjeta expandida, todos los inputs son accesibles y usables
+[x] Móvil 360px: estado vacío de la mesa se ve correctamente (mensaje + 2 botones)
+[x] Las 3 líneas de info (chips, comercio, dirección) no desbordan en pantalla angosta
+[x] Tablet y desktop: sin regresiones visuales
 
 ### T.D — TarjetaEscaneo (Fase 4)
 
-[ ] Precio y moneda visualmente alineados al mismo nivel
-[ ] Código de barras muestra ícono + es clickeable → notify "Código copiado"
-[ ] "Fuente: Open Food Facts" ya no aparece
-[ ] Botón cámara dentro del div de foto, esquina inferior derecha
+[x] Precio y moneda visualmente alineados al mismo nivel
+[x] Código de barras muestra ícono + es clickeable → notify "Código copiado"
+[x] "Fuente: Open Food Facts" ya no aparece
+[x] Botón cámara dentro del div de foto, esquina inferior derecha
 [ ] Botón recuperar foto al lado del de cámara, solo cuando `datosOriginales.imagen` existe
 [ ] Click recuperar foto → imagen vuelve a la original de la API/BD
 [ ] Botón recuperar datos solo visible cuando `datosOriginales` existe
 [ ] Click recuperar datos → nombre, marca, cantidad, unidad vuelven al original (precio/moneda/comercio no cambian)
-[ ] Tablet 768px: tarjeta centrada con max-width, imagen visible sin cortarse
-[ ] Móvil: sin regresiones en el comportamiento existente
+[x] Tablet 768px: tarjeta centrada con max-width, imagen visible sin cortarse
+[x] Móvil: sin regresiones en el comportamiento existente
 
 ### T.C — Funcionalidad preservada
 
@@ -373,6 +371,11 @@ al momento de ser creado desde la API o la base de datos local.
 - El `v-if="sesionEscaneoStore.tieneItemsPendientes"` en el drawer se mantiene igual
 - El badge rojo en el ícono hamburger del header también se mantiene sin cambios
 - Ícono elegido: `IconBriefcase` (@tabler/icons-vue) — semántico para "trabajo"
+- Se creó `src/components/Compartidos/SelectorComercioDireccion.vue` — componente
+  reutilizable para seleccionar comercio + dirección (top 3 recientes + búsqueda).
+  Usado en `TarjetaProductoBorrador` y en el bottom sheet de `MesaTrabajoPage`.
+  Motor idéntico al de `FormularioPrecio` pero sin precio/moneda.
+  Emite `{ id, nombre, direccionId, direccionNombre } | null`.
 
 ═══════════════════════════════════════════════════════════════
 

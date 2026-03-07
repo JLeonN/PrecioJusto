@@ -128,21 +128,9 @@
           </div>
         </q-card-section>
         <q-card-section class="q-pt-none q-pb-sm">
-          <q-select
+          <SelectorComercioDireccion
             v-model="comercioParaAsignar"
-            label="Comercio"
-            outlined dense
-            :options="opcionesComercios"
-            option-label="nombre"
-            clearable use-input
-            @filter="filtrarComercios"
-          >
-            <template #no-option>
-              <q-item>
-                <q-item-section class="text-grey">Sin comercios</q-item-section>
-              </q-item>
-            </template>
-          </q-select>
+          />
         </q-card-section>
         <q-card-section class="q-pt-xs">
           <div class="row justify-end q-gutter-xs">
@@ -163,10 +151,11 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import TarjetaProductoBorrador from '../components/Scanner/TarjetaProductoBorrador.vue'
+import SelectorComercioDireccion from '../components/Compartidos/SelectorComercioDireccion.vue'
 import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
 import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
@@ -197,18 +186,19 @@ const ordenActual = ref('menos-a-mas')
 const guardando = ref(false)
 const dialogoAsignarComercio = ref(false)
 const comercioParaAsignar = ref(null)
-const opcionesComercios = ref([])
 
 // Si la mesa estaba vacía al montar → muestra estado vacío (no auto-navega)
 const mesaVaciaAlMontar = ref(!sesionStore.tieneItemsPendientes)
+
+onMounted(async () => {
+  await comerciosStore.cargarComercios()
+  seleccion.actualizarItems(sesionStore.items)
+})
 
 // Si la mesa se vacía durante la sesión → navega a inicio
 watch(() => sesionStore.tieneItemsPendientes, (tieneItems) => {
   if (!tieneItems && !mesaVaciaAlMontar.value) router.push('/')
 })
-
-// Sincroniza opciones de comercios
-watch(() => comerciosStore.comerciosAgrupados, (v) => { opcionesComercios.value = v }, { immediate: true })
 
 // Mantiene itemsDisponibles del composable sincronizado
 watch(() => sesionStore.items, (v) => seleccion.actualizarItems(v), { immediate: true, deep: true })
@@ -312,30 +302,14 @@ function confirmarLimpiar() {
 
 function abrirAsignarComercio() {
   comercioParaAsignar.value = null
-  opcionesComercios.value = comerciosStore.comerciosAgrupados
   dialogoAsignarComercio.value = true
 }
 
 function confirmarAsignarComercio() {
   if (!comercioParaAsignar.value) return
-  const comercio = {
-    id: comercioParaAsignar.value.id,
-    nombre: comercioParaAsignar.value.nombre,
-    direccionId: null,
-    direccionNombre: null,
-  }
-  sesionStore.asignarComercio(seleccion.arraySeleccionados.value, comercio)
+  sesionStore.asignarComercio(seleccion.arraySeleccionados.value, comercioParaAsignar.value)
   dialogoAsignarComercio.value = false
   seleccion.desactivarModoSeleccion()
-}
-
-function filtrarComercios(val, update) {
-  update(() => {
-    const needle = val?.toLowerCase() || ''
-    opcionesComercios.value = needle
-      ? comerciosStore.comerciosAgrupados.filter((c) => c.nombre.toLowerCase().includes(needle))
-      : comerciosStore.comerciosAgrupados
-  })
 }
 </script>
 
