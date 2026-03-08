@@ -624,7 +624,7 @@ async function ejecutarFusion(destinoId, origenId) {
             ...precio,
             comercioId: comercioDestino.id,
             direccionId: destinoId,
-            nombreCompleto: `${comercioDestino.nombre} - ${destinoDir.calle}`,
+            nombreCompleto: `${comercioDestino.nombre} — ${destinoDir.calle}`,
             comercio: comercioDestino.nombre,
             direccion: destinoDir.calle,
           }

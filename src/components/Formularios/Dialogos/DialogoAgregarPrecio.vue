@@ -406,7 +406,7 @@ async function guardarPrecio() {
 
     const nombreComercio = comercio?.nombre || textoComercioEscrito.value.trim() || 'Sin comercio'
     const calleDireccion = direccion?.calle || ''
-    const nombreCompleto = calleDireccion ? `${nombreComercio} - ${calleDireccion}` : nombreComercio
+    const nombreCompleto = calleDireccion ? `${nombreComercio} — ${calleDireccion}` : nombreComercio
 
     // Resolver el branch correcto para cadenas
     const idDireccion = direccionSeleccionada.value?.value || null

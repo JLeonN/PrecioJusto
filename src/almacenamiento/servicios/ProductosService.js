@@ -290,11 +290,14 @@ class ProductosService {
       return producto
     }
 
-    /* 1. Agrupar precios por comercio (nombreCompleto) */
+    /* 1. Agrupar precios por comercio — usar IDs si existen, sino nombreCompleto como fallback legacy */
     const preciosPorComercio = {}
 
     producto.precios.forEach((precio) => {
-      const clave = precio.nombreCompleto || precio.comercio || 'Sin comercio'
+      const clave =
+        precio.comercioId && precio.direccionId
+          ? `${precio.comercioId}_${precio.direccionId}`
+          : precio.nombreCompleto || precio.comercio || 'Sin comercio'
 
       if (!preciosPorComercio[clave]) {
         preciosPorComercio[clave] = []

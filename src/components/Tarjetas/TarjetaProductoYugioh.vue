@@ -20,7 +20,7 @@
       <IconShoppingBag :size="48" class="text-grey-5" />
     </template>
     <template #overlay-info>
-      <div class="precio-valor">{{ formatearPrecio(producto.precioMejor) }}</div>
+      <div class="precio-valor">{{ formatearPrecio(precioMejorVigente) }}</div>
     </template>
     <template #info-inferior>
       <div v-if="producto.codigoBarras" class="codigo-barras" @click.stop="copiarCodigoBarras">
@@ -57,7 +57,7 @@
               <span>Hace {{ calcularMesesPrecio(precio.fecha) }}</span>
             </div>
           </div>
-          <div v-if="precio.esMejor" class="item-precio__badge">
+          <div v-if="index === 0" class="item-precio__badge">
             <q-chip dense size="sm" color="green" text-color="white"> Mejor precio </q-chip>
           </div>
         </div>
@@ -128,11 +128,14 @@ const $q = useQuasar()
 const top3PreciosUnicos = computed(() => {
   if (!props.producto.precios || props.producto.precios.length === 0) return []
 
-  /* 1. Agrupar por comercio */
+  /* 1. Agrupar por comercio — usar IDs si existen, sino nombreCompleto como fallback legacy */
   const preciosPorComercio = {}
 
   props.producto.precios.forEach((precio) => {
-    const clave = precio.nombreCompleto || precio.comercio || 'Sin comercio'
+    const clave =
+      precio.comercioId && precio.direccionId
+        ? `${precio.comercioId}_${precio.direccionId}`
+        : precio.nombreCompleto || precio.comercio || 'Sin comercio'
 
     if (!preciosPorComercio[clave]) {
       preciosPorComercio[clave] = []
@@ -152,6 +155,9 @@ const top3PreciosUnicos = computed(() => {
   /* 3. Ordenar por valor ASC y tomar máximo 3 */
   return [...preciosVigentes].sort((a, b) => a.valor - b.valor).slice(0, 3)
 })
+
+/* Precio más bajo vigente — derivado del top3 para evitar datos desactualizados en storage */
+const precioMejorVigente = computed(() => top3PreciosUnicos.value[0]?.valor ?? props.producto.precioMejor ?? 0)
 
 /* Calcular días transcurridos desde una fecha */
 const calcularDiasPrecio = (fechaISO) => {
