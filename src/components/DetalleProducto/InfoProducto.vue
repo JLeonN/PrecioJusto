@@ -131,10 +131,11 @@
         </div>
 
         <!-- Chip de tendencia general -->
-        <q-chip :color="colorTendencia" text-color="white" :icon="iconoTendencia" class="q-mt-sm">
-          <span class="text-weight-bold">
-            {{ textoTendencia }}
-          </span>
+        <q-chip :color="colorTendencia" text-color="white" class="q-mt-sm">
+          <IconTrendingDown v-if="tendenciaProducto.tipo === 'bajando'" :size="15" class="q-mr-xs" />
+          <IconTrendingUp v-else-if="tendenciaProducto.tipo === 'subiendo'" :size="15" class="q-mr-xs" />
+          <IconMinus v-else :size="15" class="q-mr-xs" />
+          <span class="text-weight-bold">{{ textoTendencia }}</span>
         </q-chip>
 
         <!-- Botón agregar precio -->
@@ -174,6 +175,9 @@ import {
   IconPhoto,
   IconTrash,
   IconRefresh,
+  IconTrendingUp,
+  IconTrendingDown,
+  IconMinus,
 } from '@tabler/icons-vue'
 import buscadorProductosService from '../../almacenamiento/servicios/BuscadorProductosService.js'
 import { useQuasar } from 'quasar'
@@ -307,23 +311,47 @@ async function actualizarCategoria(nuevaCategoria) {
 
 // ── Tendencia ────────────────────────────────────────────
 
+const tendenciaProducto = computed(() => {
+  if (!props.producto.precios || props.producto.precios.length === 0)
+    return { tipo: 'estable', porcentaje: '0.0' }
+
+  const grupos = new Map()
+  props.producto.precios.forEach((precio) => {
+    const clave =
+      precio.comercioId && precio.direccionId
+        ? `${precio.comercioId}_${precio.direccionId}`
+        : precio.nombreCompleto || precio.comercio || 'Sin comercio'
+    if (!grupos.has(clave)) grupos.set(clave, [])
+    grupos.get(clave).push(precio)
+  })
+
+  const variaciones = []
+  grupos.forEach((precios) => {
+    if (precios.length < 2) return
+    const ordenados = [...precios].sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+    variaciones.push(((ordenados[0].valor - ordenados[1].valor) / ordenados[1].valor) * 100)
+  })
+
+  if (variaciones.length === 0) return { tipo: 'estable', porcentaje: '0.0' }
+
+  const promedio = variaciones.reduce((sum, v) => sum + v, 0) / variaciones.length
+  const porcentaje = Math.abs(promedio).toFixed(1)
+
+  if (promedio < -2) return { porcentaje, tipo: 'bajando' }
+  if (promedio > 2) return { porcentaje, tipo: 'subiendo' }
+  return { porcentaje, tipo: 'estable' }
+})
+
 const colorTendencia = computed(() => {
-  if (props.producto.tendenciaGeneral === 'bajando') return 'positive'
-  if (props.producto.tendenciaGeneral === 'subiendo') return 'negative'
+  if (tendenciaProducto.value.tipo === 'bajando') return 'positive'
+  if (tendenciaProducto.value.tipo === 'subiendo') return 'negative'
   return 'grey-6'
 })
 
-const iconoTendencia = computed(() => {
-  if (props.producto.tendenciaGeneral === 'bajando') return 'arrow_downward'
-  if (props.producto.tendenciaGeneral === 'subiendo') return 'arrow_upward'
-  return 'remove'
-})
-
 const textoTendencia = computed(() => {
-  const porcentaje = Math.abs(props.producto.porcentajeTendencia)
-  if (props.producto.tendenciaGeneral === 'bajando') return `Bajando ${porcentaje}% (últimos 30 días)`
-  if (props.producto.tendenciaGeneral === 'subiendo') return `Subiendo ${porcentaje}% (últimos 30 días)`
-  return 'Precio estable (últimos 30 días)'
+  if (tendenciaProducto.value.tipo === 'bajando') return `Bajando ${tendenciaProducto.value.porcentaje}% vs visita anterior`
+  if (tendenciaProducto.value.tipo === 'subiendo') return `Subiendo ${tendenciaProducto.value.porcentaje}% vs visita anterior`
+  return 'Precio estable vs visita anterior'
 })
 
 // ── Copiar código de barras ──────────────────────────────

@@ -16,9 +16,11 @@
         <q-card-section class="text-center">
           <div class="text-grey-7 text-caption text-uppercase">Tendencia</div>
           <div class="row items-center justify-center q-mt-xs">
-            <q-icon :name="iconoTendencia" :color="colorTendencia" size="28px" />
-            <span class="text-h5 text-weight-bold q-ml-xs" :class="`text-${colorTendencia}`">
-              {{ porcentajeTendencia }}%
+            <IconTrendingDown v-if="tendenciaProducto.tipo === 'bajando'" :size="28" class="text-positive" />
+            <IconTrendingUp v-else-if="tendenciaProducto.tipo === 'subiendo'" :size="28" class="text-negative" />
+            <IconMinus v-else :size="28" class="text-grey-6" />
+            <span class="text-h5 text-weight-bold q-ml-xs" :class="colorTendencia">
+              {{ tendenciaProducto.porcentaje }}%
             </span>
           </div>
         </q-card-section>
@@ -41,6 +43,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { IconTrendingUp, IconTrendingDown, IconMinus } from '@tabler/icons-vue'
 
 const props = defineProps({
   producto: {
@@ -63,24 +66,42 @@ const totalComercios = computed(() => {
   return comerciosUnicos.size
 })
 
-// Ícono de tendencia
-const iconoTendencia = computed(() => {
-  if (props.producto.tendenciaGeneral === 'bajando') return 'trending_down'
-  if (props.producto.tendenciaGeneral === 'subiendo') return 'trending_up'
-  return 'remove'
+// Tendencia dinámica — último vs penúltimo por tienda, promediado entre todos los grupos
+const tendenciaProducto = computed(() => {
+  if (!props.producto.precios || props.producto.precios.length === 0)
+    return { tipo: 'estable', porcentaje: '0.0' }
+
+  const grupos = new Map()
+  props.producto.precios.forEach((precio) => {
+    const clave =
+      precio.comercioId && precio.direccionId
+        ? `${precio.comercioId}_${precio.direccionId}`
+        : precio.nombreCompleto || precio.comercio || 'Sin comercio'
+    if (!grupos.has(clave)) grupos.set(clave, [])
+    grupos.get(clave).push(precio)
+  })
+
+  const variaciones = []
+  grupos.forEach((precios) => {
+    if (precios.length < 2) return
+    const ordenados = [...precios].sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+    variaciones.push(((ordenados[0].valor - ordenados[1].valor) / ordenados[1].valor) * 100)
+  })
+
+  if (variaciones.length === 0) return { tipo: 'estable', porcentaje: '0.0' }
+
+  const promedio = variaciones.reduce((sum, v) => sum + v, 0) / variaciones.length
+  const porcentaje = Math.abs(promedio).toFixed(1)
+
+  if (promedio < -2) return { porcentaje, tipo: 'bajando' }
+  if (promedio > 2) return { porcentaje, tipo: 'subiendo' }
+  return { porcentaje, tipo: 'estable' }
 })
 
-// Color de tendencia
 const colorTendencia = computed(() => {
-  if (props.producto.tendenciaGeneral === 'bajando') return 'positive'
-  if (props.producto.tendenciaGeneral === 'subiendo') return 'negative'
-  return 'grey-6'
-})
-
-// Porcentaje de tendencia formateado
-const porcentajeTendencia = computed(() => {
-  const valor = props.producto.porcentajeTendencia || 0
-  return valor > 0 ? `+${valor}` : valor
+  if (tendenciaProducto.value.tipo === 'bajando') return 'text-positive'
+  if (tendenciaProducto.value.tipo === 'subiendo') return 'text-negative'
+  return 'text-grey-6'
 })
 </script>
 

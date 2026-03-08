@@ -34,7 +34,9 @@
             size="sm"
             class="q-mt-xs"
           >
-            <q-icon :name="iconoTendencia" size="14px" class="q-mr-xs" />
+            <IconTrendingDown v-if="tendenciaComercio.tipo === 'bajando'" :size="15" class="q-mr-xs" />
+            <IconTrendingUp v-else-if="tendenciaComercio.tipo === 'subiendo'" :size="15" class="q-mr-xs" />
+            <IconMinus v-else :size="15" class="q-mr-xs" />
             <span class="text-weight-bold">{{ textoTendencia }}</span>
           </q-chip>
 
@@ -65,7 +67,9 @@
               v-if="comercio.precios.length > 1"
               class="text-caption text-grey-7 row items-center q-gutter-xs q-mt-xs"
             >
-              <q-icon :name="iconoTendencia" :color="colorTendenciaText" size="16px" />
+              <IconTrendingDown v-if="tendenciaComercio.tipo === 'bajando'" :size="16" :color="colorTendenciaText" />
+              <IconTrendingUp v-else-if="tendenciaComercio.tipo === 'subiendo'" :size="16" :color="colorTendenciaText" />
+              <IconMinus v-else :size="16" :color="colorTendenciaText" />
               <span>{{ textoTendenciaCompleto }}</span>
             </div>
           </div>
@@ -89,7 +93,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { IconThumbUp, IconChevronDown, IconChevronUp } from '@tabler/icons-vue'
+import { IconThumbUp, IconChevronDown, IconChevronUp, IconTrendingUp, IconTrendingDown, IconMinus } from '@tabler/icons-vue'
 import ItemPrecioHistorial from './ItemPrecioHistorial.vue'
 
 const props = defineProps({
@@ -169,15 +173,14 @@ const fechaFormateada = computed(() => {
   return `Hace ${meses} ${meses === 1 ? 'mes' : 'meses'}`
 })
 
-// Calcular tendencia del comercio (precio más reciente vs promedio histórico)
+// Calcular tendencia del comercio (último precio vs el anterior — ignora inflación histórica)
 const tendenciaComercio = computed(() => {
   if (props.comercio.precios.length < 2) return { porcentaje: 0, tipo: 'estable' }
 
-  const precioActual = precioMasReciente.value.valor
-  const suma = props.comercio.precios.reduce((acc, p) => acc + p.valor, 0)
-  const promedio = suma / props.comercio.precios.length
+  const precioActual = preciosOrdenados.value[0].valor
+  const precioAnterior = preciosOrdenados.value[1].valor
 
-  const diferencia = ((precioActual - promedio) / promedio) * 100
+  const diferencia = ((precioActual - precioAnterior) / precioAnterior) * 100
   const porcentaje = Math.abs(diferencia).toFixed(1)
 
   if (diferencia < -2) return { porcentaje, tipo: 'bajando' }
@@ -197,13 +200,6 @@ const colorTendenciaText = computed(() => {
   if (tendenciaComercio.value.tipo === 'bajando') return 'positive'
   if (tendenciaComercio.value.tipo === 'subiendo') return 'negative'
   return 'grey-6'
-})
-
-// Ícono de la tendencia
-const iconoTendencia = computed(() => {
-  if (tendenciaComercio.value.tipo === 'bajando') return 'trending_down'
-  if (tendenciaComercio.value.tipo === 'subiendo') return 'trending_up'
-  return 'remove'
 })
 
 // Texto de la tendencia (corto)
