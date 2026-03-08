@@ -53,19 +53,23 @@ const props = defineProps({
 
 defineEmits(['confirmar-precio'])
 
-// Agrupar precios por comercio (nombreCompleto)
+// Agrupar precios por comercio — usar IDs si existen, sino nombreCompleto como fallback legacy
 const comerciosAgrupados = computed(() => {
-  // Crear un mapa con los comercios
   const mapaGrupos = new Map()
 
   props.precios.forEach((precio) => {
-    const clave = precio.nombreCompleto
+    const clave =
+      precio.comercioId && precio.direccionId
+        ? `${precio.comercioId}_${precio.direccionId}`
+        : precio.nombreCompleto || precio.comercio || 'Sin comercio'
 
     if (!mapaGrupos.has(clave)) {
       mapaGrupos.set(clave, {
         nombreCompleto: precio.nombreCompleto,
         direccion: precio.direccion,
         comercio: precio.comercio,
+        comercioId: precio.comercioId,
+        direccionId: precio.direccionId,
         precios: [],
       })
     }
@@ -76,10 +80,12 @@ const comerciosAgrupados = computed(() => {
   // Convertir el mapa a array
   const grupos = Array.from(mapaGrupos.values())
 
-  // Para cada grupo, obtener el precio más reciente
+  // Para cada grupo, ordenar por fecha y tomar el más reciente como referencia
   grupos.forEach((grupo) => {
     grupo.precios.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
     grupo.precioMasReciente = grupo.precios[0]
+    // Usar el nombreCompleto del precio más reciente (formato normalizado)
+    grupo.nombreCompleto = grupo.precios[0].nombreCompleto || grupo.nombreCompleto
   })
 
   // Ordenar comercios según el filtro seleccionado (usando SOLO el precio más reciente)
