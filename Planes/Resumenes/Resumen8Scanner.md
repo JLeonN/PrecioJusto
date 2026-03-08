@@ -27,7 +27,7 @@ Modo B (Ráfaga)
     → busca en background (fire-and-forget)
     → cuando termina: sesionEscaneoStore.agregarItem() + tarjetita de aviso
 
-Mesa de trabajo (MesaTrabajo.vue)
+Mesa de trabajo (MesaTrabajoPage.vue — ruta /mesa-trabajo)
   ← sesionEscaneoStore.items
   → edición, ordenamiento, selección múltiple, asignación de comercio en bloque
   → envío parcial → productosStore.agregarProducto() / agregarPrecioAProducto()
@@ -112,17 +112,27 @@ Tarjeta post-escaneo del **Modo A**. `q-dialog` con `position="bottom"`.
 - Edición inline (lápiz → campos editables para nombre, marca, cantidad, unidad)
 - Precio obligatorio (`formularioValido = datosForm.precio > 0`)
 - Nombre NO es obligatorio (puede escanearse sin nombre)
-- Foto opcional vía `useCamaraFoto`
+- Foto opcional vía `useCamaraFoto` — botón de cámara en overlay (esquina inferior derecha)
 - "Siguiente" → agrega a la mesa y reactiva cámara
 - "Ir a mesa" → agrega a la mesa y cierra el flujo
+- **Botón recuperar foto** (`IconRefresh`): aparece en overlay junto a la cámara, solo si `fotoModificada`
+- **Botón recuperar datos** (`IconArrowBackUp`): aparece en el área de edición junto a "Listo", solo si `datosModificados`
+- `datosOriginales`: computed derivado de `props.item.origenApi || props.item.productoExistenteId` — snapshot de nombre/marca/cantidad/unidad/imagen del item original; `null` si el producto es nuevo
+- `fotoModificada` / `datosModificados`: computeds que comparan `datosForm` vs `datosOriginales` — los botones solo aparecen cuando hay diferencia real
 
 ---
 
-### MesaTrabajo.vue (`src/components/Scanner/`)
-Diálogo full-screen que reemplaza a BandejaBorradores. Abierto desde el drawer (MainLayout).
+### MesaTrabajoPage.vue (`src/pages/`)
+Página propia con ruta `/mesa-trabajo`. Reemplaza a `MesaTrabajo.vue` (que era un `q-dialog full-screen` en `MainLayout`). El ícono en el drawer usa `to="/mesa-trabajo"` y muestra `IconBriefcase`.
+
+**Acceso:**
+- Drawer → ítem "Mesa de trabajo" (visible solo si `sesionEscaneoStore.tieneItemsPendientes`)
+- Al vaciar la mesa (enviar todos o "Limpiar todo") → auto-navega a `/`
+- Al acceder con mesa vacía → muestra estado vacío con botones "Mis Productos" y "Comercios"
 
 **Funcionalidades:**
 - Lista de `TarjetaProductoBorrador` con ordenamiento configurable
+- Selector `SelectorComercioDireccion.vue` para asignación rápida en bottom sheet
 - Contador "X / Y artículos listos para enviar"
 - **Selección múltiple:** long-press → modo selección con checkboxes → "Asignar comercio" en bloque
 - **Envío parcial:** solo los ítems completos (nombre + precio + comercio) tienen botón "Enviar" activo
@@ -141,9 +151,23 @@ Diálogo full-screen que reemplaza a BandejaBorradores. Abierto desde el drawer 
 ### TarjetaProductoBorrador.vue (`src/components/Scanner/`)
 Tarjeta expandible dentro de la Mesa de trabajo. Usa `TarjetaBase`.
 
-**Chips de completitud:** Nombre / Precio / Comercio (verde si completo, gris si falta)
+**Estado colapsado — slot `#tipo`:**
+- Fila 1: chips de completitud (Nombre / Precio / Comercio) — verde si completo, gris si falta
+- Fila 2: `IconBuildingStore` + nombre del comercio — `v-if="item.comercio"`
+- Fila 3: `IconMapPin` + dirección — `v-if="item.comercio?.direccionNombre"`
+- Info inferior: código de barras con `IconBarcode`, clickeable para copiar (`copyToClipboard`)
 
-**Botón "Enviar":** activo solo si los 3 campos obligatorios están completos.
+**Estado expandido — edición inline:**
+- Campos: nombre, precio + moneda, comercio/dirección (`SelectorComercioDireccion`), cantidad + unidad
+- Gestión de foto: miniatura + `q-menu` con opciones (cámara nativa, galería, quitar)
+- **Botón recuperar foto** (`IconRefresh :size="22"`): junto a la cámara, `v-if="fotoModificada"`
+- **Botón recuperar datos** (`IconArrowBackUp`): extremo derecho, `v-if="datosModificados"`
+- `datosOriginales`: `ref` inicializado una sola vez con `props.item.datosOriginales` (snapshot guardado por el store). **No puede ser `computed`** porque `props.item` muta con cada edición (store round-trip)
+- `recuperarDatos()`: restaura nombre, marca, cantidad, unidad (no toca precio ni imagen)
+
+**Botón "Enviar":** activo solo si nombre + precio + comercio están completos.
+
+**Prevención de cierre al editar:** el div expandido tiene `@click.stop` para que los clicks en inputs/selects no colapsen la tarjeta.
 
 ---
 
@@ -167,6 +191,13 @@ Ver documentación completa en Resumen7LocalStorage.md y Resumen1General.md (sec
   fuenteDato: 'Open Food Facts',
   productoExistenteId: 'prod_xyz', // ID en BD local (null si es nuevo)
   comercio: null,              // { id, nombre, direccionId, direccionNombre } o null
+  datosOriginales: {           // snapshot inmutable; null si el producto es nuevo (sin origenApi ni productoExistenteId)
+    nombre: 'Sprite Sabor Naranja',
+    marca: 'Coca-Cola',
+    cantidad: 500,
+    unidad: 'mililitro',
+    imagen: 'data:image/...',
+  },
 }
 ```
 
@@ -284,10 +315,11 @@ Dos niveles de protección:
 | Archivo | Rol |
 |---------|-----|
 | `src/components/Compartidos/FabAcciones.vue` | FAB con las 3 acciones |
+| `src/components/Compartidos/SelectorComercioDireccion.vue` | Selector comercio + dirección reutilizable |
 | `src/components/Scanner/EscaneadorCodigo.vue` | Overlay nativo de cámara |
 | `src/components/Scanner/TarjetaEscaneo.vue` | Post-escaneo Modo A |
-| `src/components/Scanner/MesaTrabajo.vue` | Revisión y envío |
 | `src/components/Scanner/TarjetaProductoBorrador.vue` | Tarjeta en Mesa de trabajo |
+| `src/pages/MesaTrabajoPage.vue` | Página Mesa de trabajo (`/mesa-trabajo`) |
 | `src/almacenamiento/stores/sesionEscaneoStore.js` | Estado persistente |
 | `src/pages/MisProductosPage.vue` | Orquestador del flujo |
 | `src/css/app.css` | CSS crítico del scanner (visibility + background) |

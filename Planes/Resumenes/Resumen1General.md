@@ -126,7 +126,8 @@ src/
 │   │   ├── BarraAccionesSeleccion.vue      # Barra fixed bottom con botones (eliminar, cancelar)
 │   │   ├── InputBusqueda.vue              # Input de búsqueda reutilizable con prop color
 │   │   ├── PantallaSplash.vue             # Splash screen con imagen aleatoria al iniciar
-│   │   └── FabAcciones.vue               # 🆕 FAB genérico reutilizable: Speed Dial multi-acción o botón directo
+│   │   ├── FabAcciones.vue               # FAB genérico reutilizable: Speed Dial multi-acción o botón directo
+│   │   └── SelectorComercioDireccion.vue  # Selector de comercio + dirección reutilizable (emite { id, nombre, direccionId, direccionNombre } | null)
 │   │
 │   ├── Comercios/                           # Componentes de comercios
 │   │   ├── ListaComercios.vue              # Contenedor con grid responsivo Quasar
@@ -157,9 +158,8 @@ src/
 │   │
 │   ├── Scanner/                             # Flujo de escaneo de productos
 │   │   ├── EscaneadorCodigo.vue            # Scanner nativo (overlay transparente) + fallback web; prop `continuo` para Ráfaga
-│   │   ├── TarjetaEscaneo.vue             # 🆕 Tarjeta post-escaneo del Modo A (bottom sheet q-dialog)
-│   │   ├── MesaTrabajo.vue               # 🆕 Diálogo full-screen con borradores; reemplaza BandejaBorradores
-│   │   └── TarjetaProductoBorrador.vue   # 🆕 Tarjeta expandible en Mesa de trabajo (chips de completitud)
+│   │   ├── TarjetaEscaneo.vue             # Tarjeta post-escaneo del Modo A (bottom sheet q-dialog)
+│   │   └── TarjetaProductoBorrador.vue   # Tarjeta expandible en Mesa de trabajo (chips, edición inline, recuperar foto/datos)
 │   │
 │   ├── MisProductos/                        # Componentes de productos
 │   │   └── ListaProductos.vue              # Contenedor con grid responsivo Quasar
@@ -191,9 +191,10 @@ src/
 │
 ├── pages/
 │   ├── ComerciosPage.vue                    # Página de gestión de comercios
-│   ├── EditarComercioPage.vue               # 🆕 Página de edición de comercio individual
+│   ├── EditarComercioPage.vue               # Página de edición de comercio individual
 │   ├── DetalleProductoPage.vue              # Página de detalle individual de producto
-│   └── MisProductosPage.vue                 # Página principal de productos
+│   ├── MisProductosPage.vue                 # Página principal de productos (orquestador del flujo de escaneo)
+│   └── MesaTrabajoPage.vue                  # Página Mesa de trabajo (/mesa-trabajo) — borradores de escaneo
 │
 ├── router/
 │   ├── index.js                             # Configuración del router de Vue
@@ -434,7 +435,7 @@ A. Gestión de Productos
 ✅ 🆕 FAB expandible reutilizable (FabAcciones.vue con q-fab Speed Dial + nextTick para Capacitor)
 ✅ 🆕 Modo A — Escaneo rápido: cámara → pausa → TarjetaEscaneo (precio, foto, edición inline) → Mesa de trabajo → cámara reactiva
 ✅ 🆕 Modo B — Ráfaga: cámara continua sin pausa (prop `continuo` en EscaneadorCodigo), búsqueda en background (fire-and-forget), tarjetita de aviso sobre la cámara
-✅ 🆕 Mesa de trabajo (MesaTrabajo.vue): reemplaza BandejaBorradores; ordenamiento por 5 criterios, selección múltiple por long-press, asignación de comercio en bloque, envío parcial
+✅ Mesa de trabajo (MesaTrabajoPage.vue — ruta `/mesa-trabajo`): reemplaza BandejaBorradores; página propia con drawer, ordenamiento por 5 criterios, selección múltiple por long-press, asignación de comercio en bloque, envío parcial, estado vacío con botones de redirección
 ✅ 🆕 Tarjetita de aviso sobre cámara: Teleport to="body" z-index 10000, visible durante escaneo activo (duplicado + éxito Ráfaga), botón X para cerrar
 ✅ 🆕 Detección de duplicados en sesión sin interrumpir el escaneo (aviso sobre cámara)
 ✅ 🆕 Auto-fetch al reconectar internet (@capacitor/network, nativo en Android)
@@ -613,8 +614,9 @@ H. Arquitectura y Código
 
 **Estado:**
 - `items`: Array de ítems escaneados, cada uno con:
-  `{ id, codigoBarras, nombre, marca, cantidad, unidad, imagen, precio, moneda, origenApi, fuenteDato, productoExistenteId, comercio }`
+  `{ id, codigoBarras, nombre, marca, cantidad, unidad, imagen, precio, moneda, origenApi, fuenteDato, productoExistenteId, comercio, datosOriginales }`
   - `comercio`: `null` por defecto → se asigna en la Mesa de trabajo (`{ id, nombre, direccionId, direccionNombre }`)
+  - `datosOriginales`: snapshot inmutable `{ nombre, marca, cantidad, unidad, imagen }` — solo si `origenApi || productoExistenteId`; `null` para productos nuevos. `actualizarItem()` lo preserva via spread.
 - `cargando`: Boolean mientras se hidrata desde storage
 
 **Acciones:**
@@ -867,7 +869,8 @@ H. Arquitectura y Código
       { path: '', component: MisProductosPage },
       { path: 'producto/:id', component: DetalleProductoPage },
       { path: 'comercios', component: ComerciosPage },
-      { path: 'comercios/:nombre', component: EditarComercioPage }
+      { path: 'comercios/:nombre', component: EditarComercioPage },
+      { path: 'mesa-trabajo', component: MesaTrabajoPage }
     ]
   },
   {
@@ -1004,7 +1007,7 @@ H. Arquitectura y Código
 - Señal "app lista" vía `nextTick()` en `App.vue`
 
 ### Estado Actual
-- **Versión:** 0.0.8
+- **Versión:** 1.0.0
 - **Almacenamiento:** Local (Capacitor Storage)
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
@@ -1042,4 +1045,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 03 de Marzo 2026 (fotos de productos y comercios: composable useCamaraFoto, menú contextual q-menu en 5 componentes)
+**Última actualización:** 08 de Marzo 2026 (Mesa de trabajo como página, TarjetaProductoBorrador mejorada, botones recuperar foto/datos, SelectorComercioDireccion, versión 1.0.0)
