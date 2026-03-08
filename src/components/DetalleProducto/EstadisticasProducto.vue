@@ -1,19 +1,21 @@
 <template>
-  <div class="row q-col-gutter-md">
+  <div class="row q-col-gutter-md items-stretch">
     <!-- Card: Precio promedio -->
     <div class="col-12 col-sm-4">
-      <q-card class="stat-card">
-        <q-card-section class="text-center">
+      <q-card class="stat-card full-height">
+        <q-card-section class="text-center column justify-center full-height">
           <div class="text-grey-7 text-caption text-uppercase">Precio promedio</div>
-          <div class="text-h5 text-weight-bold text-primary q-mt-xs">${{ precioPromedio }}</div>
+          <div v-if="precioPromedio > 0" class="text-h5 text-weight-bold text-primary q-mt-xs">${{ precioPromedio }}</div>
+          <div v-else class="text-caption text-grey-5 q-mt-xs">Sin datos recientes</div>
+          <div class="text-caption text-grey-5 q-mt-xs">últimos 6 meses</div>
         </q-card-section>
       </q-card>
     </div>
 
     <!-- Card: Tendencia general -->
     <div class="col-12 col-sm-4">
-      <q-card class="stat-card">
-        <q-card-section class="text-center">
+      <q-card class="stat-card full-height">
+        <q-card-section class="text-center column justify-center full-height">
           <div class="text-grey-7 text-caption text-uppercase">Tendencia</div>
           <div class="row items-center justify-center q-mt-xs">
             <IconTrendingDown v-if="tendenciaProducto.tipo === 'bajando'" :size="28" class="text-positive" />
@@ -23,18 +25,18 @@
               {{ tendenciaProducto.porcentaje }}%
             </span>
           </div>
+          <div class="text-caption text-grey-5 q-mt-xs">vs visita anterior</div>
         </q-card-section>
       </q-card>
     </div>
 
     <!-- Card: Comercios registrados -->
     <div class="col-12 col-sm-4">
-      <q-card class="stat-card">
-        <q-card-section class="text-center">
+      <q-card class="stat-card full-height">
+        <q-card-section class="text-center column justify-center full-height">
           <div class="text-grey-7 text-caption text-uppercase">Comercios</div>
-          <div class="text-h5 text-weight-bold text-primary q-mt-xs">
-            {{ totalComercios }}
-          </div>
+          <div class="text-h5 text-weight-bold text-primary q-mt-xs">{{ totalComercios }}</div>
+          <div class="text-caption text-grey-5 q-mt-xs">con precios registrados</div>
         </q-card-section>
       </q-card>
     </div>
@@ -52,18 +54,46 @@ const props = defineProps({
   },
 })
 
-// Calcular precio promedio
+// Precio promedio — más reciente por tienda, solo comercios visitados en los últimos 6 meses
 const precioPromedio = computed(() => {
   if (!props.producto.precios || props.producto.precios.length === 0) return 0
-  const suma = props.producto.precios.reduce((acc, p) => acc + p.valor, 0)
-  return Math.round(suma / props.producto.precios.length)
+
+  const hace6Meses = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000)
+  const grupos = new Map()
+
+  props.producto.precios.forEach((precio) => {
+    const clave =
+      precio.comercioId && precio.direccionId
+        ? `${precio.comercioId}_${precio.direccionId}`
+        : precio.nombreCompleto || precio.comercio || 'Sin comercio'
+    if (!grupos.has(clave)) grupos.set(clave, [])
+    grupos.get(clave).push(precio)
+  })
+
+  const preciosVigentes = []
+  grupos.forEach((precios) => {
+    const ordenados = [...precios].sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+    // Solo incluir si la visita más reciente fue dentro de los últimos 6 meses
+    if (new Date(ordenados[0].fecha) >= hace6Meses) {
+      preciosVigentes.push(ordenados[0].valor)
+    }
+  })
+
+  if (preciosVigentes.length === 0) return 0
+  return Math.round(preciosVigentes.reduce((sum, v) => sum + v, 0) / preciosVigentes.length)
 })
 
-// Total de comercios únicos (comercioId cuando existe, p.comercio como fallback para datos legacy)
+// Total de comercios únicos agrupados por ID de sucursal
 const totalComercios = computed(() => {
   if (!props.producto.precios) return 0
-  const comerciosUnicos = new Set(props.producto.precios.map((p) => p.comercioId || p.comercio))
-  return comerciosUnicos.size
+  const claves = new Set(
+    props.producto.precios.map((p) =>
+      p.comercioId && p.direccionId
+        ? `${p.comercioId}_${p.direccionId}`
+        : p.nombreCompleto || p.comercio || 'Sin comercio',
+    ),
+  )
+  return claves.size
 })
 
 // Tendencia dinámica — último vs penúltimo por tienda, promediado entre todos los grupos
