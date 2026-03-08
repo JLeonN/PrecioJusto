@@ -156,8 +156,8 @@
         <div class="foto-fila">
           <div class="flex items-center gap-sm">
             <img v-if="datosEditando.imagen" :src="datosEditando.imagen" class="foto-miniatura" />
-            <q-btn flat round dense size="sm" color="grey-6">
-              <IconCamera :size="18" />
+            <q-btn flat round dense size="md" color="grey-6">
+              <IconCamera :size="22" />
               <q-tooltip>Gestionar foto</q-tooltip>
               <q-menu anchor="bottom right" self="top right">
                 <q-list style="min-width: 140px">
@@ -176,7 +176,24 @@
                 </q-list>
               </q-menu>
             </q-btn>
+            <q-btn v-if="fotoModificada" flat round dense size="md" color="grey-6" @click="actualizar('imagen', datosOriginales.imagen)">
+              <IconRefresh :size="22" />
+              <q-tooltip>Recuperar foto original</q-tooltip>
+            </q-btn>
           </div>
+          <q-btn
+            v-if="datosModificados"
+            flat
+            no-caps
+            dense
+            size="sm"
+            color="grey-7"
+            class="q-ml-auto"
+            @click="recuperarDatos"
+          >
+            <IconArrowBackUp :size="16" class="q-mr-xs" />
+            Recuperar datos
+          </q-btn>
           <input ref="inputArchivoRef" type="file" accept="image/*" class="input-oculto" @change="alSeleccionarArchivo" />
         </div>
       </div>
@@ -229,6 +246,8 @@ import {
   IconPhoto,
   IconTrash,
   IconSend,
+  IconRefresh,
+  IconArrowBackUp,
 } from '@tabler/icons-vue'
 
 const OPCIONES_UNIDADES = [
@@ -258,6 +277,20 @@ const datosEditando = ref({ ...props.item })
 // Sincroniza si el item cambia externamente (ej. asignación de comercio en bloque)
 watch(() => props.item, (v) => { datosEditando.value = { ...v } }, { deep: true })
 
+// Datos originales de la API/BD: el store los guarda en agregarItem() como datosOriginales
+const datosOriginales = ref(props.item?.datosOriginales ?? null)
+const fotoModificada = computed(
+  () => datosOriginales.value && datosEditando.value.imagen !== datosOriginales.value.imagen,
+)
+const datosModificados = computed(
+  () =>
+    datosOriginales.value &&
+    (datosEditando.value.nombre !== datosOriginales.value.nombre ||
+      datosEditando.value.marca !== datosOriginales.value.marca ||
+      datosEditando.value.cantidad !== datosOriginales.value.cantidad ||
+      datosEditando.value.unidad !== datosOriginales.value.unidad),
+)
+
 const itemCompleto = computed(() =>
   !!datosEditando.value.nombre?.trim() &&
   datosEditando.value.precio > 0 &&
@@ -278,6 +311,15 @@ async function tomarFotoCamara() {
 async function alSeleccionarArchivo(event) {
   const res = await leerArchivo(event)
   if (res) actualizar('imagen', res)
+}
+
+function recuperarDatos() {
+  if (!datosOriginales.value) return
+  const { nombre, marca, cantidad, unidad } = datosOriginales.value
+  actualizar('nombre', nombre)
+  actualizar('marca', marca)
+  actualizar('cantidad', cantidad)
+  actualizar('unidad', unidad)
 }
 
 function copiarCodigo() {

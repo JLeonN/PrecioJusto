@@ -19,18 +19,18 @@
         <!-- Botones overlay: recuperar foto + cámara -->
         <div class="portada-botones-foto">
           <q-btn
-            v-if="item?.datosOriginales?.imagen"
+            v-if="fotoModificada"
             round
             dense
-            size="sm"
+            size="md"
             class="boton-foto-overlay"
-            @click.stop="datosForm.imagen = item.datosOriginales.imagen"
+            @click.stop="datosForm.imagen = datosOriginales.imagen"
           >
-            <IconRefresh :size="16" />
+            <IconRefresh :size="35" />
             <q-tooltip>Recuperar foto original</q-tooltip>
           </q-btn>
-          <q-btn round dense size="sm" class="boton-foto-overlay">
-            <IconCamera :size="16" />
+          <q-btn round dense size="md" class="boton-foto-overlay">
+            <IconCamera :size="35" />
             <q-tooltip>Foto del producto</q-tooltip>
             <q-menu anchor="top right" self="bottom right">
               <q-list style="min-width: 140px">
@@ -122,7 +122,7 @@
             <q-btn flat no-caps dense color="primary" label="Listo" @click="editando = false" />
             <!-- Recuperar datos originales de la API/BD -->
             <q-btn
-              v-if="item?.datosOriginales"
+              v-if="datosModificados"
               flat
               no-caps
               dense
@@ -153,10 +153,15 @@
               min="0"
               step="0.01"
               placeholder="0.00"
-              :rules="[(v) => v > 0 || 'Obligatorio']"
-              lazy-rules
+              :error="mostrarErrorPrecio"
+              no-error-icon
               hide-bottom-space
-            />
+              @blur="precioTocado = true"
+            >
+              <template v-if="mostrarErrorPrecio" #append>
+                <span class="text-negative text-caption">Obligatorio</span>
+              </template>
+            </q-input>
           </div>
           <div class="col-4">
             <q-select
@@ -166,6 +171,7 @@
               :options="MONEDAS"
               emit-value
               map-options
+              hide-bottom-space
             />
           </div>
         </div>
@@ -261,6 +267,36 @@ const abierto = computed({
 
 // Solo el precio es obligatorio para poder continuar
 const formularioValido = computed(() => datosForm.value.precio > 0)
+const precioTocado = ref(false)
+const mostrarErrorPrecio = computed(() => precioTocado.value && !formularioValido.value)
+
+// Snapshot original: el item llega ANTES de pasar por el store, se deriva de sus flags
+const datosOriginales = computed(() => {
+  if (!props.item) return null
+  if (props.item.origenApi || props.item.productoExistenteId) {
+    return {
+      nombre: props.item.nombre || '',
+      marca: props.item.marca || null,
+      cantidad: props.item.cantidad || 1,
+      unidad: props.item.unidad || 'unidad',
+      imagen: props.item.imagen || null,
+    }
+  }
+  return null
+})
+
+// Detección de cambios respecto a los datos originales
+const fotoModificada = computed(
+  () => datosOriginales.value && datosForm.value.imagen !== datosOriginales.value.imagen,
+)
+const datosModificados = computed(
+  () =>
+    datosOriginales.value &&
+    (datosForm.value.nombre !== datosOriginales.value.nombre ||
+      datosForm.value.marca !== datosOriginales.value.marca ||
+      datosForm.value.cantidad !== datosOriginales.value.cantidad ||
+      datosForm.value.unidad !== datosOriginales.value.unidad),
+)
 
 // Sincroniza el form cuando llega un nuevo item escaneado
 watch(
@@ -308,8 +344,8 @@ function copiarCodigo() {
 
 // Recupera nombre, marca, cantidad y unidad originales de la API/BD (NO toca imagen ni precio)
 function recuperarDatos() {
-  if (!props.item?.datosOriginales) return
-  const { nombre, marca, cantidad, unidad } = props.item.datosOriginales
+  if (!datosOriginales.value) return
+  const { nombre, marca, cantidad, unidad } = datosOriginales.value
   datosForm.value = { ...datosForm.value, nombre, marca, cantidad, unidad }
 }
 
@@ -334,7 +370,7 @@ function _itemActualizado() {
     imagen: datosForm.value.imagen,
     precio: datosForm.value.precio,
     moneda: datosForm.value.moneda,
-    comercio: null, // se asigna en la Mesa de trabajo
+    comercio: null,
   }
 }
 

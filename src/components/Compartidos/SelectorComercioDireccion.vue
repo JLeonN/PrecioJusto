@@ -78,7 +78,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useComerciStore } from '../../almacenamiento/stores/comerciosStore.js'
 import { IconBuildingStore, IconMapPin } from '@tabler/icons-vue'
 
-const props = defineProps({
+defineProps({
   // { id, nombre, direccionId, direccionNombre } | null
   modelValue: {
     type: Object,
