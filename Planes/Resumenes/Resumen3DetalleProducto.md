@@ -170,3 +170,28 @@ Cada precio requiere:
 - Al restaurar desde API → `fotoFuente: 'api'` si API retorna imagen; si no, conserva valor anterior (`props.producto.fotoFuente ?? null`)
 - Al quitar foto → `actualizarProducto(id, { imagen: null, fotoFuente: null })`
 - Productos legacy sin `fotoFuente` → tratar como `null` (fallback seguro con `?? null`)
+
+### InfoProducto.vue — Campo Cantidad/Unidad editable
+- Fila editable entre Categoría y Código de barras, con mismo estilo visual que `CampoEditable`
+- Modo lectura: ícono `IconRuler2` + texto formateado (ej: `500 g`, `2 L`, `1 u.`) + lápiz
+- Modo edición: `q-input` tipo número (con `step` inteligente: 1 para unidades enteras, 0.01 para el resto) + `q-select` de 7 unidades
+- Unidades disponibles: `unidad`, `litro`, `mililitro`, `kilo`, `gramo`, `metro`, `pack`
+- Abreviaturas de display: `u.`, `L`, `ml`, `kg`, `g`, `m`, `pack`
+- Guarda con `productosStore.actualizarProducto(id, { cantidad, unidad })`
+- Enter guarda, Esc cancela
+
+### InfoProducto.vue — Imagen clickeable (DialogoVerImagen)
+- La `q-img` del producto tiene `@click="verFoto = true"` y cursor `zoom-in`
+- Tooltip "Ver foto" al pasar el cursor
+- Solo activo cuando el producto tiene imagen (no afecta al placeholder)
+- Abre `DialogoVerImagen.vue` pasando `src` y `titulo` (nombre del producto)
+
+### DialogoVerImagen.vue — Visor de imagen reutilizable
+- Ubicación: `src/components/Compartidos/DialogoVerImagen.vue`
+- Props: `modelValue` (Boolean, v-model), `src` (String), `titulo` (String, opcional)
+- UI: fondo oscuro `#1a1a1a`, `border-radius: 16px`, sombra fuerte
+- Botón X flotante arriba a la derecha con `backdrop-filter: blur(4px)`
+- Título opcional del producto en pie del modal (semitransparente)
+- Animación `scale` al abrir/cerrar (`transition-show="scale"`)
+- Cierra al hacer click fuera del modal
+- Uso: `<DialogoVerImagen v-model="verFoto" :src="img" :titulo="nombre" />`

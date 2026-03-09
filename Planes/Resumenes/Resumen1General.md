@@ -128,7 +128,8 @@ src/
 │   │   ├── PantallaSplash.vue             # Splash screen con imagen aleatoria al iniciar
 │   │   ├── FabAcciones.vue               # FAB genérico reutilizable: Speed Dial multi-acción o botón directo
 │   │   ├── SelectorComercioDireccion.vue  # Selector de comercio + dirección reutilizable (emite { id, nombre, direccionId, direccionNombre } | null)
-│   │   └── PieAtribucion.vue              # Pie de atribución de fuentes; props: fuentesApi[], fuentesUsuario[]; muestra origen de datos (API o usuario)
+│   │   ├── PieAtribucion.vue              # Pie de atribución de fuentes; props: fuentesApi[], fuentesUsuario[]; muestra origen de datos (API o usuario)
+│   │   └── DialogoVerImagen.vue           # 🆕 Visor de imagen en grande; props: modelValue (v-model), src, titulo; fondo oscuro, botón X, animación scale
 │   │
 │   ├── Comercios/                           # Componentes de comercios
 │   │   ├── ListaComercios.vue              # Contenedor con grid responsivo Quasar
@@ -432,6 +433,8 @@ A. Gestión de Productos
 ✅ 🆕 Buscador inline en Mis Productos (por nombre, marca, categoría, código de barras)
 ✅ 🆕 Categoría editable en detalle del producto (heredada de API, editable con CampoEditable)
 ✅ 🆕 Foto del producto más grande en detalle (desktop: 180px, móvil: 45vw)
+✅ 🆕 Cantidad y unidad del producto visible y editable en DetalleProducto (ej: "500 g", "2 L") — inline entre Categoría y Código de barras
+✅ 🆕 Visor de imagen en grande al hacer click en la foto del producto (DialogoVerImagen.vue — componente compartido reutilizable)
 ✅ 🆕 Registro de última interacción por producto (registrarInteraccion + productosPorInteraccion)
 ✅ 🆕 Título "Historial de precios" visible en DetalleProductoPage
 ✅ 🆕 Marca editable en detalle del producto (CampoEditable con IconBuildingStore)
@@ -1050,4 +1053,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 08 de Marzo 2026 (Mesa de trabajo como página, TarjetaProductoBorrador mejorada, botones recuperar foto/datos, SelectorComercioDireccion, versión 1.0.0)
+**Última actualización:** 09 de Marzo 2026 (Cantidad/unidad editable en DetalleProducto; DialogoVerImagen reutilizable; imagen del producto clickeable para ver en grande)

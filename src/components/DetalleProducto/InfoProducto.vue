@@ -4,7 +4,15 @@
 
       <!-- IMAGEN DEL PRODUCTO (editable) -->
       <div class="info-imagen">
-        <q-img v-if="producto.imagen" :src="producto.imagen" :ratio="1" class="rounded-borders" />
+        <q-img
+          v-if="producto.imagen"
+          :src="producto.imagen"
+          :ratio="1"
+          class="rounded-borders imagen-clickeable"
+          @click="verFoto = true"
+        >
+          <q-tooltip>Ver foto</q-tooltip>
+        </q-img>
         <div v-else class="placeholder-imagen">
           <IconShoppingBag :size="64" class="text-grey-5" />
         </div>
@@ -212,6 +220,13 @@
       </div>
     </q-card-section>
   </q-card>
+
+  <!-- Visor de imagen en grande -->
+  <DialogoVerImagen
+    v-model="verFoto"
+    :src="producto.imagen || ''"
+    :titulo="producto.nombre"
+  />
 </template>
 
 <script setup>
@@ -239,6 +254,7 @@ import {
 import buscadorProductosService from '../../almacenamiento/servicios/BuscadorProductosService.js'
 import { useQuasar } from 'quasar'
 import CampoEditable from '../EditarComercio/CampoEditable.vue'
+import DialogoVerImagen from '../Compartidos/DialogoVerImagen.vue'
 import { useProductosStore } from '../../almacenamiento/stores/productosStore.js'
 
 const $q = useQuasar()
@@ -252,6 +268,9 @@ const props = defineProps({
 })
 
 defineEmits(['agregar-precio'])
+
+// ── Visor de imagen ──────────────────────────────────────
+const verFoto = ref(false)
 
 // ── Nombre editable ──────────────────────────────────────
 
@@ -541,6 +560,9 @@ const copiarCodigoBarras = async (codigo) => {
   position: absolute;
   bottom: 8px;
   left: 8px;
+}
+.imagen-clickeable {
+  cursor: zoom-in;
 }
 .btn-editar-imagen {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
