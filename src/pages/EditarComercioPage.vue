@@ -290,6 +290,12 @@
             :ultimo-precio-fecha="ultimoPrecioFecha"
           />
         </div>
+
+        <!-- Pie de atribución de fuentes -->
+        <PieAtribucion
+          :fuentes-api="fuentesApiComercio"
+          :fuentes-usuario="fuentesUsuarioComercio"
+        />
       </template>
     </div>
 
@@ -331,6 +337,7 @@ import CampoEditable from '../components/EditarComercio/CampoEditable.vue'
 import DialogoAgregarSucursal from '../components/Formularios/Dialogos/DialogoAgregarSucursal.vue'
 import ListaProductosComercio from '../components/EditarComercio/ListaProductosComercio.vue'
 import EstadisticasComercio from '../components/EditarComercio/EstadisticasComercio.vue'
+import PieAtribucion from '../components/Compartidos/PieAtribucion.vue'
 import { formatearFechaRelativa } from '../composables/useFechaRelativa.js'
 
 const route = useRoute()
@@ -695,6 +702,18 @@ async function quitarFotoComercio() {
     $q.notify({ type: 'positive', message: 'Foto eliminada', position: 'top', timeout: 1500 })
   }
 }
+
+// ── Pie de Atribución ────────────────────────────────────
+
+// Sin API de geolocalización todavía → siempre vacío (placeholder futuro)
+const fuentesApiComercio = computed(() => [])
+
+// El comercio y su foto siempre los registró el usuario
+const fuentesUsuarioComercio = computed(() => {
+  const campos = ['nombre', 'dirección', 'tipo']
+  if (direccionSeleccionada.value?.foto) campos.push('foto')
+  return [{ campos }]
+})
 
 // Inicializar dirección seleccionada cuando cambia el comercio
 watch(comercioActual, (nuevo) => {

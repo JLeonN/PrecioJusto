@@ -173,23 +173,28 @@ APORTADO POR VOS
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 4: PLACEHOLDER `EditarComercioPage` 🏪 [PENDIENTE — FUTURO]
+## 📋 FASE 4: INTEGRAR EN `EditarComercioPage` 🏪 [✅ COMPLETADA]
 
 ### Objetivo
 
-Cuando llegue el momento (integración con API de geolocalización y sistema de usuarios),
-agregar `PieAtribucion` en `EditarComercioPage`, debajo de las estadísticas del comercio.
+Mostrar `PieAtribucion` debajo de las estadísticas del comercio.
 
-### Lo que se sabe hasta ahora
+### Archivo a modificar
 
-[ ] Ubicación: debajo de las estadísticas, antes del listado de productos asociados
-[ ] `fuentesApi` incluirá: nombre de la API de geolocalización, campos aportados
-[ ] `fuentesUsuario` incluirá: foto del comercio, datos manuales, reseñas
+[x] src/pages/EditarComercioPage.vue
+
+### Implementación
+
+[x] Importar `PieAtribucion` en EditarComercioPage
+[x] `fuentesApiComercio`: computed que retorna `[]` (sin API de geolocalización todavía)
+[x] `fuentesUsuarioComercio`: computed con campos `['nombre', 'dirección', 'tipo']` + `'foto'` si la sucursal seleccionada tiene foto
+[x] `<PieAtribucion>` colocado después de la sección Estadísticas, al final del contenido
 
 ### ⚠️ Nota
 
-Esta fase NO se implementa ahora. Es un placeholder para documentar la intención
-y asegurarse de que el componente ya tenga la flexibilidad necesaria desde la Fase 1.
+La foto de una sucursal siempre viene del usuario (cámara o galería) — no hay API de fotos
+para comercios. Por eso no se necesita un campo `fotoFuente` en la dirección: si tiene foto,
+siempre es del usuario. `fuentesApi` quedó vacío como placeholder para la futura API de GPS.
 
 ═══════════════════════════════════════════════════════════════
 
@@ -253,12 +258,12 @@ y asegurarse de que el componente ya tenga la flexibilidad necesaria desde la Fa
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 75% (3/4 fases completadas)
+## 📊 PROGRESO GENERAL: 100% (4/4 fases completadas)
 
 ✅ Fase 1: Componente base PieAtribucion.vue
 ✅ Fase 2: Rastrear fuente de la foto
 ✅ Fase 3: Integrar en DetalleProductoPage
-⬜ Fase 4: Placeholder EditarComercioPage (futuro)
+✅ Fase 4: Integrar en EditarComercioPage
 ⬜ Fase Testing
 
 ═══════════════════════════════════════════════════════════════
