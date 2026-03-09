@@ -110,6 +110,62 @@
           @guardar="actualizarCategoria"
         />
 
+        <!-- Cantidad / Unidad (editable inline) -->
+        <div class="cantidad-row q-mb-xs">
+          <template v-if="!editandoCantidad">
+            <div class="cantidad-icono">
+              <IconRuler2 :size="20" class="text-orange" />
+            </div>
+            <div class="cantidad-contenido">
+              <div class="cantidad-etiqueta">Cantidad</div>
+              <div class="cantidad-valor">{{ textoTamanio }}</div>
+            </div>
+            <q-btn flat dense round size="sm" color="grey-6" @click="iniciarEdicionCantidad">
+              <IconPencil :size="16" />
+              <q-tooltip>Editar cantidad</q-tooltip>
+            </q-btn>
+          </template>
+          <template v-else>
+            <div class="cantidad-icono">
+              <IconRuler2 :size="20" class="text-orange" />
+            </div>
+            <div class="cantidad-edicion-inputs">
+              <div class="cantidad-etiqueta">Cantidad</div>
+              <div class="row q-gutter-xs no-wrap">
+                <q-input
+                  v-model.number="cantidadTemporal"
+                  type="number"
+                  dense
+                  outlined
+                  autofocus
+                  :min="0.01"
+                  :step="stepCantidad"
+                  class="cantidad-input"
+                  @keyup.enter="guardarCantidadUnidad"
+                  @keyup.esc="cancelarEdicionCantidad"
+                />
+                <q-select
+                  v-model="unidadTemporal"
+                  dense
+                  outlined
+                  emit-value
+                  map-options
+                  :options="OPCIONES_UNIDADES"
+                  class="unidad-select"
+                />
+              </div>
+            </div>
+            <div class="cantidad-acciones">
+              <q-btn flat dense round size="sm" color="positive" @click="guardarCantidadUnidad">
+                <IconCheck :size="18" />
+              </q-btn>
+              <q-btn flat dense round size="sm" color="grey-6" @click="cancelarEdicionCantidad">
+                <IconX :size="18" />
+              </q-btn>
+            </div>
+          </template>
+        </div>
+
         <!-- Código de barras -->
         <div
           v-if="producto.codigoBarras"
@@ -178,6 +234,7 @@ import {
   IconTrendingUp,
   IconTrendingDown,
   IconMinus,
+  IconRuler2,
 } from '@tabler/icons-vue'
 import buscadorProductosService from '../../almacenamiento/servicios/BuscadorProductosService.js'
 import { useQuasar } from 'quasar'
@@ -358,6 +415,67 @@ const textoTendencia = computed(() => {
   return 'Precio estable vs visita anterior'
 })
 
+// ── Cantidad / Unidad editable ───────────────────────────
+
+const OPCIONES_UNIDADES = [
+  { label: 'Unidad', value: 'unidad' },
+  { label: 'Litro (L)', value: 'litro' },
+  { label: 'Mililitro (ml)', value: 'mililitro' },
+  { label: 'Kilo (kg)', value: 'kilo' },
+  { label: 'Gramo (g)', value: 'gramo' },
+  { label: 'Metro (m)', value: 'metro' },
+  { label: 'Pack', value: 'pack' },
+]
+
+const ABREVIATURAS_UNIDAD = {
+  unidad: 'u.',
+  litro: 'L',
+  mililitro: 'ml',
+  kilo: 'kg',
+  gramo: 'g',
+  metro: 'm',
+  pack: 'pack',
+}
+
+const editandoCantidad = ref(false)
+const cantidadTemporal = ref(1)
+const unidadTemporal = ref('unidad')
+
+const textoTamanio = computed(() => {
+  const cantidad = props.producto.cantidad ?? 1
+  const unidad = props.producto.unidad ?? 'unidad'
+  const abrev = ABREVIATURAS_UNIDAD[unidad] || unidad
+  return `${cantidad} ${abrev}`
+})
+
+const stepCantidad = computed(() => {
+  const unidadesEnteras = ['unidad', 'pack', 'metro']
+  return unidadesEnteras.includes(unidadTemporal.value) ? 1 : 0.01
+})
+
+function iniciarEdicionCantidad() {
+  cantidadTemporal.value = props.producto.cantidad ?? 1
+  unidadTemporal.value = props.producto.unidad ?? 'unidad'
+  editandoCantidad.value = true
+}
+
+async function guardarCantidadUnidad() {
+  try {
+    await productosStore.actualizarProducto(props.producto.id, {
+      cantidad: cantidadTemporal.value,
+      unidad: unidadTemporal.value,
+    })
+    $q.notify({ type: 'positive', message: 'Tamaño actualizado', position: 'top', timeout: 1500 })
+  } catch {
+    $q.notify({ type: 'negative', message: 'No se pudo guardar', position: 'top' })
+  }
+  editandoCantidad.value = false
+}
+
+function cancelarEdicionCantidad() {
+  editandoCantidad.value = false
+}
+
 // ── Copiar código de barras ──────────────────────────────
 
 const copiarCodigoBarras = async (codigo) => {
@@ -489,5 +607,58 @@ const copiarCodigoBarras = async (codigo) => {
   color: #9e9e9e;
   margin: 8px 0 0 0;
   text-align: center;
+}
+.cantidad-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--color-carta-borde, #e0e0e0);
+  padding: 12px 0;
+}
+.cantidad-icono {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-acento-claro, #fff3e0);
+  border-radius: 50%;
+}
+.cantidad-contenido {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cantidad-etiqueta {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--texto-secundario, #666);
+}
+.cantidad-valor {
+  font-size: 15px;
+  color: var(--texto-primario, #333);
+  line-height: 1.4;
+}
+.cantidad-edicion-inputs {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cantidad-input {
+  width: 90px;
+}
+.unidad-select {
+  flex: 1;
+}
+.cantidad-acciones {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+  padding-top: 16px;
 }
 </style>
