@@ -16,4 +16,6 @@ Marcar con `[x]` cuando esté listo.
 
 - [ ] **Historial de Productos — Foto del Comercio/Sucursal:** En el historial de precios de un producto, mostrar la foto correspondiente a cada comercio o sucursal junto a cada entrada del historial. Actualmente no se muestra ninguna imagen del comercio.
 
+- [ ] **Estadísticas en Edición de Comercio — Revisión completa:** Las estadísticas que se muestran en `EditarComercioPage` necesitan una revisión general: sacar las que no aportan valor, editar las existentes para que sean más precisas o útiles, y agregar estadísticas nuevas. Actualmente se muestran: "Registrado" (fecha), "Último uso" (tiempo relativo), "Último precio" (tiempo relativo), "Productos" (cantidad) y "Sucursales" (cantidad). El usuario quiere definir cuáles quedan, cuáles se modifican y cuáles se agregan en una sesión de trabajo dedicada.
+
 - [ ] **Modales + Teclado Virtual (Android):** Cuando un input dentro de un modal recibe foco, el teclado virtual puede taparlo. El modal debe desplazarse automáticamente para que el input quede visible por encima del teclado. Hay que detectar bien esto porque los modales y los inputs varían mucho en tamaño y posición.

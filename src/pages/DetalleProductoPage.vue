@@ -63,6 +63,12 @@
           :orden-seleccionado="ordenSeleccionado"
           @confirmar-precio="confirmarPrecio"
         />
+
+        <!-- Pie de atribución de fuentes -->
+        <PieAtribucion
+          :fuentes-api="fuentesApiProducto"
+          :fuentes-usuario="fuentesUsuarioProducto"
+        />
       </template>
     </div>
 
@@ -92,6 +98,7 @@ import FiltrosHistorial from '../components/DetalleProducto/FiltrosHistorial.vue
 import HistorialPrecios from '../components/DetalleProducto/HistorialPrecios.vue'
 import DialogoAgregarPrecio from '../components/Formularios/Dialogos/DialogoAgregarPrecio.vue'
 import FabAcciones from '../components/Compartidos/FabAcciones.vue'
+import PieAtribucion from '../components/Compartidos/PieAtribucion.vue'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
 import { useConfirmacionesStore } from '../almacenamiento/stores/confirmacionesStore.js'
 import { useDialogoAgregarPrecio } from '../composables/useDialogoAgregarPrecio.js'
@@ -152,6 +159,25 @@ const ordenSeleccionado = ref('reciente')
 // ========================================
 // 🧮 COMPUTED
 // ========================================
+
+/* Fuentes de API del producto actual para PieAtribucion */
+const fuentesApiProducto = computed(() => {
+  if (!productoActual.value?.fuenteDato) return []
+  const campos = ['nombre', 'marca', 'categoría']
+  if (productoActual.value.fotoFuente === 'api') campos.push('foto')
+  return [{ api: productoActual.value.fuenteDato, campos }]
+})
+
+/* Fuentes del usuario del producto actual para PieAtribucion */
+const fuentesUsuarioProducto = computed(() => {
+  const tienePrecios = (productoActual.value?.precios?.length ?? 0) > 0
+  const tieneFotoUsuario = productoActual.value?.fotoFuente === 'usuario'
+  if (!tienePrecios && !tieneFotoUsuario) return []
+  const campos = []
+  if (tienePrecios) campos.push('precios')
+  if (tieneFotoUsuario) campos.push('foto')
+  return [{ campos }]
+})
 
 /* Comercios únicos disponibles para el filtro */
 const comerciosDisponibles = computed(() => {

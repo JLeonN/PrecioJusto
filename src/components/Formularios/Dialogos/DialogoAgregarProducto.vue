@@ -142,6 +142,7 @@ const datosPrecio = ref({
 const dialogoResultadosAbierto = ref(false)
 const resultadosBusqueda = ref([])
 const fuenteDatoActual = ref(null)
+const fotoFuenteActual = ref(null)
 
 // Clases responsivas
 const clasesResponsivas = computed(() => {
@@ -255,6 +256,8 @@ function autoCompletarFormulario(producto) {
     imagen: producto.imagen || datosProducto.value.imagen,
   }
   fuenteDatoActual.value = producto.fuenteDato || null
+  // Si la API trajo imagen, la foto es de la API; si no, no hay foto de API
+  fotoFuenteActual.value = producto.imagen ? 'api' : null
   console.log('✅ Formulario auto-completado')
 }
 
@@ -344,6 +347,7 @@ async function guardarProducto() {
       categoria: datosProducto.value.categoria?.trim() || '',
       imagen: datosProducto.value.imagen || null,
       fuenteDato: fuenteDatoActual.value || null,
+      fotoFuente: fotoFuenteActual.value || null,
       precios: [],
     }
 
@@ -425,6 +429,7 @@ async function limpiarFormulario() {
     imagen: null,
   }
   fuenteDatoActual.value = null
+  fotoFuenteActual.value = null
 
   datosPrecio.value = {
     comercio: '',

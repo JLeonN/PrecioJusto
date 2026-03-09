@@ -240,12 +240,15 @@ async function restaurarDesdeApi() {
       return
     }
     const resultado = resultadoApi.producto
+    // Si la API devuelve imagen → fuente = 'api'; si no → conservar la fuente existente
+    const nuevaFotoFuente = resultado.imagen ? 'api' : (props.producto.fotoFuente ?? null)
     await productosStore.actualizarProducto(props.producto.id, {
       nombre: resultado.nombre || props.producto.nombre,
       marca: resultado.marca || props.producto.marca,
       categoria: resultado.categoria || props.producto.categoria,
       imagen: resultado.imagen || props.producto.imagen,
       fuenteDato: resultadoApi.fuenteDato,
+      fotoFuente: nuevaFotoFuente,
     })
     $q.notify({ type: 'positive', message: 'Datos restaurados desde la API', position: 'top', timeout: 2000 })
   } catch {
@@ -271,7 +274,8 @@ async function alSeleccionarArchivo(event) {
 
 async function actualizarFoto(base64) {
   try {
-    await productosStore.actualizarProducto(props.producto.id, { imagen: base64 })
+    // Foto tomada o elegida por el usuario → fotoFuente = 'usuario'
+    await productosStore.actualizarProducto(props.producto.id, { imagen: base64, fotoFuente: 'usuario' })
     $q.notify({ type: 'positive', message: 'Foto actualizada', position: 'top', timeout: 1500 })
   } catch {
     $q.notify({ type: 'negative', message: 'No se pudo guardar la foto', position: 'top' })
@@ -280,7 +284,7 @@ async function actualizarFoto(base64) {
 
 async function quitarFoto() {
   try {
-    await productosStore.actualizarProducto(props.producto.id, { imagen: null })
+    await productosStore.actualizarProducto(props.producto.id, { imagen: null, fotoFuente: null })
     $q.notify({ type: 'positive', message: 'Foto eliminada', position: 'top', timeout: 1500 })
   } catch {
     $q.notify({ type: 'negative', message: 'No se pudo quitar la foto', position: 'top' })
