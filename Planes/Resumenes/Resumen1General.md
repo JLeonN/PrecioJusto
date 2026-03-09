@@ -127,7 +127,8 @@ src/
 │   │   ├── InputBusqueda.vue              # Input de búsqueda reutilizable con prop color
 │   │   ├── PantallaSplash.vue             # Splash screen con imagen aleatoria al iniciar
 │   │   ├── FabAcciones.vue               # FAB genérico reutilizable: Speed Dial multi-acción o botón directo
-│   │   └── SelectorComercioDireccion.vue  # Selector de comercio + dirección reutilizable (emite { id, nombre, direccionId, direccionNombre } | null)
+│   │   ├── SelectorComercioDireccion.vue  # Selector de comercio + dirección reutilizable (emite { id, nombre, direccionId, direccionNombre } | null)
+│   │   └── PieAtribucion.vue              # Pie de atribución de fuentes; props: fuentesApi[], fuentesUsuario[]; muestra origen de datos (API o usuario)
 │   │
 │   ├── Comercios/                           # Componentes de comercios
 │   │   ├── ListaComercios.vue              # Contenedor con grid responsivo Quasar
@@ -238,7 +239,8 @@ Planes/                                      # Planes de trabajo e implementaci�
 ├── PlanSistemaSucursales.md                 # Sistema de comercios con cadenas y sucursales
 ├── PlanTrabajoActualizacionPrecios.md       # Plan de actualización de precios
 ├── PlanTrabajoComercio.md                   # Plan de trabajo de comercios
-└── PlanAmpliarAPIProductos.md               # 🆕 Búsqueda multi-API (6 fases completadas)
+├── PlanAmpliarAPIProductos.md               # 🆕 Búsqueda multi-API (6 fases completadas)
+└── PlanPieAtribucion.md                     # 🆕 Pie de atribución de fuentes (4 fases completadas)
 ```
 
 ---
@@ -411,6 +413,8 @@ A. Gestión de Productos
 ✅ Búsqueda por nombre y marca (Open Food Facts API)
 ✅ Autocompletado de datos desde API (nombre, marca, imagen, cantidad, unidad, fuenteDato)
 ✅ 🆕 Atribución de fuente visible en detalle del producto ("Datos de Open Food Facts", etc.)
+✅ 🆕 Campo `fotoFuente` en productos ('api' | 'usuario' | null): rastrea si la foto vino de una API o fue tomada/elegida por el usuario
+✅ 🆕 Componente `PieAtribucion.vue` reutilizable: pie discreto al final del scroll con secciones separadas para fuentes API y aportaciones del usuario; integrado en DetalleProductoPage y EditarComercioPage
 ✅ Registro de precios con múltiples monedas (20+ opciones: UYU, USD, EUR, ARS, BRL, etc.)
 ✅ Monedas centralizadas en constantes (fácil agregar nuevas)
 ✅ Validación de cantidades y unidades (kg, g, L, mL, unidades, pack, metro)
@@ -1021,6 +1025,7 @@ H. Arquitectura y Código
 - **Botón back nativo:** Completado
 - **Splash screen:** Completada (imagen aleatoria, sin distorsión)
 - **Fotos de productos y comercios:** Completada (useCamaraFoto, q-menu contextual, 5 componentes)
+- **Pie de atribución:** Completado (PieAtribucion.vue en DetalleProductoPage + EditarComercioPage; campo fotoFuente en productos)
 - **Preparación:** Lista para migración a Firebase
 - **Ver detalles del sistema de escaneo:** Resumen8Scanner.md
 

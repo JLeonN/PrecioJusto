@@ -35,6 +35,7 @@ Sistema completo para gestión de comercios y sucursales que permite registrar t
 ### COMPONENTES COMPARTIDOS
 - BarraSeleccion.vue (src/components/Compartidos/)
 - BarraAccionesSeleccion.vue (src/components/Compartidos/)
+- PieAtribucion.vue (src/components/Compartidos/) — pie de atribución de fuentes; props: `fuentesApi[]`, `fuentesUsuario[]`; componente "dumb" sin acceso al store
 
 ### SERVICIOS Y STORES
 - ComerciosService.js (src/almacenamiento/servicios/)
@@ -967,6 +968,7 @@ const {
 - Estadísticas del comercio (registro, último uso, último precio, productos, sucursales)
 - Conteo de usos reales calculado desde productos (comerciosConUsosReales computed en ComerciosPage)
 - Fotos de comercios: q-menu contextual en FormularioComercio, EditarComercioPage y DialogoAgregarComercioRapido (composable useCamaraFoto)
+- Pie de atribución en EditarComercioPage: `PieAtribucion` al final del scroll; `fuentesApi=[]` (sin API de GPS todavía); `fuentesUsuario` siempre incluye 'nombre', 'dirección', 'tipo' y agrega 'foto' si la sucursal seleccionada tiene foto (fotos de comercios son siempre del usuario)
 
 ### ⏳ Pendientes
 - Eliminación con motivo

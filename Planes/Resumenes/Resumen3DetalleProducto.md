@@ -158,3 +158,15 @@ Cada precio requiere:
 ### DetalleProductoPage.vue — registrarInteraccion
 - `onMounted()` llama `productosStore.registrarInteraccion(id)` → actualiza `ultimaInteraccion`
 - Permite ordenar sugerencias del buscador por "más recientemente visitado"
+
+### DetalleProductoPage.vue — Pie de atribución (PieAtribucion)
+- Importa y renderiza `<PieAtribucion>` al final del scroll, después de `<HistorialPrecios>`
+- `fuentesApiProducto`: si el producto tiene `fuenteDato` → `[{ api: fuenteDato, campos: ['nombre', 'marca', 'categoría', ('foto' si fotoFuente==='api')] }]`; si no → `[]`
+- `fuentesUsuarioProducto`: si hay precios o foto de usuario → `[{ campos: ['precios'?, 'foto'?] }]`; si no hay ninguno → `[]`
+
+### InfoProducto.vue — Campo fotoFuente
+- Nuevo campo en productos: `fotoFuente: 'api' | 'usuario' | null`
+- Al tomar foto o elegir desde galería → `actualizarProducto(id, { imagen, fotoFuente: 'usuario' })`
+- Al restaurar desde API → `fotoFuente: 'api'` si API retorna imagen; si no, conserva valor anterior (`props.producto.fotoFuente ?? null`)
+- Al quitar foto → `actualizarProducto(id, { imagen: null, fotoFuente: null })`
+- Productos legacy sin `fotoFuente` → tratar como `null` (fallback seguro con `?? null`)

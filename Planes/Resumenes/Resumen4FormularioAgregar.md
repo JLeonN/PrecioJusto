@@ -18,6 +18,7 @@ DialogoAgregarProducto.vue integra directamente EscaneadorCodigo.vue para escane
 ### PRODUCTO
 - nombre, marca, codigoBarras, cantidad, unidad, imagen (null por defecto)
 - fuenteDato: string | null — origen de los datos (ej: 'Open Food Facts', 'Open Library')
+- fotoFuente: 'api' | 'usuario' | null — origen de la foto; 'api' si la API la proveyó, 'usuario' si el usuario la tomó/eligió, null si no hay foto o es producto legacy
 - ❌ CAMPO ELIMINADO: categoria (ya no se usa)
 
 ### PRECIO
