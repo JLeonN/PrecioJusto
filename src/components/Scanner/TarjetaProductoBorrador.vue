@@ -7,35 +7,40 @@
     :seleccionado="seleccionado"
     :permite-expansion="true"
     :mostrar-boton-agregar-precio="false"
+    :expandido-prop="expandidoLocal"
     @long-press="$emit('long-press')"
     @toggle-seleccion="$emit('toggle-seleccion')"
+    @toggle-expansion="(v) => { expandidoLocal = v }"
   >
     <!-- Chips de completitud + info de comercio/dirección -->
     <template #tipo>
       <div class="tipo-contenido">
-        <!-- Fila 1: chips de estado -->
+        <!-- Fila 1: chips de estado (botones) -->
         <div class="chips-completitud">
           <q-chip
-            dense
+            clickable
             :color="!!item.nombre?.trim() ? 'positive' : 'grey-4'"
             :text-color="!!item.nombre?.trim() ? 'white' : 'grey-6'"
             size="sm"
+            @click.stop="irACampo('nombre')"
           >
             Nombre
           </q-chip>
           <q-chip
-            dense
+            clickable
             :color="item.precio > 0 ? 'positive' : 'grey-4'"
             :text-color="item.precio > 0 ? 'white' : 'grey-6'"
             size="sm"
+            @click.stop="irACampo('precio')"
           >
             Precio
           </q-chip>
           <q-chip
-            dense
+            clickable
             :color="!!item.comercio ? 'positive' : 'grey-4'"
             :text-color="!!item.comercio ? 'white' : 'grey-6'"
             size="sm"
+            @click.stop="irACampo('comercio')"
           >
             Comercio
           </q-chip>
@@ -89,6 +94,7 @@
       <div class="edit-campos">
         <!-- Nombre -->
         <q-input
+          ref="refInputNombre"
           :model-value="datosEditando.nombre"
           label="Nombre *"
           outlined
@@ -99,6 +105,7 @@
         <div class="row q-col-gutter-sm">
           <div class="col-8">
             <q-input
+              ref="refInputPrecio"
               :model-value="datosEditando.precio"
               label="Precio *"
               outlined
@@ -123,6 +130,7 @@
         </div>
         <!-- Comercio + Dirección -->
         <SelectorComercioDireccion
+          ref="refSelectorComercio"
           :model-value="datosEditando.comercio"
           @update:model-value="(v) => actualizar('comercio', v)"
         />
@@ -230,7 +238,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useQuasar, copyToClipboard } from 'quasar'
 import TarjetaBase from '../Tarjetas/TarjetaBase.vue'
 import SelectorComercioDireccion from '../Compartidos/SelectorComercioDireccion.vue'
@@ -270,6 +278,14 @@ const emit = defineEmits(['long-press', 'toggle-seleccion', 'update:item', 'elim
 
 const $q = useQuasar()
 const { inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo } = useCamaraFoto()
+
+// Estado de expansión manejado localmente para poder controlarla desde los chips
+const expandidoLocal = ref(false)
+
+// Refs a los inputs del área expandida
+const refInputNombre = ref(null)
+const refInputPrecio = ref(null)
+const refSelectorComercio = ref(null)
 
 // Copia local para edición
 const datosEditando = ref({ ...props.item })
@@ -329,6 +345,22 @@ function copiarCodigo() {
   })
 }
 
+// Abre la tarjeta (si está cerrada) y hace focus en el campo indicado
+function irACampo(campo) {
+  expandidoLocal.value = true
+  nextTick(() => {
+    if (campo === 'nombre') {
+      refInputNombre.value?.focus()
+      if (datosEditando.value.nombre?.trim()) refInputNombre.value?.select()
+    } else if (campo === 'precio') {
+      refInputPrecio.value?.focus()
+      if (datosEditando.value.precio > 0) refInputPrecio.value?.select()
+    } else if (campo === 'comercio') {
+      refSelectorComercio.value?.focus()
+    }
+  })
+}
+
 function formatearPrecio(valor, moneda) {
   return `$${valor.toLocaleString('es-UY')} ${moneda || 'UYU'}`
 }
@@ -344,6 +376,7 @@ function formatearPrecio(valor, moneda) {
   display: flex;
   gap: 4px;
   flex-wrap: wrap;
+  justify-content: flex-end;
 }
 .info-comercio,
 .info-direccion {

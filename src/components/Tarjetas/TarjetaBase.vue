@@ -191,8 +191,9 @@ const manejarClick = () => {
     emit('toggle-seleccion')
   } else if (props.permiteExpansion) {
     /* En modo normal: toggle expansión */
-    expandido.value = !expandido.value
-    emit('toggle-expansion', expandido.value)
+    const nuevoValor = !expandido.value
+    expandidoInterno.value = nuevoValor
+    emit('toggle-expansion', nuevoValor)
   }
 }
 

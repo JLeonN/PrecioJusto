@@ -2,6 +2,7 @@
   <div class="selector-comercio-direccion">
     <!-- COMERCIO -->
     <q-select
+      ref="refSelectComercio"
       v-model="comercioSeleccionado"
       :options="comerciosFiltrados"
       :display-value="textoVisibleComercio"
@@ -97,6 +98,9 @@ defineProps({
 const emit = defineEmits(['update:modelValue'])
 
 const comerciosStore = useComerciStore()
+
+const refSelectComercio = ref(null)
+defineExpose({ focus: () => refSelectComercio.value?.focus() })
 
 // Estado del selector de comercio
 const comercioSeleccionado = ref(null)
