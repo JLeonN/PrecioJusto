@@ -252,10 +252,10 @@ Mejorar la `TarjetaEscaneo.vue` (bottom sheet del Modo A — Escaneo rápido):
 
 **Archivo:** `src/components/Scanner/TarjetaEscaneo.vue`
 
-[ ] Agregar `IconBarcode` al lado del número (igual que en TarjetaProductoBorrador)
-[ ] Hacer el área del código clickeable (`@click.stop`)
-[ ] Al hacer click: copiar con `copyToClipboard` de Quasar + notify "Código copiado"
-[ ] `cursor: pointer` cuando hay código; sin efecto si no hay código
+[x] Agregar `IconBarcode` al lado del número (igual que en TarjetaProductoBorrador)
+[x] Hacer el área del código clickeable (`@click.stop`)
+[x] Al hacer click: copiar con `copyToClipboard` de Quasar + notify "Código copiado"
+[x] `cursor: pointer` cuando hay código; sin efecto si no hay código
 
 ---
 
@@ -263,7 +263,7 @@ Mejorar la `TarjetaEscaneo.vue` (bottom sheet del Modo A — Escaneo rápido):
 
 **Archivo:** `src/components/Scanner/TarjetaEscaneo.vue`
 
-[ ] Eliminar la línea que muestra `item.fuenteDato` del template
+[x] Eliminar la línea que muestra `item.fuenteDato` del template
 
 ---
 
@@ -314,14 +314,14 @@ al momento de ser creado desde la API o la base de datos local.
 
 **Archivo:** `src/components/Scanner/TarjetaEscaneo.vue`
 
-[ ] El `q-dialog` con `position="bottom"` en pantallas ≥ 768px: - Agregar `max-width: 480px` al contenido del dialog - Centrar horizontalmente (`margin: 0 auto`)
-[ ] Esto evita que la tarjeta ocupe todo el ancho en tablet y la imagen quede cortada
-[ ] Verificar que la imagen sea siempre visible (altura mínima del área de foto)
-[ ] Confirmar que los botones Descartar / Ir a mesa / Siguiente no se cortan en móvil
+[x] El `q-dialog` con `position="bottom"` en pantallas ≥ 768px: - Agregar `max-width: 480px` al contenido del dialog - Centrar horizontalmente (`margin: 0 auto`)
+[x] Esto evita que la tarjeta ocupe todo el ancho en tablet y la imagen quede cortada
+[x] Verificar que la imagen sea siempre visible (altura mínima del área de foto)
+[x] Confirmar que los botones Descartar / Ir a mesa / Siguiente no se cortan en móvil
 
 ═══════════════════════════════════════════════════════════════
 
-## 🧪 TESTING [PENDIENTE]
+## 🧪 TESTING [COMPLETADO]
 
 ### T.A — Navegación y acceso
 
@@ -371,11 +371,11 @@ al momento de ser creado desde la API o la base de datos local.
 
 ### T.C — Funcionalidad preservada
 
-[ ] Ordenamiento de ítems (5 opciones) funciona igual que antes
-[ ] Selección múltiple con long-press funciona
-[ ] Asignación de comercio en bloque funciona
-[ ] Envío parcial (solo ítems completos) funciona
-[ ] La persistencia de la sesión sigue funcionando tras cerrar y reabrir la app
+[x] Ordenamiento de ítems (5 opciones) funciona igual que antes
+[x] Selección múltiple con long-press funciona
+[x] Asignación de comercio en bloque funciona
+[x] Envío parcial (solo ítems completos) funciona
+[x] La persistencia de la sesión sigue funcionando tras cerrar y reabrir la app
 
 ═══════════════════════════════════════════════════════════════
 
@@ -394,15 +394,15 @@ al momento de ser creado desde la API o la base de datos local.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: ~90%
+## 📊 PROGRESO GENERAL: 100% ✅
 
 ✅ Fase 1: Mesa de Trabajo como página
 ✅ Fase 2: Mejoras en tarjetas — estado colapsado
 ✅ Fase 3: Mejoras en tarjetas — estado expandido (incl. 3.4 recuperar foto/datos en Borrador)
-🔄 Fase 4: TarjetaEscaneo — completadas 4.1, 4.4, 4.5, 4.6 / pendientes 4.2, 4.3, 4.7
+✅ Fase 4: TarjetaEscaneo — todas las subfases completadas
 
 ═══════════════════════════════════════════════════════════════
 
 **CREADO:** Marzo 2026
 **ÚLTIMA ACTUALIZACIÓN:** Marzo 2026
-**ESTADO:** 🧪 PENDIENTE DE TESTING
+**ESTADO:** ✅ COMPLETADO
