@@ -379,6 +379,128 @@ al momento de ser creado desde la API o la base de datos local.
 
 ═══════════════════════════════════════════════════════════════
 
+## 📋 FASE 5: MEJORAS EN SELECCIÓN MÚLTIPLE 🃏 [PENDIENTE]
+
+### Objetivo
+
+Mejorar la UX del modo selección múltiple en la Mesa de Trabajo.
+El cambio principal es convertir la barra de selección de un elemento sticky
+en el flujo del documento a una **barra flotante fixed** posicionada sobre
+el footer, siempre visible durante el scroll.
+
+### Mejoras incluidas:
+
+- Barra de selección flotante (fixed, encima del footer)
+- Botón "Cancelar" más grande y visible
+- Texto informativo para que el usuario sepa para qué sirve la selección
+- Auto-cancelar el modo selección cuando quedan 0 ítems seleccionados
+- Bottom sheet de asignar comercio más compacto
+
+---
+
+### 5.1 — Barra de selección flotante
+
+**Archivo:** `src/pages/MesaTrabajoPage.vue`
+
+[ ] Quitar el bloque `<div v-if="seleccion.modoSeleccion.value" class="seleccion-barra">` del flujo actual
+[ ] Agregar un nuevo div `position: fixed` con clase `seleccion-barra-flotante`:
+    - `bottom: calc(var(--footer-altura, 56px) + var(--safe-area-bottom, 0px))`
+    - `left: 0`, `right: 0`
+    - `z-index: 100`
+    - Fondo blanco con `box-shadow: 0 -2px 8px rgba(0,0,0,0.12)`
+[ ] Contenido de la barra flotante (de izquierda a derecha):
+    - Botón "Cancelar" (ver 5.2)
+    - Texto contador + texto informativo (ver 5.3)
+    - `<q-space />`
+    - Botón "Asignar comercio"
+[ ] Cuando `seleccion.modoSeleccion.value` es `true`, agregar padding-bottom
+    a `.mesa-lista-scroll` para que el último ítem no quede tapado por la barra
+
+### ⚠️ Puntos delicados
+
+- La barra flotante se superpone al footer sticky — definir bien el `bottom`
+  para que quede justo encima sin solaparse
+- El `z-index` debe ser mayor que el de las tarjetas pero menor que los q-dialog
+- El padding-bottom extra en la lista debe aplicarse solo cuando `modoSeleccion === true`
+  para no alterar el scroll normal
+
+---
+
+### 5.2 — Botón "Cancelar" más visible
+
+**Archivo:** `src/pages/MesaTrabajoPage.vue`
+
+[ ] Cambiar el botón Cancelar de `flat dense no-caps size="sm" color="grey-8"`
+    a `outline no-caps color="grey-8"` (con borde, más legible)
+[ ] Quitar `dense` para que tenga más área de toque
+
+---
+
+### 5.3 — Texto informativo en la barra
+
+**Archivo:** `src/pages/MesaTrabajoPage.vue`
+
+[ ] Mostrar el contador y debajo una línea `text-caption text-grey-6`:
+    "Seleccioná artículos para asignarles el mismo comercio"
+[ ] Visible siempre que el modo selección esté activo
+
+---
+
+### 5.4 — Auto-cancelar cuando quedan 0 ítems seleccionados
+
+**Archivo:** `src/pages/MesaTrabajoPage.vue`
+
+[ ] Agregar `watch` sobre `seleccion.cantidadSeleccionados`:
+    si llega a `0` y `modoSeleccion` está activo → `desactivarModoSeleccion()`
+
+### ⚠️ Puntos delicados
+
+- Al activar el modo, `cantidadSeleccionados` pasa de 0 a 1 porque
+  `activarModoSeleccion(itemId)` siempre recibe el ítem inicial del long-press.
+  No hay riesgo de falso positivo al activar.
+
+---
+
+### 5.5 — Bottom sheet de asignar comercio más compacto
+
+**Archivo:** `src/pages/MesaTrabajoPage.vue`
+
+[ ] Reducir padding del `q-card-section` del título: `class="q-py-sm"`
+[ ] Reducir padding del `q-card-section` del selector: `class="q-pt-none q-pb-xs"`
+[ ] Reducir padding del `q-card-section` de los botones: `class="q-pt-xs q-pb-sm"`
+
+**Archivo:** `src/components/Compartidos/SelectorComercioDireccion.vue`
+
+[ ] Cambiar `gap: 12px` → `gap: 8px` en `.selector-comercio-direccion`
+
+═══════════════════════════════════════════════════════════════
+
+## 🧪 TESTING FASE 5 [PENDIENTE]
+
+### T.E — Barra flotante
+
+[ ] Barra NO visible en modo normal
+[ ] Long-press en ítem → barra aparece flotando sobre el footer
+[ ] Barra siempre visible al hacer scroll hacia abajo
+[ ] Barra siempre visible al hacer scroll hacia arriba
+[ ] El último ítem de la lista no queda tapado por la barra
+[ ] La barra no se solapa con el footer
+
+### T.F — Comportamientos de selección
+
+[ ] Deseleccionar el único ítem seleccionado → modo selección se cancela automáticamente
+[ ] Deseleccionar varios hasta llegar a 0 → modo selección se cancela automáticamente
+[ ] Seleccionar 3 ítems → deseleccionar 2 → el modo selección sigue activo con 1
+[ ] Botón "Cancelar" visible y fácil de tocar en móvil 360px
+[ ] Texto informativo visible en la barra flotante
+
+### T.G — Asignar comercio
+
+[ ] Bottom sheet más compacto: ocupa menos espacio vertical
+[ ] Funcionalidad de asignar comercio no se rompe
+
+═══════════════════════════════════════════════════════════════
+
 ## NOTAS IMPORTANTES 📌
 
 - El componente `MesaTrabajo.vue` en `components/Scanner/` queda obsoleto — eliminar
@@ -394,15 +516,16 @@ al momento de ser creado desde la API o la base de datos local.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 100% ✅
+## 📊 PROGRESO GENERAL: ~80%
 
 ✅ Fase 1: Mesa de Trabajo como página
 ✅ Fase 2: Mejoras en tarjetas — estado colapsado
 ✅ Fase 3: Mejoras en tarjetas — estado expandido (incl. 3.4 recuperar foto/datos en Borrador)
 ✅ Fase 4: TarjetaEscaneo — todas las subfases completadas
+🔲 Fase 5: Mejoras en selección múltiple
 
 ═══════════════════════════════════════════════════════════════
 
 **CREADO:** Marzo 2026
 **ÚLTIMA ACTUALIZACIÓN:** Marzo 2026
-**ESTADO:** ✅ COMPLETADO
+**ESTADO:** 🔄 EN PROGRESO (Fase 5 pendiente)
