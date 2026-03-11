@@ -35,41 +35,19 @@
       </div>
       </div>
 
-      <!-- Barra modo selección -->
-      <div v-if="seleccion.modoSeleccion.value" class="seleccion-barra">
-        <div class="contenedor-pagina row items-center no-wrap q-px-md q-py-xs">
-          <q-btn flat dense no-caps size="sm" color="grey-8" @click="seleccion.desactivarModoSeleccion()">
-            Cancelar
-          </q-btn>
-          <span class="q-ml-sm text-caption text-grey-7">
-            {{ seleccion.cantidadSeleccionados.value }} seleccionados
-          </span>
-          <q-space />
-          <q-btn
-            unelevated dense no-caps size="sm" color="primary"
-            :disable="!seleccion.haySeleccionados.value"
-            @click="abrirAsignarComercio"
-          >
-            Asignar comercio
-          </q-btn>
-        </div>
-      </div>
-
       <!-- Filtro de ordenamiento -->
-      <div v-else>
-        <div class="contenedor-pagina q-px-md q-pt-sm q-pb-xs">
-          <q-select
-            v-model="ordenActual"
-            dense outlined
-            :options="OPCIONES_ORDEN"
-            emit-value map-options
-            style="max-width: 280px"
-          />
-        </div>
+      <div class="contenedor-pagina q-px-md q-pt-sm q-pb-xs">
+        <q-select
+          v-model="ordenActual"
+          dense outlined
+          :options="OPCIONES_ORDEN"
+          emit-value map-options
+          style="max-width: 280px"
+        />
       </div>
 
       <!-- Lista de borradores -->
-      <div class="mesa-lista-scroll">
+      <div class="mesa-lista-scroll" :class="{ 'mesa-lista-con-barra': seleccion.modoSeleccion.value }">
         <div class="contenedor-pagina q-px-md q-pt-sm q-pb-md">
           <div class="row q-col-gutter-md">
             <div
@@ -118,6 +96,26 @@
       </div>
 
     </template>
+
+    <!-- Barra de selección flotante -->
+    <div v-if="seleccion.modoSeleccion.value" class="seleccion-barra-flotante">
+      <div class="contenedor-pagina row items-center no-wrap q-px-md q-py-xs">
+        <q-btn flat dense no-caps size="sm" color="grey-8" @click="seleccion.desactivarModoSeleccion()">
+          Cancelar
+        </q-btn>
+        <span class="q-ml-sm text-caption text-grey-7">
+          {{ seleccion.cantidadSeleccionados.value }} seleccionados
+        </span>
+        <q-space />
+        <q-btn
+          unelevated dense no-caps size="sm" color="primary"
+          :disable="!seleccion.haySeleccionados.value"
+          @click="abrirAsignarComercio"
+        >
+          Asignar comercio
+        </q-btn>
+      </div>
+    </div>
 
     <!-- Bottom sheet: asignar comercio en bloque -->
     <q-dialog v-model="dialogoAsignarComercio" position="bottom">
@@ -337,12 +335,20 @@ function confirmarAsignarComercio() {
 .mesa-trabajo-barra .contenedor-pagina {
   min-height: 60px;
 }
-.seleccion-barra {
-  background: #e3f2fd;
-  border-bottom: 1px solid #bbdefb;
+.seleccion-barra-flotante {
+  position: fixed;
+  bottom: calc(56px + var(--safe-area-bottom, 0px));
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: white;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.12);
 }
-.seleccion-barra .contenedor-pagina {
-  min-height: 44px;
+.seleccion-barra-flotante .contenedor-pagina {
+  min-height: 52px;
+}
+.mesa-lista-con-barra {
+  padding-bottom: 68px;
 }
 .mesa-trabajo-footer {
   background: white;

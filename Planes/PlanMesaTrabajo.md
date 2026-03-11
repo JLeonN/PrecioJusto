@@ -402,18 +402,18 @@ el footer, siempre visible durante el scroll.
 
 **Archivo:** `src/pages/MesaTrabajoPage.vue`
 
-[ ] Quitar el bloque `<div v-if="seleccion.modoSeleccion.value" class="seleccion-barra">` del flujo actual
-[ ] Agregar un nuevo div `position: fixed` con clase `seleccion-barra-flotante`:
+[x] Quitar el bloque `<div v-if="seleccion.modoSeleccion.value" class="seleccion-barra">` del flujo actual
+[x] Agregar un nuevo div `position: fixed` con clase `seleccion-barra-flotante`:
     - `bottom: calc(var(--footer-altura, 56px) + var(--safe-area-bottom, 0px))`
     - `left: 0`, `right: 0`
     - `z-index: 100`
     - Fondo blanco con `box-shadow: 0 -2px 8px rgba(0,0,0,0.12)`
-[ ] Contenido de la barra flotante (de izquierda a derecha):
+[x] Contenido de la barra flotante (de izquierda a derecha):
     - Botón "Cancelar" (ver 5.2)
     - Texto contador + texto informativo (ver 5.3)
     - `<q-space />`
     - Botón "Asignar comercio"
-[ ] Cuando `seleccion.modoSeleccion.value` es `true`, agregar padding-bottom
+[x] Cuando `seleccion.modoSeleccion.value` es `true`, agregar padding-bottom
     a `.mesa-lista-scroll` para que el último ítem no quede tapado por la barra
 
 ### ⚠️ Puntos delicados
