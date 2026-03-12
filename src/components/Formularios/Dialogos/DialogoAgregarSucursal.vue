@@ -1,6 +1,6 @@
 <template>
   <q-dialog :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)">
-    <q-card class="dialogo-agregar-sucursal">
+    <q-card class="dialogo-agregar-sucursal" :style="estiloTarjeta">
       <!-- HEADER -->
       <q-card-section class="bg-orange text-white">
         <div class="text-h6">
@@ -66,6 +66,7 @@
 import { ref, reactive } from 'vue'
 import ComerciosService from '../../../almacenamiento/servicios/ComerciosService.js'
 import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.js'
+import { useTecladoVirtual } from '../../../composables/useTecladoVirtual.js'
 
 const props = defineProps({
   modelValue: {
@@ -83,6 +84,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'sucursal-guardada'])
+
+const { estiloTarjeta } = useTecladoVirtual()
 
 const comerciosStore = useComerciStore()
 

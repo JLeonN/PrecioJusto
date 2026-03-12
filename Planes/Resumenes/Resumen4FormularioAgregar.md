@@ -146,3 +146,29 @@ Modal rápido para agregar precio a un producto ya existente. Accesible desde Ta
 - `clearable`: botón X explícito para limpiar selección
 - Pre-selecciona último comercio usado + dirección más usada al abrir
 - Botón "Agregar comercio rápido" + ícono `add_circle`
+- Usa `useTecladoVirtual`: ajusta `max-height` del q-card dinámicamente cuando aparece el teclado virtual Android
+
+## TECLADO VIRTUAL ANDROID EN DIALOGS (useTecladoVirtual.js)
+Composable en `src/composables/useTecladoVirtual.js`. Resuelve el problema de que el teclado virtual tape inputs dentro de modales.
+
+### Cómo funciona
+- Escucha `window.visualViewport.resize` (se dispara cuando el teclado aparece/desaparece)
+- Calcula `maxHeight = visualViewport.height - 24px`
+- Retorna `estiloTarjeta` computed: `{ maxHeight: '...px', overflowY: 'auto' }`
+- Al redimensionar, llama `scrollIntoView({ behavior: 'smooth', block: 'nearest' })` en el elemento enfocado
+
+### Uso en un dialog
+```javascript
+import { useTecladoVirtual } from '../../../composables/useTecladoVirtual.js'
+const { estiloTarjeta } = useTecladoVirtual()
+```
+```vue
+<q-card :style="estiloTarjeta">...</q-card>
+```
+
+### Aplicado en
+- `DialogoAgregarPrecio.vue`
+- `DialogoAgregarComercioRapido.vue`
+- `DialogoAgregarSucursal.vue`
+- `DialogoMotivoEliminacion.vue`
+- `TarjetaEscaneo.vue` (bottom sheet)

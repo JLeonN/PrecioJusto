@@ -195,3 +195,10 @@ Cada precio requiere:
 - Animación `scale` al abrir/cerrar (`transition-show="scale"`)
 - Cierra al hacer click fuera del modal
 - Uso: `<DialogoVerImagen v-model="verFoto" :src="img" :titulo="nombre" />`
+- También usado en `EditarComercioPage` al tocar la foto del comercio
+
+### ItemComercioHistorial.vue — Mejoras recientes
+- **Foto del comercio:** Si la dirección tiene foto (almacenada en `direcciones[i].foto`), muestra un thumbnail cuadrado (44×44px, `border-radius: 8px`) con borde de color que indica la frescura del precio más reciente (verde/amarillo/naranja/gris). Si no hay foto, muestra el punto de color existente (`q-avatar`).
+- **Solo nombre en el título:** El encabezado muestra `comercio.comercio` (solo el nombre), no `nombreCompleto`. La dirección ya aparece debajo en texto `caption`.
+- **Navegación a EditarComercioPage:** Ícono `IconExternalLink` al lado del nombre. Al tocar, navega a `/comercios/:nombre` con query `?direccionId=` si hay sucursal, pre-seleccionando la sucursal correcta en la página de edición.
+- **Resolución de foto:** Usa `grupoComercio` computed (búsqueda en `comerciosStore.comerciosAgrupados` por `comercioId`) → busca en `comerciosOriginales[i].direcciones` → retorna `dir.foto`.

@@ -1,6 +1,6 @@
 <template>
   <q-dialog v-model="dialogoAbierto" persistent>
-    <q-card style="min-width: 350px; max-width: 500px">
+    <q-card style="min-width: 350px; max-width: 500px" :style="estiloTarjeta">
       <!-- Header con nombre del producto -->
       <q-card-section class="row items-center q-pb-none">
         <q-icon name="add_circle" color="primary" size="24px" class="q-mr-sm" />
@@ -159,6 +159,7 @@ import { useProductosStore } from '../../../almacenamiento/stores/productosStore
 import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.js'
 import { MONEDAS, MONEDA_DEFAULT } from '../../../almacenamiento/constantes/Monedas.js'
 import DialogoAgregarComercioRapido from './DialogoAgregarComercioRapido.vue'
+import { useTecladoVirtual } from '../../../composables/useTecladoVirtual.js'
 
 const props = defineProps({
   modelValue: {
@@ -172,6 +173,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'precio-guardado'])
+
+const { estiloTarjeta } = useTecladoVirtual()
 
 /* Stores */
 const productosStore = useProductosStore()

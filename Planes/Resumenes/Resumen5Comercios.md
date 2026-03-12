@@ -31,6 +31,7 @@ Sistema completo para gestión de comercios y sucursales que permite registrar t
 ### COMPOSABLES
 - useFechaRelativa.js (src/composables/) - formatearFechaRelativa, formatearUltimoUso, formatearFechaCorta
 - useCamaraFoto.js (src/composables/) - `{ inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo }`
+- useTecladoVirtual.js (src/composables/) - ajusta `max-height` del q-card ante teclado virtual; usado en DialogoAgregarSucursal y DialogoMotivoEliminacion
 
 ### COMPONENTES COMPARTIDOS
 - BarraSeleccion.vue (src/components/Compartidos/)
@@ -969,6 +970,9 @@ const {
 - Conteo de usos reales calculado desde productos (comerciosConUsosReales computed en ComerciosPage)
 - Fotos de comercios: q-menu contextual en FormularioComercio, EditarComercioPage y DialogoAgregarComercioRapido (composable useCamaraFoto)
 - Pie de atribución en EditarComercioPage: `PieAtribucion` al final del scroll; `fuentesApi=[]` (sin API de GPS todavía); `fuentesUsuario` siempre incluye 'nombre', 'dirección', 'tipo' y agrega 'foto' si la sucursal seleccionada tiene foto (fotos de comercios son siempre del usuario)
+- 🆕 Visor de foto en EditarComercioPage: tocar la foto del comercio abre `DialogoVerImagen` a pantalla completa (src = foto de la dirección seleccionada, titulo = nombre del comercio)
+- 🆕 Pre-selección de sucursal desde historial de producto: EditarComercioPage acepta `?direccionId=` en la query string; un `watch` sobre `comercioActual` detecta el parámetro y llama `seleccionarDireccion(dir)` automáticamente
+- 🆕 Ajuste de dialogs ante teclado virtual: `useTecladoVirtual` aplicado en DialogoAgregarSucursal y DialogoMotivoEliminacion
 
 ### ⏳ Pendientes
 - Eliminación con motivo

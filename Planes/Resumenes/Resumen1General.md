@@ -182,7 +182,8 @@ src/
 │   ├── useDialogoAgregarPrecio.js          # Lógica reutilizable del modal agregar precio
 │   ├── useFechaRelativa.js                 # Formato de fechas relativas y cortas
 │   ├── useBotonAtras.js                   # Botón back nativo Android (drawer/detalle/salir)
-│   └── useCamaraFoto.js                   # 🆕 Captura de fotos: cámara nativa + galería (input file)
+│   ├── useCamaraFoto.js                   # Captura de fotos: cámara nativa + galería (input file)
+│   └── useTecladoVirtual.js               # 🆕 Ajuste automático de dialogs ante teclado virtual Android
 ├── css/
 │   ├── app.css                              # Clases CSS globales del Design System
 │   ├── quasar.variables.scss               # Variables de Quasar (colores, fuentes)
@@ -536,6 +537,7 @@ G. UX y Accesibilidad
 ✅ Scroll automático al expandir tarjetas
 ✅ Formato de números con separadores de miles
 ✅ Formato de fechas en español uruguayo
+✅ 🆕 Ajuste automático de dialogs ante teclado virtual Android: `useTecladoVirtual` vía `visualViewport.resize` → reduce `max-height` del q-card y hace scroll al input enfocado. Aplicado en: DialogoAgregarPrecio, DialogoAgregarComercioRapido, DialogoAgregarSucursal, DialogoMotivoEliminacion, TarjetaEscaneo
 
 H. Arquitectura y Código
 
@@ -1053,4 +1055,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 09 de Marzo 2026 (Cantidad/unidad editable en DetalleProducto; DialogoVerImagen reutilizable; imagen del producto clickeable para ver en grande)
+**Última actualización:** 12 de Marzo 2026 (useTecladoVirtual en 5 dialogs; fotos de comercio en historial de producto con borde de frescura; navegación desde historial a EditarComercioPage; DialogoVerImagen en EditarComercioPage)

@@ -1,6 +1,6 @@
 <template>
   <q-dialog v-model="dialogoAbierto" persistent>
-    <q-card style="min-width: 350px; max-width: 500px">
+    <q-card style="min-width: 350px; max-width: 500px" :style="estiloTarjeta">
       <!-- Header -->
       <q-card-section class="row items-center q-pb-none">
         <q-icon name="store" color="primary" size="24px" class="q-mr-sm" />
@@ -143,6 +143,7 @@ import { IconCamera, IconPhoto, IconTrash } from '@tabler/icons-vue'
 import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.js'
 import ComerciosService from '../../../almacenamiento/servicios/ComerciosService.js'
 import { useCamaraFoto } from '../../../composables/useCamaraFoto.js'
+import { useTecladoVirtual } from '../../../composables/useTecladoVirtual.js'
 
 const props = defineProps({
   modelValue: {
@@ -160,6 +161,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'comercio-creado'])
+
+const { estiloTarjeta } = useTecladoVirtual()
 
 const $q = useQuasar()
 const comerciosStore = useComerciStore()

@@ -1,6 +1,6 @@
 <template>
   <q-dialog v-model="abierto" position="bottom" @show="alAbrir" @hide="alCerrar">
-    <q-card class="tarjeta-escaneo-card">
+    <q-card class="tarjeta-escaneo-card" :style="estiloTarjeta">
       <!-- FOTO + NOMBRE (con gradiente) -->
       <div class="tarjeta-escaneo-portada">
         <img
@@ -212,6 +212,7 @@
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
 import { useQuasar, copyToClipboard } from 'quasar'
+import { useTecladoVirtual } from '../../composables/useTecladoVirtual.js'
 import { MONEDAS, MONEDA_DEFAULT } from '../../almacenamiento/constantes/Monedas.js'
 import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
 import {
@@ -243,6 +244,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'siguiente', 'ir-a-mesa', 'descartar'])
+
+const { estiloTarjeta } = useTecladoVirtual()
 
 const $q = useQuasar()
 const inputPrecioRef = ref(null)

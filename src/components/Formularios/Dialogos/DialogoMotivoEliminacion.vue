@@ -1,6 +1,6 @@
 <template>
   <q-dialog v-model="dialogoAbierto" persistent>
-    <q-card class="dialogo-motivo-eliminacion">
+    <q-card class="dialogo-motivo-eliminacion" :style="estiloTarjeta">
       <!-- HEADER -->
       <q-card-section class="bg-negative text-white">
         <div class="row items-center">
@@ -117,6 +117,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useTecladoVirtual } from '../../../composables/useTecladoVirtual.js'
 
 const props = defineProps({
   modelValue: {
@@ -134,6 +135,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'confirmar', 'cancelar'])
+
+const { estiloTarjeta } = useTecladoVirtual()
 
 // Estado del diálogo
 const dialogoAbierto = computed({
