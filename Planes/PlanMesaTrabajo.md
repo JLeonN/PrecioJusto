@@ -430,9 +430,9 @@ el footer, siempre visible durante el scroll.
 
 **Archivo:** `src/pages/MesaTrabajoPage.vue`
 
-[ ] Cambiar el botón Cancelar de `flat dense no-caps size="sm" color="grey-8"`
+[x] Cambiar el botón Cancelar de `flat dense no-caps size="sm" color="grey-8"`
     a `outline no-caps color="grey-8"` (con borde, más legible)
-[ ] Quitar `dense` para que tenga más área de toque
+[x] Quitar `dense` para que tenga más área de toque
 
 ---
 
@@ -440,9 +440,9 @@ el footer, siempre visible durante el scroll.
 
 **Archivo:** `src/pages/MesaTrabajoPage.vue`
 
-[ ] Mostrar el contador y debajo una línea `text-caption text-grey-6`:
+[x] Mostrar el contador y debajo una línea `text-caption text-grey-6`:
     "Seleccioná artículos para asignarles el mismo comercio"
-[ ] Visible siempre que el modo selección esté activo
+[x] Visible siempre que el modo selección esté activo
 
 ---
 
@@ -450,7 +450,7 @@ el footer, siempre visible durante el scroll.
 
 **Archivo:** `src/pages/MesaTrabajoPage.vue`
 
-[ ] Agregar `watch` sobre `seleccion.cantidadSeleccionados`:
+[x] Agregar `watch` sobre `seleccion.cantidadSeleccionados`:
     si llega a `0` y `modoSeleccion` está activo → `desactivarModoSeleccion()`
 
 ### ⚠️ Puntos delicados
@@ -471,7 +471,7 @@ el footer, siempre visible durante el scroll.
 
 **Archivo:** `src/components/Compartidos/SelectorComercioDireccion.vue`
 
-[ ] Cambiar `gap: 12px` → `gap: 8px` en `.selector-comercio-direccion`
+[x] Cambiar `gap: 12px` → `gap: 8px` en `.selector-comercio-direccion`
 
 ═══════════════════════════════════════════════════════════════
 

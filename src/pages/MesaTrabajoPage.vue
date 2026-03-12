@@ -100,12 +100,13 @@
     <!-- Barra de selección flotante -->
     <div v-if="seleccion.modoSeleccion.value" class="seleccion-barra-flotante">
       <div class="contenedor-pagina row items-center no-wrap q-px-md q-py-xs">
-        <q-btn flat dense no-caps size="sm" color="grey-8" @click="seleccion.desactivarModoSeleccion()">
+        <q-btn outline no-caps color="grey-8" @click="seleccion.desactivarModoSeleccion()">
           Cancelar
         </q-btn>
-        <span class="q-ml-sm text-caption text-grey-7">
-          {{ seleccion.cantidadSeleccionados.value }} seleccionados
-        </span>
+        <div class="q-ml-sm">
+          <div class="text-caption text-grey-7">{{ seleccion.cantidadSeleccionados.value }} seleccionados</div>
+          <div class="text-caption text-grey-5">Seleccioná artículos para asignarles el mismo comercio</div>
+        </div>
         <q-space />
         <q-btn
           unelevated dense no-caps size="sm" color="primary"
@@ -200,6 +201,11 @@ watch(() => sesionStore.tieneItemsPendientes, (tieneItems) => {
 
 // Mantiene itemsDisponibles del composable sincronizado
 watch(() => sesionStore.items, (v) => seleccion.actualizarItems(v), { immediate: true, deep: true })
+
+// Auto-cancela selección si el usuario deselecciona el último ítem
+watch(seleccion.cantidadSeleccionados, (cantidad) => {
+  if (cantidad === 0 && seleccion.modoSeleccion.value) seleccion.desactivarModoSeleccion()
+})
 
 const cantidadListos = computed(() =>
   sesionStore.items.filter(
