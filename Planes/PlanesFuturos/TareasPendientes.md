@@ -12,8 +12,6 @@ Cuando una tarea se completa, simplemente se borra.
 
 - **Estrategia de búsqueda: local primero, APIs después:** En toda circunstancia donde se busque un producto (por nombre, código de barras, etc.), la app debe consultar primero la base de datos local del usuario y solo si no hay resultados suficientes, recurrir a las APIs externas. Revisar todos los puntos de búsqueda de la app y unificar este comportamiento.
 
-- **Historial de Productos — Foto del Comercio/Sucursal:** En el historial de precios de un producto, mostrar la foto correspondiente a cada comercio o sucursal junto a cada entrada del historial. Actualmente no se muestra ninguna imagen del comercio.
-
 - **Estadísticas en Edición de Comercio — Revisión completa:** Las estadísticas que se muestran en `EditarComercioPage` necesitan una revisión general: sacar las que no aportan valor, editar las existentes para que sean más precisas o útiles, y agregar estadísticas nuevas. Actualmente se muestran: "Registrado" (fecha), "Último uso" (tiempo relativo), "Último precio" (tiempo relativo), "Productos" (cantidad) y "Sucursales" (cantidad). El usuario quiere definir cuáles quedan, cuáles se modifican y cuáles se agregan en una sesión de trabajo dedicada.
 
 - **DialogoVerImagen — Integración y auditoría de uso:** El componente `DialogoVerImagen.vue` (`src/components/Compartidos/`) existe pero no se usa en la sección de comercios. Integrarlo donde el usuario pueda ver la foto del comercio en tamaño completo (ej: al tocar la foto en `EditarComercioPage`). Además, auditar toda la app para identificar otros lugares donde se muestran imágenes sin visor (productos, historial, etc.) y aplicar el mismo componente.

@@ -3,8 +3,11 @@
     <!-- ESTADO COLAPSADO -->
     <q-card-section class="comercio-header">
       <div class="row items-center no-wrap">
-        <!-- Indicador de frescura del precio más reciente -->
-        <q-avatar :color="colorFrescuraMasReciente" size="12px" class="q-mr-md" />
+        <!-- Foto del comercio con borde de frescura, o punto de color si no hay foto -->
+        <div v-if="fotoComercio" class="avatar-foto q-mr-md" :style="{ borderColor: colorBordeFoto }">
+          <img :src="fotoComercio" class="foto-comercio" />
+        </div>
+        <q-avatar v-else :color="colorFrescuraMasReciente" size="12px" class="q-mr-md" />
 
         <!-- Información principal -->
         <div class="comercio-info">
@@ -95,6 +98,9 @@
 import { ref, computed } from 'vue'
 import { IconThumbUp, IconChevronDown, IconChevronUp, IconTrendingUp, IconTrendingDown, IconMinus } from '@tabler/icons-vue'
 import ItemPrecioHistorial from './ItemPrecioHistorial.vue'
+import { useComerciStore } from 'src/almacenamiento/stores/comerciosStore'
+
+const comerciosStore = useComerciStore()
 
 const props = defineProps({
   comercio: {
@@ -114,6 +120,31 @@ const expandido = ref(false)
 const toggleExpandir = () => {
   expandido.value = !expandido.value
 }
+
+// Foto del comercio/dirección correspondiente a este grupo del historial
+const fotoComercio = computed(() => {
+  const { comercioId, direccionId } = props.comercio
+  if (!comercioId || !direccionId) return null
+  for (const grupo of comerciosStore.comerciosAgrupados) {
+    const original = (grupo.comerciosOriginales || []).find((c) => c.id === comercioId)
+    if (original) {
+      const dir = (original.direcciones || []).find((d) => d.id === direccionId)
+      return dir?.foto || null
+    }
+  }
+  return null
+})
+
+// Mapeo del color de frescura a CSS para el borde de la foto
+const colorBordeFoto = computed(() => {
+  const mapa = {
+    positive: '#21ba45',
+    warning: '#f2c037',
+    orange: '#f27200',
+    'grey-5': '#bdbdbd',
+  }
+  return mapa[colorFrescuraMasReciente.value] || '#bdbdbd'
+})
 
 // Precios ordenados por fecha (más reciente primero)
 const preciosOrdenados = computed(() => {
@@ -247,5 +278,19 @@ const textoTendenciaCompleto = computed(() => {
 }
 .comercio-expandido {
   background-color: var(--fondo-drawer);
+}
+.avatar-foto {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  border: 3px solid;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.foto-comercio {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 </style>
