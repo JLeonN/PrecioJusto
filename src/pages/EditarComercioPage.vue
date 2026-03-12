@@ -62,7 +62,7 @@
         <!-- SECCIÓN: FOTO DEL LOCAL -->
         <div class="seccion-foto q-mb-lg">
           <div v-if="direccionSeleccionada?.foto" class="foto-wrapper">
-            <img :src="direccionSeleccionada.foto" class="foto-comercio" />
+            <img :src="direccionSeleccionada.foto" class="foto-comercio foto-comercio-clickable" @click="verFotoAbierta = true" />
             <div class="foto-overlay">
               <q-btn round flat dense class="btn-foto-overlay btn-overlay-camara">
                 <IconCamera :size="20" />
@@ -307,6 +307,11 @@
       :comercio-tipo="comercioActual.tipo"
       @sucursal-guardada="onSucursalGuardada"
     />
+    <DialogoVerImagen
+      v-model="verFotoAbierta"
+      :src="direccionSeleccionada?.foto || ''"
+      :titulo="comercioActual?.nombre || ''"
+    />
   </q-page>
 </template>
 
@@ -338,6 +343,7 @@ import DialogoAgregarSucursal from '../components/Formularios/Dialogos/DialogoAg
 import ListaProductosComercio from '../components/EditarComercio/ListaProductosComercio.vue'
 import EstadisticasComercio from '../components/EditarComercio/EstadisticasComercio.vue'
 import PieAtribucion from '../components/Compartidos/PieAtribucion.vue'
+import DialogoVerImagen from '../components/Compartidos/DialogoVerImagen.vue'
 import { formatearFechaRelativa } from '../composables/useFechaRelativa.js'
 
 const route = useRoute()
@@ -449,6 +455,9 @@ const fusionando = ref(false)
 
 // Dirección seleccionada
 const direccionSeleccionada = ref(null)
+
+// Visor de foto del comercio
+const verFotoAbierta = ref(false)
 
 // Comercio original que contiene la dirección seleccionada
 const comercioOriginalActual = computed(() => {
@@ -782,6 +791,9 @@ onMounted(async () => {
   width: 100%;
   height: auto;
   display: block;
+}
+.foto-comercio-clickable {
+  cursor: pointer;
 }
 .foto-overlay {
   position: absolute;
