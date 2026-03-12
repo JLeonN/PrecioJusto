@@ -11,7 +11,10 @@
 
         <!-- Información principal -->
         <div class="comercio-info">
-          <div class="text-subtitle1 text-weight-bold">{{ comercio.nombreCompleto }}</div>
+          <div class="row items-center no-wrap q-gutter-xs">
+            <span class="text-subtitle1 text-weight-bold">{{ comercio.comercio }}</span>
+            <IconExternalLink :size="14" class="text-grey-5 icono-editar" @click="irAEditar" />
+          </div>
           <div class="text-caption text-grey-7">{{ comercio.direccion }}</div>
 
           <!-- Precio más reciente -->
@@ -96,11 +99,13 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { IconThumbUp, IconChevronDown, IconChevronUp, IconTrendingUp, IconTrendingDown, IconMinus } from '@tabler/icons-vue'
+import { useRouter } from 'vue-router'
+import { IconThumbUp, IconChevronDown, IconChevronUp, IconTrendingUp, IconTrendingDown, IconMinus, IconExternalLink } from '@tabler/icons-vue'
 import ItemPrecioHistorial from './ItemPrecioHistorial.vue'
 import { useComerciStore } from 'src/almacenamiento/stores/comerciosStore'
 
 const comerciosStore = useComerciStore()
+const router = useRouter()
 
 const props = defineProps({
   comercio: {
@@ -121,19 +126,39 @@ const toggleExpandir = () => {
   expandido.value = !expandido.value
 }
 
+// Grupo del comercio en el store (base para foto y navegación)
+const grupoComercio = computed(() => {
+  const { comercioId } = props.comercio
+  if (!comercioId) return null
+  return comerciosStore.comerciosAgrupados.find(
+    (g) => (g.comerciosOriginales || []).some((c) => c.id === comercioId),
+  ) || null
+})
+
 // Foto del comercio/dirección correspondiente a este grupo del historial
 const fotoComercio = computed(() => {
+  if (!grupoComercio.value) return null
   const { comercioId, direccionId } = props.comercio
-  if (!comercioId || !direccionId) return null
-  for (const grupo of comerciosStore.comerciosAgrupados) {
-    const original = (grupo.comerciosOriginales || []).find((c) => c.id === comercioId)
-    if (original) {
-      const dir = (original.direcciones || []).find((d) => d.id === direccionId)
-      return dir?.foto || null
-    }
-  }
-  return null
+  if (!direccionId) return null
+  const original = (grupoComercio.value.comerciosOriginales || []).find((c) => c.id === comercioId)
+  const dir = (original?.direcciones || []).find((d) => d.id === direccionId)
+  return dir?.foto || null
 })
+
+// Navegar a la edición del comercio, pre-seleccionando la sucursal si aplica
+function irAEditar(event) {
+  event.stopPropagation()
+  if (!grupoComercio.value) return
+  const nombreNorm = grupoComercio.value.nombre
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+  const query = props.comercio.direccionId ? { direccionId: props.comercio.direccionId } : {}
+  router.push({ path: `/comercios/${encodeURIComponent(nombreNorm)}`, query })
+}
 
 // Mapeo del color de frescura a CSS para el borde de la foto
 const colorBordeFoto = computed(() => {
@@ -292,5 +317,9 @@ const textoTendenciaCompleto = computed(() => {
   height: 100%;
   object-fit: cover;
   display: block;
+}
+.icono-editar {
+  cursor: pointer;
+  flex-shrink: 0;
 }
 </style>

@@ -463,6 +463,15 @@ function seleccionarDireccion(direccion) {
   direccionSeleccionada.value = direccion
 }
 
+// Pre-seleccionar sucursal si viene con ?direccionId= (ej: desde historial de producto)
+watch(comercioActual, (comercio) => {
+  if (!comercio || direccionSeleccionada.value) return
+  const idDir = route.query.direccionId
+  if (!idDir) return
+  const dir = comercio.direcciones?.find((d) => d.id === idDir)
+  if (dir) seleccionarDireccion(dir)
+}, { immediate: true })
+
 // Guardar campo del comercio (nombre, tipo) - afecta todos los originales si es cadena
 async function guardarCampo(campo, valor) {
   if (!comercioActual.value) return
