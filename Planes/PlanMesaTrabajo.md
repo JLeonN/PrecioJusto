@@ -403,18 +403,10 @@ el footer, siempre visible durante el scroll.
 **Archivo:** `src/pages/MesaTrabajoPage.vue`
 
 [x] Quitar el bloque `<div v-if="seleccion.modoSeleccion.value" class="seleccion-barra">` del flujo actual
-[x] Agregar un nuevo div `position: fixed` con clase `seleccion-barra-flotante`:
-    - `bottom: calc(var(--footer-altura, 56px) + var(--safe-area-bottom, 0px))`
-    - `left: 0`, `right: 0`
-    - `z-index: 100`
-    - Fondo blanco con `box-shadow: 0 -2px 8px rgba(0,0,0,0.12)`
-[x] Contenido de la barra flotante (de izquierda a derecha):
-    - Botón "Cancelar" (ver 5.2)
-    - Texto contador + texto informativo (ver 5.3)
-    - `<q-space />`
-    - Botón "Asignar comercio"
+[x] Agregar un nuevo div `position: fixed` con clase `seleccion-barra-flotante`: - `bottom: calc(var(--footer-altura, 56px) + var(--safe-area-bottom, 0px))` - `left: 0`, `right: 0` - `z-index: 100` - Fondo blanco con `box-shadow: 0 -2px 8px rgba(0,0,0,0.12)`
+[x] Contenido de la barra flotante (de izquierda a derecha): - Botón "Cancelar" (ver 5.2) - Texto contador + texto informativo (ver 5.3) - `<q-space />` - Botón "Asignar comercio"
 [x] Cuando `seleccion.modoSeleccion.value` es `true`, agregar padding-bottom
-    a `.mesa-lista-scroll` para que el último ítem no quede tapado por la barra
+a `.mesa-lista-scroll` para que el último ítem no quede tapado por la barra
 
 ### ⚠️ Puntos delicados
 
@@ -431,7 +423,7 @@ el footer, siempre visible durante el scroll.
 **Archivo:** `src/pages/MesaTrabajoPage.vue`
 
 [x] Cambiar el botón Cancelar de `flat dense no-caps size="sm" color="grey-8"`
-    a `outline no-caps color="grey-8"` (con borde, más legible)
+a `outline no-caps color="grey-8"` (con borde, más legible)
 [x] Quitar `dense` para que tenga más área de toque
 
 ---
@@ -441,7 +433,7 @@ el footer, siempre visible durante el scroll.
 **Archivo:** `src/pages/MesaTrabajoPage.vue`
 
 [x] Mostrar el contador y debajo una línea `text-caption text-grey-6`:
-    "Seleccioná artículos para asignarles el mismo comercio"
+"Seleccioná artículos para asignarles el mismo comercio"
 [x] Visible siempre que el modo selección esté activo
 
 ---
@@ -451,7 +443,7 @@ el footer, siempre visible durante el scroll.
 **Archivo:** `src/pages/MesaTrabajoPage.vue`
 
 [x] Agregar `watch` sobre `seleccion.cantidadSeleccionados`:
-    si llega a `0` y `modoSeleccion` está activo → `desactivarModoSeleccion()`
+si llega a `0` y `modoSeleccion` está activo → `desactivarModoSeleccion()`
 
 ### ⚠️ Puntos delicados
 
@@ -479,25 +471,25 @@ el footer, siempre visible durante el scroll.
 
 ### T.E — Barra flotante
 
-[ ] Barra NO visible en modo normal
-[ ] Long-press en ítem → barra aparece flotando sobre el footer
-[ ] Barra siempre visible al hacer scroll hacia abajo
-[ ] Barra siempre visible al hacer scroll hacia arriba
-[ ] El último ítem de la lista no queda tapado por la barra
-[ ] La barra no se solapa con el footer
+[x] Barra NO visible en modo normal
+[x] Long-press en ítem → barra aparece flotando sobre el footer
+[x] Barra siempre visible al hacer scroll hacia abajo
+[x] Barra siempre visible al hacer scroll hacia arriba
+[x] El último ítem de la lista no queda tapado por la barra
+[x] La barra no se solapa con el footer
 
 ### T.F — Comportamientos de selección
 
-[ ] Deseleccionar el único ítem seleccionado → modo selección se cancela automáticamente
-[ ] Deseleccionar varios hasta llegar a 0 → modo selección se cancela automáticamente
-[ ] Seleccionar 3 ítems → deseleccionar 2 → el modo selección sigue activo con 1
-[ ] Botón "Cancelar" visible y fácil de tocar en móvil 360px
-[ ] Texto informativo visible en la barra flotante
+[x] Deseleccionar el único ítem seleccionado → modo selección se cancela automáticamente
+[x] Deseleccionar varios hasta llegar a 0 → modo selección se cancela automáticamente
+[x] Seleccionar 3 ítems → deseleccionar 2 → el modo selección sigue activo con 1
+[x] Botón "Cancelar" visible y fácil de tocar en móvil 360px
+[x] Texto informativo visible en la barra flotante
 
 ### T.G — Asignar comercio
 
-[ ] Bottom sheet más compacto: ocupa menos espacio vertical
-[ ] Funcionalidad de asignar comercio no se rompe
+[x] Bottom sheet más compacto: ocupa menos espacio vertical
+[x] Funcionalidad de asignar comercio no se rompe
 
 ═══════════════════════════════════════════════════════════════
 

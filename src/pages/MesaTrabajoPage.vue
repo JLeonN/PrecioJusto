@@ -70,34 +70,38 @@
         </div>
       </div>
 
-      <q-separator />
-
-      <!-- Footer -->
-      <div class="mesa-trabajo-footer">
-        <div class="contenedor-pagina row items-center no-wrap">
-          <q-btn
-            flat no-caps color="negative" size="sm"
-            :disable="sesionStore.items.length === 0"
-            @click="confirmarLimpiar"
-          >
-            Limpiar todo
-          </q-btn>
-          <q-space />
-          <q-btn
-            unelevated no-caps color="primary"
-            :disable="cantidadListos === 0 || guardando"
-            :loading="guardando"
-            @click="guardarCompletos"
-          >
-            <IconSend :size="16" class="q-mr-xs" />
-            Enviar listos ({{ cantidadListos }})
-          </q-btn>
+      <!-- Footer: se oculta en modo selección -->
+      <Transition name="deslizar-abajo">
+        <div v-if="!seleccion.modoSeleccion.value" class="footer-contenedor">
+          <q-separator />
+          <div class="mesa-trabajo-footer">
+            <div class="contenedor-pagina row items-center no-wrap">
+              <q-btn
+                flat no-caps color="negative" size="sm"
+                :disable="sesionStore.items.length === 0"
+                @click="confirmarLimpiar"
+              >
+                Limpiar todo
+              </q-btn>
+              <q-space />
+              <q-btn
+                unelevated no-caps color="primary"
+                :disable="cantidadListos === 0 || guardando"
+                :loading="guardando"
+                @click="guardarCompletos"
+              >
+                <IconSend :size="16" class="q-mr-xs" />
+                Enviar listos ({{ cantidadListos }})
+              </q-btn>
+            </div>
+          </div>
         </div>
-      </div>
+      </Transition>
 
     </template>
 
-    <!-- Barra de selección flotante -->
+    <!-- Barra de selección flotante con animación -->
+    <Transition name="deslizar-abajo">
     <div v-if="seleccion.modoSeleccion.value" class="seleccion-barra-flotante">
       <div class="contenedor-pagina row items-center no-wrap q-px-md q-py-xs">
         <q-btn outline no-caps color="grey-8" @click="seleccion.desactivarModoSeleccion()">
@@ -117,6 +121,7 @@
         </q-btn>
       </div>
     </div>
+    </Transition>
 
     <!-- Bottom sheet: asignar comercio en bloque -->
     <q-dialog v-model="dialogoAsignarComercio" position="bottom">
@@ -343,7 +348,7 @@ function confirmarAsignarComercio() {
 }
 .seleccion-barra-flotante {
   position: fixed;
-  bottom: calc(56px + var(--safe-area-bottom, 0px));
+  bottom: var(--safe-area-bottom, 0px);
   left: 0;
   right: 0;
   z-index: 100;
@@ -356,7 +361,7 @@ function confirmarAsignarComercio() {
 .mesa-lista-con-barra {
   padding-bottom: 68px;
 }
-.mesa-trabajo-footer {
+.footer-contenedor {
   background: white;
   position: sticky;
   bottom: 0;
@@ -364,5 +369,14 @@ function confirmarAsignarComercio() {
 .mesa-trabajo-footer .contenedor-pagina {
   padding: 10px 16px;
   padding-bottom: calc(10px + var(--safe-area-bottom, 0px));
+}
+.deslizar-abajo-enter-active,
+.deslizar-abajo-leave-active {
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+.deslizar-abajo-enter-from,
+.deslizar-abajo-leave-to {
+  transform: translateY(100%);
+  opacity: 0;
 }
 </style>
