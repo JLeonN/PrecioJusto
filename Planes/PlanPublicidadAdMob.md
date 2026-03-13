@@ -69,6 +69,7 @@ para que la app no crashee al iniciar.
 ### 1.1 — Instalar el paquete
 
 [ ] Ejecutar:
+
 ```
 npm install @capacitor-community/admob
 npx cap sync android
@@ -79,6 +80,7 @@ npx cap sync android
 **Archivo:** `android/app/src/main/AndroidManifest.xml`
 
 [ ] Agregar dentro del tag `<application>`:
+
 ```xml
 <meta-data
     android:name="com.google.android.gms.ads.APPLICATION_ID"
@@ -165,11 +167,12 @@ Expone `altoBanner` para que el layout aplique el padding correcto.
 
 [ ] Guard: si no es nativo, salir
 [ ] Llamar a `AdMob.showBanner()` con:
-  - `adId`: `CONFIG_PUBLICIDAD.banner`
-  - `adSize`: `BannerAdSize.BANNER` (320x50 — el más pequeño)
-  - `position`: `BannerAdPosition.BOTTOM_CENTER`
-  - `margin`: 0
-  - `isTesting`: `MODO_PRUEBA`
+
+- `adId`: `CONFIG_PUBLICIDAD.banner`
+- `adSize`: `BannerAdSize.BANNER` (320x50 — el más pequeño)
+- `position`: `BannerAdPosition.BOTTOM_CENTER`
+- `margin`: 0
+- `isTesting`: `MODO_PRUEBA`
 
 ### Función `ocultarBanner()`
 
@@ -224,10 +227,7 @@ Agregar un indicador visual claro cuando `MODO_PRUEBA = true`.
 
 [ ] Importar `MODO_PRUEBA` desde `ConfigPublicidad.js`
 [ ] En `q-header`: aplicar clase condicional `'bg-orange-8'` si `MODO_PRUEBA`, mantener `'bg-white'` si no
-[ ] En `q-toolbar`: agregar texto central `"● MODO PRUEBA"` visible solo si `MODO_PRUEBA`:
-    - Color blanco (contrasta con naranja)
-    - `text-weight-bold`, tamaño pequeño
-    - Posicionado en el centro del toolbar (reemplaza el espacio del título)
+[ ] En `q-toolbar`: agregar texto central `"● MODO PRUEBA"` visible solo si `MODO_PRUEBA`: - Color blanco (contrasta con naranja) - `text-weight-bold`, tamaño pequeño - Posicionado en el centro del toolbar (reemplaza el espacio del título)
 [ ] El color del texto del toolbar también cambia a `text-white` en modo prueba
 
 ### ⚠️ Puntos delicados
@@ -264,10 +264,11 @@ No es un diálogo ni un popup — es una página de navegación real.
 **Archivo:** `src/layouts/MainLayout.vue`
 
 [ ] Agregar ítem al final de la lista del Drawer, antes del cierre de `q-list`:
-  - Ícono: `IconHeart` de `@tabler/icons-vue`
-  - Label: "Gracias"
-  - `to="/gracias"` — navegación estándar, igual que el resto del drawer
-[ ] Importar `IconHeart`
+
+- Ícono: `IconHeart` de `@tabler/icons-vue`
+- Label: "Gracias"
+- `to="/gracias"` — navegación estándar, igual que el resto del drawer
+  [ ] Importar `IconHeart`
 
 ### 5.3 — Página GraciasPage.vue
 
@@ -282,14 +283,14 @@ No es un diálogo ni un popup — es una página de navegación real.
 [ ] Ícono grande de corazón centrado (decorativo)
 [ ] Título: "Gracias por tu apoyo"
 [ ] Párrafo explicativo breve, sin tecnicismos:
-    "Ver un anuncio corto nos ayuda a mantener la app gratuita para todos"
+"Ver un anuncio corto nos ayuda a mantener la app gratuita para todos"
 [ ] Si `contadorGracias > 0`: mostrar mensaje amigable "Has dado N gracias ❤️"
 [ ] Botón principal: "Ver anuncio" con ícono `IconPlayerPlay`
 [ ] Al tocar el botón:
-  [ ] Llamar `mostrarRecompensado()` del composable
-  [ ] Si retorna `true` (video completado): incrementar contador, guardar en localStorage,
-      actualizar `contadorGracias` reactivo, mostrar notificación (`q-notify`)
-  [ ] Si retorna `false` (cerró antes): no incrementar, sin notificación
+[ ] Llamar `mostrarRecompensado()` del composable
+[ ] Si retorna `true` (video completado): incrementar contador, guardar en localStorage,
+actualizar `contadorGracias` reactivo, mostrar notificación (`q-notify`)
+[ ] Si retorna `false` (cerró antes): no incrementar, sin notificación
 
 ### ⚠️ Nota de diseño
 

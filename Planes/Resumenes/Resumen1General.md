@@ -238,11 +238,23 @@ Resúmenes de Documentación/                  # En raíz del proyecto
 └── Resumen7LocalStorage.md                  # Documentación de almacenamiento
 
 Planes/                                      # Planes de trabajo e implementación
-├── PlanSistemaSucursales.md                 # Sistema de comercios con cadenas y sucursales
-├── PlanTrabajoActualizacionPrecios.md       # Plan de actualización de precios
-├── PlanTrabajoComercio.md                   # Plan de trabajo de comercios
-├── PlanAmpliarAPIProductos.md               # 🆕 Búsqueda multi-API (6 fases completadas)
-└── PlanPieAtribucion.md                     # 🆕 Pie de atribución de fuentes (4 fases completadas)
+├── PlanPublicidadAdMob.md                   # 🔧 Integración AdMob (activo — en curso)
+├── PlanesFuturos/                           # Ideas y planes sin fecha definida
+│   ├── PlanGeolocalizacionComercios.md
+│   └── TareasPendientes.md
+├── PlanesTerminados/                        # Planes completados (archivo histórico)
+│   ├── PlanAmpliarAPIProductos.md
+│   ├── PlanFabYEscaneoFormulario.md
+│   ├── PlanFotosComercios.md
+│   ├── PlanMejorasAndroid.md
+│   ├── PlanMesaTrabajo.md
+│   ├── PlanPieAtribucion.md
+│   ├── PlanSistemaSucursales.md
+│   ├── PlanTrabajoActualizacionPrecios.md
+│   ├── PlanTrabajoComercio.md
+│   ├── PlanTrabajoEscaneoProductos.md
+│   └── PlanTrabajoMisProductos.md
+└── Resumenes/                               # Documentación técnica del proyecto
 ```
 
 ---
@@ -1016,7 +1028,7 @@ H. Arquitectura y Código
 - Señal "app lista" vía `nextTick()` en `App.vue`
 
 ### Estado Actual
-- **Versión:** 1.0.0
+- **Versión:** 1.0.2
 - **Almacenamiento:** Local (Capacitor Storage)
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
@@ -1032,6 +1044,7 @@ H. Arquitectura y Código
 - **Fotos de productos y comercios:** Completada (useCamaraFoto, q-menu contextual, 5 componentes)
 - **Pie de atribución:** Completado (PieAtribucion.vue en DetalleProductoPage + EditarComercioPage; campo fotoFuente en productos)
 - **Preparación:** Lista para migración a Firebase
+- **Publicidad AdMob:** En curso (ver PlanPublicidadAdMob.md — pendiente IDs de producción)
 - **Ver detalles del sistema de escaneo:** Resumen8Scanner.md
 
 ---
@@ -1055,4 +1068,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 12 de Marzo 2026 (useTecladoVirtual en 5 dialogs; fotos de comercio en historial de producto con borde de frescura; navegación desde historial a EditarComercioPage; DialogoVerImagen en EditarComercioPage)
+**Última actualización:** 13 de Marzo 2026 (reorganización de Planes/ con PlanesTerminados/; inicio plan de publicidad AdMob; versión 1.0.2)
