@@ -37,12 +37,12 @@
         <!-- Cabecera del producto -->
         <InfoProducto
           :producto="productoActual"
-          class="q-mb-lg"
+          class="q-mb-xl"
           @agregar-precio="abrirModalPrecio(productoActual.id)"
         />
 
         <!-- Estadísticas en cards -->
-        <EstadisticasProducto :producto="productoActual" class="q-mb-md" />
+        <EstadisticasProducto :producto="productoActual" class="q-mb-md q-mt-lg" />
 
         <!-- Título de sección historial -->
         <p class="text-subtitle1 text-weight-bold q-mt-md q-mb-xs">Historial de precios</p>
@@ -99,8 +99,10 @@ import HistorialPrecios from '../components/DetalleProducto/HistorialPrecios.vue
 import DialogoAgregarPrecio from '../components/Formularios/Dialogos/DialogoAgregarPrecio.vue'
 import FabAcciones from '../components/Compartidos/FabAcciones.vue'
 import PieAtribucion from '../components/Compartidos/PieAtribucion.vue'
+
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
 import { useConfirmacionesStore } from '../almacenamiento/stores/confirmacionesStore.js'
+import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
 import { useDialogoAgregarPrecio } from '../composables/useDialogoAgregarPrecio.js'
 import { useQuasar } from 'quasar'
 
@@ -110,6 +112,7 @@ import { useQuasar } from 'quasar'
 
 const productosStore = useProductosStore()
 const confirmacionesStore = useConfirmacionesStore()
+const comerciosStore = useComerciStore()
 const route = useRoute()
 const $q = useQuasar()
 
@@ -297,8 +300,11 @@ async function confirmarPrecio(precioId) {
 // ========================================
 
 onMounted(async () => {
-  await confirmacionesStore.cargarConfirmaciones()
-  await cargarProducto()
+  await Promise.all([
+    confirmacionesStore.cargarConfirmaciones(),
+    comerciosStore.cargarComercios(),
+    cargarProducto(),
+  ])
   // Registrar visita para ordenar sugerencias del buscador por interacción reciente
   if (route.params.id) productosStore.registrarInteraccion(route.params.id)
 })

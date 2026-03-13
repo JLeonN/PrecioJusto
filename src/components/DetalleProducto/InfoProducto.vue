@@ -1,6 +1,6 @@
 <template>
   <q-card class="info-producto">
-    <q-card-section class="info-contenido">
+    <q-card-section class="info-contenido q-pb-lg">
 
       <!-- IMAGEN DEL PRODUCTO (editable) -->
       <div class="info-imagen">
@@ -213,10 +213,6 @@
           <IconPlus :size="20" class="q-mr-xs" />
         </q-btn>
 
-        <!-- Fuente del dato (API de origen) -->
-        <p v-if="producto.fuenteDato" class="fuente-dato-texto">
-          Datos de {{ producto.fuenteDato }}
-        </p>
       </div>
     </q-card-section>
   </q-card>

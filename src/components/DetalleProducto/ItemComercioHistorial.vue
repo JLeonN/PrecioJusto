@@ -148,8 +148,10 @@ const fotoComercio = computed(() => {
 // Navegar a la edición del comercio, pre-seleccionando la sucursal si aplica
 function irAEditar(event) {
   event.stopPropagation()
-  if (!grupoComercio.value) return
-  const nombreNorm = grupoComercio.value.nombre
+  // Preferir el nombre del grupo del store; fallback al nombre del precio
+  const nombre = grupoComercio.value?.nombre || props.comercio.comercio
+  if (!nombre) return
+  const nombreNorm = nombre
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
