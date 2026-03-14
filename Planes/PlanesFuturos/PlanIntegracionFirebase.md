@@ -37,8 +37,15 @@ compartidos y la base para una comunidad colaborativa de precios.
   contraseña, foto de perfil, correo
 - **PlanRedConexion** — Configuración de red: elegir si sincroniza por WiFi o también
   por datos móviles
-- **PlanCompartirDatos** — Compartir productos/comercios individuales con otro usuario
-  específico (via link, código o QR)
+- **PlanSistemaAmigos** — Sistema de amigos dentro de la app para compartir productos
+  y comercios sin salir de la app. El usuario siempre queda dentro del ecosistema.
+  Reemplaza la idea original de compartir por link/QR/código externo.
+  > Cosas a resolver cuando se planifique:
+  > - ¿Cómo se encuentran los usuarios entre sí? (por @usuario, por QR, por email, etc.)
+  > - ¿Cómo llegan los items compartidos al otro? (bandeja de entrada, notificación, etc.)
+  > - ¿Qué nivel de privacidad tiene el perfil del usuario frente a desconocidos?
+  > - ¿Se necesitan solicitudes de amistad o es directo?
+  > - ¿Notificaciones push al recibir algo?
 - **PlanModeracionComunidad** — Sistema de reporte de contenido inapropiado en la
   página comunitaria
 

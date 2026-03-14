@@ -4,6 +4,11 @@ Proyecto: Precio Justo
 Fecha inicio: Marzo 2026
 Responsable: Leo + CH
 
+### 🕐 ESTADO: SUSPENDIDO — Esperando producción en Google Play
+Google rechazó el acceso a producción el 14/03/2026 y reinició el período de prueba cerrada.
+Nueva fecha estimada para retomar: **28/03/2026** (14 días desde la revisión).
+Completar IDs de producción en `ConfigPublicidad.js` una vez que la app esté en producción.
+
 ═══════════════════════════════════════════════════════════════
 
 ## 📖 DESCRIPCIÓN DEL PLAN

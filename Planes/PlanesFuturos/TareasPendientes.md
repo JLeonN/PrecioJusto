@@ -16,6 +16,3 @@ Las tareas más difíciles siempre van arriba.
 ### Dificultad 5/10
 - **Estadísticas en Edición de Comercio — Revisión completa:** Las estadísticas que se muestran en `EditarComercioPage` necesitan una revisión general: sacar las que no aportan valor, editar las existentes para que sean más precisas o útiles, y agregar estadísticas nuevas. Actualmente se muestran: "Registrado" (fecha), "Último uso" (tiempo relativo), "Último precio" (tiempo relativo), "Productos" (cantidad) y "Sucursales" (cantidad). El usuario quiere definir cuáles quedan, cuáles se modifican y cuáles se agregan en una sesión de trabajo dedicada.
 
-### Dificultad 3/10
-- **Producción Google Play — Publicidad AdMob:** La prueba cerrada necesita 14 días con al menos 12 verificadores activos (actualmente van 5 días). Un día antes de cumplirse los 14 días, recordar iniciar la configuración de AdMob y preparar la estrategia de publicidad antes de solicitar acceso a producción.
-  Hoy es 04/03/2026.
