@@ -35,7 +35,7 @@
       </div>
       </div>
 
-      <!-- Filtro de ordenamiento -->
+      <!-- Filtro de ordenamiento + buscador -->
       <div class="contenedor-pagina q-px-md q-pt-sm q-pb-xs">
         <q-select
           v-model="ordenActual"
@@ -44,14 +44,27 @@
           emit-value map-options
           style="max-width: 280px"
         />
+        <InputBusqueda
+          v-model="textoBusqueda"
+          placeholder="Buscar por nombre, marca o código..."
+          class="q-mt-sm"
+        />
       </div>
 
       <!-- Lista de borradores -->
       <div class="mesa-lista-scroll" :class="{ 'mesa-lista-con-barra': seleccion.modoSeleccion.value }">
         <div class="contenedor-pagina q-px-md q-pt-sm q-pb-md">
+
+          <!-- Sin resultados de búsqueda -->
+          <div v-if="textoBusqueda && itemsFiltrados.length === 0" class="text-center q-pa-xl">
+            <q-icon name="search_off" size="64px" color="grey-5" />
+            <p class="text-h6 text-grey-7 q-mt-md">Sin resultados</p>
+            <p class="text-grey-6">No hay ítems para "{{ textoBusqueda }}"</p>
+          </div>
+
           <div class="row q-col-gutter-md">
             <div
-              v-for="item in itemsOrdenados"
+              v-for="item in itemsFiltrados"
               :key="item.id"
               class="col-12 col-sm-6 col-md-4 col-xl-3"
             >
@@ -160,6 +173,7 @@ import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import TarjetaProductoBorrador from '../components/Scanner/TarjetaProductoBorrador.vue'
 import SelectorComercioDireccion from '../components/Compartidos/SelectorComercioDireccion.vue'
+import InputBusqueda from '../components/Compartidos/InputBusqueda.vue'
 import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
 import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
@@ -187,6 +201,7 @@ const comerciosStore = useComerciStore()
 const seleccion = useSeleccionMultiple()
 
 const ordenActual = ref('menos-a-mas')
+const textoBusqueda = ref('')
 const guardando = ref(false)
 const dialogoAsignarComercio = ref(false)
 const comercioParaAsignar = ref(null)
@@ -218,6 +233,11 @@ const cantidadListos = computed(() =>
   ).length,
 )
 
+// Normaliza texto: minúsculas + sin tildes
+function normalizarTexto(texto) {
+  return texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+
 const itemsOrdenados = computed(() => {
   const lista = [...sesionStore.items]
   if (ordenActual.value === 'sin-comercio') return lista.filter((i) => !i.comercio)
@@ -230,6 +250,23 @@ const itemsOrdenados = computed(() => {
   if (ordenActual.value === 'alfabetico')
     return lista.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''))
   return lista
+})
+
+// Items filtrados por buscador (sobre la lista ya ordenada)
+const itemsFiltrados = computed(() => {
+  const texto = textoBusqueda.value?.trim() || ''
+  if (!texto) return itemsOrdenados.value
+  const textoNorm = normalizarTexto(texto)
+  const palabras = textoNorm.split(/\s+/).filter(Boolean)
+  const esNumerico = /^\d+$/.test(texto)
+  return itemsOrdenados.value.filter((i) => {
+    if (esNumerico && i.codigoBarras?.includes(texto)) return true
+    const nombreNorm = normalizarTexto(i.nombre || '')
+    if (palabras.every((p) => nombreNorm.includes(p))) return true
+    const marcaNorm = normalizarTexto(i.marca || '')
+    if (marcaNorm && marcaNorm.includes(textoNorm)) return true
+    return false
+  })
 })
 
 async function _guardarItem(item) {
