@@ -44,7 +44,8 @@ export default defineConfig((/* ctx */) => {
 
       // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
 
-      // publicPath: '/',
+      // Configuración para GitHub Pages - Subdirectorio
+      publicPath: '/PrecioJusto/',
       // analyze: true,
       // env: {},
       // rawDefine: {}
