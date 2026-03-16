@@ -111,19 +111,21 @@ import {
 } from '@tabler/icons-vue'
 import { useBotonAtras } from '../composables/useBotonAtras.js'
 import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
+import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
 
 const router = useRouter()
 const route = useRoute()
 const drawerAbierto = ref(false)
 const sesionEscaneoStore = useSesionEscaneoStore()
+const preferenciasStore = usePreferenciasStore()
 
 const toggleDrawer = () => {
   drawerAbierto.value = !drawerAbierto.value
 }
 
-// Carga la bandeja de borradores persistida al iniciar la app
+// Carga datos persistidos al iniciar la app
 onMounted(async () => {
-  await sesionEscaneoStore.cargarSesion()
+  await Promise.all([sesionEscaneoStore.cargarSesion(), preferenciasStore.inicializar()])
 })
 
 useBotonAtras({ drawerAbierto, router, route })

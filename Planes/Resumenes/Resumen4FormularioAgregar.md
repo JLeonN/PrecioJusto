@@ -30,7 +30,16 @@ DialogoAgregarProducto.vue integra directamente EscaneadorCodigo.vue para escane
 ## CONSTANTES
 - Monedas: src/almacenamiento/constantes/Monedas.js
 - Lista completa de monedas del mundo (20+ opciones)
-- MONEDA_DEFAULT: 'UYU'
+- MONEDA_DEFAULT: 'UYU' (solo se usa como valor inicial del store, no en los componentes)
+
+## PREFERENCIAS DE MONEDA Y UNIDAD (preferenciasStore)
+Todos los selectores de moneda y unidad usan `preferenciasStore` (Pinia) como fuente única de verdad. El store se inicializa una sola vez en `MainLayout.vue` al arrancar la app.
+
+**Comportamiento por componente:**
+- `FormularioPrecio.vue`: init `moneda` desde el store; `alCambiarMoneda()` llama `preferenciasStore.guardarMoneda()`; `onMounted` ya no carga preferencias (solo carga comercios)
+- `FormularioProducto.vue`: init `unidad` desde el store; `alCambiarUnidad()` llama `preferenciasStore.guardarUnidad()`; eliminado `onMounted` de preferencias
+- `DialogoAgregarProducto.vue`: estado inicial `datosPrecio.moneda` y `datosProducto.unidad` vienen del store; `limpiarFormulario()` es ahora **síncrona** (usaba `await preferenciasService`)
+- `DialogoAgregarPrecio.vue`: `monedaSeleccionada` init desde store; handler `alCambiarMoneda()` guarda en store; `cerrar()` resetea a `preferenciasStore.moneda` (no a `MONEDA_DEFAULT` hardcodeado)
 
 ## NUEVO FLUJO: AGREGAR COMERCIO RÁPIDO
 1. Usuario escribe nombre comercio/dirección en selectores

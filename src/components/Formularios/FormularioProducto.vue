@@ -140,10 +140,10 @@
 </template>
 
 <script setup>
-import { ref, watch, computed, onMounted } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { IconSearch, IconCamera, IconPhoto, IconTrash } from '@tabler/icons-vue'
 import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
-import preferenciasService from '../../almacenamiento/servicios/PreferenciasService.js'
+import { usePreferenciasStore } from '../../almacenamiento/stores/preferenciasStore.js'
 
 const props = defineProps({
   modelValue: {
@@ -177,6 +177,7 @@ const opcionesUnidades = [
 ]
 
 const { inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo } = useCamaraFoto()
+const preferenciasStore = usePreferenciasStore()
 
 // Estado interno
 const datosInternos = ref({
@@ -184,7 +185,7 @@ const datosInternos = ref({
   marca: props.modelValue.marca || '',
   codigoBarras: props.modelValue.codigoBarras || '',
   cantidad: props.modelValue.cantidad || 1,
-  unidad: props.modelValue.unidad || 'unidad',
+  unidad: props.modelValue.unidad || preferenciasStore.unidad,
   imagen: props.modelValue.imagen || null,
 })
 
@@ -198,16 +199,9 @@ const stepCantidad = computed(() => {
   return unidadesEnteras.includes(datosInternos.value.unidad) ? '1' : '0.01'
 })
 
-// Cargar unidad guardada al montar
-onMounted(async () => {
-  const preferencias = await preferenciasService.obtenerPreferencias()
-  datosInternos.value.unidad = preferencias.unidad
-  emitirCambios()
-})
-
 // Al cambiar unidad, guardarla
 async function alCambiarUnidad() {
-  await preferenciasService.guardarUnidad(datosInternos.value.unidad)
+  await preferenciasStore.guardarUnidad(datosInternos.value.unidad)
   emitirCambios()
 }
 

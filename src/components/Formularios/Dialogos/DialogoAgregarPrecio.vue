@@ -41,13 +41,14 @@
           </div>
           <div class="col-4">
             <q-select
-              v-model="monedaSeleccionada"
+              :model-value="monedaSeleccionada"
               label="Moneda"
               outlined
               dense
               :options="opcionesMoneda"
               emit-value
               map-options
+              @update:model-value="alCambiarMoneda"
             />
           </div>
         </div>
@@ -160,7 +161,8 @@ import { ref, computed, watch, nextTick } from 'vue'
 import { useQuasar } from 'quasar'
 import { useProductosStore } from '../../../almacenamiento/stores/productosStore.js'
 import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.js'
-import { MONEDAS, MONEDA_DEFAULT } from '../../../almacenamiento/constantes/Monedas.js'
+import { MONEDAS } from '../../../almacenamiento/constantes/Monedas.js'
+import { usePreferenciasStore } from '../../../almacenamiento/stores/preferenciasStore.js'
 import DialogoAgregarComercioRapido from './DialogoAgregarComercioRapido.vue'
 import { useTecladoVirtual } from '../../../composables/useTecladoVirtual.js'
 import { filtrarInputPrecio, formatearPrecioAlSalir, soloNumerosDecimales } from '../../../utils/PrecioUtils.js'
@@ -183,6 +185,7 @@ const { estiloTarjeta } = useTecladoVirtual()
 /* Stores */
 const productosStore = useProductosStore()
 const comerciosStore = useComerciStore()
+const preferenciasStore = usePreferenciasStore()
 const $q = useQuasar()
 
 /* Estado del diálogo */
@@ -195,7 +198,7 @@ const dialogoAbierto = computed({
 const inputPrecioRef = ref(null)
 // String para preservar ceros finales (ej: "3.30"); el valor numérico se parsea al guardar
 const precioTexto = ref('')
-const monedaSeleccionada = ref(MONEDA_DEFAULT)
+const monedaSeleccionada = ref(preferenciasStore.moneda)
 const comercioSeleccionado = ref(null) // objeto agrupado completo
 const direccionSeleccionada = ref(null) // { label, value, direccion }
 const textoComercioEscrito = ref('')
@@ -205,6 +208,11 @@ const dialogoComercioRapidoAbierto = ref(false)
 
 /* Opciones de moneda */
 const opcionesMoneda = MONEDAS
+
+function alCambiarMoneda(val) {
+  monedaSeleccionada.value = val
+  preferenciasStore.guardarMoneda(val)
+}
 
 /* Producto actual */
 const productoActual = computed(() => {
@@ -485,7 +493,7 @@ async function guardarPrecio() {
 function cerrar() {
   dialogoAbierto.value = false
   precioTexto.value = ''
-  monedaSeleccionada.value = MONEDA_DEFAULT
+  monedaSeleccionada.value = preferenciasStore.moneda
   comercioSeleccionado.value = null
   direccionSeleccionada.value = null
   textoComercioEscrito.value = ''

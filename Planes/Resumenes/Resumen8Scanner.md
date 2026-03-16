@@ -111,6 +111,7 @@ Tarjeta post-escaneo del **Modo A**. `q-dialog` con `position="bottom"`.
 - Foto en tiempo real (usa `datosForm.imagen`, no `item.imagen`)
 - Edición inline (lápiz → campos editables para nombre, marca, cantidad, unidad)
 - Precio obligatorio (`formularioValido = datosForm.precio > 0`)
+- Moneda: `datosForm.moneda` se inicializa con `preferenciasStore.moneda` (no hardcodeado). `alCambiarMoneda(val)` actualiza el form Y guarda en el store. El reset en `alCerrar()` también usa el store.
 - Nombre NO es obligatorio (puede escanearse sin nombre)
 - Foto opcional vía `useCamaraFoto` — botón de cámara en overlay (esquina inferior derecha)
 - "Siguiente" → agrega a la mesa y reactiva cámara
@@ -168,6 +169,8 @@ Tarjeta expandible dentro de la Mesa de trabajo. Usa `TarjetaBase`.
 **Botón "Enviar":** activo solo si nombre + precio + comercio están completos.
 
 **Prevención de cierre al editar:** el div expandido tiene `@click.stop` para que los clicks en inputs/selects no colapsen la tarjeta.
+
+**Moneda:** cuando el usuario cambia la moneda del ítem en edición, `actualizar('moneda', val)` también llama `preferenciasStore.guardarMoneda(val)` — la preferencia queda guardada automáticamente.
 
 ---
 

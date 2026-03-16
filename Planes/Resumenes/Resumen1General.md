@@ -118,7 +118,8 @@ src/
 │       ├── productosStore.js               # Estado global de productos (Pinia)
 │       ├── comerciosStore.js               # Estado global de comercios (Pinia)
 │       ├── confirmacionesStore.js          # Estado global de confirmaciones (Pinia)
-│       └── sesionEscaneoStore.js           # 🆕 Borradores de escaneo con persistencia (Pinia)
+│       ├── sesionEscaneoStore.js           # 🆕 Borradores de escaneo con persistencia (Pinia)
+│       └── preferenciasStore.js           # Preferencias del usuario (moneda, unidad) — carga única al iniciar
 │
 ├── components/
 │   ├── Compartidos/                         # Componentes reutilizables entre secciones
@@ -515,8 +516,10 @@ D. Preferencias de Usuario
 ✅ Configuración de moneda preferida (UYU por defecto)
 ✅ Configuración de unidad preferida (unidad por defecto)
 ✅ Persistencia automática de preferencias en Capacitor Storage
-✅ Sincronización reactiva con toda la UI
-✅ Carga automática al abrir formularios
+✅ `preferenciasStore.js` — Pinia store reactivo como fuente única de verdad
+✅ Carga única al iniciar la app (`MainLayout.vue` → `preferenciasStore.inicializar()`)
+✅ Todos los selectores de moneda y unidad sincronizan automáticamente via el store
+✅ Al cambiar moneda/unidad en cualquier componente → se persiste y actualiza el estado global
 
 E. Sistema de Almacenamiento
 
@@ -655,15 +658,25 @@ H. Arquitectura y Código
 - `cantidadItems`: Cantidad de ítems (para badge en drawer)
 - `tieneItemsPendientes`: Boolean
 
-### preferenciaStore.js
+### preferenciasStore.js
+**Propósito:** Fuente única de verdad para las preferencias del usuario. Se inicializa una sola vez al arrancar la app (en `MainLayout.vue`) y queda disponible reactivamente en todos los componentes.
+
 **Estado:**
-- `idioma`: String del idioma seleccionado ('es' o 'en')
-- `moneda`: String de la moneda preferida ('UYU', 'USD', 'EUR', etc.)
-- `unidad`: String de la unidad preferida ('unidad', 'litro', 'kilo', etc.)
+- `moneda`: String de la moneda preferida ('UYU', 'USD', 'EUR', etc.) — default 'UYU'
+- `unidad`: String de la unidad preferida ('unidad', 'litro', 'kilo', etc.) — default 'unidad'
 
 **Acciones:**
-- `cargarPreferencias()`: Carga preferencias desde storage
-- `actualizarPreferencia(clave, valor)`: Actualiza una preferencia específica
+- `inicializar()`: Carga preferencias desde `PreferenciasService` (una vez al arrancar)
+- `guardarMoneda(val)`: Actualiza `moneda` en el store y persiste en storage
+- `guardarUnidad(val)`: Actualiza `unidad` en el store y persiste en storage
+
+**Componentes que lo usan:**
+- `FormularioPrecio` — init + guarda al cambiar moneda
+- `FormularioProducto` — init + guarda al cambiar unidad
+- `DialogoAgregarProducto` — init + `limpiarFormulario()` (ahora sync)
+- `DialogoAgregarPrecio` — init, guarda al cambiar, reset correcto al cerrar
+- `TarjetaEscaneo` — init, reset, guarda cuando el usuario cambia explícitamente
+- `TarjetaProductoBorrador` — guarda cuando el usuario edita la moneda del ítem
 
 ---
 
@@ -1071,4 +1084,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 13 de Marzo 2026 (reorganización de Planes/ con PlanesTerminados/; inicio plan de publicidad AdMob; versión 1.0.2)
+**Última actualización:** 16 de Marzo 2026 — `preferenciasStore.js` implementado (moneda/unidad como store Pinia reactivo, carga única al iniciar); inputs de precio unificados (`PrecioUtils.js`, `inputmode="decimal"`, `toFixed(2)` en blur, display `es-UY`).

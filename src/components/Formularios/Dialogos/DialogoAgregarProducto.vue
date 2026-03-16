@@ -81,7 +81,7 @@ import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.j
 import productosService from '../../../almacenamiento/servicios/ProductosService.js'
 import buscadorProductosService from '../../../almacenamiento/servicios/BuscadorProductosService.js'
 import openFoodFactsService from '../../../almacenamiento/servicios/OpenFoodFactsService.js'
-import preferenciasService from '../../../almacenamiento/servicios/PreferenciasService.js'
+import { usePreferenciasStore } from '../../../almacenamiento/stores/preferenciasStore.js'
 
 const props = defineProps({
   modelValue: {
@@ -99,6 +99,7 @@ const emit = defineEmits(['update:modelValue', 'producto-guardado'])
 
 const productosStore = useProductosStore()
 const comerciosStore = useComerciStore()
+const preferenciasStore = usePreferenciasStore()
 const $q = useQuasar()
 
 // Estado del diálogo
@@ -132,7 +133,7 @@ const datosPrecio = ref({
   comercio: '',
   direccion: '',
   valor: null,
-  moneda: 'UYU',
+  moneda: preferenciasStore.moneda,
   comercioId: null,
   direccionId: null,
   nombreCompleto: '',
@@ -415,16 +416,14 @@ async function guardarProducto() {
   }
 }
 
-// Limpiar formulario (mantiene moneda y unidad)
-async function limpiarFormulario() {
-  const preferencias = await preferenciasService.obtenerPreferencias()
-
+// Limpiar formulario (mantiene moneda y unidad guardadas)
+function limpiarFormulario() {
   datosProducto.value = {
     nombre: '',
     marca: '',
     codigoBarras: '',
     cantidad: 1,
-    unidad: preferencias.unidad,
+    unidad: preferenciasStore.unidad,
     categoria: '',
     imagen: null,
   }
@@ -435,7 +434,7 @@ async function limpiarFormulario() {
     comercio: '',
     direccion: '',
     valor: null,
-    moneda: preferencias.moneda,
+    moneda: preferenciasStore.moneda,
     comercioId: null,
     direccionId: null,
     nombreCompleto: '',
@@ -443,14 +442,14 @@ async function limpiarFormulario() {
 }
 
 // Cancelar (limpiar y cerrar)
-async function cancelar() {
-  await limpiarFormulario()
+function cancelar() {
+  limpiarFormulario()
   cerrarDialogo()
 }
 
 // Al cerrar (click fuera o ESC)
-async function alCerrar() {
-  await limpiarFormulario()
+function alCerrar() {
+  limpiarFormulario()
 }
 
 // Cerrar diálogo

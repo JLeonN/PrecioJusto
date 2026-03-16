@@ -150,8 +150,8 @@
 <script setup>
 import { ref, watch, onMounted, computed } from 'vue'
 import { useComerciStore } from '../../almacenamiento/stores/comerciosStore.js'
-import preferenciasService from '../../almacenamiento/servicios/PreferenciasService.js'
-import { MONEDAS, MONEDA_DEFAULT } from '../../almacenamiento/constantes/Monedas.js'
+import { usePreferenciasStore } from '../../almacenamiento/stores/preferenciasStore.js'
+import { MONEDAS } from '../../almacenamiento/constantes/Monedas.js'
 import DialogoAgregarComercioRapido from './Dialogos/DialogoAgregarComercioRapido.vue'
 import { filtrarInputPrecio, formatearPrecioAlSalir, soloNumerosDecimales } from '../../utils/PrecioUtils.js'
 
@@ -174,8 +174,9 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-// Store de comercios
+// Stores
 const comerciosStore = useComerciStore()
+const preferenciasStore = usePreferenciasStore()
 
 // Opciones de moneda (importadas desde constantes)
 const opcionesMoneda = MONEDAS
@@ -185,7 +186,7 @@ const datosInternos = ref({
   comercio: props.modelValue.comercio || '',
   direccion: props.modelValue.direccion || '',
   valor: props.modelValue.valor || null,
-  moneda: props.modelValue.moneda || MONEDA_DEFAULT,
+  moneda: props.modelValue.moneda || preferenciasStore.moneda,
 })
 
 // Estado del selector de comercios
@@ -293,13 +294,7 @@ const textoVisibleDireccion = computed(() => {
 // LIFECYCLE
 // ========================================
 
-// Cargar moneda guardada al montar
 onMounted(async () => {
-  const preferencias = await preferenciasService.obtenerPreferencias()
-  datosInternos.value.moneda = preferencias.moneda
-  emitirCambios()
-
-  // Cargar comercios
   await comerciosStore.cargarComercios()
 })
 
@@ -491,7 +486,7 @@ function alCrearComercio(comercioCreado) {
 
 // Al cambiar moneda, guardarla
 async function alCambiarMoneda() {
-  await preferenciasService.guardarMoneda(datosInternos.value.moneda)
+  await preferenciasStore.guardarMoneda(datosInternos.value.moneda)
   emitirCambios()
 }
 
@@ -503,7 +498,7 @@ watch(
       comercio: nuevoValor.comercio || '',
       direccion: nuevoValor.direccion || '',
       valor: nuevoValor.valor || null,
-      moneda: nuevoValor.moneda || MONEDA_DEFAULT,
+      moneda: nuevoValor.moneda || preferenciasStore.moneda,
     }
     valorPrecioTexto.value = formatearPrecioAlSalir(nuevoValor.valor != null ? String(nuevoValor.valor) : '')
   },

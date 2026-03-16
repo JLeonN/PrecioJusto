@@ -21,3 +21,6 @@ Las tareas más difíciles siempre van arriba.
 
 ### Dificultad 3/10
 - **Mesa de Trabajo — Buscador de productos:** Agregar el mismo buscador que tienen las vistas de Productos y Comercios (mismo componente, mismo comportamiento) para filtrar los productos visibles en la Mesa de Trabajo.
+
+### Dificultad 2/10
+- **Investigar GitHub Pages para este proyecto:** Evaluar si es viable usar GitHub Pages para publicar una versión web de la app (Quasar puede compilar como SPA). Considerar las limitaciones: GitHub Pages solo sirve archivos estáticos, no hay backend ni base de datos, y la app usa Capacitor para Android. Determinar si tendría utilidad real (demo, landing, versión web limitada) o si no aplica al modelo de la app.

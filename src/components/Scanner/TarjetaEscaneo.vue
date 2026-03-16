@@ -166,13 +166,14 @@
           </div>
           <div class="col-4">
             <q-select
-              v-model="datosForm.moneda"
+              :model-value="datosForm.moneda"
               outlined
               dense
               :options="MONEDAS"
               emit-value
               map-options
               hide-bottom-space
+              @update:model-value="alCambiarMoneda"
             />
           </div>
         </div>
@@ -214,7 +215,8 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import { useQuasar, copyToClipboard } from 'quasar'
 import { useTecladoVirtual } from '../../composables/useTecladoVirtual.js'
-import { MONEDAS, MONEDA_DEFAULT } from '../../almacenamiento/constantes/Monedas.js'
+import { MONEDAS } from '../../almacenamiento/constantes/Monedas.js'
+import { usePreferenciasStore } from '../../almacenamiento/stores/preferenciasStore.js'
 import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
 import { filtrarInputPrecio, formatearPrecioAlSalir, soloNumerosDecimales } from '../../utils/PrecioUtils.js'
 import {
@@ -256,6 +258,7 @@ const editando = ref(false)
 const precioTexto = ref('')
 
 const { inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo } = useCamaraFoto()
+const preferenciasStore = usePreferenciasStore()
 
 const datosForm = ref({
   nombre: '',
@@ -264,7 +267,7 @@ const datosForm = ref({
   unidad: 'unidad',
   imagen: null,
   precio: null,
-  moneda: MONEDA_DEFAULT,
+  moneda: preferenciasStore.moneda,
 })
 
 const abierto = computed({
@@ -317,7 +320,7 @@ watch(
       unidad: nuevoItem.unidad || 'unidad',
       imagen: nuevoItem.imagen || null,
       precio: nuevoItem.precio || null,
-      moneda: nuevoItem.moneda || MONEDA_DEFAULT,
+      moneda: nuevoItem.moneda || preferenciasStore.moneda,
     }
     precioTexto.value = formatearPrecioAlSalir(nuevoItem.precio ? String(nuevoItem.precio) : '')
     editando.value = false
@@ -337,10 +340,15 @@ function alCerrar() {
     unidad: 'unidad',
     imagen: null,
     precio: null,
-    moneda: MONEDA_DEFAULT,
+    moneda: preferenciasStore.moneda,
   }
   precioTexto.value = ''
   editando.value = false
+}
+
+function alCambiarMoneda(val) {
+  datosForm.value.moneda = val
+  preferenciasStore.guardarMoneda(val)
 }
 
 function alCambiarPrecio(val) {

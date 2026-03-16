@@ -244,6 +244,7 @@ import { useQuasar, copyToClipboard } from 'quasar'
 import TarjetaBase from '../Tarjetas/TarjetaBase.vue'
 import SelectorComercioDireccion from '../Compartidos/SelectorComercioDireccion.vue'
 import { MONEDAS } from '../../almacenamiento/constantes/Monedas.js'
+import { usePreferenciasStore } from '../../almacenamiento/stores/preferenciasStore.js'
 import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
 import { filtrarInputPrecio, formatearPrecioAlSalir, soloNumerosDecimales, formatearPrecioDisplay } from '../../utils/PrecioUtils.js'
 import {
@@ -280,6 +281,7 @@ const emit = defineEmits(['long-press', 'toggle-seleccion', 'update:item', 'elim
 
 const $q = useQuasar()
 const { inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo } = useCamaraFoto()
+const preferenciasStore = usePreferenciasStore()
 
 // Estado de expansión manejado localmente para poder controlarla desde los chips
 const expandidoLocal = ref(false)
@@ -340,6 +342,7 @@ function alSalirPrecio() {
 function actualizar(campo, valor) {
   datosEditando.value = { ...datosEditando.value, [campo]: valor }
   emit('update:item', { ...datosEditando.value })
+  if (campo === 'moneda') preferenciasStore.guardarMoneda(valor)
 }
 
 // Foto
