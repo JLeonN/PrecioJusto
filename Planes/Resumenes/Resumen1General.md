@@ -1044,7 +1044,7 @@ H. Arquitectura y Código
 - Señal "app lista" vía `nextTick()` en `App.vue`
 
 ### Estado Actual
-- **Versión:** 1.0.2
+- **Versión:** 1.0.3
 - **Almacenamiento:** Local (Capacitor Storage)
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
@@ -1052,7 +1052,7 @@ H. Arquitectura y Código
 - **FAB reutilizable:** Completado (FabAcciones.vue — Speed Dial multi-acción o botón directo)
 - **Flujo de escaneo — Modo A (Escaneo rápido):** Completado (TarjetaEscaneo, foto, edición inline)
 - **Flujo de escaneo — Modo B (Ráfaga):** Completado (cámara continua, búsqueda background, aviso sobre cámara)
-- **Mesa de trabajo:** Completada (reemplaza BandejaBorradores; ordenamiento, selección, envío parcial)
+- **Mesa de trabajo:** Completada (reemplaza BandejaBorradores; ordenamiento, selección, envío parcial, filtro de búsqueda por nombre/marca/categoría)
 - **APIs de búsqueda:** Completado (7 APIs orquestadas, libros por ISBN, fuenteDato en UI)
 - **Safe area:** Completada (Android 15+ edge-to-edge)
 - **Botón back nativo:** Completado
@@ -1084,4 +1084,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 16 de Marzo 2026 — `preferenciasStore.js` implementado (moneda/unidad como store Pinia reactivo, carga única al iniciar); inputs de precio unificados (`PrecioUtils.js`, `inputmode="decimal"`, `toFixed(2)` en blur, display `es-UY`).
+**Última actualización:** 16 de Marzo 2026 — v1.0.3: filtro de búsqueda en Mesa de Trabajo (nombre/marca/categoría); `preferenciasStore.js` como fuente única de verdad para moneda/unidad; `PrecioUtils.js` para inputs y display de precios (`inputmode="decimal"`, `toFixed(2)` en blur, display `es-UY`).
