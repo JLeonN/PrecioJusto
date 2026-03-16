@@ -6,61 +6,7 @@ Este documento complementa el Plan de Despliegue con ejemplos de código especí
 
 ## 1. CONFIGURACIÓN DE `quasar.config.js`
 
-### Opción A: Deploy en dominio raíz (jleonn.github.io)
-
-```javascript
-// quasar.config.js
-import { defineConfig } from '#q-app/wrappers'
-
-export default defineConfig((/* ctx */) => {
-  return {
-    boot: ['axios'],
-    css: ['app.css'],
-    extras: ['roboto-font', 'material-icons'],
-
-    build: {
-      target: {
-        browser: ['es2022', 'firefox115', 'chrome115', 'safari14'],
-        node: 'node20',
-      },
-      vueRouterMode: 'hash',
-
-      // Configuración para GitHub Pages - Dominio raíz
-      publicPath: '/',
-
-      vitePlugins: [
-        [
-          'vite-plugin-checker',
-          {
-            eslint: {
-              lintCommand: 'eslint -c ./eslint.config.js "./src*/**/*.{js,mjs,cjs,vue}"',
-              useFlatConfig: true,
-            },
-          },
-          { server: false },
-        ],
-      ],
-    },
-
-    devServer: {
-      open: true,
-    },
-
-    framework: {
-      config: {},
-      plugins: ['Notify', 'Dialog'],
-    },
-
-    animations: [],
-
-    capacitor: {
-      hideSplashscreen: true,
-    },
-  }
-})
-```
-
-### Opción B: Deploy en subdirectorio (jleonn.github.io/PrecioJusto)
+### Deploy en subdirectorio (jleonn.github.io/PrecioJusto)
 
 ```javascript
 // quasar.config.js
@@ -124,10 +70,10 @@ export default defineConfig((/* ctx */) => {
 name: Deploy Precio Justo to GitHub Pages
 
 on:
-  # Ejecutar en cada push a main
+  # Ejecutar en cada push a master
   push:
     branches:
-      - main
+      - master
 
   # Permitir ejecución manual desde Actions tab
   workflow_dispatch:
@@ -222,11 +168,69 @@ export function usePlataforma() {
 }
 ```
 
+---
+
+## 4. COMPONENTE UI PARA FUNCIONALIDADES NO DISPONIBLES EN WEB
+
+### Componente reutilizable de aviso
+
+**Archivo:** `src/components/FuncionalidadNoDisponible.vue`
+
+```vue
+<template>
+  <q-card flat bordered class="funcionalidad-no-disponible">
+    <q-card-section class="row items-center q-gutter-sm">
+      <q-icon :name="icono" size="40px" color="grey-6" />
+      <div class="col">
+        <div class="text-subtitle1 text-weight-medium text-grey-8">
+          {{ titulo }}
+        </div>
+        <div class="text-caption text-grey-6">
+          {{ descripcion }}
+        </div>
+      </div>
+    </q-card-section>
+    <q-separator />
+    <q-card-section class="q-py-sm bg-blue-1">
+      <div class="row items-center q-gutter-xs">
+        <q-icon name="phone_android" size="18px" color="primary" />
+        <span class="text-caption text-primary"> Disponible en la app Android </span>
+      </div>
+    </q-card-section>
+  </q-card>
+</template>
+
+<script setup>
+defineProps({
+  titulo: {
+    type: String,
+    default: 'Funcionalidad no disponible',
+  },
+  descripcion: {
+    type: String,
+    default: 'Esta función solo está disponible en la versión Android de la aplicación.',
+  },
+  icono: {
+    type: String,
+    default: 'block',
+  },
+})
+</script>
+
+<style scoped>
+.funcionalidad-no-disponible {
+  border-color: #e0e0e0;
+  border-radius: 8px;
+}
+</style>
+```
+
 ### Uso en componentes
 
 ```vue
 <template>
   <div>
+    <!-- Si es nativo, mostrar funcionalidad real -->
     <q-btn
       v-if="esNativo"
       @click="escanearCodigoNativo"
@@ -234,40 +238,31 @@ export function usePlataforma() {
       icon="qr_code_scanner"
     />
 
-    <q-btn
+    <!-- Si es web, mostrar componente de aviso -->
+    <FuncionalidadNoDisponible
       v-else
-      @click="mostrarMensajeWebNoSoportado"
-      label="Escanear no disponible en web"
-      icon="qr_code_scanner"
-      disable
+      titulo="Escáner de códigos de barras"
+      descripcion="El escaneo automático de códigos de barras requiere la cámara del dispositivo móvil."
+      icono="qr_code_scanner"
     />
   </div>
 </template>
 
 <script setup>
 import { usePlataforma } from 'src/composables/usePlataforma'
-import { useQuasar } from 'quasar'
+import FuncionalidadNoDisponible from 'src/components/FuncionalidadNoDisponible.vue'
 
-const { esNativo, esWeb } = usePlataforma()
-const $q = useQuasar()
+const { esNativo } = usePlataforma()
 
 const escanearCodigoNativo = async () => {
   // Implementación con Capacitor MLKit
-}
-
-const mostrarMensajeWebNoSoportado = () => {
-  $q.notify({
-    type: 'warning',
-    message: 'El escaneo de códigos requiere la app móvil',
-    caption: 'Esta función no está disponible en la versión web',
-  })
 }
 </script>
 ```
 
 ---
 
-## 4. ALTERNATIVA: MÉTODO MANUAL CON `push-dir`
+## 5. ALTERNATIVA: MÉTODO MANUAL CON `push-dir`
 
 ### Instalación
 
@@ -311,9 +306,9 @@ npm run deploy
 
 ---
 
-## 5. FALLBACK PARA FEATURES NO DISPONIBLES EN WEB
+## 6. FALLBACK PARA FEATURES NO DISPONIBLES EN WEB
 
-### Scanner de código de barras
+### Scanner de código de barras con fallback de entrada manual
 
 **Archivo:** `src/composables/useEscanerCodigoBarra.js`
 
@@ -326,9 +321,12 @@ export function useEscanerCodigoBarra() {
   const { esNativo } = usePlataforma()
   const $q = useQuasar()
 
+  // Indica si el escaneo nativo está soportado
+  const soportaEscaneo = () => esNativo.value
+
   const escanearCodigo = async () => {
     if (!esNativo.value) {
-      // Versión web: mostrar diálogo para entrada manual
+      // Versión web: entrada manual con diálogo
       return await solicitarCodigoManual()
     }
 
@@ -350,7 +348,7 @@ export function useEscanerCodigoBarra() {
       $q.dialog({
         title: 'Ingresar código de barras',
         message:
-          'El escaneo automático solo está disponible en la app móvil. Por favor, ingresa el código manualmente:',
+          'El escaneo automático solo está disponible en la app Android. Ingresá el código manualmente:',
         prompt: {
           model: '',
           type: 'text',
@@ -368,10 +366,6 @@ export function useEscanerCodigoBarra() {
     })
   }
 
-  const soportaEscaneo = () => {
-    return esNativo.value
-  }
-
   return {
     escanearCodigo,
     soportaEscaneo,
@@ -379,57 +373,50 @@ export function useEscanerCodigoBarra() {
 }
 ```
 
-### Camera API con fallback
+### Listado de funcionalidades con fallback recomendado
 
-```javascript
-import { Camera } from '@capacitor/camera'
-import { usePlataforma } from './usePlataforma'
+| Funcionalidad                | Nativo                  | Web                                          | Componente a usar               |
+| ---------------------------- | ----------------------- | -------------------------------------------- | ------------------------------- |
+| Escaneo de códigos de barras | `BarcodeScanner.scan()` | `FuncionalidadNoDisponible` + diálogo manual | `useEscanerCodigoBarra.js`      |
+| Cámara nativa completa       | `Camera.getPhoto()`     | `FuncionalidadNoDisponible`                  | `FuncionalidadNoDisponible.vue` |
+| Notificaciones push          | Plugin nativo           | `FuncionalidadNoDisponible`                  | `FuncionalidadNoDisponible.vue` |
 
-export function useCamara() {
-  const { esNativo } = usePlataforma()
+### Ejemplo: múltiples features no disponibles en una página
 
-  const tomarFoto = async () => {
-    try {
-      const image = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: esNativo.value ? 'uri' : 'dataUrl',
-        source: 'camera',
-      })
+```vue
+<template>
+  <q-page padding>
+    <div class="q-gutter-md">
+      <!-- Scanner: fallback con entrada manual -->
+      <FuncionalidadNoDisponible
+        v-if="esWeb"
+        titulo="Escáner de códigos de barras"
+        descripcion="El escaneo automático requiere la cámara del dispositivo móvil."
+        icono="qr_code_scanner"
+      />
 
-      return image
-    } catch (error) {
-      console.error('Error tomando foto:', error)
-      return null
-    }
-  }
+      <!-- Cámara: no disponible en web -->
+      <FuncionalidadNoDisponible
+        v-if="esWeb"
+        titulo="Cámara de fotos"
+        descripcion="La captura de fotos de productos requiere la app Android."
+        icono="photo_camera"
+      />
+    </div>
+  </q-page>
+</template>
 
-  const seleccionarImagen = async () => {
-    try {
-      const image = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: esNativo.value ? 'uri' : 'dataUrl',
-        source: 'photos',
-      })
+<script setup>
+import { usePlataforma } from 'src/composables/usePlataforma'
+import FuncionalidadNoDisponible from 'src/components/FuncionalidadNoDisponible.vue'
 
-      return image
-    } catch (error) {
-      console.error('Error seleccionando imagen:', error)
-      return null
-    }
-  }
-
-  return {
-    tomarFoto,
-    seleccionarImagen,
-  }
-}
+const { esWeb } = usePlataforma()
+</script>
 ```
 
 ---
 
-## 6. SCRIPT DE VALIDACIÓN PRE-DEPLOY
+## 7. SCRIPT DE VALIDACIÓN PRE-DEPLOY
 
 ### Archivo: `scripts/validar-build.js`
 
@@ -499,7 +486,7 @@ function getDirectorySize(dirPath) {
 
 ---
 
-## 7. README BADGE PARA STATUS DE DEPLOY
+## 8. README BADGE PARA STATUS DE DEPLOY
 
 ### Agregar al `README.md`
 
@@ -512,12 +499,12 @@ Aplicación para comparar y trackear precios de productos en diferentes comercio
 
 ## 🌐 Versiones
 
-- **Web:** https://jleonn.github.io/
+- **Web:** https://jleonn.github.io/PrecioJusto/
 - **Android:** [Descargar APK](link-to-release)
 
 ## 🚀 Deploy
 
-El sitio se despliega automáticamente a GitHub Pages cuando se hace push a `main`.
+El sitio se despliega automáticamente a GitHub Pages cuando se hace push a `master`.
 
 ### Deploy manual
 
@@ -531,7 +518,7 @@ npm run build
 
 ---
 
-## 8. ENVIRONMENT VARIABLES (SI SE NECESITAN)
+## 9. ENVIRONMENT VARIABLES (SI SE NECESITAN)
 
 ### Para APIs con diferentes endpoints
 
@@ -566,7 +553,7 @@ export { api }
 
 ---
 
-## 9. TESTING LOCAL DEL BUILD
+## 10. TESTING LOCAL DEL BUILD
 
 ### Servidor simple con Python
 
@@ -597,7 +584,7 @@ open http://localhost:8000
 
 ---
 
-## 10. TROUBLESHOOTING COMÚN
+## 11. TROUBLESHOOTING COMÚN
 
 ### Problema: Assets no cargan (404)
 

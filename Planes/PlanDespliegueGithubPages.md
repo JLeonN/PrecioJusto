@@ -50,19 +50,19 @@ Genera automáticamente:
 
 ### 1.3 Opciones de Despliegue en GitHub Pages
 
-#### Opción A: Usuario/Organización (Recomendada)
+#### Opción A: Usuario/Organización
 
 - **Repositorio:** `<username>.github.io`
 - **URL resultante:** `https://jleonn.github.io/`
 - **Requiere:** `publicPath` configurado como `/`
 - **Ventaja:** URL limpia en dominio raíz
 
-#### Opción B: Proyecto específico
+#### Opción B: Proyecto específico ⭐ ELEGIDA
 
-- **Repositorio:** Cualquier repo (ej: `PrecioJusto`)
+- **Repositorio:** `PrecioJusto` (repo actual)
 - **URL resultante:** `https://jleonn.github.io/PrecioJusto/`
-- **Requiere:** `publicPath` configurado como `/PrecioJusto/`
-- **Ventaja:** Permite múltiples proyectos
+- **Requiere:** `publicPath` configurado como `/PrecioJusto/'`
+- **Ventaja:** Permite múltiples proyectos, no requiere nuevo repo
 
 ### 1.4 Métodos de Publicación
 
@@ -113,16 +113,7 @@ Genera automáticamente:
 
 ### 2.1 Configuración en `quasar.config.js`
 
-**Para Opción A (usuario.github.io):**
-
-```javascript
-build: {
-  publicPath: '/',
-  // ... resto de configuración
-}
-```
-
-**Para Opción B (repo específico):**
+**Para Opción B - Subdirectorio (elegida):**
 
 ```javascript
 build: {
@@ -237,7 +228,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main # Cambiar a 'master' si es tu rama principal
+      - master # Rama principal del repositorio
   workflow_dispatch: # Permite ejecución manual
 
 # Permisos necesarios para GitHub Pages
@@ -329,7 +320,7 @@ Los siguientes plugins NO funcionarán en web:
 - `@capacitor-mlkit/barcode-scanning`
 - `@capacitor/camera` (funciona parcialmente con API web)
 
-**Solución:** Implementar detección de plataforma y fallbacks:
+**Solución:** Implementar detección de plataforma, componente de error UI y fallbacks:
 
 ```javascript
 import { Capacitor } from '@capacitor/core'
@@ -337,7 +328,8 @@ import { Capacitor } from '@capacitor/core'
 if (Capacitor.isNativePlatform()) {
   // Usar plugin nativo
 } else {
-  // Usar alternativa web o deshabilitar feature
+  // Mostrar componente FuncionalidadNoDisponible
+  // Ver EjemplosConfiguracionWeb.md sección 4
 }
 ```
 
@@ -419,12 +411,13 @@ Antes de considerar el deploy exitoso, validar:
 
 ## 10. PRÓXIMOS PASOS
 
-1. **Decidir estrategia:** Opción A (dominio raíz) vs Opción B (subdirectorio)
-2. **Configurar proyecto:** Modificar `quasar.config.js` según opción elegida
-3. **Implementar GitHub Actions:** Crear workflow file
-4. **Testing:** Validar compilación local
-5. **Deploy:** Push y monitorear despliegue
-6. **Validación:** Ejecutar testing checklist completo
+1. ~~**Decidir estrategia:**~~ Opción B (subdirectorio `/PrecioJusto/`) - DECIDIDO
+2. **Configurar proyecto:** Descomentar y modificar `publicPath` en `quasar.config.js`
+3. **Crear componente UI de error:** `FuncionalidadNoDisponible.vue` para features solo Android
+4. **Implementar GitHub Actions:** Crear workflow file apuntando a rama `master`
+5. **Testing:** Validar compilación local
+6. **Deploy:** Push y monitorear despliegue
+7. **Validación:** Ejecutar testing checklist completo
 
 ---
 

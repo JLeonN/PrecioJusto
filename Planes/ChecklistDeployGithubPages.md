@@ -6,7 +6,7 @@
 
 Desplegar la aplicación Precio Justo en GitHub Pages usando GitHub Actions para deploy automático.
 
-**URL objetivo:** `https://jleonn.github.io/` o `https://jleonn.github.io/PrecioJusto/`
+**URL objetivo:** `https://jleonn.github.io/PrecioJusto/`
 
 ---
 
@@ -21,22 +21,11 @@ Desplegar la aplicación Precio Justo en GitHub Pages usando GitHub Actions para
 
 ## 📋 FASE 1: DECISIÓN DE ESTRATEGIA
 
-### Elegir tipo de deployment:
-
-**Opción A: Dominio Raíz** ⭐ RECOMENDADO
-
-- [ ] Crear nuevo repositorio `jleonn.github.io`
-- [ ] Mover código a nuevo repositorio
-- [ ] Configurar `publicPath: '/'`
-- [ ] URL final: `https://jleonn.github.io/`
-
-**Opción B: Subdirectorio del Repo Actual**
+### Estrategia elegida: Subdirectorio del Repo Actual (Opción B)
 
 - [ ] Mantener repositorio actual `PrecioJusto`
 - [ ] Configurar `publicPath: '/PrecioJusto/'`
 - [ ] URL final: `https://jleonn.github.io/PrecioJusto/`
-
-**Decisión tomada:** ******\_******
 
 ---
 
@@ -54,18 +43,7 @@ Desplegar la aplicación Precio Justo en GitHub Pages usando GitHub Actions para
 
 - [ ] Abrir `quasar.config.js`
 - [ ] Localizar sección `build`
-- [ ] Agregar configuración de `publicPath`:
-
-**Si elegiste Opción A:**
-
-```javascript
-build: {
-  publicPath: '/',
-  // ...resto
-}
-```
-
-**Si elegiste Opción B:**
+- [ ] Agregar/descomentar configuración de `publicPath`:
 
 ```javascript
 build: {
@@ -98,9 +76,7 @@ build: {
 
 - [ ] Crear archivo `.github/workflows/deploy.yml`
 - [ ] Copiar contenido del workflow (ver `EjemplosConfiguracionWeb.md`)
-- [ ] Verificar que la rama en `branches:` coincide con tu rama principal
-  - [ ] `main` (recomendado)
-  - [ ] `master` (si usas master)
+- [ ] Verificar que la rama en `branches:` es `master`
 
 ### 3.3 Validar sintaxis YAML
 
@@ -158,7 +134,7 @@ build: {
 
 ### 5.3 Push
 
-- [ ] Ejecutar: `git push origin main` (o `master`)
+- [ ] Ejecutar: `git push origin master`
 - [ ] Verificar que el push fue exitoso
 
 ---
@@ -220,7 +196,7 @@ build: {
 
 - [ ] Obtener URL de producción:
   - GitHub Actions → último workflow → job "deploy" → output URL
-  - O construir manualmente: `https://jleonn.github.io/` o `https://jleonn.github.io/PrecioJusto/`
+  - O construir manualmente: `https://jleonn.github.io/PrecioJusto/`
 - [ ] Abrir URL en navegador
 - [ ] Esperar a que cargue (puede tomar 1-2 minutos la primera vez)
 
@@ -303,7 +279,7 @@ build: {
 
 ### 10.1 Futuras actualizaciones
 
-- [ ] Entender que cada push a `main` triggerea deploy automático
+- [ ] Entender que cada push a `master` triggerea deploy automático
 - [ ] Monitorear GitHub Actions en cada deploy
 - [ ] Validar que el sitio sigue funcionando después de updates
 
@@ -328,7 +304,7 @@ build: {
 
 ### URLs Importantes
 
-**Producción:** **********************\_\_\_**********************
+**Producción:** https://jleonn.github.io/PrecioJusto/
 
 **GitHub Actions:** https://github.com/JLeonN/PrecioJusto/actions
 

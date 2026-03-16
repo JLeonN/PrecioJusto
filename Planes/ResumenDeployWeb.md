@@ -9,11 +9,11 @@
 touch public/.nojekyll
 ```
 
-Modificar `quasar.config.js`:
+Modificar `quasar.config.js` (descomentar y cambiar `publicPath`):
 
 ```javascript
 build: {
-  publicPath: '/',  // o '/PrecioJusto/' para subdirectorio
+  publicPath: '/PrecioJusto/',
   vueRouterMode: 'hash',
 }
 ```
@@ -27,7 +27,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   workflow_dispatch:
 
 permissions:
@@ -77,29 +77,23 @@ jobs:
 ```bash
 git add .
 git commit -m "feat: configurar deploy a GitHub Pages"
-git push
+git push origin master
 ```
 
 GitHub Actions se encargará del resto. La app estará en:
 
-- `https://jleonn.github.io/` (si publicPath es '/')
-- `https://jleonn.github.io/PrecioJusto/` (si publicPath es '/PrecioJusto/')
+- `https://jleonn.github.io/PrecioJusto/`
 
 ---
 
-## Decisiones Clave
+## Decisiones Tomadas
 
-### Opción 1: Dominio Raíz ⭐ RECOMENDADO
-
-- **Repo:** `jleonn.github.io`
-- **URL:** `https://jleonn.github.io/`
-- **publicPath:** `'/'`
-
-### Opción 2: Subdirectorio
+### Opción B: Subdirectorio ⭐ ELEGIDA
 
 - **Repo:** `PrecioJusto` (actual)
 - **URL:** `https://jleonn.github.io/PrecioJusto/`
 - **publicPath:** `'/PrecioJusto/'`
+- **Rama:** `master`
 
 ---
 
@@ -119,17 +113,18 @@ GitHub Actions se encargará del resto. La app estará en:
 - Cámara nativa completa
 - Notificaciones push
 
-**Solución:** Detectar plataforma y mostrar alternativas
+**Solución:** Detectar plataforma y mostrar componente `FuncionalidadNoDisponible.vue`:
 
-```javascript
-import { Capacitor } from '@capacitor/core'
-
-if (Capacitor.isNativePlatform()) {
-  // Funcionalidad nativa
-} else {
-  // Fallback web
-}
+```vue
+<FuncionalidadNoDisponible
+  v-if="esWeb"
+  titulo="Escáner de códigos de barras"
+  descripcion="El escaneo automático requiere la cámara del dispositivo móvil."
+  icono="qr_code_scanner"
+/>
 ```
+
+Ver detalles completos en `EjemplosConfiguracionWeb.md` secciones 3, 4 y 6.
 
 ---
 
@@ -166,5 +161,7 @@ Validar:
 
 ## Documentos Completos
 
-- **Plan completo:** `PlanDespliegueGithubPages.md`
-- **Ejemplos código:** `EjemplosConfiguracionWeb.md`
+- **Plan de despliegue:** `PlanDespliegueGithubPages.md`
+- **Plan de implementación paso a paso:** `PlanImplementacionDeployWeb.md`
+- **Ejemplos de código:** `EjemplosConfiguracionWeb.md`
+- **Checklist completo:** `ChecklistDeployGithubPages.md`

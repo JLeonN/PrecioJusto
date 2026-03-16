@@ -89,7 +89,21 @@ build: {
   // vueOptionsAPI: false,
 ```
 
-3. **Agregar la línea `publicPath`** DESPUÉS de `vueRouterMode`:
+3. **Agregar/descomentar la línea `publicPath`** (ya existe comentada, descomentar y cambiar):
+
+Cambiar esto:
+
+```javascript
+// publicPath: '/',
+```
+
+Por esto:
+
+```javascript
+  publicPath: '/PrecioJusto/',
+```
+
+Resultado final de la sección `build`:
 
 ```javascript
 build: {
@@ -99,7 +113,7 @@ build: {
   },
 
   vueRouterMode: 'hash',
-  publicPath: '/PrecioJusto/', // ← AGREGAR ESTA LÍNEA
+  publicPath: '/PrecioJusto/',
 
   // vueRouterBase,
   // vueDevtools,
@@ -176,7 +190,7 @@ name: Deploy Precio Justo to GitHub Pages
 on:
   push:
     branches:
-      - main
+      - master
   workflow_dispatch:
 
 permissions:
@@ -237,12 +251,7 @@ jobs:
 
 ### ⚠️ IMPORTANTE:
 
-- **Verificar rama:** Si tu rama principal se llama `master` en lugar de `main`, cambiar línea 5:
-
-  ```yaml
-  branches:
-    - master # ← Cambiar aquí si es necesario
-  ```
+- **Rama configurada:** El workflow apunta a `master` (rama principal del repositorio)
 
 - **Indentación:** YAML es sensible a espacios. Usa ESPACIOS, NO tabs
 - **No modificar nombres de actions** (actions/checkout@v4, etc.)
@@ -264,7 +273,122 @@ git branch
 
 ---
 
-## PASO 5: VERIFICAR `package.json`
+## PASO 5: CREAR COMPOSABLE Y COMPONENTE DE ERROR PARA WEB
+
+**¿Por qué?** Las funcionalidades nativas de Android (escáner, cámara, notificaciones) no están disponibles en web. Necesitamos un componente visual que informe al usuario y un composable para detectar la plataforma.
+
+### Instrucciones:
+
+1. **Crear composable de detección de plataforma:**
+
+**Archivo:** `src/composables/usePlataforma.js`
+
+```javascript
+import { Capacitor } from '@capacitor/core'
+import { computed } from 'vue'
+
+export function usePlataforma() {
+  const esNativo = computed(() => Capacitor.isNativePlatform())
+  const esWeb = computed(() => !Capacitor.isNativePlatform())
+  const esAndroid = computed(() => Capacitor.getPlatform() === 'android')
+
+  const nombrePlataforma = computed(() => Capacitor.getPlatform())
+
+  return {
+    esNativo,
+    esWeb,
+    esAndroid,
+    nombrePlataforma,
+  }
+}
+```
+
+2. **Crear componente UI de error:**
+
+**Archivo:** `src/components/FuncionalidadNoDisponible.vue`
+
+```vue
+<template>
+  <q-card flat bordered class="funcionalidad-no-disponible">
+    <q-card-section class="row items-center q-gutter-sm">
+      <q-icon :name="icono" size="40px" color="grey-6" />
+      <div class="col">
+        <div class="text-subtitle1 text-weight-medium text-grey-8">
+          {{ titulo }}
+        </div>
+        <div class="text-caption text-grey-6">
+          {{ descripcion }}
+        </div>
+      </div>
+    </q-card-section>
+    <q-separator />
+    <q-card-section class="q-py-sm bg-blue-1">
+      <div class="row items-center q-gutter-xs">
+        <q-icon name="phone_android" size="18px" color="primary" />
+        <span class="text-caption text-primary"> Disponible en la app Android </span>
+      </div>
+    </q-card-section>
+  </q-card>
+</template>
+
+<script setup>
+defineProps({
+  titulo: {
+    type: String,
+    default: 'Funcionalidad no disponible',
+  },
+  descripcion: {
+    type: String,
+    default: 'Esta función solo está disponible en la versión Android de la aplicación.',
+  },
+  icono: {
+    type: String,
+    default: 'block',
+  },
+})
+</script>
+
+<style scoped>
+.funcionalidad-no-disponible {
+  border-color: #e0e0e0;
+  border-radius: 8px;
+}
+</style>
+```
+
+3. **Uso en cualquier componente:**
+
+```vue
+<template>
+  <div>
+    <q-btn v-if="esNativo" @click="escanear" label="Escanear" icon="qr_code_scanner" />
+    <FuncionalidadNoDisponible
+      v-else
+      titulo="Escáner de códigos de barras"
+      descripcion="El escaneo automático requiere la cámara del dispositivo móvil."
+      icono="qr_code_scanner"
+    />
+  </div>
+</template>
+
+<script setup>
+import { usePlataforma } from 'src/composables/usePlataforma'
+import FuncionalidadNoDisponible from 'src/components/FuncionalidadNoDisponible.vue'
+
+const { esNativo } = usePlataforma()
+</script>
+```
+
+### ✅ Validación:
+
+- [ ] Composable `src/composables/usePlataforma.js` creado
+- [ ] Componente `src/components/FuncionalidadNoDisponible.vue` creado
+- [ ] El componente se muestra correctamente en web (ejecutar `npm run dev`)
+- [ ] En web muestra el aviso; en nativo muestra la funcionalidad real
+
+---
+
+## PASO 6: VERIFICAR `package.json`
 
 **¿Por qué?** GitHub Actions ejecutará `npm run build`, debemos asegurarnos que existe.
 
@@ -298,7 +422,7 @@ git branch
 
 ---
 
-## PASO 6: TESTING LOCAL ANTES DE COMMIT
+## PASO 7: TESTING LOCAL ANTES DE COMMIT
 
 **¿Por qué?** Validar que la compilación funciona ANTES de subir a GitHub.
 
@@ -366,7 +490,7 @@ python3 -m http.server 8000
 
 ---
 
-## PASO 7: COMMIT DE CAMBIOS
+## PASO 8: COMMIT DE CAMBIOS
 
 **¿Por qué?** Necesitamos guardar nuestros cambios en Git antes de subirlos.
 
@@ -387,6 +511,8 @@ Changes not staged for commit:
 Untracked files:
   .github/
   public/.nojekyll
+  src/composables/usePlataforma.js
+  src/components/FuncionalidadNoDisponible.vue
 ```
 
 2. **Agregar TODOS los archivos modificados:**
@@ -408,6 +534,8 @@ Changes to be committed:
   new file:   .github/workflows/deploy.yml
   modified:   quasar.config.js
   new file:   public/.nojekyll
+  new file:   src/composables/usePlataforma.js
+  new file:   src/components/FuncionalidadNoDisponible.vue
 ```
 
 4. **Hacer commit:**
@@ -419,7 +547,7 @@ git commit -m "feat: configurar deploy automático a GitHub Pages"
 **Resultado esperado:**
 
 ```
-[main abc1234] feat: configurar deploy automático a GitHub Pages
+[master abc1234] feat: configurar deploy automático a GitHub Pages
  3 files changed, 52 insertions(+)
  create mode 100644 .github/workflows/deploy.yml
  create mode 100644 public/.nojekyll
@@ -433,19 +561,13 @@ git commit -m "feat: configurar deploy automático a GitHub Pages"
 
 ---
 
-## PASO 8: PUSH A GITHUB
+## PASO 9: PUSH A GITHUB
 
 **¿Por qué?** Subir los cambios a GitHub para que GitHub Actions pueda ejecutarse.
 
 ### Instrucciones:
 
 1. **Subir cambios:**
-
-```bash
-git push origin main
-```
-
-**O si tu rama se llama `master`:**
 
 ```bash
 git push origin master
@@ -462,7 +584,7 @@ Writing objects: 100% (6/6), 1.23 KiB | 1.23 MiB/s, done.
 Total 6 (delta 2), reused 0 (delta 0), pack-reused 0
 remote: Resolving deltas: 100% (2/2), completed with 1 local object.
 To github.com:JLeonN/PrecioJusto.git
-   abc1234..def5678  main -> main
+   abc1234..def5678  master -> master
 ```
 
 2. **Si hay error de autenticación:**
@@ -473,7 +595,7 @@ git config --global user.name "Tu Nombre"
 git config --global user.email "tu@email.com"
 
 # Intentar push nuevamente
-git push origin main
+git push origin master
 ```
 
 ### ✅ Validación:
@@ -483,7 +605,7 @@ git push origin main
 
 ---
 
-## PASO 9: CONFIGURAR GITHUB PAGES EN EL REPOSITORIO
+## PASO 10: CONFIGURAR GITHUB PAGES EN EL REPOSITORIO
 
 **¿Por qué?** Debemos decirle a GitHub que use GitHub Actions para el deploy.
 
@@ -519,7 +641,7 @@ git push origin main
 
 ---
 
-## PASO 10: VERIFICAR PERMISOS DE GITHUB ACTIONS
+## PASO 11: VERIFICAR PERMISOS DE GITHUB ACTIONS
 
 **¿Por qué?** GitHub Actions necesita permisos para desplegar.
 
@@ -545,7 +667,7 @@ git push origin main
 
 ---
 
-## PASO 11: MONITOREAR GITHUB ACTIONS
+## PASO 12: MONITOREAR GITHUB ACTIONS
 
 **¿Por qué?** Ver el progreso del deployment en tiempo real.
 
@@ -597,7 +719,7 @@ git push origin main
 
 ---
 
-## PASO 12: OBTENER URL DE PRODUCCIÓN
+## PASO 13: OBTENER URL DE PRODUCCIÓN
 
 **¿Por qué?** Necesitamos la URL para acceder a la app.
 
@@ -631,7 +753,7 @@ La URL será: `https://jleonn.github.io/PrecioJusto/`
 
 ---
 
-## PASO 13: VALIDAR SITIO EN PRODUCCIÓN
+## PASO 14: VALIDAR SITIO EN PRODUCCIÓN
 
 **¿Por qué?** Asegurarnos que todo funciona en producción.
 
@@ -679,7 +801,7 @@ La URL será: `https://jleonn.github.io/PrecioJusto/`
 
 ---
 
-## PASO 14: DOCUMENTAR EN README
+## PASO 15: DOCUMENTAR EN README
 
 **¿Por qué?** Para que otros (y tú en el futuro) sepan dónde está el sitio.
 
@@ -709,7 +831,7 @@ Aplicación para comparar y trackear precios de productos en diferentes comercio
 
 ## 🚀 Deploy
 
-La versión web se despliega automáticamente a GitHub Pages cuando se hace push a la rama `main`.
+La versión web se despliega automáticamente a GitHub Pages cuando se hace push a la rama `master`.
 
 ---
 ```
@@ -721,7 +843,7 @@ La versión web se despliega automáticamente a GitHub Pages cuando se hace push
 ```bash
 git add README.md
 git commit -m "docs: agregar enlace a demo en vivo"
-git push origin main
+git push origin master
 ```
 
 ### ✅ Validación:
@@ -733,7 +855,7 @@ git push origin main
 
 ---
 
-## PASO 15: PRUEBA DE DEPLOY AUTOMÁTICO
+## PASO 16: PRUEBA DE DEPLOY AUTOMÁTICO
 
 **¿Por qué?** Verificar que futuros cambios se despliegan automáticamente.
 
@@ -741,18 +863,24 @@ git push origin main
 
 1. **Hacer un cambio menor visible:**
 
-Abrir `src/pages/IndexPage.vue` y hacer un pequeño cambio, por ejemplo:
-
-Buscar algo como:
+Abrir `src/pages/IndexPage.vue` y hacer un pequeño cambio. Actualmente la página está vacía, cambiar:
 
 ```vue
-<div class="text-h2">Precio Justo</div>
+<template>
+  <q-page class="flex flex-center">
+    <!-- Vacío por ahora -->
+  </q-page>
+</template>
 ```
 
-Cambiar a:
+Por:
 
 ```vue
-<div class="text-h2">Precio Justo 🎉</div>
+<template>
+  <q-page class="flex flex-center">
+    <div class="text-h4 text-grey-7">Precio Justo - Web</div>
+  </q-page>
+</template>
 ```
 
 2. **Guardar el archivo**
@@ -762,7 +890,7 @@ Cambiar a:
 ```bash
 git add src/pages/IndexPage.vue
 git commit -m "test: validar deploy automático"
-git push origin main
+git push origin master
 ```
 
 4. **Monitorear GitHub Actions:**
@@ -773,7 +901,7 @@ git push origin main
 5. **Validar en producción:**
    - Ir a `https://jleonn.github.io/PrecioJusto/`
    - Recargar página (Ctrl+Shift+R para forzar recarga)
-   - Verificar que se ve el cambio (el emoji 🎉)
+   - Verificar que se ve el cambio (el texto "Precio Justo - Web")
 
 ### ✅ Validación:
 
@@ -789,14 +917,17 @@ git push origin main
 ### Checklist Final de Éxito:
 
 - [ ] ✅ Archivo `.nojekyll` creado
-- [ ] ✅ `quasar.config.js` configurado con `publicPath`
-- [ ] ✅ GitHub Actions workflow creado
+- [ ] ✅ `quasar.config.js` configurado con `publicPath: '/PrecioJusto/'`
+- [ ] ✅ Composable `usePlataforma.js` creado
+- [ ] ✅ Componente `FuncionalidadNoDisponible.vue` creado
+- [ ] ✅ GitHub Actions workflow creado (apuntando a `master`)
 - [ ] ✅ Build local exitoso
 - [ ] ✅ Cambios pusheados a GitHub
 - [ ] ✅ GitHub Pages configurado correctamente
 - [ ] ✅ Workflow ejecutado sin errores
 - [ ] ✅ Sitio accesible en `https://jleonn.github.io/PrecioJusto/`
 - [ ] ✅ Todas las funcionalidades core funcionan
+- [ ] ✅ Features no disponibles en web muestran componente de error
 - [ ] ✅ LocalStorage persiste datos
 - [ ] ✅ README.md actualizado
 - [ ] ✅ Deploy automático validado
@@ -815,7 +946,7 @@ git push origin main
 Ahora, cada vez que hagas:
 
 ```bash
-git push origin main
+git push origin master
 ```
 
 GitHub Actions automáticamente:
@@ -905,7 +1036,7 @@ GitHub Actions automáticamente:
 
 ### Mantenimiento
 
-- **Deploy automático:** Cada push a `main` despliega automáticamente
+- **Deploy automático:** Cada push a `master` despliega automáticamente
 - **Tiempo de deploy:** 2-4 minutos
 - **Límites GitHub Pages:** 100GB bandwidth/mes, 1GB tamaño repo
 
@@ -940,9 +1071,9 @@ npm run cel
 
 ---
 
-**Fecha de implementación:** ******\_\_\_******
+**Fecha de implementación:** **\*\***\_\_\_**\*\***
 
-**Implementado por:** ******\_\_\_******
+**Implementado por:** **\*\***\_\_\_**\*\***
 
 **Versión:** 1.0
 
