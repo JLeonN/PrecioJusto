@@ -130,26 +130,6 @@ function similitudTexto(texto1, texto2) { ... }
 }
 ```
 
-### GITHUB & COMMITS
-
-- **ANTES DE HACER UN COMMIT:**
-  - SIEMPRE pregunta antes: "¿Hacemos un commit?" o similar.
-  - Espera la confirmación del usuario.
-  - Solo después de la confirmación, procede a hacer el commit.
-  - Esta regla aplica SIEMPRE, sin excepciones.
-
-- Título:
-  - Máximo 3 o 4 palabras.
-  - Debe entregarse en un bloque de código independiente para copiar y pegar.
-- Descripción del commit:
-  - Breve, clara y técnica.
-  - Debe entregarse en un bloque de código independiente para copiar y pegar.
-  - Usar Markdown.
-  - Debe describir **todo el trabajo realizado desde el último commit hasta el momento actual**, no solo el último cambio.
-- Importante:
-  - El título y la descripción **siempre deben estar separados**.
-  - El commit debe asumir que pueden existir commits previos en el mismo chat.
-
 ### NOTAS DE PARCHE (USER-FACING)
 
 - Flujo: Antes de redactar, pregunta "¿Qué deben incluir las notas de parche de esta versión?" y sugiere contenido basado en lo último en lo que estuvimos trabajando.
