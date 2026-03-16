@@ -106,14 +106,15 @@
           <div class="col-8">
             <q-input
               ref="refInputPrecio"
-              :model-value="datosEditando.precio"
+              :model-value="precioTexto"
               label="Precio *"
               outlined
               dense
-              type="number"
-              min="0"
-              step="0.01"
-              @update:model-value="(v) => actualizar('precio', parseFloat(v) || 0)"
+              type="text"
+              inputmode="decimal"
+              @update:model-value="alCambiarPrecio"
+              @blur="alSalirPrecio"
+              @keydown="soloNumerosDecimales"
             />
           </div>
           <div class="col-4">
@@ -244,6 +245,7 @@ import TarjetaBase from '../Tarjetas/TarjetaBase.vue'
 import SelectorComercioDireccion from '../Compartidos/SelectorComercioDireccion.vue'
 import { MONEDAS } from '../../almacenamiento/constantes/Monedas.js'
 import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
+import { filtrarInputPrecio, formatearPrecioAlSalir, soloNumerosDecimales, formatearPrecioDisplay } from '../../utils/PrecioUtils.js'
 import {
   IconShoppingBag,
   IconBarcode,
@@ -289,9 +291,21 @@ const refSelectorComercio = ref(null)
 
 // Copia local para edición
 const datosEditando = ref({ ...props.item })
+// String para preservar ceros finales (ej: "3.30"); datosEditando.precio guarda el número
+const precioTexto = ref(formatearPrecioAlSalir(props.item.precio > 0 ? String(props.item.precio) : ''))
 
 // Sincroniza si el item cambia externamente (ej. asignación de comercio en bloque)
-watch(() => props.item, (v) => { datosEditando.value = { ...v } }, { deep: true })
+watch(
+  () => props.item,
+  (v) => {
+    datosEditando.value = { ...v }
+    // Evitar sobreescribir mientras el usuario escribe: solo actualizar si el número cambió
+    if (parseFloat(precioTexto.value) !== v.precio) {
+      precioTexto.value = formatearPrecioAlSalir(v.precio > 0 ? String(v.precio) : '')
+    }
+  },
+  { deep: true },
+)
 
 // Datos originales de la API/BD: el store los guarda en agregarItem() como datosOriginales
 const datosOriginales = ref(props.item?.datosOriginales ?? null)
@@ -312,6 +326,15 @@ const itemCompleto = computed(() =>
   datosEditando.value.precio > 0 &&
   !!datosEditando.value.comercio,
 )
+
+function alCambiarPrecio(val) {
+  precioTexto.value = filtrarInputPrecio(val)
+  actualizar('precio', parseFloat(precioTexto.value) || 0)
+}
+
+function alSalirPrecio() {
+  precioTexto.value = formatearPrecioAlSalir(precioTexto.value)
+}
 
 // Actualiza un campo y emite el item completo actualizado
 function actualizar(campo, valor) {
@@ -362,7 +385,7 @@ function irACampo(campo) {
 }
 
 function formatearPrecio(valor, moneda) {
-  return `$${valor.toLocaleString('es-UY')} ${moneda || 'UYU'}`
+  return `${formatearPrecioDisplay(valor)} ${moneda || 'UYU'}`
 }
 </script>
 

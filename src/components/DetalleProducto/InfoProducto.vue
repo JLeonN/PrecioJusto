@@ -187,7 +187,7 @@
 
         <!-- Precio más bajo actual -->
         <div class="precio-principal q-mt-sm">
-          <div class="text-h4 text-weight-bold text-primary">${{ producto.precioMejor }}</div>
+          <div class="text-h4 text-weight-bold text-primary">{{ formatearPrecioDisplay(producto.precioMejor) }}</div>
           <div class="comercio-info row items-center q-gutter-xs no-wrap q-mt-xs">
             <IconMapPin :size="18" class="text-grey-6" />
             <span class="text-body2 text-grey-7">{{ producto.comercioMejor }}</span>
@@ -252,6 +252,7 @@ import { useQuasar } from 'quasar'
 import CampoEditable from '../EditarComercio/CampoEditable.vue'
 import DialogoVerImagen from '../Compartidos/DialogoVerImagen.vue'
 import { useProductosStore } from '../../almacenamiento/stores/productosStore.js'
+import { formatearPrecioDisplay } from '../../utils/PrecioUtils.js'
 
 const $q = useQuasar()
 const productosStore = useProductosStore()

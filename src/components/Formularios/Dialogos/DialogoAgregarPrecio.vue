@@ -26,13 +26,16 @@
           <div class="col-8">
             <q-input
               ref="inputPrecioRef"
-              v-model.number="precioNuevo"
+              :model-value="precioTexto"
               label="Nuevo precio"
               outlined
               dense
-              type="number"
+              type="text"
               inputmode="decimal"
-              :rules="[(val) => val > 0 || 'El precio debe ser mayor a 0']"
+              :rules="[(val) => parseFloat(val) > 0 || 'El precio debe ser mayor a 0']"
+              @update:model-value="alCambiarPrecioTexto"
+              @blur="alSalirPrecioTexto"
+              @keydown="soloNumerosDecimales"
               @focus="seleccionarTextoPrecio"
             />
           </div>
@@ -160,6 +163,7 @@ import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.j
 import { MONEDAS, MONEDA_DEFAULT } from '../../../almacenamiento/constantes/Monedas.js'
 import DialogoAgregarComercioRapido from './DialogoAgregarComercioRapido.vue'
 import { useTecladoVirtual } from '../../../composables/useTecladoVirtual.js'
+import { filtrarInputPrecio, formatearPrecioAlSalir, soloNumerosDecimales } from '../../../utils/PrecioUtils.js'
 
 const props = defineProps({
   modelValue: {
@@ -189,7 +193,8 @@ const dialogoAbierto = computed({
 
 /* Refs del formulario */
 const inputPrecioRef = ref(null)
-const precioNuevo = ref(null)
+// String para preservar ceros finales (ej: "3.30"); el valor numérico se parsea al guardar
+const precioTexto = ref('')
 const monedaSeleccionada = ref(MONEDA_DEFAULT)
 const comercioSeleccionado = ref(null) // objeto agrupado completo
 const direccionSeleccionada = ref(null) // { label, value, direccion }
@@ -240,7 +245,7 @@ const hintDireccion = computed(() => {
 })
 
 /* Validación para guardar */
-const puedeGuardar = computed(() => precioNuevo.value > 0)
+const puedeGuardar = computed(() => parseFloat(precioTexto.value) > 0)
 
 /* Resuelve el comercioId del branch dueño de una dirección (necesario para cadenas) */
 function resolverComercioId(comercioOGrupo, idDireccion) {
@@ -291,7 +296,8 @@ watch(
 
       /* Pre-llenar precio actual */
       if (productoActual.value) {
-        precioNuevo.value = productoActual.value.precioMejor || null
+        const mejor = productoActual.value.precioMejor
+        precioTexto.value = formatearPrecioAlSalir(mejor ? String(mejor) : '')
       }
 
       /* Pre-seleccionar último comercio usado */
@@ -360,6 +366,14 @@ function alEscribirComercio(val) {
   }
 }
 
+function alCambiarPrecioTexto(val) {
+  precioTexto.value = filtrarInputPrecio(val)
+}
+
+function alSalirPrecioTexto() {
+  precioTexto.value = formatearPrecioAlSalir(precioTexto.value)
+}
+
 /* Seleccionar texto del input precio al hacer focus */
 function seleccionarTextoPrecio() {
   nextTick(() => {
@@ -421,7 +435,7 @@ async function guardarPrecio() {
       comercio: nombreComercio,
       nombreCompleto: nombreCompleto,
       direccion: calleDireccion,
-      valor: precioNuevo.value,
+      valor: parseFloat(precioTexto.value),
       moneda: monedaSeleccionada.value,
       fecha: new Date().toISOString(),
       confirmaciones: 0,
@@ -442,7 +456,7 @@ async function guardarPrecio() {
 
       $q.notify({
         type: 'positive',
-        message: `Precio $${precioNuevo.value} guardado`,
+        message: `Precio $${precioTexto.value} guardado`,
         caption: nombreCompleto,
         position: 'top',
         timeout: 3000,
@@ -470,7 +484,7 @@ async function guardarPrecio() {
 /* Cerrar y limpiar */
 function cerrar() {
   dialogoAbierto.value = false
-  precioNuevo.value = null
+  precioTexto.value = ''
   monedaSeleccionada.value = MONEDA_DEFAULT
   comercioSeleccionado.value = null
   direccionSeleccionada.value = null

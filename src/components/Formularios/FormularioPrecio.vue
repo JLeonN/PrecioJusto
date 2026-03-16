@@ -107,18 +107,19 @@
       <div class="col-8">
         <q-input
           ref="qInputPrecioRef"
-          v-model.number="datosInternos.valor"
+          :model-value="valorPrecioTexto"
           label="Precio"
           outlined
           dense
-          type="number"
-          min="0"
-          step="0.01"
+          type="text"
+          inputmode="decimal"
           placeholder="0.00"
           :error="!!errorPrecioMsg"
           :error-message="errorPrecioMsg"
           :rules="modo === 'comunidad' ? [requerido, precioValido] : [precioValido]"
           @update:model-value="alCambiarPrecio"
+          @blur="alSalirPrecio"
+          @keydown="soloNumerosDecimales"
         />
       </div>
 
@@ -152,6 +153,7 @@ import { useComerciStore } from '../../almacenamiento/stores/comerciosStore.js'
 import preferenciasService from '../../almacenamiento/servicios/PreferenciasService.js'
 import { MONEDAS, MONEDA_DEFAULT } from '../../almacenamiento/constantes/Monedas.js'
 import DialogoAgregarComercioRapido from './Dialogos/DialogoAgregarComercioRapido.vue'
+import { filtrarInputPrecio, formatearPrecioAlSalir, soloNumerosDecimales } from '../../utils/PrecioUtils.js'
 
 const props = defineProps({
   modelValue: {
@@ -203,6 +205,8 @@ const direccionTieneFoco = ref(false) // Si el input tiene foco
 
 // Ref del input de precio (para validación programática)
 const qInputPrecioRef = ref(null)
+// Texto string del precio para preservar ceros finales (ej: "3.30")
+const valorPrecioTexto = ref(formatearPrecioAlSalir(props.modelValue.valor != null ? String(props.modelValue.valor) : ''))
 // Mensaje de error manual del precio (para casos que las rules no cubren, ej: valor null)
 const errorPrecioMsg = ref('')
 
@@ -501,6 +505,7 @@ watch(
       valor: nuevoValor.valor || null,
       moneda: nuevoValor.moneda || MONEDA_DEFAULT,
     }
+    valorPrecioTexto.value = formatearPrecioAlSalir(nuevoValor.valor != null ? String(nuevoValor.valor) : '')
   },
   { deep: true },
 )
@@ -538,10 +543,17 @@ function enfocarYNavegar() {
   qInputPrecioRef.value?.focus()
 }
 
-// Al cambiar el precio: limpiar error manual y emitir
-function alCambiarPrecio() {
+// Al cambiar el precio: filtrar letras, actualizar valor numérico y emitir
+function alCambiarPrecio(val) {
+  valorPrecioTexto.value = filtrarInputPrecio(val)
+  datosInternos.value.valor = parseFloat(valorPrecioTexto.value) || null
   errorPrecioMsg.value = ''
   emitirCambios()
+}
+
+// Al salir del campo: formatear a 2 decimales si corresponde (ej: "3.3" → "3.30")
+function alSalirPrecio() {
+  valorPrecioTexto.value = formatearPrecioAlSalir(valorPrecioTexto.value)
 }
 
 /**
@@ -550,11 +562,11 @@ function alCambiarPrecio() {
  * @returns {boolean} true si el precio es válido
  */
 function validarPrecio() {
-  const val = datosInternos.value.valor
+  const val = valorPrecioTexto.value
   errorPrecioMsg.value = ''
 
   // Precio vacío/nulo → error manual (las rules no lo capturan en modo local)
-  if (val === null || val === undefined || val === '') {
+  if (!val || val.trim() === '') {
     errorPrecioMsg.value = 'Ingresá el precio del producto'
     enfocarYNavegar()
     return false
@@ -579,7 +591,7 @@ function requerido(val) {
 
 function precioValido(val) {
   if (val === null || val === undefined || val === '') return true
-  return val > 0 || 'El precio debe ser mayor a 0'
+  return parseFloat(val) > 0 || 'El precio debe ser mayor a 0'
 }
 </script>
 

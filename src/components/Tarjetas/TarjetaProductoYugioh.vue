@@ -93,6 +93,7 @@ import {
   IconAlertCircle,
   IconAlertTriangle,
 } from '@tabler/icons-vue'
+import { formatearPrecioDisplay } from '../../utils/PrecioUtils.js'
 
 /* Props del componente */
 const props = defineProps({
@@ -175,9 +176,7 @@ const calcularMesesPrecio = (fechaISO) => {
 }
 
 /* Formatear precio */
-const formatearPrecio = (valor) => {
-  return `$${valor.toLocaleString('es-UY')}`
-}
+const formatearPrecio = (valor) => formatearPrecioDisplay(valor)
 
 /* Formatear fecha relativa */
 const formatearFecha = (fechaISO) => {

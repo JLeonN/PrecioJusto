@@ -184,6 +184,8 @@ src/
 │   ├── useBotonAtras.js                   # Botón back nativo Android (drawer/detalle/salir)
 │   ├── useCamaraFoto.js                   # Captura de fotos: cámara nativa + galería (input file)
 │   └── useTecladoVirtual.js               # 🆕 Ajuste automático de dialogs ante teclado virtual Android
+├── utils/                                  # 🆕 Utilidades reutilizables de lógica pura
+│   └── PrecioUtils.js                      # 🆕 Formateo y validación de inputs de precio (formatearPrecioDisplay, soloNumerosDecimales, filtrarInputPrecio, formatearPrecioAlSalir)
 ├── css/
 │   ├── app.css                              # Clases CSS globales del Design System
 │   ├── quasar.variables.scss               # Variables de Quasar (colores, fuentes)
@@ -550,6 +552,7 @@ G. UX y Accesibilidad
 ✅ Formato de números con separadores de miles
 ✅ Formato de fechas en español uruguayo
 ✅ 🆕 Ajuste automático de dialogs ante teclado virtual Android: `useTecladoVirtual` vía `visualViewport.resize` → reduce `max-height` del q-card y hace scroll al input enfocado. Aplicado en: DialogoAgregarPrecio, DialogoAgregarComercioRapido, DialogoAgregarSucursal, DialogoMotivoEliminacion, TarjetaEscaneo
+✅ 🆕 Inputs de precio unificados (`type="text"` + `inputmode="decimal"`): FormularioPrecio, DialogoAgregarPrecio, TarjetaEscaneo y TarjetaProductoBorrador usan string interno + `PrecioUtils.js` (`soloNumerosDecimales`, `filtrarInputPrecio`, `formatearPrecioAlSalir`). Display de precios en UI vía `formatearPrecioDisplay` (locale `es-UY`, 2 decimales solo si hay parte decimal).
 
 H. Arquitectura y Código
 

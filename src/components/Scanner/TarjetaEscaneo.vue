@@ -145,18 +145,19 @@
           <div class="col-8">
             <q-input
               ref="inputPrecioRef"
-              v-model.number="datosForm.precio"
+              :model-value="precioTexto"
               label="Precio *"
               outlined
               dense
-              type="number"
-              min="0"
-              step="0.01"
+              type="text"
+              inputmode="decimal"
               placeholder="0.00"
               :error="mostrarErrorPrecio"
               no-error-icon
               hide-bottom-space
-              @blur="precioTocado = true"
+              @update:model-value="alCambiarPrecio"
+              @blur="alSalirPrecio"
+              @keydown="soloNumerosDecimales"
             >
               <template v-if="mostrarErrorPrecio" #append>
                 <span class="text-negative text-caption">Obligatorio</span>
@@ -215,6 +216,7 @@ import { useQuasar, copyToClipboard } from 'quasar'
 import { useTecladoVirtual } from '../../composables/useTecladoVirtual.js'
 import { MONEDAS, MONEDA_DEFAULT } from '../../almacenamiento/constantes/Monedas.js'
 import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
+import { filtrarInputPrecio, formatearPrecioAlSalir, soloNumerosDecimales } from '../../utils/PrecioUtils.js'
 import {
   IconShoppingBag,
   IconBarcode,
@@ -250,6 +252,8 @@ const { estiloTarjeta } = useTecladoVirtual()
 const $q = useQuasar()
 const inputPrecioRef = ref(null)
 const editando = ref(false)
+// String para preservar ceros finales (ej: "3.30"); datosForm.precio guarda el número
+const precioTexto = ref('')
 
 const { inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo } = useCamaraFoto()
 
@@ -315,6 +319,7 @@ watch(
       precio: nuevoItem.precio || null,
       moneda: nuevoItem.moneda || MONEDA_DEFAULT,
     }
+    precioTexto.value = formatearPrecioAlSalir(nuevoItem.precio ? String(nuevoItem.precio) : '')
     editando.value = false
   },
   { immediate: true },
@@ -334,7 +339,19 @@ function alCerrar() {
     precio: null,
     moneda: MONEDA_DEFAULT,
   }
+  precioTexto.value = ''
   editando.value = false
+}
+
+function alCambiarPrecio(val) {
+  precioTexto.value = filtrarInputPrecio(val)
+  datosForm.value.precio = parseFloat(precioTexto.value) || null
+}
+
+// Combina formateo y marca de campo tocado al salir
+function alSalirPrecio() {
+  precioTexto.value = formatearPrecioAlSalir(precioTexto.value)
+  precioTocado.value = true
 }
 
 // Copiar código de barras al portapapeles

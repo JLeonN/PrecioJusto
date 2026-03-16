@@ -19,7 +19,7 @@
 
           <!-- Precio más reciente -->
           <div class="row items-center q-gutter-sm q-mt-xs">
-            <div class="text-h6 text-weight-bold text-primary">${{ precioMasReciente.valor }}</div>
+            <div class="text-h6 text-weight-bold text-primary">{{ formatearPrecioDisplay(precioMasReciente.valor) }}</div>
             <span class="text-caption text-grey-7">({{ fechaFormateada }})</span>
           </div>
 
@@ -103,6 +103,7 @@ import { useRouter } from 'vue-router'
 import { IconThumbUp, IconChevronDown, IconChevronUp, IconTrendingUp, IconTrendingDown, IconMinus, IconExternalLink } from '@tabler/icons-vue'
 import ItemPrecioHistorial from './ItemPrecioHistorial.vue'
 import { useComerciStore } from 'src/almacenamiento/stores/comerciosStore'
+import { formatearPrecioDisplay } from '../../utils/PrecioUtils.js'
 
 const comerciosStore = useComerciStore()
 const router = useRouter()

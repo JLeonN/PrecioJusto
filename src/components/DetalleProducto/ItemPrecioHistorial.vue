@@ -5,7 +5,7 @@
 
     <!-- Información del precio -->
     <div class="precio-info">
-      <div class="precio-valor text-h6 text-weight-bold text-primary">${{ precio.valor }}</div>
+      <div class="precio-valor text-h6 text-weight-bold text-primary">{{ formatearPrecioDisplay(precio.valor) }}</div>
       <div class="precio-fecha text-caption text-grey-7">{{ fechaFormateada }}</div>
       <q-badge :color="colorConfianza" class="q-mt-xs">
         <div class="row items-center no-wrap q-gutter-xs">
@@ -40,6 +40,7 @@
 <script setup>
 import { computed } from 'vue'
 import { IconThumbUp, IconCheck } from '@tabler/icons-vue'
+import { formatearPrecioDisplay } from '../../utils/PrecioUtils.js'
 
 const props = defineProps({
   precio: {
