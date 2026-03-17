@@ -7,6 +7,7 @@
  * Solo cambia la variable ADAPTADOR_ACTIVO más abajo.
  */
 
+import { Capacitor } from '@capacitor/core'
 import LocalStorageAdapter from '../adaptadores/LocalStorageAdapter.js'
 import CapacitorAdapter from '../adaptadores/CapacitorAdapter.js'
 // import FirestoreAdapter from '../adaptadores/FirestoreAdapter.js' // 🔥 Descomentar cuando crees FirestoreAdapter
@@ -27,7 +28,8 @@ import CapacitorAdapter from '../adaptadores/CapacitorAdapter.js'
  * 4. Crear índices en Firestore para queries rápidas
  * 5. Configurar reglas de seguridad en Firebase Console
  */
-const ADAPTADOR_ACTIVO = 'capacitor' // 👈 CAMBIAR AQUÍ
+// En web usa localStorage, en móvil nativo usa Capacitor Storage
+const ADAPTADOR_ACTIVO = Capacitor.isNativePlatform() ? 'capacitor' : 'local'
 
 // Mapa de adaptadores disponibles
 const adaptadores = {
