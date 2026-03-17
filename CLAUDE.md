@@ -130,11 +130,3 @@ function similitudTexto(texto1, texto2) { ... }
 }
 ```
 
-### NOTAS DE PARCHE (USER-FACING)
-
-- Flujo: Antes de redactar, pregunta "¿Qué deben incluir las notas de parche de esta versión?" y sugiere contenido basado en lo último en lo que estuvimos trabajando.
-- Formato: Solo texto simple, sin tecnicismos, orientado al usuario final.
-- Restricciones: Máximo 450 caracteres. Incluir emojis.
-- Idiomas: Generar dos versiones (<es-419> y <en-US>) con estructura idéntica.
-- Etiquetas: Siempre entregar cada versión dentro de sus etiquetas correspondientes: <es-419> </es-419> y <en-US> </en-US>.
-- Entrega: Ambas versiones dentro de un único bloque de código para copiar.
