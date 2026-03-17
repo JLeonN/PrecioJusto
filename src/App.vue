@@ -5,7 +5,7 @@
 
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
-import './css/variables.css'
+import './css/Variables.css'
 import './css/app.css'
 import PantallaSplash from './components/Compartidos/PantallaSplash.vue'
 
