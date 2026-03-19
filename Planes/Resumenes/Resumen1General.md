@@ -569,6 +569,8 @@ H. Arquitectura y Código
 ✅ Logs estructurados con emojis para debugging
 ✅ Manejo de errores robusto con try-catch
 ✅ Constantes centralizadas (evita duplicación)
+✅ Uso de `publicPath` condicional (`process.env.GITHUB_ACTIONS`) para habilitar compatibilidad de activos estáticos simultáneamente entre Capacitor Android local y subpath de Github Pages
+✅ Dependencias de despliegue (Node 22) y nombres de importación normalizados para prever Strict Case-Sensitivity en Ubuntu/Linux
 
 ---
 
