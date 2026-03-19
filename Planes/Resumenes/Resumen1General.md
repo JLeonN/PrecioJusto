@@ -520,6 +520,7 @@ D. Preferencias de Usuario
 ✅ Carga única al iniciar la app (`MainLayout.vue` → `preferenciasStore.inicializar()`)
 ✅ Todos los selectores de moneda y unidad sincronizan automáticamente via el store
 ✅ Al cambiar moneda/unidad en cualquier componente → se persiste y actualiza el estado global
+✅ 🐛 Fix: escaneo rápido ahora inicia con la moneda preferida del usuario (ya no hardcodeaba 'UYU' en `_construirItem()`)
 
 E. Sistema de Almacenamiento
 
