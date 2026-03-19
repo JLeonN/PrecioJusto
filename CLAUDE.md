@@ -129,4 +129,3 @@ function similitudTexto(texto1, texto2) { ... }
   transition: background-color 0.2s ease;
 }
 ```
-
