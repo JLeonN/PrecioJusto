@@ -15,14 +15,20 @@ description: Flujo completo de release: lectura de commits, incremento de versi�
    - Si existe `android/app/build.gradle`: `versionCode++`, `versionName = nueva_version`.
 4. **Documentación**: 
    - Si existe `Planes/Resumenes/`: actualizar `Resumen1General.md` con cambios y versión.
-5. **Build**: 
-   - Detectar tipo (`capacitor`, `quasar`, `vite`) y ejecutar build correspondiente. **Detenerse si falla**.
+5. **Build y Sync**: 
+   - Detectar tipo (`capacitor`, `quasar`) y ejecutar build.
+   - Si es Capacitor: `npx cap sync android; npx cap open android`.
+   - **Detenerse si falla el build**.
 6. **Release**: 
    - `git add -A`
    - `git commit -m "v{versión}" -m "{descripción técnica}"`
    - `git tag v{versión}`
    - `git status`
 7. **Notas de Parche**: 
-   - Generar notas con emojis (< 450 chars) en español e inglés en un solo bloque de código.
+   - Generar notas con emojis (< 450 chars) en español (es-419) e inglés.
+   - **Enfoque Obligatorio**: Deben ser **amigables con el usuario**, destacando solo lo que le importa y aporta valor real (mejoras visuales, corrección de errores molestos, nuevas funciones). **Evitar lenguaje técnico interno**.
+   - **Formato Obligatorio**: 
+     - `<es-419> [Notas en español] </es-419>`
+     - `<en-US> [Notes in English] </en-US>`
 
 No realizar push. No pedir confirmación. Detenerse solo en error de build.
