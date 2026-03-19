@@ -182,6 +182,7 @@ import EscaneadorCodigo from '../components/Scanner/EscaneadorCodigo.vue'
 import TarjetaEscaneo from '../components/Scanner/TarjetaEscaneo.vue'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
 import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
+import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
 import { useSeleccionMultiple } from '../composables/useSeleccionMultiple.js'
 import { useDialogoAgregarPrecio } from '../composables/useDialogoAgregarPrecio.js'
 import buscadorProductosService from '../almacenamiento/servicios/BuscadorProductosService.js'
@@ -190,6 +191,7 @@ import { useQuasar } from 'quasar'
 
 const productosStore = useProductosStore()
 const sesionEscaneoStore = useSesionEscaneoStore()
+const preferenciasStore = usePreferenciasStore()
 const $q = useQuasar()
 
 // ========================================
@@ -231,7 +233,7 @@ function _construirItem(codigo, existente, productoApi, resultadoApi) {
     unidad: productoApi?.unidad || existente?.unidad || 'unidad',
     imagen: productoApi?.imagen || existente?.imagen || null,
     precio: null,
-    moneda: 'UYU',
+    moneda: preferenciasStore.moneda,
     origenApi: !!productoApi,
     fuenteDato: resultadoApi?.fuenteDato || null,
   }
