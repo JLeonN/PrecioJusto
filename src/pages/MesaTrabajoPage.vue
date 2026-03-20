@@ -77,6 +77,7 @@
                 @update:item="(v) => sesionStore.actualizarItem(item.id, v)"
                 @eliminar="sesionStore.eliminarItem(item.id)"
                 @enviar="enviarItem(item)"
+                @abrir-nuevo-comercio="abrirDialogoNuevoComercioDesdeTarjeta(item.id)"
               />
             </div>
           </div>
@@ -164,6 +165,14 @@
       </q-card>
     </q-dialog>
 
+    <!-- Diálogo: Agregar Nuevo Comercio Rápido desde tarjeta -->
+    <DialogoAgregarComercioRapido
+      v-model="dialogoNuevoComercioAbierto"
+      :nombre-inicial="datosInicialesNuevoComercio.nombre"
+      :direccion-inicial="datosInicialesNuevoComercio.direccion"
+      @comercio-creado="alCrearComercio"
+    />
+
   </q-page>
 </template>
 
@@ -173,6 +182,7 @@ import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import TarjetaProductoBorrador from '../components/Scanner/TarjetaProductoBorrador.vue'
 import SelectorComercioDireccion from '../components/Compartidos/SelectorComercioDireccion.vue'
+import DialogoAgregarComercioRapido from '../components/Formularios/Dialogos/DialogoAgregarComercioRapido.vue'
 import InputBusqueda from '../components/Compartidos/InputBusqueda.vue'
 import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
@@ -205,6 +215,10 @@ const textoBusqueda = ref('')
 const guardando = ref(false)
 const dialogoAsignarComercio = ref(false)
 const comercioParaAsignar = ref(null)
+
+const dialogoNuevoComercioAbierto = ref(false)
+const itemIdParaNuevoComercio = ref(null)
+const datosInicialesNuevoComercio = ref({ nombre: '', direccion: '' })
 
 // Si la mesa estaba vacía al montar → muestra estado vacío (no auto-navega)
 const mesaVaciaAlMontar = ref(!sesionStore.tieneItemsPendientes)
@@ -356,6 +370,38 @@ function confirmarAsignarComercio() {
   sesionStore.asignarComercio(seleccion.arraySeleccionados.value, comercioParaAsignar.value)
   dialogoAsignarComercio.value = false
   seleccion.desactivarModoSeleccion()
+}
+
+function abrirDialogoNuevoComercioDesdeTarjeta(itemId) {
+  itemIdParaNuevoComercio.value = itemId
+  
+  // Buscar el ítem para pre-llenar datos si el usuario escribió algo en los inputs
+  const item = sesionStore.items.find(i => i.id === itemId)
+  if (item?.comercio) {
+    datosInicialesNuevoComercio.value = {
+      nombre: item.comercio.nombre || '',
+      direccion: item.comercio.direccionNombre || ''
+    }
+  } else {
+    datosInicialesNuevoComercio.value = { nombre: '', direccion: '' }
+  }
+  
+  dialogoNuevoComercioAbierto.value = true
+}
+
+function alCrearComercio(comercioCreado) {
+  if (!itemIdParaNuevoComercio.value) return
+  
+  const datosComercio = {
+    id: comercioCreado.id,
+    nombre: comercioCreado.nombre,
+    direccionId: comercioCreado.direcciones?.[0]?.id || null,
+    direccionNombre: comercioCreado.direcciones?.[0]?.nombreCompleto || comercioCreado.direcciones?.[0]?.calle || ''
+  }
+  
+  sesionStore.actualizarItem(itemIdParaNuevoComercio.value, { comercio: datosComercio })
+  dialogoNuevoComercioAbierto.value = false
+  itemIdParaNuevoComercio.value = null
 }
 </script>
 

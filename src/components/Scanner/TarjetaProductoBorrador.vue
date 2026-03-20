@@ -129,12 +129,25 @@
             />
           </div>
         </div>
-        <!-- Comercio + Dirección -->
         <SelectorComercioDireccion
           ref="refSelectorComercio"
           :model-value="datosEditando.comercio"
           @update:model-value="(v) => actualizar('comercio', v)"
         />
+
+        <!-- Botón para agregar nuevo comercio -->
+        <q-btn
+          flat
+          dense
+          no-caps
+          color="primary"
+          icon="add_circle"
+          label="Agregar comercio rápido"
+          size="md"
+          class="q-mb-sm"
+          @click.stop="$emit('abrir-nuevo-comercio')"
+        />
+
         <!-- Cantidad + Unidad -->
         <div class="row q-col-gutter-sm">
           <div class="col-6">
@@ -277,7 +290,14 @@ const props = defineProps({
   seleccionado: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['long-press', 'toggle-seleccion', 'update:item', 'eliminar', 'enviar'])
+const emit = defineEmits([
+  'long-press', 
+  'toggle-seleccion', 
+  'update:item', 
+  'eliminar', 
+  'enviar',
+  'abrir-nuevo-comercio'
+])
 
 const $q = useQuasar()
 const { inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo } = useCamaraFoto()
