@@ -459,6 +459,7 @@ A. Gestión de Productos
 ✅ 🆕 Modo A — Escaneo rápido: cámara → pausa → TarjetaEscaneo (precio, foto, edición inline) → Mesa de trabajo → cámara reactiva
 ✅ 🆕 Modo B — Ráfaga: cámara continua sin pausa (prop `continuo` en EscaneadorCodigo), búsqueda en background (fire-and-forget), tarjetita de aviso sobre la cámara
 ✅ Mesa de trabajo (MesaTrabajoPage.vue — ruta `/mesa-trabajo`): reemplaza BandejaBorradores; página propia con drawer, ordenamiento por 5 criterios, selección múltiple por long-press, asignación de comercio en bloque, envío parcial, estado vacío con botones de redirección
+✅ 🆕 Registro de comercio rápido desde tarjeta en Mesa de Trabajo (integrado en TarjetaProductoBorrador)
 ✅ 🆕 Tarjetita de aviso sobre cámara: Teleport to="body" z-index 10000, visible durante escaneo activo (duplicado + éxito Ráfaga), botón X para cerrar
 ✅ 🆕 Detección de duplicados en sesión sin interrumpir el escaneo (aviso sobre cámara)
 ✅ 🆕 Auto-fetch al reconectar internet (@capacitor/network, nativo en Android)
@@ -555,7 +556,8 @@ G. UX y Accesibilidad
 ✅ Scroll automático al expandir tarjetas
 ✅ Formato de números con separadores de miles
 ✅ Formato de fechas en español uruguayo
-✅ 🆕 Ajuste automático de dialogs ante teclado virtual Android: `useTecladoVirtual` vía `visualViewport.resize` → reduce `max-height` del q-card y hace scroll al input enfocado. Aplicado en: DialogoAgregarPrecio, DialogoAgregarComercioRapido, DialogoAgregarSucursal, DialogoMotivoEliminacion, TarjetaEscaneo
+✅ 🆕 Ajuste automático de dialogs ante teclado virtual Android: `useTecladoVirtual` mejorado con detección de redimensionamiento visual, scroll inteligente al centro del input enfocado y reducción dinámica de altura del modal. Aplicado en: DialogoAgregarPrecio, DialogoAgregarComercioRapido, DialogoAgregarSucursal, DialogoMotivoEliminacion, TarjetaEscaneo, DialogoAgregarProducto.
+✅ 🆕 Reversión de `behavior="dialog"` en selectores móviles en favor de un modo menú con `maxHeight` limitado, garantizando que el desplegable siempre aparezca debajo del input sin ser tapado por el teclado.
 ✅ 🆕 Inputs de precio unificados (`type="text"` + `inputmode="decimal"`): FormularioPrecio, DialogoAgregarPrecio, TarjetaEscaneo y TarjetaProductoBorrador usan string interno + `PrecioUtils.js` (`soloNumerosDecimales`, `filtrarInputPrecio`, `formatearPrecioAlSalir`). Display de precios en UI vía `formatearPrecioDisplay` (locale `es-UY`, 2 decimales solo si hay parte decimal).
 
 H. Arquitectura y Código
