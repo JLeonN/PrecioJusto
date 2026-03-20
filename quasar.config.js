@@ -3,7 +3,8 @@
 
 import { defineConfig } from '#q-app/wrappers'
 
-export default defineConfig((/* ctx */) => {
+export default defineConfig((ctx) => {
+  console.log('Quasar Build Context:', ctx)
   return {
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
     // preFetch: true,
@@ -44,7 +45,7 @@ export default defineConfig((/* ctx */) => {
 
       // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
 
-      publicPath: process.env.GITHUB_ACTIONS ? '/PrecioJusto/' : '/',
+      publicPath: ctx.dev ? '/' : (process.env.GITHUB_ACTIONS ? '/PrecioJusto/' : './'),
       // analyze: true,
       // env: {},
       // rawDefine: {}
