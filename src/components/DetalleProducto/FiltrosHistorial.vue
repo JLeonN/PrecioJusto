@@ -31,6 +31,7 @@
             emit-value
             map-options
             @update:model-value="$emit('update:periodo', $event)"
+            :behavior="$q.platform.is.mobile ? 'dialog' : 'menu'"
           >
             <template #prepend>
               <IconCalendar :size="18" />
@@ -49,6 +50,7 @@
             emit-value
             map-options
             @update:model-value="$emit('update:orden', $event)"
+            :behavior="$q.platform.is.mobile ? 'dialog' : 'menu'"
           >
             <template #prepend>
               <IconArrowsSort :size="18" />

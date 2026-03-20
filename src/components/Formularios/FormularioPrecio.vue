@@ -17,6 +17,8 @@
       @input-value="alEscribirComercio"
       @focus="alEnfocarComercio"
       @blur="guardarComercioEscrito"
+      behavior="menu"
+      :menu-props="{ maxHeight: '180px', autoClose: true }"
     >
       <template #prepend>
         <q-icon name="store" />
@@ -70,6 +72,8 @@
       @input-value="alEscribirDireccion"
       @focus="alEnfocarDireccion"
       @blur="guardarDireccionEscrita"
+      behavior="menu"
+      :menu-props="{ maxHeight: '150px', autoClose: true }"
     >
       <template #prepend>
         <q-icon name="place" />

@@ -1,31 +1,23 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 
-// OPCIÓN B (alternativa más robusta, no implementada):
-// Usar el plugin nativo @capacitor/keyboard en lugar de visualViewport.
-// Instalación: npm install @capacitor/keyboard && npx cap sync android
-//
-// import { Keyboard } from '@capacitor/keyboard'
-//
-// Keyboard.addListener('keyboardWillShow', (info) => {
-//   alturaViewport.value = window.innerHeight - info.keyboardHeight
-// })
-// Keyboard.addListener('keyboardWillHide', () => {
-//   alturaViewport.value = window.innerHeight
-// })
-//
-// Ventajas: recibe la altura exacta ANTES de que aparezca el teclado (sin salto visual),
-// más confiable en Android con pantallas con notch o barra de navegación en gesture mode.
-// Desventaja: requiere nueva dependencia y rebuild nativo.
-
 export function useTecladoVirtual() {
   const alturaViewport = ref(window.visualViewport?.height ?? window.innerHeight)
+  const tecladoAbierto = ref(false)
 
   function alRedimensionar() {
-    alturaViewport.value = window.visualViewport?.height ?? window.innerHeight
-    // Scroll al elemento enfocado para que quede visible sobre el teclado
-    const enfocado = document.activeElement
-    if (enfocado && enfocado !== document.body) {
-      setTimeout(() => enfocado.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50)
+    const nuevaAltura = window.visualViewport?.height ?? window.innerHeight
+    // Si la altura se reduce más del 20%, asumimos que el teclado está abierto
+    tecladoAbierto.value = nuevaAltura < window.innerHeight * 0.8
+    alturaViewport.value = nuevaAltura
+
+    if (tecladoAbierto.value) {
+      // Scroll al elemento enfocado para que quede en el centro de la zona visible
+      const enfocado = document.activeElement
+      if (enfocado && (enfocado.tagName === 'INPUT' || enfocado.tagName === 'TEXTAREA' || enfocado.closest('.q-field'))) {
+        setTimeout(() => {
+          enfocado.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }, 300) // Un poco más de tiempo para asegurar que el teclado terminó de subir
+      }
     }
   }
 
@@ -37,11 +29,11 @@ export function useTecladoVirtual() {
     window.visualViewport?.removeEventListener('resize', alRedimensionar)
   })
 
-  // Margen de 24px para no quedar pegado al borde de la pantalla
   const estiloTarjeta = computed(() => ({
-    maxHeight: `${alturaViewport.value - 24}px`,
-    overflowY: 'auto',
+    maxHeight: `${alturaViewport.value - 40}px`,
+    display: 'flex',
+    flexDirection: 'column'
   }))
 
-  return { estiloTarjeta }
+  return { alturaViewport, tecladoAbierto, estiloTarjeta }
 }

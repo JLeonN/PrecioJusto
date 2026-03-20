@@ -17,6 +17,8 @@
       @input-value="alEscribirComercio"
       @focus="comercioTieneFoco = true"
       @blur="guardarComercioEscrito"
+      behavior="menu"
+      :menu-props="{ maxHeight: '180px', autoClose: true }"
     >
       <template #prepend>
         <IconBuildingStore :size="18" />
@@ -59,6 +61,8 @@
       @input-value="textoTemporalDireccion = $event || ''"
       @focus="direccionTieneFoco = true"
       @blur="guardarDireccionEscrita"
+      behavior="menu"
+      :menu-props="{ maxHeight: '150px', autoClose: true }"
     >
       <template #prepend>
         <IconMapPin :size="18" />

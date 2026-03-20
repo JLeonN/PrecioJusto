@@ -1,6 +1,6 @@
 <template>
   <q-dialog v-model="dialogoAbierto" @before-hide="alCerrar">
-    <q-card class="dialogo-agregar" :class="clasesResponsivas">
+    <q-card class="dialogo-agregar" :class="clasesResponsivas" :style="estiloTarjeta">
       <!-- HEADER -->
       <q-card-section class="row items-center q-pb-none">
         <div class="text-h6">Agregar Producto</div>
@@ -82,6 +82,7 @@ import productosService from '../../../almacenamiento/servicios/ProductosService
 import buscadorProductosService from '../../../almacenamiento/servicios/BuscadorProductosService.js'
 import openFoodFactsService from '../../../almacenamiento/servicios/OpenFoodFactsService.js'
 import { usePreferenciasStore } from '../../../almacenamiento/stores/preferenciasStore.js'
+import { useTecladoVirtual } from '../../../composables/useTecladoVirtual.js'
 
 const props = defineProps({
   modelValue: {
@@ -101,6 +102,7 @@ const productosStore = useProductosStore()
 const comerciosStore = useComerciStore()
 const preferenciasStore = usePreferenciasStore()
 const $q = useQuasar()
+const { estiloTarjeta } = useTecladoVirtual()
 
 // Estado del diálogo
 const dialogoAbierto = computed({
@@ -482,7 +484,7 @@ async function alDetectarCodigo(codigo) {
   max-height: 90vh;
 }
 .contenido-scroll {
-  max-height: 60vh;
+  flex: 1;
   overflow-y: auto;
 }
 .dialogo-landscape .contenido-scroll {

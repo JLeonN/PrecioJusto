@@ -49,6 +49,8 @@
               emit-value
               map-options
               @update:model-value="alCambiarMoneda"
+              behavior="menu"
+              :menu-props="{ maxHeight: '200px', autoClose: true }"
             />
           </div>
         </div>
@@ -71,6 +73,8 @@
           @input-value="alEscribirComercio"
           @focus="comercioTieneFoco = true"
           @blur="comercioTieneFoco = false"
+          behavior="menu"
+          :menu-props="{ maxHeight: '180px', autoClose: true }"
         >
           <!-- Opciones: muestra sucursales si es cadena, direcciones si es individual -->
           <template #option="{ itemProps, opt }">
@@ -111,6 +115,8 @@
           :hint="hintDireccion"
           class="q-mb-sm"
           @filter="filtrarDirecciones"
+          behavior="menu"
+          :menu-props="{ maxHeight: '150px', autoClose: true }"
         >
           <template #no-option>
             <q-item>
