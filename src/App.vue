@@ -1,19 +1,9 @@
 <template>
   <PantallaSplash :appLista="appLista" />
   <router-view />
-  <div class="version-badge">v1.0.6</div>
 </template>
 
 <style scoped>
-.version-badge {
-  position: fixed;
-  bottom: 2px;
-  right: 5px;
-  font-size: 10px;
-  color: rgba(0,0,0,0.3);
-  z-index: 99999;
-  pointer-events: none;
-}
 </style>
 
 <script setup>

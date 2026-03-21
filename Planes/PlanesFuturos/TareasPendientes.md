@@ -18,6 +18,3 @@ Las tareas más difíciles siempre van arriba.
 
 - **Estadísticas en Edición de Comercio — Revisión completa:** Las estadísticas que se muestran en `EditarComercioPage` necesitan una revisión general: sacar las que no aportan valor, editar las existentes para que sean más precisas o útiles, y agregar estadísticas nuevas. Actualmente se muestran: "Registrado" (fecha), "Último uso" (tiempo relativo), "Último precio" (tiempo relativo), "Productos" (cantidad) y "Sucursales" (cantidad). El usuario quiere definir cuáles quedan, cuáles se modifican y cuáles se agregan en una sesión de trabajo dedicada.
 
-### Dificultad 1/10
-
-- **Remover identificador de versión (v1.0.6):** Una vez que se confirme que la app funciona correctamente en todos los dispositivos tras los cambios en `publicPath`, se debe remover el componente de texto `v1.0.6` agregado en `App.vue` (y su estilo correspondiente).
