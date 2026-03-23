@@ -16,11 +16,6 @@ Las tareas más difíciles siempre van arriba.
 
 ### Dificultad 6/10
 
-- **Validación y UX en Modal Agregar Producto (Manual):** No permitir guardar un producto si el precio es menor a $1 (evitar que se guarde en $0). Al intentar guardar con datos faltantes o inválidos:
-  - Realizar **auto-scroll** suave para centrar el input.
-  - Hacer **focus** automático al campo.
-  - Aplicar una **animación de "shake" (temblor)** visual en el input para captar la atención.
-  - Asegurar compatibilidad con el teclado virtual (reutilizar lógica de `useTecladoVirtual.js` y `FormularioPrecio.vue`).
 
 ### Dificultad 5/10
 

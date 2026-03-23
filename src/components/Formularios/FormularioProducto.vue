@@ -2,14 +2,18 @@
   <div class="formulario-producto">
     <!-- NOMBRE DEL PRODUCTO -->
     <q-input
+      ref="qInputNombreRef"
       v-model="datosInternos.nombre"
       label="Nombre del producto"
       outlined
       dense
       placeholder="Ej: Leche La Serenísima"
-      :rules="modo === 'comunidad' ? [requerido] : []"
+      :rules="modo === 'comunidad' ? [requerido] : [requeridoNombreLocal]"
+      :error="!!errorNombreMsg"
+      :error-message="errorNombreMsg"
+      :class="{ 'shake': animarShakeNombre }"
       :loading="buscandoNombre"
-      @update:model-value="emitirCambios"
+      @update:model-value="alCambiarNombre"
     >
       <template #append>
         <q-btn
@@ -145,6 +149,11 @@ import { IconSearch, IconCamera, IconPhoto, IconTrash } from '@tabler/icons-vue'
 import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
 import { usePreferenciasStore } from '../../almacenamiento/stores/preferenciasStore.js'
 
+// Refs para validación
+const qInputNombreRef = ref(null)
+const errorNombreMsg = ref('')
+const animarShakeNombre = ref(false)
+
 const props = defineProps({
   modelValue: {
     type: Object,
@@ -246,6 +255,12 @@ function emitirCambios() {
   emit('update:modelValue', { ...datosInternos.value })
 }
 
+// Al cambiar el nombre: limpiar error
+function alCambiarNombre() {
+  errorNombreMsg.value = ''
+  emitirCambios()
+}
+
 // Funciones de búsqueda
 function buscarPorCodigo() {
   buscandoCodigo.value = true
@@ -271,13 +286,64 @@ function requerido(val) {
   return (val && val.length > 0) || 'Este campo es requerido'
 }
 
+function requeridoNombreLocal(val) {
+  return (val && val.trim().length > 0) || 'El nombre es obligatorio'
+}
+
 function cantidadValida(val) {
   if (val === null || val === undefined || val === '') return true
   return val > 0 || 'La cantidad debe ser mayor a 0'
 }
+
+// Desplaza, enfoca y agita para mostrar error
+function animarErrorNombre() {
+  const el = qInputNombreRef.value?.$el
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  qInputNombreRef.value?.focus()
+
+  animarShakeNombre.value = false
+  setTimeout(() => {
+    animarShakeNombre.value = true
+    setTimeout(() => {
+      animarShakeNombre.value = false
+    }, 500)
+  }, 10)
+}
+
+function validarFormulario() {
+  const val = datosInternos.value.nombre
+  errorNombreMsg.value = ''
+
+  if (!val || val.trim() === '') {
+    errorNombreMsg.value = 'El nombre es obligatorio'
+    animarErrorNombre()
+    return false
+  }
+
+  const resultado = qInputNombreRef.value?.validate()
+  if (!resultado) {
+    animarErrorNombre()
+    return false
+  }
+
+  return true
+}
+
+defineExpose({ validarFormulario })
 </script>
 
 <style scoped>
+.shake {
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
 .formulario-producto {
   display: flex;
   flex-direction: column;
