@@ -1,6 +1,5 @@
 <template>
   <q-page class="mesa-trabajo-pagina">
-
     <!-- Estado vacío: llegó a la ruta con mesa vacía -->
     <div v-if="mesaVaciaAlMontar" class="col flex flex-center column q-pa-xl">
       <IconShoppingBag :size="64" class="text-grey-4" />
@@ -22,26 +21,27 @@
 
     <!-- Contenido normal -->
     <template v-else>
-
       <!-- Cabecera -->
       <div class="mesa-trabajo-barra">
-      <div class="contenedor-pagina row items-center no-wrap q-px-md">
-        <div class="col">
-          <div class="text-subtitle1 text-weight-bold">Mesa de trabajo</div>
-          <div class="text-caption text-grey-6">
-            {{ cantidadListos }} / {{ sesionStore.items.length }} artículos listos
+        <div class="contenedor-pagina row items-center no-wrap q-px-md">
+          <div class="col">
+            <div class="text-subtitle1 text-weight-bold">Mesa de trabajo</div>
+            <div class="text-caption text-grey-6">
+              {{ cantidadListos }} / {{ sesionStore.items.length }} artículos listos
+            </div>
           </div>
         </div>
-      </div>
       </div>
 
       <!-- Filtro de ordenamiento + buscador -->
       <div class="contenedor-pagina q-px-md q-pt-sm q-pb-xs">
         <q-select
           v-model="ordenActual"
-          dense outlined
+          dense
+          outlined
           :options="OPCIONES_ORDEN"
-          emit-value map-options
+          emit-value
+          map-options
           style="max-width: 280px"
         />
         <InputBusqueda
@@ -52,9 +52,11 @@
       </div>
 
       <!-- Lista de borradores -->
-      <div class="mesa-lista-scroll" :class="{ 'mesa-lista-con-barra': seleccion.modoSeleccion.value }">
+      <div
+        class="mesa-lista-scroll"
+        :class="{ 'mesa-lista-con-barra': seleccion.modoSeleccion.value }"
+      >
         <div class="contenedor-pagina q-px-md q-pt-sm q-pb-md">
-
           <!-- Sin resultados de búsqueda -->
           <div v-if="textoBusqueda && itemsFiltrados.length === 0" class="text-center q-pa-xl">
             <q-icon name="search_off" size="64px" color="grey-5" />
@@ -91,7 +93,10 @@
           <div class="mesa-trabajo-footer">
             <div class="contenedor-pagina row items-center no-wrap">
               <q-btn
-                flat no-caps color="negative" size="sm"
+                flat
+                no-caps
+                color="negative"
+                size="sm"
                 :disable="sesionStore.items.length === 0"
                 @click="confirmarLimpiar"
               >
@@ -99,7 +104,9 @@
               </q-btn>
               <q-space />
               <q-btn
-                unelevated no-caps color="primary"
+                unelevated
+                no-caps
+                color="primary"
                 :disable="cantidadListos === 0 || guardando"
                 :loading="guardando"
                 @click="guardarCompletos"
@@ -111,50 +118,74 @@
           </div>
         </div>
       </Transition>
-
     </template>
 
     <!-- Barra de selección flotante con animación -->
     <Transition name="deslizar-abajo">
-    <div v-if="seleccion.modoSeleccion.value" class="seleccion-barra-flotante">
-      <div class="contenedor-pagina row items-center no-wrap q-px-md q-py-xs">
-        <q-btn outline no-caps color="grey-8" @click="seleccion.desactivarModoSeleccion()">
-          Cancelar
-        </q-btn>
-        <div class="q-ml-sm">
-          <div class="text-caption text-grey-7">{{ seleccion.cantidadSeleccionados.value }} seleccionados</div>
-          <div class="text-caption text-grey-5">Seleccioná artículos para asignarles el mismo comercio</div>
+      <div v-if="seleccion.modoSeleccion.value" class="seleccion-barra-flotante">
+        <div class="contenedor-pagina row items-center no-wrap q-px-md q-py-xs">
+          <q-btn outline no-caps color="grey-8" @click="seleccion.desactivarModoSeleccion()">
+            Cancelar
+          </q-btn>
+          <div class="q-ml-sm">
+            <div class="text-caption text-grey-7">
+              {{ seleccion.cantidadSeleccionados.value }} seleccionados
+            </div>
+            <div class="text-caption text-grey-5">
+              Seleccioná artículos para asignarles el mismo comercio
+            </div>
+          </div>
+          <q-space />
+          <q-btn
+            unelevated
+            dense
+            no-caps
+            size="sm"
+            color="primary"
+            :disable="!seleccion.haySeleccionados.value"
+            @click="abrirAsignarComercio"
+          >
+            Asignar comercio
+          </q-btn>
         </div>
-        <q-space />
-        <q-btn
-          unelevated dense no-caps size="sm" color="primary"
-          :disable="!seleccion.haySeleccionados.value"
-          @click="abrirAsignarComercio"
-        >
-          Asignar comercio
-        </q-btn>
       </div>
-    </div>
     </Transition>
 
     <!-- Bottom sheet: asignar comercio en bloque -->
     <q-dialog v-model="dialogoAsignarComercio" position="bottom">
-      <q-card style="border-radius: 16px 16px 0 0; width: 100%; max-width: 100vw; padding-bottom: var(--safe-area-bottom, 0px)">
+      <q-card
+        style="
+          border-radius: 16px 16px 0 0;
+          width: 100%;
+          max-width: 100vw;
+          padding-bottom: var(--safe-area-bottom, 0px);
+        "
+      >
         <q-card-section class="q-pb-sm">
           <div class="text-subtitle2">
             Asignar comercio a {{ seleccion.cantidadSeleccionados.value }} ítem(s)
           </div>
         </q-card-section>
         <q-card-section class="q-pt-none q-pb-sm">
-          <SelectorComercioDireccion
-            v-model="comercioParaAsignar"
+          <SelectorComercioDireccion v-model="comercioParaAsignar" />
+          <q-btn
+            flat
+            no-caps
+            color="primary"
+            icon="add_circle"
+            label="Agregar comercio rápido"
+            size="md"
+            class="full-width q-mt-md boton-agregar-masivo"
+            @click="abrirDialogoNuevoComercioDesdeAsignacionMasiva"
           />
         </q-card-section>
         <q-card-section class="q-pt-xs">
           <div class="row justify-end q-gutter-xs">
             <q-btn flat no-caps color="grey-7" v-close-popup>Cancelar</q-btn>
             <q-btn
-              unelevated no-caps color="primary"
+              unelevated
+              no-caps
+              color="primary"
               :disable="!comercioParaAsignar"
               @click="confirmarAsignarComercio"
             >
@@ -172,7 +203,6 @@
       :direccion-inicial="datosInicialesNuevoComercio.direccion"
       @comercio-creado="alCrearComercio"
     />
-
   </q-page>
 </template>
 
@@ -188,12 +218,7 @@ import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoSto
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
 import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
 import { useSeleccionMultiple } from '../composables/useSeleccionMultiple.js'
-import {
-  IconShoppingBag,
-  IconSend,
-  IconHome,
-  IconMapPin,
-} from '@tabler/icons-vue'
+import { IconShoppingBag, IconSend, IconHome, IconMapPin } from '@tabler/icons-vue'
 
 const OPCIONES_ORDEN = [
   { label: 'Menos completo primero', value: 'menos-a-mas' },
@@ -229,34 +254,41 @@ onMounted(async () => {
 })
 
 // Si la mesa se vacía durante la sesión → navega a inicio
-watch(() => sesionStore.tieneItemsPendientes, (tieneItems) => {
-  if (!tieneItems && !mesaVaciaAlMontar.value) router.push('/')
-})
+watch(
+  () => sesionStore.tieneItemsPendientes,
+  (tieneItems) => {
+    if (!tieneItems && !mesaVaciaAlMontar.value) router.push('/')
+  },
+)
 
 // Mantiene itemsDisponibles del composable sincronizado
-watch(() => sesionStore.items, (v) => seleccion.actualizarItems(v), { immediate: true, deep: true })
+watch(
+  () => sesionStore.items,
+  (v) => seleccion.actualizarItems(v),
+  { immediate: true, deep: true },
+)
 
 // Auto-cancela selección si el usuario deselecciona el último ítem
 watch(seleccion.cantidadSeleccionados, (cantidad) => {
   if (cantidad === 0 && seleccion.modoSeleccion.value) seleccion.desactivarModoSeleccion()
 })
 
-const cantidadListos = computed(() =>
-  sesionStore.items.filter(
-    (i) => !!i.nombre?.trim() && i.precio > 0 && !!i.comercio,
-  ).length,
+const cantidadListos = computed(
+  () => sesionStore.items.filter((i) => !!i.nombre?.trim() && i.precio > 0 && !!i.comercio).length,
 )
 
 // Normaliza texto: minúsculas + sin tildes
 function normalizarTexto(texto) {
-  return texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  return texto
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
 }
 
 const itemsOrdenados = computed(() => {
   const lista = [...sesionStore.items]
   if (ordenActual.value === 'sin-comercio') return lista.filter((i) => !i.comercio)
-  const puntaje = (i) =>
-    [!!i.nombre?.trim(), i.precio > 0, !!i.comercio].filter(Boolean).length
+  const puntaje = (i) => [!!i.nombre?.trim(), i.precio > 0, !!i.comercio].filter(Boolean).length
   if (ordenActual.value === 'menos-a-mas') return lista.sort((a, b) => puntaje(a) - puntaje(b))
   if (ordenActual.value === 'mas-a-menos') return lista.sort((a, b) => puntaje(b) - puntaje(a))
   if (ordenActual.value === 'por-comercio')
@@ -374,32 +406,48 @@ function confirmarAsignarComercio() {
 
 function abrirDialogoNuevoComercioDesdeTarjeta(itemId) {
   itemIdParaNuevoComercio.value = itemId
-  
+
   // Buscar el ítem para pre-llenar datos si el usuario escribió algo en los inputs
-  const item = sesionStore.items.find(i => i.id === itemId)
+  const item = sesionStore.items.find((i) => i.id === itemId)
   if (item?.comercio) {
     datosInicialesNuevoComercio.value = {
       nombre: item.comercio.nombre || '',
-      direccion: item.comercio.direccionNombre || ''
+      direccion: item.comercio.direccionNombre || '',
     }
   } else {
     datosInicialesNuevoComercio.value = { nombre: '', direccion: '' }
   }
-  
+
+  dialogoNuevoComercioAbierto.value = true
+}
+
+function abrirDialogoNuevoComercioDesdeAsignacionMasiva() {
+  itemIdParaNuevoComercio.value = null // Indica que es masivo
+  datosInicialesNuevoComercio.value = { nombre: '', direccion: '' }
   dialogoNuevoComercioAbierto.value = true
 }
 
 function alCrearComercio(comercioCreado) {
-  if (!itemIdParaNuevoComercio.value) return
-  
   const datosComercio = {
     id: comercioCreado.id,
     nombre: comercioCreado.nombre,
     direccionId: comercioCreado.direcciones?.[0]?.id || null,
-    direccionNombre: comercioCreado.direcciones?.[0]?.nombreCompleto || comercioCreado.direcciones?.[0]?.calle || ''
+    direccionNombre:
+      comercioCreado.direcciones?.[0]?.nombreCompleto ||
+      comercioCreado.direcciones?.[0]?.calle ||
+      '',
   }
-  
-  sesionStore.actualizarItem(itemIdParaNuevoComercio.value, { comercio: datosComercio })
+
+  if (itemIdParaNuevoComercio.value) {
+    // Caso: Desde una sola tarjeta
+    sesionStore.actualizarItem(itemIdParaNuevoComercio.value, { comercio: datosComercio })
+  } else {
+    // Caso: Asignación masiva (desde el diálogo)
+    sesionStore.asignarComercio(seleccion.arraySeleccionados.value, datosComercio)
+    dialogoAsignarComercio.value = false
+    seleccion.desactivarModoSeleccion()
+  }
+
   dialogoNuevoComercioAbierto.value = false
   itemIdParaNuevoComercio.value = null
 }
@@ -455,11 +503,21 @@ function alCrearComercio(comercioCreado) {
 }
 .deslizar-abajo-enter-active,
 .deslizar-abajo-leave-active {
-  transition: transform 0.25s ease, opacity 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    opacity 0.25s ease;
 }
 .deslizar-abajo-enter-from,
 .deslizar-abajo-leave-to {
   transform: translateY(100%);
   opacity: 0;
+}
+.boton-agregar-masivo {
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+.boton-agregar-masivo:hover {
+  background: rgba(25, 118, 210, 0.08) !important;
 }
 </style>
