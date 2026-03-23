@@ -18,6 +18,7 @@
               <span>Datos del Producto</span>
             </div>
             <FormularioProducto
+              ref="refFormularioProducto"
               v-model="datosProducto"
               :modo="modo"
               @buscar-codigo="buscarPorCodigo"
@@ -47,7 +48,6 @@
           label="Guardar Producto"
           color="primary"
           :loading="guardando"
-          :disable="!formularioValido"
           @click="guardarProducto"
         />
       </q-card-actions>
@@ -110,7 +110,8 @@ const dialogoAbierto = computed({
   set: (value) => emit('update:modelValue', value),
 })
 
-// Ref al formulario de precio (para validación programática)
+// Ref a los formularios (para validación programática)
+const refFormularioProducto = ref(null)
 const refFormularioPrecio = ref(null)
 
 // Estado de carga
@@ -152,24 +153,6 @@ const clasesResponsivas = computed(() => {
   return {
     'dialogo-landscape': $q.screen.width > $q.screen.height && $q.screen.lt.sm,
   }
-})
-
-// Validación básica del formulario (modo local: sin obligatorios)
-const formularioValido = computed(() => {
-  if (props.modo === 'comunidad') {
-    // Modo comunidad: todos los campos obligatorios
-    return (
-      (datosProducto.value.nombre || '').trim() !== '' &&
-      (datosProducto.value.marca || '').trim() !== '' &&
-      (datosProducto.value.codigoBarras || '').trim() !== '' &&
-      (datosPrecio.value.comercio || '').trim() !== '' &&
-      datosPrecio.value.valor !== null &&
-      datosPrecio.value.valor > 0
-    )
-  }
-
-  // Modo local: solo nombre obligatorio
-  return (datosProducto.value.nombre || '').trim() !== ''
 })
 
 // Watchers para sincronizar datos
@@ -268,12 +251,18 @@ function autoCompletarFormulario(producto) {
 async function guardarProducto() {
   guardando.value = true
 
-  // Validar precio: si hay comercio o se ingresó un valor, debe ser > 0
-  const valorPrecio = datosPrecio.value.valor
-  const hayComercio = (datosPrecio.value.comercio || '').trim() !== ''
-  const hayDatosPrecio = hayComercio || valorPrecio !== null
-  if (hayDatosPrecio && !(valorPrecio > 0)) {
-    refFormularioPrecio.value?.validarPrecio()
+  // 1. Validar datos del producto (nombre obligatorio en local)
+  if (props.modo === 'comunidad' || (datosProducto.value.nombre || '').trim() === '') {
+    const productoValido = refFormularioProducto.value?.validarFormulario()
+    if (!productoValido) {
+      guardando.value = false
+      return
+    }
+  }
+
+  // 2. Validar precio: obligatorio siempre (>= $1) para evitar productos sin precio ($0)
+  const precioValido = refFormularioPrecio.value?.validarPrecio()
+  if (!precioValido) {
     guardando.value = false
     return
   }

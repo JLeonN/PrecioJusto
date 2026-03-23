@@ -120,6 +120,7 @@
           placeholder="0.00"
           :error="!!errorPrecioMsg"
           :error-message="errorPrecioMsg"
+          :class="{ 'shake': animarShake }"
           :rules="modo === 'comunidad' ? [requerido, precioValido] : [precioValido]"
           @update:model-value="alCambiarPrecio"
           @blur="alSalirPrecio"
@@ -214,6 +215,7 @@ const qInputPrecioRef = ref(null)
 const valorPrecioTexto = ref(formatearPrecioAlSalir(props.modelValue.valor != null ? String(props.modelValue.valor) : ''))
 // Mensaje de error manual del precio (para casos que las rules no cubren, ej: valor null)
 const errorPrecioMsg = ref('')
+const animarShake = ref(false)
 
 // Estado del diálogo de nuevo comercio
 const dialogoNuevoComercioAbierto = ref(false)
@@ -535,17 +537,26 @@ function emitirCambios() {
   })
 }
 
-// Desplaza el input de precio a la vista y lo enfoca
+// Desplaza el input de precio a la vista, lo enfoca y aplica animación
 function enfocarYNavegar() {
   const el = qInputPrecioRef.value?.$el
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
   qInputPrecioRef.value?.focus()
+
+  animarShake.value = false
+  setTimeout(() => {
+    animarShake.value = true
+    setTimeout(() => {
+      animarShake.value = false
+    }, 500)
+  }, 10)
 }
 
 // Al cambiar el precio: filtrar letras, actualizar valor numérico y emitir
 function alCambiarPrecio(val) {
   valorPrecioTexto.value = filtrarInputPrecio(val)
-  datosInternos.value.valor = parseFloat(valorPrecioTexto.value) || null
+  const floatVal = parseFloat(valorPrecioTexto.value)
+  datosInternos.value.valor = isNaN(floatVal) ? null : floatVal
   errorPrecioMsg.value = ''
   emitirCambios()
 }
@@ -590,11 +601,22 @@ function requerido(val) {
 
 function precioValido(val) {
   if (val === null || val === undefined || val === '') return true
-  return parseFloat(val) > 0 || 'El precio debe ser mayor a 0'
+  return parseFloat(val) >= 1 || 'El precio debe ser al menos de $1'
 }
 </script>
 
 <style scoped>
+.shake {
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
 .formulario-precio {
   display: flex;
   flex-direction: column;
