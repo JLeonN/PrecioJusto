@@ -14,6 +14,22 @@ Las tareas más difíciles siempre van arriba.
 
 - **Estrategia de búsqueda: local primero, APIs después:** En toda circunstancia donde se busque un producto (por nombre, código de barras, etc.), la app debe consultar primero la base de datos local del usuario y solo si no hay resultados suficientes, recurrir a las APIs externas. Revisar todos los puntos de búsqueda de la app y unificar este comportamiento.
 
+### Dificultad 6/10
+
+- **Validación y UX en Formularios (Agregar Producto y otros):** No permitir guardar un producto si el precio es menor a $1 (evitar que se guarde en $0). Al intentar guardar con datos faltantes o inválidos:
+  - Ubicar el primer campo con error (de arriba hacia abajo).
+  - Realizar **auto-scroll** suave para centrar el input.
+  - Hacer **focus** automático al campo.
+  - Aplicar una **animación de "shake" (temblor)** visual en el input para captar la atención.
+  - Asegurar compatibilidad con el teclado virtual (reutilizar lógica de `useTecladoVirtual.js` y `FormularioPrecio.vue`).
+
+### Dificultad 5/10
+
+- **Rotación y Recorte de Imágenes en Edición:** Implementar un **componente reutilizable** (para Comercios y Productos) que gestione la edición avanzada de fotos en pantalla completa:
+  - **Rotación Permanente:** Botones para girar 90° (izq/der) que modifiquen el archivo real (usando Canvas).
+  - **Recorte (Cropping):** Incorporar herramienta de recorte (ej. `vue-cropperjs`) para permitir al usuario ajustar el encuadre de la foto.
+  - **Feedback táctil:** Considerar el uso de `Haptics` para vibración leve al interactuar con estas herramientas en el celular.
+
 ### Dificultad 4/10
 
 - **Estadísticas en Edición de Comercio — Revisión completa:** Las estadísticas que se muestran en `EditarComercioPage` necesitan una revisión general: sacar las que no aportan valor, editar las existentes para que sean más precisas o útiles, y agregar estadísticas nuevas. Actualmente se muestran: "Registrado" (fecha), "Último uso" (tiempo relativo), "Último precio" (tiempo relativo), "Productos" (cantidad) y "Sucursales" (cantidad). El usuario quiere definir cuáles quedan, cuáles se modifican y cuáles se agregan en una sesión de trabajo dedicada.
