@@ -41,7 +41,7 @@
       </q-card-section>
 
       <!-- ACCIONES -->
-      <q-card-actions align="right" class="q-px-md q-pb-md">
+      <q-card-actions align="right" class="q-px-md q-pb-md acciones-safe-area">
         <q-btn flat label="Cancelar" color="grey-7" @click="cancelar" />
         <q-btn
           unelevated
@@ -478,6 +478,9 @@ async function alDetectarCodigo(codigo) {
 }
 .dialogo-landscape .contenido-scroll {
   max-height: 50vh;
+}
+.acciones-safe-area {
+  padding-bottom: calc(16px + var(--safe-area-bottom, 0px)) !important;
 }
 .formularios-contenedor {
   padding: 0 4px;

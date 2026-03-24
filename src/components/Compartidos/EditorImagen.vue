@@ -120,7 +120,7 @@ async function alGuardar() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: calc(12px + var(--safe-area-top, 0px)) 16px 12px;
   background: rgba(0, 0, 0, 0.4);
   flex-shrink: 0;
 }
@@ -146,7 +146,7 @@ async function alGuardar() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: 12px 16px calc(12px + var(--safe-area-bottom, 0px));
   background: rgba(0, 0, 0, 0.55);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   flex-shrink: 0;

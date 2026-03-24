@@ -104,7 +104,7 @@ function alGuardarEditor(nuevaImagenBase64) {
 }
 .visor-btn-cerrar {
   position: absolute;
-  top: 10px;
+  top: calc(10px + var(--safe-area-top, 0px));
   right: 10px;
   z-index: 10;
   background: rgba(0, 0, 0, 0.55);
@@ -119,7 +119,7 @@ function alGuardarEditor(nuevaImagenBase64) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
+  padding: 10px 16px calc(10px + var(--safe-area-bottom, 0px));
   background: rgba(0, 0, 0, 0.35);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   gap: 12px;
