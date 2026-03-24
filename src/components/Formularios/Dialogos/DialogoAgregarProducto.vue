@@ -1,6 +1,12 @@
 <template>
   <q-dialog v-model="dialogoAbierto" @before-hide="alCerrar">
-    <q-card class="dialogo-agregar" :class="clasesResponsivas" :style="estiloTarjeta">
+    <q-card class="dialogo-agregar relative-position" :class="clasesResponsivas" :style="estiloTarjeta">
+      <q-inner-loading :showing="buscandoConsultaExterna" color="primary">
+        <div class="column items-center q-gutter-sm">
+          <q-spinner color="primary" size="40px" />
+          <span class="text-caption text-grey-7">Consultando fuentes externas…</span>
+        </div>
+      </q-inner-loading>
       <!-- HEADER -->
       <q-card-section class="row items-center q-pb-none">
         <div class="text-h6">Agregar Producto</div>
@@ -58,7 +64,10 @@
   <DialogoResultadosBusqueda
     v-model="dialogoResultadosAbierto"
     :resultados="resultadosBusqueda"
+    :variante-pie="variantePieResultados"
+    :pie-acciones-loading="pieAccionesLoading"
     @producto-seleccionado="autoCompletarFormulario"
+    @ampliar-busqueda="onAmpliarBusqueda"
   />
 
   <!-- ESCÁNER UNITARIO (solo llena el campo código de barras) -->
@@ -79,8 +88,9 @@ import EscaneadorCodigo from '../../Scanner/EscaneadorCodigo.vue'
 import { useProductosStore } from '../../../almacenamiento/stores/productosStore.js'
 import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.js'
 import productosService from '../../../almacenamiento/servicios/ProductosService.js'
-import buscadorProductosService from '../../../almacenamiento/servicios/BuscadorProductosService.js'
-import openFoodFactsService from '../../../almacenamiento/servicios/OpenFoodFactsService.js'
+import busquedaProductosHibridaService, {
+  FUENTE_DATO_LOCAL,
+} from '../../../almacenamiento/servicios/BusquedaProductosHibridaService.js'
 import { usePreferenciasStore } from '../../../almacenamiento/stores/preferenciasStore.js'
 import { useTecladoVirtual } from '../../../composables/useTecladoVirtual.js'
 
@@ -142,11 +152,23 @@ const datosPrecio = ref({
   nombreCompleto: '',
 })
 
-// Estados de búsqueda API
+// Estados de búsqueda API / híbrida
 const dialogoResultadosAbierto = ref(false)
 const resultadosBusqueda = ref([])
 const fuenteDatoActual = ref(null)
 const fotoFuenteActual = ref(null)
+const buscandoConsultaExterna = ref(false)
+const variantePieResultados = ref(null)
+const pieAccionesLoading = ref(false)
+const ultimoCodigoBusqueda = ref('')
+const ultimoTextoNombreBusqueda = ref('')
+
+watch(dialogoResultadosAbierto, (abierto) => {
+  if (!abierto) {
+    variantePieResultados.value = null
+    pieAccionesLoading.value = false
+  }
+})
 
 // Clases responsivas
 const clasesResponsivas = computed(() => {
@@ -172,15 +194,24 @@ watch(
   { deep: true },
 )
 
-// Buscar por código de barras usando el orquestador de APIs
+// Buscar por código: local primero (plan BusquedaLocalPrimeroYEstadosCarga)
 async function buscarPorCodigo(codigo, callbackFinalizar) {
   try {
-    console.log(`🔍 Buscando producto por código: ${codigo}`)
+    const c = (codigo || '').trim()
+    ultimoCodigoBusqueda.value = c
+    console.log(`🔍 Buscando producto por código: ${c}`)
 
-    const resultado = await buscadorProductosService.buscarPorCodigo(codigo)
+    const res = await busquedaProductosHibridaService.buscarPorCodigoConPolitica(c, {
+      forzarApi: false,
+      onAntesLlamadaApi: () => {
+        buscandoConsultaExterna.value = true
+      },
+    })
 
-    if (resultado) {
-      resultadosBusqueda.value = [{ ...resultado.producto, fuenteDato: resultado.fuenteDato }]
+    variantePieResultados.value = res.puedeEnriquecerConApi ? 'codigo-local' : null
+    resultadosBusqueda.value = res.itemsParaDialogo
+
+    if (res.itemsParaDialogo.length > 0) {
       dialogoResultadosAbierto.value = true
     } else {
       $q.notify({
@@ -197,19 +228,33 @@ async function buscarPorCodigo(codigo, callbackFinalizar) {
       position: 'top',
     })
   } finally {
+    buscandoConsultaExterna.value = false
     if (callbackFinalizar) callbackFinalizar()
   }
 }
 
-// Buscar por nombre en OpenFoodFacts
+// Buscar por nombre: local primero; OFF si no hay locales o por pie del diálogo
 async function buscarPorNombre(texto, callbackFinalizar) {
   try {
-    console.log(`🔍 Buscando productos por nombre: ${texto}`)
+    const t = (texto || '').trim()
+    ultimoTextoNombreBusqueda.value = t
+    if (!t) {
+      if (callbackFinalizar) callbackFinalizar()
+      return
+    }
+    console.log(`🔍 Buscando productos por nombre: ${t}`)
 
-    const resultados = await openFoodFactsService.buscarPorTexto(texto)
+    const res = await busquedaProductosHibridaService.buscarPorNombreConPolitica(t, {
+      ampliarOpenFoodFacts: false,
+      onAntesLlamadaApi: () => {
+        buscandoConsultaExterna.value = true
+      },
+    })
 
-    if (resultados.length > 0) {
-      resultadosBusqueda.value = resultados
+    variantePieResultados.value = res.puedeAmpliarOpenFoodFacts ? 'nombre-local' : null
+    resultadosBusqueda.value = res.itemsParaDialogo
+
+    if (res.itemsParaDialogo.length > 0) {
       dialogoResultadosAbierto.value = true
     } else {
       $q.notify({
@@ -226,11 +271,61 @@ async function buscarPorNombre(texto, callbackFinalizar) {
       position: 'top',
     })
   } finally {
+    buscandoConsultaExterna.value = false
     if (callbackFinalizar) callbackFinalizar()
   }
 }
 
-// Auto-completar formulario con datos de API
+async function onAmpliarBusqueda() {
+  const tipo = variantePieResultados.value
+  if (!tipo) return
+
+  pieAccionesLoading.value = true
+  buscandoConsultaExterna.value = true
+  try {
+    if (tipo === 'codigo-local') {
+      const res = await busquedaProductosHibridaService.buscarPorCodigoConPolitica(ultimoCodigoBusqueda.value, {
+        forzarApi: true,
+        onAntesLlamadaApi: () => {},
+      })
+      variantePieResultados.value = null
+      resultadosBusqueda.value = res.itemsParaDialogo
+      if (res.itemsParaDialogo.length === 0) {
+        $q.notify({
+          type: 'warning',
+          message: 'No se encontró en fuentes externas',
+          position: 'top',
+        })
+      }
+    } else if (tipo === 'nombre-local') {
+      const res = await busquedaProductosHibridaService.buscarPorNombreConPolitica(ultimoTextoNombreBusqueda.value, {
+        ampliarOpenFoodFacts: true,
+        onAntesLlamadaApi: () => {},
+      })
+      variantePieResultados.value = null
+      resultadosBusqueda.value = res.itemsParaDialogo
+      if (res.itemsParaDialogo.length === 0) {
+        $q.notify({
+          type: 'warning',
+          message: 'No se encontraron productos en Open Food Facts',
+          position: 'top',
+        })
+      }
+    }
+  } catch (error) {
+    console.error('❌ Error al ampliar búsqueda:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Error al consultar fuentes externas',
+      position: 'top',
+    })
+  } finally {
+    pieAccionesLoading.value = false
+    buscandoConsultaExterna.value = false
+  }
+}
+
+// Auto-completar formulario (local o API)
 function autoCompletarFormulario(producto) {
   datosProducto.value = {
     nombre: producto.nombre || datosProducto.value.nombre,
@@ -242,8 +337,11 @@ function autoCompletarFormulario(producto) {
     imagen: producto.imagen || datosProducto.value.imagen,
   }
   fuenteDatoActual.value = producto.fuenteDato || null
-  // Si la API trajo imagen, la foto es de la API; si no, no hay foto de API
-  fotoFuenteActual.value = producto.imagen ? 'api' : null
+  if (producto.fuenteDato === FUENTE_DATO_LOCAL) {
+    fotoFuenteActual.value = producto.fotoFuente ?? (producto.imagen ? 'usuario' : null)
+  } else {
+    fotoFuenteActual.value = producto.imagen ? 'api' : null
+  }
   console.log('✅ Formulario auto-completado')
 }
 

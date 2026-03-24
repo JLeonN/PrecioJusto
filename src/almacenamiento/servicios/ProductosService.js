@@ -209,6 +209,52 @@ class ProductosService {
   }
 
   /**
+   * Normaliza texto para búsqueda (misma lógica que el filtro de Mis Productos).
+   * @private
+   */
+  _normalizarTextoBusqueda(texto) {
+    return texto
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+  }
+
+  /**
+   * 🔍 BUSCAR EN LOCAL por nombre, marca, categoría o código (alineado a MisProductosPage).
+   * Usado por BusquedaProductosHibridaService (plan: búsqueda local primero).
+   * @param {string} termino - Término de búsqueda
+   * @returns {Promise<Array>}
+   */
+  async buscarPorTextoFlexible(termino) {
+    try {
+      const texto = (termino || '').trim()
+      if (!texto) return []
+
+      const todosLosProductos = await this.obtenerTodos()
+      const textoNorm = this._normalizarTextoBusqueda(texto)
+      const palabras = textoNorm.split(/\s+/).filter(Boolean)
+      const esNumerico = /^\d+$/.test(texto)
+
+      const resultados = todosLosProductos.filter((p) => {
+        if (esNumerico && p.codigoBarras?.includes(texto)) return true
+        const nombreNorm = this._normalizarTextoBusqueda(p.nombre || '')
+        if (palabras.length > 0 && palabras.every((palabra) => nombreNorm.includes(palabra))) return true
+        const marcaNorm = this._normalizarTextoBusqueda(p.marca || '')
+        if (marcaNorm && marcaNorm.includes(textoNorm)) return true
+        const categoriaNorm = this._normalizarTextoBusqueda(p.categoria || '')
+        if (categoriaNorm && categoriaNorm.includes(textoNorm)) return true
+        return false
+      })
+
+      console.log(`✅ buscarPorTextoFlexible: ${resultados.length} coincidencias para "${texto}"`)
+      return resultados
+    } catch (error) {
+      console.error('❌ Error en buscarPorTextoFlexible:', error)
+      return []
+    }
+  }
+
+  /**
    * 🔍 BUSCAR PRODUCTO POR CÓDIGO DE BARRAS
    * @param {string} codigoBarras - Código de barras del producto
    * @returns {Promise<Object|null>} - Producto encontrado o null

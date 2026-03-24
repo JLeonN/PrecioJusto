@@ -115,6 +115,19 @@
       @precio-guardado="alGuardarPrecio"
     />
 
+    <!-- Overlay: consulta a APIs durante escaneo -->
+    <Teleport to="body">
+      <div
+        v-if="escaneoConsultandoApi && scannerActivo"
+        class="escaneo-api-overlay"
+        aria-live="polite"
+        aria-busy="true"
+      >
+        <q-spinner color="white" size="42px" />
+        <span class="escaneo-api-overlay__texto">Consultando fuentes externas…</span>
+      </div>
+    </Teleport>
+
     <!-- TARJETITA SOBRE LA CÁMARA (duplicado + éxito Ráfaga) -->
     <Teleport to="body">
       <Transition name="aviso-deslizar">
@@ -207,6 +220,8 @@ const itemActual = ref(null)
 const avisoEscaneo = reactive({ visible: false, tipo: 'exito', nombre: '', codigo: '', imagen: null })
 // Códigos en búsqueda background (previene doble escaneo del mismo código en Ráfaga)
 const codigosProcesando = new Set()
+// Overlay mientras se consultan APIs (código no estaba en local)
+const escaneoConsultandoApi = ref(false)
 
 function mostrarAvisoEscaneo(tipo, { nombre, codigo, imagen }) {
   Object.assign(avisoEscaneo, { visible: true, tipo, nombre: nombre || '', codigo, imagen: imagen || null })
@@ -239,10 +254,18 @@ function _construirItem(codigo, existente, productoApi, resultadoApi) {
   }
 }
 
-// Busca en BD local + API y devuelve el item construido
+// Busca en BD local; solo llama APIs si no hay producto local (plan búsqueda local primero)
 async function _buscarProducto(codigo) {
   const existente = await productosService.buscarPorCodigoBarras(codigo)
-  const resultadoApi = await buscadorProductosService.buscarPorCodigo(codigo)
+  let resultadoApi = null
+  if (!existente) {
+    escaneoConsultandoApi.value = true
+    try {
+      resultadoApi = await buscadorProductosService.buscarPorCodigo(codigo)
+    } finally {
+      escaneoConsultandoApi.value = false
+    }
+  }
   return _construirItem(codigo, existente, resultadoApi?.producto || null, resultadoApi)
 }
 
@@ -496,6 +519,25 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.escaneo-api-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.55);
+  pointer-events: all;
+}
+.escaneo-api-overlay__texto {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 15px;
+  font-weight: 500;
+  padding: 0 24px;
+  text-align: center;
+}
 /* Tarjetita de aviso sobre la cámara */
 .aviso-escaneo {
   position: fixed;

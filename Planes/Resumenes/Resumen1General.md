@@ -35,7 +35,8 @@ La app está desarrollada con **Vue.js 3**, **Quasar Framework** y **Capacitor**
 - **Patrón Strategy** (adaptadores de almacenamiento)
 
 ### APIs Externas
-- **BuscadorProductosService** (orquestador — único punto de entrada)
+- **BuscadorProductosService** (orquestador por código de barras)
+- **BusquedaProductosHibridaService** (local primero, APIs después — diálogo agregar y política unificada con escaneo)
 - **Open Food Facts** (alimentos), **Open Beauty Facts** (cosméticos), **Open Pet Food Facts** (mascotas), **Open Products Facts** (general)
 - **Open Library + Google Books** (libros por ISBN 978/979)
 - **UPCitemdb** (comodín general, 100 req/día, solo APK — CORS en browser)
@@ -105,7 +106,8 @@ src/
 │   │   ├── ComerciosService.js             # CRUD de comercios + validación duplicados
 │   │   ├── ConfirmacionesService.js        # Gestión de confirmaciones de precios
 │   │   ├── PreferenciasService.js          # Preferencias del usuario (moneda, unidad)
-│   │   ├── BuscadorProductosService.js     # Orquestador multi-API (único punto de entrada)
+│   │   ├── BuscadorProductosService.js     # Orquestador multi-API por código de barras
+│   │   ├── BusquedaProductosHibridaService.js  # Local primero + API (código y nombre); ver PlanBusquedaLocalPrimeroYEstadosCarga
 │   │   ├── OpenFoodFactsService.js         # Alimentos (Open Food Facts API)
 │   │   ├── OpenBeautyFactsService.js       # Cosméticos y perfumes
 │   │   ├── OpenPetFoodFactsService.js      # Alimentos para mascotas
@@ -705,6 +707,8 @@ H. Arquitectura y Código
 - `eliminar(id)`: Elimina un producto
 - `agregarPrecio(productoId, precio)`: Agrega precio a producto
 - `buscarPorCodigoBarras(codigo)`: Busca producto por código
+- `buscarPorNombre(termino)`: Coincidencia por substring en nombre
+- `buscarPorTextoFlexible(termino)`: Búsqueda local alineada al filtro de Mis Productos (nombre, marca, categoría, código)
 
 ### ComerciosService.js
 **Responsabilidades:**
@@ -750,8 +754,15 @@ H. Arquitectura y Código
 
 **Retorna:** `{ producto, fuenteDato }` o `null`
 
+### BusquedaProductosHibridaService.js
+**Responsabilidades:**
+- Encapsula la política “base local primero, APIs si hace falta” (plan `Planes/PlanBusquedaLocalPrimeroYEstadosCarga.md`)
+- `buscarPorCodigoConPolitica(codigo, { forzarApi })`: si hay producto local y no se fuerza API, no llama al orquestador; expone `puedeEnriquecerConApi` para el pie del diálogo de resultados
+- `buscarPorNombreConPolitica(texto, { ampliarOpenFoodFacts })`: primero `ProductosService.buscarPorTextoFlexible`; si hay resultados locales, no llama a OFF salvo ampliación explícita; si no hay locales, llama a `OpenFoodFactsService.buscarPorTexto`
+- Exporta `FUENTE_DATO_LOCAL` (`Mis productos`) para etiquetar filas en `DialogoResultadosBusqueda`
+
 ### OpenFoodFactsService.js y familia
-- `OpenFoodFactsService` — alimentos; también `buscarPorTexto(texto)`
+- `OpenFoodFactsService` — alimentos; también `buscarPorTexto(texto)` (uso vía capa híbrida en flujos “agregar producto” cuando corresponde)
 - `OpenBeautyFactsService` — cosméticos/perfumes
 - `OpenPetFoodFactsService` — alimentos mascotas
 - `OpenProductsFactsService` — productos generales

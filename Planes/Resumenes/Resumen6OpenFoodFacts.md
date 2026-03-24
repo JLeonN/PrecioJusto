@@ -2,8 +2,9 @@
 
 ## ARQUITECTURA GENERAL
 
-El sistema usa un **orquestador** (`BuscadorProductosService`) como único punto de entrada.
-Ningún componente importa servicios de API directamente — todo pasa por el orquestador.
+El sistema usa un **orquestador** (`BuscadorProductosService`) como punto de entrada para **búsqueda por código de barras** en red.
+
+Para **unificar política local + API** en formularios y alinearse con el escaneo, existe `BusquedaProductosHibridaService.js`: consulta primero `ProductosService` y solo después el orquestador (código) u `OpenFoodFactsService.buscarPorTexto` (nombre), según el plan `Planes/PlanBusquedaLocalPrimeroYEstadosCarga.md`.
 
 ```
 codigoBarras
@@ -35,8 +36,13 @@ codigoBarras
 
 Retorna: `{ producto, fuenteDato }` o `null`
 
+### Búsqueda por texto (nombre) — Open Food Facts
+
+En el flujo de **Agregar producto**, `buscarPorTexto` se usa cuando no hay coincidencias en la base local del usuario, o cuando el usuario elige **“Buscar en Open Food Facts”** desde el pie del diálogo de resultados (resultados locales ya mostrados). No sustituye al orquestador para códigos de barras.
+
 ### Valores de fuenteDato
 ```javascript
+'Mis productos'  // resultados desde BusquedaProductosHibridaService (solo local)
 'Open Food Facts' | 'Open Beauty Facts' | 'Open Pet Food Facts'
 'Open Products Facts' | 'Open Library' | 'Google Books' | 'UPCitemdb'
 ```

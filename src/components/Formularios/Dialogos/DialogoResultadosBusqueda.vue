@@ -36,9 +36,12 @@
             <!-- INFO -->
             <q-item-section>
               <q-item-label class="text-weight-bold">{{ producto.nombre }}</q-item-label>
-              <q-item-label caption>{{ producto.marca }}</q-item-label>
+              <q-item-label v-if="producto.marca" caption>{{ producto.marca }}</q-item-label>
               <q-item-label caption class="text-grey-6">
                 {{ producto.cantidad }} {{ producto.unidad }}
+              </q-item-label>
+              <q-item-label v-if="producto.fuenteDato" caption class="text-primary text-weight-medium">
+                {{ producto.fuenteDato }}
               </q-item-label>
             </q-item-section>
 
@@ -56,6 +59,20 @@
           <p class="text-caption text-grey-6">Intenta con otro término de búsqueda</p>
         </div>
       </q-card-section>
+
+      <q-card-actions
+        v-if="variantePie"
+        vertical
+        class="q-px-md q-pb-md q-pt-none"
+      >
+        <q-btn
+          outline
+          color="primary"
+          :label="etiquetaPie"
+          :loading="pieAccionesLoading"
+          @click="emit('ampliar-busqueda')"
+        />
+      </q-card-actions>
     </q-card>
   </q-dialog>
 </template>
@@ -73,9 +90,24 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  /** 'codigo-local' | 'nombre-local' — muestra pie para consultar API */
+  variantePie: {
+    type: String,
+    default: null,
+  },
+  pieAccionesLoading: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-const emit = defineEmits(['update:modelValue', 'producto-seleccionado'])
+const emit = defineEmits(['update:modelValue', 'producto-seleccionado', 'ampliar-busqueda'])
+
+const etiquetaPie = computed(() =>
+  props.variantePie === 'codigo-local'
+    ? 'Consultar en internet'
+    : 'Buscar en Open Food Facts',
+)
 
 const dialogoAbierto = computed({
   get: () => props.modelValue,

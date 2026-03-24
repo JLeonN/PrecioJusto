@@ -350,7 +350,6 @@ export const useProductosStore = defineStore('productos', () => {
       return productos.value
     }
 
-    cargando.value = true
     error.value = null
 
     try {
@@ -362,8 +361,6 @@ export const useProductosStore = defineStore('productos', () => {
       console.error('❌ Error al buscar productos:', err)
       error.value = 'Error en la búsqueda'
       return []
-    } finally {
-      cargando.value = false
     }
   }
 
