@@ -184,18 +184,18 @@ Cada precio requiere:
 - La `q-img` del producto tiene `@click="verFoto = true"` y cursor `zoom-in`
 - Tooltip "Ver foto" al pasar el cursor
 - Solo activo cuando el producto tiene imagen (no afecta al placeholder)
-- Abre `DialogoVerImagen.vue` pasando `src` y `titulo` (nombre del producto)
+- Abre `DialogoVerImagen.vue` pasando `src`, `titulo` (nombre del producto) y `:editable="!!producto.imagen"` para permitir rotar/recortar y guardar la nueva imagen en el producto cuando ya hay foto
 
 ### DialogoVerImagen.vue — Visor de imagen reutilizable
 - Ubicación: `src/components/Compartidos/DialogoVerImagen.vue`
-- Props: `modelValue` (Boolean, v-model), `src` (String), `titulo` (String, opcional)
-- UI: fondo oscuro `#1a1a1a`, `border-radius: 16px`, sombra fuerte
+- Props: `modelValue` (Boolean, v-model), `src` (String), `titulo` (String, opcional), `editable` (Boolean, default false) — si hay `src` y `editable`, el pie muestra botón "Editar" que abre `EditorImagen.vue`
+- Evento `@guardar` — emite la imagen en base64 (JPEG) al guardar desde el editor; el padre persiste vía `productosStore.actualizarProducto`
+- UI: fondo oscuro `#1a1a1a`, `border-radius: 16px`, sombra fuerte; safe area en botón cerrar y pie del visor (`var(--safe-area-top/bottom)`)
 - Botón X flotante arriba a la derecha con `backdrop-filter: blur(4px)`
 - Título opcional del producto en pie del modal (semitransparente)
 - Animación `scale` al abrir/cerrar (`transition-show="scale"`)
 - Cierra al hacer click fuera del modal
-- Uso: `<DialogoVerImagen v-model="verFoto" :src="img" :titulo="nombre" />`
-- También usado en `EditarComercioPage` al tocar la foto del comercio
+- Uso: `<DialogoVerImagen v-model="verFoto" :src="img" :titulo="nombre" :editable="condicion" @guardar="..." />` — en detalle, `condicion` es `!!producto.imagen`; en comercios, `!!direccionSeleccionada?.foto`
 
 ### ItemComercioHistorial.vue — Mejoras recientes
 - **Foto del comercio:** Si la dirección tiene foto (almacenada en `direcciones[i].foto`), muestra un thumbnail cuadrado (44×44px, `border-radius: 8px`) con borde de color que indica la frescura del precio más reciente (verde/amarillo/naranja/gris). Si no hay foto, muestra el punto de color existente (`q-avatar`).

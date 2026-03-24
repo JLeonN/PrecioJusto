@@ -139,7 +139,7 @@ unidad, litro, mililitro, kilo, gramo, metro, pack
 ✅ ETAPA 4: Escaneo código de barras con cámara (completado — ver Resumen8Scanner.md para detalle completo)
   - EscaneadorCodigo.vue: overlay nativo (@capacitor-mlkit/barcode-scanning), fallback web; prop `continuo` para Ráfaga
   - TarjetaEscaneo.vue: tarjeta post-escaneo (Modo A); precio obligatorio, foto opcional, edición inline
-  - MesaTrabajo.vue: reemplaza BandejaBorradores; full-screen con ordenamiento, selección múltiple, envío parcial
+  - MesaTrabajoPage.vue (ruta `/mesa-trabajo`): reemplaza el antiguo diálogo full-screen `MesaTrabajo.vue` / BandejaBorradores; página con ordenamiento, selección múltiple, envío parcial
   - Flujo orquestado desde MisProductosPage.vue con sesionEscaneoStore (comercio por ítem, no global)
 
 ## DIALOGO AGREGAR PRECIO (DialogoAgregarPrecio.vue)

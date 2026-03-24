@@ -97,7 +97,7 @@ src/
 │   │   ├── CapacitorAdapter.js             # Implementación con Capacitor Preferences
 │   │   └── FirestoreAdapter.js             # Implementación con Firebase (futuro)
 │   │
-│   ├── constantes/                          # 🆕 Constantes globales
+│   ├── constantes/                          # Constantes globales
 │   │   └── Monedas.js                       # Lista completa de monedas del mundo (20+ opciones)
 │   │
 │   ├── servicios/
@@ -105,20 +105,20 @@ src/
 │   │   ├── ComerciosService.js             # CRUD de comercios + validación duplicados
 │   │   ├── ConfirmacionesService.js        # Gestión de confirmaciones de precios
 │   │   ├── PreferenciasService.js          # Preferencias del usuario (moneda, unidad)
-│   │   ├── BuscadorProductosService.js     # 🆕 Orquestador multi-API (único punto de entrada)
+│   │   ├── BuscadorProductosService.js     # Orquestador multi-API (único punto de entrada)
 │   │   ├── OpenFoodFactsService.js         # Alimentos (Open Food Facts API)
-│   │   ├── OpenBeautyFactsService.js       # 🆕 Cosméticos y perfumes
-│   │   ├── OpenPetFoodFactsService.js      # 🆕 Alimentos para mascotas
-│   │   ├── OpenProductsFactsService.js     # 🆕 Productos generales (electrónica, hogar)
-│   │   ├── OpenLibraryService.js           # 🆕 Libros por ISBN (primario)
-│   │   ├── GoogleBooksService.js           # 🆕 Libros por ISBN (respaldo)
-│   │   └── UpcItemDbService.js             # 🆕 Comodín general (100 req/día, solo APK)
+│   │   ├── OpenBeautyFactsService.js       # Cosméticos y perfumes
+│   │   ├── OpenPetFoodFactsService.js      # Alimentos para mascotas
+│   │   ├── OpenProductsFactsService.js     # Productos generales (electrónica, hogar)
+│   │   ├── OpenLibraryService.js           # Libros por ISBN (primario)
+│   │   ├── GoogleBooksService.js           # Libros por ISBN (respaldo)
+│   │   └── UpcItemDbService.js             # Comodín general (100 req/día, solo APK)
 │   │
 │   └── stores/
 │       ├── productosStore.js               # Estado global de productos (Pinia)
 │       ├── comerciosStore.js               # Estado global de comercios (Pinia)
 │       ├── confirmacionesStore.js          # Estado global de confirmaciones (Pinia)
-│       ├── sesionEscaneoStore.js           # 🆕 Borradores de escaneo con persistencia (Pinia)
+│       ├── sesionEscaneoStore.js           # Borradores de escaneo con persistencia (Pinia)
 │       └── preferenciasStore.js           # Preferencias del usuario (moneda, unidad) — carga única al iniciar
 │
 ├── components/
@@ -131,7 +131,7 @@ src/
 │   │   ├── SelectorComercioDireccion.vue  # Selector de comercio + dirección reutilizable (emite { id, nombre, direccionId, direccionNombre } | null)
 │   │   ├── PieAtribucion.vue              # Pie de atribución de fuentes; props: fuentesApi[], fuentesUsuario[]; muestra origen de datos (API o usuario)
 │   │   ├── DialogoVerImagen.vue           # Visor de imagen en grande; props: modelValue, src, titulo, editable; footer con botón Editar → EditorImagen
-│   │   └── EditorImagen.vue               # 🆕 Editor de imagen (rotación 90°, recorte vue-advanced-cropper); pantalla completa; Cancelar/Guardar
+│   │   └── EditorImagen.vue               # Editor de imagen (rotación 90°, recorte vue-advanced-cropper); pantalla completa; Cancelar/Guardar
 │   │
 │   ├── Comercios/                           # Componentes de comercios
 │   │   ├── ListaComercios.vue              # Contenedor con grid responsivo Quasar
@@ -156,7 +156,7 @@ src/
 │   │       ├── DialogoResultadosBusqueda.vue        # Modal con resultados de Open Food Facts
 │   │       ├── DialogoCoincidencias.vue             # Alerta de comercios similares (agregar sucursal)
 │   │       ├── DialogoDuplicadoExacto.vue           # Confirmación de duplicado exacto
-│   │       ├── DialogoAgregarSucursal.vue           # 🆕 Modal para agregar sucursal a comercio
+│   │       ├── DialogoAgregarSucursal.vue           # Modal para agregar sucursal a comercio
 │   │       ├── DialogoMismaUbicacion.vue            # Alerta de misma dirección
 │   │       └── DialogoMotivoEliminacion.vue         # Confirmación con motivo de eliminación
 │   │
@@ -168,14 +168,14 @@ src/
 │   ├── MisProductos/                        # Componentes de productos
 │   │   └── ListaProductos.vue              # Contenedor con grid responsivo Quasar
 │   │
-│   ├── EditarComercio/                     # 🆕 Componentes de edición de comercio
-│   │   ├── SelectorSucursales.vue         # 🆕 Mini-tarjetas con calle, barrio, artículos por sucursal
+│   ├── EditarComercio/                     # Componentes de edición de comercio
+│   │   ├── SelectorSucursales.vue         # Mini-tarjetas con calle, barrio, artículos por sucursal
 │   │   ├── CampoEditable.vue              # Campo inline editable (texto + lápiz → input)
 │   │   ├── EstadisticasComercio.vue       # Grid de mini-cards con estadísticas
 │   │   └── ListaProductosComercio.vue     # Lista de productos asociados al comercio
 │   │
 │   └── Tarjetas/                            # Componentes de tarjetas
-│       ├── TarjetaBase.vue                 # 🆕 Tarjeta base reutilizable estilo Yu-Gi-Oh
+│       ├── TarjetaBase.vue                 # Tarjeta base reutilizable estilo Yu-Gi-Oh
 │       ├── TarjetaProductoYugioh.vue       # Tarjeta de producto (usa TarjetaBase)
 │       └── TarjetaComercioYugioh.vue       # Tarjeta de comercio (usa TarjetaBase)
 │
@@ -185,9 +185,9 @@ src/
 │   ├── useFechaRelativa.js                 # Formato de fechas relativas y cortas
 │   ├── useBotonAtras.js                   # Botón back nativo Android (drawer/detalle/salir)
 │   ├── useCamaraFoto.js                   # Captura de fotos: cámara nativa + galería (input file)
-│   └── useTecladoVirtual.js               # 🆕 Ajuste automático de dialogs ante teclado virtual Android
-├── utils/                                  # 🆕 Utilidades reutilizables de lógica pura
-│   └── PrecioUtils.js                      # 🆕 Formateo y validación de inputs de precio (formatearPrecioDisplay, soloNumerosDecimales, filtrarInputPrecio, formatearPrecioAlSalir)
+│   └── useTecladoVirtual.js               # Ajuste automático de dialogs ante teclado virtual Android
+├── utils/                                  # Utilidades reutilizables de lógica pura
+│   └── PrecioUtils.js                      # Formateo y validación de inputs de precio (formatearPrecioDisplay, soloNumerosDecimales, filtrarInputPrecio, formatearPrecioAlSalir)
 ├── css/
 │   ├── app.css                              # Clases CSS globales del Design System
 │   ├── quasar.variables.scss               # Variables de Quasar (colores, fuentes)
@@ -430,9 +430,9 @@ A. Gestión de Productos
 ✅ Detección automática de ISBN (978/979) → flujo libros; resto → flujo productos
 ✅ Búsqueda por nombre y marca (Open Food Facts API)
 ✅ Autocompletado de datos desde API (nombre, marca, imagen, cantidad, unidad, fuenteDato)
-✅ 🆕 Atribución de fuente visible en detalle del producto ("Datos de Open Food Facts", etc.)
-✅ 🆕 Campo `fotoFuente` en productos ('api' | 'usuario' | null): rastrea si la foto vino de una API o fue tomada/elegida por el usuario
-✅ 🆕 Componente `PieAtribucion.vue` reutilizable: pie discreto al final del scroll con secciones separadas para fuentes API y aportaciones del usuario; integrado en DetalleProductoPage y EditarComercioPage
+✅ Atribución de fuente visible en detalle del producto ("Datos de Open Food Facts", etc.)
+✅ Campo `fotoFuente` en productos ('api' | 'usuario' | null): rastrea si la foto vino de una API o fue tomada/elegida por el usuario
+✅ Componente `PieAtribucion.vue` reutilizable: pie discreto al final del scroll con secciones separadas para fuentes API y aportaciones del usuario; integrado en DetalleProductoPage y EditarComercioPage
 ✅ Registro de precios con múltiples monedas (20+ opciones: UYU, USD, EUR, ARS, BRL, etc.)
 ✅ Monedas centralizadas en constantes (fácil agregar nuevas)
 ✅ Validación de cantidades y unidades (kg, g, L, mL, unidades, pack, metro)
@@ -447,43 +447,43 @@ A. Gestión de Productos
 ✅ Filtros de historial (comercio, período, orden precio/fecha)
 ✅ Confirmaciones de precios con validación de usuario único
 ✅ Estadísticas: precio promedio, tendencia, total de comercios
-✅ 🆕 Buscador inline en Mis Productos (por nombre, marca, categoría, código de barras)
-✅ 🆕 Categoría editable en detalle del producto (heredada de API, editable con CampoEditable)
-✅ 🆕 Foto del producto más grande en detalle (desktop: 180px, móvil: 45vw)
-✅ 🆕 Cantidad y unidad del producto visible y editable en DetalleProducto (ej: "500 g", "2 L") — inline entre Categoría y Código de barras
+✅ Buscador inline en Mis Productos (por nombre, marca, categoría, código de barras)
+✅ Categoría editable en detalle del producto (heredada de API, editable con CampoEditable)
+✅ Foto del producto más grande en detalle (desktop: 180px, móvil: 45vw)
+✅ Cantidad y unidad del producto visible y editable en DetalleProducto (ej: "500 g", "2 L") — inline entre Categoría y Código de barras
 ✅ Visor de imagen en grande al hacer click en la foto del producto (DialogoVerImagen.vue)
-✅ 🆕 Editor de imagen en vista grande: rotación 90° izq/der y recorte (EditorImagen.vue con vue-advanced-cropper); integrado en productos y comercios
-✅ 🆕 Registro de última interacción por producto (registrarInteraccion + productosPorInteraccion)
-✅ 🆕 Título "Historial de precios" visible en DetalleProductoPage
-✅ 🆕 Marca editable en detalle del producto (CampoEditable con IconBuildingStore)
-✅ 🆕 Botón restaurar datos desde API en detalle del producto (re-fetch por código de barras)
-✅ 🆕 FAB expandible reutilizable (FabAcciones.vue con q-fab Speed Dial + nextTick para Capacitor)
-✅ 🆕 Modo A — Escaneo rápido: cámara → pausa → TarjetaEscaneo (precio, foto, edición inline) → Mesa de trabajo → cámara reactiva
-✅ 🆕 Modo B — Ráfaga: cámara continua sin pausa (prop `continuo` en EscaneadorCodigo), búsqueda en background (fire-and-forget), tarjetita de aviso sobre la cámara
+✅ Editor de imagen en vista grande: rotación 90° izq/der y recorte (EditorImagen.vue con vue-advanced-cropper); integrado en productos y comercios
+✅ Registro de última interacción por producto (registrarInteraccion + productosPorInteraccion)
+✅ Título "Historial de precios" visible en DetalleProductoPage
+✅ Marca editable en detalle del producto (CampoEditable con IconBuildingStore)
+✅ Botón restaurar datos desde API en detalle del producto (re-fetch por código de barras)
+✅ FAB expandible reutilizable (FabAcciones.vue con q-fab Speed Dial + nextTick para Capacitor)
+✅ Modo A — Escaneo rápido: cámara → pausa → TarjetaEscaneo (precio, foto, edición inline) → Mesa de trabajo → cámara reactiva
+✅ Modo B — Ráfaga: cámara continua sin pausa (prop `continuo` en EscaneadorCodigo), búsqueda en background (fire-and-forget), tarjetita de aviso sobre la cámara
 ✅ Mesa de trabajo (MesaTrabajoPage.vue — ruta `/mesa-trabajo`): reemplaza BandejaBorradores; página propia con drawer, ordenamiento por 5 criterios, selección múltiple por long-press, asignación de comercio en bloque, envío parcial, estado vacío con botones de redirección
-✅ 🆕 Registro de comercio rápido desde tarjeta en Mesa de Trabajo (integrado en TarjetaProductoBorrador)
-✅ 🆕 Tarjetita de aviso sobre cámara: Teleport to="body" z-index 10000, visible durante escaneo activo (duplicado + éxito Ráfaga), botón X para cerrar
-✅ 🆕 Detección de duplicados en sesión sin interrumpir el escaneo (aviso sobre cámara)
-✅ 🆕 Auto-fetch al reconectar internet (@capacitor/network, nativo en Android)
-✅ 🆕 Gestión de fotos con composable `useCamaraFoto`: cámara nativa (solo Android) + galería (todas las plataformas). Menú contextual `q-menu` con 3 opciones (Tomar foto, Desde galería, Borrar foto). Integrado en InfoProducto, FormularioProducto, FormularioComercio, EditarComercioPage y DialogoAgregarComercioRapido.
+✅ Registro de comercio rápido desde tarjeta en Mesa de Trabajo (integrado en TarjetaProductoBorrador)
+✅ Tarjetita de aviso sobre cámara: Teleport to="body" z-index 10000, visible durante escaneo activo (duplicado + éxito Ráfaga), botón X para cerrar
+✅ Detección de duplicados en sesión sin interrumpir el escaneo (aviso sobre cámara)
+✅ Auto-fetch al reconectar internet (@capacitor/network, nativo en Android)
+✅ Gestión de fotos con composable `useCamaraFoto`: cámara nativa (solo Android) + galería (todas las plataformas). Menú contextual `q-menu` con 3 opciones (Tomar foto, Desde galería, Borrar foto). Integrado en InfoProducto, FormularioProducto, FormularioComercio, EditarComercioPage y DialogoAgregarComercioRapido.
 
 B. Gestión de Comercios y Sucursales
 
 ✅ Registro de comercios con formulario completo (nombre, tipo opcional, dirección, barrio, ciudad)
-✅ 🆕 Creación rápida de comercios desde formulario de precio (solo nombre obligatorio)
-✅ 🆕 Diálogo reutilizable DialogoAgregarComercioRapido.vue
-✅ 🆕 Pre-llenado de datos escritos por el usuario en diálogo rápido
-✅ 🆕 Auto-selección del comercio recién creado (flujo sin interrupciones)
+✅ Creación rápida de comercios desde formulario de precio (solo nombre obligatorio)
+✅ Diálogo reutilizable DialogoAgregarComercioRapido.vue
+✅ Pre-llenado de datos escritos por el usuario en diálogo rápido
+✅ Auto-selección del comercio recién creado (flujo sin interrupciones)
 ✅ Validación de duplicados con algoritmo inteligente (3 niveles)
 ✅ Detección de nombres similares (Levenshtein distance)
 ✅ Detección de direcciones cercanas con normalización
-✅ 🆕 Sistema de sucursales: agrupación automática de cadenas por nombre normalizado
-✅ 🆕 Getter `comerciosAgrupados` con dirección principal, top 3, contadores
-✅ 🆕 Diálogo de duplicado exacto con confirmación (DialogoDuplicadoExacto.vue)
-✅ 🆕 Diálogo de coincidencias con opción "agregar sucursal"
-✅ 🆕 Overlay de dirección principal dentro de la imagen de tarjeta
-✅ 🆕 TarjetaBase con sistema de slots genéricos (#overlay-info)
-✅ 🆕 Botón expandir: derecha cuando cerrado, centro cuando abierto
+✅ Sistema de sucursales: agrupación automática de cadenas por nombre normalizado
+✅ Getter `comerciosAgrupados` con dirección principal, top 3, contadores
+✅ Diálogo de duplicado exacto con confirmación (DialogoDuplicadoExacto.vue)
+✅ Diálogo de coincidencias con opción "agregar sucursal"
+✅ Overlay de dirección principal dentro de la imagen de tarjeta
+✅ TarjetaBase con sistema de slots genéricos (#overlay-info)
+✅ Botón expandir: derecha cuando cerrado, centro cuando abierto
 ✅ Tipos de comercio predefinidos (campo opcional)
 ✅ Múltiples direcciones por comercio (agregar/eliminar)
 ✅ Tarjetas expandibles con sucursales (top 3 + indicador "más...")
@@ -493,22 +493,22 @@ B. Gestión de Comercios y Sucursales
 ✅ Sistema de uso reciente (ordenamiento inteligente)
 ✅ Registro automático de uso al agregar precio
 ✅ Diálogos de confirmación: coincidencias, duplicado exacto, misma ubicación, motivo eliminación
-✅ 🆕 Página de edición de comercio con edición inline de campos
-✅ 🆕 Selector de sucursales como mini-tarjetas (calle, barrio/ciudad, artículos registrados)
-✅ 🆕 Agregar/eliminar sucursales desde página de edición
-✅ 🆕 Fusionar sucursales (transferir precios entre sucursales)
-✅ 🆕 Estadísticas del comercio (registro, último uso, productos, sucursales)
-✅ 🆕 Lista de productos asociados con último precio, filtrada por sucursal seleccionada
-✅ 🆕 Composable reutilizable de fechas relativas (useFechaRelativa.js)
-✅ 🆕 Conteo de usos calculado desde productos reales (no desde cantidadUsos del store)
-✅ 🆕 Fotos de comercios funcionales: q-menu en FormularioComercio, EditarComercioPage y DialogoAgregarComercioRapido (reemplaza botón placeholder deshabilitado)
+✅ Página de edición de comercio con edición inline de campos
+✅ Selector de sucursales como mini-tarjetas (calle, barrio/ciudad, artículos registrados)
+✅ Agregar/eliminar sucursales desde página de edición
+✅ Fusionar sucursales (transferir precios entre sucursales)
+✅ Estadísticas del comercio (registro, último uso, productos, sucursales)
+✅ Lista de productos asociados con último precio, filtrada por sucursal seleccionada
+✅ Composable reutilizable de fechas relativas (useFechaRelativa.js)
+✅ Conteo de usos calculado desde productos reales (no desde cantidadUsos del store)
+✅ Fotos de comercios funcionales: q-menu en FormularioComercio, EditarComercioPage y DialogoAgregarComercioRapido (reemplaza botón placeholder deshabilitado)
 
 C. Integración Comercios + Productos
 
 ✅ Selectores de comercio y dirección en FormularioPrecio.vue
 ✅ Autocompletado de comercios ordenados por uso reciente
 ✅ Auto-selección de dirección más usada del comercio
-✅ 🆕 Botón "Agregar comercio rápido" debajo del selector de dirección (FormularioPrecio y DialogoAgregarPrecio)
+✅ Botón "Agregar comercio rápido" debajo del selector de dirección (FormularioPrecio y DialogoAgregarPrecio)
 ✅ Captura de texto escrito por usuario (nombre comercio + dirección)
 ✅ Guardado de comercioId y direccionId en precios
 ✅ Retrocompatibilidad con precios legacy (solo strings)
@@ -558,9 +558,9 @@ G. UX y Accesibilidad
 ✅ Scroll automático al expandir tarjetas
 ✅ Formato de números con separadores de miles
 ✅ Formato de fechas en español uruguayo
-✅ 🆕 Ajuste automático de dialogs ante teclado virtual Android: `useTecladoVirtual` mejorado con detección de redimensionamiento visual, scroll inteligente al centro del input enfocado y reducción dinámica de altura del modal. Aplicado en: DialogoAgregarPrecio, DialogoAgregarComercioRapido, DialogoAgregarSucursal, DialogoMotivoEliminacion, TarjetaEscaneo, DialogoAgregarProducto.
-✅ 🆕 Reversión de `behavior="dialog"` en selectores móviles en favor de un modo menú con `maxHeight` limitado, garantizando que el desplegable siempre aparezca debajo del input sin ser tapado por el teclado.
-✅ 🆕 Inputs de precio unificados (`type="text"` + `inputmode="decimal"`): FormularioPrecio, DialogoAgregarPrecio, TarjetaEscaneo y TarjetaProductoBorrador usan string interno + `PrecioUtils.js` (`soloNumerosDecimales`, `filtrarInputPrecio`, `formatearPrecioAlSalir`). Display de precios en UI vía `formatearPrecioDisplay` (locale `es-UY`, 2 decimales solo si hay parte decimal).
+✅ Ajuste automático de dialogs ante teclado virtual Android: `useTecladoVirtual` mejorado con detección de redimensionamiento visual, scroll inteligente al centro del input enfocado y reducción dinámica de altura del modal. Aplicado en: DialogoAgregarPrecio, DialogoAgregarComercioRapido, DialogoAgregarSucursal, DialogoMotivoEliminacion, TarjetaEscaneo, DialogoAgregarProducto.
+✅ Reversión de `behavior="dialog"` en selectores móviles en favor de un modo menú con `maxHeight` limitado, garantizando que el desplegable siempre aparezca debajo del input sin ser tapado por el teclado.
+✅ Inputs de precio unificados (`type="text"` + `inputmode="decimal"`): FormularioPrecio, DialogoAgregarPrecio, TarjetaEscaneo y TarjetaProductoBorrador usan string interno + `PrecioUtils.js` (`soloNumerosDecimales`, `filtrarInputPrecio`, `formatearPrecioAlSalir`). Display de precios en UI vía `formatearPrecioDisplay` (locale `es-UY`, 2 decimales solo si hay parte decimal).
 
 H. Arquitectura y Código
 
@@ -613,12 +613,12 @@ H. Arquitectura y Código
 - `eliminarComercios(ids)`: Elimina múltiples comercios
 - `agregarDireccion(comercioId, direccion)`: Agrega dirección a comercio
 - `eliminarDireccion(comercioId, direccionId)`: Elimina dirección de comercio
-- `editarDireccion(comercioId, direccionId, datos)`: 🆕 Edita dirección existente
+- `editarDireccion(comercioId, direccionId, datos)`: Edita dirección existente
 
 **Getters:**
 - `comerciosOrdenados`: Comercios ordenados alfabéticamente
 - `comerciosPorUso`: Comercios ordenados por uso reciente
-- `comerciosAgrupados`: 🆕 Comercios agrupados por nombre (cadenas como una sola tarjeta)
+- `comerciosAgrupados`: Comercios agrupados por nombre (cadenas como una sola tarjeta)
 - `obtenerComercioPorId(id)`: Busca comercio por ID
 - `totalComercios`: Cantidad total de comercios
 - `totalDirecciones`: Suma de todas las direcciones
@@ -1017,7 +1017,7 @@ H. Arquitectura y Código
   - Resumen5Comercios.md — Sistema de comercios y sucursales
   - Resumen6OpenFoodFacts.md — APIs de búsqueda de productos
   - Resumen7LocalStorage.md — Sistema de almacenamiento (adaptadores, stores)
-  - Resumen8Scanner.md — 🆕 Sistema de escaneo completo (Ráfaga, Escaneo rápido, Mesa de trabajo)
+  - Resumen8Scanner.md — Sistema de escaneo completo (Ráfaga, Escaneo rápido, Mesa de trabajo)
 
 ### Principios del Proyecto
 1. **Nomenclatura en Español:** Todo el código usa español descriptivo
@@ -1033,6 +1033,7 @@ H. Arquitectura y Código
 - Variables en `Variables.css`: `--safe-area-top` y `--safe-area-bottom`
 - Header: `.q-header { padding-top: var(--safe-area-top) }` en `app.css` (global, sin tocar)
 - `BarraAccionesSeleccion.vue` ya tiene `padding-bottom: calc(12px + env(safe-area-inset-bottom))`
+- Diálogos con visor/editor de imagen y formularios modales: `DialogoVerImagen.vue` y `EditorImagen.vue` aplican `var(--safe-area-top)` / `var(--safe-area-bottom)` en header, footer y toolbar; `DialogoAgregarProducto.vue` usa clase `acciones-safe-area` en `q-card-actions` para el pie del modal ante teclado + safe area
 - ⚠️ **Toda página nueva que use `q-page-sticky` con FAB** debe incluir:
   ```html
   <q-page-sticky ... class="fab-agregar">
@@ -1091,4 +1092,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 23 de Marzo 2026 — v1.0.9: Editor de imágenes con rotación y recorte (EditorImagen.vue, vue-advanced-cropper); botón Editar en vista grande de fotos (productos y comercios).
+**Última actualización:** 24 de Marzo 2026 — Safe area en `DialogoVerImagen`, `EditorImagen` y acciones de `DialogoAgregarProducto` (notch / home indicator). v1.0.9: editor de imágenes (rotación, recorte vue-advanced-cropper) y botón Editar en vista grande.

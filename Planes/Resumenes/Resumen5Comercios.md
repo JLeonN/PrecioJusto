@@ -970,9 +970,9 @@ const {
 - Conteo de usos reales calculado desde productos (comerciosConUsosReales computed en ComerciosPage)
 - Fotos de comercios: q-menu contextual en FormularioComercio, EditarComercioPage y DialogoAgregarComercioRapido (composable useCamaraFoto)
 - Pie de atribución en EditarComercioPage: `PieAtribucion` al final del scroll; `fuentesApi=[]` (sin API de GPS todavía); `fuentesUsuario` siempre incluye 'nombre', 'dirección', 'tipo' y agrega 'foto' si la sucursal seleccionada tiene foto (fotos de comercios son siempre del usuario)
-- 🆕 Visor de foto en EditarComercioPage: tocar la foto del comercio abre `DialogoVerImagen` a pantalla completa (src = foto de la dirección seleccionada, titulo = nombre del comercio)
-- 🆕 Pre-selección de sucursal desde historial de producto: EditarComercioPage acepta `?direccionId=` en la query string; un `watch` sobre `comercioActual` detecta el parámetro y llama `seleccionarDireccion(dir)` automáticamente
-- 🆕 Ajuste de dialogs ante teclado virtual: `useTecladoVirtual` aplicado en DialogoAgregarSucursal y DialogoMotivoEliminacion
+- Visor de foto en EditarComercioPage: tocar la foto del comercio abre `DialogoVerImagen` a pantalla completa (src = foto de la dirección seleccionada, titulo = nombre del comercio)
+- Pre-selección de sucursal desde historial de producto: EditarComercioPage acepta `?direccionId=` en la query string; un `watch` sobre `comercioActual` detecta el parámetro y llama `seleccionarDireccion(dir)` automáticamente
+- Ajuste de dialogs ante teclado virtual: `useTecladoVirtual` aplicado en DialogoAgregarSucursal y DialogoMotivoEliminacion
 
 ### ⏳ Pendientes
 - Eliminación con motivo

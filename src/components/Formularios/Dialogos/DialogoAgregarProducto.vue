@@ -328,7 +328,7 @@ async function guardarProducto() {
       return
     }
 
-    console.log('🆕 Creando producto nuevo...')
+    console.log('Creando producto nuevo...')
 
     const nuevoProducto = {
       nombre: datosProducto.value.nombre?.trim() || 'Sin nombre',

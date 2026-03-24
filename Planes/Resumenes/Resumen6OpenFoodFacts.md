@@ -113,11 +113,10 @@ adb logcat -s Capacitor/Console
 
 ## COMPONENTES QUE USAN EL ORQUESTADOR
 
-- `DialogoAgregarProducto.vue` — al escanear código
-- `BandejaBorradores.vue` — auto-fetch al reconectar + guardarTodos
+- `DialogoAgregarProducto.vue` — al escanear código unitario desde el formulario y búsqueda por código
+- `MisProductosPage.vue` — flujo de escaneo (Modo A/B): tras detectar código, consulta BD local y API vía orquestador
 - `InfoProducto.vue` — botón "Restaurar desde API"
-- `MisProductosPage.vue` — flujo de escaneo
-- `DialogoEditarItemBandeja.vue` — restaurar desde API
+- La **Mesa de trabajo** (`MesaTrabajoPage.vue` + `TarjetaProductoBorrador.vue`) opera sobre ítems ya en `sesionEscaneoStore`; los datos de API se resuelven al escanear en `MisProductosPage` / `TarjetaEscaneo`, no en un componente "bandeja" aparte (el antiguo `BandejaBorradores.vue` / `DialogoEditarItemBandeja.vue` ya no existe en el árbol actual)
 
 ## fuenteDato EN EL FLUJO
 
@@ -128,4 +127,4 @@ adb logcat -s Capacitor/Console
 
 ---
 
-**Última actualización:** 01 de Marzo 2026
+**Última actualización:** 24 de Marzo 2026 — Lista de consumidores alineada con `MesaTrabajoPage` y eliminación de referencias a bandeja antigua.
