@@ -14,15 +14,6 @@ Las tareas más difíciles siempre van arriba.
 
 - **Estrategia de búsqueda: local primero, APIs después:** En toda circunstancia donde se busque un producto (por nombre, código de barras, etc.), la app debe consultar primero la base de datos local del usuario y solo si no hay resultados suficientes, recurrir a las APIs externas. Revisar todos los puntos de búsqueda de la app y unificar este comportamiento.
 
-### Dificultad 6/10
-
-
-### Dificultad 5/10
-
-- **Rotación y Recorte de Imágenes en Edición:** Implementar un **componente reutilizable** (para Comercios y Productos) que gestione la edición avanzada de fotos en pantalla completa:
-  - **Rotación Permanente:** Botones para girar 90° (izq/der) que modifiquen el archivo real (usando Canvas).
-  - **Recorte (Cropping):** Incorporar herramienta de recorte (ej. `vue-cropperjs`) para permitir al usuario ajustar el encuadre de la foto.
-  - **Feedback táctil:** Considerar el uso de `Haptics` para vibración leve al interactuar con estas herramientas en el celular.
 
 ### Dificultad 4/10
 

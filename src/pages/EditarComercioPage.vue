@@ -311,6 +311,8 @@
       v-model="verFotoAbierta"
       :src="direccionSeleccionada?.foto || ''"
       :titulo="comercioActual?.nombre || ''"
+      :editable="!!direccionSeleccionada?.foto"
+      @guardar="alGuardarFotoEditada"
     />
   </q-page>
 </template>
@@ -706,6 +708,10 @@ async function guardarFotoComercio(base64) {
   } else {
     $q.notify({ type: 'negative', message: 'No se pudo guardar la foto', position: 'top' })
   }
+}
+
+async function alGuardarFotoEditada(nuevaImagenBase64) {
+  await guardarFotoComercio(nuevaImagenBase64)
 }
 
 async function quitarFotoComercio() {

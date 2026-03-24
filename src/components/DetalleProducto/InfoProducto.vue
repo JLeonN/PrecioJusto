@@ -222,6 +222,8 @@
     v-model="verFoto"
     :src="producto.imagen || ''"
     :titulo="producto.nombre"
+    :editable="!!producto.imagen"
+    @guardar="alGuardarFotoEditada"
   />
 </template>
 
@@ -353,6 +355,10 @@ async function actualizarFoto(base64) {
   } catch {
     $q.notify({ type: 'negative', message: 'No se pudo guardar la foto', position: 'top' })
   }
+}
+
+async function alGuardarFotoEditada(nuevaImagenBase64) {
+  await actualizarFoto(nuevaImagenBase64)
 }
 
 async function quitarFoto() {

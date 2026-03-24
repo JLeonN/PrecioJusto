@@ -20,15 +20,36 @@
         no-spinner
       />
 
-      <!-- Título opcional -->
-      <div v-if="titulo" class="visor-titulo">{{ titulo }}</div>
+      <!-- Footer: título a la izquierda, botón Editar a la derecha (si editable) -->
+      <div v-if="titulo || (editable && src)" class="visor-footer">
+        <span v-if="titulo" class="visor-titulo">{{ titulo }}</span>
+        <q-btn
+          v-if="editable && src"
+          flat
+          dense
+          color="primary"
+          label="Editar"
+          size="sm"
+          class="visor-btn-editar"
+          @click="abrirEditor"
+        />
+      </div>
     </div>
+
+    <!-- Editor de imagen (rotación + recorte) -->
+    <EditorImagen
+      v-model="editorAbierto"
+      :src="src"
+      @guardar="alGuardarEditor"
+      @cancelar="editorAbierto = false"
+    />
   </q-dialog>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { IconX } from '@tabler/icons-vue'
+import EditorImagen from './EditorImagen.vue'
 
 const props = defineProps({
   modelValue: {
@@ -43,14 +64,30 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  editable: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'guardar'])
+
+const editorAbierto = ref(false)
 
 const abierto = computed({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val),
 })
+
+function abrirEditor() {
+  editorAbierto.value = true
+}
+
+function alGuardarEditor(nuevaImagenBase64) {
+  editorAbierto.value = false
+  emit('guardar', nuevaImagenBase64)
+  abierto.value = false
+}
 </script>
 
 <style scoped>
@@ -78,13 +115,25 @@ const abierto = computed({
   max-height: calc(85vh - 48px);
   border-radius: 16px;
 }
-.visor-titulo {
+.visor-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.35);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 12px;
+}
+.visor-titulo {
+  flex: 1;
   color: rgba(255, 255, 255, 0.85);
   font-size: 13px;
   font-weight: 500;
-  text-align: center;
-  background: rgba(0, 0, 0, 0.35);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.visor-btn-editar {
+  flex-shrink: 0;
 }
 </style>
