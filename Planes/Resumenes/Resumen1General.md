@@ -130,7 +130,8 @@ src/
 │   │   ├── FabAcciones.vue               # FAB genérico reutilizable: Speed Dial multi-acción o botón directo
 │   │   ├── SelectorComercioDireccion.vue  # Selector de comercio + dirección reutilizable (emite { id, nombre, direccionId, direccionNombre } | null)
 │   │   ├── PieAtribucion.vue              # Pie de atribución de fuentes; props: fuentesApi[], fuentesUsuario[]; muestra origen de datos (API o usuario)
-│   │   └── DialogoVerImagen.vue           # 🆕 Visor de imagen en grande; props: modelValue (v-model), src, titulo; fondo oscuro, botón X, animación scale
+│   │   ├── DialogoVerImagen.vue           # Visor de imagen en grande; props: modelValue, src, titulo, editable; footer con botón Editar → EditorImagen
+│   │   └── EditorImagen.vue               # 🆕 Editor de imagen (rotación 90°, recorte vue-advanced-cropper); pantalla completa; Cancelar/Guardar
 │   │
 │   ├── Comercios/                           # Componentes de comercios
 │   │   ├── ListaComercios.vue              # Contenedor con grid responsivo Quasar
@@ -450,7 +451,8 @@ A. Gestión de Productos
 ✅ 🆕 Categoría editable en detalle del producto (heredada de API, editable con CampoEditable)
 ✅ 🆕 Foto del producto más grande en detalle (desktop: 180px, móvil: 45vw)
 ✅ 🆕 Cantidad y unidad del producto visible y editable en DetalleProducto (ej: "500 g", "2 L") — inline entre Categoría y Código de barras
-✅ 🆕 Visor de imagen en grande al hacer click en la foto del producto (DialogoVerImagen.vue — componente compartido reutilizable)
+✅ Visor de imagen en grande al hacer click en la foto del producto (DialogoVerImagen.vue)
+✅ 🆕 Editor de imagen en vista grande: rotación 90° izq/der y recorte (EditorImagen.vue con vue-advanced-cropper); integrado en productos y comercios
 ✅ 🆕 Registro de última interacción por producto (registrarInteraccion + productosPorInteraccion)
 ✅ 🆕 Título "Historial de precios" visible en DetalleProductoPage
 ✅ 🆕 Marca editable en detalle del producto (CampoEditable con IconBuildingStore)
@@ -1049,7 +1051,7 @@ H. Arquitectura y Código
 - Señal "app lista" vía `nextTick()` en `App.vue`
 
 ### Estado Actual
-- **Versión:** 1.0.3
+- **Versión:** 1.0.9
 - **Almacenamiento:** Local (Capacitor Storage)
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
@@ -1089,4 +1091,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 16 de Marzo 2026 — v1.0.3: filtro de búsqueda en Mesa de Trabajo (nombre/marca/categoría); `preferenciasStore.js` como fuente única de verdad para moneda/unidad; `PrecioUtils.js` para inputs y display de precios (`inputmode="decimal"`, `toFixed(2)` en blur, display `es-UY`).
+**Última actualización:** 23 de Marzo 2026 — v1.0.9: Editor de imágenes con rotación y recorte (EditorImagen.vue, vue-advanced-cropper); botón Editar en vista grande de fotos (productos y comercios).
