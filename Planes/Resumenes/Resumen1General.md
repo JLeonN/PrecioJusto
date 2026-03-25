@@ -1063,7 +1063,7 @@ H. Arquitectura y Código
 - Señal "app lista" vía `nextTick()` en `App.vue`
 
 ### Estado Actual
-- **Versión:** 1.0.9
+- **Versión:** 1.1.2
 - **Almacenamiento:** Local (Capacitor Storage)
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
@@ -1103,4 +1103,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 24 de Marzo 2026 — Safe area en `DialogoVerImagen`, `EditorImagen` y acciones de `DialogoAgregarProducto` (notch / home indicator). v1.0.9: editor de imágenes (rotación, recorte vue-advanced-cropper) y botón Editar en vista grande.
+**Última actualización:** 25 de Marzo 2026 — Regla centralizada de colores: usar siempre `src/css/Variables.css`. v1.1.2: actualización de documentación y reglas de IA.
