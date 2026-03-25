@@ -75,6 +75,7 @@ Antes de crear cualquier archivo, verifica que cumpla con PascalCase.
 
 - No dejar líneas en blanco entre reglas CSS.
 - Mantener el CSS compacto y sin espacios innecesarios entre selectores.
+- Cuando haya que asignar colores a la app, no inventarlos: usar siempre las variables definidas en `src/css/Variables.css`.
   **Ejemplos:**
 
 ❌ **NO hacer:**
