@@ -69,11 +69,7 @@
     </div>
 
     <!-- BOTÓN FLOTANTE AGREGAR (oculto en modo selección) -->
-    <FabAcciones
-      v-if="!seleccion.modoSeleccion.value"
-      :acciones="accionesFab"
-      color="primary"
-    />
+    <FabAcciones v-if="!seleccion.modoSeleccion.value" :acciones="accionesFab" color="primary" />
 
     <!-- BARRA DE ACCIONES (fixed bottom en modo selección) -->
     <BarraAccionesSeleccion
@@ -123,8 +119,16 @@
         aria-live="polite"
         aria-busy="true"
       >
-        <q-spinner color="white" size="42px" />
-        <span class="escaneo-api-overlay__texto">Consultando fuentes externas…</span>
+        <div class="escaneo-api-overlay-halo" />
+        <div class="escaneo-api-overlay-card">
+          <div class="escaneo-api-overlay-badge">Escáner activo</div>
+          <q-spinner color="white" size="46px" />
+          <div class="escaneo-api-overlay-titulo">Buscando coincidencias</div>
+          <span class="escaneo-api-overlay-texto">Consultando fuentes externas...</span>
+          <span class="escaneo-api-overlay-detalle"
+            >Ocultamos el fondo mientras traemos los datos del producto.</span
+          >
+        </div>
       </div>
     </Teleport>
 
@@ -134,18 +138,28 @@
         <div v-if="avisoEscaneo.visible" class="aviso-escaneo">
           <div
             class="aviso-escaneo-card"
-            :class="avisoEscaneo.tipo === 'duplicado' ? 'aviso-escaneo-card--duplicado' : 'aviso-escaneo-card--exito'"
+            :class="
+              avisoEscaneo.tipo === 'duplicado'
+                ? 'aviso-escaneo-card--duplicado'
+                : 'aviso-escaneo-card--exito'
+            "
           >
             <img v-if="avisoEscaneo.imagen" :src="avisoEscaneo.imagen" class="aviso-escaneo-foto" />
             <div v-else class="aviso-escaneo-foto aviso-escaneo-foto--vacia">
               <IconShoppingBag :size="18" style="color: white" />
             </div>
             <div class="aviso-escaneo-texto">
-              <div class="aviso-escaneo-nombre ellipsis">{{ avisoEscaneo.nombre || avisoEscaneo.codigo }}</div>
-              <div v-if="avisoEscaneo.nombre" class="aviso-escaneo-codigo">{{ avisoEscaneo.codigo }}</div>
-              <div class="aviso-escaneo-etiqueta">{{ avisoEscaneo.tipo === 'duplicado' ? 'Ya en la mesa' : 'Agregado ✓' }}</div>
+              <div class="aviso-escaneo-nombre ellipsis">
+                {{ avisoEscaneo.nombre || avisoEscaneo.codigo }}
+              </div>
+              <div v-if="avisoEscaneo.nombre" class="aviso-escaneo-codigo">
+                {{ avisoEscaneo.codigo }}
+              </div>
+              <div class="aviso-escaneo-etiqueta">
+                {{ avisoEscaneo.tipo === 'duplicado' ? 'Ya en la mesa' : 'Agregado OK' }}
+              </div>
             </div>
-            <button class="aviso-escaneo-cerrar" @click="avisoEscaneo.visible = false">✕</button>
+            <button class="aviso-escaneo-cerrar" @click="avisoEscaneo.visible = false">X</button>
           </div>
         </div>
       </Transition>
@@ -217,14 +231,26 @@ const tarjetaEscaneoAbierta = ref(false)
 const itemActual = ref(null)
 
 // Tarjetita de aviso sobre la cámara (duplicado + éxito en Ráfaga)
-const avisoEscaneo = reactive({ visible: false, tipo: 'exito', nombre: '', codigo: '', imagen: null })
+const avisoEscaneo = reactive({
+  visible: false,
+  tipo: 'exito',
+  nombre: '',
+  codigo: '',
+  imagen: null,
+})
 // Códigos en búsqueda background (previene doble escaneo del mismo código en Ráfaga)
 const codigosProcesando = new Set()
 // Overlay mientras se consultan APIs (código no estaba en local)
 const escaneoConsultandoApi = ref(false)
 
 function mostrarAvisoEscaneo(tipo, { nombre, codigo, imagen }) {
-  Object.assign(avisoEscaneo, { visible: true, tipo, nombre: nombre || '', codigo, imagen: imagen || null })
+  Object.assign(avisoEscaneo, {
+    visible: true,
+    tipo,
+    nombre: nombre || '',
+    codigo,
+    imagen: imagen || null,
+  })
 }
 
 function iniciarEscaneoRapido() {
@@ -238,7 +264,7 @@ function iniciarRafaga() {
 }
 
 // Construye el item a partir de los resultados de búsqueda
-function _construirItem(codigo, existente, productoApi, resultadoApi) {
+function construirItem(codigo, existente, productoApi, resultadoApi) {
   return {
     codigoBarras: codigo,
     productoExistenteId: existente?.id || null,
@@ -255,7 +281,7 @@ function _construirItem(codigo, existente, productoApi, resultadoApi) {
 }
 
 // Busca en BD local; solo llama APIs si no hay producto local (plan búsqueda local primero)
-async function _buscarProducto(codigo) {
+async function buscarProducto(codigo) {
   const existente = await productosService.buscarPorCodigoBarras(codigo)
   let resultadoApi = null
   if (!existente) {
@@ -266,13 +292,13 @@ async function _buscarProducto(codigo) {
       escaneoConsultandoApi.value = false
     }
   }
-  return _construirItem(codigo, existente, resultadoApi?.producto || null, resultadoApi)
+  return construirItem(codigo, existente, resultadoApi?.producto || null, resultadoApi)
 }
 
 // Fire-and-forget: busca en background y agrega a la mesa cuando termina (solo Ráfaga)
-async function _buscarYAgregarRafaga(codigo) {
+async function buscarYAgregarRafaga(codigo) {
   try {
-    const nuevoItem = await _buscarProducto(codigo)
+    const nuevoItem = await buscarProducto(codigo)
     sesionEscaneoStore.agregarItem(nuevoItem)
     mostrarAvisoEscaneo('exito', { nombre: nuevoItem.nombre, codigo, imagen: nuevoItem.imagen })
   } finally {
@@ -288,9 +314,13 @@ async function procesarCodigoEscaneado(codigo) {
   const yaEnSesion = sesionEscaneoStore.items.some((i) => i.codigoBarras === codigo)
   if (yaEnSesion) {
     const encontrado = sesionEscaneoStore.items.find((i) => i.codigoBarras === codigo)
-    mostrarAvisoEscaneo('duplicado', { nombre: encontrado?.nombre || '', codigo, imagen: encontrado?.imagen || null })
+    mostrarAvisoEscaneo('duplicado', {
+      nombre: encontrado?.nombre || '',
+      codigo,
+      imagen: encontrado?.imagen || null,
+    })
     if (!esRafaga) {
-      // En Ráfaga la cámara es continua → no hay que reiniciarla
+      // En Ráfaga la cámara es continua; no hay que reiniciarla.
       scannerActivo.value = false
       await nextTick()
       scannerActivo.value = true
@@ -301,24 +331,24 @@ async function procesarCodigoEscaneado(codigo) {
   // Duplicado siendo buscado en background (Ráfaga)
   if (codigosProcesando.has(codigo)) {
     mostrarAvisoEscaneo('duplicado', { nombre: '', codigo, imagen: null })
-    return // en Ráfaga la cámara sigue activa; en modo A esto no debería ocurrir
+    return // En Ráfaga la cámara sigue activa; en modo A esto no debería ocurrir.
   }
 
   if (esRafaga) {
-    // Ráfaga (continuo): cámara nunca para → solo lanzar búsqueda en background
+    // Ráfaga (continuo): la cámara nunca para; solo lanza búsqueda en background.
     codigosProcesando.add(codigo)
-    _buscarYAgregarRafaga(codigo) // sin await → fire-and-forget
+    buscarYAgregarRafaga(codigo) // Sin await; fire-and-forget.
     return
   }
 
-  // Modo A: buscar y mostrar TarjetaEscaneo (cámara se pausa mientras busca)
-  const nuevoItem = await _buscarProducto(codigo)
+  // Modo A: busca y muestra TarjetaEscaneo mientras la cámara queda en pausa.
+  const nuevoItem = await buscarProducto(codigo)
   scannerActivo.value = false
   itemActual.value = nuevoItem
   tarjetaEscaneoAbierta.value = true
 }
 
-// Guarda en la mesa y reactiva la cámara para el siguiente escaneo
+// Guarda en la mesa y reactiva la cámara para el siguiente escaneo.
 function alSiguiente(itemActualizado) {
   sesionEscaneoStore.agregarItem(itemActualizado)
   tarjetaEscaneoAbierta.value = false
@@ -335,29 +365,32 @@ function alIrAMesa(itemActualizado) {
   modoEscaneo.value = null
 }
 
-// Descarta el item y vuelve a la cámara (solo en modo rápido)
+// Descarta el item y vuelve a la cámara (solo en modo rápido).
 function alDescartarItem() {
   tarjetaEscaneoAbierta.value = false
   itemActual.value = null
   if (modoEscaneo.value === 'rapido') scannerActivo.value = true
 }
 
-// El usuario cerró el scanner manualmente
+// El usuario cerró el escáner manualmente.
 function alCerrarScanner() {
   scannerActivo.value = false
   itemActual.value = null
   modoEscaneo.value = null
 }
 
-/* Texto de búsqueda activo */
+// Texto de búsqueda activo.
 const textoBusqueda = ref('')
 
-/* Normaliza texto: minúsculas + sin tildes */
+// Normaliza texto: minúsculas y sin tildes.
 function normalizarTexto(texto) {
-  return texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  return texto
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
 }
 
-/* Productos filtrados por texto (o todos, ordenados por última interacción) */
+// Productos filtrados por texto, u ordenados por última interacción.
 const productosFiltrados = computed(() => {
   const base = productosStore.productosPorInteraccion
   const texto = textoBusqueda.value?.trim() || ''
@@ -377,22 +410,22 @@ const productosFiltrados = computed(() => {
   })
 })
 
-/* Estado del diálogo agregar */
+// Estado del diálogo agregar.
 const dialogoAgregarAbierto = ref(false)
 
-/* Estado del diálogo confirmación */
+// Estado del diálogo confirmación.
 const dialogoConfirmacionAbierto = ref(false)
 
-/* Estado de eliminación */
+// Estado de eliminación.
 const eliminando = ref(false)
 
-/* Composable de selección múltiple */
+// Composable de selección múltiple.
 const seleccion = useSeleccionMultiple()
 
-/* Productos eliminados (para deshacer) */
+// Productos eliminados para deshacer.
 const productosEliminadosParaDeshacer = ref([])
 
-/* Composable agregar precio (reemplaza lógica manual) */
+// Composable para agregar precio; reemplaza la lógica manual.
 const { dialogoPrecioAbierto, productoParaPrecioId, abrirModalPrecio, alGuardarPrecio } =
   useDialogoAgregarPrecio()
 
@@ -415,18 +448,18 @@ function onProductoGuardado() {
   cargarProductos()
 }
 
-/* Activar modo selección con un item inicial */
+// Activa el modo selección con un item inicial.
 function activarSeleccionConItem(productoId) {
   seleccion.activarModoSeleccion(productoId)
 }
 
-/* Confirmar eliminación */
+// Abre el diálogo de confirmación para eliminar.
 function confirmarEliminacion() {
   if (!seleccion.haySeleccionados.value) return
   dialogoConfirmacionAbierto.value = true
 }
 
-/* Eliminar productos seleccionados */
+// Elimina los productos seleccionados.
 async function eliminarSeleccionados() {
   eliminando.value = true
 
@@ -437,7 +470,7 @@ async function eliminarSeleccionados() {
       productosStore.productos.find((p) => p.id === id),
     )
 
-    console.log(`🗑️ Eliminando ${idsAEliminar.length} productos...`)
+    console.log(`Eliminando ${idsAEliminar.length} productos...`)
 
     let eliminadosExitosos = 0
     for (const id of idsAEliminar) {
@@ -467,7 +500,7 @@ async function eliminarSeleccionados() {
       ],
     })
   } catch (error) {
-    console.error('❌ Error al eliminar productos:', error)
+    console.error('Error al eliminar productos:', error)
     $q.notify({
       type: 'negative',
       message: 'Error al eliminar productos',
@@ -478,11 +511,11 @@ async function eliminarSeleccionados() {
   }
 }
 
-/* Deshacer eliminación */
+// Deshace la última eliminación.
 async function deshacerEliminacion() {
   if (productosEliminadosParaDeshacer.value.length === 0) return
 
-  console.log('↩️ Deshaciendo eliminación...')
+  console.log('Deshaciendo eliminación...')
 
   let restauradosExitosos = 0
 
@@ -503,7 +536,7 @@ async function deshacerEliminacion() {
   })
 }
 
-/* Actualizar items disponibles cuando cambien los productos */
+// Actualiza los items disponibles cuando cambian los productos.
 watch(
   () => productosStore.productos,
   (nuevosProductos) => {
@@ -524,19 +557,65 @@ onMounted(async () => {
   inset: 0;
   z-index: 99999;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  background: rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+  padding: 24px;
+  background:
+    linear-gradient(180deg, rgba(2, 10, 24, 0.9) 0%, rgba(4, 16, 36, 0.94) 100%),
+    rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(12px) saturate(0.9);
   pointer-events: all;
 }
-.escaneo-api-overlay__texto {
+.escaneo-api-overlay-halo {
+  position: absolute;
+  width: min(82vw, 420px);
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(0, 153, 255, 0.22) 0%, rgba(0, 153, 255, 0) 68%);
+  filter: blur(6px);
+}
+.escaneo-api-overlay-card {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 340px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 26px 22px 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(180deg, rgba(13, 30, 58, 0.96) 0%, rgba(7, 20, 40, 0.98) 100%);
+  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.38);
+  text-align: center;
+}
+.escaneo-api-overlay-badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(82, 168, 255, 0.16);
+  color: rgba(201, 230, 255, 0.98);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.escaneo-api-overlay-titulo {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+.escaneo-api-overlay-texto {
   color: rgba(255, 255, 255, 0.95);
   font-size: 15px;
   font-weight: 500;
-  padding: 0 24px;
   text-align: center;
+}
+.escaneo-api-overlay-detalle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  line-height: 1.35;
 }
 /* Tarjetita de aviso sobre la cámara */
 .aviso-escaneo {
@@ -555,11 +634,11 @@ onMounted(async () => {
   gap: 10px;
   padding: 10px 10px 10px 14px;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   pointer-events: auto;
 }
 .aviso-escaneo-cerrar {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   border: none;
   border-radius: 50%;
   width: 24px;
@@ -588,7 +667,7 @@ onMounted(async () => {
   flex-shrink: 0;
 }
 .aviso-escaneo-foto--vacia {
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -605,12 +684,12 @@ onMounted(async () => {
   max-width: 200px;
 }
 .aviso-escaneo-codigo {
-  color: rgba(255,255,255,0.75);
+  color: rgba(255, 255, 255, 0.75);
   font-size: 11px;
   font-family: 'Courier New', monospace;
 }
 .aviso-escaneo-etiqueta {
-  color: rgba(255,255,255,0.85);
+  color: rgba(255, 255, 255, 0.85);
   font-size: 11px;
 }
 /* Transición slide-down */

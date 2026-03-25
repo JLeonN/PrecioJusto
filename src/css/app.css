@@ -95,7 +95,7 @@ body.scanner-activo,
 body.scanner-activo #q-app {
   background: transparent !important;
 }
-/* Oculta todo excepto el overlay del scanner y la tarjetita de aviso (teleportados directo a body) */
-body.scanner-activo > *:not(.scanner-overlay):not(.aviso-escaneo) {
+/* Oculta todo excepto el overlay del scanner, la capa de carga y la tarjetita de aviso */
+body.scanner-activo > *:not(.scanner-overlay):not(.escaneo-api-overlay):not(.aviso-escaneo) {
   visibility: hidden !important;
 }
