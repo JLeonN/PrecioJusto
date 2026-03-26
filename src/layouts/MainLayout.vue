@@ -36,9 +36,9 @@
           <!-- Header del drawer -->
           <q-item class="q-mb-md">
             <q-item-section avatar>
-              <q-avatar color="primary" text-color="white" size="56px">
-                <IconShoppingCart :size="32" />
-              </q-avatar>
+              <div class="logo-app-drawer-box">
+                <img src="/icons/PrecioJusto-Icono.png" alt="Icono de Precio Justo" class="logo-app-drawer" />
+              </div>
             </q-item-section>
             <q-item-section>
               <q-item-label class="text-h6 text-weight-bold"> Precio Justo </q-item-label>
@@ -104,7 +104,6 @@ import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   IconSearch,
-  IconShoppingCart,
   IconHome,
   IconMapPin,
   IconBriefcase,
@@ -139,5 +138,18 @@ useBotonAtras({ drawerAbierto, router, route })
   background: color-mix(in srgb, var(--color-primario) 8%, transparent);
   border-radius: 8px;
   margin: 0 8px;
+}
+.logo-app-drawer-box {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--color-primario);
+}
+.logo-app-drawer {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 </style>
