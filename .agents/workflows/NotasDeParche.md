@@ -1,5 +1,5 @@
 ---
-description: Flujo completo de release: lectura de commits, incremento de versión, actualización de archivos, build, commit, tag y generación de notas de parche.
+description: Flujo completo de release: lectura de commits, incremento de versión, actualización de archivos, build, commit, tag y generación de notas de parche para usuarios finales, no para desarrolladores.
 ---
 
 // turbo-all
@@ -109,7 +109,8 @@ Generá las notas basándote en los commits del PASO 1.
 
 - Máximo 450 caracteres por versión
 - Incluir emojis
-- Lenguaje simple, orientado al usuario final (sin tecnicismos)
+- Lenguaje simple, orientado al usuario final, sin tecnicismos ni detalles internos de desarrollo
+- No mencionar reglas internas, configuraciones, rutas, commits, variables, archivos ni cambios técnicos que no le importen a un usuario final
 - Dos versiones: español latinoamericano (`es-419`) e inglés (`en-US`)
 - Estructura idéntica en ambas versiones
 
