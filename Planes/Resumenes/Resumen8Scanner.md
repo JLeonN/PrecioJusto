@@ -161,9 +161,11 @@ Tarjeta expandible dentro de la Mesa de trabajo. Usa `TarjetaBase`.
 
 **Estado expandido — edición inline:**
 - Campos: nombre, precio + moneda, comercio/dirección (`SelectorComercioDireccion`), cantidad + unidad
-- Gestión de foto: miniatura + `q-menu` con opciones (cámara nativa, galería, quitar)
+- Marca editable en el bloque de edición
+- Gestión de foto: botón flotante en el recuadro de imagen + `q-menu` con opciones (cámara nativa, galería, quitar)
 - **Botón recuperar foto** (`IconRefresh :size="22"`): junto a la cámara, `v-if="fotoModificada"`
 - **Botón recuperar datos** (`IconArrowBackUp`): extremo derecho, `v-if="datosModificados"`
+- Botón `Eliminar` visible en el header derecho con estilo destacado
 - `datosOriginales`: `ref` inicializado una sola vez con `props.item.datosOriginales` (snapshot guardado por el store). **No puede ser `computed`** porque `props.item` muta con cada edición (store round-trip)
 - `recuperarDatos()`: restaura nombre, marca, cantidad, unidad (no toca precio ni imagen)
 
@@ -330,4 +332,4 @@ Dos niveles de protección:
 
 ---
 
-**Última actualización:** 26 de Marzo 2026 — acceso a Mesa documentado también desde el header global (además del drawer).
+**Última actualización:** 26 de Marzo 2026 — acceso a Mesa documentado también desde el header global (además del drawer) y edición rápida de la tarjeta de Mesa con marca, foto reubicada y eliminación en header.

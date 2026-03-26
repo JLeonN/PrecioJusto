@@ -165,7 +165,7 @@ src/
 │   ├── Scanner/                             # Flujo de escaneo de productos
 │   │   ├── EscaneadorCodigo.vue            # Scanner nativo (overlay transparente) + fallback web; prop `continuo` para Ráfaga
 │   │   ├── TarjetaEscaneo.vue             # Tarjeta post-escaneo del Modo A (bottom sheet q-dialog)
-│   │   └── TarjetaProductoBorrador.vue   # Tarjeta expandible en Mesa de trabajo (chips, edición inline, recuperar foto/datos)
+│   │   └── TarjetaProductoBorrador.vue   # Tarjeta expandible en Mesa de trabajo (chips, marca editable, foto en recuadro, eliminar en header, recuperar foto/datos)
 │   │
 │   ├── MisProductos/                        # Componentes de productos
 │   │   └── ListaProductos.vue              # Contenedor con grid responsivo Quasar
@@ -463,6 +463,7 @@ A. Gestión de Productos
 ✅ Modo A — Escaneo rápido: cámara → pausa → TarjetaEscaneo (precio, foto, edición inline) → Mesa de trabajo → cámara reactiva
 ✅ Modo B — Ráfaga: cámara continua sin pausa (prop `continuo` en EscaneadorCodigo), búsqueda en background (fire-and-forget), tarjetita de aviso sobre la cámara
 ✅ Mesa de trabajo (MesaTrabajoPage.vue — ruta `/mesa-trabajo`): reemplaza BandejaBorradores; página propia con drawer, ordenamiento por 5 criterios, selección múltiple por long-press, asignación de comercio en bloque, envío parcial, estado vacío con botones de redirección
+✅ TarjetaProductoBorrador en Mesa: marca editable, cámara movida al recuadro de imagen, eliminar reubicado en el header y foto/datos recuperables desde la misma tarjeta
 ✅ Registro de comercio rápido desde tarjeta en Mesa de Trabajo (integrado en TarjetaProductoBorrador)
 ✅ Tarjetita de aviso sobre cámara: Teleport to="body" z-index 10000, visible durante escaneo activo (duplicado + éxito Ráfaga), botón X para cerrar
 ✅ Detección de duplicados en sesión sin interrumpir el escaneo (aviso sobre cámara)
@@ -1113,4 +1114,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 26 de Marzo 2026 — Header global actualizado en `MainLayout.vue` (accesos rápidos, estado activo por ruta, Mesa condicional y eliminación de contador duplicado en botón de Mesa).
+**Última actualización:** 26 de Marzo 2026 — Header global actualizado en `MainLayout.vue` (accesos rápidos, estado activo por ruta, Mesa condicional y eliminación de contador duplicado en botón de Mesa). También se ajustó la tarjeta de Mesa de trabajo para edición rápida con marca, foto y acciones reubicadas.
