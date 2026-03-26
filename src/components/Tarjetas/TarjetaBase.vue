@@ -23,8 +23,24 @@
 
     <!-- HEADER (Nombre + Botón flotante) -->
     <div class="tarjeta-yugioh__header">
+      <div
+        v-if="$slots['header-left']"
+        class="tarjeta-yugioh__header-accion tarjeta-yugioh__header-accion--left"
+        @click.stop
+      >
+        <slot name="header-left"></slot>
+      </div>
+
       <div class="tarjeta-yugioh__nombre">
         <slot name="nombre">{{ nombre }}</slot>
+      </div>
+
+      <div
+        v-if="$slots['header-right']"
+        class="tarjeta-yugioh__header-accion tarjeta-yugioh__header-accion--right"
+        @click.stop
+      >
+        <slot name="header-right"></slot>
       </div>
 
       <!-- BOTÓN FLOTANTE (solo productos, ocultable para contextos sin precio) -->
@@ -283,12 +299,26 @@ const manejarLongPress = () => {
 }
 .tarjeta-yugioh__nombre {
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   line-height: 1.3;
+}
+.tarjeta-yugioh__header-accion {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+.tarjeta-yugioh__header-accion--left {
+  margin-right: 8px;
+}
+.tarjeta-yugioh__header-accion--right {
+  margin-left: 8px;
 }
 /* ========================================
    BOTÓN FLOTANTE (Agregar Precio)

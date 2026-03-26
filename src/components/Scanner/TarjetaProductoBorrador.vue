@@ -16,6 +16,21 @@
       }
     "
   >
+    <template #header-right>
+      <q-btn
+        v-if="!modoSeleccion"
+        flat
+        round
+        dense
+        size="sm"
+        class="boton-eliminar-header"
+        @click.stop="$emit('eliminar')"
+      >
+        <IconTrash :size="18" />
+        <q-tooltip>Eliminar</q-tooltip>
+      </q-btn>
+    </template>
+
     <!-- Chips de completitud + info de comercio/dirección -->
     <template #tipo>
       <div class="tipo-contenido">
@@ -62,9 +77,57 @@
       </div>
     </template>
 
-    <!-- Placeholder icon -->
-    <template #placeholder-icono>
-      <IconShoppingBag :size="48" class="text-grey-5" />
+    <!-- Imagen + acciones de foto -->
+    <template #imagen>
+      <div class="imagen-slot">
+        <div v-if="!datosEditando.imagen" class="imagen-slot__placeholder">
+          <IconShoppingBag :size="48" class="text-grey-5" />
+        </div>
+        <q-img v-else :src="datosEditando.imagen" class="imagen-slot__imagen" fit="cover" />
+
+        <div class="imagen-slot__acciones">
+          <q-btn flat round dense size="sm" class="boton-foto-overlay" @click.stop>
+            <IconCamera :size="18" />
+            <q-tooltip>Gestionar foto</q-tooltip>
+            <q-menu anchor="bottom right" self="top right">
+              <q-list style="min-width: 140px">
+                <q-item v-if="esNativo" clickable v-close-popup @click="tomarFotoCamara">
+                  <q-item-section avatar><IconCamera :size="16" /></q-item-section>
+                  <q-item-section>Tomar foto</q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup @click="abrirGaleria">
+                  <q-item-section avatar><IconPhoto :size="16" /></q-item-section>
+                  <q-item-section>Galería</q-item-section>
+                </q-item>
+                <q-item
+                  v-if="datosEditando.imagen"
+                  clickable
+                  v-close-popup
+                  @click="actualizar('imagen', null)"
+                >
+                  <q-item-section avatar
+                    ><IconTrash :size="16" class="text-negative"
+                  /></q-item-section>
+                  <q-item-section class="text-negative">Quitar</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
+
+          <q-btn
+            v-if="fotoModificada"
+            flat
+            round
+            dense
+            size="sm"
+            class="boton-foto-overlay"
+            @click.stop="actualizar('imagen', datosOriginales.imagen)"
+          >
+            <IconRefresh :size="18" />
+            <q-tooltip>Recuperar foto original</q-tooltip>
+          </q-btn>
+        </div>
+      </div>
     </template>
 
     <!-- Precio en overlay si existe -->
@@ -116,6 +179,15 @@
           outlined
           dense
           @update:model-value="(v) => actualizar('nombre', v)"
+        />
+        <q-input
+          :model-value="datosEditando.marca"
+          label="Marca"
+          outlined
+          dense
+          hint="Opcional"
+          class="q-mt-xs"
+          @update:model-value="(v) => actualizar('marca', v)"
         />
         <!-- Precio + Moneda -->
         <div class="row q-col-gutter-sm">
@@ -190,88 +262,32 @@
             />
           </div>
         </div>
-        <!-- Foto -->
-        <div class="foto-fila">
-          <div class="flex items-center gap-sm">
-            <img v-if="datosEditando.imagen" :src="datosEditando.imagen" class="foto-miniatura" />
-            <q-btn flat round dense size="md" color="grey-6">
-              <IconCamera :size="22" />
-              <q-tooltip>Gestionar foto</q-tooltip>
-              <q-menu anchor="bottom right" self="top right">
-                <q-list style="min-width: 140px">
-                  <q-item v-if="esNativo" clickable v-close-popup @click="tomarFotoCamara">
-                    <q-item-section avatar><IconCamera :size="16" /></q-item-section>
-                    <q-item-section>Tomar foto</q-item-section>
-                  </q-item>
-                  <q-item clickable v-close-popup @click="abrirGaleria">
-                    <q-item-section avatar><IconPhoto :size="16" /></q-item-section>
-                    <q-item-section>Galería</q-item-section>
-                  </q-item>
-                  <q-item
-                    v-if="datosEditando.imagen"
-                    clickable
-                    v-close-popup
-                    @click="actualizar('imagen', null)"
-                  >
-                    <q-item-section avatar
-                      ><IconTrash :size="16" class="text-negative"
-                    /></q-item-section>
-                    <q-item-section class="text-negative">Quitar</q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
-            </q-btn>
-            <q-btn
-              v-if="fotoModificada"
-              flat
-              round
-              dense
-              size="md"
-              color="grey-6"
-              @click="actualizar('imagen', datosOriginales.imagen)"
-            >
-              <IconRefresh :size="22" />
-              <q-tooltip>Recuperar foto original</q-tooltip>
-            </q-btn>
-          </div>
-          <q-btn
-            v-if="datosModificados"
-            flat
-            no-caps
-            dense
-            size="sm"
-            color="grey-7"
-            class="q-ml-auto"
-            @click="recuperarDatos"
-          >
-            <IconArrowBackUp :size="16" class="q-mr-xs" />
-            Recuperar datos
-          </q-btn>
-          <input
-            ref="inputArchivoRef"
-            type="file"
-            accept="image/*"
-            class="input-oculto"
-            @change="alSeleccionarArchivo"
-          />
-        </div>
+        <q-btn
+          v-if="datosModificados"
+          flat
+          no-caps
+          dense
+          size="sm"
+          color="grey-7"
+          class="boton-recuperar-datos"
+          @click="recuperarDatos"
+        >
+          <IconArrowBackUp :size="16" class="q-mr-xs" />
+          Recuperar datos
+        </q-btn>
+        <input
+          ref="inputArchivoRef"
+          type="file"
+          accept="image/*"
+          class="input-oculto"
+          @change="alSeleccionarArchivo"
+        />
       </div>
     </template>
 
     <!-- Botones de acción -->
     <template #acciones>
-      <q-btn
-        flat
-        round
-        dense
-        size="sm"
-        color="negative"
-        class="q-mr-auto"
-        @click.stop="$emit('eliminar')"
-      >
-        <IconTrash :size="18" />
-        <q-tooltip>Eliminar</q-tooltip>
-      </q-btn>
+      <q-space />
       <q-btn
         unelevated
         no-caps
@@ -394,7 +410,7 @@ const itemCompleto = computed(
     !!datosEditando.value.comercio,
 )
 const mostrarAvisoSinCoincidencia = computed(
-  () => props.item?.sinCoincidencia === true && !props.item?.imagen,
+  () => props.item?.sinCoincidencia === true && !datosEditando.value?.imagen,
 )
 
 function alCambiarPrecio(val) {
@@ -552,19 +568,53 @@ function formatearPrecio(valor, moneda) {
   flex-direction: column;
   gap: 10px;
 }
-.foto-fila {
+.boton-recuperar-datos {
+  align-self: flex-end;
+}
+.boton-eliminar-header {
+  background: rgba(255, 255, 255, 0.92);
+  color: #d32f2f;
+  border: 1px solid rgba(211, 47, 47, 0.35);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(2px);
+  transition: all 0.2s ease;
+}
+.boton-eliminar-header:hover {
+  background: #ffffff;
+  color: #b71c1c;
+  border-color: rgba(183, 28, 28, 0.5);
+}
+.imagen-slot {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.imagen-slot__placeholder {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  background: var(--color-primario-claro);
 }
-.foto-miniatura {
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-  border-radius: 6px;
+.imagen-slot__imagen {
+  width: 100%;
+  height: 100%;
 }
-.gap-sm {
-  gap: 8px;
+.imagen-slot__acciones {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 4;
+  display: flex;
+  gap: 6px;
+}
+.boton-foto-overlay {
+  background: rgba(0, 0, 0, 0.45);
+  color: white;
+}
+.boton-foto-overlay:hover {
+  background: rgba(0, 0, 0, 0.65);
 }
 .input-oculto {
   display: none;
