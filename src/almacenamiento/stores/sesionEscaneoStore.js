@@ -53,6 +53,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
         items.value = (datos.items || []).map((item) => ({
           ...item,
           comercio: item.comercio ?? null,
+          sinCoincidencia: item.sinCoincidencia ?? false,
         }))
       }
     } catch (error) {
@@ -76,6 +77,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
       moneda: item.moneda || 'UYU',
       origenApi: item.origenApi || false,
       fuenteDato: item.fuenteDato || null,
+      sinCoincidencia: item.sinCoincidencia || false,
       productoExistenteId: item.productoExistenteId || null,
       comercio: item.comercio ?? null, // { id, nombre, direccionId, direccionNombre } | null
       // Snapshot inmutable del estado original (para poder recuperar foto/datos)

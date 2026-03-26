@@ -10,7 +10,11 @@
     :expandido-prop="expandidoLocal"
     @long-press="$emit('long-press')"
     @toggle-seleccion="$emit('toggle-seleccion')"
-    @toggle-expansion="(v) => { expandidoLocal = v }"
+    @toggle-expansion="
+      (v) => {
+        expandidoLocal = v
+      }
+    "
   >
     <!-- Chips de completitud + info de comercio/dirección -->
     <template #tipo>
@@ -64,8 +68,20 @@
     </template>
 
     <!-- Precio en overlay si existe -->
-    <template v-if="item.precio > 0" #overlay-info>
-      <div class="precio-overlay">{{ formatearPrecio(item.precio, item.moneda) }}</div>
+    <template v-if="item.precio > 0 || mostrarAvisoSinCoincidencia" #overlay-info>
+      <div class="overlay-contenido">
+        <div v-if="mostrarAvisoSinCoincidencia" class="sin-coincidencia-overlay">
+          <div class="sin-coincidencia-overlay__titulo">
+            Este artículo no apareció en nuestras bases.
+          </div>
+          <div class="sin-coincidencia-overlay__texto">
+            Podés editarlo en esta tarjeta o desde el historial del artículo.
+          </div>
+        </div>
+        <div v-if="item.precio > 0" class="precio-overlay">
+          {{ formatearPrecio(item.precio, item.moneda) }}
+        </div>
+      </div>
     </template>
 
     <!-- Info inferior: código de barras (clickeable para copiar) -->
@@ -191,14 +207,29 @@
                     <q-item-section avatar><IconPhoto :size="16" /></q-item-section>
                     <q-item-section>Galería</q-item-section>
                   </q-item>
-                  <q-item v-if="datosEditando.imagen" clickable v-close-popup @click="actualizar('imagen', null)">
-                    <q-item-section avatar><IconTrash :size="16" class="text-negative" /></q-item-section>
+                  <q-item
+                    v-if="datosEditando.imagen"
+                    clickable
+                    v-close-popup
+                    @click="actualizar('imagen', null)"
+                  >
+                    <q-item-section avatar
+                      ><IconTrash :size="16" class="text-negative"
+                    /></q-item-section>
                     <q-item-section class="text-negative">Quitar</q-item-section>
                   </q-item>
                 </q-list>
               </q-menu>
             </q-btn>
-            <q-btn v-if="fotoModificada" flat round dense size="md" color="grey-6" @click="actualizar('imagen', datosOriginales.imagen)">
+            <q-btn
+              v-if="fotoModificada"
+              flat
+              round
+              dense
+              size="md"
+              color="grey-6"
+              @click="actualizar('imagen', datosOriginales.imagen)"
+            >
               <IconRefresh :size="22" />
               <q-tooltip>Recuperar foto original</q-tooltip>
             </q-btn>
@@ -216,7 +247,13 @@
             <IconArrowBackUp :size="16" class="q-mr-xs" />
             Recuperar datos
           </q-btn>
-          <input ref="inputArchivoRef" type="file" accept="image/*" class="input-oculto" @change="alSeleccionarArchivo" />
+          <input
+            ref="inputArchivoRef"
+            type="file"
+            accept="image/*"
+            class="input-oculto"
+            @change="alSeleccionarArchivo"
+          />
         </div>
       </div>
     </template>
@@ -259,7 +296,12 @@ import SelectorComercioDireccion from '../Compartidos/SelectorComercioDireccion.
 import { MONEDAS } from '../../almacenamiento/constantes/Monedas.js'
 import { usePreferenciasStore } from '../../almacenamiento/stores/preferenciasStore.js'
 import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
-import { filtrarInputPrecio, formatearPrecioAlSalir, soloNumerosDecimales, formatearPrecioDisplay } from '../../utils/PrecioUtils.js'
+import {
+  filtrarInputPrecio,
+  formatearPrecioAlSalir,
+  soloNumerosDecimales,
+  formatearPrecioDisplay,
+} from '../../utils/PrecioUtils.js'
 import {
   IconShoppingBag,
   IconBarcode,
@@ -291,12 +333,12 @@ const props = defineProps({
 })
 
 const emit = defineEmits([
-  'long-press', 
-  'toggle-seleccion', 
-  'update:item', 
-  'eliminar', 
+  'long-press',
+  'toggle-seleccion',
+  'update:item',
+  'eliminar',
   'enviar',
-  'abrir-nuevo-comercio'
+  'abrir-nuevo-comercio',
 ])
 
 const $q = useQuasar()
@@ -314,7 +356,9 @@ const refSelectorComercio = ref(null)
 // Copia local para edición
 const datosEditando = ref({ ...props.item })
 // String para preservar ceros finales (ej: "3.30"); datosEditando.precio guarda el número
-const precioTexto = ref(formatearPrecioAlSalir(props.item.precio > 0 ? String(props.item.precio) : ''))
+const precioTexto = ref(
+  formatearPrecioAlSalir(props.item.precio > 0 ? String(props.item.precio) : ''),
+)
 
 // Sincroniza si el item cambia externamente (ej. asignación de comercio en bloque)
 watch(
@@ -343,10 +387,14 @@ const datosModificados = computed(
       datosEditando.value.unidad !== datosOriginales.value.unidad),
 )
 
-const itemCompleto = computed(() =>
-  !!datosEditando.value.nombre?.trim() &&
-  datosEditando.value.precio > 0 &&
-  !!datosEditando.value.comercio,
+const itemCompleto = computed(
+  () =>
+    !!datosEditando.value.nombre?.trim() &&
+    datosEditando.value.precio > 0 &&
+    !!datosEditando.value.comercio,
+)
+const mostrarAvisoSinCoincidencia = computed(
+  () => props.item?.sinCoincidencia === true && !props.item?.imagen,
 )
 
 function alCambiarPrecio(val) {
@@ -439,10 +487,45 @@ function formatearPrecio(valor, moneda) {
   flex-shrink: 0;
 }
 .precio-overlay {
+  position: absolute;
+  right: 0;
+  bottom: 0;
   color: white;
   font-size: 20px;
   font-weight: bold;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+.overlay-contenido {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  width: 100%;
+  min-height: 92px;
+}
+.sin-coincidencia-overlay {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translate(-50%, calc(-50% - 18px));
+  width: calc(100% - 24px);
+  max-width: 240px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(20, 20, 20, 0.42);
+  backdrop-filter: blur(4px);
+  text-align: center;
+  color: white;
+}
+.sin-coincidencia-overlay__titulo {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.sin-coincidencia-overlay__texto {
+  margin-top: 4px;
+  font-size: 11px;
+  line-height: 1.35;
 }
 .info-inferior-fila {
   display: flex;

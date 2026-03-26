@@ -265,6 +265,7 @@ function iniciarRafaga() {
 
 // Construye el item a partir de los resultados de búsqueda
 function construirItem(codigo, existente, productoApi, resultadoApi) {
+  const sinCoincidencia = !existente && !productoApi
   return {
     codigoBarras: codigo,
     productoExistenteId: existente?.id || null,
@@ -277,6 +278,7 @@ function construirItem(codigo, existente, productoApi, resultadoApi) {
     moneda: preferenciasStore.moneda,
     origenApi: !!productoApi,
     fuenteDato: resultadoApi?.fuenteDato || null,
+    sinCoincidencia,
   }
 }
 

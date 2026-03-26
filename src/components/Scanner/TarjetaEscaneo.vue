@@ -9,7 +9,18 @@
           class="tarjeta-escaneo-portada__imagen"
         />
         <div v-else class="tarjeta-escaneo-portada__placeholder">
-          <IconShoppingBag :size="56" class="text-grey-4" />
+          <div v-if="mostrarAvisoSinCoincidencia" class="tarjeta-escaneo-portada__aviso">
+            <div class="tarjeta-escaneo-portada__aviso-titulo">
+              No lo encontramos en nuestras bases.
+            </div>
+            <div class="tarjeta-escaneo-portada__aviso-texto">
+              Revisá que el código se haya escaneado bien.
+            </div>
+            <div class="tarjeta-escaneo-portada__aviso-texto">
+              Podés editarlo acá, en la Mesa o desde el historial del artículo.
+            </div>
+          </div>
+          <IconShoppingBag v-else :size="56" class="text-grey-4" />
         </div>
         <div class="tarjeta-escaneo-portada__gradiente">
           <div class="tarjeta-escaneo-portada__nombre ellipsis-2-lines">
@@ -279,6 +290,9 @@ const abierto = computed({
 const formularioValido = computed(() => datosForm.value.precio > 0)
 const precioTocado = ref(false)
 const mostrarErrorPrecio = computed(() => precioTocado.value && !formularioValido.value)
+const mostrarAvisoSinCoincidencia = computed(
+  () => props.item?.sinCoincidencia === true && !datosForm.value.imagen,
+)
 
 // Snapshot original: el item llega ANTES de pasar por el store, se deriva de sus flags
 const datosOriginales = computed(() => {
@@ -452,6 +466,26 @@ function emitDescartar() {
   justify-content: center;
   width: 100%;
   height: 100%;
+  padding: 20px;
+}
+.tarjeta-escaneo-portada__aviso {
+  max-width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  text-align: center;
+  color: var(--texto-secundario, #616161);
+}
+.tarjeta-escaneo-portada__aviso-titulo {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--texto-primario, #424242);
+}
+.tarjeta-escaneo-portada__aviso-texto {
+  font-size: 13px;
+  line-height: 1.4;
 }
 .tarjeta-escaneo-portada__gradiente {
   position: absolute;
