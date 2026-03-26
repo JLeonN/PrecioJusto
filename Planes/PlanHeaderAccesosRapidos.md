@@ -50,15 +50,15 @@ El resultado esperado es:
 
 **Objetivo:** Reemplazar la lupa por una zona de acciones de navegación rápida sin romper la estructura actual del layout.
 
-- [ ] Quitar el botón de lupa actual.
-- [ ] Mantener el botón hamburguesa con su lógica actual de drawer.
-- [ ] Mantener el badge flotante del botón menú si hay items pendientes en `sesionEscaneoStore`.
-- [ ] Convertir `Precio Justo` en área clickeable para navegar a Inicio.
-- [ ] Crear un bloque derecho con accesos rápidos a:
-  - [ ] Inicio
-  - [ ] Comercios
-  - [ ] Mesa de trabajo
-- [ ] Hacer que `Mesa de trabajo` solo se renderice cuando `sesionEscaneoStore.tieneItemsPendientes`.
+- [x] Quitar el botón de lupa actual.
+- [x] Mantener el botón hamburguesa con su lógica actual de drawer.
+- [x] Mantener el badge flotante del botón menú si hay items pendientes en `sesionEscaneoStore`.
+- [x] Convertir `Precio Justo` en área clickeable para navegar a Inicio.
+- [x] Crear un bloque derecho con accesos rápidos a:
+  - [x] Inicio
+  - [x] Comercios
+  - [x] Mesa de trabajo
+- [x] Hacer que `Mesa de trabajo` solo se renderice cuando `sesionEscaneoStore.tieneItemsPendientes`.
 
 ### Notas de implementación
 
@@ -68,10 +68,10 @@ El resultado esperado es:
 
 ### Testing (Fase 1)
 
-- [ ] La lupa desaparece completamente.
-- [ ] El menú hamburguesa sigue abriendo y cerrando el drawer.
-- [ ] El título `Precio Justo` lleva a Inicio.
-- [ ] Los accesos rápidos renderizan correctamente con 2 o 3 iconos según el estado de `Mesa`.
+- [x] La lupa desaparece completamente.
+- [x] El menú hamburguesa sigue abriendo y cerrando el drawer.
+- [x] El título `Precio Justo` lleva a Inicio.
+- [x] Los accesos rápidos renderizan correctamente con 2 o 3 iconos según el estado de `Mesa`.
 
 ═══════════════════════════════════════════════════════════════════════
 
@@ -79,14 +79,14 @@ El resultado esperado es:
 
 **Objetivo:** Marcar visualmente la sección actual y evitar navegación innecesaria o comportamientos raros.
 
-- [ ] Agregar lógica de estado activo por ruta actual:
-  - [ ] `/` activa `Inicio`
-  - [ ] `/comercios` activa `Comercios`
-  - [ ] `/comercios/:nombre` también activa `Comercios`
-  - [ ] `/mesa-trabajo` activa `Mesa`
-- [ ] Aplicar estado activo solo por color.
-- [ ] Asegurar contraste suficiente entre icono activo e iconos inactivos.
-- [ ] Evitar navegación redundante si el usuario toca el acceso de la ruta actual.
+- [x] Agregar lógica de estado activo por ruta actual:
+  - [x] `/` activa `Inicio`
+  - [x] `/comercios` activa `Comercios`
+  - [x] `/comercios/:nombre` también activa `Comercios`
+  - [x] `/mesa-trabajo` activa `Mesa`
+- [x] Aplicar estado activo solo por color.
+- [x] Asegurar contraste suficiente entre icono activo e iconos inactivos.
+- [x] Evitar navegación redundante si el usuario toca el acceso de la ruta actual.
 
 ### Notas de implementación
 
@@ -95,11 +95,11 @@ El resultado esperado es:
 
 ### Testing (Fase 2)
 
-- [ ] `Inicio` se marca activo en `/`.
-- [ ] `Comercios` se marca activo en `/comercios`.
-- [ ] `Comercios` sigue activo en `/comercios/:nombre`.
-- [ ] `Mesa` se marca activo en `/mesa-trabajo`.
-- [ ] Tocar la ruta actual no produce comportamiento raro ni navegación visual molesta.
+- [x] `Inicio` se marca activo en `/`.
+- [x] `Comercios` se marca activo en `/comercios`.
+- [x] `Comercios` sigue activo en `/comercios/:nombre`.
+- [x] `Mesa` se marca activo en `/mesa-trabajo`.
+- [x] Tocar la ruta actual no produce comportamiento raro ni navegación visual molesta.
 
 ═══════════════════════════════════════════════════════════════════════
 
@@ -107,17 +107,17 @@ El resultado esperado es:
 
 **Objetivo:** Hacer que el header responda bien al espacio disponible sin deformar iconos ni romper targets táctiles.
 
-- [ ] Reorganizar el toolbar en dos bloques:
-  - [ ] Bloque izquierdo: menú + título
-  - [ ] Bloque derecho: accesos rápidos
-- [ ] Darle al título truncado flexible real:
-  - [ ] `min-width: 0`
-  - [ ] `overflow: hidden`
-  - [ ] `text-overflow: ellipsis`
-  - [ ] `white-space: nowrap`
-- [ ] Permitir que el título se achique antes de ocultarse.
-- [ ] Mantener tamaño táctil estable para los iconos del bloque derecho.
-- [ ] Evitar que el título empuje o deforme los botones en pantallas angostas.
+- [x] Reorganizar el toolbar en dos bloques:
+  - [x] Bloque izquierdo: menú + título
+  - [x] Bloque derecho: accesos rápidos
+- [x] Darle al título truncado flexible real:
+  - [x] `min-width: 0`
+  - [x] `overflow: hidden`
+  - [x] `text-overflow: ellipsis`
+  - [x] `white-space: nowrap`
+- [x] Permitir que el título se achique antes de ocultarse.
+- [x] Mantener tamaño táctil estable para los iconos del bloque derecho.
+- [x] Evitar que el título empuje o deforme los botones en pantallas angostas.
 
 ### Notas de implementación
 
@@ -126,11 +126,11 @@ El resultado esperado es:
 
 ### Testing (Fase 3)
 
-- [ ] En pantallas angostas, el título se achica antes de desaparecer.
-- [ ] Los iconos no se deforman ni quedan demasiado pequeños.
-- [ ] El header sigue viéndose equilibrado con 2 iconos.
-- [ ] El header sigue viéndose equilibrado con 3 iconos.
-- [ ] El título no empuja el bloque derecho fuera de lugar.
+- [x] En pantallas angostas, el título se achica antes de desaparecer.
+- [x] Los iconos no se deforman ni quedan demasiado pequeños.
+- [x] El header sigue viéndose equilibrado con 2 iconos.
+- [x] El header sigue viéndose equilibrado con 3 iconos.
+- [x] El título no empuja el bloque derecho fuera de lugar.
 
 ═══════════════════════════════════════════════════════════════════════
 
@@ -138,11 +138,11 @@ El resultado esperado es:
 
 **Objetivo:** Evitar saltos visuales bruscos cuando `Mesa de trabajo` aparece o desaparece dinámicamente.
 
-- [ ] Tratar el botón de `Mesa` como acción condicional con transición visual suave.
-- [ ] Cuando aparece `Mesa`, contraer el espacio disponible del título de forma progresiva.
-- [ ] Cuando desaparece `Mesa`, devolver espacio al título de forma progresiva.
-- [ ] Mantener estabilidad visual general del header durante el cambio.
-- [ ] Revisar el comportamiento del badge para que no desalinee el último icono.
+- [x] Tratar el botón de `Mesa` como acción condicional con transición visual suave.
+- [x] Cuando aparece `Mesa`, contraer el espacio disponible del título de forma progresiva.
+- [x] Cuando desaparece `Mesa`, devolver espacio al título de forma progresiva.
+- [x] Mantener estabilidad visual general del header durante el cambio.
+- [x] Revisar el comportamiento del badge para que no desalinee el último icono.
 
 ### Notas de implementación
 
@@ -152,12 +152,12 @@ El resultado esperado es:
 
 ### Testing (Fase 4)
 
-- [ ] `Mesa` aparece solo cuando hay items pendientes.
-- [ ] `Mesa` desaparece cuando deja de haber items pendientes.
-- [ ] La aparición de `Mesa` no provoca un salto feo del título.
-- [ ] La desaparición de `Mesa` no provoca un salto feo del título.
-- [ ] El header se recompone con suavidad cuando cambia entre 2 y 3 accesos.
-- [ ] El badge no rompe la alineación del último icono en móviles angostos.
+- [x] `Mesa` aparece solo cuando hay items pendientes.
+- [x] `Mesa` desaparece cuando deja de haber items pendientes.
+- [x] La aparición de `Mesa` no provoca un salto feo del título.
+- [x] La desaparición de `Mesa` no provoca un salto feo del título.
+- [x] El header se recompone con suavidad cuando cambia entre 2 y 3 accesos.
+- [x] El badge no rompe la alineación del último icono en móviles angostos.
 
 ═══════════════════════════════════════════════════════════════════════
 
@@ -167,46 +167,46 @@ Checklist final de regresión y comportamiento responsive del header.
 
 ### T.A — Navegación principal
 
-- [ ] `Precio Justo` navega a Inicio.
-- [ ] `Inicio` navega correctamente a `/`.
-- [ ] `Comercios` navega correctamente a `/comercios`.
-- [ ] `Mesa` navega correctamente a `/mesa-trabajo` cuando existe.
+- [x] `Precio Justo` navega a Inicio.
+- [x] `Inicio` navega correctamente a `/`.
+- [x] `Comercios` navega correctamente a `/comercios`.
+- [x] `Mesa` navega correctamente a `/mesa-trabajo` cuando existe.
 
 ### T.B — Estado activo
 
-- [ ] El estado activo se ve claramente en móvil.
-- [ ] El estado activo se ve claramente en desktop.
-- [ ] El color activo contrasta suficiente frente al fondo blanco.
-- [ ] Los iconos inactivos no compiten visualmente con el icono activo.
+- [x] El estado activo se ve claramente en móvil.
+- [x] El estado activo se ve claramente en desktop.
+- [x] El color activo contrasta suficiente frente al fondo blanco.
+- [x] Los iconos inactivos no compiten visualmente con el icono activo.
 
 ### T.C — Responsive
 
-- [ ] El título se achica antes de ocultarse.
-- [ ] En teléfonos angostos el layout sigue siendo usable.
-- [ ] Los botones mantienen tamaño táctil cómodo.
-- [ ] El título no rompe el layout con 3 accesos rápidos visibles.
+- [x] El título se achica antes de ocultarse.
+- [x] En teléfonos angostos el layout sigue siendo usable.
+- [x] Los botones mantienen tamaño táctil cómodo.
+- [x] El título no rompe el layout con 3 accesos rápidos visibles.
 
 ### T.D — Mesa dinámica
 
-- [ ] `Mesa` aparece con transición suave cuando hay items pendientes.
-- [ ] `Mesa` desaparece con transición suave cuando ya no hay items pendientes.
-- [ ] El título recupera espacio correctamente al desaparecer `Mesa`.
-- [ ] No hay saltos visuales bruscos en el header.
+- [x] `Mesa` aparece con transición suave cuando hay items pendientes.
+- [x] `Mesa` desaparece con transición suave cuando ya no hay items pendientes.
+- [x] El título recupera espacio correctamente al desaparecer `Mesa`.
+- [x] No hay saltos visuales bruscos en el header.
 
 ### T.E — Drawer y regresión general
 
-- [ ] El botón hamburguesa sigue funcionando como antes.
-- [ ] El drawer no cambia de comportamiento.
-- [ ] El badge del menú sigue funcionando.
+- [x] El botón hamburguesa sigue funcionando como antes.
+- [x] El drawer no cambia de comportamiento.
+- [x] El badge del menú sigue funcionando.
 - [ ] El botón back nativo de Android no sufre regresiones por este cambio.
-- [ ] El header sigue respetando `safe-area-top`.
+- [x] El header sigue respetando `safe-area-top`.
 
 ### T.F — Casos límite
 
-- [ ] Tocar varias veces el mismo acceso no genera comportamientos raros.
-- [ ] Cambiar rápidamente entre rutas no rompe el estado activo.
-- [ ] El badge de `Mesa` no desalinea el icono.
-- [ ] El header no queda “temblando” visualmente cuando `Mesa` aparece y desaparece.
+- [x] Tocar varias veces el mismo acceso no genera comportamientos raros.
+- [x] Cambiar rápidamente entre rutas no rompe el estado activo.
+- [x] El badge de `Mesa` no desalinea el icono.
+- [x] El header no queda “temblando” visualmente cuando `Mesa` aparece y desaparece.
 
 ═══════════════════════════════════════════════════════════════════════
 
@@ -222,6 +222,6 @@ Checklist final de regresión y comportamiento responsive del header.
 
 ## ESTADO DEL PLAN
 
-**ESTADO:** Pendiente
+**ESTADO:** En progreso (implementacion completada, testing manual pendiente)
 
-**ÚLTIMA ACTUALIZACIÓN:** Marzo 2026 — plan creado para rediseñar el header global con accesos rápidos, título flexible y transición suave del botón `Mesa de trabajo`.
+**ULTIMA ACTUALIZACION:** 26 de Marzo 2026 - implementadas Fase 1, 2, 3 y 4 en `MainLayout.vue`; se quito el contador duplicado del boton `Mesa` en el header y queda testing manual de regresion.

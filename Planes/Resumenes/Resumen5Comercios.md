@@ -932,9 +932,10 @@ const {
   - Duplicado: Reasignar
   - Otro: Mantener con nombre original
 
-### Fase 7: Router y Navegación (En Progreso)
+### Fase 7: Router y Navegacion (Completado)
 - Ruta /comercios configurada
 - Link en MainLayout drawer
+- Acceso rapido en header global hacia `/comercios`
 
 ## FEATURES IMPLEMENTADAS
 

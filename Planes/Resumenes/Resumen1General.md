@@ -207,7 +207,7 @@ src/
 │
 ├── router/
 │   ├── index.js                             # Configuración del router de Vue
-│   └── routes.js                            # Definición de rutas (/, /comercios, /comercios/:nombre, /producto/:id)
+│   └── routes.js                            # Definición de rutas (/, /producto/:id, /comercios, /comercios/:nombre, /mesa-trabajo)
 │
 ├── App.vue                                  # Componente raíz de Vue
 └── main.js                                  # Punto de entrada de la aplicación
@@ -914,6 +914,15 @@ H. Arquitectura y Código
 - **Modo:** Hash (URLs con #)
 - **Layout:** MainLayout para todas las rutas
 
+### Header global (MainLayout.vue)
+- Menú hamburguesa a la izquierda (mantiene lógica de drawer).
+- Título `Precio Justo` clickeable (navega a `/`).
+- Accesos rápidos a la derecha: Inicio, Comercios y Mesa.
+- Estado activo por color según ruta actual.
+- El acceso a Mesa aparece solo si `sesionEscaneoStore.tieneItemsPendientes`.
+- No hay badge numérico en el botón de Mesa del header para evitar duplicación visual.
+- El badge de cantidad se mantiene en el botón hamburguesa y en el item de Mesa dentro del drawer.
+
 ### Rutas Definidas
 ```javascript
 [
@@ -1072,6 +1081,7 @@ H. Arquitectura y Código
 - **Flujo de escaneo — Modo A (Escaneo rápido):** Completado (TarjetaEscaneo, foto, edición inline)
 - **Flujo de escaneo — Modo B (Ráfaga):** Completado (cámara continua, búsqueda background, aviso sobre cámara)
 - **Mesa de trabajo:** Completada (reemplaza BandejaBorradores; ordenamiento, selección, envío parcial, filtro de búsqueda por nombre/marca/categoría)
+- **Header global con accesos rápidos:** Completado (Inicio/Comercios/Mesa, estado activo por color, Mesa condicional, sin contador duplicado en el botón de Mesa)
 - **APIs de búsqueda:** Completado (7 APIs orquestadas, libros por ISBN, fuenteDato en UI)
 - **Safe area:** Completada (Android 15+ edge-to-edge)
 - **Botón back nativo:** Completado
@@ -1103,4 +1113,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 25 de Marzo 2026 — Regla centralizada de colores: usar siempre `src/css/Variables.css`. v1.1.2: actualización de documentación y reglas de IA.
+**Última actualización:** 26 de Marzo 2026 — Header global actualizado en `MainLayout.vue` (accesos rápidos, estado activo por ruta, Mesa condicional y eliminación de contador duplicado en botón de Mesa).

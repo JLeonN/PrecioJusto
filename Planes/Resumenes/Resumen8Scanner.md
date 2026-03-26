@@ -128,6 +128,7 @@ Página propia con ruta `/mesa-trabajo`. Reemplaza a `MesaTrabajo.vue` (que era 
 
 **Acceso:**
 - Drawer → ítem "Mesa de trabajo" (visible solo si `sesionEscaneoStore.tieneItemsPendientes`)
+- Header global (`MainLayout.vue`) → acceso rápido con `IconBriefcase` (visible solo si `sesionEscaneoStore.tieneItemsPendientes`)
 - Al vaciar la mesa (enviar todos o "Limpiar todo") → auto-navega a `/`
 - Al acceder con mesa vacía → muestra estado vacío con botones "Mis Productos" y "Comercios"
 
@@ -329,4 +330,4 @@ Dos niveles de protección:
 
 ---
 
-**Última actualización:** Marzo 2026
+**Última actualización:** 26 de Marzo 2026 — acceso a Mesa documentado también desde el header global (además del drawer).
