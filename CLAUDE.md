@@ -9,6 +9,13 @@
 - Si ya existe una convención para nombres o estructura, adaptarse a ella antes de proponer una nueva.
 - Si el proyecto ya usa acentos, eñes o un estilo de redacción particular, conservarlo en vez de simplificarlo a ASCII.
 
+### Codificación y Acentos
+
+- Guardar siempre archivos de texto en **UTF-8** para evitar caracteres corruptos.
+- No reemplazar acentos ni eñes por ASCII cuando el proyecto ya usa español.
+- Si aparece texto dañado (ej.: `Ã¡`, `Ã±`, `â†’`), corregirlo antes de cerrar la tarea.
+- Mantener redacción natural en español en UI, documentación, comentarios y mensajes.
+
 ### Script Móvil (Android)
 
 Script estándar para compilar y abrir en Android Studio:

@@ -222,6 +222,6 @@ Checklist final de regresión y comportamiento responsive del header.
 
 ## ESTADO DEL PLAN
 
-**ESTADO:** En progreso (implementacion completada, testing manual pendiente)
+**ESTADO:** En progreso (implementación completada, testing manual pendiente)
 
-**ULTIMA ACTUALIZACION:** 26 de Marzo 2026 - implementadas Fase 1, 2, 3 y 4 en `MainLayout.vue`; se quito el contador duplicado del boton `Mesa` en el header y queda testing manual de regresion.
+**ÚLTIMA ACTUALIZACIÓN:** 26 de Marzo 2026 - implementadas Fase 1, 2, 3 y 4 en `MainLayout.vue`; se quitó el contador duplicado del botón `Mesa` en el header y queda testing manual de regresión.

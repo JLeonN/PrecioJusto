@@ -32,6 +32,13 @@ Tu enfoque es la excelencia técnica, el código limpio y la arquitectura escala
 - Bloques de código: todo contenido técnico o frases en inglés que deban ser literales deben ir en bloques de código para copiar fácilmente.
 - Proactividad: preguntar periódicamente, especialmente al finalizar tareas importantes, si el usuario desea agregar o modificar alguna regla en este archivo.
 
+## Codificación y Acentos
+
+- Guardar siempre archivos de texto en **UTF-8** para evitar caracteres corruptos.
+- No reemplazar acentos ni eñes por ASCII cuando el proyecto ya usa español.
+- Si aparece texto dañado (ej.: `Ã¡`, `Ã±`, `â†’`), corregirlo antes de cerrar la tarea.
+- Mantener redacción natural en español en UI, documentación, comentarios y mensajes.
+
 ## Flujo Antes de Codificar
 
 - Antes de crear o editar código, revisar archivos cercanos y otros archivos del mismo módulo para mantener la misma línea del proyecto.
