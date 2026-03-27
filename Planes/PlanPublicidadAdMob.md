@@ -249,53 +249,61 @@ Agregar un indicador visual claro cuando `MODO_PRUEBA = true`.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 5: PÁGINA GRACIAS + REWARDED + CONTADOR 🙏 [PENDIENTE]
+## 📋 FASE 5: PÁGINA GRACIAS + REWARDED + CONTADOR 🙏 [COMPLETADA PARCIAL - SIN VIDEO]
 
 ### Objetivo
 
 Crear una página dedicada accesible desde el Drawer donde el usuario
-puede ver un video recompensado para apoyar la app. Es una experiencia
-completa: mensaje de agradecimiento, contador personal y botón de video.
+puede dejar un agradecimiento para apoyar la app. Es una experiencia
+completa: mensaje de agradecimiento, contador personal y acción directa de apoyo.
 No es un diálogo ni un popup — es una página de navegación real.
 
+
+### Estado parcial actual (26/03/2026)
+
+[x] Ruta `/gracias` implementada
+[x] Ítem "Gracias" implementado en el Drawer
+[x] `GraciasPage.vue` creada con contador local (`contadorGracias`) y botón "Dar gracias"
+[x] Persistencia en localStorage + notificación al incrementar
+[ ] Integración de video rewarded (pendiente para fase futura)
 ### 5.1 — Ruta nueva
 
 **Archivo:** `src/router/routes.js`
 
-[ ] Agregar ruta `/gracias` apuntando a `GraciasPage.vue`
+[x] Agregar ruta `/gracias` apuntando a `GraciasPage.vue`
 
 ### 5.2 — Ítem en el Drawer
 
 **Archivo:** `src/layouts/MainLayout.vue`
 
-[ ] Agregar ítem al final de la lista del Drawer, antes del cierre de `q-list`:
+[x] Agregar ítem al final de la lista del Drawer, antes del cierre de `q-list`:
 
 - Ícono: `IconHeart` de `@tabler/icons-vue`
 - Label: "Gracias"
 - `to="/gracias"` — navegación estándar, igual que el resto del drawer
-  [ ] Importar `IconHeart`
+  [x] Importar `IconHeart`
 
 ### 5.3 — Página GraciasPage.vue
 
 **Archivo:** `src/pages/GraciasPage.vue`
 
-[ ] Es una página completa con su propio `q-page` y header implícito del layout
-[ ] Importar `usePublicidad`
-[ ] Leer y escribir el contador desde localStorage con clave `'contadorGracias'`
-[ ] `contadorGracias`: ref inicializado desde `localStorage.getItem('contadorGracias') || 0`
+[x] Es una página completa con su propio `q-page` y header implícito del layout
+[ ] Importar `usePublicidad` (pendiente - no aplica en fase parcial sin video)
+[x] Leer y escribir el contador desde localStorage con clave `'contadorGracias'`
+[x] `contadorGracias`: ref inicializado desde `localStorage.getItem('contadorGracias') || 0`
 
 **UI de la página:**
-[ ] Ícono grande de corazón centrado (decorativo)
-[ ] Título: "Gracias por tu apoyo"
-[ ] Párrafo explicativo breve, sin tecnicismos:
-"Ver un anuncio corto nos ayuda a mantener la app gratuita para todos"
-[ ] Si `contadorGracias > 0`: mostrar mensaje amigable "Has dado N gracias ❤️"
-[ ] Botón principal: "Ver anuncio" con ícono `IconPlayerPlay`
-[ ] Al tocar el botón:
-[ ] Llamar `mostrarRecompensado()` del composable
-[ ] Si retorna `true` (video completado): incrementar contador, guardar en localStorage,
+[x] Ícono grande de corazón centrado (decorativo)
+[x] Título: "Gracias por tu apoyo"
+[x] Párrafo explicativo breve, sin tecnicismos:
+"Tu apoyo nos ayuda a mantener la app gratuita para todos"
+[x] Si `contadorGracias > 0`: mostrar mensaje amigable "Has dado N gracias ❤️"
+[x] Botón principal adaptado a fase parcial: "Dar gracias" (sin video)
+[x] Al tocar el botón de fase parcial:
+[ ] Llamar `mostrarRecompensado()` del composable (pendiente para fase futura con video)
+[ ] Si retorna `true` (video completado): incrementar contador, guardar en localStorage, (pendiente video)
 actualizar `contadorGracias` reactivo, mostrar notificación (`q-notify`)
-[ ] Si retorna `false` (cerró antes): no incrementar, sin notificación
+[ ] Si retorna `false` (cerró antes): no incrementar, sin notificación (pendiente video)
 
 ### ⚠️ Nota de diseño
 
@@ -351,17 +359,17 @@ Nunca mostrarlo dos veces seguidas sin que el usuario haya interactuado.
 [ ] Si no hay conexión: banner no aparece, padding = 0, sin errores
 [ ] El banner se mantiene al navegar entre páginas (no desaparece ni parpadea)
 
-### T.C — Botón Gracias y video recompensado
+### T.C — Botón Gracias + contador (video pendiente)
 
-[ ] Ítem "Gracias" visible en el Drawer con ícono corazón
-[ ] Al tocar: navega a GraciasPage correctamente
-[ ] Botón "Ver anuncio" visible y funcional
-[ ] Al tocar botón: el video recompensado se carga y reproduce
-[ ] Si el usuario completa el video: contador sube, notificación de agradecimiento
-[ ] Si el usuario cierra el video antes: contador no sube, sin notificación
-[ ] El contador persiste al cerrar y reabrir la app
-[ ] Mensaje "Has dado N gracias" se actualiza inmediatamente tras ver el video
-[ ] Primera vez (contador = 0): el mensaje de contador no aparece
+[x] Ítem "Gracias" visible en el Drawer con ícono corazón
+[x] Al tocar: navega a GraciasPage correctamente
+[x] Botón "Dar gracias" visible y funcional
+[x] Al tocar botón: incrementa contador, guarda en localStorage y muestra notificación
+[ ] Si el usuario completa el video: contador sube, notificación de agradecimiento (pendiente video)
+[ ] Si el usuario cierra el video antes: contador no sube, sin notificación (pendiente video)
+[x] El contador persiste al cerrar y reabrir la app
+[x] Mensaje "Has dado N gracias" se actualiza inmediatamente tras dar gracias
+[x] Primera vez (contador = 0): el mensaje de contador no aparece
 
 ### T.D — Interstitial (cuando se implemente estadísticas)
 
@@ -392,13 +400,13 @@ Nunca mostrarlo dos veces seguidas sin que el usuario haya interactuado.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 0% — PENDIENTE
+## 📊 PROGRESO GENERAL: 15% — AVANCE PARCIAL (FASE 5 SIN VIDEO)
 
 ⏳ Fase 1: Instalación del plugin
 ⏳ Fase 2: Archivo de configuración
 ⏳ Fase 3: Composable usePublicidad
 ⏳ Fase 4: Banner en MainLayout
-⏳ Fase 5: Botón Gracias + rewarded + contador
+✅ Fase 5: Página Gracias + contador (parcial sin video)
 ⏳ Fase 6: Interstitial — preparación
 ⏳ Fase Testing
 
