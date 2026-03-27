@@ -83,7 +83,27 @@
         <div v-if="!datosEditando.imagen" class="imagen-slot__placeholder">
           <IconShoppingBag :size="48" class="text-grey-5" />
         </div>
-        <q-img v-else :src="datosEditando.imagen" class="imagen-slot__imagen" fit="cover" />
+        <q-img
+          v-else
+          :src="datosEditando.imagen"
+          class="imagen-slot__imagen"
+          fit="cover"
+          @click.stop="verFoto = true"
+        />
+
+        <div v-if="datosEditando.imagen" class="imagen-slot__acciones-izquierda">
+          <q-btn
+            flat
+            round
+            dense
+            size="sm"
+            class="boton-foto-overlay"
+            @click.stop="verFoto = true"
+          >
+            <IconSearch :size="18" />
+            <q-tooltip>Ver imagen completa</q-tooltip>
+          </q-btn>
+        </div>
 
         <div class="imagen-slot__acciones">
           <q-btn flat round dense size="sm" class="boton-foto-overlay" @click.stop>
@@ -302,6 +322,14 @@
       </q-btn>
     </template>
   </TarjetaBase>
+
+  <DialogoVerImagen
+    v-model="verFoto"
+    :src="datosEditando.imagen || ''"
+    :titulo="datosEditando.nombre || 'Sin nombre'"
+    :editable="!!datosEditando.imagen"
+    @guardar="alGuardarFotoEditada"
+  />
 </template>
 
 <script setup>
@@ -309,6 +337,7 @@ import { ref, computed, watch, nextTick } from 'vue'
 import { useQuasar, copyToClipboard } from 'quasar'
 import TarjetaBase from '../Tarjetas/TarjetaBase.vue'
 import SelectorComercioDireccion from '../Compartidos/SelectorComercioDireccion.vue'
+import DialogoVerImagen from '../Compartidos/DialogoVerImagen.vue'
 import { MONEDAS } from '../../almacenamiento/constantes/Monedas.js'
 import { usePreferenciasStore } from '../../almacenamiento/stores/preferenciasStore.js'
 import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
@@ -320,6 +349,7 @@ import {
 } from '../../utils/PrecioUtils.js'
 import {
   IconShoppingBag,
+  IconSearch,
   IconBarcode,
   IconMapPin,
   IconBuildingStore,
@@ -360,6 +390,7 @@ const emit = defineEmits([
 const $q = useQuasar()
 const { inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo } = useCamaraFoto()
 const preferenciasStore = usePreferenciasStore()
+const verFoto = ref(false)
 
 // Estado de expansión manejado localmente para poder controlarla desde los chips
 const expandidoLocal = ref(false)
@@ -437,6 +468,9 @@ async function tomarFotoCamara() {
 async function alSeleccionarArchivo(event) {
   const res = await leerArchivo(event)
   if (res) actualizar('imagen', res)
+}
+function alGuardarFotoEditada(nuevaImagenBase64) {
+  actualizar('imagen', nuevaImagenBase64)
 }
 
 function recuperarDatos() {
@@ -600,6 +634,13 @@ function formatearPrecio(valor, moneda) {
 .imagen-slot__imagen {
   width: 100%;
   height: 100%;
+}
+.imagen-slot__acciones-izquierda {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 4;
+  display: flex;
 }
 .imagen-slot__acciones {
   position: absolute;
