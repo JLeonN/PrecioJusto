@@ -132,6 +132,7 @@
               </q-chip>
             </q-item-section>
           </q-item>
+          <!--
           <q-item clickable v-ripple to="/gracias">
             <q-item-section avatar>
               <IconHeart :size="24" />
@@ -140,6 +141,7 @@
               <q-item-label>Gracias</q-item-label>
             </q-item-section>
           </q-item>
+          -->
 
         </q-list>
       </q-scroll-area>
@@ -155,7 +157,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { IconHome, IconMapPin, IconBriefcase, IconHeart } from '@tabler/icons-vue'
+import { IconHome, IconMapPin, IconBriefcase } from '@tabler/icons-vue'
 import { useBotonAtras } from '../composables/useBotonAtras.js'
 import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
