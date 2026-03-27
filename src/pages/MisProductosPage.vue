@@ -122,7 +122,7 @@
         <div class="escaneo-api-overlay-halo" />
         <div class="escaneo-api-overlay-card">
           <div class="escaneo-api-overlay-badge">Escáner activo</div>
-          <q-spinner color="white" size="46px" />
+          <q-spinner color="primary" size="46px" />
           <div class="escaneo-api-overlay-titulo">Buscando coincidencias</div>
           <span class="escaneo-api-overlay-texto">Consultando fuentes externas...</span>
           <span class="escaneo-api-overlay-detalle"
@@ -564,9 +564,13 @@ onMounted(async () => {
   overflow: hidden;
   padding: 24px;
   background:
-    linear-gradient(180deg, rgba(2, 10, 24, 0.9) 0%, rgba(4, 16, 36, 0.94) 100%),
-    rgba(0, 0, 0, 0.78);
-  backdrop-filter: blur(12px) saturate(0.9);
+    linear-gradient(
+      180deg,
+      var(--scanner-overlay-fondo-inicio) 0%,
+      var(--scanner-overlay-fondo-fin) 100%
+    ),
+    var(--scanner-overlay-fondo-base);
+  backdrop-filter: blur(9px) saturate(1.05);
   pointer-events: all;
 }
 .escaneo-api-overlay-halo {
@@ -574,7 +578,7 @@ onMounted(async () => {
   width: min(82vw, 420px);
   aspect-ratio: 1;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(0, 153, 255, 0.22) 0%, rgba(0, 153, 255, 0) 68%);
+  background: radial-gradient(circle, var(--scanner-halo) 0%, rgba(33, 150, 243, 0) 68%);
   filter: blur(6px);
 }
 .escaneo-api-overlay-card {
@@ -587,35 +591,39 @@ onMounted(async () => {
   gap: 10px;
   padding: 26px 22px 24px;
   border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: linear-gradient(180deg, rgba(13, 30, 58, 0.96) 0%, rgba(7, 20, 40, 0.98) 100%);
-  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.38);
+  border: 1px solid var(--scanner-panel-borde);
+  background: linear-gradient(
+    180deg,
+    var(--scanner-panel-bg) 0%,
+    var(--scanner-panel-bg-secundario) 100%
+  );
+  box-shadow: var(--scanner-panel-sombra);
   text-align: center;
 }
 .escaneo-api-overlay-badge {
   padding: 6px 12px;
   border-radius: 999px;
-  background: rgba(82, 168, 255, 0.16);
-  color: rgba(201, 230, 255, 0.98);
+  background: rgba(33, 150, 243, 0.12);
+  color: var(--scanner-texto-eyebrow);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 .escaneo-api-overlay-titulo {
-  color: #ffffff;
+  color: var(--scanner-texto-principal);
   font-size: 20px;
   font-weight: 700;
   line-height: 1.15;
 }
 .escaneo-api-overlay-texto {
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--scanner-texto-principal);
   font-size: 15px;
   font-weight: 500;
   text-align: center;
 }
 .escaneo-api-overlay-detalle {
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--scanner-texto-secundario);
   font-size: 13px;
   line-height: 1.35;
 }

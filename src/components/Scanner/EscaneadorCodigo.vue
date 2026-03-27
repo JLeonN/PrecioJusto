@@ -1,7 +1,19 @@
-<template>
-  <!-- MODO NATIVO: overlay sobre la cámara -->
+﻿<template>
+  <!-- Overlay de escaneo (nativo + preview web) -->
   <Teleport to="body">
-    <div v-if="activo && esNativo" class="scanner-overlay">
+    <div v-if="activo" class="scanner-overlay">
+      <video
+        v-if="!esNativo && previewWebActiva"
+        ref="videoPreviewRef"
+        class="scanner-web-preview"
+        autoplay
+        playsinline
+        muted
+      />
+      <div v-else-if="!esNativo" class="scanner-web-fallback">
+        <div class="scanner-web-fallback__texto">{{ mensajePreviewWeb }}</div>
+      </div>
+
       <div class="scanner-header">
         <div class="scanner-header-contenido">
           <div class="scanner-header-texto">
@@ -9,19 +21,16 @@
             <div class="scanner-header-titulo">Alineá el código dentro del recuadro</div>
           </div>
           <q-btn round flat class="scanner-header-cerrar" @click="alCerrar">
-            <IconX :size="28" color="white" />
+            <IconX :size="28" color="var(--color-primario-oscuro)" />
           </q-btn>
         </div>
       </div>
 
-      <!-- Área oscura superior -->
       <div class="scanner-fondo-oscuro scanner-fondo-oscuro--arriba" />
 
-      <!-- Fila central: oscuro | ventana | oscuro -->
       <div class="scanner-fila-central">
         <div class="scanner-fondo-oscuro scanner-fondo-oscuro--lado" />
         <div class="scanner-ventana">
-          <div class="scanner-ventana-resplandor" />
           <div class="scanner-ventana-etiqueta">Zona de lectura</div>
           <span class="scanner-corner scanner-corner--tl" />
           <span class="scanner-corner scanner-corner--tr" />
@@ -32,51 +41,23 @@
         <div class="scanner-fondo-oscuro scanner-fondo-oscuro--lado" />
       </div>
 
-      <!-- Área oscura inferior con instrucción -->
       <div class="scanner-fondo-oscuro scanner-fondo-oscuro--abajo">
         <div class="scanner-panel-instruccion">
           <p class="scanner-instruccion">Apuntá el código de barras al recuadro</p>
           <p class="scanner-ayuda">
             Mantené el celular firme durante un segundo para una lectura más rápida.
           </p>
+          <p v-if="!esNativo" class="scanner-ayuda scanner-ayuda--preview-web">
+            Vista previa web (sin escaneo automático).
+          </p>
         </div>
       </div>
     </div>
   </Teleport>
-
-  <!-- MODO WEB: input manual (solo para desarrollo/testing) -->
-  <q-dialog :model-value="activo && !esNativo" persistent @update:model-value="alCerrar">
-    <q-card class="scanner-dialogo-web">
-      <q-card-section>
-        <div class="text-subtitle1 text-weight-bold">Ingresar código de barras</div>
-        <div class="text-caption text-grey-6">
-          El escáner de cámara solo funciona en la app móvil
-        </div>
-      </q-card-section>
-      <q-card-section class="q-pt-none">
-        <q-input
-          v-model="codigoManual"
-          label="Código EAN"
-          outlined
-          autofocus
-          @keyup.enter="confirmarCodigoManual"
-        />
-      </q-card-section>
-      <q-card-actions align="right">
-        <q-btn flat label="Cancelar" @click="alCerrar" />
-        <q-btn
-          color="primary"
-          label="Confirmar"
-          :disable="!codigoManual"
-          @click="confirmarCodigoManual"
-        />
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
 </template>
 
 <script setup>
-import { ref, watch, onUnmounted } from 'vue'
+import { nextTick, onUnmounted, ref, watch } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { BarcodeScanner, BarcodeFormat } from '@capacitor-mlkit/barcode-scanning'
 import { useQuasar } from 'quasar'
@@ -95,7 +76,10 @@ const emit = defineEmits(['codigo-detectado', 'cerrar'])
 
 const $q = useQuasar()
 const esNativo = Capacitor.isNativePlatform()
-const codigoManual = ref('')
+const videoPreviewRef = ref(null)
+const previewWebActiva = ref(false)
+const mensajePreviewWeb = ref('Solicitando acceso a la cámara del navegador...')
+let streamPreviewWeb = null
 
 // Formatos de código de barras a detectar (los más comunes en supermercados).
 const FORMATOS_SOPORTADOS = [
@@ -107,7 +91,10 @@ const FORMATOS_SOPORTADOS = [
 ]
 
 async function iniciarScaneo() {
-  if (!esNativo) return
+  if (!esNativo) {
+    await iniciarPreviewWeb()
+    return
+  }
 
   const tienePermiso = await verificarPermiso()
   if (!tienePermiso) return
@@ -136,15 +123,53 @@ async function iniciarScaneo() {
 }
 
 async function detenerScaneo() {
-  if (!esNativo) return
-  codigosEnCooldown.clear()
-  document.body.classList.remove('scanner-activo')
-  await BarcodeScanner.removeAllListeners()
-  try {
-    await BarcodeScanner.stopScan()
-  } catch {
-    // Ignorar error si el scan ya estaba detenido
+  if (esNativo) {
+    codigosEnCooldown.clear()
+    document.body.classList.remove('scanner-activo')
+    await BarcodeScanner.removeAllListeners()
+    try {
+      await BarcodeScanner.stopScan()
+    } catch {
+      // Ignorar error si el scan ya estaba detenido
+    }
+    return
   }
+
+  detenerPreviewWeb()
+}
+
+async function iniciarPreviewWeb() {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    previewWebActiva.value = false
+    mensajePreviewWeb.value = 'Tu navegador no soporta vista previa de cámara.'
+    return
+  }
+
+  try {
+    streamPreviewWeb = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' } },
+      audio: false,
+    })
+    previewWebActiva.value = true
+    mensajePreviewWeb.value = ''
+    await nextTick()
+    if (videoPreviewRef.value) {
+      videoPreviewRef.value.srcObject = streamPreviewWeb
+      await videoPreviewRef.value.play()
+    }
+  } catch {
+    previewWebActiva.value = false
+    mensajePreviewWeb.value = 'No se pudo abrir la cámara del navegador.'
+  }
+}
+
+function detenerPreviewWeb() {
+  if (streamPreviewWeb) {
+    streamPreviewWeb.getTracks().forEach((track) => track.stop())
+    streamPreviewWeb = null
+  }
+  previewWebActiva.value = false
+  mensajePreviewWeb.value = 'Solicitando acceso a la cámara del navegador...'
 }
 
 async function verificarPermiso() {
@@ -178,14 +203,7 @@ async function verificarPermiso() {
 
 function alCerrar() {
   detenerScaneo()
-  codigoManual.value = ''
   emit('cerrar')
-}
-
-function confirmarCodigoManual() {
-  if (!codigoManual.value) return
-  emit('codigo-detectado', codigoManual.value.trim())
-  codigoManual.value = ''
 }
 
 // Inicia o detiene el scaneo cuando cambia la prop activo
@@ -215,9 +233,48 @@ onUnmounted(() => {
   flex-direction: column;
   background: transparent;
 }
+.scanner-web-preview,
+.scanner-web-fallback {
+  position: absolute;
+  inset: 0;
+}
+.scanner-web-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+}
+.scanner-web-fallback {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(
+    180deg,
+    var(--scanner-overlay-fondo-inicio) 0%,
+    var(--scanner-overlay-fondo-fin) 100%
+  );
+}
+.scanner-web-fallback__texto {
+  max-width: 280px;
+  text-align: center;
+  color: var(--scanner-texto-principal);
+  background: var(--scanner-panel-bg);
+  border: 1px solid var(--scanner-panel-borde);
+  border-radius: 14px;
+  padding: 10px 14px;
+}
+.scanner-header,
+.scanner-fondo-oscuro,
+.scanner-fila-central {
+  position: relative;
+  z-index: 1;
+}
 .scanner-header {
   padding: calc(var(--safe-area-top) + 10px) 16px 10px;
-  background: linear-gradient(180deg, rgba(3, 11, 24, 0.82) 0%, rgba(3, 11, 24, 0.2) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--scanner-overlay-fondo-inicio) 0%,
+    rgba(241, 248, 255, 0.24) 100%
+  );
 }
 .scanner-header-contenido {
   display: flex;
@@ -226,14 +283,14 @@ onUnmounted(() => {
   gap: 12px;
 }
 .scanner-header-texto {
-  color: white;
+  color: var(--scanner-texto-principal);
 }
 .scanner-header-eyebrow {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  opacity: 0.72;
+  color: var(--scanner-texto-eyebrow);
 }
 .scanner-header-titulo {
   margin-top: 4px;
@@ -243,11 +300,12 @@ onUnmounted(() => {
   max-width: 230px;
 }
 .scanner-header-cerrar {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: var(--scanner-cerrar-bg);
+  border: 1px solid var(--scanner-cerrar-borde);
+  box-shadow: 0 6px 14px rgba(25, 118, 210, 0.14);
 }
 .scanner-fondo-oscuro {
-  background: rgba(4, 13, 27, 0.8);
+  background: var(--scanner-overlay-fondo-base);
   backdrop-filter: blur(3px);
 }
 .scanner-fondo-oscuro--arriba {
@@ -274,19 +332,20 @@ onUnmounted(() => {
   flex-shrink: 0;
   position: relative;
   background: transparent;
-  border-radius: 24px;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-    0 0 0 9999px rgba(0, 0, 0, 0);
+  border-radius: 20px;
+  overflow: visible;
+  box-shadow: none;
 }
-.scanner-ventana-resplandor {
+.scanner-ventana::before {
+  content: '';
   position: absolute;
-  inset: -8px;
-  border-radius: 30px;
-  border: 1px solid rgba(74, 180, 255, 0.28);
+  inset: 0;
+  border-radius: 20px;
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
   box-shadow:
-    0 0 24px rgba(56, 161, 255, 0.18),
-    inset 0 0 20px rgba(56, 161, 255, 0.06);
+    0 0 0 1px rgba(33, 150, 243, 0.18),
+    0 0 16px rgba(33, 150, 243, 0.2);
+  pointer-events: none;
 }
 .scanner-ventana-etiqueta {
   position: absolute;
@@ -295,9 +354,9 @@ onUnmounted(() => {
   transform: translateX(-50%);
   padding: 6px 12px;
   border-radius: 999px;
-  background: rgba(7, 22, 42, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.92);
+  background: var(--scanner-panel-bg);
+  border: 1px solid var(--scanner-panel-borde);
+  color: var(--scanner-texto-eyebrow);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -305,59 +364,69 @@ onUnmounted(() => {
   white-space: nowrap;
 }
 .scanner-instruccion {
-  color: #ffffff;
+  color: var(--scanner-texto-principal);
   font-size: 15px;
   font-weight: 600;
   text-align: center;
   margin: 0;
-  opacity: 0.96;
 }
 .scanner-panel-instruccion {
   width: min(100%, 360px);
   padding: 16px 18px;
   border-radius: 20px;
-  background: rgba(9, 22, 42, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  background: var(--scanner-panel-bg);
+  border: 1px solid var(--scanner-panel-borde);
+  box-shadow: var(--scanner-panel-sombra);
 }
 .scanner-ayuda {
   margin: 8px 0 0;
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--scanner-texto-secundario);
   font-size: 13px;
   line-height: 1.35;
   text-align: center;
 }
+.scanner-ayuda--preview-web {
+  margin-top: 6px;
+  font-size: 12px;
+}
 .scanner-corner {
   position: absolute;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-color: #ffffff;
   border-style: solid;
+  border-width: 4px;
   filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.18));
+  pointer-events: none;
+  z-index: 2;
 }
 .scanner-corner--tl {
-  top: 0;
-  left: 0;
-  border-width: 4px 0 0 4px;
-  border-top-left-radius: 20px;
+  top: 2px;
+  left: 2px;
+  border-right: 0;
+  border-bottom: 0;
+  border-top-left-radius: 16px;
 }
 .scanner-corner--tr {
-  top: 0;
-  right: 0;
-  border-width: 4px 4px 0 0;
-  border-top-right-radius: 20px;
+  top: 2px;
+  right: 2px;
+  border-left: 0;
+  border-bottom: 0;
+  border-top-right-radius: 16px;
 }
 .scanner-corner--bl {
-  bottom: 0;
-  left: 0;
-  border-width: 0 0 4px 4px;
-  border-bottom-left-radius: 20px;
+  bottom: 2px;
+  left: 2px;
+  border-top: 0;
+  border-right: 0;
+  border-bottom-left-radius: 16px;
 }
 .scanner-corner--br {
-  bottom: 0;
-  right: 0;
-  border-width: 0 4px 4px 0;
-  border-bottom-right-radius: 20px;
+  bottom: 2px;
+  right: 2px;
+  border-top: 0;
+  border-left: 0;
+  border-bottom-right-radius: 16px;
 }
 .scanner-linea {
   position: absolute;
@@ -365,9 +434,10 @@ onUnmounted(() => {
   right: 16px;
   height: 3px;
   border-radius: 999px;
-  background: linear-gradient(to right, transparent, #77d5ff, #ffffff, #77d5ff, transparent);
-  box-shadow: 0 0 18px rgba(119, 213, 255, 0.45);
+  background: linear-gradient(to right, transparent, #64b5f6, #ffffff, #64b5f6, transparent);
+  box-shadow: 0 0 18px rgba(33, 150, 243, 0.4);
   animation: mover-linea 1.8s ease-in-out infinite;
+  z-index: 1;
 }
 @keyframes mover-linea {
   0%,
@@ -377,8 +447,5 @@ onUnmounted(() => {
   50% {
     top: 88%;
   }
-}
-.scanner-dialogo-web {
-  min-width: 300px;
 }
 </style>

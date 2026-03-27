@@ -119,6 +119,23 @@
   /* Safe area (Android 15+ edge-to-edge) */
   --safe-area-top: env(safe-area-inset-top, 0px);
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* ===========================
+     VARIABLES SCANNER
+     =========================== */
+  --scanner-overlay-fondo-inicio: rgba(241, 248, 255, 0.72);
+  --scanner-overlay-fondo-fin: rgba(224, 239, 252, 0.74);
+  --scanner-overlay-fondo-base: rgba(209, 231, 249, 0.58);
+  --scanner-panel-bg: rgba(255, 255, 255, 0.9);
+  --scanner-panel-bg-secundario: rgba(248, 252, 255, 0.9);
+  --scanner-panel-borde: rgba(33, 150, 243, 0.24);
+  --scanner-panel-sombra: 0 12px 28px rgba(25, 118, 210, 0.2);
+  --scanner-texto-principal: var(--texto-primario);
+  --scanner-texto-secundario: rgba(33, 33, 33, 0.72);
+  --scanner-texto-eyebrow: rgba(25, 118, 210, 0.88);
+  --scanner-halo: rgba(33, 150, 243, 0.22);
+  --scanner-cerrar-bg: rgba(255, 255, 255, 0.74);
+  --scanner-cerrar-borde: rgba(33, 150, 243, 0.28);
   /* Animaciones */
   --transicion-carta: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --transicion-expansion: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
