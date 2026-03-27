@@ -18,10 +18,18 @@ Las tareas más difíciles siempre van arriba.
 
 - **App en varios idiomas:** Preparar la app para soportar múltiples idiomas. Antes de implementar cualquier cambio hay que hacer un plan dedicado para definir el alcance, la estrategia de traducciones y los puntos de la UI que se van a tocar.
 
-### Dificultad 3/10
+### Dificultad 4/10
 
-- **Modo oscuro:** Implementar un modo oscuro para toda la aplicación. Antes de tocar estilos o componentes hay que hacer un plan dedicado para definir tokens de color, alcance visual y estrategia de activación.
+- **Confirmación de eliminación embebida en botón de papelera (reutilizable):** Diseñar e implementar un patrón de confirmación dentro del propio botón de eliminar (sin depender siempre de diálogos externos), con comportamiento reutilizable para toda la app. Priorizar los botones con ícono de papelera y revisar impacto global para unificar la experiencia de eliminación en listas, tarjetas y acciones rápidas.
 
 ### Dificultad 4/10
 
 - **Estadísticas en Edición de Comercio — Revisión completa:** Las estadísticas que se muestran en `EditarComercioPage` necesitan una revisión general: sacar las que no aportan valor, editar las existentes para que sean más precisas o útiles, y agregar estadísticas nuevas. Actualmente se muestran: "Registrado" (fecha), "Último uso" (tiempo relativo), "Último precio" (tiempo relativo), "Productos" (cantidad) y "Sucursales" (cantidad). El usuario quiere definir cuáles quedan, cuáles se modifican y cuáles se agregan en una sesión de trabajo dedicada.
+
+### Dificultad 3/10
+
+- **Modo oscuro:** Implementar un modo oscuro para toda la aplicación. Antes de tocar estilos o componentes hay que hacer un plan dedicado para definir tokens de color, alcance visual y estrategia de activación.
+
+### Dificultad 2/10
+
+- **Aclarar colores de la sección de escáner:** Ajustar la paleta visual de la sección de escáner porque hoy se percibe muy oscura. Buscar una versión más clara y legible (fondos, overlays y contraste general) manteniendo consistencia con el estilo actual de la app.
