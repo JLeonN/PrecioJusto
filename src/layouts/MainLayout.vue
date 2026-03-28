@@ -148,7 +148,7 @@
 
         <q-separator />
 
-        <q-list padding>
+        <q-list padding class="drawer-lista-inferior">
           <q-item clickable v-ripple to="/configuracion">
             <q-item-section avatar>
               <IconSettings :size="24" />
@@ -279,6 +279,11 @@ useBotonAtras({ drawerAbierto, router, route })
 }
 .drawer-scroll {
   flex: 1 1 auto;
+  padding-bottom: 8px;
+}
+.drawer-lista-inferior {
+  padding-top: 8px;
+  padding-bottom: calc(12px + var(--safe-area-bottom)) !important;
 }
 .bandeja-drawer-item {
   background: color-mix(in srgb, var(--color-primario) 8%, transparent);
