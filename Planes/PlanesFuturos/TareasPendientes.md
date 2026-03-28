@@ -29,7 +29,3 @@ Las tareas más difíciles siempre van arriba.
 ### Dificultad 3/10
 
 - **Modo oscuro:** Implementar un modo oscuro para toda la aplicación. Antes de tocar estilos o componentes hay que hacer un plan dedicado para definir tokens de color, alcance visual y estrategia de activación.
-
-### Dificultad 2/10
-
-- **Aclarar colores de la sección de escáner:** Ajustar la paleta visual de la sección de escáner porque hoy se percibe muy oscura. Buscar una versión más clara y legible (fondos, overlays y contraste general) manteniendo consistencia con el estilo actual de la app.
