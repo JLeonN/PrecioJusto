@@ -253,55 +253,55 @@ significado de moneda predeterminada vs moneda de un precio puntual.
 
 ═══════════════════════════════════════════════════════════════════════
 
-## 🧪 FASE TESTING [PENDIENTE]
+## 🧪 FASE TESTING [VALIDADA PARCIALMENTE]
 
 ### T.A — Configuración manual
 
-[ ] Entrar a Configuración desde el drawer
-[ ] Verificar que el botón está siempre abajo del todo
-[ ] Desactivar modo automático
-[ ] Elegir una moneda manual
-[ ] Cerrar y reabrir la app
-[ ] Verificar persistencia correcta de la moneda manual
+[x] Entrar a Configuración desde el drawer
+[x] Verificar que el botón está siempre abajo del todo
+[x] Desactivar modo automático
+[x] Elegir una moneda manual
+[x] Cerrar y reabrir la app
+[x] Verificar persistencia correcta de la moneda manual
 
 ### T.B — Configuración automática
 
-[ ] Activar modo automático
-[ ] Verificar que se muestra país detectado si existe
-[ ] Verificar que se muestra moneda detectada si existe
-[ ] Si no se detecta país, verificar mensaje de fallback
-[ ] Verificar que en fallback se usa la última moneda manual guardada
+[x] Activar modo automático
+[x] Verificar que se muestra país detectado si existe
+[x] Verificar que se muestra moneda detectada si existe
+[x] Si no se detecta país, verificar mensaje de fallback
+[x] Verificar que en fallback se usa la última moneda manual guardada
 
 ### T.C — Formularios nuevos
 
-[ ] Abrir `DialogoAgregarProducto`
-[ ] Verificar que la moneda inicial coincide con `monedaDefaultEfectiva`
-[ ] Abrir `DialogoAgregarPrecio`
-[ ] Verificar que la moneda inicial coincide con `monedaDefaultEfectiva`
-[ ] Abrir flujo de escaneo rápido
-[ ] Verificar que la moneda inicial coincide con `monedaDefaultEfectiva`
+[x] Abrir `DialogoAgregarProducto`
+[x] Verificar que la moneda inicial coincide con `monedaDefaultEfectiva`
+[x] Abrir `DialogoAgregarPrecio`
+[x] Verificar que la moneda inicial coincide con `monedaDefaultEfectiva`
+[x] Abrir flujo de escaneo rápido
+[x] Verificar que la moneda inicial coincide con `monedaDefaultEfectiva` en el estado interno del flujo
 
 ### T.D — Moneda local de precio
 
-[ ] En un formulario nuevo, cambiar moneda solo para ese precio
-[ ] Guardar el precio y verificar que se persiste con esa moneda puntual
-[ ] Abrir un nuevo formulario
-[ ] Verificar que NO quedó como preferencia global accidental
+[x] En un formulario nuevo, cambiar moneda solo para ese precio
+[x] Guardar el precio y verificar que se persiste con esa moneda puntual
+[x] Abrir un nuevo formulario
+[x] Verificar que NO quedó como preferencia global accidental
 
 ### T.E — Regresiones
 
-[ ] Verificar que Mesa de trabajo sigue funcionando
-[ ] Verificar que `TarjetaProductoBorrador` no pisa Configuración
-[ ] Verificar que `TarjetaEscaneo` no pisa Configuración
-[ ] Verificar que formularios viejos con datos existentes no rompen
-[ ] Verificar compatibilidad con preferencias viejas migradas
+[x] Verificar que Mesa de trabajo sigue funcionando
+[x] Verificar que `TarjetaProductoBorrador` no pisa Configuración
+[x] Verificar que `TarjetaEscaneo` no pisa Configuración
+[x] Verificar que formularios viejos con datos existentes no rompen
+[x] Verificar compatibilidad con preferencias viejas migradas
 
 ### T.F — Navegación
 
-[ ] Verificar ida y vuelta desde drawer
+[x] Verificar ida y vuelta desde drawer
 [ ] Verificar botón back nativo en Android
-[ ] Verificar comportamiento visual en móvil
-[ ] Verificar que el drawer sigue ordenado correctamente con y sin items en Mesa
+[x] Verificar comportamiento visual en móvil
+[x] Verificar que el drawer sigue ordenado correctamente con y sin items en Mesa
 
 ═══════════════════════════════════════════════════════════════════════
 
@@ -326,4 +326,4 @@ significado de moneda predeterminada vs moneda de un precio puntual.
 - [ ] Fase 6: Ajustes de UX y documentación interna
 - [ ] Fase Testing
 
-**ESTADO:** 🚧 Implementación base realizada; falta validación manual de testing y regresiones
+**ESTADO:** 🚧 Implementación base validada; queda pendiente solo la verificación del botón back nativo en Android

@@ -1,6 +1,6 @@
 
 > precio-justo@1.1.3 dev
-> quasar dev --host 127.0.0.1 --port 9000
+> quasar dev --port 9001
 
 
  .d88888b.
@@ -59,7 +59,7 @@ Quasar Build Context: {
 }
  App •  TIP  • 🚀  You are using the --port parameter. It is recommended to use a different devServer port for each Quasar mode to avoid browser cache issues
 
- » Reported at............ 28/3/2026 8:12:58 a.m.
+ » Reported at............ 28/3/2026 5:42:11 p.m.
  » App dir................ C:\Z-Programacion\Quasar\PrecioJusto
  » App URL................ http://192.168.1.10:9001/
                            http://localhost:9001/
