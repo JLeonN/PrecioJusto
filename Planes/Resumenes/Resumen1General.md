@@ -1,4 +1,4 @@
-# RESUMEN GENERAL - PRECIO JUSTO
+﻿# RESUMEN GENERAL - PRECIO JUSTO
 
 ## PROPÓSITO
 Este documento proporciona una visión general completa de Precio Justo, incluyendo su arquitectura, tecnologías, estructura de archivos y funcionalidades principales. Está diseñado para que desarrolladores y asistentes de IA comprendan rápidamente el proyecto.
@@ -1039,6 +1039,7 @@ H. Arquitectura y Código
   - Resumen6OpenFoodFacts.md — APIs de búsqueda de productos
   - Resumen7LocalStorage.md — Sistema de almacenamiento (adaptadores, stores)
   - Resumen8Scanner.md — Sistema de escaneo completo (Ráfaga, Escaneo rápido, Mesa de trabajo)
+  - Resumen9Configuracion.md — Configuración global y crecimiento futuro de preferencias
 
 ### Principios del Proyecto
 1. **Nomenclatura en Español:** Todo el código usa español descriptivo
@@ -1073,7 +1074,7 @@ H. Arquitectura y Código
 - Señal "app lista" vía `nextTick()` en `App.vue`
 
 ### Estado Actual
-- **Versión:** 1.1.2
+- **Versión:** 1.1.4
 - **Almacenamiento:** Local (Capacitor Storage)
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
@@ -1090,8 +1091,10 @@ H. Arquitectura y Código
 - **Fotos de productos y comercios:** Completada (useCamaraFoto, q-menu contextual, 5 componentes)
 - **Pie de atribución:** Completado (PieAtribucion.vue en DetalleProductoPage + EditarComercioPage; campo fotoFuente en productos)
 - **Preparación:** Lista para migración a Firebase
+- **Configuración global:** Completada (moneda predeterminada manual/automática; ver Resumen9Configuracion.md)
 - **Publicidad AdMob:** En curso (ver PlanPublicidadAdMob.md — pendiente IDs de producción)
 - **Ver detalles del sistema de escaneo:** Resumen8Scanner.md
+- **Ver detalles de configuración:** Resumen9Configuracion.md
 
 ---
 
@@ -1114,4 +1117,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 26 de Marzo 2026 — Header global actualizado en `MainLayout.vue` (accesos rápidos, estado activo por ruta, Mesa condicional y eliminación de contador duplicado en botón de Mesa). También se ajustó la tarjeta de Mesa de trabajo para edición rápida con marca, foto y acciones reubicadas.
+**Última actualización:** 28 de Marzo de 2026 — Se agregó la sección de Configuración con resumen propio y se actualizó la versión del proyecto a 1.1.4.
