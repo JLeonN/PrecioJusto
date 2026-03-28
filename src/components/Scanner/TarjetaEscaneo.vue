@@ -278,7 +278,7 @@ const datosForm = ref({
   unidad: 'unidad',
   imagen: null,
   precio: null,
-  moneda: preferenciasStore.moneda,
+  moneda: preferenciasStore.monedaDefaultEfectiva,
 })
 
 const abierto = computed({
@@ -334,7 +334,7 @@ watch(
       unidad: nuevoItem.unidad || 'unidad',
       imagen: nuevoItem.imagen || null,
       precio: nuevoItem.precio || null,
-      moneda: nuevoItem.moneda || preferenciasStore.moneda,
+      moneda: nuevoItem.moneda || preferenciasStore.monedaDefaultEfectiva,
     }
     precioTexto.value = formatearPrecioAlSalir(nuevoItem.precio ? String(nuevoItem.precio) : '')
     editando.value = false
@@ -354,7 +354,7 @@ function alCerrar() {
     unidad: 'unidad',
     imagen: null,
     precio: null,
-    moneda: preferenciasStore.moneda,
+    moneda: preferenciasStore.monedaDefaultEfectiva,
   }
   precioTexto.value = ''
   editando.value = false
@@ -362,7 +362,6 @@ function alCerrar() {
 
 function alCambiarMoneda(val) {
   datosForm.value.moneda = val
-  preferenciasStore.guardarMoneda(val)
 }
 
 function alCambiarPrecio(val) {

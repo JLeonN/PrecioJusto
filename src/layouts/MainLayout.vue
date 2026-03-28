@@ -76,8 +76,9 @@
       behavior="mobile"
       class="bg-grey-1"
     >
-      <q-scroll-area class="fit">
-        <q-list padding class="drawer-lista">
+      <div class="fit drawer-contenedor">
+        <q-scroll-area class="drawer-scroll">
+          <q-list padding class="drawer-lista">
           <!-- Header del drawer -->
           <q-item class="q-mb-md">
             <q-item-section avatar>
@@ -132,19 +133,32 @@
               </q-chip>
             </q-item-section>
           </q-item>
-          <!--
-          <q-item clickable v-ripple to="/gracias">
+            <!--
+            <q-item clickable v-ripple to="/gracias">
+              <q-item-section avatar>
+                <IconHeart :size="24" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>Gracias</q-item-label>
+              </q-item-section>
+            </q-item>
+            -->
+          </q-list>
+        </q-scroll-area>
+
+        <q-separator />
+
+        <q-list padding>
+          <q-item clickable v-ripple to="/configuracion">
             <q-item-section avatar>
-              <IconHeart :size="24" />
+              <IconSettings :size="24" />
             </q-item-section>
             <q-item-section>
-              <q-item-label>Gracias</q-item-label>
+              <q-item-label class="text-weight-medium">Configuración</q-item-label>
             </q-item-section>
           </q-item>
-          -->
-
         </q-list>
-      </q-scroll-area>
+      </div>
     </q-drawer>
 
     <!-- CONTENIDO PRINCIPAL -->
@@ -157,7 +171,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { IconHome, IconMapPin, IconBriefcase } from '@tabler/icons-vue'
+import { IconHome, IconMapPin, IconBriefcase, IconSettings } from '@tabler/icons-vue'
 import { useBotonAtras } from '../composables/useBotonAtras.js'
 import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
@@ -258,6 +272,13 @@ useBotonAtras({ drawerAbierto, router, route })
 }
 .drawer-lista {
   padding-top: calc(8px + var(--safe-area-top)) !important;
+}
+.drawer-contenedor {
+  display: flex;
+  flex-direction: column;
+}
+.drawer-scroll {
+  flex: 1 1 auto;
 }
 .bandeja-drawer-item {
   background: color-mix(in srgb, var(--color-primario) 8%, transparent);

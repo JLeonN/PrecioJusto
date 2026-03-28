@@ -204,7 +204,7 @@ const dialogoAbierto = computed({
 const inputPrecioRef = ref(null)
 // String para preservar ceros finales (ej: "3.30"); el valor numérico se parsea al guardar
 const precioTexto = ref('')
-const monedaSeleccionada = ref(preferenciasStore.moneda)
+const monedaSeleccionada = ref(preferenciasStore.monedaDefaultEfectiva)
 const comercioSeleccionado = ref(null) // objeto agrupado completo
 const direccionSeleccionada = ref(null) // { label, value, direccion }
 const textoComercioEscrito = ref('')
@@ -217,7 +217,6 @@ const opcionesMoneda = MONEDAS
 
 function alCambiarMoneda(val) {
   monedaSeleccionada.value = val
-  preferenciasStore.guardarMoneda(val)
 }
 
 /* Producto actual */
@@ -499,7 +498,7 @@ async function guardarPrecio() {
 function cerrar() {
   dialogoAbierto.value = false
   precioTexto.value = ''
-  monedaSeleccionada.value = preferenciasStore.moneda
+  monedaSeleccionada.value = preferenciasStore.monedaDefaultEfectiva
   comercioSeleccionado.value = null
   direccionSeleccionada.value = null
   textoComercioEscrito.value = ''

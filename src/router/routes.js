@@ -18,6 +18,9 @@ const routes = [
       // Mesa de trabajo (solo accesible con ítems pendientes)
       { path: 'mesa-trabajo', component: () => import('pages/MesaTrabajoPage.vue') },
 
+      // Página de configuración global
+      { path: 'configuracion', component: () => import('pages/ConfiguracionPage.vue') },
+
       // Página de agradecimiento
       { path: 'gracias', component: () => import('pages/GraciasPage.vue') },
     ],

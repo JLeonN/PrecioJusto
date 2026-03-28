@@ -191,7 +191,7 @@ const datosInternos = ref({
   comercio: props.modelValue.comercio || '',
   direccion: props.modelValue.direccion || '',
   valor: props.modelValue.valor || null,
-  moneda: props.modelValue.moneda || preferenciasStore.moneda,
+  moneda: props.modelValue.moneda || preferenciasStore.monedaDefaultEfectiva,
 })
 
 // Estado del selector de comercios
@@ -490,9 +490,8 @@ function alCrearComercio(comercioCreado) {
   emitirCambios()
 }
 
-// Al cambiar moneda, guardarla
-async function alCambiarMoneda() {
-  await preferenciasStore.guardarMoneda(datosInternos.value.moneda)
+// Al cambiar moneda local del registro actual.
+function alCambiarMoneda() {
   emitirCambios()
 }
 
@@ -504,7 +503,7 @@ watch(
       comercio: nuevoValor.comercio || '',
       direccion: nuevoValor.direccion || '',
       valor: nuevoValor.valor || null,
-      moneda: nuevoValor.moneda || preferenciasStore.moneda,
+      moneda: nuevoValor.moneda || preferenciasStore.monedaDefaultEfectiva,
     }
     valorPrecioTexto.value = formatearPrecioAlSalir(nuevoValor.valor != null ? String(nuevoValor.valor) : '')
   },

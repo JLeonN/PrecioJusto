@@ -75,32 +75,32 @@ cambio local como si fuera una preferencia global.
 
 ### PreferenciasService.js
 
-[ ] Revisar la estructura actual de `preferencias_usuario`
-[ ] Agregar soporte para `modoMoneda`
-[ ] Agregar soporte para `monedaManual`
-[ ] Agregar soporte para `paisDetectado`
-[ ] Agregar soporte para `monedaDetectada`
-[ ] Mantener compatibilidad con datos viejos que solo tengan `moneda`
-[ ] Definir fallback seguro si faltan campos
-[ ] Persistir la nueva estructura sin romper la app existente
+[x] Revisar la estructura actual de `preferencias_usuario`
+[x] Agregar soporte para `modoMoneda`
+[x] Agregar soporte para `monedaManual`
+[x] Agregar soporte para `paisDetectado`
+[x] Agregar soporte para `monedaDetectada`
+[x] Mantener compatibilidad con datos viejos que solo tengan `moneda`
+[x] Definir fallback seguro si faltan campos
+[x] Persistir la nueva estructura sin romper la app existente
 
 ### preferenciasStore.js
 
-[ ] Reemplazar el modelo actual basado solo en `moneda`
-[ ] Exponer estado reactivo de `modoMoneda`
-[ ] Exponer estado reactivo de `monedaManual`
-[ ] Exponer estado reactivo de `paisDetectado`
-[ ] Exponer estado reactivo de `monedaDetectada`
-[ ] Implementar `monedaDefaultEfectiva`
-[ ] Crear acciones separadas para guardar modo manual/automático
-[ ] Crear acción específica para guardar la moneda manual
-[ ] Evitar que los formularios sigan cambiando la preferencia global
+[x] Reemplazar el modelo actual basado solo en `moneda`
+[x] Exponer estado reactivo de `modoMoneda`
+[x] Exponer estado reactivo de `monedaManual`
+[x] Exponer estado reactivo de `paisDetectado`
+[x] Exponer estado reactivo de `monedaDetectada`
+[x] Implementar `monedaDefaultEfectiva`
+[x] Crear acciones separadas para guardar modo manual/automático
+[x] Crear acción específica para guardar la moneda manual
+[x] Evitar que los formularios sigan cambiando la preferencia global
 
 ### Compatibilidad
 
-[ ] Si existe preferencia vieja `moneda`, migrarla razonablemente a `monedaManual`
-[ ] Si no existe nada guardado, arrancar con un estado por defecto coherente
-[ ] Mantener la inicialización única desde `MainLayout.vue`
+[x] Si existe preferencia vieja `moneda`, migrarla razonablemente a `monedaManual`
+[x] Si no existe nada guardado, arrancar con un estado por defecto coherente
+[x] Mantener la inicialización única desde `MainLayout.vue`
 
 ═══════════════════════════════════════════════════════════════════════
 
@@ -113,26 +113,26 @@ de ubicación en esta primera versión.
 
 ### Estrategia técnica
 
-[ ] Crear utilidad o servicio para detectar región del dispositivo
-[ ] Priorizar APIs disponibles sin permisos invasivos
-[ ] Evaluar `Intl.Locale`, `navigator.language`, `navigator.languages` o equivalente
-[ ] Extraer código de país si la región viene informada
-[ ] Mapear país → moneda predeterminada
-[ ] Definir fallback si no hay región válida
+[x] Crear utilidad o servicio para detectar región del dispositivo
+[x] Priorizar APIs disponibles sin permisos invasivos
+[x] Evaluar `Intl.Locale`, `navigator.language`, `navigator.languages` o equivalente
+[x] Extraer código de país si la región viene informada
+[x] Mapear país → moneda predeterminada
+[x] Definir fallback si no hay región válida
 
 ### Reglas de resolución
 
-[ ] Si `modoMoneda = manual` → usar `monedaManual`
-[ ] Si `modoMoneda = automatica` y hay país válido → usar `monedaDetectada`
-[ ] Si `modoMoneda = automatica` y falla la detección → usar `monedaManual`
-[ ] Si también falta `monedaManual`, usar fallback técnico final seguro
+[x] Si `modoMoneda = manual` → usar `monedaManual`
+[x] Si `modoMoneda = automatica` y hay país válido → usar `monedaDetectada`
+[x] Si `modoMoneda = automatica` y falla la detección → usar `monedaManual`
+[x] Si también falta `monedaManual`, usar fallback técnico final seguro
 
 ### Casos delicados
 
-[ ] Idioma sin región (`es`, `en`) no debe tomarse como país válido
-[ ] Región desconocida no debe romper la app
-[ ] El resultado detectado debe guardarse solo como dato de contexto, no como decisión manual
-[ ] La app no debe pedir permisos de ubicación para esta fase
+[x] Idioma sin región (`es`, `en`) no debe tomarse como país válido
+[x] Región desconocida no debe romper la app
+[x] El resultado detectado debe guardarse solo como dato de contexto, no como decisión manual
+[x] La app no debe pedir permisos de ubicación para esta fase
 
 ═══════════════════════════════════════════════════════════════════════
 
@@ -145,30 +145,30 @@ estructura visual preparada para sumar nuevas secciones a futuro.
 
 ### Archivo nuevo
 
-[ ] Crear `src/pages/ConfiguracionPage.vue`
+[x] Crear `src/pages/ConfiguracionPage.vue`
 
 ### Estructura base
 
-[ ] Header/título claro de la sección
-[ ] Contenedor principal con diseño consistente con el resto de la app
-[ ] Organización por bloques o tarjetas de configuración
-[ ] Espacio preparado para futuras opciones
+[x] Header/título claro de la sección
+[x] Contenedor principal con diseño consistente con el resto de la app
+[x] Organización por bloques o tarjetas de configuración
+[x] Espacio preparado para futuras opciones
 
 ### Sección Moneda
 
-[ ] Mostrar bloque `Moneda predeterminada`
-[ ] Agregar switch o selector para `Usar moneda automática según país`
-[ ] Si automático está activo, mostrar país detectado
-[ ] Si automático está activo, mostrar moneda resultante
-[ ] Si automático falla, mostrar mensaje de fallback a moneda manual
-[ ] Si manual está activo, mostrar selector de monedas
-[ ] Guardar cambios directamente en preferencias globales
+[x] Mostrar bloque `Moneda predeterminada`
+[x] Agregar switch o selector para `Usar moneda automática según país`
+[x] Si automático está activo, mostrar país detectado
+[x] Si automático está activo, mostrar moneda resultante
+[x] Si automático falla, mostrar mensaje de fallback a moneda manual
+[x] Si manual está activo, mostrar selector de monedas
+[x] Guardar cambios directamente en preferencias globales
 
 ### Textos explicativos
 
-[ ] Aclarar que esta configuración define la moneda inicial de formularios nuevos
-[ ] Aclarar que cambiar la moneda de un precio puntual no cambia la preferencia general
-[ ] Aclarar que la detección automática depende de la región detectada del dispositivo
+[x] Aclarar que esta configuración define la moneda inicial de formularios nuevos
+[x] Aclarar que cambiar la moneda de un precio puntual no cambia la preferencia general
+[x] Aclarar que la detección automática depende de la región detectada del dispositivo
 
 ═══════════════════════════════════════════════════════════════════════
 
@@ -181,17 +181,17 @@ siempre abajo del todo, independientemente del resto de opciones.
 
 ### MainLayout.vue
 
-[ ] Agregar ítem `Configuración` en el drawer
-[ ] Usar ícono consistente con el resto del sistema
-[ ] Ubicarlo siempre abajo del todo
-[ ] Mantener separado visualmente del bloque principal de navegación
+[x] Agregar ítem `Configuración` en el drawer
+[x] Usar ícono consistente con el resto del sistema
+[x] Ubicarlo siempre abajo del todo
+[x] Mantener separado visualmente del bloque principal de navegación
 [ ] Verificar comportamiento con scroll del drawer
 [ ] Verificar que Mesa de trabajo siga funcionando sin desplazar Configuración
 
 ### Router
 
-[ ] Crear ruta nueva para Configuración
-[ ] Integrarla bajo `MainLayout.vue`
+[x] Crear ruta nueva para Configuración
+[x] Integrarla bajo `MainLayout.vue`
 [ ] Verificar navegación desde drawer
 [ ] Verificar botón back nativo en Android
 
@@ -206,20 +206,20 @@ termina guardándose como si fuera preferencia global.
 
 ### Revisión de componentes y flujos
 
-[ ] Revisar `FormularioPrecio.vue`
-[ ] Revisar `DialogoAgregarPrecio.vue`
-[ ] Revisar `DialogoAgregarProducto.vue`
-[ ] Revisar `TarjetaEscaneo.vue`
-[ ] Revisar `TarjetaProductoBorrador.vue`
-[ ] Revisar cualquier otro flujo donde hoy se invoque `guardarMoneda()`
+[x] Revisar `FormularioPrecio.vue`
+[x] Revisar `DialogoAgregarPrecio.vue`
+[x] Revisar `DialogoAgregarProducto.vue`
+[x] Revisar `TarjetaEscaneo.vue`
+[x] Revisar `TarjetaProductoBorrador.vue`
+[x] Revisar cualquier otro flujo donde hoy se invoque `guardarMoneda()`
 
 ### Cambios esperados
 
-[ ] Inicializar formularios nuevos con `monedaDefaultEfectiva`
-[ ] Permitir cambiar la moneda local del precio sin tocar Configuración
-[ ] Guardar en el precio la moneda realmente elegida para ese registro
-[ ] Evitar side effects globales al editar moneda en formularios
-[ ] Mantener consistencia entre alta manual, escaneo rápido, mesa y edición
+[x] Inicializar formularios nuevos con `monedaDefaultEfectiva`
+[x] Permitir cambiar la moneda local del precio sin tocar Configuración
+[x] Guardar en el precio la moneda realmente elegida para ese registro
+[x] Evitar side effects globales al editar moneda en formularios
+[x] Mantener consistencia entre alta manual, escaneo rápido, mesa y edición
 
 ### Criterios funcionales
 
@@ -316,7 +316,7 @@ significado de moneda predeterminada vs moneda de un precio puntual.
 
 ═══════════════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 0% — PLAN DEFINIDO
+## 📊 PROGRESO GENERAL: 75% — IMPLEMENTACIÓN BASE COMPLETADA
 
 - [ ] Fase 1: Modelo de preferencias y persistencia
 - [ ] Fase 2: Detección automática de país y moneda
@@ -326,4 +326,4 @@ significado de moneda predeterminada vs moneda de un precio puntual.
 - [ ] Fase 6: Ajustes de UX y documentación interna
 - [ ] Fase Testing
 
-**ESTADO:** ⏳ Pendiente de implementación
+**ESTADO:** 🚧 Implementación base realizada; falta validación manual de testing y regresiones

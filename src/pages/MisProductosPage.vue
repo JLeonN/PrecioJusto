@@ -275,7 +275,7 @@ function construirItem(codigo, existente, productoApi, resultadoApi) {
     unidad: productoApi?.unidad || existente?.unidad || 'unidad',
     imagen: productoApi?.imagen || existente?.imagen || null,
     precio: null,
-    moneda: preferenciasStore.moneda,
+    moneda: preferenciasStore.monedaDefaultEfectiva,
     origenApi: !!productoApi,
     fuenteDato: resultadoApi?.fuenteDato || null,
     sinCoincidencia,
