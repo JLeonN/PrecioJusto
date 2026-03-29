@@ -2,18 +2,6 @@
   <!-- Overlay de escaneo (nativo + preview web) -->
   <Teleport to="body">
     <div v-if="activo" class="scanner-overlay">
-      <video
-        v-if="!esNativo && previewWebActiva"
-        ref="videoPreviewRef"
-        class="scanner-web-preview"
-        autoplay
-        playsinline
-        muted
-      />
-      <div v-else-if="!esNativo" class="scanner-web-fallback">
-        <div class="scanner-web-fallback__texto">{{ mensajePreviewWeb }}</div>
-      </div>
-
       <div class="scanner-header">
         <div class="scanner-header-contenido">
           <div class="scanner-header-texto">
@@ -47,9 +35,6 @@
           <p class="scanner-ayuda">
             Mantené el celular firme durante un segundo para una lectura más rápida.
           </p>
-          <p v-if="!esNativo" class="scanner-ayuda scanner-ayuda--preview-web">
-            Vista previa web (sin escaneo automático).
-          </p>
         </div>
       </div>
     </div>
@@ -57,7 +42,7 @@
 </template>
 
 <script setup>
-import { nextTick, onUnmounted, ref, watch } from 'vue'
+import { onUnmounted, watch } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { BarcodeScanner, BarcodeFormat } from '@capacitor-mlkit/barcode-scanning'
 import { useQuasar } from 'quasar'
@@ -72,14 +57,10 @@ const props = defineProps({
 // Set de códigos en cooldown (solo modo continuo).
 const codigosEnCooldown = new Set()
 
-const emit = defineEmits(['codigo-detectado', 'cerrar'])
+const emit = defineEmits(['codigo-detectado', 'cerrar', 'no-disponible'])
 
 const $q = useQuasar()
 const esNativo = Capacitor.isNativePlatform()
-const videoPreviewRef = ref(null)
-const previewWebActiva = ref(false)
-const mensajePreviewWeb = ref('Solicitando acceso a la cámara del navegador...')
-let streamPreviewWeb = null
 
 // Formatos de código de barras a detectar (los más comunes en supermercados).
 const FORMATOS_SOPORTADOS = [
@@ -92,7 +73,7 @@ const FORMATOS_SOPORTADOS = [
 
 async function iniciarScaneo() {
   if (!esNativo) {
-    await iniciarPreviewWeb()
+    emit('no-disponible')
     return
   }
 
@@ -134,42 +115,6 @@ async function detenerScaneo() {
     }
     return
   }
-
-  detenerPreviewWeb()
-}
-
-async function iniciarPreviewWeb() {
-  if (!navigator.mediaDevices?.getUserMedia) {
-    previewWebActiva.value = false
-    mensajePreviewWeb.value = 'Tu navegador no soporta vista previa de cámara.'
-    return
-  }
-
-  try {
-    streamPreviewWeb = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: 'environment' } },
-      audio: false,
-    })
-    previewWebActiva.value = true
-    mensajePreviewWeb.value = ''
-    await nextTick()
-    if (videoPreviewRef.value) {
-      videoPreviewRef.value.srcObject = streamPreviewWeb
-      await videoPreviewRef.value.play()
-    }
-  } catch {
-    previewWebActiva.value = false
-    mensajePreviewWeb.value = 'No se pudo abrir la cámara del navegador.'
-  }
-}
-
-function detenerPreviewWeb() {
-  if (streamPreviewWeb) {
-    streamPreviewWeb.getTracks().forEach((track) => track.stop())
-    streamPreviewWeb = null
-  }
-  previewWebActiva.value = false
-  mensajePreviewWeb.value = 'Solicitando acceso a la cámara del navegador...'
 }
 
 async function verificarPermiso() {
@@ -232,35 +177,6 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   background: transparent;
-}
-.scanner-web-preview,
-.scanner-web-fallback {
-  position: absolute;
-  inset: 0;
-}
-.scanner-web-preview {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  background: #000;
-}
-.scanner-web-fallback {
-  display: grid;
-  place-items: center;
-  background: linear-gradient(
-    180deg,
-    var(--scanner-overlay-fondo-inicio) 0%,
-    var(--scanner-overlay-fondo-fin) 100%
-  );
-}
-.scanner-web-fallback__texto {
-  max-width: 280px;
-  text-align: center;
-  color: var(--scanner-texto-principal);
-  background: var(--scanner-panel-bg);
-  border: 1px solid var(--scanner-panel-borde);
-  border-radius: 14px;
-  padding: 10px 14px;
 }
 .scanner-header,
 .scanner-fondo-oscuro,
@@ -384,10 +300,6 @@ onUnmounted(() => {
   font-size: 13px;
   line-height: 1.35;
   text-align: center;
-}
-.scanner-ayuda--preview-web {
-  margin-top: 6px;
-  font-size: 12px;
 }
 .scanner-corner {
   position: absolute;

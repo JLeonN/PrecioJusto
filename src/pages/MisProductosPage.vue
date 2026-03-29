@@ -93,6 +93,7 @@
       :continuo="modoEscaneo === 'rafaga'"
       @codigo-detectado="procesarCodigoEscaneado"
       @cerrar="alCerrarScanner"
+      @no-disponible="alEscanerNoDisponible"
     />
 
     <!-- TARJETA POST-ESCANEO (solo modo A: escaneo rápido) -->
@@ -111,10 +112,45 @@
       @precio-guardado="alGuardarPrecio"
     />
 
+    <q-dialog v-model="dialogoCodigoManualAbierto" @hide="alCerrarDialogoCodigoManual">
+      <q-card class="dialogo-codigo-manual">
+        <q-card-section>
+          <div class="text-h6">{{ tituloDialogoCodigoManual }}</div>
+          <div class="text-body2 text-grey-7 q-mt-xs">
+            Escribí o pegá el código de barras para continuar sin cámara.
+          </div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <q-input
+            ref="inputCodigoManualRef"
+            v-model="codigoManual"
+            label="Código de barras"
+            outlined
+            dense
+            autofocus
+            @keyup.enter="confirmarCodigoManual"
+          />
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Cancelar" color="grey-7" @click="cancelarCodigoManual" />
+          <q-btn
+            unelevated
+            label="Continuar"
+            color="primary"
+            :disable="!codigoManual.trim()"
+            :loading="procesandoCodigoManual"
+            @click="confirmarCodigoManual"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
     <!-- Overlay: consulta a APIs durante escaneo -->
     <Teleport to="body">
       <div
-        v-if="escaneoConsultandoApi && scannerActivo"
+        v-if="mostrarOverlayEscaneoApi"
         class="escaneo-api-overlay"
         aria-live="polite"
         aria-busy="true"
@@ -229,6 +265,11 @@ const scannerActivo = ref(false)
 const modoEscaneo = ref(null) // 'rapido' | 'rafaga' | null
 const tarjetaEscaneoAbierta = ref(false)
 const itemActual = ref(null)
+const dialogoCodigoManualAbierto = ref(false)
+const codigoManual = ref('')
+const procesandoCodigoManual = ref(false)
+const usandoIngresoManual = ref(false)
+const inputCodigoManualRef = ref(null)
 
 // Tarjetita de aviso sobre la cámara (duplicado + éxito en Ráfaga)
 const avisoEscaneo = reactive({
@@ -242,6 +283,13 @@ const avisoEscaneo = reactive({
 const codigosProcesando = new Set()
 // Overlay mientras se consultan APIs (código no estaba en local)
 const escaneoConsultandoApi = ref(false)
+
+const tituloDialogoCodigoManual = computed(() =>
+  modoEscaneo.value === 'rafaga' ? 'Ráfaga manual' : 'Escaneo rápido manual',
+)
+const mostrarOverlayEscaneoApi = computed(
+  () => escaneoConsultandoApi.value && (scannerActivo.value || usandoIngresoManual.value),
+)
 
 function mostrarAvisoEscaneo(tipo, { nombre, codigo, imagen }) {
   Object.assign(avisoEscaneo, {
@@ -323,9 +371,13 @@ async function procesarCodigoEscaneado(codigo) {
     })
     if (!esRafaga) {
       // En Ráfaga la cámara es continua; no hay que reiniciarla.
-      scannerActivo.value = false
-      await nextTick()
-      scannerActivo.value = true
+      if (usandoIngresoManual.value) {
+        abrirDialogoCodigoManual()
+      } else {
+        scannerActivo.value = false
+        await nextTick()
+        scannerActivo.value = true
+      }
     }
     return
   }
@@ -355,6 +407,10 @@ function alSiguiente(itemActualizado) {
   sesionEscaneoStore.agregarItem(itemActualizado)
   tarjetaEscaneoAbierta.value = false
   itemActual.value = null
+  if (usandoIngresoManual.value) {
+    abrirDialogoCodigoManual()
+    return
+  }
   scannerActivo.value = true
 }
 
@@ -364,6 +420,7 @@ function alIrAMesa(itemActualizado) {
   tarjetaEscaneoAbierta.value = false
   itemActual.value = null
   scannerActivo.value = false
+  usandoIngresoManual.value = false
   modoEscaneo.value = null
 }
 
@@ -371,13 +428,19 @@ function alIrAMesa(itemActualizado) {
 function alDescartarItem() {
   tarjetaEscaneoAbierta.value = false
   itemActual.value = null
-  if (modoEscaneo.value === 'rapido') scannerActivo.value = true
+  if (modoEscaneo.value !== 'rapido') return
+  if (usandoIngresoManual.value) {
+    abrirDialogoCodigoManual()
+    return
+  }
+  scannerActivo.value = true
 }
 
 // El usuario cerró el escáner manualmente.
 function alCerrarScanner() {
   scannerActivo.value = false
   itemActual.value = null
+  usandoIngresoManual.value = false
   modoEscaneo.value = null
 }
 
@@ -437,6 +500,55 @@ async function cargarProductos() {
 
 function abrirDialogoAgregar() {
   dialogoAgregarAbierto.value = true
+}
+
+function alEscanerNoDisponible() {
+  scannerActivo.value = false
+  itemActual.value = null
+  usandoIngresoManual.value = true
+  abrirDialogoCodigoManual()
+}
+
+function abrirDialogoCodigoManual() {
+  codigoManual.value = ''
+  dialogoCodigoManualAbierto.value = true
+  nextTick(() => {
+    inputCodigoManualRef.value?.focus?.()
+  })
+}
+
+function alCerrarDialogoCodigoManual() {
+  codigoManual.value = ''
+  procesandoCodigoManual.value = false
+}
+
+function cancelarCodigoManual() {
+  dialogoCodigoManualAbierto.value = false
+  usandoIngresoManual.value = false
+  modoEscaneo.value = null
+}
+
+async function confirmarCodigoManual() {
+  const codigo = codigoManual.value.trim()
+  if (!codigo || procesandoCodigoManual.value) return
+
+  procesandoCodigoManual.value = true
+
+  try {
+    if (modoEscaneo.value === 'rafaga') {
+      codigoManual.value = ''
+      await procesarCodigoEscaneado(codigo)
+      nextTick(() => {
+        inputCodigoManualRef.value?.focus?.()
+      })
+      return
+    }
+
+    dialogoCodigoManualAbierto.value = false
+    await procesarCodigoEscaneado(codigo)
+  } finally {
+    procesandoCodigoManual.value = false
+  }
 }
 
 // Acciones del FAB expandible (3 opciones)
@@ -554,6 +666,10 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.dialogo-codigo-manual {
+  width: min(92vw, 420px);
+  border-radius: 18px;
+}
 .escaneo-api-overlay {
   position: fixed;
   inset: 0;

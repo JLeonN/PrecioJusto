@@ -75,6 +75,7 @@
     :activo="escanerUnitarioActivo"
     @codigo-detectado="alDetectarCodigo"
     @cerrar="escanerUnitarioActivo = false"
+    @no-disponible="alEscanerNoDisponible"
   />
 </template>
 
@@ -549,6 +550,16 @@ function cerrarDialogo() {
 // Activa el escáner unitario (solo llena el campo de código de barras)
 function alEscanearCodigo() {
   escanerUnitarioActivo.value = true
+}
+
+function alEscanerNoDisponible() {
+  escanerUnitarioActivo.value = false
+  $q.notify({
+    type: 'info',
+    message: 'En web escribí el código de barras manualmente.',
+    position: 'top',
+    timeout: 2500,
+  })
 }
 
 // Al detectar un código: llena el campo y dispara búsqueda API automáticamente.
