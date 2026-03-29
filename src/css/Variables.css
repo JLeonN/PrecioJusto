@@ -130,6 +130,12 @@
   --scanner-panel-bg-secundario: rgba(248, 252, 255, 0.9);
   --scanner-panel-borde: rgba(33, 150, 243, 0.24);
   --scanner-panel-sombra: 0 12px 28px rgba(25, 118, 210, 0.2);
+  --boton-eliminar-fondo: rgba(255, 255, 255, 0.92);
+  --boton-eliminar-borde: rgba(244, 67, 54, 0.35);
+  --boton-eliminar-fondo-hover: var(--fondo-tarjeta);
+  --boton-eliminar-borde-hover: rgba(244, 67, 54, 0.55);
+  --boton-eliminar-texto: var(--color-error);
+  --boton-eliminar-fondo-confirmar: rgba(244, 67, 54, 0.12);
   --scanner-texto-principal: var(--texto-primario);
   --scanner-texto-secundario: rgba(33, 33, 33, 0.72);
   --scanner-texto-eyebrow: rgba(25, 118, 210, 0.88);

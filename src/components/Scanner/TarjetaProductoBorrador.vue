@@ -17,20 +17,8 @@
     "
   >
     <template #header-right>
-      <q-btn
-        v-if="!modoSeleccion"
-        flat
-        round
-        dense
-        size="sm"
-        class="boton-eliminar-header"
-        @click.stop="$emit('eliminar')"
-      >
-        <IconTrash :size="18" />
-        <q-tooltip>Eliminar</q-tooltip>
-      </q-btn>
+      <BotonConfirmacionEliminar v-if="!modoSeleccion" @confirmar="$emit('eliminar')" />
     </template>
-
     <!-- Chips de completitud + info de comercio/dirección -->
     <template #tipo>
       <div class="tipo-contenido">
@@ -76,7 +64,6 @@
         </div>
       </div>
     </template>
-
     <!-- Imagen + acciones de foto -->
     <template #imagen>
       <div class="imagen-slot">
@@ -90,7 +77,6 @@
           fit="cover"
           @click.stop="verFoto = true"
         />
-
         <div v-if="datosEditando.imagen" class="imagen-slot__acciones-izquierda">
           <q-btn
             flat
@@ -104,7 +90,6 @@
             <q-tooltip>Ver imagen completa</q-tooltip>
           </q-btn>
         </div>
-
         <div class="imagen-slot__acciones">
           <q-btn flat round dense size="sm" class="boton-foto-overlay" @click.stop>
             <IconCamera :size="18" />
@@ -133,7 +118,6 @@
               </q-list>
             </q-menu>
           </q-btn>
-
           <q-btn
             v-if="fotoModificada"
             flat
@@ -149,7 +133,6 @@
         </div>
       </div>
     </template>
-
     <!-- Precio en overlay si existe -->
     <template v-if="item.precio > 0 || mostrarAvisoSinCoincidencia" #overlay-info>
       <div class="overlay-contenido">
@@ -166,7 +149,6 @@
         </div>
       </div>
     </template>
-
     <!-- Info inferior: código de barras (clickeable para copiar) -->
     <template #info-inferior>
       <div
@@ -179,7 +161,6 @@
         <span v-else class="text-grey-5">Sin código</span>
       </div>
     </template>
-
     <!-- Header de la sección expandida -->
     <template #expandido-header>
       <div class="expandido-titulo">
@@ -187,7 +168,6 @@
         <span>EDITAR</span>
       </div>
     </template>
-
     <!-- Contenido expandido: edición inline -->
     <template #expandido-contenido>
       <div class="edit-campos">
@@ -242,7 +222,6 @@
           :model-value="datosEditando.comercio"
           @update:model-value="(v) => actualizar('comercio', v)"
         />
-
         <!-- Botón para agregar nuevo comercio -->
         <q-btn
           flat
@@ -255,7 +234,6 @@
           class="q-mb-sm"
           @click.stop="$emit('abrir-nuevo-comercio')"
         />
-
         <!-- Cantidad + Unidad -->
         <div class="row q-col-gutter-sm">
           <div class="col-6">
@@ -304,7 +282,6 @@
         />
       </div>
     </template>
-
     <!-- Botones de acción -->
     <template #acciones>
       <q-space />
@@ -322,7 +299,6 @@
       </q-btn>
     </template>
   </TarjetaBase>
-
   <DialogoVerImagen
     v-model="verFoto"
     :src="datosEditando.imagen || ''"
@@ -336,6 +312,7 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import { useQuasar, copyToClipboard } from 'quasar'
 import TarjetaBase from '../Tarjetas/TarjetaBase.vue'
+import BotonConfirmacionEliminar from '../Compartidos/BotonConfirmacionEliminar.vue'
 import SelectorComercioDireccion from '../Compartidos/SelectorComercioDireccion.vue'
 import DialogoVerImagen from '../Compartidos/DialogoVerImagen.vue'
 import { MONEDAS } from '../../almacenamiento/constantes/Monedas.js'
@@ -528,7 +505,7 @@ function formatearPrecio(valor, moneda) {
   min-width: 0;
 }
 .info-comercio {
-  color: var(--texto-primario, #1a1a1a);
+  color: var(--texto-primario);
 }
 .info-icono {
   flex-shrink: 0;
@@ -601,19 +578,6 @@ function formatearPrecio(valor, moneda) {
 }
 .boton-recuperar-datos {
   align-self: flex-end;
-}
-.boton-eliminar-header {
-  background: rgba(255, 255, 255, 0.92);
-  color: #d32f2f;
-  border: 1px solid rgba(211, 47, 47, 0.35);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
-  backdrop-filter: blur(2px);
-  transition: all 0.2s ease;
-}
-.boton-eliminar-header:hover {
-  background: #ffffff;
-  color: #b71c1c;
-  border-color: rgba(183, 28, 28, 0.5);
 }
 .imagen-slot {
   position: relative;
