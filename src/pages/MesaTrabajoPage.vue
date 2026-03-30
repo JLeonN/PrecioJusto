@@ -128,15 +128,19 @@
       <div v-if="seleccion.modoSeleccion.value" class="seleccion-barra-flotante">
         <div class="contenedor-pagina q-px-md q-py-xs">
           <div class="row items-center no-wrap seleccion-barra-principal">
-            <q-btn outline no-caps color="grey-8" @click="cerrarSeleccion()">
-              Cancelar
-            </q-btn>
+            <q-btn
+              outline
+              round
+              dense
+              color="grey-8"
+              icon="close"
+              aria-label="Cerrar selección"
+              class="boton-cerrar-seleccion"
+              @click="cerrarSeleccion()"
+            />
             <div class="q-ml-sm seleccion-barra-textos">
               <div class="text-caption text-grey-7">
                 {{ seleccion.cantidadSeleccionados.value }} seleccionados
-              </div>
-              <div class="text-caption text-grey-5">
-                Seleccioná artículos para asignarles el mismo comercio
               </div>
             </div>
             <q-space />
@@ -159,10 +163,9 @@
             </q-btn>
             <q-btn
               unelevated
-              dense
               no-caps
-              size="sm"
               color="primary"
+              class="boton-asignar-comercio boton-accion-seleccion"
               :disable="!seleccion.haySeleccionados.value"
               @click="abrirAsignarComercio"
             >
@@ -176,7 +179,7 @@
                 no-caps
                 color="negative"
                 icon="delete"
-                class="full-width"
+                class="full-width boton-accion-seleccion"
                 :disable="!seleccion.haySeleccionados.value"
                 @click="borrarSeleccionados"
               >
@@ -553,9 +556,21 @@ function alCrearComercio(comercioCreado) {
 }
 .seleccion-barra-principal {
   min-height: 52px;
+  gap: 6px;
+}
+.boton-cerrar-seleccion {
+  flex-shrink: 0;
 }
 .seleccion-barra-textos {
   min-width: 0;
+  flex-shrink: 1;
+}
+.boton-asignar-comercio {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+.boton-accion-seleccion {
+  min-height: 40px;
 }
 .seleccion-barra-expandida {
   padding: 0 0 8px;
