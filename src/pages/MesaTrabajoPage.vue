@@ -174,17 +174,41 @@
           </div>
           <Transition name="desplegar-eliminacion">
             <div v-if="menuEliminacionAbierto" class="seleccion-barra-expandida">
-              <q-btn
-                unelevated
-                no-caps
-                color="negative"
-                icon="delete"
-                class="full-width boton-accion-seleccion"
-                :disable="!seleccion.haySeleccionados.value"
-                @click="borrarSeleccionados"
-              >
-                Borrar lo seleccionado
-              </q-btn>
+              <div class="seleccion-barra-accion-eliminar">
+                <q-btn
+                  v-if="!confirmacionEliminarActiva"
+                  unelevated
+                  no-caps
+                  color="negative"
+                  icon="delete"
+                  class="full-width boton-accion-seleccion"
+                  :disable="!seleccion.haySeleccionados.value"
+                  @click="abrirConfirmacionEliminar"
+                >
+                  Borrar lo seleccionado
+                </q-btn>
+                <div v-else class="seleccion-barra-confirmacion-eliminar">
+                  <q-btn
+                    unelevated
+                    no-caps
+                    color="negative"
+                    class="boton-confirmacion-eliminar"
+                    :disable="!seleccion.haySeleccionados.value"
+                    @click="borrarSeleccionados"
+                  >
+                    Confirmar
+                  </q-btn>
+                  <q-btn
+                    flat
+                    no-caps
+                    color="grey-8"
+                    class="boton-cancelar-eliminar"
+                    @click="cancelarConfirmacionEliminar"
+                  >
+                    Cancelar
+                  </q-btn>
+                </div>
+              </div>
             </div>
           </Transition>
         </div>
@@ -281,6 +305,7 @@ const guardando = ref(false)
 const dialogoAsignarComercio = ref(false)
 const comercioParaAsignar = ref(null)
 const menuEliminacionAbierto = ref(false)
+const confirmacionEliminarActiva = ref(false)
 
 const dialogoNuevoComercioAbierto = ref(false)
 const itemIdParaNuevoComercio = ref(null)
@@ -313,6 +338,7 @@ watch(
 watch(seleccion.cantidadSeleccionados, (cantidad) => {
   if (cantidad === 0 && seleccion.modoSeleccion.value) {
     menuEliminacionAbierto.value = false
+    confirmacionEliminarActiva.value = false
     seleccion.desactivarModoSeleccion()
   }
 })
@@ -443,11 +469,22 @@ function abrirAsignarComercio() {
 
 function toggleMenuEliminacion() {
   menuEliminacionAbierto.value = !menuEliminacionAbierto.value
+  if (!menuEliminacionAbierto.value) confirmacionEliminarActiva.value = false
 }
 
 function cerrarSeleccion() {
   menuEliminacionAbierto.value = false
+  confirmacionEliminarActiva.value = false
   seleccion.desactivarModoSeleccion()
+}
+
+function abrirConfirmacionEliminar() {
+  if (!seleccion.haySeleccionados.value) return
+  confirmacionEliminarActiva.value = true
+}
+
+function cancelarConfirmacionEliminar() {
+  confirmacionEliminarActiva.value = false
 }
 
 function borrarSeleccionados() {
@@ -459,6 +496,7 @@ function borrarSeleccionados() {
   })
 
   menuEliminacionAbierto.value = false
+  confirmacionEliminarActiva.value = false
   seleccion.limpiarDespuesDeEliminar()
 }
 
@@ -574,6 +612,30 @@ function alCrearComercio(comercioCreado) {
 }
 .seleccion-barra-expandida {
   padding: 0 0 8px;
+}
+.seleccion-barra-accion-eliminar {
+  min-height: 40px;
+}
+.seleccion-barra-confirmacion-eliminar {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid rgba(244, 67, 54, 0.35);
+  border-radius: 8px;
+  background: rgba(244, 67, 54, 0.12);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  gap: 6px;
+}
+.boton-confirmacion-eliminar,
+.boton-cancelar-eliminar {
+  min-height: 32px;
+}
+.boton-confirmacion-eliminar {
+  flex: 1;
+}
+.boton-cancelar-eliminar {
+  flex: 1;
 }
 .boton-toggle-eliminacion {
   flex-shrink: 0;

@@ -1,4 +1,4 @@
-# Tareas Pendientes
+﻿# Tareas Pendientes
 
 Lista de cosas que hay que hacer pero que no tienen plan propio todavía.
 Cuando una tarea se completa, simplemente se borra.
@@ -20,7 +20,7 @@ Las tareas más difíciles siempre van arriba.
 
 ### Dificultad 4/10
 
-- **Expandir confirmación de eliminación embebida en botón de papelera (patrón reutilizable ya implementado):** El patrón base ya está implementado y funcionando mediante el componente `src/components/Compartidos/BotonConfirmacionEliminar.vue`. Actualmente ya se usa en `src/components/Scanner/TarjetaProductoBorrador.vue`, donde el botón de papelera abre una confirmación inline dentro del propio control antes de emitir la eliminación. La nueva tarea ya no es diseñar el patrón, sino extenderlo a otros puntos de la app donde exista opción de eliminar algo y hoy todavía se depende de diálogos externos, confirmaciones ad hoc o eliminación directa. Revisar y priorizar listas, tarjetas y acciones rápidas con ícono de papelera o intención equivalente, unificando comportamiento, textos, estados cancelables y experiencia visual. Dejar relevado dónde conviene usar `BotonConfirmacionEliminar`, dónde corresponde mantener un diálogo por tratarse de casos más sensibles o masivos, y cuáles pantallas quedan migradas. Punto de partida recomendado: flujos de scanner, tarjetas, ediciones inline y otras acciones de borrado simple de un solo elemento.
+- **Expandir confirmación de eliminación embebida en botón de papelera (patrón reutilizable ya implementado):** El patrón base ya está implementado y funcionando mediante `src/components/Compartidos/BotonConfirmacionEliminar.vue`, pero desde ahora la regla de implementación queda explícita: **conservar primero la interfaz existente (forma, tamaño, colores, texto y layout) y agregar solo la lógica de confirmación embebida (`Confirmar | Cancelar`)**. No rediseñar botones ni reemplazar bloques visuales completos salvo pedido explícito del usuario. Aplicar este criterio en listas, tarjetas y acciones rápidas de borrado simple; mantener diálogos externos solo para borrados masivos o casos sensibles donde esté justificado.
 
 ### Dificultad 4/10
 
