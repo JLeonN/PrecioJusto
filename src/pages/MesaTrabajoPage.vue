@@ -54,7 +54,10 @@
       <!-- Lista de borradores -->
       <div
         class="mesa-lista-scroll"
-        :class="{ 'mesa-lista-con-barra': seleccion.modoSeleccion.value }"
+        :class="{
+          'mesa-lista-con-barra': seleccion.modoSeleccion.value,
+          'mesa-lista-con-barra-expandida': seleccion.modoSeleccion.value && menuEliminacionAbierto,
+        }"
       >
         <div class="contenedor-pagina q-px-md q-pt-sm q-pb-md">
           <!-- Sin resultados de búsqueda -->
@@ -123,30 +126,64 @@
     <!-- Barra de selección flotante con animación -->
     <Transition name="deslizar-abajo">
       <div v-if="seleccion.modoSeleccion.value" class="seleccion-barra-flotante">
-        <div class="contenedor-pagina row items-center no-wrap q-px-md q-py-xs">
-          <q-btn outline no-caps color="grey-8" @click="seleccion.desactivarModoSeleccion()">
-            Cancelar
-          </q-btn>
-          <div class="q-ml-sm">
-            <div class="text-caption text-grey-7">
-              {{ seleccion.cantidadSeleccionados.value }} seleccionados
+        <div class="contenedor-pagina q-px-md q-py-xs">
+          <div class="row items-center no-wrap seleccion-barra-principal">
+            <q-btn outline no-caps color="grey-8" @click="cerrarSeleccion()">
+              Cancelar
+            </q-btn>
+            <div class="q-ml-sm seleccion-barra-textos">
+              <div class="text-caption text-grey-7">
+                {{ seleccion.cantidadSeleccionados.value }} seleccionados
+              </div>
+              <div class="text-caption text-grey-5">
+                Seleccioná artículos para asignarles el mismo comercio
+              </div>
             </div>
-            <div class="text-caption text-grey-5">
-              Seleccioná artículos para asignarles el mismo comercio
-            </div>
+            <q-space />
+            <q-btn
+              flat
+              round
+              dense
+              color="grey-7"
+              class="q-mr-sm boton-toggle-eliminacion"
+              :aria-label="
+                menuEliminacionAbierto ? 'Ocultar opción de borrado' : 'Mostrar opción de borrado'
+              "
+              @click="toggleMenuEliminacion"
+            >
+              <q-icon
+                name="keyboard_arrow_up"
+                size="24px"
+                :class="{ 'icono-toggle-eliminacion-abierto': menuEliminacionAbierto }"
+              />
+            </q-btn>
+            <q-btn
+              unelevated
+              dense
+              no-caps
+              size="sm"
+              color="primary"
+              :disable="!seleccion.haySeleccionados.value"
+              @click="abrirAsignarComercio"
+            >
+              Asignar comercio
+            </q-btn>
           </div>
-          <q-space />
-          <q-btn
-            unelevated
-            dense
-            no-caps
-            size="sm"
-            color="primary"
-            :disable="!seleccion.haySeleccionados.value"
-            @click="abrirAsignarComercio"
-          >
-            Asignar comercio
-          </q-btn>
+          <Transition name="desplegar-eliminacion">
+            <div v-if="menuEliminacionAbierto" class="seleccion-barra-expandida">
+              <q-btn
+                unelevated
+                no-caps
+                color="negative"
+                icon="delete"
+                class="full-width"
+                :disable="!seleccion.haySeleccionados.value"
+                @click="borrarSeleccionados"
+              >
+                Borrar lo seleccionado
+              </q-btn>
+            </div>
+          </Transition>
         </div>
       </div>
     </Transition>
@@ -240,6 +277,7 @@ const textoBusqueda = ref('')
 const guardando = ref(false)
 const dialogoAsignarComercio = ref(false)
 const comercioParaAsignar = ref(null)
+const menuEliminacionAbierto = ref(false)
 
 const dialogoNuevoComercioAbierto = ref(false)
 const itemIdParaNuevoComercio = ref(null)
@@ -270,7 +308,10 @@ watch(
 
 // Auto-cancela selección si el usuario deselecciona el último ítem
 watch(seleccion.cantidadSeleccionados, (cantidad) => {
-  if (cantidad === 0 && seleccion.modoSeleccion.value) seleccion.desactivarModoSeleccion()
+  if (cantidad === 0 && seleccion.modoSeleccion.value) {
+    menuEliminacionAbierto.value = false
+    seleccion.desactivarModoSeleccion()
+  }
 })
 
 const cantidadListos = computed(
@@ -397,11 +438,32 @@ function abrirAsignarComercio() {
   dialogoAsignarComercio.value = true
 }
 
+function toggleMenuEliminacion() {
+  menuEliminacionAbierto.value = !menuEliminacionAbierto.value
+}
+
+function cerrarSeleccion() {
+  menuEliminacionAbierto.value = false
+  seleccion.desactivarModoSeleccion()
+}
+
+function borrarSeleccionados() {
+  const idsSeleccionados = seleccion.arraySeleccionados.value
+  if (!idsSeleccionados.length) return
+
+  idsSeleccionados.forEach((id) => {
+    sesionStore.eliminarItem(id)
+  })
+
+  menuEliminacionAbierto.value = false
+  seleccion.limpiarDespuesDeEliminar()
+}
+
 function confirmarAsignarComercio() {
   if (!comercioParaAsignar.value) return
   sesionStore.asignarComercio(seleccion.arraySeleccionados.value, comercioParaAsignar.value)
   dialogoAsignarComercio.value = false
-  seleccion.desactivarModoSeleccion()
+  cerrarSeleccion()
 }
 
 function abrirDialogoNuevoComercioDesdeTarjeta(itemId) {
@@ -445,7 +507,7 @@ function alCrearComercio(comercioCreado) {
     // Caso: Asignación masiva (desde el diálogo)
     sesionStore.asignarComercio(seleccion.arraySeleccionados.value, datosComercio)
     dialogoAsignarComercio.value = false
-    seleccion.desactivarModoSeleccion()
+    cerrarSeleccion()
   }
 
   dialogoNuevoComercioAbierto.value = false
@@ -489,8 +551,26 @@ function alCrearComercio(comercioCreado) {
 .seleccion-barra-flotante .contenedor-pagina {
   min-height: 52px;
 }
+.seleccion-barra-principal {
+  min-height: 52px;
+}
+.seleccion-barra-textos {
+  min-width: 0;
+}
+.seleccion-barra-expandida {
+  padding: 0 0 8px;
+}
+.boton-toggle-eliminacion {
+  flex-shrink: 0;
+}
+.icono-toggle-eliminacion-abierto {
+  transform: rotate(180deg);
+}
 .mesa-lista-con-barra {
   padding-bottom: 68px;
+}
+.mesa-lista-con-barra-expandida {
+  padding-bottom: 128px;
 }
 .footer-contenedor {
   background: white;
@@ -511,6 +591,26 @@ function alCrearComercio(comercioCreado) {
 .deslizar-abajo-leave-to {
   transform: translateY(100%);
   opacity: 0;
+}
+.desplegar-eliminacion-enter-active,
+.desplegar-eliminacion-leave-active {
+  transition:
+    max-height 0.22s ease,
+    opacity 0.22s ease,
+    transform 0.22s ease;
+  overflow: hidden;
+}
+.desplegar-eliminacion-enter-from,
+.desplegar-eliminacion-leave-to {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(8px);
+}
+.desplegar-eliminacion-enter-to,
+.desplegar-eliminacion-leave-from {
+  max-height: 72px;
+  opacity: 1;
+  transform: translateY(0);
 }
 .boton-agregar-masivo {
   border-radius: 12px;
