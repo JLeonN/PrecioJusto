@@ -354,9 +354,9 @@ defineExpose({ validarFormulario })
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  border: 1px solid var(--color-carta-borde, #ddd);
+  border: 1px solid var(--color-carta-borde);
   border-radius: 8px;
-  background: var(--fondo-tarjeta, white);
+  background: var(--fondo-tarjeta);
 }
 .foto-fila__izquierda {
   display: flex;

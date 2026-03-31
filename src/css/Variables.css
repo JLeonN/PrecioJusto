@@ -1,150 +1,168 @@
 /* ===========================
-   VARIABLES DE COLORES
+   VARIABLES GLOBALES
    =========================== */
-
 :root {
-  /* Colores principales */
-  --color-primario: #2196f3; /* Azul principal */
+  /* ===========================
+     PALETA BASE
+     =========================== */
+  --color-primario: #2196f3;
   --color-primario-oscuro: #1976d2;
   --color-primario-claro: #bbdefb;
-
-  --color-secundario: #4caf50; /* Verde */
+  --color-secundario: #4caf50;
   --color-secundario-oscuro: #388e3c;
   --color-secundario-claro: #c8e6c9;
-
-  --color-acento: #ff9800; /* Naranja */
+  --color-acento: #ff9800;
   --color-acento-oscuro: #f57c00;
   --color-acento-claro: #ffe0b2;
-
-  /* Colores de estado */
   --color-exito: #4caf50;
   --color-advertencia: #ff9800;
   --color-error: #f44336;
   --color-info: #2196f3;
-
-  /* Colores de fondo - Gris medio */
-  --fondo-app: #eeeeee; /* Gris medio */
-  --fondo-tarjeta: #ffffff; /* Blanco para contraste */
-  --fondo-drawer: #f5f5f5; /* Gris claro para drawer */
-
-  /* Colores de texto */
+  /* ===========================
+     SUPERFICIES Y TEXTO
+     =========================== */
+  --fondo-app: #eeeeee;
+  --fondo-app-secundario: #f7f8fb;
+  --fondo-tarjeta: #ffffff;
+  --fondo-drawer: #f5f5f5;
+  --fondo-oscuro: #1a1a1a;
+  --fondo-oscuro-secundario: #2a2a2a;
   --texto-primario: #212121;
   --texto-secundario: #757575;
+  --texto-sutil: #9e9e9e;
   --texto-deshabilitado: #bdbdbd;
   --texto-sobre-primario: #ffffff;
-
-  /* Bordes */
+  --texto-sobre-primario-suave: rgba(255, 255, 255, 0.85);
+  --texto-sobre-primario-tenue: rgba(255, 255, 255, 0.75);
+  /* ===========================
+     BORDES, SOMBRAS Y OVERLAYS
+     =========================== */
   --borde-color: #e0e0e0;
   --borde-radio: 8px;
-
-  /* Sombras */
+  --borde-blanco-sutil: rgba(255, 255, 255, 0.08);
+  --borde-blanco-medio: rgba(255, 255, 255, 0.45);
   --sombra-ligera: 0 1px 3px rgba(0, 0, 0, 0.12);
   --sombra-media: 0 2px 8px rgba(0, 0, 0, 0.15);
   --sombra-fuerte: 0 4px 16px rgba(0, 0, 0, 0.2);
-
-  /* Espaciado */
+  --sombra-flotante: 0 4px 20px rgba(0, 0, 0, 0.5);
+  --sombra-texto-overlay: 0 2px 4px rgba(0, 0, 0, 0.6);
+  --sombra-texto-overlay-suave: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --sombra-boton-circular: 0 1px 4px rgba(0, 0, 0, 0.25);
+  --sombra-modal-oscuro: 0 24px 64px rgba(0, 0, 0, 0.6);
+  --overlay-oscuro-minimo: rgba(0, 0, 0, 0.05);
+  --overlay-oscuro-bajo: rgba(0, 0, 0, 0.1);
+  --overlay-oscuro-suave: rgba(0, 0, 0, 0.35);
+  --overlay-oscuro-medio: rgba(0, 0, 0, 0.45);
+  --overlay-oscuro-fuerte: rgba(0, 0, 0, 0.55);
+  --overlay-oscuro-intenso: rgba(0, 0, 0, 0.65);
+  --overlay-blanco-suave: rgba(255, 255, 255, 0.15);
+  --overlay-blanco-medio: rgba(255, 255, 255, 0.2);
+  --overlay-blanco-alto: rgba(255, 255, 255, 0.9);
+  --color-acento-fondo-suave: rgba(255, 152, 0, 0.15);
+  --color-error-borde: rgba(244, 67, 54, 0.35);
+  --color-error-fondo-suave: rgba(244, 67, 54, 0.12);
+  --color-exito-fondo-alto: rgba(25, 135, 65, 0.93);
+  --color-acento-fondo-alto: rgba(180, 105, 0, 0.93);
+  /* ===========================
+     ESPACIADOS BASE
+     =========================== */
   --espaciado-xs: 4px;
   --espaciado-sm: 8px;
   --espaciado-md: 16px;
   --espaciado-lg: 24px;
   --espaciado-xl: 32px;
-
   /* ===========================
      VARIABLES DE FORMULARIOS
      =========================== */
-
-  /* Inputs y selects */
   --input-border-radius: 8px;
   --input-font-size: 14px;
-
-  /* Formularios */
   --form-gap: 16px;
   --form-max-width: 500px;
-
-  /* Selectores */
   --select-dropdown-max-height: 250px;
-
-  /* Diálogos */
   --dialogo-padding: 16px;
   --dialogo-border-radius: 12px;
   --dialogo-min-width: 350px;
   --dialogo-max-width: 500px;
-
   /* ===========================
-     VARIABLES TARJETAS YUGIOH
+     TARJETAS YUGIOH
      =========================== */
-
-  /* Colores de tarjeta (usando paleta existente) */
-  --color-carta-header-producto: var(--color-primario); /* Azul para productos */
-  --color-carta-header-comercio: var(--color-acento); /* Naranja para comercios */
-  --color-carta-borde: #d4d4d4; /* Borde suave grisáceo */
-  --color-carta-info-bg: #fafafa; /* Fondo zona inferior */
-
-  /* Degradados para efectos de profundidad */
-  --degradado-carta-header: linear-gradient(180deg, var(--color-primario) 0%, #1976d2 100%);
-  --degradado-carta-header-comercio: linear-gradient(180deg, var(--color-acento) 0%, #f57c00 100%);
+  --color-carta-header-producto: var(--color-primario);
+  --color-carta-header-comercio: var(--color-acento);
+  --color-carta-borde: #d4d4d4;
+  --color-carta-info-bg: #fafafa;
+  --degradado-carta-header: linear-gradient(
+    180deg,
+    var(--color-primario) 0%,
+    var(--color-primario-oscuro) 100%
+  );
+  --degradado-carta-header-comercio: linear-gradient(
+    180deg,
+    var(--color-acento) 0%,
+    var(--color-acento-oscuro) 100%
+  );
   --degradado-precio-overlay: linear-gradient(
     to top,
     rgba(0, 0, 0, 0.8) 0%,
     rgba(0, 0, 0, 0.4) 50%,
     transparent 100%
   );
-
-  /* Sombras estilo carta */
+  --degradado-marco-imagen: linear-gradient(135deg, #f0f0f0 0%, var(--borde-color) 100%);
   --sombra-carta:
     0 6px 12px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
-
   --sombra-carta-hover: 0 8px 16px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.15);
-
   --sombra-interna-marco: inset 0 2px 4px rgba(0, 0, 0, 0.15);
-
   --sombra-boton-flotante: 0 4px 8px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
-
-  /* Bordes y radios de carta */
-  --borde-carta-radio: 12px; /* Bordes redondeados de carta */
-  --borde-carta-grosor: 2px; /* Grosor del borde */
-  --borde-marco-imagen: 3px; /* Marco más grueso para imagen */
-
-  /* Espaciados específicos de carta */
-  --carta-padding-header: 12px 16px; /* Padding del header (nombre) */
-  --carta-padding-info: 10px 14px; /* Padding zona info inferior */
-  --carta-padding-expandido: 16px; /* Padding contenido expandido */
-  --carta-gap-secciones: 2px; /* Separación entre secciones */
-
-  /* Tamaños de imagen según estado */
-  --carta-imagen-altura-cerrada: 180px; /* Altura imagen estado cerrado */
-  --carta-imagen-altura-abierta: 200px; /* Altura imagen estado abierto */
-
-  /* Safe area (Android 15+ edge-to-edge) */
-  --safe-area-top: env(safe-area-inset-top, 0px);
-  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
-
+  --borde-carta-radio: 12px;
+  --borde-carta-grosor: 2px;
+  --borde-marco-imagen: 3px;
+  --carta-padding-header: 12px 16px;
+  --carta-padding-info: 10px 14px;
+  --carta-padding-expandido: 16px;
+  --carta-gap-secciones: 2px;
+  --carta-imagen-altura-cerrada: 180px;
+  --carta-imagen-altura-abierta: 200px;
   /* ===========================
-     VARIABLES SCANNER
+     SCANNER Y OVERLAYS
      =========================== */
   --scanner-overlay-fondo-inicio: rgba(241, 248, 255, 0.72);
+  --scanner-overlay-fondo-header-fin: rgba(241, 248, 255, 0.24);
   --scanner-overlay-fondo-fin: rgba(224, 239, 252, 0.74);
   --scanner-overlay-fondo-base: rgba(209, 231, 249, 0.58);
   --scanner-panel-bg: rgba(255, 255, 255, 0.9);
   --scanner-panel-bg-secundario: rgba(248, 252, 255, 0.9);
   --scanner-panel-borde: rgba(33, 150, 243, 0.24);
   --scanner-panel-sombra: 0 12px 28px rgba(25, 118, 210, 0.2);
+  --scanner-texto-principal: var(--texto-primario);
+  --scanner-texto-secundario: rgba(33, 33, 33, 0.72);
+  --scanner-texto-eyebrow: rgba(25, 118, 210, 0.88);
+  --scanner-halo: rgba(33, 150, 243, 0.22);
+  --scanner-halo-transparente: rgba(33, 150, 243, 0);
+  --scanner-cerrar-bg: rgba(255, 255, 255, 0.74);
+  --scanner-cerrar-borde: rgba(33, 150, 243, 0.28);
+  --scanner-cerrar-sombra: 0 6px 14px rgba(25, 118, 210, 0.14);
+  --scanner-luz-borde: rgba(33, 150, 243, 0.18);
+  --scanner-luz-sombra: rgba(33, 150, 243, 0.2);
+  --scanner-luz-linea: #64b5f6;
+  --scanner-luz-linea-sombra: rgba(33, 150, 243, 0.4);
+  --scanner-corner-sombra: rgba(255, 255, 255, 0.18);
+  --scanner-estado-badge: rgba(33, 150, 243, 0.12);
+  /* ===========================
+     BOTONES Y ACCIONES
+     =========================== */
   --boton-eliminar-fondo: rgba(255, 255, 255, 0.92);
   --boton-eliminar-borde: rgba(244, 67, 54, 0.35);
   --boton-eliminar-fondo-hover: var(--fondo-tarjeta);
   --boton-eliminar-borde-hover: rgba(244, 67, 54, 0.55);
   --boton-eliminar-texto: var(--color-error);
   --boton-eliminar-fondo-confirmar: rgba(244, 67, 54, 0.12);
-  --scanner-texto-principal: var(--texto-primario);
-  --scanner-texto-secundario: rgba(33, 33, 33, 0.72);
-  --scanner-texto-eyebrow: rgba(25, 118, 210, 0.88);
-  --scanner-halo: rgba(33, 150, 243, 0.22);
-  --scanner-cerrar-bg: rgba(255, 255, 255, 0.74);
-  --scanner-cerrar-borde: rgba(33, 150, 243, 0.28);
-  /* Animaciones */
+  /* ===========================
+     ANIMACIONES Y SAFE AREA
+     =========================== */
   --transicion-carta: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --transicion-expansion: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
   --transicion-boton-flotante:
     width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
 }

@@ -694,7 +694,7 @@ onMounted(async () => {
   width: min(82vw, 420px);
   aspect-ratio: 1;
   border-radius: 999px;
-  background: radial-gradient(circle, var(--scanner-halo) 0%, rgba(33, 150, 243, 0) 68%);
+  background: radial-gradient(circle, var(--scanner-halo) 0%, var(--scanner-halo-transparente) 68%);
   filter: blur(6px);
 }
 .escaneo-api-overlay-card {
@@ -719,7 +719,7 @@ onMounted(async () => {
 .escaneo-api-overlay-badge {
   padding: 6px 12px;
   border-radius: 999px;
-  background: rgba(33, 150, 243, 0.12);
+  background: var(--scanner-estado-badge);
   color: var(--scanner-texto-eyebrow);
   font-size: 11px;
   font-weight: 700;
@@ -760,16 +760,16 @@ onMounted(async () => {
   gap: 10px;
   padding: 10px 10px 10px 14px;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--sombra-flotante);
   pointer-events: auto;
 }
 .aviso-escaneo-cerrar {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--overlay-blanco-medio);
   border: none;
   border-radius: 50%;
   width: 24px;
   height: 24px;
-  color: white;
+  color: var(--texto-sobre-primario);
   font-size: 13px;
   cursor: pointer;
   display: flex;
@@ -780,10 +780,10 @@ onMounted(async () => {
   margin-top: -2px;
 }
 .aviso-escaneo-card--exito {
-  background: rgba(25, 135, 65, 0.93);
+  background: var(--color-exito-fondo-alto);
 }
 .aviso-escaneo-card--duplicado {
-  background: rgba(180, 105, 0, 0.93);
+  background: var(--color-acento-fondo-alto);
 }
 .aviso-escaneo-foto {
   width: 40px;
@@ -793,7 +793,7 @@ onMounted(async () => {
   flex-shrink: 0;
 }
 .aviso-escaneo-foto--vacia {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--overlay-blanco-suave);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -804,18 +804,18 @@ onMounted(async () => {
   gap: 1px;
 }
 .aviso-escaneo-nombre {
-  color: white;
+  color: var(--texto-sobre-primario);
   font-size: 14px;
   font-weight: 600;
   max-width: 200px;
 }
 .aviso-escaneo-codigo {
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--texto-sobre-primario-tenue);
   font-size: 11px;
   font-family: 'Courier New', monospace;
 }
 .aviso-escaneo-etiqueta {
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--texto-sobre-primario-suave);
   font-size: 11px;
 }
 /* Transición slide-down */

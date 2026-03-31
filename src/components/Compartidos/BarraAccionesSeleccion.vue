@@ -66,7 +66,7 @@ const textoBotonEliminar = computed(() => {
   z-index: 1000;
   background-color: var(--fondo-tarjeta);
   border-top: 2px solid var(--borde-color);
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--sombra-media);
   padding: 12px 16px;
   padding-bottom: calc(12px + env(safe-area-inset-bottom)); /* Safe area para iOS */
 }

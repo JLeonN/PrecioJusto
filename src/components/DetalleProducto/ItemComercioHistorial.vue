@@ -166,12 +166,12 @@ function irAEditar(event) {
 // Mapeo del color de frescura a CSS para el borde de la foto
 const colorBordeFoto = computed(() => {
   const mapa = {
-    positive: '#21ba45',
-    warning: '#f2c037',
-    orange: '#f27200',
-    'grey-5': '#bdbdbd',
+    positive: 'var(--color-exito)',
+    warning: 'var(--color-advertencia)',
+    orange: 'var(--color-acento-oscuro)',
+    'grey-5': 'var(--texto-deshabilitado)',
   }
-  return mapa[colorFrescuraMasReciente.value] || '#bdbdbd'
+  return mapa[colorFrescuraMasReciente.value] || 'var(--texto-deshabilitado)'
 })
 
 // Precios ordenados por fecha (más reciente primero)

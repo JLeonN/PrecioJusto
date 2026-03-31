@@ -70,19 +70,19 @@ const darGracias = () => {
 .titulo-gracias {
   margin: 0;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--texto-primario);
 }
 
 .texto-gracias {
   margin: 0;
-  color: #4b5563;
+  color: var(--texto-secundario);
   line-height: 1.45;
 }
 
 .contador-gracias {
   margin: 4px 0;
   font-weight: 600;
-  color: #374151;
+  color: var(--texto-primario);
 }
 
 .boton-gracias {

@@ -100,7 +100,7 @@ const estaSeleccionada = (direccion) => props.direccionSeleccionada?.id === dire
 }
 .mini-tarjeta-sucursal--activa {
   border-color: var(--color-acento);
-  background-color: #fff3e0;
+  background-color: var(--color-acento-claro);
 }
 .mini-tarjeta-sucursal__calle {
   font-size: 13px;

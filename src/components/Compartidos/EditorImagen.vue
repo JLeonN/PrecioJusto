@@ -110,7 +110,7 @@ async function alGuardar() {
 
 <style scoped>
 .editor-contenedor {
-  background: #1a1a1a;
+  background: var(--fondo-oscuro);
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -121,11 +121,11 @@ async function alGuardar() {
   align-items: center;
   justify-content: space-between;
   padding: calc(12px + var(--safe-area-top, 0px)) 16px 12px;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--overlay-oscuro-medio);
   flex-shrink: 0;
 }
 .editor-titulo {
-  color: white;
+  color: var(--texto-sobre-primario);
   font-size: 16px;
   font-weight: 600;
 }
@@ -140,15 +140,15 @@ async function alGuardar() {
   width: 100%;
   height: 100%;
   min-height: 300px;
-  background: #2a2a2a;
+  background: var(--fondo-oscuro-secundario);
 }
 .editor-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px calc(12px + var(--safe-area-bottom, 0px));
-  background: rgba(0, 0, 0, 0.55);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--overlay-oscuro-fuerte);
+  border-top: 1px solid var(--borde-blanco-sutil);
   flex-shrink: 0;
 }
 .editor-rotacion {

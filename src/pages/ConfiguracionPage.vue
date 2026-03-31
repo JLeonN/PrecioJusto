@@ -103,7 +103,7 @@ onMounted(async () => {
 
 <style scoped>
 .configuracion-page {
-  background: #f7f8fb;
+  background: var(--fondo-app-secundario);
 }
 
 .contenedor-configuracion {

@@ -807,7 +807,7 @@ onMounted(async () => {
   left: 0;
   right: 0;
   height: 56px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.55), transparent);
+  background: linear-gradient(to top, var(--overlay-oscuro-fuerte), transparent);
   display: flex;
   align-items: flex-end;
   justify-content: flex-end;
@@ -823,14 +823,14 @@ onMounted(async () => {
   width: 100%;
   max-width: 400px;
   aspect-ratio: 16/9;
-  background: var(--color-primario-claro, #f5f5f5);
+  background: var(--color-primario-claro);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 2px dashed var(--color-carta-borde, #ddd);
+  border: 2px dashed var(--color-carta-borde);
   cursor: pointer;
 }
 .input-archivo-oculto {
@@ -847,9 +847,9 @@ onMounted(async () => {
   color: var(--texto-primario);
 }
 .seccion-campos {
-  background: var(--fondo-tarjeta, white);
+  background: var(--fondo-tarjeta);
   border-radius: 12px;
   padding: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--sombra-ligera);
 }
 </style>

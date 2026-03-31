@@ -173,8 +173,8 @@ const manejarExpansion = (expandido) => {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  color: white;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  color: var(--texto-sobre-primario);
+  text-shadow: var(--sombra-texto-overlay);
 }
 .direccion-overlay__icono {
   flex-shrink: 0;

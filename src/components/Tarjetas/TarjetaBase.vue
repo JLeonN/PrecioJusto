@@ -271,10 +271,10 @@ const manejarLongPress = () => {
   top: 12px;
   right: 12px;
   z-index: 2;
-  background: white;
+  background: var(--fondo-tarjeta);
   border-radius: 50%;
   padding: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--sombra-media);
 }
 /* ========================================
    HEADER (Nombre)
@@ -282,7 +282,7 @@ const manejarLongPress = () => {
 .tarjeta-yugioh__header {
   position: relative;
   padding: var(--carta-padding-header);
-  color: white;
+  color: var(--texto-sobre-primario);
   font-weight: bold;
   font-size: 16px;
   display: flex;
@@ -331,7 +331,7 @@ const manejarLongPress = () => {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: white;
+  background: var(--fondo-tarjeta);
   color: var(--color-primario);
   border: none;
   cursor: pointer;
@@ -357,7 +357,7 @@ const manejarLongPress = () => {
 }
 .tarjeta-yugioh__boton-flotante:hover {
   transform: scale(1.05);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--sombra-fuerte);
 }
 .tarjeta-yugioh__boton-flotante:active {
   transform: scale(0.95);
@@ -382,7 +382,7 @@ const manejarLongPress = () => {
 .tarjeta-yugioh__marco-imagen {
   position: relative;
   padding: 8px;
-  background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+  background: var(--degradado-marco-imagen);
 }
 .tarjeta-yugioh__contenedor-imagen {
   position: relative;
@@ -453,15 +453,15 @@ const manejarLongPress = () => {
 /* Color según tipo */
 .tarjeta-yugioh--producto .tarjeta-yugioh__expandido-header {
   background: var(--color-secundario);
-  color: white;
+  color: var(--texto-sobre-primario);
 }
 .tarjeta-yugioh--comercio .tarjeta-yugioh__expandido-header {
   background: var(--color-acento);
-  color: white;
+  color: var(--texto-sobre-primario);
 }
 .tarjeta-yugioh__expandido-contenido {
   padding: var(--carta-padding-expandido);
-  background: white;
+  background: var(--fondo-tarjeta);
 }
 /* ========================================
    ZONA DE ACCIONES (estilo ATK/DEF)
@@ -481,14 +481,14 @@ const manejarLongPress = () => {
   position: absolute;
   bottom: 4px;
   right: 8px;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--overlay-blanco-alto);
   border-radius: 50%;
   width: 32px;
   height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--sombra-ligera);
   z-index: 2;
   transition: left 0.3s ease, right 0.3s ease, transform 0.3s ease;
 }

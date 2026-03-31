@@ -221,10 +221,10 @@ const manejarExpansion = (expandido) => {
 
 <style scoped>
 .precio-valor {
-  color: white;
+  color: var(--texto-sobre-primario);
   font-size: 24px;
   font-weight: bold;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  text-shadow: var(--sombra-texto-overlay);
 }
 .tipo-direccion {
   display: flex;
@@ -246,7 +246,7 @@ const manejarExpansion = (expandido) => {
 }
 .codigo-barras:active {
   background-color: var(--color-primario);
-  color: white;
+  color: var(--texto-sobre-primario);
 }
 .codigo-barras__texto {
   font-family: 'Courier New', monospace;
@@ -286,7 +286,7 @@ const manejarExpansion = (expandido) => {
   width: 32px;
   height: 32px;
   background: var(--color-primario);
-  color: white;
+  color: var(--texto-sobre-primario);
   border-radius: 50%;
   font-weight: bold;
   font-size: 16px;
@@ -342,7 +342,7 @@ const manejarExpansion = (expandido) => {
   border-radius: 4px;
   font-size: 10px;
   font-weight: 600;
-  background: rgba(255, 152, 0, 0.15);
-  color: var(--color-acento, #ff9800);
+  background: var(--color-acento-fondo-suave);
+  color: var(--color-acento);
 }
 </style>

@@ -93,10 +93,10 @@ function alGuardarEditor(nuevaImagenBase64) {
 <style scoped>
 .visor-contenedor {
   position: relative;
-  background: #1a1a1a;
+  background: var(--fondo-oscuro);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--sombra-modal-oscuro);
   width: min(90vw, 480px);
   max-height: 85vh;
   display: flex;
@@ -107,7 +107,7 @@ function alGuardarEditor(nuevaImagenBase64) {
   top: calc(10px + var(--safe-area-top, 0px));
   right: 10px;
   z-index: 10;
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--overlay-oscuro-fuerte);
   backdrop-filter: blur(4px);
 }
 .visor-imagen {
@@ -120,13 +120,13 @@ function alGuardarEditor(nuevaImagenBase64) {
   align-items: center;
   justify-content: space-between;
   padding: 10px 16px calc(10px + var(--safe-area-bottom, 0px));
-  background: rgba(0, 0, 0, 0.35);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--overlay-oscuro-suave);
+  border-top: 1px solid var(--borde-blanco-sutil);
   gap: 12px;
 }
 .visor-titulo {
   flex: 1;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--texto-sobre-primario-suave);
   font-size: 13px;
   font-weight: 500;
   overflow: hidden;

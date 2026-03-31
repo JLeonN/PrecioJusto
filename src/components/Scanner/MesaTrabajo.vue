@@ -336,13 +336,13 @@ function filtrarComercios(val, update) {
 }
 .mesa-trabajo-barra {
   min-height: 60px;
-  border-bottom: 1px solid #e0e0e0;
-  background: white;
+  border-bottom: 1px solid var(--borde-color);
+  background: var(--fondo-tarjeta);
 }
 .seleccion-barra {
   min-height: 44px;
-  background: #e3f2fd;
-  border-bottom: 1px solid #bbdefb;
+  background: var(--color-primario-claro);
+  border-bottom: 1px solid var(--color-primario-claro);
 }
 .lista-borradores {
   display: flex;
@@ -352,6 +352,6 @@ function filtrarComercios(val, update) {
 .mesa-trabajo-footer {
   padding: 10px 16px;
   padding-bottom: calc(10px + var(--safe-area-bottom, 0px));
-  background: white;
+  background: var(--fondo-tarjeta);
 }
 </style>

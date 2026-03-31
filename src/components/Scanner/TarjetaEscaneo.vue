@@ -449,7 +449,7 @@ function emitDescartar() {
   height: 230px;
   overflow: hidden;
   border-radius: 16px 16px 0 0;
-  background: var(--fondo-tarjeta, #f5f5f5);
+  background: var(--fondo-tarjeta);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -474,13 +474,13 @@ function emitDescartar() {
   gap: 8px;
   align-items: center;
   text-align: center;
-  color: var(--texto-secundario, #616161);
+  color: var(--texto-secundario);
 }
 .tarjeta-escaneo-portada__aviso-titulo {
   font-size: 16px;
   font-weight: 600;
   line-height: 1.35;
-  color: var(--texto-primario, #424242);
+  color: var(--texto-primario);
 }
 .tarjeta-escaneo-portada__aviso-texto {
   font-size: 13px;
@@ -492,13 +492,13 @@ function emitDescartar() {
   left: 0;
   right: 0;
   padding: 32px 14px 12px;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.65));
+  background: linear-gradient(transparent, var(--overlay-oscuro-intenso));
 }
 .tarjeta-escaneo-portada__nombre {
-  color: white;
+  color: var(--texto-sobre-primario);
   font-size: 16px;
   font-weight: 600;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  text-shadow: var(--sombra-texto-overlay-suave);
   line-height: 1.3;
 }
 .portada-botones-foto {
@@ -510,11 +510,11 @@ function emitDescartar() {
   z-index: 2;
 }
 .boton-foto-overlay {
-  background: rgba(0, 0, 0, 0.45);
-  color: white;
+  background: var(--overlay-oscuro-medio);
+  color: var(--texto-sobre-primario);
 }
 .boton-foto-overlay:hover {
-  background: rgba(0, 0, 0, 0.65);
+  background: var(--overlay-oscuro-intenso);
 }
 .codigo-barras-fila {
   display: flex;
@@ -540,7 +540,7 @@ function emitDescartar() {
   font-family: 'Courier New', monospace;
   font-size: 13px;
   font-weight: 500;
-  color: var(--texto-secundario, #666);
+  color: var(--texto-secundario);
   letter-spacing: 0.5px;
 }
 .tarjeta-escaneo-precio {
@@ -548,7 +548,7 @@ function emitDescartar() {
 }
 .tarjeta-escaneo-footer {
   padding: 8px 16px 12px;
-  border-top: 1px solid var(--borde-color, #e0e0e0);
+  border-top: 1px solid var(--borde-color);
 }
 .input-archivo-oculto {
   display: none;

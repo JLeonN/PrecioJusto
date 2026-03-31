@@ -189,7 +189,7 @@ onUnmounted(() => {
   background: linear-gradient(
     180deg,
     var(--scanner-overlay-fondo-inicio) 0%,
-    rgba(241, 248, 255, 0.24) 100%
+    var(--scanner-overlay-fondo-header-fin) 100%
   );
 }
 .scanner-header-contenido {
@@ -218,7 +218,7 @@ onUnmounted(() => {
 .scanner-header-cerrar {
   background: var(--scanner-cerrar-bg);
   border: 1px solid var(--scanner-cerrar-borde);
-  box-shadow: 0 6px 14px rgba(25, 118, 210, 0.14);
+  box-shadow: var(--scanner-cerrar-sombra);
 }
 .scanner-fondo-oscuro {
   background: var(--scanner-overlay-fondo-base);
@@ -257,10 +257,10 @@ onUnmounted(() => {
   position: absolute;
   inset: 0;
   border-radius: 20px;
-  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  border: 1.5px solid var(--borde-blanco-medio);
   box-shadow:
-    0 0 0 1px rgba(33, 150, 243, 0.18),
-    0 0 16px rgba(33, 150, 243, 0.2);
+    0 0 0 1px var(--scanner-luz-borde),
+    0 0 16px var(--scanner-luz-sombra);
   pointer-events: none;
 }
 .scanner-ventana-etiqueta {
@@ -305,10 +305,10 @@ onUnmounted(() => {
   position: absolute;
   width: 32px;
   height: 32px;
-  border-color: #ffffff;
+  border-color: var(--texto-sobre-primario);
   border-style: solid;
   border-width: 4px;
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.18));
+  filter: drop-shadow(0 0 8px var(--scanner-corner-sombra));
   pointer-events: none;
   z-index: 2;
 }
@@ -346,8 +346,15 @@ onUnmounted(() => {
   right: 16px;
   height: 3px;
   border-radius: 999px;
-  background: linear-gradient(to right, transparent, #64b5f6, #ffffff, #64b5f6, transparent);
-  box-shadow: 0 0 18px rgba(33, 150, 243, 0.4);
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--scanner-luz-linea),
+    var(--texto-sobre-primario),
+    var(--scanner-luz-linea),
+    transparent
+  );
+  box-shadow: 0 0 18px var(--scanner-luz-linea-sombra);
   animation: mover-linea 1.8s ease-in-out infinite;
   z-index: 1;
 }

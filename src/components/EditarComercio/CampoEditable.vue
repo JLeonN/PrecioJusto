@@ -122,7 +122,7 @@ function cancelar() {
 
 <style scoped>
 .campo-editable {
-  border-bottom: 1px solid var(--color-carta-borde, #e0e0e0);
+  border-bottom: 1px solid var(--color-carta-borde);
   padding: 12px 0;
 }
 .campo-editable__lectura {
@@ -133,7 +133,7 @@ function cancelar() {
   padding: 4px 0;
 }
 .campo-editable__lectura:hover {
-  background: rgba(0, 0, 0, 0.02);
+  background: var(--overlay-oscuro-minimo);
   border-radius: 8px;
 }
 .campo-editable__edicion {
@@ -148,7 +148,7 @@ function cancelar() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-acento-claro, #fff3e0);
+  background: var(--color-acento-claro);
   border-radius: 50%;
 }
 .campo-editable__contenido {
@@ -168,11 +168,11 @@ function cancelar() {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--texto-secundario, #666);
+  color: var(--texto-secundario);
 }
 .campo-editable__valor {
   font-size: 15px;
-  color: var(--texto-primario, #333);
+  color: var(--texto-primario);
   line-height: 1.4;
 }
 .campo-editable__acciones {

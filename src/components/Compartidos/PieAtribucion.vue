@@ -50,13 +50,13 @@ const tieneFuentes = computed(
 
 <style scoped>
 .pie-atribucion {
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--borde-color);
   padding: 12px 16px;
   margin-top: 16px;
 }
 .pie-sin-info {
   font-size: 11px;
-  color: #bdbdbd;
+  color: var(--texto-deshabilitado);
   margin: 0;
   text-align: center;
 }
@@ -70,7 +70,7 @@ const tieneFuentes = computed(
   display: block;
   font-size: 10px;
   font-weight: 600;
-  color: #bdbdbd;
+  color: var(--texto-deshabilitado);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 3px;
@@ -80,12 +80,12 @@ const tieneFuentes = computed(
   align-items: baseline;
   gap: 4px;
   font-size: 11px;
-  color: #9e9e9e;
+  color: var(--texto-sutil);
   margin: 0 0 2px 0;
   flex-wrap: wrap;
 }
 .pie-bullet {
-  color: #bdbdbd;
+  color: var(--texto-deshabilitado);
   flex-shrink: 0;
 }
 .pie-nombre {
@@ -93,7 +93,7 @@ const tieneFuentes = computed(
   flex-shrink: 0;
 }
 .pie-flecha {
-  color: #bdbdbd;
+  color: var(--texto-deshabilitado);
   flex-shrink: 0;
 }
 </style>

@@ -108,7 +108,7 @@ const textoUltimoPrecio = computed(() => {
   align-items: center;
   gap: 10px;
   padding: 12px;
-  background: var(--color-primario-claro, #f5f5f5);
+  background: var(--color-primario-claro);
   border-radius: 10px;
 }
 .stat-card__info {
@@ -122,12 +122,12 @@ const textoUltimoPrecio = computed(() => {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.3px;
-  color: var(--texto-secundario, #666);
+  color: var(--texto-secundario);
 }
 .stat-card__valor {
   font-size: 13px;
   font-weight: 500;
-  color: var(--texto-primario, #333);
+  color: var(--texto-primario);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

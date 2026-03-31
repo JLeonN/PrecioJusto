@@ -571,8 +571,8 @@ function alCrearComercio(comercioCreado) {
   overflow-y: auto;
 }
 .mesa-trabajo-barra {
-  border-bottom: 1px solid #e0e0e0;
-  background: white;
+  border-bottom: 1px solid var(--borde-color);
+  background: var(--fondo-tarjeta);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -586,8 +586,8 @@ function alCrearComercio(comercioCreado) {
   left: 0;
   right: 0;
   z-index: 100;
-  background: white;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.12);
+  background: var(--fondo-tarjeta);
+  box-shadow: var(--sombra-media);
 }
 .seleccion-barra-flotante .contenedor-pagina {
   min-height: 52px;
@@ -619,9 +619,9 @@ function alCrearComercio(comercioCreado) {
 .seleccion-barra-confirmacion-eliminar {
   width: 100%;
   min-height: 40px;
-  border: 1px solid rgba(244, 67, 54, 0.35);
+  border: 1px solid var(--color-error-borde);
   border-radius: 8px;
-  background: rgba(244, 67, 54, 0.12);
+  background: var(--color-error-fondo-suave);
   display: flex;
   align-items: center;
   padding: 4px;
@@ -650,7 +650,7 @@ function alCrearComercio(comercioCreado) {
   padding-bottom: 128px;
 }
 .footer-contenedor {
-  background: white;
+  background: var(--fondo-tarjeta);
   position: sticky;
   bottom: 0;
 }
@@ -695,6 +695,6 @@ function alCrearComercio(comercioCreado) {
   font-weight: 600;
 }
 .boton-agregar-masivo:hover {
-  background: rgba(25, 118, 210, 0.08) !important;
+  background: color-mix(in srgb, var(--color-primario) 8%, transparent) !important;
 }
 </style>

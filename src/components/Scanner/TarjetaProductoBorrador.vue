@@ -514,10 +514,10 @@ function formatearPrecio(valor, moneda) {
   position: absolute;
   right: 0;
   bottom: 0;
-  color: white;
+  color: var(--texto-sobre-primario);
   font-size: 20px;
   font-weight: bold;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  text-shadow: var(--sombra-texto-overlay);
 }
 .overlay-contenido {
   position: relative;
@@ -536,10 +536,10 @@ function formatearPrecio(valor, moneda) {
   max-width: 240px;
   padding: 10px 12px;
   border-radius: 12px;
-  background: rgba(20, 20, 20, 0.42);
+  background: var(--overlay-oscuro-medio);
   backdrop-filter: blur(4px);
   text-align: center;
-  color: white;
+  color: var(--texto-sobre-primario);
 }
 .sin-coincidencia-overlay__titulo {
   font-size: 13px;
@@ -612,11 +612,11 @@ function formatearPrecio(valor, moneda) {
   gap: 6px;
 }
 .boton-foto-overlay {
-  background: rgba(0, 0, 0, 0.45);
-  color: white;
+  background: var(--overlay-oscuro-medio);
+  color: var(--texto-sobre-primario);
 }
 .boton-foto-overlay:hover {
-  background: rgba(0, 0, 0, 0.65);
+  background: var(--overlay-oscuro-intenso);
 }
 .input-oculto {
   display: none;

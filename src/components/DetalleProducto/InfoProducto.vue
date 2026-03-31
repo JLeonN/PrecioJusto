@@ -568,7 +568,7 @@ const copiarCodigoBarras = async (codigo) => {
   cursor: zoom-in;
 }
 .btn-editar-imagen {
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--sombra-boton-circular);
 }
 .input-archivo-oculto {
   display: none;
@@ -616,10 +616,10 @@ const copiarCodigoBarras = async (codigo) => {
   width: fit-content;
 }
 .codigo-barras:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: var(--overlay-oscuro-minimo);
 }
 .codigo-barras:active {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: var(--overlay-oscuro-bajo);
 }
 .codigo-barras span {
   font-size: 12px;
@@ -629,7 +629,7 @@ const copiarCodigoBarras = async (codigo) => {
 }
 .fuente-dato-texto {
   font-size: 11px;
-  color: #9e9e9e;
+  color: var(--texto-sutil);
   margin: 8px 0 0 0;
   text-align: center;
 }
@@ -637,7 +637,7 @@ const copiarCodigoBarras = async (codigo) => {
   display: flex;
   align-items: center;
   gap: 12px;
-  border-bottom: 1px solid var(--color-carta-borde, #e0e0e0);
+  border-bottom: 1px solid var(--color-carta-borde);
   padding: 12px 0;
 }
 .cantidad-icono {
@@ -647,7 +647,7 @@ const copiarCodigoBarras = async (codigo) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-acento-claro, #fff3e0);
+  background: var(--color-acento-claro);
   border-radius: 50%;
 }
 .cantidad-contenido {
@@ -661,11 +661,11 @@ const copiarCodigoBarras = async (codigo) => {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--texto-secundario, #666);
+  color: var(--texto-secundario);
 }
 .cantidad-valor {
   font-size: 15px;
-  color: var(--texto-primario, #333);
+  color: var(--texto-primario);
   line-height: 1.4;
 }
 .cantidad-edicion-inputs {
