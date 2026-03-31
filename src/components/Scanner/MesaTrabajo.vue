@@ -94,7 +94,7 @@
 
   <!-- Bottom sheet: asignar comercio en bloque -->
   <q-dialog v-model="dialogoAsignarComercio" position="bottom">
-    <q-card style="border-radius: 16px 16px 0 0; width: 100%; max-width: 100vw; padding-bottom: var(--safe-area-bottom, 0px)">
+    <q-card style="border-radius: 16px 16px 0 0; width: 100%; max-width: 100vw; padding-bottom: calc(var(--safe-area-bottom, 0px) + var(--espacio-publicidad, 0px))">
       <q-card-section class="q-pb-sm">
         <div class="text-subtitle2">
           Asignar comercio a {{ seleccion.cantidadSeleccionados.value }} ítem(s)
@@ -351,7 +351,7 @@ function filtrarComercios(val, update) {
 }
 .mesa-trabajo-footer {
   padding: 10px 16px;
-  padding-bottom: calc(10px + var(--safe-area-bottom, 0px));
+  padding-bottom: calc(10px + var(--safe-area-bottom, 0px) + var(--espacio-publicidad, 0px));
   background: var(--fondo-tarjeta);
 }
 </style>

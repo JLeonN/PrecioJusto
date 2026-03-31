@@ -58,7 +58,7 @@ defineProps({
 
 <style scoped>
 .fab-sticky {
-  bottom: calc(18px + var(--safe-area-bottom, 0px)) !important;
+  bottom: calc(18px + var(--safe-area-bottom, 0px) + var(--espacio-publicidad, 0px)) !important;
   z-index: 2000;
 }
 </style>

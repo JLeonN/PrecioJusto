@@ -60,7 +60,7 @@ const textoBotonEliminar = computed(() => {
 <style scoped>
 .barra-acciones-fixed {
   position: fixed;
-  bottom: 0;
+  bottom: var(--espacio-publicidad, 0px);
   left: 0;
   right: 0;
   z-index: 1000;

@@ -222,7 +222,7 @@
           border-radius: 16px 16px 0 0;
           width: 100%;
           max-width: 100vw;
-          padding-bottom: var(--safe-area-bottom, 0px);
+          padding-bottom: calc(var(--safe-area-bottom, 0px) + var(--espacio-publicidad, 0px));
         "
       >
         <q-card-section class="q-pb-sm">
@@ -582,7 +582,7 @@ function alCrearComercio(comercioCreado) {
 }
 .seleccion-barra-flotante {
   position: fixed;
-  bottom: var(--safe-area-bottom, 0px);
+  bottom: calc(var(--safe-area-bottom, 0px) + var(--espacio-publicidad, 0px));
   left: 0;
   right: 0;
   z-index: 100;
@@ -652,7 +652,7 @@ function alCrearComercio(comercioCreado) {
 .footer-contenedor {
   background: var(--fondo-tarjeta);
   position: sticky;
-  bottom: 0;
+  bottom: var(--espacio-publicidad, 0px);
 }
 .mesa-trabajo-footer .contenedor-pagina {
   padding: 10px 16px;

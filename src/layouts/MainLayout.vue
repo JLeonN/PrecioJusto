@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hHh lpR fFf">
+  <q-layout view="hHh lpR fFf" :style="estiloLayout">
     <!-- HEADER -->
     <q-header elevated :class="clasesHeader">
       <q-toolbar class="header-toolbar">
@@ -25,7 +25,7 @@
             <span class="title-text">Precio Justo</span>
           </q-btn>
         </div>
-        <div v-if="MODO_PRUEBA" class="indicador-modo-prueba">● MODO PRUEBA</div>
+        <div v-if="MODO_PRUEBA" class="indicador-modo-prueba">MODO PRUEBA</div>
 
         <div class="header-actions">
           <q-btn
@@ -162,7 +162,7 @@
     </q-drawer>
 
     <!-- CONTENIDO PRINCIPAL -->
-    <q-page-container :style="{ paddingBottom: altoBanner + 'px' }">
+    <q-page-container :style="estiloContenedorPrincipal">
       <router-view />
     </q-page-container>
   </q-layout>
@@ -194,6 +194,12 @@ const esComerciosActivo = computed(() => route.path.startsWith('/comercios'))
 const esMesaActivo = computed(() => route.path === '/mesa-trabajo')
 const clasesHeader = computed(() => (MODO_PRUEBA ? 'bg-orange-8 text-white' : 'bg-white text-primary'))
 const colorBotonMenu = computed(() => (MODO_PRUEBA ? 'white' : 'primary'))
+const estiloLayout = computed(() => ({
+  '--espacio-publicidad': `${altoBanner.value}px`,
+}))
+const estiloContenedorPrincipal = computed(() => ({
+  paddingBottom: `calc(${altoBanner.value}px + var(--safe-area-bottom, 0px) + 8px)`,
+}))
 
 const obtenerColorAccion = (estaActivo) => {
   if (MODO_PRUEBA) return estaActivo.value ? 'white' : 'grey-3'
@@ -308,7 +314,7 @@ useBotonAtras({ drawerAbierto, router, route })
 }
 .drawer-lista-inferior {
   padding-top: 8px;
-  padding-bottom: calc(12px + var(--safe-area-bottom)) !important;
+  padding-bottom: calc(12px + var(--safe-area-bottom) + var(--espacio-publicidad, 0px)) !important;
 }
 .bandeja-drawer-item {
   background: color-mix(in srgb, var(--color-primario) 8%, transparent);
