@@ -1074,7 +1074,7 @@ H. Arquitectura y Código
 - Señal "app lista" vía `nextTick()` en `App.vue`
 
 ### Estado Actual
-- **Versión:** 1.1.4
+- **Versión:** 1.1.5
 - **Almacenamiento:** Local (Capacitor Storage)
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
@@ -1117,4 +1117,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 28 de Marzo de 2026 — Se agregó la sección de Configuración con resumen propio y se actualizó la versión del proyecto a 1.1.4.
+**Última actualización:** 31 de Marzo de 2026 — Se actualizó la versión del proyecto a 1.1.5 y se alineó la numeración de Android.
