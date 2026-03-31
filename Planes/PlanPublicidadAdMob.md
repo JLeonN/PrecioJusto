@@ -44,12 +44,12 @@ para la futura página de estadísticas.
 - Cambiar `MODO_PRUEBA = false`
 - Verificar en APK de staging que los anuncios reales cargan correctamente
 
-### IDS PENDIENTES (completar cuando la app esté en producción):
+### IDS DE PRODUCCIÓN (completados):
 
-- App ID de AdMob: `PENDIENTE`
-- Ad Unit ID — Banner: `PENDIENTE`
-- Ad Unit ID — Interstitial: `PENDIENTE`
-- Ad Unit ID — Recompensado: `PENDIENTE`
+- App ID de AdMob: `ca-app-pub-7620083100302566~1638876761`
+- Ad Unit ID — Banner: `ca-app-pub-7620083100302566/7968916165`
+- Ad Unit ID — Interstitial: `ca-app-pub-7620083100302566/3199370442`
+- Ad Unit ID — Recompensado: `ca-app-pub-7620083100302566/2050879654`
 
 ### TECNOLOGÍAS:
 
@@ -73,7 +73,7 @@ para la futura página de estadísticas.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 1: INSTALACIÓN DEL PLUGIN 🔧 [PENDIENTE]
+## 📋 FASE 1: INSTALACIÓN DEL PLUGIN 🔧 [COMPLETADA]
 
 ### Objetivo
 
@@ -110,7 +110,7 @@ En modo prueba el App ID oficial de Google para testing es:
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 2: ARCHIVO DE CONFIGURACIÓN ⚙️ [PENDIENTE]
+## 📋 FASE 2: ARCHIVO DE CONFIGURACIÓN ⚙️ [COMPLETADA]
 
 ### Objetivo
 
@@ -150,7 +150,7 @@ export const CONFIG_PUBLICIDAD = MODO_PRUEBA ? IDS_PRUEBA : IDS_PRODUCCION
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 3: COMPOSABLE usePublicidad 🎯 [PENDIENTE]
+## 📋 FASE 3: COMPOSABLE usePublicidad 🎯 [COMPLETADA]
 
 ### Objetivo
 
@@ -217,7 +217,7 @@ Expone `altoBanner` para que el layout aplique el padding correcto.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 4: BANNER EN MAINLAYOUT 📐 [PENDIENTE]
+## 📋 FASE 4: BANNER EN MAINLAYOUT 📐 [COMPLETADA]
 
 ### Objetivo
 
@@ -259,7 +259,7 @@ Agregar un indicador visual claro cuando `MODO_PRUEBA = true`.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 5: PÁGINA GRACIAS + REWARDED + CONTADOR 🙏 [COMPLETADA PARCIAL - SIN VIDEO]
+## 📋 FASE 5: PÁGINA GRACIAS + REWARDED + CONTADOR 🙏 [COMPLETADA]
 
 ### Objetivo
 
@@ -275,8 +275,8 @@ No es un diálogo ni un popup — es una página de navegación real.
 [x] Ítem "Gracias" implementado en el Drawer
 [x] `GraciasPage.vue` creada con contador local (`contadorGracias`) y botón "Dar gracias"
 [x] Persistencia en localStorage + notificación al incrementar
-[x] El ítem del Drawer está preparado, pero en el layout actual sigue comentado hasta activar el flujo rewarded completo
-[ ] Integración de video rewarded (pendiente para fase futura)
+[x] El ítem del Drawer está activo en el layout y navega correctamente a `/gracias`
+[x] Integración de video rewarded en `GraciasPage.vue`
 ### 5.1 — Ruta nueva
 
 **Archivo:** `src/router/routes.js`
@@ -323,7 +323,7 @@ No agregar lógica de recompensas ni desbloqueo de funciones.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📋 FASE 6: INTERSTITIAL — PREPARACIÓN 🎬 [PENDIENTE]
+## 📋 FASE 6: INTERSTITIAL — PREPARACIÓN 🎬 [COMPLETADA]
 
 ### Objetivo
 
@@ -411,18 +411,18 @@ Nunca mostrarlo dos veces seguidas sin que el usuario haya interactuado.
 
 ═══════════════════════════════════════════════════════════════
 
-## 📊 PROGRESO GENERAL: 15% — AVANCE PARCIAL (FASE 5 SIN VIDEO)
+## 📊 PROGRESO GENERAL: 85% — IMPLEMENTACIÓN COMPLETA (FALTA TESTING FINAL EN APK)
 
-⏳ Fase 1: Instalación del plugin
-⏳ Fase 2: Archivo de configuración
-⏳ Fase 3: Composable usePublicidad
-⏳ Fase 4: Banner en MainLayout
-✅ Fase 5: Página Gracias + contador (parcial sin video)
-⏳ Fase 6: Interstitial — preparación
+✅ Fase 1: Instalación del plugin
+✅ Fase 2: Archivo de configuración
+✅ Fase 3: Composable usePublicidad
+✅ Fase 4: Banner en MainLayout
+✅ Fase 5: Página Gracias + rewarded + contador
+✅ Fase 6: Interstitial — preparación
 ⏳ Fase Testing
 
 ═══════════════════════════════════════════════════════════════
 
 **CREADO:** Marzo 2026
 **ÚLTIMA ACTUALIZACIÓN:** 31 de Marzo de 2026
-**ESTADO:** 🚧 PENDIENTE — esperando IDs de producción de AdMob
+**ESTADO:** 🚧 EN PRUEBAS — implementación lista, pendiente validación final en APK/AAB

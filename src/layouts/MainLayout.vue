@@ -1,10 +1,10 @@
 <template>
   <q-layout view="hHh lpR fFf">
     <!-- HEADER -->
-    <q-header elevated class="bg-white text-primary">
+    <q-header elevated :class="clasesHeader">
       <q-toolbar class="header-toolbar">
         <div class="header-left">
-          <q-btn flat dense round aria-label="Menu" @click="toggleDrawer" color="primary">
+          <q-btn flat dense round aria-label="Menu" @click="toggleDrawer" :color="colorBotonMenu">
             <q-icon name="menu" />
             <q-badge
               v-if="sesionEscaneoStore.tieneItemsPendientes"
@@ -15,6 +15,7 @@
           </q-btn>
 
           <q-btn
+            v-if="!MODO_PRUEBA"
             flat
             no-caps
             class="title-link"
@@ -24,13 +25,14 @@
             <span class="title-text">Precio Justo</span>
           </q-btn>
         </div>
+        <div v-if="MODO_PRUEBA" class="indicador-modo-prueba">● MODO PRUEBA</div>
 
         <div class="header-actions">
           <q-btn
             flat
             round
             class="quick-access-btn"
-            :color="esInicioActivo ? 'primary' : 'grey-6'"
+            :color="obtenerColorAccion(esInicioActivo)"
             aria-label="Ir a Inicio"
             @click="irAInicio"
           >
@@ -41,7 +43,7 @@
             flat
             round
             class="quick-access-btn"
-            :color="esComerciosActivo ? 'primary' : 'grey-6'"
+            :color="obtenerColorAccion(esComerciosActivo)"
             aria-label="Ir a Comercios"
             @click="irAComercios"
           >
@@ -54,7 +56,7 @@
                 flat
                 round
                 class="quick-access-btn"
-                :color="esMesaActivo ? 'primary' : 'grey-6'"
+                :color="obtenerColorAccion(esMesaActivo)"
                 aria-label="Ir a Mesa de trabajo"
                 @click="irAMesaTrabajo"
               >
@@ -133,7 +135,6 @@
               </q-chip>
             </q-item-section>
           </q-item>
-            <!--
             <q-item clickable v-ripple to="/gracias">
               <q-item-section avatar>
                 <IconHeart :size="24" />
@@ -142,7 +143,6 @@
                 <q-item-label>Gracias</q-item-label>
               </q-item-section>
             </q-item>
-            -->
           </q-list>
         </q-scroll-area>
 
@@ -162,7 +162,7 @@
     </q-drawer>
 
     <!-- CONTENIDO PRINCIPAL -->
-    <q-page-container>
+    <q-page-container :style="{ paddingBottom: altoBanner + 'px' }">
       <router-view />
     </q-page-container>
   </q-layout>
@@ -171,8 +171,10 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { IconHome, IconMapPin, IconBriefcase, IconSettings } from '@tabler/icons-vue'
+import { IconHome, IconMapPin, IconBriefcase, IconHeart, IconSettings } from '@tabler/icons-vue'
 import { useBotonAtras } from '../composables/useBotonAtras.js'
+import { usePublicidad } from '../composables/usePublicidad.js'
+import { MODO_PRUEBA } from '../almacenamiento/constantes/ConfigPublicidad.js'
 import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
 
@@ -181,6 +183,7 @@ const route = useRoute()
 const drawerAbierto = ref(false)
 const sesionEscaneoStore = useSesionEscaneoStore()
 const preferenciasStore = usePreferenciasStore()
+const { inicializar, mostrarBanner, altoBanner } = usePublicidad()
 
 const toggleDrawer = () => {
   drawerAbierto.value = !drawerAbierto.value
@@ -189,6 +192,13 @@ const toggleDrawer = () => {
 const esInicioActivo = computed(() => route.path === '/')
 const esComerciosActivo = computed(() => route.path.startsWith('/comercios'))
 const esMesaActivo = computed(() => route.path === '/mesa-trabajo')
+const clasesHeader = computed(() => (MODO_PRUEBA ? 'bg-orange-8 text-white' : 'bg-white text-primary'))
+const colorBotonMenu = computed(() => (MODO_PRUEBA ? 'white' : 'primary'))
+
+const obtenerColorAccion = (estaActivo) => {
+  if (MODO_PRUEBA) return estaActivo.value ? 'white' : 'grey-3'
+  return estaActivo.value ? 'primary' : 'grey-6'
+}
 
 const irAInicio = () => {
   if (esInicioActivo.value) return
@@ -208,6 +218,12 @@ const irAMesaTrabajo = () => {
 // Carga datos persistidos al iniciar la app
 onMounted(async () => {
   await Promise.all([sesionEscaneoStore.cargarSesion(), preferenciasStore.inicializar()])
+  try {
+    await inicializar()
+    await mostrarBanner()
+  } catch {
+    // Si AdMob falla, la app debe seguir funcionando sin publicidad.
+  }
 })
 
 useBotonAtras({ drawerAbierto, router, route })
@@ -215,6 +231,7 @@ useBotonAtras({ drawerAbierto, router, route })
 
 <style scoped>
 .header-toolbar {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -245,6 +262,14 @@ useBotonAtras({ drawerAbierto, router, route })
   align-items: center;
   gap: 2px;
   flex: 0 0 auto;
+}
+.indicador-modo-prueba {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  pointer-events: none;
 }
 .quick-access-btn {
   min-width: 40px;
