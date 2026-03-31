@@ -29,6 +29,15 @@ para la futura página de estadísticas.
 - Interstitial preparado para cuando exista la página de estadísticas
 - La publicidad solo se activa en plataforma nativa (no en web/dev)
 
+### REGLAS DE EJECUCIÓN PARA IA
+
+- No inventar IDs reales, nombres de métodos ni comportamientos del plugin.
+- Si la API instalada del plugin cambia, ajustar el plan antes de escribir código.
+- No tocar lo que ya esté marcado como `[x]` salvo que solo sea para aclarar el estado actual.
+- No pasar a una fase posterior si la anterior todavía depende de IDs, rutas o archivos pendientes.
+- Limitar los cambios a los archivos listados en el plan, salvo que aparezca una dependencia técnica real.
+- Mantener la publicidad desactivada en web y en cualquier entorno no nativo.
+
 ### ⚠️ ANTES DE GENERAR EL AAB DE PRODUCCIÓN:
 
 - Completar los IDs reales en `ConfigPublicidad.js` (sección IDS_PRODUCCION)
@@ -155,6 +164,7 @@ Expone `altoBanner` para que el layout aplique el padding correcto.
 
 ### Lógica
 
+[ ] Verificar la API real del paquete instalado antes de escribir el composable
 [ ] Importar `AdMob`, `BannerAdSize`, `BannerAdPosition` de `@capacitor-community/admob`
 [ ] Importar `Capacitor` de `@capacitor/core`
 [ ] Importar `CONFIG_PUBLICIDAD` de `ConfigPublicidad.js`
@@ -265,6 +275,7 @@ No es un diálogo ni un popup — es una página de navegación real.
 [x] Ítem "Gracias" implementado en el Drawer
 [x] `GraciasPage.vue` creada con contador local (`contadorGracias`) y botón "Dar gracias"
 [x] Persistencia en localStorage + notificación al incrementar
+[x] El ítem del Drawer está preparado, pero en el layout actual sigue comentado hasta activar el flujo rewarded completo
 [ ] Integración de video rewarded (pendiente para fase futura)
 ### 5.1 — Ruta nueva
 
@@ -413,5 +424,5 @@ Nunca mostrarlo dos veces seguidas sin que el usuario haya interactuado.
 ═══════════════════════════════════════════════════════════════
 
 **CREADO:** Marzo 2026
-**ÚLTIMA ACTUALIZACIÓN:** Marzo 2026
+**ÚLTIMA ACTUALIZACIÓN:** 31 de Marzo de 2026
 **ESTADO:** 🚧 PENDIENTE — esperando IDs de producción de AdMob
