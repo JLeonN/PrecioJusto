@@ -47,7 +47,10 @@
       </q-card-section>
 
       <!-- ACCIONES -->
-      <q-card-actions align="right" class="q-px-md q-pb-md acciones-safe-area">
+      <q-card-actions
+        align="right"
+        class="q-px-md q-pb-md acciones-safe-area acciones-safe-area-publicidad"
+      >
         <q-btn flat label="Cancelar" color="grey-7" @click="cancelar" />
         <q-btn
           unelevated
@@ -576,6 +579,12 @@ async function alDetectarCodigo(codigo) {
 .dialogo-agregar {
   min-width: 350px;
   max-width: 500px;
+  max-height: calc(
+    100dvh - var(--safe-area-top, 0px) - var(--safe-area-bottom, 0px) - var(--espacio-publicidad, 0px) - 24px
+  );
+  display: flex;
+  flex-direction: column;
+  margin-bottom: calc(var(--espacio-publicidad, 0px) + 8px);
 }
 .dialogo-landscape {
   max-width: 90vw;
@@ -583,13 +592,14 @@ async function alDetectarCodigo(codigo) {
 }
 .contenido-scroll {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
 }
 .dialogo-landscape .contenido-scroll {
   max-height: 50vh;
 }
 .acciones-safe-area {
-  padding-bottom: calc(16px + var(--safe-area-bottom, 0px)) !important;
+  padding-bottom: calc(16px + var(--safe-area-bottom, 0px) + var(--espacio-publicidad, 0px)) !important;
 }
 .formularios-contenedor {
   padding: 0 4px;

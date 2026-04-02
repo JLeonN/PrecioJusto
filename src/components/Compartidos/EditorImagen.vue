@@ -146,7 +146,7 @@ async function alGuardar() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px calc(12px + var(--safe-area-bottom, 0px));
+  padding: 12px 16px calc(12px + var(--safe-area-bottom, 0px) + var(--espacio-publicidad, 0px));
   background: var(--overlay-oscuro-fuerte);
   border-top: 1px solid var(--borde-blanco-sutil);
   flex-shrink: 0;

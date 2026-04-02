@@ -24,7 +24,7 @@
       </q-card-section>
 
       <!-- ACCIONES -->
-      <q-card-actions vertical class="q-px-md q-pb-md">
+      <q-card-actions vertical class="q-px-md q-pb-md acciones-safe-area-publicidad">
         <q-btn
           unelevated
           color="primary"

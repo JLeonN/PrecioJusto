@@ -5,6 +5,9 @@
 .q-header {
   padding-top: var(--safe-area-top);
 }
+.acciones-safe-area-publicidad {
+  padding-bottom: calc(16px + var(--safe-area-bottom, 0px) + var(--espacio-publicidad, 0px)) !important;
+}
 /* ===========================
    ESTILOS GENERALES
    =========================== */

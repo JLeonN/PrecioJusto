@@ -140,7 +140,7 @@
       </q-card-section>
 
       <!-- Acciones -->
-      <q-card-actions align="right" class="q-px-md q-pb-md">
+      <q-card-actions align="right" class="q-px-md q-pb-md acciones-safe-area-publicidad">
         <q-btn flat label="Cancelar" color="grey-7" @click="cerrar" />
         <q-btn
           unelevated

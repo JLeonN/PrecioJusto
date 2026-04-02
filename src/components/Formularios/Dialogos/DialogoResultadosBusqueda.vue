@@ -63,7 +63,7 @@
       <q-card-actions
         v-if="variantePie"
         vertical
-        class="q-px-md q-pb-md q-pt-none"
+        class="q-px-md q-pb-md q-pt-none acciones-safe-area-publicidad"
       >
         <q-btn
           outline

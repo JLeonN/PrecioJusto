@@ -119,7 +119,7 @@ function alGuardarEditor(nuevaImagenBase64) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px calc(10px + var(--safe-area-bottom, 0px));
+  padding: 10px 16px calc(10px + var(--safe-area-bottom, 0px) + var(--espacio-publicidad, 0px));
   background: var(--overlay-oscuro-suave);
   border-top: 1px solid var(--borde-blanco-sutil);
   gap: 12px;

@@ -435,7 +435,7 @@ function emitDescartar() {
   border-radius: 16px 16px 0 0;
   width: 100%;
   max-width: 100vw;
-  padding-bottom: var(--safe-area-bottom);
+  padding-bottom: calc(var(--safe-area-bottom, 0px) + var(--espacio-publicidad, 0px));
 }
 @media (min-width: 768px) {
   .tarjeta-escaneo-card {
@@ -547,7 +547,7 @@ function emitDescartar() {
   padding: 8px 16px 10px;
 }
 .tarjeta-escaneo-footer {
-  padding: 8px 16px 12px;
+  padding: 8px 16px calc(12px + var(--espacio-publicidad, 0px));
   border-top: 1px solid var(--borde-color);
 }
 .input-archivo-oculto {

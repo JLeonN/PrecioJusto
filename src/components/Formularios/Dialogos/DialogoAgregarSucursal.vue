@@ -48,7 +48,7 @@
       </q-card-section>
 
       <!-- ACCIONES -->
-      <q-card-actions align="right" class="q-pa-md">
+      <q-card-actions align="right" class="q-pa-md acciones-safe-area-publicidad">
         <q-btn flat label="Cancelar" color="grey" @click="cerrar" />
         <q-btn
           label="Agregar sucursal"

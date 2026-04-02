@@ -16,19 +16,28 @@ let listenersBannerRegistrados = false
 
 const esPlataformaNativa = () => Capacitor.isNativePlatform()
 
+const actualizarVariableEspacioPublicidad = (altura) => {
+  if (typeof document === 'undefined') return
+  const alturaNormalizada = Number.isFinite(altura) ? Math.max(0, Math.round(altura)) : 0
+  document.documentElement.style.setProperty('--espacio-publicidad', `${alturaNormalizada}px`)
+}
+
 const registrarListenersBanner = async () => {
   if (listenersBannerRegistrados) return
 
   await AdMob.addListener(BannerAdPluginEvents.Loaded, () => {
     if (altoBanner.value === 0) altoBanner.value = 50
+    actualizarVariableEspacioPublicidad(altoBanner.value)
   })
 
   await AdMob.addListener(BannerAdPluginEvents.SizeChanged, ({ height }) => {
     altoBanner.value = Number.isFinite(height) ? height : 50
+    actualizarVariableEspacioPublicidad(altoBanner.value)
   })
 
   await AdMob.addListener(BannerAdPluginEvents.FailedToLoad, () => {
     altoBanner.value = 0
+    actualizarVariableEspacioPublicidad(0)
   })
 
   listenersBannerRegistrados = true
@@ -58,6 +67,7 @@ const mostrarBanner = async () => {
     })
   } catch {
     altoBanner.value = 0
+    actualizarVariableEspacioPublicidad(0)
   }
 }
 
@@ -68,6 +78,7 @@ const ocultarBanner = async () => {
     await AdMob.hideBanner()
   } finally {
     altoBanner.value = 0
+    actualizarVariableEspacioPublicidad(0)
   }
 }
 
@@ -120,3 +131,5 @@ export const usePublicidad = () => ({
   mostrarInterstitial,
   mostrarRecompensado,
 })
+
+actualizarVariableEspacioPublicidad(0)

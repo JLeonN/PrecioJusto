@@ -133,7 +133,7 @@
           />
         </q-card-section>
 
-        <q-card-actions align="right">
+        <q-card-actions align="right" class="acciones-safe-area-publicidad">
           <q-btn flat label="Cancelar" color="grey-7" @click="cancelarCodigoManual" />
           <q-btn
             unelevated
@@ -216,7 +216,7 @@
           </div>
         </q-card-section>
 
-        <q-card-actions align="right">
+        <q-card-actions align="right" class="acciones-safe-area-publicidad">
           <q-btn flat label="Cancelar" color="grey-7" @click="dialogoConfirmacionAbierto = false" />
           <q-btn
             unelevated
