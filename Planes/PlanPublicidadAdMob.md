@@ -4,10 +4,9 @@ Proyecto: Precio Justo
 Fecha inicio: Marzo 2026
 Responsable: Leo + CH
 
-### 🕐 ESTADO: SUSPENDIDO — Esperando producción en Google Play
-Google rechazó el acceso a producción el 14/03/2026 y reinició el período de prueba cerrada.
-Nueva fecha estimada para retomar: **28/03/2026** (14 días desde la revisión).
-Completar IDs de producción en `ConfigPublicidad.js` una vez que la app esté en producción.
+### 🕐 ESTADO: EN PRODUCCIÓN — Modo prueba desactivado
+La app ya quedó configurada con los IDs reales de AdMob y `MODO_PRUEBA = false`.
+El siguiente paso es validar el comportamiento final en APK/AAB de producción.
 
 ═══════════════════════════════════════════════════════════════
 
@@ -127,7 +126,7 @@ Bien comentado y fácil de encontrar.
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // MODO PRUEBA — cambiar a false antes de publicar
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-export const MODO_PRUEBA = true
+export const MODO_PRUEBA = false
 
 // IDs de prueba oficiales de Google (siempre funcionan en APK)
 const IDS_PRUEBA = {
@@ -351,12 +350,12 @@ Nunca mostrarlo dos veces seguidas sin que el usuario haya interactuado.
 
 ═══════════════════════════════════════════════════════════════
 
-## 🧪 FASE TESTING: PRUEBAS EN APK [PENDIENTE]
+## 🧪 FASE TESTING: PRUEBAS EN APK [EN CURSO]
 
 ### T.A — Configuración y modo prueba
 
-[ ] `MODO_PRUEBA = true` → los anuncios de prueba de Google aparecen (no los reales)
-[ ] `MODO_PRUEBA = false` con IDs `PENDIENTE` → la app no crashea, los anuncios no cargan (esperado)
+[x] `MODO_PRUEBA = false` → se usan los IDs reales de producción
+[x] IDs reales cargados en `ConfigPublicidad.js`
 [ ] En web/browser → no se inicializa AdMob, no hay errores en consola
 [ ] En APK → AdMob se inicializa correctamente
 
@@ -392,7 +391,7 @@ Nunca mostrarlo dos veces seguidas sin que el usuario haya interactuado.
 
 [ ] Completar los 4 IDs reales en `ConfigPublicidad.js`
 [ ] Actualizar el App ID en `AndroidManifest.xml`
-[ ] Cambiar `MODO_PRUEBA = false`
+[x] Cambiar `MODO_PRUEBA = false`
 [ ] Generar APK de staging y verificar que los anuncios reales cargan
 [ ] Verificar que el banner real tiene el alto correcto (puede diferir del de prueba)
 [ ] Generar AAB de producción
@@ -424,5 +423,5 @@ Nunca mostrarlo dos veces seguidas sin que el usuario haya interactuado.
 ═══════════════════════════════════════════════════════════════
 
 **CREADO:** Marzo 2026
-**ÚLTIMA ACTUALIZACIÓN:** 31 de Marzo de 2026
-**ESTADO:** 🚧 EN PRUEBAS — implementación lista, pendiente validación final en APK/AAB
+**ÚLTIMA ACTUALIZACIÓN:** 2 de Abril de 2026
+**ESTADO:** 🚧 EN PRODUCCIÓN — pendiente validación final en APK/AAB
