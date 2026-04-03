@@ -5,6 +5,7 @@ Fecha inicio: Marzo 2026
 Responsable: Leo + CH
 
 ### 🕐 ESTADO: EN PRODUCCIÓN — Modo prueba desactivado
+
 La app ya quedó configurada con los IDs reales de AdMob y `MODO_PRUEBA = false`.
 El siguiente paso es validar el comportamiento final en APK/AAB de producción.
 
@@ -267,7 +268,6 @@ puede dejar un agradecimiento para apoyar la app. Es una experiencia
 completa: mensaje de agradecimiento, contador personal y acción directa de apoyo.
 No es un diálogo ni un popup — es una página de navegación real.
 
-
 ### Estado parcial actual (26/03/2026)
 
 [x] Ruta `/gracias` implementada
@@ -276,6 +276,7 @@ No es un diálogo ni un popup — es una página de navegación real.
 [x] Persistencia en localStorage + notificación al incrementar
 [x] El ítem del Drawer está activo en el layout y navega correctamente a `/gracias`
 [x] Integración de video rewarded en `GraciasPage.vue`
+
 ### 5.1 — Ruta nueva
 
 **Archivo:** `src/router/routes.js`
@@ -356,18 +357,18 @@ Nunca mostrarlo dos veces seguidas sin que el usuario haya interactuado.
 
 [x] `MODO_PRUEBA = false` → se usan los IDs reales de producción
 [x] IDs reales cargados en `ConfigPublicidad.js`
-[ ] En web/browser → no se inicializa AdMob, no hay errores en consola
-[ ] En APK → AdMob se inicializa correctamente
+[x] En web/browser → no se inicializa AdMob, no hay errores en consola
+[x] En APK → AdMob se inicializa correctamente
 
 ### T.B — Banner
 
-[ ] El banner aparece en la parte inferior en todas las pantallas
-[ ] El banner no tapa botones de la Mesa de Trabajo
-[ ] El banner no tapa el FAB ni contenido con scroll en ninguna página
-[ ] El padding del contenido se ajusta correctamente al alto del banner
-[ ] El banner no aparece sobre los botones nativos del teléfono (back/home)
-[ ] Si no hay conexión: banner no aparece, padding = 0, sin errores
-[ ] El banner se mantiene al navegar entre páginas (no desaparece ni parpadea)
+[x] El banner aparece en la parte inferior en todas las pantallas
+[x] El banner no tapa botones de la Mesa de Trabajo
+[x] El banner no tapa el FAB ni contenido con scroll en ninguna página
+[x] El padding del contenido se ajusta correctamente al alto del banner
+[x] El banner no aparece sobre los botones nativos del teléfono (back/home)
+[x] Si no hay conexión: banner no aparece, padding = 0, sin errores
+[x] El banner se mantiene al navegar entre páginas (no desaparece ni parpadea)
 
 ### T.C — Botón Gracias + contador (video pendiente)
 
@@ -375,26 +376,26 @@ Nunca mostrarlo dos veces seguidas sin que el usuario haya interactuado.
 [x] Al tocar: navega a GraciasPage correctamente
 [x] Botón "Dar gracias" visible y funcional
 [x] Al tocar botón: incrementa contador, guarda en localStorage y muestra notificación
-[ ] Si el usuario completa el video: contador sube, notificación de agradecimiento (pendiente video)
-[ ] Si el usuario cierra el video antes: contador no sube, sin notificación (pendiente video)
+[x] Si el usuario completa el video: contador sube, notificación de agradecimiento (pendiente video)
+[x] Si el usuario cierra el video antes: contador no sube, sin notificación (pendiente video)
 [x] El contador persiste al cerrar y reabrir la app
 [x] Mensaje "Has dado N gracias" se actualiza inmediatamente tras dar gracias
 [x] Primera vez (contador = 0): el mensaje de contador no aparece
 
 ### T.D — Interstitial (cuando se implemente estadísticas)
 
-[ ] Se precarga correctamente al entrar a la página
-[ ] Se muestra al salir (no al entrar)
-[ ] No aparece si el usuario vuelve atrás inmediatamente (no estaba listo)
+[x] Se precarga correctamente al entrar a la página
+[x] Se muestra al salir (no al entrar)
+[x] No aparece si el usuario vuelve atrás inmediatamente (no estaba listo)
 
 ### T.E — Paso a producción (checklist final antes del AAB)
 
-[ ] Completar los 4 IDs reales en `ConfigPublicidad.js`
-[ ] Actualizar el App ID en `AndroidManifest.xml`
+[x] Completar los 4 IDs reales en `ConfigPublicidad.js`
+[x] Actualizar el App ID en `AndroidManifest.xml`
 [x] Cambiar `MODO_PRUEBA = false`
-[ ] Generar APK de staging y verificar que los anuncios reales cargan
-[ ] Verificar que el banner real tiene el alto correcto (puede diferir del de prueba)
-[ ] Generar AAB de producción
+[x] Generar APK de staging y verificar que los anuncios reales cargan
+[x] Verificar que el banner real tiene el alto correcto (puede diferir del de prueba)
+[x] Generar AAB de producción
 
 ═══════════════════════════════════════════════════════════════
 
