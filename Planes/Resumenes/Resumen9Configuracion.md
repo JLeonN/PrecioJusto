@@ -10,11 +10,13 @@ La sección de Configuración concentra las preferencias globales de la app y de
 - Detección de país para intentar definir la moneda correcta
 - Fallback seguro a la última moneda manual guardada
 - La moneda elegida en un precio puntual no modifica la preferencia global
+- El cambio de moneda automática/manual puede disparar un interstitial con control de frecuencia
 
 ## Lo que ya resuelve
 - Define una única moneda global para formularios nuevos
 - Muestra la moneda predeterminada efectiva en pantalla
 - Permite separar claramente moneda global y moneda local
+- Mantiene una integración simple con publicidad sin ensuciar la lógica de preferencias
 
 ## Preparado para el futuro
 - Idioma de la app
