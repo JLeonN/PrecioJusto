@@ -14,6 +14,10 @@ Las tareas más difíciles siempre van arriba.
 
 - **Precios especiales, packs y escalas (mayoristas / por cantidad):** Permitir registrar situaciones que no son “un solo precio unitario simple”: ofertas tipo 2×$100, precio distinto si comprás 1, venta mínima en pack, etc. Incluir en UI algo explícito (checkbox, toggle o equivalente) y persistencia coherente. **Mayoristas y tramos:** muchos comercios aplican precio según cantidad (ej.: 1 unidad $75, 3 iguales $73 c/u, 6 iguales $70 c/u); el modelo y el formulario deben poder cubrir eso o, como mínimo, dejar el diseño listo para ampliarlo — definir en sesión dedicada cómo se cargan los tramos, cómo se compara con otros locales y cómo se muestra en listados. Auditar todos los puntos de ingreso de precio: `DialogoAgregarPrecio`, `FormularioPrecio` / flujos de agregar producto, mesa de trabajo / borradores de escaneo, detalle de producto y cualquier otro formulario de precio.
 
+### Dificultad 6/10
+
+- **Subir símbolos de depuración del App Bundle en Play Console:** Resolver la advertencia de Google Play que indica que el bundle contiene código nativo sin archivo de símbolos. Definir y documentar el flujo para generar y subir símbolos de depuración en cada release Android (incluyendo dónde quedan en el proyecto y en qué paso del proceso `build` se obtienen), para facilitar análisis y depuración de fallas y ANR.
+
 ### Dificultad 5/10
 
 - **App en varios idiomas:** Preparar la app para soportar múltiples idiomas. Antes de implementar cualquier cambio hay que hacer un plan dedicado para definir el alcance, la estrategia de traducciones y los puntos de la UI que se van a tocar.
