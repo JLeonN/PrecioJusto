@@ -78,16 +78,30 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { MONEDAS } from '../almacenamiento/constantes/Monedas.js'
+import { usePublicidad } from '../composables/usePublicidad.js'
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
 
 const preferenciasStore = usePreferenciasStore()
+const { mostrarInterstitial } = usePublicidad()
+const ultimoIntersticialMostrado = ref(0)
+const TIEMPO_ESPERA_INTERSTICIAL_MS = 60000
 
 const esModoAutomatico = computed(() => preferenciasStore.modoMoneda === 'automatica')
 
 async function cambiarModoAutomatico(valor) {
-  await preferenciasStore.guardarModoMoneda(valor ? 'automatica' : 'manual')
+  const nuevoModo = valor ? 'automatica' : 'manual'
+
+  if (preferenciasStore.modoMoneda === nuevoModo) return
+
+  await preferenciasStore.guardarModoMoneda(nuevoModo)
+
+  const ahora = Date.now()
+  if (ahora - ultimoIntersticialMostrado.value < TIEMPO_ESPERA_INTERSTICIAL_MS) return
+
+  ultimoIntersticialMostrado.value = ahora
+  await mostrarInterstitial()
 }
 
 async function cambiarMonedaManual(moneda) {

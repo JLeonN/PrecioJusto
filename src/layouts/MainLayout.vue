@@ -183,7 +183,7 @@ const route = useRoute()
 const drawerAbierto = ref(false)
 const sesionEscaneoStore = useSesionEscaneoStore()
 const preferenciasStore = usePreferenciasStore()
-const { inicializar, mostrarBanner, altoBanner } = usePublicidad()
+const { inicializar, mostrarBanner, precargarInterstitial, altoBanner } = usePublicidad()
 
 const toggleDrawer = () => {
   drawerAbierto.value = !drawerAbierto.value
@@ -226,6 +226,7 @@ onMounted(async () => {
   await Promise.all([sesionEscaneoStore.cargarSesion(), preferenciasStore.inicializar()])
   try {
     await inicializar()
+    await precargarInterstitial()
     await mostrarBanner()
   } catch {
     // Si AdMob falla, la app debe seguir funcionando sin publicidad.
