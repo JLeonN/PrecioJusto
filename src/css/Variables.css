@@ -79,6 +79,10 @@
   --color-icono-overlay-fondo: rgba(255, 255, 255, 0.9);
   --color-icono-overlay-texto: #5f6f82;
   --color-icono-overlay-borde: rgba(31, 127, 218, 0.2);
+  --sucursal-activa-fondo: #e8f2ff;
+  --sucursal-activa-borde: #4a9fff;
+  --sucursal-activa-texto: #11355c;
+  --sucursal-activa-texto-secundario: #35597d;
   /* ===========================
      ESPACIADOS BASE
      =========================== */
@@ -261,5 +265,9 @@ body.body--dark {
   --color-icono-overlay-fondo: rgba(20, 31, 45, 0.92);
   --color-icono-overlay-texto: #8fc6ff;
   --color-icono-overlay-borde: rgba(143, 198, 255, 0.28);
+  --sucursal-activa-fondo: #2a3b4e;
+  --sucursal-activa-borde: #5ca9ff;
+  --sucursal-activa-texto: #e9f3ff;
+  --sucursal-activa-texto-secundario: #b7d2ef;
   --degradado-marco-imagen: linear-gradient(135deg, #223243 0%, #182430 100%);
 }

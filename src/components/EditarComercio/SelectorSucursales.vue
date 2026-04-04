@@ -2,7 +2,7 @@
   <!-- CADENA: mini-tarjetas horizontales scrolleables -->
   <div v-if="esCadena" class="selector-sucursales">
     <div class="selector-sucursales__titulo">
-      <IconMapPin :size="18" class="text-orange" />
+      <IconMapPin :size="18" class="selector-sucursales__titulo-icono" />
       <span>Sucursales</span>
     </div>
     <div class="selector-sucursales__lista">
@@ -80,6 +80,9 @@ const estaSeleccionada = (direccion) => props.direccionSeleccionada?.id === dire
   font-size: 14px;
   color: var(--texto-primario);
 }
+.selector-sucursales__titulo-icono {
+  color: var(--color-acento);
+}
 .selector-sucursales__lista {
   display: flex;
   gap: 10px;
@@ -99,8 +102,15 @@ const estaSeleccionada = (direccion) => props.direccionSeleccionada?.id === dire
   transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 .mini-tarjeta-sucursal--activa {
-  border-color: var(--color-acento);
-  background-color: var(--color-acento-claro);
+  border-color: var(--sucursal-activa-borde);
+  background-color: var(--sucursal-activa-fondo);
+}
+.mini-tarjeta-sucursal--activa .mini-tarjeta-sucursal__calle {
+  color: var(--sucursal-activa-texto);
+}
+.mini-tarjeta-sucursal--activa .mini-tarjeta-sucursal__ubicacion,
+.mini-tarjeta-sucursal--activa .mini-tarjeta-sucursal__articulos {
+  color: var(--sucursal-activa-texto-secundario);
 }
 .mini-tarjeta-sucursal__calle {
   font-size: 13px;
