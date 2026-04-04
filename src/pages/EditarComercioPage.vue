@@ -105,9 +105,9 @@
         <input ref="inputArchivoRef" type="file" accept="image/*" class="input-archivo-oculto" @change="alSeleccionarArchivo" />
 
         <!-- SECCIÓN: DATOS EDITABLES -->
-        <div class="seccion-campos q-mb-lg">
+        <div class="seccion-campos seccion-datos-comercio q-mb-lg">
           <div class="seccion-titulo q-mb-sm">
-            <IconEdit :size="18" class="text-orange" />
+            <IconEdit :size="18" class="icono-acento-vivo" />
             <span>Datos del comercio</span>
           </div>
 
@@ -116,6 +116,8 @@
             etiqueta="Nombre"
             :valor="comercioActual.nombre"
             :icono="IconBuilding"
+            color-icono-fondo="var(--icono-datos-comercio-fondo)"
+            color-icono-texto="var(--icono-datos-comercio-texto)"
             requerido
             @guardar="(v) => guardarCampo('nombre', v)"
           />
@@ -127,6 +129,8 @@
             :icono="IconTag"
             tipo="select"
             :opciones="opcionesTipo"
+            color-icono-fondo="var(--icono-datos-comercio-fondo)"
+            color-icono-texto="var(--icono-datos-comercio-texto)"
             sin-valor-texto="Sin categoría"
             @guardar="(v) => guardarCampo('tipo', v)"
           />
@@ -136,6 +140,8 @@
             etiqueta="Dirección"
             :valor="direccionSeleccionada?.calle"
             :icono="IconMapPin"
+            color-icono-fondo="var(--icono-datos-comercio-fondo)"
+            color-icono-texto="var(--icono-datos-comercio-texto)"
             requerido
             @guardar="(v) => guardarCampoDireccion('calle', v)"
           />
@@ -145,6 +151,8 @@
             etiqueta="Barrio"
             :valor="direccionSeleccionada?.barrio"
             :icono="IconMap"
+            color-icono-fondo="var(--icono-datos-comercio-fondo)"
+            color-icono-texto="var(--icono-datos-comercio-texto)"
             sin-valor-texto="Sin barrio"
             @guardar="(v) => guardarCampoDireccion('barrio', v)"
           />
@@ -154,6 +162,8 @@
             etiqueta="Ciudad"
             :valor="direccionSeleccionada?.ciudad"
             :icono="IconMapPin"
+            color-icono-fondo="var(--icono-datos-comercio-fondo)"
+            color-icono-texto="var(--icono-datos-comercio-texto)"
             sin-valor-texto="Sin ciudad"
             @guardar="(v) => guardarCampoDireccion('ciudad', v)"
           />
@@ -862,5 +872,13 @@ onMounted(async () => {
   border-radius: 12px;
   padding: 16px;
   box-shadow: var(--sombra-ligera);
+}
+.seccion-datos-comercio {
+  --icono-datos-comercio-fondo: color-mix(in srgb, var(--color-acento) 36%, transparent);
+  --icono-datos-comercio-texto: color-mix(in srgb, var(--color-acento) 84%, white 16%);
+}
+.icono-acento-vivo {
+  color: color-mix(in srgb, var(--color-acento) 88%, white 12%);
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--color-acento) 36%, transparent));
 }
 </style>
