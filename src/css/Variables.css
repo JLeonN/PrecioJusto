@@ -14,6 +14,9 @@
   --color-acento: #ff9800;
   --color-acento-oscuro: #f57c00;
   --color-acento-claro: #ffe0b2;
+  --color-primario-tema: var(--color-primario);
+  --color-secundario-tema: var(--color-secundario);
+  --color-acento-tema: var(--color-acento);
   --color-exito: #4caf50;
   --color-advertencia: #ff9800;
   --color-error: #f44336;
@@ -25,6 +28,10 @@
   --fondo-app-secundario: #f7f8fb;
   --fondo-tarjeta: #ffffff;
   --fondo-drawer: #f5f5f5;
+  --fondo-header-claro: #ffffff;
+  --fondo-header-oscuro: #1f2530;
+  --fondo-drawer-claro: #f5f5f5;
+  --fondo-drawer-oscuro: #181e27;
   --fondo-oscuro: #1a1a1a;
   --fondo-oscuro-secundario: #2a2a2a;
   --texto-primario: #212121;
@@ -63,6 +70,10 @@
   --color-error-fondo-suave: rgba(244, 67, 54, 0.12);
   --color-exito-fondo-alto: rgba(25, 135, 65, 0.93);
   --color-acento-fondo-alto: rgba(180, 105, 0, 0.93);
+  --fondo-banner-suave: #eff4fb;
+  --fondo-banner-informativo: #edf6ff;
+  --fondo-input: #ffffff;
+  --fondo-dialogo: #ffffff;
   /* ===========================
      ESPACIADOS BASE
      =========================== */
@@ -166,4 +177,40 @@
   --safe-area-top: env(safe-area-inset-top, 0px);
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --espacio-publicidad: 0px;
+}
+body.body--dark {
+  --color-primario: #6db4ff;
+  --color-primario-oscuro: #3f93e8;
+  --color-primario-claro: #b7dcff;
+  --color-secundario: #78cb7f;
+  --color-secundario-oscuro: #52ae5b;
+  --color-secundario-claro: #beecc2;
+  --color-acento: #ffb44d;
+  --color-acento-oscuro: #f59721;
+  --color-acento-claro: #ffdcae;
+  --color-primario-tema: var(--color-primario);
+  --color-secundario-tema: var(--color-secundario);
+  --color-acento-tema: var(--color-acento);
+  --fondo-app: #0e1218;
+  --fondo-app-secundario: #131a22;
+  --fondo-tarjeta: #1a232d;
+  --fondo-drawer: #151c25;
+  --fondo-header-oscuro: #141b23;
+  --fondo-drawer-oscuro: #101720;
+  --texto-primario: #e9eef5;
+  --texto-secundario: #bac8d9;
+  --texto-sutil: #98a9bd;
+  --texto-deshabilitado: #708197;
+  --borde-color: #2b3a4b;
+  --sombra-ligera: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --sombra-media: 0 6px 16px rgba(0, 0, 0, 0.4);
+  --sombra-fuerte: 0 10px 24px rgba(0, 0, 0, 0.45);
+  --color-acento-fondo-suave: rgba(255, 180, 77, 0.16);
+  --color-error-borde: rgba(244, 67, 54, 0.45);
+  --color-error-fondo-suave: rgba(244, 67, 54, 0.16);
+  --fondo-banner-suave: #1a2531;
+  --fondo-banner-informativo: #1a2b3d;
+  --fondo-input: #17202a;
+  --fondo-dialogo: #19222d;
+  --degradado-marco-imagen: linear-gradient(135deg, #223243 0%, #182430 100%);
 }

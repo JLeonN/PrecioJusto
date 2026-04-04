@@ -19,7 +19,7 @@
             flat
             no-caps
             class="title-link"
-            :color="esInicioActivo ? 'primary' : 'grey-8'"
+            :color="colorTituloHeader"
             @click="irAInicio"
           >
             <span class="title-text">Precio Justo</span>
@@ -76,7 +76,7 @@
       bordered
       overlay
       behavior="mobile"
-      class="bg-grey-1"
+      :class="clasesDrawer"
     >
       <div class="fit drawer-contenedor">
         <q-scroll-area class="drawer-scroll">
@@ -172,6 +172,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { IconHome, IconMapPin, IconBriefcase, IconHeart, IconSettings } from '@tabler/icons-vue'
+import { useQuasar } from 'quasar'
 import { useBotonAtras } from '../composables/useBotonAtras.js'
 import { usePublicidad } from '../composables/usePublicidad.js'
 import { MODO_PRUEBA } from '../almacenamiento/constantes/ConfigPublicidad.js'
@@ -180,6 +181,7 @@ import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore
 
 const router = useRouter()
 const route = useRoute()
+const quasar = useQuasar()
 const drawerAbierto = ref(false)
 const sesionEscaneoStore = useSesionEscaneoStore()
 const preferenciasStore = usePreferenciasStore()
@@ -192,8 +194,22 @@ const toggleDrawer = () => {
 const esInicioActivo = computed(() => route.path === '/')
 const esComerciosActivo = computed(() => route.path.startsWith('/comercios'))
 const esMesaActivo = computed(() => route.path === '/mesa-trabajo')
-const clasesHeader = computed(() => (MODO_PRUEBA ? 'bg-orange-8 text-white' : 'bg-white text-primary'))
-const colorBotonMenu = computed(() => (MODO_PRUEBA ? 'white' : 'primary'))
+const clasesHeader = computed(() => {
+  if (MODO_PRUEBA) return 'bg-orange-8 text-white'
+  return quasar.dark.isActive ? 'header-tema-oscuro text-white' : 'header-tema-claro text-primary'
+})
+const colorTituloHeader = computed(() => {
+  if (MODO_PRUEBA) return 'white'
+  if (quasar.dark.isActive) return esInicioActivo.value ? 'primary' : 'grey-3'
+  return esInicioActivo.value ? 'primary' : 'grey-8'
+})
+const clasesDrawer = computed(() =>
+  quasar.dark.isActive ? 'drawer-tema drawer-tema-oscuro' : 'drawer-tema drawer-tema-claro',
+)
+const colorBotonMenu = computed(() => {
+  if (MODO_PRUEBA) return 'white'
+  return quasar.dark.isActive ? 'white' : 'primary'
+})
 const estiloLayout = computed(() => ({
   '--espacio-publicidad': `${altoBanner.value}px`,
 }))
@@ -203,6 +219,7 @@ const estiloContenedorPrincipal = computed(() => ({
 
 const obtenerColorAccion = (estaActivo) => {
   if (MODO_PRUEBA) return estaActivo.value ? 'white' : 'grey-3'
+  if (quasar.dark.isActive) return estaActivo.value ? 'primary' : 'grey-4'
   return estaActivo.value ? 'primary' : 'grey-6'
 }
 
@@ -242,6 +259,18 @@ useBotonAtras({ drawerAbierto, router, route })
   display: flex;
   align-items: center;
   gap: 8px;
+}
+.header-tema-claro {
+  background: var(--fondo-header-claro);
+}
+.header-tema-oscuro {
+  background: var(--fondo-header-oscuro);
+}
+.drawer-tema-claro {
+  background: var(--fondo-drawer-claro);
+}
+.drawer-tema-oscuro {
+  background: var(--fondo-drawer-oscuro);
 }
 .header-left {
   display: flex;

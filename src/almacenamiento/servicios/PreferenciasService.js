@@ -1,6 +1,6 @@
 /**
  * Servicio de preferencias de usuario.
- * Maneja preferencias globales de moneda y unidad con persistencia.
+ * Maneja preferencias globales de moneda, tema y unidad con persistencia.
  */
 
 import { adaptadorActual } from './AlmacenamientoService.js'
@@ -8,6 +8,7 @@ import { MONEDA_DEFAULT } from '../constantes/Monedas.js'
 
 const PREFERENCIAS_BASE = {
   modoMoneda: 'automatica',
+  modoTema: 'sistema',
   monedaManual: MONEDA_DEFAULT,
   paisDetectado: null,
   monedaDetectada: null,
@@ -27,8 +28,16 @@ function normalizarPreferencias(preferenciasCrudas) {
       ? preferenciasCrudas.modoMoneda
       : PREFERENCIAS_BASE.modoMoneda
 
+  const modoTema =
+    preferenciasCrudas.modoTema === 'claro' ||
+    preferenciasCrudas.modoTema === 'oscuro' ||
+    preferenciasCrudas.modoTema === 'sistema'
+      ? preferenciasCrudas.modoTema
+      : PREFERENCIAS_BASE.modoTema
+
   return {
     modoMoneda,
+    modoTema,
     monedaManual,
     paisDetectado: preferenciasCrudas.paisDetectado || null,
     monedaDetectada: preferenciasCrudas.monedaDetectada || null,
@@ -66,6 +75,10 @@ class PreferenciasService {
 
   async guardarModoMoneda(modoMoneda) {
     return this.guardarPreferenciasParciales({ modoMoneda })
+  }
+
+  async guardarModoTema(modoTema) {
+    return this.guardarPreferenciasParciales({ modoTema })
   }
 
   async guardarMonedaManual(monedaManual) {

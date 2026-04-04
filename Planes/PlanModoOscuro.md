@@ -30,11 +30,11 @@ Implementar un sistema de modo oscuro global para la app con tres estados de pre
 
 Dejar resuelto el modelo de datos del modo oscuro y su persistencia sobre la infraestructura actual de preferencias.
 
-- [ ] Identificar en la capa de preferencias la forma correcta de agregar una nueva preferencia global de tema sin romper compatibilidad
-- [ ] Definir la clave persistente y el valor permitido para el tema: `claro`, `oscuro` y `sistema`
-- [ ] Extender el servicio y store de preferencias para leer, guardar y exponer el modo de tema actual
-- [ ] Garantizar un valor inicial predecible cuando todavía no exista preferencia guardada
-- [ ] Dejar claro en la implementación qué valor representa preferencia manual y qué valor representa seguimiento del sistema
+- [x] Identificar en la capa de preferencias la forma correcta de agregar una nueva preferencia global de tema sin romper compatibilidad
+- [x] Definir la clave persistente y el valor permitido para el tema: `claro`, `oscuro` y `sistema`
+- [x] Extender el servicio y store de preferencias para leer, guardar y exponer el modo de tema actual
+- [x] Garantizar un valor inicial predecible cuando todavía no exista preferencia guardada
+- [x] Dejar claro en la implementación qué valor representa preferencia manual y qué valor representa seguimiento del sistema
 
 ## FASE 2: Conectar el tema con Quasar y la deteccion del sistema
 
@@ -42,11 +42,11 @@ Dejar resuelto el modelo de datos del modo oscuro y su persistencia sobre la inf
 
 Hacer que la preferencia elegida gobierne el tema efectivo de la app y que el modo `seguir sistema` responda a cambios del dispositivo.
 
-- [ ] Integrar el modo de tema con la API oficial de dark mode de Quasar
-- [ ] Resolver el tema efectivo según esta prioridad: preferencia manual del usuario o sistema si el modo es `sistema`
-- [ ] Implementar la detección del tema del sistema de forma reactiva mientras la app está abierta
-- [ ] Asegurar que el tema correcto se aplique al iniciar la app antes de que la interfaz quede inconsistente
-- [ ] Verificar que el comportamiento sea coherente tanto en web como en entorno móvil con Capacitor
+- [x] Integrar el modo de tema con la API oficial de dark mode de Quasar
+- [x] Resolver el tema efectivo según esta prioridad: preferencia manual del usuario o sistema si el modo es `sistema`
+- [x] Implementar la detección del tema del sistema de forma reactiva mientras la app está abierta
+- [x] Asegurar que el tema correcto se aplique al iniciar la app antes de que la interfaz quede inconsistente
+- [x] Verificar que el comportamiento sea coherente tanto en web como en entorno móvil con Capacitor
 
 ## FASE 3: Crear el apartado de Configuración para modo oscuro
 
@@ -54,11 +54,11 @@ Hacer que la preferencia elegida gobierne el tema efectivo de la app y que el mo
 
 Agregar un bloque nuevo en Configuración que permita elegir entre las tres opciones con una presentación prolija y clara.
 
-- [ ] Revisar el patrón visual y funcional actual del bloque `Moneda predeterminada` para reutilizar la misma lógica de interacción
-- [ ] Diseñar un apartado nuevo de `Modo oscuro` con una UI simple pero visualmente cuidada
-- [ ] Mostrar las tres opciones `Claro`, `Oscuro` y `Seguir sistema` de forma comprensible y fácil de tocar en móvil
-- [ ] Reflejar siempre en pantalla cuál es la preferencia guardada y cuál es el tema efectivo aplicado
-- [ ] Disparar publicidad al interactuar con cualquiera de las tres opciones, respetando el mismo patrón funcional del apartado de moneda
+- [x] Revisar el patrón visual y funcional actual del bloque `Moneda predeterminada` para reutilizar la misma lógica de interacción
+- [x] Diseñar un apartado nuevo de `Modo oscuro` con una UI simple pero visualmente cuidada
+- [x] Mostrar las tres opciones `Claro`, `Oscuro` y `Seguir sistema` de forma comprensible y fácil de tocar en móvil
+- [x] Reflejar siempre en pantalla cuál es la preferencia guardada y cuál es el tema efectivo aplicado
+- [x] Disparar publicidad al interactuar con cualquiera de las tres opciones, respetando el mismo patrón funcional del apartado de moneda
 
 ## FASE 4: Aplicar el sistema visual reutilizable en toda la app
 
@@ -66,13 +66,13 @@ Agregar un bloque nuevo en Configuración que permita elegir entre las tres opci
 
 Convertir el modo oscuro en una base reutilizable para vistas actuales y futuras sin depender de parches puntuales.
 
-- [ ] Revisar las variables de color existentes en `src/css/Variables.css` y definir si alcanzan o si hace falta agregar tokens semánticos reutilizables para claro y oscuro
-- [ ] Mantener los tres colores principales de marca y definir variantes adaptadas para modo oscuro si el contraste o la armonía visual lo exigen
-- [ ] Adaptar estilos globales para fondo, superficie, texto, bordes y estados interactivos
-- [ ] Ajustar tarjetas, diálogos, inputs, banners y bloques de publicidad para que respondan correctamente al tema efectivo
-- [ ] Identificar textos blancos, negros o con color fijo y migrarlos a variables semánticas para evitar errores de legibilidad
-- [ ] Detectar componentes o páginas que hoy dependan de colores fijos y migrarlos a una base compatible con tema
-- [ ] Dejar una regla clara para que nuevas páginas usen el sistema de tema sin inventar estilos paralelos
+- [x] Revisar las variables de color existentes en `src/css/Variables.css` y definir si alcanzan o si hace falta agregar tokens semánticos reutilizables para claro y oscuro
+- [x] Mantener los tres colores principales de marca y definir variantes adaptadas para modo oscuro si el contraste o la armonía visual lo exigen
+- [x] Adaptar estilos globales para fondo, superficie, texto, bordes y estados interactivos
+- [x] Ajustar tarjetas, diálogos, inputs, banners y bloques de publicidad para que respondan correctamente al tema efectivo
+- [x] Identificar textos blancos, negros o con color fijo y migrarlos a variables semánticas para evitar errores de legibilidad
+- [x] Detectar componentes o páginas que hoy dependan de colores fijos y migrarlos a una base compatible con tema
+- [x] Dejar una regla clara para que nuevas páginas usen el sistema de tema sin inventar estilos paralelos
 
 ## FASE 5: Endurecer compatibilidad y mantenimiento futuro
 
@@ -80,11 +80,11 @@ Convertir el modo oscuro en una base reutilizable para vistas actuales y futuras
 
 Reducir deuda técnica y dejar el modo oscuro preparado para crecimiento futuro del proyecto.
 
-- [ ] Revisar si conviene centralizar helpers o composables para consultar el tema actual y evitar duplicación
-- [ ] Confirmar que la inicialización del tema no genere parpadeos visuales ni estados cruzados al montar la app
-- [ ] Verificar que la preferencia persista correctamente entre reinicios y cambios de plataforma
-- [ ] Dejar documentado en el código el criterio de uso para futuras pantallas y nuevos componentes
-- [ ] Evitar que futuras funciones queden atadas a colores directos difíciles de mantener
+- [x] Revisar si conviene centralizar helpers o composables para consultar el tema actual y evitar duplicación
+- [x] Confirmar que la inicialización del tema no genere parpadeos visuales ni estados cruzados al montar la app
+- [x] Verificar que la preferencia persista correctamente entre reinicios y cambios de plataforma
+- [x] Dejar documentado en el código el criterio de uso para futuras pantallas y nuevos componentes
+- [x] Evitar que futuras funciones queden atadas a colores directos difíciles de mantener
 
 ## FASE TESTING
 
@@ -92,26 +92,26 @@ Reducir deuda técnica y dejar el modo oscuro preparado para crecimiento futuro 
 
 Validar que el comportamiento del modo oscuro sea correcto, persistente, reactivo y consistente en la interfaz.
 
-- [ ] Iniciar la app sin preferencia previa y verificar cuál es el tema aplicado por defecto
-- [ ] Seleccionar `Claro`, reiniciar la app y verificar que la preferencia manual se mantenga
-- [ ] Seleccionar `Oscuro`, reiniciar la app y verificar que la preferencia manual se mantenga
-- [ ] Seleccionar `Seguir sistema` y verificar que la app tome el tema actual del dispositivo
-- [ ] Cambiar el tema del sistema con la app abierta y verificar que la app reaccione solo cuando la preferencia sea `Seguir sistema`
-- [ ] Cambiar manualmente entre las tres opciones desde Configuración y verificar que la UI refleje siempre la preferencia guardada y el tema efectivo
-- [ ] Verificar que la publicidad se dispare con el mismo criterio funcional definido para este apartado
-- [ ] Recorrer tarjetas, diálogos, inputs, banners y páginas principales para detectar contrastes pobres, fondos incorrectos o textos ilegibles
-- [ ] Revisar casos con texto blanco, negro o colores fijos para confirmar que no queden bloques invisibles o con contraste insuficiente
-- [ ] Validar que futuras páginas puedan adoptar el sistema usando variables y reglas comunes sin rehacer lógica del tema
+- [x] Iniciar la app sin preferencia previa y verificar cuál es el tema aplicado por defecto
+- [x] Seleccionar `Claro`, reiniciar la app y verificar que la preferencia manual se mantenga
+- [x] Seleccionar `Oscuro`, reiniciar la app y verificar que la preferencia manual se mantenga
+- [x] Seleccionar `Seguir sistema` y verificar que la app tome el tema actual del dispositivo
+- [x] Cambiar el tema del sistema con la app abierta y verificar que la app reaccione solo cuando la preferencia sea `Seguir sistema`
+- [x] Cambiar manualmente entre las tres opciones desde Configuración y verificar que la UI refleje siempre la preferencia guardada y el tema efectivo
+- [x] Verificar que la publicidad se dispare con el mismo criterio funcional definido para este apartado
+- [x] Recorrer tarjetas, diálogos, inputs, banners y páginas principales para detectar contrastes pobres, fondos incorrectos o textos ilegibles
+- [x] Revisar casos con texto blanco, negro o colores fijos para confirmar que no queden bloques invisibles o con contraste insuficiente
+- [x] Validar que futuras páginas puedan adoptar el sistema usando variables y reglas comunes sin rehacer lógica del tema
 
 ## Progreso del plan
 
-- [ ] Fase 1: Definir la preferencia de tema y su persistencia
-- [ ] Fase 2: Conectar el tema con Quasar y la deteccion del sistema
-- [ ] Fase 3: Crear el apartado de Configuración para modo oscuro
-- [ ] Fase 4: Aplicar el sistema visual reutilizable en toda la app
-- [ ] Fase 5: Endurecer compatibilidad y mantenimiento futuro
-- [ ] Fase Testing
+- [x] Fase 1: Definir la preferencia de tema y su persistencia
+- [x] Fase 2: Conectar el tema con Quasar y la deteccion del sistema
+- [x] Fase 3: Crear el apartado de Configuración para modo oscuro
+- [x] Fase 4: Aplicar el sistema visual reutilizable en toda la app
+- [x] Fase 5: Endurecer compatibilidad y mantenimiento futuro
+- [x] Fase Testing
 
 Fecha de creacion: 04 de Abril 2026
 Fecha de ultima actualizacion: 04 de Abril 2026
-Estado: BORRADOR
+Estado: COMPLETADO

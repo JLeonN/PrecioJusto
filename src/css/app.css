@@ -15,6 +15,48 @@ body {
   background-color: var(--fondo-app);
   color: var(--texto-primario);
 }
+body.body--dark .q-layout,
+body.body--dark .q-page-container,
+body.body--dark .q-page {
+  background-color: var(--fondo-app);
+  color: var(--texto-primario);
+}
+body.body--dark .q-card,
+body.body--dark .q-dialog__inner > div {
+  background: var(--fondo-dialogo);
+  color: var(--texto-primario);
+  border-color: var(--borde-color);
+}
+body.body--dark .q-banner {
+  background: var(--fondo-banner-suave);
+  color: var(--texto-primario);
+}
+body.body--dark .q-field--outlined .q-field__control {
+  background: var(--fondo-input);
+  color: var(--texto-primario);
+}
+body.body--dark .q-field__native,
+body.body--dark .q-field__input,
+body.body--dark .q-field__label {
+  color: var(--texto-primario);
+}
+body.body--dark .q-separator {
+  background: var(--borde-color);
+}
+body.body--dark .q-item {
+  color: var(--texto-primario);
+}
+body.body--dark .text-grey-7,
+body.body--dark .text-grey-6,
+body.body--dark .text-grey-5,
+body.body--dark .text-grey-4,
+body.body--dark .text-grey {
+  color: var(--texto-secundario) !important;
+}
+body.body--dark .text-dark,
+body.body--dark .text-black {
+  color: var(--texto-primario) !important;
+}
 /* ===========================
    CONTENEDORES DE PÁGINA
    =========================== */

@@ -1,11 +1,13 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
+import { Dark } from 'quasar'
 import preferenciasService from '../servicios/PreferenciasService.js'
 import { MONEDA_DEFAULT } from '../constantes/Monedas.js'
 import { detectarMonedaPorRegion, obtenerMonedaFallback } from '../servicios/DeteccionRegionService.js'
 
 export const usePreferenciasStore = defineStore('preferencias', () => {
   const modoMoneda = ref('automatica')
+  const modoTema = ref('sistema')
   const monedaManual = ref(MONEDA_DEFAULT)
   const paisDetectado = ref(null)
   const monedaDetectada = ref(null)
@@ -30,6 +32,21 @@ export const usePreferenciasStore = defineStore('preferencias', () => {
   const usandoFallbackAutomatico = computed(
     () => modoMoneda.value === 'automatica' && !monedaDetectada.value,
   )
+  const esTemaSistema = computed(() => modoTema.value === 'sistema')
+  const temaEfectivo = computed(() => {
+    if (modoTema.value === 'claro') return 'claro'
+    if (modoTema.value === 'oscuro') return 'oscuro'
+    return Dark.isActive ? 'oscuro' : 'claro'
+  })
+
+  function aplicarModoTema() {
+    if (modoTema.value === 'sistema') {
+      Dark.set('auto')
+      return
+    }
+
+    Dark.set(modoTema.value === 'oscuro')
+  }
 
   async function detectarMonedaAutomatica() {
     const resultadoDeteccion = detectarMonedaPorRegion()
@@ -47,10 +64,12 @@ export const usePreferenciasStore = defineStore('preferencias', () => {
     try {
       const preferencias = await preferenciasService.obtenerPreferencias()
       modoMoneda.value = preferencias.modoMoneda || 'automatica'
+      modoTema.value = preferencias.modoTema || 'sistema'
       monedaManual.value = preferencias.monedaManual || MONEDA_DEFAULT
       paisDetectado.value = preferencias.paisDetectado || null
       monedaDetectada.value = preferencias.monedaDetectada || null
       unidad.value = preferencias.unidad || 'unidad'
+      aplicarModoTema()
 
       if (modoMoneda.value === 'automatica') {
         await detectarMonedaAutomatica()
@@ -67,6 +86,19 @@ export const usePreferenciasStore = defineStore('preferencias', () => {
     if (modoMoneda.value === 'automatica') {
       await detectarMonedaAutomatica()
     }
+  }
+
+  async function guardarModoTema(valorModoTema) {
+    const modoNormalizado =
+      valorModoTema === 'claro' || valorModoTema === 'oscuro' || valorModoTema === 'sistema'
+        ? valorModoTema
+        : 'sistema'
+
+    if (modoTema.value === modoNormalizado) return
+
+    modoTema.value = modoNormalizado
+    aplicarModoTema()
+    await preferenciasService.guardarModoTema(modoTema.value)
   }
 
   async function guardarMonedaManual(moneda) {
@@ -86,15 +118,20 @@ export const usePreferenciasStore = defineStore('preferencias', () => {
 
   return {
     modoMoneda,
+    modoTema,
     monedaManual,
     paisDetectado,
     monedaDetectada,
     monedaDefaultEfectiva,
     usandoFallbackAutomatico,
+    esTemaSistema,
+    temaEfectivo,
     unidad,
+    aplicarModoTema,
     inicializar,
     detectarMonedaAutomatica,
     guardarModoMoneda,
+    guardarModoTema,
     guardarMonedaManual,
     guardarMoneda,
     guardarUnidad,
