@@ -3,7 +3,7 @@
     <div class="estadisticas-comercio__grid">
       <!-- Registrado -->
       <div class="stat-card">
-        <IconCalendar :size="20" class="text-orange" />
+        <IconCalendar :size="20" class="icono-estadistica" />
         <div class="stat-card__info">
           <div class="stat-card__etiqueta">Registrado</div>
           <div class="stat-card__valor">{{ fechaRegistro }}</div>
@@ -12,7 +12,7 @@
 
       <!-- Último uso -->
       <div class="stat-card">
-        <IconClock :size="20" class="text-orange" />
+        <IconClock :size="20" class="icono-estadistica" />
         <div class="stat-card__info">
           <div class="stat-card__etiqueta">Último uso</div>
           <div class="stat-card__valor">{{ textoUltimoUso }}</div>
@@ -21,7 +21,7 @@
 
       <!-- Último precio -->
       <div class="stat-card">
-        <IconCoin :size="20" class="text-orange" />
+        <IconCoin :size="20" class="icono-estadistica" />
         <div class="stat-card__info">
           <div class="stat-card__etiqueta">Último precio</div>
           <div class="stat-card__valor">{{ textoUltimoPrecio }}</div>
@@ -30,7 +30,7 @@
 
       <!-- Productos -->
       <div class="stat-card">
-        <IconShoppingBag :size="20" class="text-orange" />
+        <IconShoppingBag :size="20" class="icono-estadistica" />
         <div class="stat-card__info">
           <div class="stat-card__etiqueta">Productos</div>
           <div class="stat-card__valor">{{ totalProductos }}</div>
@@ -39,7 +39,7 @@
 
       <!-- Sucursales -->
       <div class="stat-card">
-        <IconMapPin :size="20" class="text-orange" />
+        <IconMapPin :size="20" class="icono-estadistica" />
         <div class="stat-card__info">
           <div class="stat-card__etiqueta">Sucursales</div>
           <div class="stat-card__valor">{{ comercio.totalSucursales || 1 }}</div>
@@ -107,9 +107,15 @@ const textoUltimoPrecio = computed(() => {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px;
-  background: var(--color-primario-claro);
+  padding: 14px;
+  background: color-mix(in srgb, var(--fondo-banner-informativo) 72%, var(--fondo-app-secundario) 28%);
   border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--color-acento) 30%, transparent 70%);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+.icono-estadistica {
+  color: var(--color-acento);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--color-acento) 48%, transparent));
 }
 .stat-card__info {
   display: flex;
