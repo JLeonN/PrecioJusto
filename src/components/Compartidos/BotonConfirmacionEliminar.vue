@@ -165,7 +165,7 @@ onBeforeUnmount(() => {
   background: var(--boton-eliminar-fondo);
   color: var(--boton-eliminar-texto);
   border: 1px solid var(--boton-eliminar-borde);
-  box-shadow: var(--sombra-media);
+  box-shadow: var(--sombra-ligera);
   backdrop-filter: blur(2px);
 }
 .boton-confirmacion-eliminar__accion {

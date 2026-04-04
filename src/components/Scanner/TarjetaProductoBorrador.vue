@@ -26,8 +26,8 @@
         <div class="chips-completitud">
           <q-chip
             clickable
-            :color="!!item.nombre?.trim() ? 'positive' : 'grey-4'"
-            :text-color="!!item.nombre?.trim() ? 'white' : 'grey-6'"
+            class="chip-campo"
+            :class="!!item.nombre?.trim() ? 'chip-campo--completo' : 'chip-campo--pendiente'"
             size="sm"
             @click.stop="irACampo('nombre')"
           >
@@ -35,8 +35,8 @@
           </q-chip>
           <q-chip
             clickable
-            :color="item.precio > 0 ? 'positive' : 'grey-4'"
-            :text-color="item.precio > 0 ? 'white' : 'grey-6'"
+            class="chip-campo"
+            :class="item.precio > 0 ? 'chip-campo--completo' : 'chip-campo--pendiente'"
             size="sm"
             @click.stop="irACampo('precio')"
           >
@@ -44,8 +44,8 @@
           </q-chip>
           <q-chip
             clickable
-            :color="!!item.comercio ? 'positive' : 'grey-4'"
-            :text-color="!!item.comercio ? 'white' : 'grey-6'"
+            class="chip-campo"
+            :class="!!item.comercio ? 'chip-campo--completo' : 'chip-campo--pendiente'"
             size="sm"
             @click.stop="irACampo('comercio')"
           >
@@ -495,6 +495,22 @@ function formatearPrecio(valor, moneda) {
   gap: 4px;
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+.chip-campo {
+  border: 1px solid var(--chip-campo-inactivo-borde);
+  background: var(--chip-campo-inactivo-fondo);
+  color: var(--chip-campo-inactivo-texto);
+  font-weight: 600;
+}
+.chip-campo--pendiente {
+  border-color: var(--chip-campo-inactivo-borde);
+  background: var(--chip-campo-inactivo-fondo);
+  color: var(--chip-campo-inactivo-texto);
+}
+.chip-campo--completo {
+  border-color: var(--chip-campo-completo-borde);
+  background: var(--chip-campo-completo-fondo);
+  color: var(--chip-campo-completo-texto);
 }
 .info-comercio,
 .info-direccion {

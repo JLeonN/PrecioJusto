@@ -169,6 +169,12 @@
   --boton-eliminar-borde-hover: rgba(244, 67, 54, 0.55);
   --boton-eliminar-texto: var(--color-error);
   --boton-eliminar-fondo-confirmar: rgba(244, 67, 54, 0.12);
+  --chip-campo-inactivo-fondo: #e5e7eb;
+  --chip-campo-inactivo-texto: #738095;
+  --chip-campo-inactivo-borde: #d5dce7;
+  --chip-campo-completo-fondo: #2e9d5f;
+  --chip-campo-completo-texto: #ffffff;
+  --chip-campo-completo-borde: #2a8f58;
   /* ===========================
      ANIMACIONES Y SAFE AREA
      =========================== */
@@ -219,5 +225,17 @@ body.body--dark {
   --color-carta-info-bg: #1c2734;
   --borde-header-claro: rgba(17, 24, 39, 0.08);
   --borde-header-oscuro: rgba(109, 180, 255, 0.3);
+  --boton-eliminar-fondo: rgba(19, 29, 41, 0.86);
+  --boton-eliminar-borde: rgba(255, 131, 131, 0.48);
+  --boton-eliminar-fondo-hover: rgba(28, 40, 56, 0.96);
+  --boton-eliminar-borde-hover: rgba(255, 131, 131, 0.7);
+  --boton-eliminar-texto: #ffb0b0;
+  --boton-eliminar-fondo-confirmar: rgba(255, 131, 131, 0.2);
+  --chip-campo-inactivo-fondo: #2b3948;
+  --chip-campo-inactivo-texto: #9fb0c3;
+  --chip-campo-inactivo-borde: #3b4a5b;
+  --chip-campo-completo-fondo: #2b9d62;
+  --chip-campo-completo-texto: #f4fff8;
+  --chip-campo-completo-borde: #37b775;
   --degradado-marco-imagen: linear-gradient(135deg, #223243 0%, #182430 100%);
 }
