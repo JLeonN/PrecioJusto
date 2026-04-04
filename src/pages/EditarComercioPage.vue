@@ -86,8 +86,8 @@
             </div>
           </div>
           <div v-else class="foto-placeholder">
-            <IconCamera :size="48" class="text-grey-4" />
-            <span class="text-grey-5 text-caption">Sin foto</span>
+            <IconCamera :size="48" class="foto-placeholder-icono" />
+            <span class="foto-placeholder-texto">Sin foto</span>
             <q-menu anchor="center middle" self="center middle">
               <q-list style="min-width: 160px">
                 <q-item v-if="esNativo" clickable v-close-popup @click="seleccionarCamara">
@@ -823,15 +823,26 @@ onMounted(async () => {
   width: 100%;
   max-width: 400px;
   aspect-ratio: 16/9;
-  background: var(--color-primario-claro);
+  background:
+    radial-gradient(circle at 24% 22%, var(--overlay-blanco-suave) 0%, transparent 45%),
+    linear-gradient(140deg, var(--fondo-drawer) 0%, var(--fondo-tarjeta) 100%);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 2px dashed var(--color-carta-borde);
+  border: 2px dashed color-mix(in srgb, var(--color-primario) 48%, var(--borde-color));
   cursor: pointer;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--overlay-blanco-suave) 35%, transparent);
+}
+.foto-placeholder-icono {
+  color: color-mix(in srgb, var(--color-primario) 62%, var(--texto-secundario));
+}
+.foto-placeholder-texto {
+  font-size: 12px;
+  color: var(--texto-secundario);
+  font-weight: 600;
 }
 .input-archivo-oculto {
   display: none;
