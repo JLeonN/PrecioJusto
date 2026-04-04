@@ -434,7 +434,7 @@ const manejarLongPress = () => {
   display: flex;
   align-items: center;
   font-size: 13px;
-  color: var(--texto-secundario);
+  color: var(--texto-primario);
 }
 /* ========================================
    CONTENIDO EXPANDIDO

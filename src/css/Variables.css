@@ -101,6 +101,8 @@
   --color-carta-header-comercio: var(--color-acento);
   --color-carta-borde: #d4d4d4;
   --color-carta-info-bg: #fafafa;
+  --borde-header-claro: rgba(17, 24, 39, 0.08);
+  --borde-header-oscuro: rgba(109, 180, 255, 0.24);
   --degradado-carta-header: linear-gradient(
     180deg,
     var(--color-primario) 0%,
@@ -212,5 +214,10 @@ body.body--dark {
   --fondo-banner-informativo: #1a2b3d;
   --fondo-input: #17202a;
   --fondo-dialogo: #19222d;
+  --overlay-blanco-alto: rgba(18, 26, 36, 0.92);
+  --color-carta-borde: #2f4258;
+  --color-carta-info-bg: #1c2734;
+  --borde-header-claro: rgba(17, 24, 39, 0.08);
+  --borde-header-oscuro: rgba(109, 180, 255, 0.3);
   --degradado-marco-imagen: linear-gradient(135deg, #223243 0%, #182430 100%);
 }

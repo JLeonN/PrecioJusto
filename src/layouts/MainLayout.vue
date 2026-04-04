@@ -1,7 +1,7 @@
 <template>
   <q-layout view="hHh lpR fFf" :style="estiloLayout">
     <!-- HEADER -->
-    <q-header elevated :class="clasesHeader">
+    <q-header :class="clasesHeader">
       <q-toolbar class="header-toolbar">
         <div class="header-left">
           <q-btn flat dense round aria-label="Menu" @click="toggleDrawer" :color="colorBotonMenu">
@@ -262,9 +262,13 @@ useBotonAtras({ drawerAbierto, router, route })
 }
 .header-tema-claro {
   background: var(--fondo-header-claro);
+  border-bottom: 1px solid var(--borde-header-claro);
+  box-shadow: 0 2px 10px rgba(16, 24, 40, 0.08);
 }
 .header-tema-oscuro {
   background: var(--fondo-header-oscuro);
+  border-bottom: 1px solid var(--borde-header-oscuro);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
 }
 .drawer-tema-claro {
   background: var(--fondo-drawer-claro);
