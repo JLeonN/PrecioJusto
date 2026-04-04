@@ -1,9 +1,15 @@
 <template>
-  <div class="campo-editable">
+  <div
+    class="campo-editable"
+    :style="{
+      '--campo-icono-fondo': colorIconoFondo,
+      '--campo-icono-texto': colorIconoTexto,
+    }"
+  >
     <!-- MODO LECTURA -->
     <div v-if="!editando" class="campo-editable__lectura" @click="iniciarEdicion">
       <div class="campo-editable__icono">
-        <component :is="icono" :size="20" class="text-orange" />
+        <component :is="icono" :size="20" class="campo-editable__icono-svg" />
       </div>
       <div class="campo-editable__contenido">
         <div class="campo-editable__etiqueta">{{ etiqueta }}</div>
@@ -19,7 +25,7 @@
     <!-- MODO EDICIÓN -->
     <div v-else class="campo-editable__edicion">
       <div class="campo-editable__icono">
-        <component :is="icono" :size="20" class="text-orange" />
+        <component :is="icono" :size="20" class="campo-editable__icono-svg" />
       </div>
       <div class="campo-editable__input-contenedor">
         <div class="campo-editable__etiqueta">{{ etiqueta }}</div>
@@ -91,6 +97,14 @@ const props = defineProps({
     type: String,
     default: 'Sin definir',
   },
+  colorIconoFondo: {
+    type: String,
+    default: 'var(--color-acento-claro)',
+  },
+  colorIconoTexto: {
+    type: String,
+    default: 'var(--color-acento)',
+  },
 })
 
 const emit = defineEmits(['guardar'])
@@ -148,8 +162,11 @@ function cancelar() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-acento-claro);
+  background: var(--campo-icono-fondo);
   border-radius: 50%;
+}
+.campo-editable__icono-svg {
+  color: var(--campo-icono-texto);
 }
 .campo-editable__contenido {
   flex: 1;

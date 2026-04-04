@@ -74,6 +74,11 @@
   --fondo-banner-informativo: #edf6ff;
   --fondo-input: #ffffff;
   --fondo-dialogo: #ffffff;
+  --color-icono-producto-fondo: #d9ebff;
+  --color-icono-producto-texto: #1f7fda;
+  --color-icono-overlay-fondo: rgba(255, 255, 255, 0.9);
+  --color-icono-overlay-texto: #5f6f82;
+  --color-icono-overlay-borde: rgba(31, 127, 218, 0.2);
   /* ===========================
      ESPACIADOS BASE
      =========================== */
@@ -251,5 +256,10 @@ body.body--dark {
   --scanner-halo: rgba(88, 160, 230, 0.2);
   --scanner-halo-transparente: rgba(88, 160, 230, 0);
   --scanner-estado-badge: rgba(88, 160, 230, 0.18);
+  --color-icono-producto-fondo: #1d3550;
+  --color-icono-producto-texto: #73b8ff;
+  --color-icono-overlay-fondo: rgba(20, 31, 45, 0.92);
+  --color-icono-overlay-texto: #8fc6ff;
+  --color-icono-overlay-borde: rgba(143, 198, 255, 0.28);
   --degradado-marco-imagen: linear-gradient(135deg, #223243 0%, #182430 100%);
 }

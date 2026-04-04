@@ -18,7 +18,7 @@
         </div>
         <!-- Overlay botón restaurar desde API (solo si tiene código de barras) -->
         <div v-if="producto.codigoBarras" class="imagen-overlay-izquierda">
-          <q-btn round color="white" text-color="grey-7" size="sm" class="btn-restaurar-api" :loading="restaurandoApi" @click="restaurarDesdeApi">
+          <q-btn round size="sm" class="btn-restaurar-api" :loading="restaurandoApi" @click="restaurarDesdeApi">
             <IconRefresh :size="16" />
             <q-tooltip>Restaurar datos desde la API</q-tooltip>
           </q-btn>
@@ -26,7 +26,7 @@
 
         <!-- Overlay botón editar foto -->
         <div class="imagen-overlay">
-          <q-btn round color="white" text-color="grey-7" size="sm" class="btn-editar-imagen">
+          <q-btn round size="sm" class="btn-editar-imagen">
             <IconCamera :size="16" />
             <q-tooltip>Editar foto</q-tooltip>
             <q-menu anchor="bottom right" self="top right">
@@ -103,6 +103,8 @@
           etiqueta="Marca"
           :valor="producto.marca || ''"
           :icono="IconBuildingStore"
+          color-icono-fondo="var(--color-icono-producto-fondo)"
+          color-icono-texto="var(--color-icono-producto-texto)"
           sin-valor-texto="Sin marca"
           class="q-mb-xs"
           @guardar="actualizarMarca"
@@ -113,6 +115,8 @@
           etiqueta="Categoría"
           :valor="producto.categoria || ''"
           :icono="IconTag"
+          color-icono-fondo="var(--color-icono-producto-fondo)"
+          color-icono-texto="var(--color-icono-producto-texto)"
           sin-valor-texto="Sin categoría"
           class="q-mb-xs"
           @guardar="actualizarCategoria"
@@ -122,7 +126,7 @@
         <div class="cantidad-row q-mb-xs">
           <template v-if="!editandoCantidad">
             <div class="cantidad-icono">
-              <IconRuler2 :size="20" class="text-orange" />
+              <IconRuler2 :size="20" class="icono-producto" />
             </div>
             <div class="cantidad-contenido">
               <div class="cantidad-etiqueta">Cantidad</div>
@@ -135,7 +139,7 @@
           </template>
           <template v-else>
             <div class="cantidad-icono">
-              <IconRuler2 :size="20" class="text-orange" />
+              <IconRuler2 :size="20" class="icono-producto" />
             </div>
             <div class="cantidad-edicion-inputs">
               <div class="cantidad-etiqueta">Cantidad</div>
@@ -570,6 +574,15 @@ const copiarCodigoBarras = async (codigo) => {
 .btn-editar-imagen {
   box-shadow: var(--sombra-boton-circular);
 }
+.btn-restaurar-api,
+.btn-editar-imagen {
+  background: var(--color-icono-overlay-fondo);
+  color: var(--color-icono-overlay-texto);
+  border: 1px solid var(--color-icono-overlay-borde);
+}
+.icono-producto {
+  color: var(--color-icono-producto-texto);
+}
 .input-archivo-oculto {
   display: none;
 }
@@ -647,7 +660,7 @@ const copiarCodigoBarras = async (codigo) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-acento-claro);
+  background: var(--color-icono-producto-fondo);
   border-radius: 50%;
 }
 .cantidad-contenido {
