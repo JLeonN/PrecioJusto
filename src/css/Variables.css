@@ -237,5 +237,19 @@ body.body--dark {
   --chip-campo-completo-fondo: #2b9d62;
   --chip-campo-completo-texto: #f4fff8;
   --chip-campo-completo-borde: #37b775;
+  --scanner-overlay-fondo-inicio: rgba(7, 12, 18, 0.78);
+  --scanner-overlay-fondo-header-fin: rgba(10, 17, 24, 0.46);
+  --scanner-overlay-fondo-fin: rgba(9, 15, 22, 0.82);
+  --scanner-overlay-fondo-base: rgba(7, 12, 18, 0.68);
+  --scanner-panel-bg: rgba(23, 32, 43, 0.94);
+  --scanner-panel-bg-secundario: rgba(18, 27, 37, 0.96);
+  --scanner-panel-borde: rgba(109, 180, 255, 0.32);
+  --scanner-panel-sombra: 0 14px 32px rgba(0, 0, 0, 0.48);
+  --scanner-texto-principal: #e8eef6;
+  --scanner-texto-secundario: rgba(194, 209, 227, 0.86);
+  --scanner-texto-eyebrow: rgba(137, 197, 255, 0.95);
+  --scanner-halo: rgba(88, 160, 230, 0.2);
+  --scanner-halo-transparente: rgba(88, 160, 230, 0);
+  --scanner-estado-badge: rgba(88, 160, 230, 0.18);
   --degradado-marco-imagen: linear-gradient(135deg, #223243 0%, #182430 100%);
 }
