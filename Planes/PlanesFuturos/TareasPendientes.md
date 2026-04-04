@@ -24,6 +24,8 @@ Las tareas más difíciles siempre van arriba.
 
 ### Dificultad 4/10
 
+- **Unificar el proyecto Android y el `applicationId`:** Revisar y dejar una sola fuente de verdad para Android, porque hoy existen dos estructuras con `applicationId` distinto (`android/` y `src-capacitor/android/`). Definir cuál es la carpeta válida para compilar y sincronizar, alinear configuración, y evitar que futuros cambios se hagan en el proyecto equivocado.
+
 - **Expandir confirmación de eliminación embebida en botón de papelera (patrón reutilizable ya implementado):** El patrón base ya está implementado y funcionando mediante `src/components/Compartidos/BotonConfirmacionEliminar.vue`, pero desde ahora la regla de implementación queda explícita: **conservar primero la interfaz existente (forma, tamaño, colores, texto y layout) y agregar solo la lógica de confirmación embebida (`Confirmar | Cancelar`)**. No rediseñar botones ni reemplazar bloques visuales completos salvo pedido explícito del usuario. Aplicar este criterio en listas, tarjetas y acciones rápidas de borrado simple; mantener diálogos externos solo para borrados masivos o casos sensibles donde esté justificado.
 
 ### Dificultad 4/10

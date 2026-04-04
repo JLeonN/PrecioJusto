@@ -5,6 +5,8 @@ import {
   BannerAdPluginEvents,
   BannerAdPosition,
   BannerAdSize,
+  InterstitialAdPluginEvents,
+  RewardAdPluginEvents,
 } from '@capacitor-community/admob'
 import { CONFIG_PUBLICIDAD, MODO_PRUEBA } from '../almacenamiento/constantes/ConfigPublicidad.js'
 
@@ -13,6 +15,7 @@ const interstitialListo = ref(false)
 
 let publicidadInicializada = false
 let listenersBannerRegistrados = false
+let listenersErroresRegistrados = false
 
 const esPlataformaNativa = () => Capacitor.isNativePlatform()
 
@@ -35,12 +38,28 @@ const registrarListenersBanner = async () => {
     actualizarVariableEspacioPublicidad(altoBanner.value)
   })
 
-  await AdMob.addListener(BannerAdPluginEvents.FailedToLoad, () => {
+  await AdMob.addListener(BannerAdPluginEvents.FailedToLoad, (error) => {
+    console.error('[AdMob] Fallo al cargar banner', error)
     altoBanner.value = 0
     actualizarVariableEspacioPublicidad(0)
   })
 
   listenersBannerRegistrados = true
+}
+
+const registrarListenersErrores = async () => {
+  if (listenersErroresRegistrados) return
+
+  await AdMob.addListener(InterstitialAdPluginEvents.FailedToLoad, (error) => {
+    console.error('[AdMob] Fallo al cargar interstitial', error)
+    interstitialListo.value = false
+  })
+
+  await AdMob.addListener(RewardAdPluginEvents.FailedToLoad, (error) => {
+    console.error('[AdMob] Fallo al cargar recompensado', error)
+  })
+
+  listenersErroresRegistrados = true
 }
 
 const inicializar = async () => {
@@ -51,6 +70,7 @@ const inicializar = async () => {
   })
 
   await registrarListenersBanner()
+  await registrarListenersErrores()
   publicidadInicializada = true
 }
 
@@ -65,7 +85,8 @@ const mostrarBanner = async () => {
       margin: 0,
       isTesting: MODO_PRUEBA,
     })
-  } catch {
+  } catch (error) {
+    console.error('[AdMob] Error al mostrar banner', error)
     altoBanner.value = 0
     actualizarVariableEspacioPublicidad(0)
   }
@@ -91,16 +112,21 @@ const precargarInterstitial = async () => {
       isTesting: MODO_PRUEBA,
     })
     interstitialListo.value = true
-  } catch {
+  } catch (error) {
+    console.error('[AdMob] Error al precargar interstitial', error)
     interstitialListo.value = false
   }
 }
 
 const mostrarInterstitial = async () => {
-  if (!esPlataformaNativa() || !interstitialListo.value) return
+  if (!esPlataformaNativa() || !interstitialListo.value) return false
 
   try {
     await AdMob.showInterstitial()
+    return true
+  } catch (error) {
+    console.error('[AdMob] Error al mostrar interstitial', error)
+    return false
   } finally {
     interstitialListo.value = false
   }
@@ -116,7 +142,8 @@ const mostrarRecompensado = async () => {
     })
     const recompensa = await AdMob.showRewardVideoAd()
     return Boolean(recompensa)
-  } catch {
+  } catch (error) {
+    console.error('[AdMob] Error al mostrar recompensado', error)
     return false
   }
 }

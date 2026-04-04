@@ -12,9 +12,9 @@ const IDS_PRUEBA = {
 
 const IDS_PRODUCCION = {
   appId: 'ca-app-pub-7620083100302566~1638876761',
-  banner: 'ca-app-pub-7620083100302566/7968916165',
-  interstitial: 'ca-app-pub-7620083100302566/3199370442',
-  recompensado: 'ca-app-pub-7620083100302566/2050879654',
+  banner: 'ca-app-pub-7620083100302566/2960754181',
+  interstitial: 'ca-app-pub-7620083100302566/9278750524',
+  recompensado: 'ca-app-pub-7620083100302566/6160595185',
 }
 
 export const CONFIG_PUBLICIDAD = MODO_PRUEBA ? IDS_PRUEBA : IDS_PRODUCCION
