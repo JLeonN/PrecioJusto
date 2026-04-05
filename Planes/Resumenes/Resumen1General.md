@@ -1074,7 +1074,7 @@ H. Arquitectura y Código
 - Señal "app lista" vía `nextTick()` en `App.vue`
 
 ### Estado Actual
-- **Versión:** 1.1.7
+- **Versión:** 1.1.8
 - **Almacenamiento:** Local (Capacitor Storage)
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
@@ -1092,7 +1092,7 @@ H. Arquitectura y Código
 - **Pie de atribución:** Completado (PieAtribucion.vue en DetalleProductoPage + EditarComercioPage; campo fotoFuente en productos)
 - **Preparación:** Lista para migración a Firebase
 - **Configuración global:** Completada (moneda predeterminada manual/automática; ver Resumen9Configuracion.md)
-- **Publicidad AdMob:** Integrada y en producción; banner, interstitial y rewarded activos (ver PlanPublicidadAdMob.md)
+- **Publicidad AdMob:** Integrada y en producción; banner, interstitial y rewarded activos. Los IDs de producción fueron regenerados para corregir fallos de serving en algunas unidades (ver PlanPublicidadAdMob.md)
 - **app-ads.txt:** Publicado en GitHub Pages para ayudar a la verificación de AdMob
 - **Ver detalles del sistema de escaneo:** Resumen8Scanner.md
 - **Ver detalles de configuración:** Resumen9Configuracion.md
@@ -1118,4 +1118,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 3 de Abril de 2026 — Se actualizó la versión del proyecto a 1.1.7, se integró AdMob en producción y se publicó app-ads.txt.
+**Última actualización:** 4 de Abril de 2026 — Se actualizó la versión del proyecto a 1.1.8, se regeneraron los IDs de AdMob de producción y se publicó app-ads.txt.
