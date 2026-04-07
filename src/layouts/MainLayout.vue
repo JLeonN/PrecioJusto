@@ -202,10 +202,11 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { IconHome, IconMapPin, IconBriefcase, IconHeart, IconSettings, IconRefresh } from '@tabler/icons-vue'
 import { useQuasar } from 'quasar'
+import { App } from '@capacitor/app'
 import { useBotonAtras } from '../composables/useBotonAtras.js'
 import { usePublicidad } from '../composables/usePublicidad.js'
 import { useActualizacionApp } from '../composables/useActualizacionApp.js'
@@ -222,6 +223,7 @@ const preferenciasStore = usePreferenciasStore()
 const { inicializar, mostrarBanner, precargarInterstitial, altoBanner } = usePublicidad()
 const { estadoActualizacion, modalActualizacionAbierto, refrescarEstadoActualizacion, cerrarModalActualizacion, abrirUrlPlayStore } =
   useActualizacionApp()
+let removerListenerEstadoApp = null
 
 const toggleDrawer = () => {
   drawerAbierto.value = !drawerAbierto.value
@@ -302,6 +304,8 @@ const actualizarAppAhora = async () => {
 // Carga datos persistidos al iniciar la app
 onMounted(async () => {
   await Promise.all([sesionEscaneoStore.cargarSesion(), preferenciasStore.inicializar()])
+  await refrescarEstadoActualizacion({ mostrarModalSiHay: true })
+
   try {
     await inicializar()
     await precargarInterstitial()
@@ -309,7 +313,22 @@ onMounted(async () => {
   } catch {
     // Si AdMob falla, la app debe seguir funcionando sin publicidad.
   }
-  await refrescarEstadoActualizacion({ mostrarModalSiHay: true })
+
+  try {
+    const listenerEstadoApp = await App.addListener('appStateChange', ({ isActive }) => {
+      if (!isActive) return
+      refrescarEstadoActualizacion({ mostrarModalSiHay: true })
+    })
+    removerListenerEstadoApp = () => listenerEstadoApp.remove()
+  } catch {
+    // En web puede no estar disponible este evento.
+  }
+})
+
+onUnmounted(() => {
+  if (!removerListenerEstadoApp) return
+  removerListenerEstadoApp()
+  removerListenerEstadoApp = null
 })
 
 useBotonAtras({ drawerAbierto, router, route })

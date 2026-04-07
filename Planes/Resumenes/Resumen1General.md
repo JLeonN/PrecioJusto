@@ -1074,7 +1074,7 @@ H. Arquitectura y Código
 - Señal "app lista" vía `nextTick()` en `App.vue`
 
 ### Estado Actual
-- **Versión:** 1.1.10
+- **Versión:** 1.1.11
 - **Almacenamiento:** Local (Capacitor Storage)
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
