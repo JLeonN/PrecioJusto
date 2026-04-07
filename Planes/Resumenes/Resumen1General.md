@@ -1074,7 +1074,7 @@ H. Arquitectura y Código
 - Señal "app lista" vía `nextTick()` en `App.vue`
 
 ### Estado Actual
-- **Versión:** 1.1.8
+- **Versión:** 1.1.9
 - **Almacenamiento:** Local (Capacitor Storage)
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
@@ -1118,4 +1118,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 4 de Abril de 2026 — Se actualizó la versión del proyecto a 1.1.8, se regeneraron los IDs de AdMob de producción y se publicó app-ads.txt.
+**Última actualización:** 7 de Abril de 2026 — Se implementó el sistema universal de actualizaciones con `version.json`, verificación remota, aviso en la app y automatización para GitHub Pages.

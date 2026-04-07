@@ -54,7 +54,7 @@ npm run generarVersionJson
 
 ```json
 {
-  "versionDisponible": "1.1.8",
+  "versionDisponible": "1.1.9",
   "urlPlayStore": "https://play.google.com/store/apps/details?id=com.preciojusto.app",
   "mostrarActualizacion": true
 }
