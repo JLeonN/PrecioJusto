@@ -967,7 +967,7 @@ const {
 - Eliminar sucursal individual con confirmación
 - Fusionar sucursales (transferir precios entre sucursales)
 - Lista de productos asociados con último precio (filtrada por sucursal)
-- Estadísticas del comercio (registro, último uso, último precio, productos, sucursales)
+- Estadísticas en EditarComercioPage comentadas temporalmente por bajo valor actual. Se planifica retomarlas como futura pantalla dedicada de datos con métricas más útiles y avanzadas.
 - Conteo de usos reales calculado desde productos (comerciosConUsosReales computed en ComerciosPage)
 - Fotos de comercios: q-menu contextual en FormularioComercio, EditarComercioPage y DialogoAgregarComercioRapido (composable useCamaraFoto)
 - Pie de atribución en EditarComercioPage: `PieAtribucion` al final del scroll; `fuentesApi=[]` (sin API de GPS todavía); `fuentesUsuario` siempre incluye 'nombre', 'dirección', 'tipo' y agrega 'foto' si la sucursal seleccionada tiene foto (fotos de comercios son siempre del usuario)

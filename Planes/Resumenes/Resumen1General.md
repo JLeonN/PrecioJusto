@@ -500,7 +500,7 @@ B. Gestión de Comercios y Sucursales
 ✅ Selector de sucursales como mini-tarjetas (calle, barrio/ciudad, artículos registrados)
 ✅ Agregar/eliminar sucursales desde página de edición
 ✅ Fusionar sucursales (transferir precios entre sucursales)
-✅ Estadísticas del comercio (registro, último uso, productos, sucursales)
+✅ Estadísticas de EditarComercioPage comentadas temporalmente. Quedan reservadas para futura pantalla dedicada de datos con estadísticas ampliadas.
 ✅ Lista de productos asociados con último precio, filtrada por sucursal seleccionada
 ✅ Composable reutilizable de fechas relativas (useFechaRelativa.js)
 ✅ Conteo de usos calculado desde productos reales (no desde cantidadUsos del store)

@@ -17,11 +17,3 @@ Las tareas más difíciles siempre van arriba.
 ### Dificultad 5/10
 
 - **App en varios idiomas:** Preparar la app para soportar múltiples idiomas. Antes de implementar cualquier cambio hay que hacer un plan dedicado para definir el alcance, la estrategia de traducciones y los puntos de la UI que se van a tocar.
-
-### Dificultad 4/10
-
-- **Expandir confirmación de eliminación embebida en botón de papelera (patrón reutilizable ya implementado):** El patrón base ya está implementado y funcionando mediante `src/components/Compartidos/BotonConfirmacionEliminar.vue`, pero desde ahora la regla de implementación queda explícita: **conservar primero la interfaz existente (forma, tamaño, colores, texto y layout) y agregar solo la lógica de confirmación embebida (`Confirmar | Cancelar`)**. No rediseñar botones ni reemplazar bloques visuales completos salvo pedido explícito del usuario. Aplicar este criterio en listas, tarjetas y acciones rápidas de borrado simple; mantener diálogos externos solo para borrados masivos o casos sensibles donde esté justificado.
-
-### Dificultad 4/10
-
-- **Estadísticas en Edición de Comercio — Revisión completa:** Las estadísticas que se muestran en `EditarComercioPage` necesitan una revisión general: sacar las que no aportan valor, editar las existentes para que sean más precisas o útiles, y agregar estadísticas nuevas. Actualmente se muestran: "Registrado" (fecha), "Último uso" (tiempo relativo), "Último precio" (tiempo relativo), "Productos" (cantidad) y "Sucursales" (cantidad). El usuario quiere definir cuáles quedan, cuáles se modifican y cuáles se agregan en una sesión de trabajo dedicada.

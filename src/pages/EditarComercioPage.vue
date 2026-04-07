@@ -288,7 +288,8 @@
           </template>
         </div>
 
-        <!-- SECCIÓN: ESTADÍSTICAS -->
+        <!-- SECCIÓN: ESTADÍSTICAS (comentada temporalmente para evaluar una pantalla de datos dedicada en el futuro) -->
+        <!--
         <div class="seccion-campos q-mb-lg">
           <div class="seccion-titulo q-mb-sm">
             <IconChartBar :size="18" class="text-orange" />
@@ -300,6 +301,7 @@
             :ultimo-precio-fecha="ultimoPrecioFecha"
           />
         </div>
+        -->
 
         <!-- Pie de atribución de fuentes -->
         <PieAtribucion
@@ -344,7 +346,6 @@ import {
   IconTrash,
   IconShoppingBag,
   IconGitMerge,
-  IconChartBar,
 } from '@tabler/icons-vue'
 import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
@@ -353,7 +354,6 @@ import SelectorSucursales from '../components/EditarComercio/SelectorSucursales.
 import CampoEditable from '../components/EditarComercio/CampoEditable.vue'
 import DialogoAgregarSucursal from '../components/Formularios/Dialogos/DialogoAgregarSucursal.vue'
 import ListaProductosComercio from '../components/EditarComercio/ListaProductosComercio.vue'
-import EstadisticasComercio from '../components/EditarComercio/EstadisticasComercio.vue'
 import PieAtribucion from '../components/Compartidos/PieAtribucion.vue'
 import DialogoVerImagen from '../components/Compartidos/DialogoVerImagen.vue'
 import { formatearFechaRelativa } from '../composables/useFechaRelativa.js'
@@ -429,19 +429,6 @@ const productosConPrecio = computed(() => {
       ultimoPrecioTexto: textoUltimoPrecio,
     }
   })
-})
-
-// Fecha del último precio registrado en la sucursal seleccionada
-const ultimoPrecioFecha = computed(() => {
-  let fechaMasReciente = null
-  for (const producto of productosAsociados.value) {
-    for (const precio of filtrarPreciosPorSucursal(producto.precios)) {
-      if (precio.fecha && (!fechaMasReciente || new Date(precio.fecha) > new Date(fechaMasReciente))) {
-        fechaMasReciente = precio.fecha
-      }
-    }
-  }
-  return fechaMasReciente
 })
 
 // Cantidad de artículos registrados por dirección (para mini-tarjetas)
