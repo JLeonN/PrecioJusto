@@ -13,6 +13,17 @@ const estadoActualizacion = ref({
   debeMostrarModal: false,
 })
 
+function obtenerUrlPlayStoreNativa(urlPlayStore) {
+  if (typeof urlPlayStore !== 'string' || !urlPlayStore.includes('play.google.com/store/apps/details')) {
+    return urlPlayStore
+  }
+
+  const coincidenciaId = urlPlayStore.match(/[?&]id=([^&]+)/)
+  if (!coincidenciaId?.[1]) return urlPlayStore
+
+  return `market://details?id=${decodeURIComponent(coincidenciaId[1])}`
+}
+
 async function refrescarEstadoActualizacion({ mostrarModalSiHay = false } = {}) {
   cargandoActualizacion.value = true
 
@@ -35,17 +46,26 @@ function cerrarModalActualizacion() {
 }
 
 async function abrirUrlPlayStore() {
-  const urlObjetivo = estadoActualizacion.value.urlPlayStore || urlPlayStoreDefecto
-  if (!urlObjetivo) return
+  const urlHttps = estadoActualizacion.value.urlPlayStore || urlPlayStoreDefecto
+  if (!urlHttps) return
 
   try {
-    await App.openUrl({ url: urlObjetivo })
-    return
+    const urlNativa = obtenerUrlPlayStoreNativa(urlHttps)
+    await App.openUrl({ url: urlNativa })
+    return true
   } catch {
-    // Fallback web.
+    // Si falla market:// o no hay app compatible, usamos el enlace web.
   }
 
-  window.open(urlObjetivo, '_blank', 'noopener')
+  try {
+    await App.openUrl({ url: urlHttps })
+    return true
+  } catch {
+    // Fallback final para web o navegadores restrictivos.
+  }
+
+  window.open(urlHttps, '_blank', 'noopener')
+  return true
 }
 
 export function useActualizacionApp() {
