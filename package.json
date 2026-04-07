@@ -11,9 +11,11 @@
     "format": "prettier --write \"**/*.{js,vue,css,html,md,json}\" --ignore-path .gitignore",
     "test": "echo \"No test specified\" && exit 0",
     "dev": "quasar dev",
+    "generarVersionJson": "node Scripts/GenerarVersionJson.js",
+    "prebuild": "npm run generarVersionJson",
     "build": "quasar build",
     "postinstall": "quasar prepare",
-    "cel": "quasar build && npx cap sync android && npx cap open android"
+    "cel": "npm run build && npx cap sync android && npx cap open android"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.0.0",

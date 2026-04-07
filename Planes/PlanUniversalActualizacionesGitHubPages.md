@@ -1,4 +1,4 @@
-# PLAN UNIVERSAL ACTUALIZACIONES GITHUB PAGES
+﻿# PLAN UNIVERSAL ACTUALIZACIONES GITHUB PAGES
 
 ## Descripcion del plan
 
@@ -30,12 +30,12 @@ Plan universal para implementar o mantener un sistema de aviso de actualización
 
 Recolectar los datos mínimos para que la implementación no quede incompleta ni atada a supuestos falsos.
 
-- [ ] Preguntar si el proyecto ya tiene GitHub Pages funcionando
-- [ ] Preguntar cuál es la URL de la app en Play Store
-- [ ] Preguntar si el proyecto ya tiene alguna lógica previa de actualización o si se implementará desde cero
-- [ ] Preguntar si `version.json` debe generarse automáticamente desde la versión del proyecto
-- [ ] Preguntar si el proyecto es Android puro con web embebida, Vue con Capacitor, React con Capacitor o React Native
-- [ ] Preguntar si el usuario quiere modal al abrir la app, botón en menú o ambas cosas
+- [x] Preguntar si el proyecto ya tiene GitHub Pages funcionando (resuelto por inspección del workflow)
+- [x] Preguntar cuál es la URL de la app en Play Store (resuelto desde `capacitor.config.json`)
+- [x] Preguntar si el proyecto ya tiene alguna lógica previa de actualización o si se implementará desde cero
+- [x] Preguntar si `version.json` debe generarse automáticamente desde la versión del proyecto
+- [x] Preguntar si el proyecto es Android puro con web embebida, Vue con Capacitor, React con Capacitor o React Native
+- [x] Preguntar si el usuario quiere modal al abrir la app, botón en menú o ambas cosas (se implementaron ambas)
 
 ## FASE 1: Detectar el estado del proyecto
 
@@ -43,12 +43,12 @@ Recolectar los datos mínimos para que la implementación no quede incompleta ni
 
 Entender si se está trabajando sobre un proyecto nuevo, uno parcialmente preparado o uno que ya tiene parte del flujo resuelto.
 
-- [ ] Verificar si existe configuración de GitHub Pages o workflow de publicación
-- [ ] Verificar si existe `public/version.json` o un archivo equivalente
-- [ ] Verificar si el proyecto ya usa Capacitor
-- [ ] Verificar cómo se define la versión actual del proyecto
-- [ ] Verificar si ya existe algún script que genere archivos antes del build
-- [ ] Detectar si el proyecto ya tiene una ruta de compilación para Android
+- [x] Verificar si existe configuración de GitHub Pages o workflow de publicación
+- [x] Verificar si existe `public/version.json` o un archivo equivalente
+- [x] Verificar si el proyecto ya usa Capacitor
+- [x] Verificar cómo se define la versión actual del proyecto
+- [x] Verificar si ya existe algún script que genere archivos antes del build
+- [x] Detectar si el proyecto ya tiene una ruta de compilación para Android
 
 ## FASE 2: Resolver GitHub Pages
 
@@ -56,11 +56,11 @@ Entender si se está trabajando sobre un proyecto nuevo, uno parcialmente prepar
 
 Dejar claro si solo hay que consumir GitHub Pages o si también hay que crearlo.
 
-- [ ] Si GitHub Pages no existe, crear el flujo de publicación desde el propio proyecto
-- [ ] Si GitHub Pages ya existe, reutilizar la publicación actual sin duplicar infraestructura
-- [ ] Definir la URL pública final donde vivirá `version.json`
-- [ ] Confirmar el nombre del repositorio para calcular correctamente la URL pública
-- [ ] Documentar si la publicación se hace por rama, carpeta `docs` o GitHub Actions
+- [x] Si GitHub Pages no existe, crear el flujo de publicación desde el propio proyecto (no aplica: ya existía)
+- [x] Si GitHub Pages ya existe, reutilizar la publicación actual sin duplicar infraestructura
+- [x] Definir la URL pública final donde vivirá `version.json`
+- [x] Confirmar el nombre del repositorio para calcular correctamente la URL pública
+- [x] Documentar si la publicación se hace por rama, carpeta `docs` o GitHub Actions
 
 ## FASE 3: Blindar rutas entre web y Android
 
@@ -68,12 +68,12 @@ Dejar claro si solo hay que consumir GitHub Pages o si también hay que crearlo.
 
 Evitar el problema clásico donde GitHub Pages funciona en navegador pero la app Android queda en blanco por rutas mal resueltas.
 
-- [ ] Revisar si el proyecto necesita `publicPath` condicional o una base equivalente
+- [x] Revisar si el proyecto necesita `publicPath` condicional o una base equivalente
 - [ ] Verificar que la app web publicada en GitHub Pages siga resolviendo sus assets correctamente
-- [ ] Verificar que la app Android no dependa de rutas relativas pensadas para GitHub Pages
-- [ ] Mantener `version.json` fuera de cualquier lógica de navegación interna
-- [ ] Usar siempre una URL absoluta para consultar `version.json`
-- [ ] Documentar explícitamente el criterio técnico para no mezclar rutas web y rutas Android
+- [x] Verificar que la app Android no dependa de rutas relativas pensadas para GitHub Pages
+- [x] Mantener `version.json` fuera de cualquier lógica de navegación interna
+- [x] Usar siempre una URL absoluta para consultar `version.json`
+- [x] Documentar explícitamente el criterio técnico para no mezclar rutas web y rutas Android
 
 ## FASE 4: Definir y generar version.json
 
@@ -81,12 +81,12 @@ Evitar el problema clásico donde GitHub Pages funciona en navegador pero la app
 
 Unificar la fuente remota de versión y evitar mantenimiento manual innecesario.
 
-- [ ] Definir la estructura estándar de `version.json`
-- [ ] Incluir al menos `versionDisponible`, `urlPlayStore` y `mostrarActualizacion`
-- [ ] Generar `version.json` automáticamente desde la versión real del proyecto si el stack lo permite
-- [ ] Reutilizar el valor existente de `urlPlayStore` si el archivo ya existe
-- [ ] Evitar que el usuario tenga que editar manualmente la versión en más de un lugar
-- [ ] Verificar que `version.json` se publique junto con el build
+- [x] Definir la estructura estándar de `version.json`
+- [x] Incluir al menos `versionDisponible`, `urlPlayStore` y `mostrarActualizacion`
+- [x] Generar `version.json` automáticamente desde la versión real del proyecto si el stack lo permite
+- [x] Reutilizar el valor existente de `urlPlayStore` si el archivo ya existe
+- [x] Evitar que el usuario tenga que editar manualmente la versión en más de un lugar
+- [x] Verificar que `version.json` se publique junto con el build
 
 ## FASE 5: Crear la lógica de verificación
 
@@ -94,12 +94,12 @@ Unificar la fuente remota de versión y evitar mantenimiento manual innecesario.
 
 Consultar la versión remota, compararla con la instalada y devolver un estado claro para la interfaz.
 
-- [ ] Obtener la versión instalada desde la fuente real del proyecto
-- [ ] Consultar `version.json` con `fetch` o la técnica equivalente del stack
-- [ ] Comparar versiones semánticas de forma segura
-- [ ] Devolver un estado claro con `hayActualizacion`, `versionDisponible`, `urlPlayStore` y `debeMostrarModal`
-- [ ] Tolerar errores de red, JSON inválido o falta de datos sin romper la app
-- [ ] Evitar mostrar avisos si la información remota es inconsistente
+- [x] Obtener la versión instalada desde la fuente real del proyecto
+- [x] Consultar `version.json` con `fetch` o la técnica equivalente del stack
+- [x] Comparar versiones semánticas de forma segura
+- [x] Devolver un estado claro con `hayActualizacion`, `versionDisponible`, `urlPlayStore` y `debeMostrarModal`
+- [x] Tolerar errores de red, JSON inválido o falta de datos sin romper la app
+- [x] Evitar mostrar avisos si la información remota es inconsistente
 
 ## FASE 6: Integrar aviso al usuario
 
@@ -107,12 +107,12 @@ Consultar la versión remota, compararla con la instalada y devolver un estado c
 
 Mostrar la actualización disponible de una forma visible, simple y consistente con el proyecto.
 
-- [ ] Implementar modal de actualización al abrir la app si el usuario lo pidió
-- [ ] Implementar botón visible en menú o drawer si el usuario lo pidió
-- [ ] Hacer que ambos usen la misma URL de Play Store
-- [ ] Permitir cancelar el modal sin marcar la actualización como descartada permanente, salvo que el proyecto pida otra cosa
-- [ ] Si el usuario cancela y vuelve a abrir la app, decidir si el modal reaparece según la regla del proyecto
-- [ ] Mantener el estilo visual alineado con el proyecto actual
+- [x] Implementar modal de actualización al abrir la app
+- [x] Implementar botón visible en menú o drawer
+- [x] Hacer que ambos usen la misma URL de Play Store
+- [x] Permitir cancelar el modal sin marcar la actualización como descartada permanente
+- [x] Si el usuario cancela y vuelve a abrir la app, decidir si el modal reaparece según la regla del proyecto
+- [x] Mantener el estilo visual alineado con el proyecto actual
 
 ## FASE 7: Adaptar según tecnología
 
@@ -120,11 +120,11 @@ Mostrar la actualización disponible de una forma visible, simple y consistente 
 
 Aplicar la misma idea general sin asumir el mismo tipo de proyecto en todos los repositorios.
 
-- [ ] Si el proyecto es Vue o Quasar con Capacitor, integrar la lógica en el layout o punto de arranque principal
-- [ ] Si el proyecto es React web con Capacitor, integrar la lógica en el layout raíz o en el contenedor principal
-- [ ] Si el proyecto es React Native, detectar primero cómo obtiene la versión instalada y cómo abre Play Store
-- [ ] Si React Native no tiene una librería estándar ya presente, no inventar; documentar la adaptación necesaria antes de implementar
-- [ ] Priorizar siempre el stack real del proyecto actual sobre cualquier receta genérica
+- [x] Si el proyecto es Vue o Quasar con Capacitor, integrar la lógica en el layout o punto de arranque principal
+- [x] Si el proyecto es React web con Capacitor, integrar la lógica en el layout raíz o en el contenedor principal (no aplica en este repo)
+- [x] Si el proyecto es React Native, detectar primero cómo obtiene la versión instalada y cómo abre Play Store (no aplica en este repo)
+- [x] Si React Native no tiene una librería estándar ya presente, no inventar; documentar la adaptación necesaria antes de implementar (no aplica en este repo)
+- [x] Priorizar siempre el stack real del proyecto actual sobre cualquier receta genérica
 
 ## FASE 8: Documentar mantenimiento
 
@@ -132,12 +132,12 @@ Aplicar la misma idea general sin asumir el mismo tipo de proyecto en todos los 
 
 Dejar el sistema entendible para futuras IAs y para el usuario sin depender de memoria informal.
 
-- [ ] Documentar dónde vive `version.json`
-- [ ] Documentar cómo se genera
-- [ ] Documentar cómo se publica en GitHub Pages
-- [ ] Documentar qué archivo controla la versión oficial del proyecto
-- [ ] Documentar cómo cambiar la URL de Play Store si cambia el identificador de la app
-- [ ] Documentar el flujo mínimo para publicar una nueva versión sin romper el sistema de aviso
+- [x] Documentar dónde vive `version.json`
+- [x] Documentar cómo se genera
+- [x] Documentar cómo se publica en GitHub Pages
+- [x] Documentar qué archivo controla la versión oficial del proyecto
+- [x] Documentar cómo cambiar la URL de Play Store si cambia el identificador de la app
+- [x] Documentar el flujo mínimo para publicar una nueva versión sin romper el sistema de aviso
 
 ## FASE TESTING
 
@@ -152,22 +152,22 @@ Validar que el flujo funcione tanto en web publicada como en Android real.
 - [ ] Probar un escenario sin actualización disponible
 - [ ] Probar un escenario con actualización disponible
 - [ ] Verificar que el modal y el botón del menú abran la URL correcta de Play Store
-- [ ] Verificar que si falla la descarga de `version.json` la app siga funcionando sin errores visibles graves
-- [ ] Ejecutar lint, build o el proceso equivalente según el stack
+- [x] Verificar que si falla la descarga de `version.json` la app siga funcionando sin errores visibles graves
+- [x] Ejecutar lint, build o el proceso equivalente según el stack
 
 ## Progreso del plan
 
-- [ ] Preguntas obligatorias antes de ejecutar
-- [ ] Fase 1: Detectar el estado del proyecto
-- [ ] Fase 2: Resolver GitHub Pages
+- [x] Preguntas obligatorias antes de ejecutar
+- [x] Fase 1: Detectar el estado del proyecto
+- [x] Fase 2: Resolver GitHub Pages
 - [ ] Fase 3: Blindar rutas entre web y Android
-- [ ] Fase 4: Definir y generar version.json
-- [ ] Fase 5: Crear la lógica de verificación
-- [ ] Fase 6: Integrar aviso al usuario
-- [ ] Fase 7: Adaptar según tecnología
-- [ ] Fase 8: Documentar mantenimiento
+- [x] Fase 4: Definir y generar version.json
+- [x] Fase 5: Crear la lógica de verificación
+- [x] Fase 6: Integrar aviso al usuario
+- [x] Fase 7: Adaptar según tecnología
+- [x] Fase 8: Documentar mantenimiento
 - [ ] Fase Testing
 
 Fecha de creacion: 06 de Abril 2026
-Fecha de ultima actualizacion: 06 de Abril 2026
-Estado: BORRADOR
+Fecha de ultima actualizacion: 07 de Abril 2026
+Estado: EN VALIDACION

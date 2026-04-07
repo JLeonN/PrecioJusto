@@ -149,6 +149,20 @@
         <q-separator />
 
         <q-list padding class="drawer-lista-inferior">
+          <q-item clickable v-ripple @click="manejarClickActualizarApp">
+            <q-item-section avatar>
+              <IconRefresh :size="24" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label class="text-weight-medium">Actualizar app</q-item-label>
+              <q-item-label caption>
+                {{ textoActualizacionDrawer }}
+              </q-item-label>
+            </q-item-section>
+            <q-item-section v-if="estadoActualizacion.hayActualizacion" side>
+              <q-chip color="positive" text-color="white" dense>Nuevo</q-chip>
+            </q-item-section>
+          </q-item>
           <q-item clickable v-ripple to="/configuracion">
             <q-item-section avatar>
               <IconSettings :size="24" />
@@ -165,16 +179,36 @@
     <q-page-container :style="estiloContenedorPrincipal">
       <router-view />
     </q-page-container>
+
+    <q-dialog v-model="modalActualizacionAbierto" persistent>
+      <q-card style="min-width: 320px; max-width: 92vw">
+        <q-card-section class="row items-center q-gutter-sm">
+          <q-icon name="system_update" color="primary" size="26px" />
+          <div class="text-h6">Nueva actualización disponible</div>
+        </q-card-section>
+        <q-card-section class="q-pt-none">
+          <p class="q-ma-none">
+            Tenés la versión {{ estadoActualizacion.versionInstalada || 'actual' }} y ya existe la
+            versión {{ estadoActualizacion.versionDisponible || 'nueva' }}.
+          </p>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat no-caps label="Más tarde" @click="cerrarModalActualizacion" />
+          <q-btn color="primary" unelevated no-caps label="Ir a Play Store" @click="actualizarAppAhora" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-layout>
 </template>
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { IconHome, IconMapPin, IconBriefcase, IconHeart, IconSettings } from '@tabler/icons-vue'
+import { IconHome, IconMapPin, IconBriefcase, IconHeart, IconSettings, IconRefresh } from '@tabler/icons-vue'
 import { useQuasar } from 'quasar'
 import { useBotonAtras } from '../composables/useBotonAtras.js'
 import { usePublicidad } from '../composables/usePublicidad.js'
+import { useActualizacionApp } from '../composables/useActualizacionApp.js'
 import { MODO_PRUEBA } from '../almacenamiento/constantes/ConfigPublicidad.js'
 import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
@@ -186,6 +220,8 @@ const drawerAbierto = ref(false)
 const sesionEscaneoStore = useSesionEscaneoStore()
 const preferenciasStore = usePreferenciasStore()
 const { inicializar, mostrarBanner, precargarInterstitial, altoBanner } = usePublicidad()
+const { estadoActualizacion, modalActualizacionAbierto, refrescarEstadoActualizacion, cerrarModalActualizacion, abrirUrlPlayStore } =
+  useActualizacionApp()
 
 const toggleDrawer = () => {
   drawerAbierto.value = !drawerAbierto.value
@@ -216,6 +252,13 @@ const estiloLayout = computed(() => ({
 const estiloContenedorPrincipal = computed(() => ({
   paddingBottom: `calc(${altoBanner.value}px + var(--safe-area-bottom, 0px) + 8px)`,
 }))
+const textoActualizacionDrawer = computed(() => {
+  if (estadoActualizacion.value.hayActualizacion) {
+    return `Versión ${estadoActualizacion.value.versionDisponible} disponible`
+  }
+
+  return 'Buscar versión nueva'
+})
 
 const obtenerColorAccion = (estaActivo) => {
   if (MODO_PRUEBA) return estaActivo.value ? 'white' : 'grey-3'
@@ -238,6 +281,24 @@ const irAMesaTrabajo = () => {
   router.push('/mesa-trabajo')
 }
 
+const manejarClickActualizarApp = async () => {
+  await refrescarEstadoActualizacion({ mostrarModalSiHay: true })
+
+  if (!estadoActualizacion.value.hayActualizacion) {
+    quasar.notify({
+      type: 'positive',
+      message: 'Tu app ya está actualizada.',
+      position: 'top',
+      timeout: 2000,
+    })
+  }
+}
+
+const actualizarAppAhora = async () => {
+  await abrirUrlPlayStore()
+  cerrarModalActualizacion()
+}
+
 // Carga datos persistidos al iniciar la app
 onMounted(async () => {
   await Promise.all([sesionEscaneoStore.cargarSesion(), preferenciasStore.inicializar()])
@@ -248,6 +309,7 @@ onMounted(async () => {
   } catch {
     // Si AdMob falla, la app debe seguir funcionando sin publicidad.
   }
+  await refrescarEstadoActualizacion({ mostrarModalSiHay: true })
 })
 
 useBotonAtras({ drawerAbierto, router, route })
