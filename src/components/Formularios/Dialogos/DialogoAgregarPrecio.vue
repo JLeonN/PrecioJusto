@@ -15,7 +15,9 @@
       <q-card-section v-if="productoActual" class="q-pt-sm q-pb-none">
         <div class="text-caption text-grey-7">
           Precio actual más bajo:
-          <span class="text-weight-bold text-primary"> ${{ productoActual.precioMejor }} </span>
+          <span class="text-weight-bold text-primary">
+            {{ formatearPrecioConCodigo(productoActual.precioMejor, productoActual.monedaReferencia) }}
+          </span>
         </div>
       </q-card-section>
 
@@ -171,7 +173,12 @@ import { MONEDAS } from '../../../almacenamiento/constantes/Monedas.js'
 import { usePreferenciasStore } from '../../../almacenamiento/stores/preferenciasStore.js'
 import DialogoAgregarComercioRapido from './DialogoAgregarComercioRapido.vue'
 import { useTecladoVirtual } from '../../../composables/useTecladoVirtual.js'
-import { filtrarInputPrecio, formatearPrecioAlSalir, soloNumerosDecimales } from '../../../utils/PrecioUtils.js'
+import {
+  filtrarInputPrecio,
+  formatearPrecioAlSalir,
+  formatearPrecioConCodigo,
+  soloNumerosDecimales,
+} from '../../../utils/PrecioUtils.js'
 
 const props = defineProps({
   modelValue: {
@@ -469,7 +476,7 @@ async function guardarPrecio() {
 
       $q.notify({
         type: 'positive',
-        message: `Precio $${precioTexto.value} guardado`,
+        message: `Precio ${formatearPrecioConCodigo(precioTexto.value, monedaSeleccionada.value)} guardado`,
         caption: nombreCompleto,
         position: 'top',
         timeout: 3000,

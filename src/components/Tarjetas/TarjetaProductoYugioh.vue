@@ -20,7 +20,9 @@
       <IconShoppingBag :size="48" class="text-grey-5" />
     </template>
     <template #overlay-info>
-      <div class="precio-valor">{{ formatearPrecio(precioMejorVigente) }}</div>
+      <div class="precio-valor">
+        {{ formatearPrecio(precioMejorVigente.valor, precioMejorVigente.moneda) }}
+      </div>
     </template>
     <template #info-inferior>
       <div v-if="producto.codigoBarras" class="codigo-barras" @click.stop="copiarCodigoBarras">
@@ -44,7 +46,7 @@
         <div v-for="(precio, index) in top3PreciosUnicos" :key="precio.id" class="item-precio">
           <div class="item-precio__posicion">{{ index + 1 }}</div>
           <div class="item-precio__info">
-            <div class="item-precio__valor">{{ formatearPrecio(precio.valor) }}</div>
+            <div class="item-precio__valor">{{ formatearPrecio(precio.valor, precio.moneda) }}</div>
             <div class="item-precio__comercio">
               <IconMapPin :size="14" />
               {{ precio.nombreCompleto || precio.comercio }}
@@ -93,7 +95,8 @@ import {
   IconAlertCircle,
   IconAlertTriangle,
 } from '@tabler/icons-vue'
-import { formatearPrecioDisplay } from '../../utils/PrecioUtils.js'
+import { MONEDA_DEFAULT } from '../../almacenamiento/constantes/Monedas.js'
+import { formatearPrecioConCodigo } from '../../utils/PrecioUtils.js'
 
 /* Props del componente */
 const props = defineProps({
@@ -125,8 +128,8 @@ defineEmits(['long-press', 'toggle-seleccion', 'agregar-precio'])
 /* Quasar */
 const $q = useQuasar()
 
-/* TOP 3 precios actuales con comercios únicos */
-const top3PreciosUnicos = computed(() => {
+/* TOP de precios vigentes por comercio en la moneda de referencia */
+const preciosVigentesPorComercio = computed(() => {
   if (!props.producto.precios || props.producto.precios.length === 0) return []
 
   /* 1. Agrupar por comercio — usar IDs si existen, sino nombreCompleto como fallback legacy */
@@ -153,12 +156,32 @@ const top3PreciosUnicos = computed(() => {
     return ordenadosPorFecha[0]
   })
 
-  /* 3. Ordenar por valor ASC y tomar máximo 3 */
-  return [...preciosVigentes].sort((a, b) => a.valor - b.valor).slice(0, 3)
+  return preciosVigentes
 })
 
-/* Precio más bajo vigente — derivado del top3 para evitar datos desactualizados en storage */
-const precioMejorVigente = computed(() => top3PreciosUnicos.value[0]?.valor ?? props.producto.precioMejor ?? 0)
+const monedaReferencia = computed(() => {
+  if (preciosVigentesPorComercio.value.length === 0) return MONEDA_DEFAULT
+  const precioVigenteMasReciente = [...preciosVigentesPorComercio.value].sort(
+    (a, b) => new Date(b.fecha) - new Date(a.fecha),
+  )[0]
+  return precioVigenteMasReciente?.moneda || MONEDA_DEFAULT
+})
+
+const top3PreciosUnicos = computed(() => {
+  return preciosVigentesPorComercio.value
+    .filter((precio) => (precio.moneda || MONEDA_DEFAULT) === monedaReferencia.value)
+    .sort((a, b) => a.valor - b.valor)
+    .slice(0, 3)
+})
+
+/* Precio más bajo vigente en la moneda de referencia */
+const precioMejorVigente = computed(() => {
+  if (top3PreciosUnicos.value.length > 0) return top3PreciosUnicos.value[0]
+  return {
+    valor: props.producto.precioMejor ?? 0,
+    moneda: monedaReferencia.value,
+  }
+})
 
 /* Calcular días transcurridos desde una fecha */
 const calcularDiasPrecio = (fechaISO) => {
@@ -176,7 +199,7 @@ const calcularMesesPrecio = (fechaISO) => {
 }
 
 /* Formatear precio */
-const formatearPrecio = (valor) => formatearPrecioDisplay(valor)
+const formatearPrecio = (valor, moneda) => formatearPrecioConCodigo(valor, moneda)
 
 /* Formatear fecha relativa */
 const formatearFecha = (fechaISO) => {

@@ -321,7 +321,7 @@ import {
   filtrarInputPrecio,
   formatearPrecioAlSalir,
   soloNumerosDecimales,
-  formatearPrecioDisplay,
+  formatearPrecioConCodigo,
 } from '../../utils/PrecioUtils.js'
 import {
   IconShoppingBag,
@@ -480,7 +480,7 @@ function irACampo(campo) {
 }
 
 function formatearPrecio(valor, moneda) {
-  return `${formatearPrecioDisplay(valor)} ${moneda || 'UYU'}`
+  return formatearPrecioConCodigo(valor, moneda)
 }
 </script>
 

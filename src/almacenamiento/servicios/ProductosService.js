@@ -331,6 +331,7 @@ class ProductosService {
       producto.precioMejor = 0
       producto.comercioMejor = 'Sin datos'
       producto.diferenciaPrecio = 0
+      producto.monedaReferencia = 'UYU'
       producto.tendenciaGeneral = 'estable'
       producto.porcentajeTendencia = 0
       return producto
@@ -360,25 +361,39 @@ class ProductosService {
       return ordenadosPorFecha[0]
     })
 
-    /* 3. De los precios vigentes, encontrar el más bajo */
-    const vigentesOrdenados = [...preciosVigentes].sort((a, b) => a.valor - b.valor)
+    /* 3. Moneda de referencia: la del precio vigente más reciente */
+    const precioVigenteMasReciente = [...preciosVigentes].sort(
+      (a, b) => new Date(b.fecha) - new Date(a.fecha),
+    )[0]
+    producto.monedaReferencia = precioVigenteMasReciente?.moneda || 'UYU'
+
+    const vigentesMismaMoneda = preciosVigentes.filter(
+      (precio) => (precio.moneda || 'UYU') === producto.monedaReferencia,
+    )
+    const vigentesComparables = vigentesMismaMoneda.length > 0 ? vigentesMismaMoneda : preciosVigentes
+
+    /* 4. De los precios vigentes en moneda de referencia, encontrar el más bajo */
+    const vigentesOrdenados = [...vigentesComparables].sort((a, b) => a.valor - b.valor)
     const mejorPrecioVigente = vigentesOrdenados[0]
 
     producto.precioMejor = mejorPrecioVigente.valor
     producto.comercioMejor = mejorPrecioVigente.nombreCompleto || mejorPrecioVigente.comercio
 
-    /* 4. Marcar cuál es el mejor precio vigente */
+    /* 5. Marcar cuál es el mejor precio vigente */
     producto.precios.forEach((precio) => {
       precio.esMejor = precio.id === mejorPrecioVigente.id
     })
 
-    /* 5. Diferencia entre mejor y peor precio VIGENTE */
+    /* 6. Diferencia entre mejor y peor precio vigente (misma moneda) */
     const peorPrecioVigente = vigentesOrdenados[vigentesOrdenados.length - 1]
     producto.diferenciaPrecio = peorPrecioVigente.valor - mejorPrecioVigente.valor
 
-    /* 6. Tendencia y porcentaje (conservar lógica existente) */
-    producto.tendenciaGeneral = this._calcularTendencia(producto.precios)
-    producto.porcentajeTendencia = this._calcularPorcentajeTendencia(producto.precios)
+    /* 7. Tendencia y porcentaje solo para moneda de referencia */
+    const preciosMismaMoneda = producto.precios.filter(
+      (precio) => (precio.moneda || 'UYU') === producto.monedaReferencia,
+    )
+    producto.tendenciaGeneral = this._calcularTendencia(preciosMismaMoneda)
+    producto.porcentajeTendencia = this._calcularPorcentajeTendencia(preciosMismaMoneda)
 
     return producto
   }

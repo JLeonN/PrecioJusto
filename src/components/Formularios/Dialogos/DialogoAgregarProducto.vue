@@ -97,6 +97,7 @@ import busquedaProductosHibridaService, {
 } from '../../../almacenamiento/servicios/BusquedaProductosHibridaService.js'
 import { usePreferenciasStore } from '../../../almacenamiento/stores/preferenciasStore.js'
 import { useTecladoVirtual } from '../../../composables/useTecladoVirtual.js'
+import { formatearPrecioConCodigo } from '../../../utils/PrecioUtils.js'
 
 const props = defineProps({
   modelValue: {
@@ -362,7 +363,7 @@ async function guardarProducto() {
     }
   }
 
-  // 2. Validar precio: obligatorio siempre (>= $1) para evitar productos sin precio ($0)
+  // 2. Validar precio: obligatorio siempre (>= 1) para evitar productos sin precio.
   const precioValido = refFormularioPrecio.value?.validarPrecio()
   if (!precioValido) {
     guardando.value = false
@@ -414,7 +415,7 @@ async function guardarProducto() {
         $q.notify({
           type: 'positive',
           message: `Precio agregado a "${productoExistente.nombre}"`,
-          caption: `${datosPrecio.value.comercio} - $${datosPrecio.value.valor}`,
+          caption: `${datosPrecio.value.comercio} - ${formatearPrecioConCodigo(datosPrecio.value.valor, datosPrecio.value.moneda)}`,
           position: 'top',
           icon: 'add_circle',
           timeout: 3000,

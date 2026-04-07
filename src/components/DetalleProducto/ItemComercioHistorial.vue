@@ -19,7 +19,9 @@
 
           <!-- Precio más reciente -->
           <div class="row items-center q-gutter-sm q-mt-xs">
-            <div class="text-h6 text-weight-bold text-primary">{{ formatearPrecioDisplay(precioMasReciente.valor) }}</div>
+            <div class="text-h6 text-weight-bold text-primary">
+              {{ formatearPrecioConCodigo(precioMasReciente.valor, precioMasReciente.moneda) }}
+            </div>
             <span class="text-caption text-grey-7">({{ fechaFormateada }})</span>
           </div>
 
@@ -103,7 +105,8 @@ import { useRouter } from 'vue-router'
 import { IconThumbUp, IconChevronDown, IconChevronUp, IconTrendingUp, IconTrendingDown, IconMinus, IconExternalLink } from '@tabler/icons-vue'
 import ItemPrecioHistorial from './ItemPrecioHistorial.vue'
 import { useComerciStore } from 'src/almacenamiento/stores/comerciosStore'
-import { formatearPrecioDisplay } from '../../utils/PrecioUtils.js'
+import { MONEDA_DEFAULT } from '../../almacenamiento/constantes/Monedas.js'
+import { formatearPrecioConCodigo } from '../../utils/PrecioUtils.js'
 
 const comerciosStore = useComerciStore()
 const router = useRouter()
@@ -184,6 +187,10 @@ const precioMasReciente = computed(() => {
   return preciosOrdenados.value[0]
 })
 
+const monedaReferenciaComercio = computed(() => {
+  return precioMasReciente.value?.moneda || MONEDA_DEFAULT
+})
+
 // Color de frescura del precio más reciente
 const colorFrescuraMasReciente = computed(() => {
   const ahora = new Date()
@@ -234,10 +241,13 @@ const fechaFormateada = computed(() => {
 
 // Calcular tendencia del comercio (último precio vs el anterior — ignora inflación histórica)
 const tendenciaComercio = computed(() => {
-  if (props.comercio.precios.length < 2) return { porcentaje: 0, tipo: 'estable' }
+  const preciosMismaMoneda = preciosOrdenados.value.filter(
+    (precio) => (precio.moneda || MONEDA_DEFAULT) === monedaReferenciaComercio.value,
+  )
+  if (preciosMismaMoneda.length < 2) return { porcentaje: 0, tipo: 'estable' }
 
-  const precioActual = preciosOrdenados.value[0].valor
-  const precioAnterior = preciosOrdenados.value[1].valor
+  const precioActual = preciosMismaMoneda[0].valor
+  const precioAnterior = preciosMismaMoneda[1].valor
 
   const diferencia = ((precioActual - precioAnterior) / precioAnterior) * 100
   const porcentaje = Math.abs(diferencia).toFixed(1)

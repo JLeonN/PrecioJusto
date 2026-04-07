@@ -600,7 +600,7 @@ function requerido(val) {
 
 function precioValido(val) {
   if (val === null || val === undefined || val === '') return true
-  return parseFloat(val) >= 1 || 'El precio debe ser al menos de $1'
+  return parseFloat(val) >= 1 || 'El precio debe ser al menos de 1'
 }
 </script>
 

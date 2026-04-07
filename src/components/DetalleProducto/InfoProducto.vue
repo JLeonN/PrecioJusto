@@ -191,7 +191,9 @@
 
         <!-- Precio más bajo actual -->
         <div class="precio-principal q-mt-sm">
-          <div class="text-h4 text-weight-bold text-primary">{{ formatearPrecioDisplay(producto.precioMejor) }}</div>
+          <div class="text-h4 text-weight-bold text-primary">
+            {{ formatearPrecioConCodigo(producto.precioMejor, producto.monedaReferencia) }}
+          </div>
           <div class="comercio-info row items-center q-gutter-xs no-wrap q-mt-xs">
             <IconMapPin :size="18" class="text-grey-6" />
             <span class="text-body2 text-grey-7">{{ producto.comercioMejor }}</span>
@@ -258,7 +260,8 @@ import { useQuasar } from 'quasar'
 import CampoEditable from '../EditarComercio/CampoEditable.vue'
 import DialogoVerImagen from '../Compartidos/DialogoVerImagen.vue'
 import { useProductosStore } from '../../almacenamiento/stores/productosStore.js'
-import { formatearPrecioDisplay } from '../../utils/PrecioUtils.js'
+import { MONEDA_DEFAULT } from '../../almacenamiento/constantes/Monedas.js'
+import { formatearPrecioConCodigo } from '../../utils/PrecioUtils.js'
 
 const $q = useQuasar()
 const productosStore = useProductosStore()
@@ -401,9 +404,11 @@ async function actualizarCategoria(nuevaCategoria) {
 const tendenciaProducto = computed(() => {
   if (!props.producto.precios || props.producto.precios.length === 0)
     return { tipo: 'estable', porcentaje: '0.0' }
+  const monedaRef = props.producto.monedaReferencia || MONEDA_DEFAULT
 
   const grupos = new Map()
   props.producto.precios.forEach((precio) => {
+    if ((precio.moneda || MONEDA_DEFAULT) !== monedaRef) return
     const clave =
       precio.comercioId && precio.direccionId
         ? `${precio.comercioId}_${precio.direccionId}`

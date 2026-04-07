@@ -5,7 +5,9 @@
       <q-card class="stat-card full-height">
         <q-card-section class="text-center column justify-center full-height">
           <div class="text-grey-7 text-caption text-uppercase">Precio promedio</div>
-          <div v-if="precioPromedio > 0" class="text-h5 text-weight-bold text-primary q-mt-xs">${{ precioPromedio }}</div>
+          <div v-if="precioPromedio > 0" class="text-h5 text-weight-bold text-primary q-mt-xs">
+            {{ formatearPrecioConCodigo(precioPromedio, monedaReferencia) }}
+          </div>
           <div v-else class="text-caption text-grey-5 q-mt-xs">Sin datos recientes</div>
           <div class="text-caption text-grey-5 q-mt-xs">últimos 6 meses</div>
         </q-card-section>
@@ -46,12 +48,20 @@
 <script setup>
 import { computed } from 'vue'
 import { IconTrendingUp, IconTrendingDown, IconMinus } from '@tabler/icons-vue'
+import { MONEDA_DEFAULT } from '../../almacenamiento/constantes/Monedas.js'
+import { formatearPrecioConCodigo } from '../../utils/PrecioUtils.js'
 
 const props = defineProps({
   producto: {
     type: Object,
     required: true,
   },
+})
+
+const monedaReferencia = computed(() => {
+  if (!props.producto.precios || props.producto.precios.length === 0) return MONEDA_DEFAULT
+  const masReciente = [...props.producto.precios].sort((a, b) => new Date(b.fecha) - new Date(a.fecha))[0]
+  return masReciente?.moneda || props.producto.monedaReferencia || MONEDA_DEFAULT
 })
 
 // Precio promedio — más reciente por tienda, solo comercios visitados en los últimos 6 meses
@@ -74,7 +84,10 @@ const precioPromedio = computed(() => {
   grupos.forEach((precios) => {
     const ordenados = [...precios].sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
     // Solo incluir si la visita más reciente fue dentro de los últimos 6 meses
-    if (new Date(ordenados[0].fecha) >= hace6Meses) {
+    if (
+      new Date(ordenados[0].fecha) >= hace6Meses &&
+      (ordenados[0].moneda || MONEDA_DEFAULT) === monedaReferencia.value
+    ) {
       preciosVigentes.push(ordenados[0].valor)
     }
   })
@@ -113,8 +126,11 @@ const tendenciaProducto = computed(() => {
 
   const variaciones = []
   grupos.forEach((precios) => {
-    if (precios.length < 2) return
-    const ordenados = [...precios].sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+    const preciosMismaMoneda = precios.filter(
+      (precio) => (precio.moneda || MONEDA_DEFAULT) === monedaReferencia.value,
+    )
+    if (preciosMismaMoneda.length < 2) return
+    const ordenados = [...preciosMismaMoneda].sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
     variaciones.push(((ordenados[0].valor - ordenados[1].valor) / ordenados[1].valor) * 100)
   })
 

@@ -357,6 +357,7 @@ import ListaProductosComercio from '../components/EditarComercio/ListaProductosC
 import PieAtribucion from '../components/Compartidos/PieAtribucion.vue'
 import DialogoVerImagen from '../components/Compartidos/DialogoVerImagen.vue'
 import { formatearFechaRelativa } from '../composables/useFechaRelativa.js'
+import { formatearPrecioConCodigo } from '../utils/PrecioUtils.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -419,7 +420,7 @@ const productosConPrecio = computed(() => {
 
     const ultimoPrecio = preciosComercio[0]
     const textoUltimoPrecio = ultimoPrecio
-      ? `$${ultimoPrecio.valor} - ${formatearFechaRelativa(ultimoPrecio.fecha)}`
+      ? `${formatearPrecioConCodigo(ultimoPrecio.valor, ultimoPrecio.moneda)} - ${formatearFechaRelativa(ultimoPrecio.fecha)}`
       : 'Sin precio'
 
     return {
