@@ -38,6 +38,42 @@ npm run format
 quasar build
 ```
 
+## Simbolos de depuracion Android (Play Console)
+
+Este proyecto ya genera simbolos nativos en `release` con:
+
+- `android/app/build.gradle` -> `ndk.debugSymbolLevel 'SYMBOL_TABLE'`
+
+Flujo recomendado por release Android:
+
+1. Generar release Android completo (bundle + zip de simbolos + validacion):
+
+```bash
+npm run androidReleaseConSimbolos
+```
+
+2. Si queres ejecutar por pasos:
+
+```bash
+npm run androidReleaseBundle
+npm run androidEmpaquetarSimbolos
+npm run androidVerificarSimbolos
+```
+
+3. Archivos esperados despues del build:
+
+- AAB: `android/app/build/outputs/bundle/release/app-release.aab`
+- Simbolos: `android/app/build/outputs/native-debug-symbols/release/native-debug-symbols.zip`
+
+4. Subir a Play Console (cuando aparezca advertencia o si queres asegurarlo manualmente):
+
+- `Test and release` -> `App bundle explorer`
+- Elegir el artifact/version
+- Pestaña `Downloads` -> seccion `Assets`
+- Subir `native-debug-symbols.zip` en `debug symbols`
+
+Nota tecnica: con App Bundle + AGP 4.1+ Play puede tomar los simbolos automaticamente desde el bundle, pero en este proyecto los `.so` nativos vienen de dependencias de terceros y no siempre se genera el zip automatico en `outputs`. Por eso se agrega `androidEmpaquetarSimbolos`, que crea `native-debug-symbols.zip` desde `android/app/build/intermediates/merged_native_libs/release/mergeReleaseNativeLibs/out/lib`.
+
 ## Sistema de actualizacion en GitHub Pages
 
 - La app publica `public/version.json` en GitHub Pages junto al build.
