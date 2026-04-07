@@ -14,7 +14,7 @@
     "generarVersionJson": "node Scripts/GenerarVersionJson.js",
     "prebuild": "npm run generarVersionJson",
     "build": "quasar build",
-    "postinstall": "quasar prepare",
+    "postinstall": "quasar prepare && node Scripts/AplicarParcheBannerAdmob.js",
     "cel": "npm run androidReleaseConSimbolos && npx cap open android",
     "androidReleaseBundle": "npm run build && npx cap sync android && cd android && gradlew.bat bundleRelease",
     "androidEmpaquetarSimbolos": "powershell -NoProfile -ExecutionPolicy Bypass -File Scripts/EmpaquetarSimbolosAndroid.ps1",
