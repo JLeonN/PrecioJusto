@@ -27,6 +27,10 @@ Definir e implementar una mecánica de precios por cantidad dentro del producto 
 - No es obligatorio calcular combinaciones como 8 unidades si el comercio solo informa escalones como 1, 3 o 6
 - La tarjeta del producto debe seguir mostrando el mejor precio base disponible para 1 unidad
 - Si otro comercio no gana en precio base pero sí ofrece una mejora por cantidad, la tarjeta debe destacarlo visualmente sin reemplazar el precio base mostrado
+- Una escala menor que el precio base o menor que una escala anterior se considera mejora
+- Una escala igual al precio base o igual a una escala anterior se considera neutral
+- Una escala mayor que el precio base o mayor que una escala anterior se considera sospechosa
+- Las escalas sospechosas se pueden guardar, pero no deben generar destaque visual en la tarjeta y deben marcarse como sospechosas en el histórico
 
 ## FASE 1: Definir estructura de datos y reglas de negocio
 
@@ -39,7 +43,8 @@ Cerrar la estructura mínima de datos y las reglas operativas para soportar esca
 - [ ] Establecer que la cantidad mínima permitida para una escala sea 2 o mayor
 - [ ] Definir que cada escala se guarda como dato informado por el comercio y no como resultado de una simulación de compra
 - [ ] Confirmar cómo se resuelve la prioridad entre precio base y escalas durante cálculos y visualización
-- [ ] Definir cuándo una escala debe considerarse una mejora real para resaltar la tarjeta
+- [ ] Definir cuándo una escala debe considerarse mejora, neutral o sospechosa
+- [ ] Definir qué datos adicionales hacen falta para reflejar estado sospechoso en el histórico
 - [ ] Dejar fuera de este plan cualquier lógica de packs o promociones temporales
 
 ## FASE 2: Diseñar validaciones y flujo de carga
@@ -60,7 +65,7 @@ Definir cómo el usuario crea, edita y corrige escalas por cantidad dentro del f
 - [ ] Validar que no se puedan repetir cantidades mínimas
 - [ ] Validar que no se puedan guardar escalas con cantidad menor a 2
 - [ ] Validar que no se puedan guardar precios vacíos, inválidos o inconsistentes
-- [ ] Definir si una escala peor que el precio base o peor que una escala anterior se bloquea o se advierte
+- [ ] Permitir guardar escalas sospechosas, pero marcarlas internamente para revisión posterior
 - [ ] Implementar confirmación inline al desactivar el switch solo si el usuario ya editó escalas
 - [ ] Hacer que la confirmación inline siga la misma lógica visual de confirmar o cancelar ya usada al borrar tarjetas en mesa de trabajo
 
@@ -79,6 +84,7 @@ Resolver cómo se informa en la interfaz que un producto tiene mejor precio por 
 - [ ] Hacer que la aparición del bloque de precios mayoristas tenga una expansión suave y sin saltos bruscos del layout
 - [ ] Proteger la interacción del switch, inputs y controles de escalas para que la tarjeta de mesa de trabajo no se cierre al tocarlos
 - [ ] Definir cómo se muestra al usuario que el brillo o destaque de la tarjeta responde a una ventaja por cantidad y no a un mejor precio base
+- [ ] Evitar que las escalas sospechosas generen destaque visual en la tarjeta principal
 
 ## FASE 4: Integrar la mecánica en cálculos y comportamiento real
 
@@ -89,6 +95,7 @@ Definir cómo las escalas impactan en el resto del sistema para que no queden so
 - [ ] Identificar en qué partes del flujo actual se calcula o usa el precio del producto
 - [ ] Confirmar si la mecánica afecta comparaciones, historial y otras vistas relacionadas
 - [ ] Definir cómo guardar o reflejar que un precio registrado provino de una escala por cantidad
+- [ ] Definir cómo guardar o reflejar que una escala quedó marcada como sospechosa
 - [ ] Revisar si hace falta agregar datos auxiliares para auditoría o trazabilidad futura
 - [ ] Detectar áreas del sistema que puedan romperse si el producto empieza a tener escalas
 - [ ] Definir en qué vistas alcanza con informar la existencia de escalas y en cuáles hace falta usarlas para cálculos reales
@@ -103,6 +110,7 @@ Ejecutar la mecánica por etapas, reduciendo riesgo y permitiendo validar la exp
 - [ ] Implementar después la carga y edición de escalas en la interfaz
 - [ ] Implementar luego la visualización en tarjeta y detalle
 - [ ] Integrar finalmente la lógica en comparaciones, historial o puntos donde realmente aporte valor
+- [ ] Implementar la marca visual o semántica de sospecha en el histórico
 - [ ] Revisar textos, etiquetas y consistencia visual en toda la experiencia
 - [ ] Dejar documentadas las decisiones tomadas para futuras mecánicas como packs o promociones temporales
 
@@ -119,6 +127,9 @@ Validar de forma ejecutable por IA y revisable por humano que las escalas por ca
 - [ ] Intentar guardar una escala para 1 unidad y verificar que el sistema la rechace
 - [ ] Verificar que la tarjeta siga mostrando el mejor precio base disponible para 1 unidad
 - [ ] Verificar que la tarjeta se destaque cuando exista una ventaja por cantidad aunque ese comercio no gane en precio base
+- [ ] Verificar que una escala neutral no genere destaque visual por sí sola
+- [ ] Verificar que una escala sospechosa se guarde pero quede marcada como sospechosa en el histórico
+- [ ] Verificar que una escala sospechosa no genere destaque visual en la tarjeta principal
 - [ ] Verificar que el detalle del producto muestre las escalas en formato de lista simple
 - [ ] Verificar que al activar el switch el campo de precio actual pase a representar el precio base de 1 unidad
 - [ ] Verificar que al desactivar el switch sin haber editado escalas no aparezca confirmación
