@@ -155,6 +155,8 @@ const datosPrecio = ref({
   comercioId: null,
   direccionId: null,
   nombreCompleto: '',
+  activarPreciosMayoristas: false,
+  escalasPorCantidad: [],
 })
 
 // Estados de búsqueda API / híbrida
@@ -397,6 +399,10 @@ async function guardarProducto() {
         direccion: datosPrecio.value.direccion?.trim() || '',
         valor: datosPrecio.value.valor || 0,
         moneda: datosPrecio.value.moneda || 'UYU',
+        activarPreciosMayoristas: Boolean(datosPrecio.value.activarPreciosMayoristas),
+        escalasPorCantidad: Array.isArray(datosPrecio.value.escalasPorCantidad)
+          ? datosPrecio.value.escalasPorCantidad
+          : [],
         fecha: new Date().toISOString(),
         confirmaciones: 0,
         usuarioId: 'user_actual_123',
@@ -461,6 +467,10 @@ async function guardarProducto() {
         direccion: datosPrecio.value.direccion?.trim() || '',
         valor: datosPrecio.value.valor || 0,
         moneda: datosPrecio.value.moneda || 'UYU',
+        activarPreciosMayoristas: Boolean(datosPrecio.value.activarPreciosMayoristas),
+        escalasPorCantidad: Array.isArray(datosPrecio.value.escalasPorCantidad)
+          ? datosPrecio.value.escalasPorCantidad
+          : [],
         fecha: new Date().toISOString(),
         confirmaciones: 0,
         usuarioId: 'user_actual_123',
@@ -532,6 +542,8 @@ function limpiarFormulario() {
     comercioId: null,
     direccionId: null,
     nombreCompleto: '',
+    activarPreciosMayoristas: false,
+    escalasPorCantidad: [],
   }
 }
 

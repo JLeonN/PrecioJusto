@@ -1,41 +1,42 @@
-/**
- * 🛒 SERVICIO DE PRODUCTOS
+﻿/**
+ * SERVICIO DE PRODUCTOS
  *
  * Este servicio maneja TODA la lógica de negocio relacionada con productos.
  * NO sabe si usa localStorage, Capacitor o Firestore (eso lo decide el adaptador).
  *
- * 📌 RESPONSABILIDADES:
+ * RESPONSABILIDADES:
  * - CRUD de productos (Crear, Leer, Actualizar, Eliminar)
  * - Validaciones de datos
  * - Cálculos de tendencias y estadísticas
  * - Transformaciones de datos
  * - Búsqueda y deduplicación
  *
- * 🔥 MIGRACIÓN A FIRESTORE:
+ * MIGRACIÓN A FIRESTORE:
  * Este servicio NO necesita cambios al migrar a Firestore.
  * Solo cambia el adaptador en AlmacenamientoService.js
  */
 
 import { adaptadorActual } from './AlmacenamientoService.js'
+import { normalizarEscalasPorCantidad, obtenerResumenEscalas } from '../../utils/EscalasCantidadUtils.js'
 
 class ProductosService {
   constructor() {
     this.adaptador = adaptadorActual
     this.prefijoProductos = 'producto_'
 
-    console.log('🛒 ProductosService inicializado con', this.adaptador.constructor.name)
+    console.log('ProductosService inicializado con', this.adaptador.constructor.name)
   }
 
   // ========================================
-  // 📝 CREAR / GUARDAR
+  // CREAR / GUARDAR
   // ========================================
 
   /**
-   * 💾 GUARDAR PRODUCTO
+   * GUARDAR PRODUCTO
    * @param {Object} producto - Datos del producto
    * @returns {Promise<Object|null>} - Producto guardado o null si falla
    *
-   * 🔥 FIRESTORE: Este método NO cambia, solo el adaptador interno.
+   * FIRESTORE: Este método NO cambia, solo el adaptador interno.
    * En Firestore se guardará automáticamente con el mismo formato.
    */
   async guardarProducto(producto) {
@@ -43,7 +44,7 @@ class ProductosService {
       // Validar datos básicos
       const erroresValidacion = this._validarProducto(producto)
       if (erroresValidacion.length > 0) {
-        console.error('❌ Validación fallida:', erroresValidacion)
+        console.error('Validación fallida:', erroresValidacion)
         return null
       }
 
@@ -65,24 +66,24 @@ class ProductosService {
       const guardado = await this.adaptador.guardar(clave, producto)
 
       if (guardado) {
-        console.log(`✅ Producto guardado: ${producto.nombre} (ID: ${producto.id})`)
+        console.log(`Producto guardado: ${producto.nombre} (ID: ${producto.id})`)
         return producto
       }
 
       return null
     } catch (error) {
-      console.error('❌ Error al guardar producto:', error)
+      console.error('Error al guardar producto:', error)
       return null
     }
   }
 
   /**
-   * ➕ AGREGAR PRECIO A PRODUCTO
+   * AGREGAR PRECIO A PRODUCTO
    * @param {number} productoId - ID del producto
    * @param {Object} precio - Nuevo precio {comercioId, direccionId, valor, moneda, usuarioId}
    * @returns {Promise<Object|null>} - Producto actualizado o null
    *
-   * 🔥 FIRESTORE EQUIVALENTE:
+   * FIRESTORE EQUIVALENTE:
    * await db.collection('productos').doc(productoId).update({
    *   precios: firebase.firestore.FieldValue.arrayUnion(precio)
    * })
@@ -92,19 +93,19 @@ class ProductosService {
       // Obtener producto actual
       const producto = await this.obtenerProducto(productoId)
       if (!producto) {
-        console.error(`❌ Producto ${productoId} no encontrado`)
+        console.error(`Producto ${productoId} no encontrado`)
         return null
       }
 
       // Validar precio
       if (!precio.valor || precio.valor <= 0) {
-        console.error('❌ Precio inválido:', precio)
+        console.error('Precio inválido:', precio)
         return null
       }
 
       // Validar comercioId y direccionId
       if (!precio.comercioId || !precio.direccionId) {
-        console.warn('⚠️ Precio sin comercioId/direccionId (datos legacy)')
+        console.warn('Precio sin comercioId/direccionId (datos legacy)')
         // Mantener compatibilidad con precios viejos
       }
 
@@ -121,6 +122,9 @@ class ProductosService {
         precio.direccion = precio.nombreCompleto?.split(' - ')[1] || ''
       }
 
+      // Normalizar escalas por cantidad dentro del registro de precio
+      precio = this._normalizarPrecioConEscalas(precio)
+
       // Agregar a la lista de precios
       producto.precios = producto.precios || []
       producto.precios.push(precio)
@@ -131,17 +135,17 @@ class ProductosService {
       // Guardar
       return await this.guardarProducto(productoActualizado)
     } catch (error) {
-      console.error('❌ Error al agregar precio:', error)
+      console.error('Error al agregar precio:', error)
       return null
     }
   }
 
   // ========================================
-  // 📖 LEER / OBTENER
+  // LEER / OBTENER
   // ========================================
 
   /**
-   * 📖 OBTENER PRODUCTO POR ID
+   * OBTENER PRODUCTO POR ID
    * @param {number} productoId - ID del producto
    * @returns {Promise<Object|null>} - Producto o null si no existe
    */
@@ -151,21 +155,21 @@ class ProductosService {
       const producto = await this.adaptador.obtener(clave)
 
       if (producto) {
-        console.log(`✅ Producto obtenido: ${producto.nombre}`)
+        console.log(`Producto obtenido: ${producto.nombre}`)
       }
 
       return producto
     } catch (error) {
-      console.error(`❌ Error al obtener producto ${productoId}:`, error)
+      console.error(`Error al obtener producto ${productoId}:`, error)
       return null
     }
   }
 
   /**
-   * 📋 OBTENER TODOS LOS PRODUCTOS
+   * OBTENER TODOS LOS PRODUCTOS
    * @returns {Promise<Array>} - Array de productos
    *
-   * 🔥 FIRESTORE: Considerar paginación si hay +100 productos
+   * FIRESTORE: Considerar paginación si hay +100 productos
    * const snapshot = await db.collection('productos')
    *   .limit(50)
    *   .orderBy('fechaActualizacion', 'desc')
@@ -176,20 +180,20 @@ class ProductosService {
       const resultados = await this.adaptador.listarTodo(this.prefijoProductos)
       const productos = resultados.map((r) => r.valor)
 
-      console.log(`✅ Obtenidos ${productos.length} productos`)
+      console.log(`Obtenidos ${productos.length} productos`)
       return productos
     } catch (error) {
-      console.error('❌ Error al obtener productos:', error)
+      console.error('Error al obtener productos:', error)
       return []
     }
   }
 
   /**
-   * 🔍 BUSCAR PRODUCTOS POR NOMBRE
+   * BUSCAR PRODUCTOS POR NOMBRE
    * @param {string} termino - Término de búsqueda
    * @returns {Promise<Array>} - Productos que coinciden
    *
-   * 🔥 FIRESTORE: Usar índices de texto completo o Algolia para búsqueda avanzada
+   * FIRESTORE: Usar índices de texto completo o Algolia para búsqueda avanzada
    */
   async buscarPorNombre(termino) {
     try {
@@ -200,10 +204,10 @@ class ProductosService {
         producto.nombre.toLowerCase().includes(terminoLower),
       )
 
-      console.log(`✅ Encontrados ${resultados.length} productos con "${termino}"`)
+      console.log(`Encontrados ${resultados.length} productos con "${termino}"`)
       return resultados
     } catch (error) {
-      console.error('❌ Error al buscar productos:', error)
+      console.error('Error al buscar productos:', error)
       return []
     }
   }
@@ -220,7 +224,7 @@ class ProductosService {
   }
 
   /**
-   * 🔍 BUSCAR EN LOCAL por nombre, marca, categoría o código (alineado a MisProductosPage).
+   * BUSCAR EN LOCAL por nombre, marca, categoría o código (alineado a MisProductosPage).
    * Usado por BusquedaProductosHibridaService (plan: búsqueda local primero).
    * @param {string} termino - Término de búsqueda
    * @returns {Promise<Array>}
@@ -246,20 +250,20 @@ class ProductosService {
         return false
       })
 
-      console.log(`✅ buscarPorTextoFlexible: ${resultados.length} coincidencias para "${texto}"`)
+      console.log(`buscarPorTextoFlexible: ${resultados.length} coincidencias para "${texto}"`)
       return resultados
     } catch (error) {
-      console.error('❌ Error en buscarPorTextoFlexible:', error)
+      console.error('Error en buscarPorTextoFlexible:', error)
       return []
     }
   }
 
   /**
-   * 🔍 BUSCAR PRODUCTO POR CÓDIGO DE BARRAS
+   * BUSCAR PRODUCTO POR CÓDIGO DE BARRAS
    * @param {string} codigoBarras - Código de barras del producto
    * @returns {Promise<Object|null>} - Producto encontrado o null
    *
-   * 🎯 NUEVO: Para evitar duplicados
+   * NUEVO: Para evitar duplicados
    */
   async buscarPorCodigoBarras(codigoBarras) {
     try {
@@ -278,29 +282,29 @@ class ProductosService {
 
       if (productoEncontrado) {
         console.log(
-          `✅ Producto encontrado por código: ${productoEncontrado.nombre} (${codigoNormalizado})`,
+          `Producto encontrado por código: ${productoEncontrado.nombre} (${codigoNormalizado})`,
         )
       } else {
-        console.log(`ℹ️ No existe producto con código: ${codigoNormalizado}`)
+        console.log(`No existe producto con código: ${codigoNormalizado}`)
       }
 
       return productoEncontrado || null
     } catch (error) {
-      console.error('❌ Error al buscar por código de barras:', error)
+      console.error('Error al buscar por código de barras:', error)
       return null
     }
   }
 
   // ========================================
-  // 🗑️ ELIMINAR
+  // ELIMINAR
   // ========================================
 
   /**
-   * 🗑️ ELIMINAR PRODUCTO
+   * ELIMINAR PRODUCTO
    * @param {number} productoId - ID del producto
    * @returns {Promise<boolean>} - true si eliminó exitosamente
    *
-   * 🔥 FIRESTORE: Considerar "soft delete" (marcar como eliminado en vez de borrar)
+   * FIRESTORE: Considerar "soft delete" (marcar como eliminado en vez de borrar)
    * await db.collection('productos').doc(productoId).update({
    *   eliminado: true,
    *   fechaEliminacion: new Date()
@@ -312,18 +316,18 @@ class ProductosService {
       const eliminado = await this.adaptador.eliminar(clave)
 
       if (eliminado) {
-        console.log(`✅ Producto ${productoId} eliminado`)
+        console.log(`Producto ${productoId} eliminado`)
       }
 
       return eliminado
     } catch (error) {
-      console.error(`❌ Error al eliminar producto ${productoId}:`, error)
+      console.error(`Error al eliminar producto ${productoId}:`, error)
       return false
     }
   }
 
   // ========================================
-  // 🧮 CÁLCULOS Y TRANSFORMACIONES
+  // CÁLCULOS Y TRANSFORMACIONES
   // ========================================
   /* Calcular campos automáticos del producto (precio vigente por comercio) */
   _calcularCamposAutomaticos(producto) {
@@ -337,7 +341,9 @@ class ProductosService {
       return producto
     }
 
-    /* 1. Agrupar precios por comercio — usar IDs si existen, sino nombreCompleto como fallback legacy */
+    producto.precios = producto.precios.map((precio) => this._normalizarPrecioConEscalas(precio))
+
+    /* 1. Agrupar precios por comercio - usar IDs si existen, sino nombreCompleto como fallback legacy */
     const preciosPorComercio = {}
 
     producto.precios.forEach((precio) => {
@@ -358,7 +364,7 @@ class ProductosService {
       const ordenadosPorFecha = [...preciosDelComercio].sort(
         (a, b) => new Date(b.fecha) - new Date(a.fecha),
       )
-      return ordenadosPorFecha[0]
+      return this._normalizarPrecioConEscalas(ordenadosPorFecha[0])
     })
 
     /* 3. Moneda de referencia: la del precio vigente más reciente */
@@ -394,12 +400,37 @@ class ProductosService {
     )
     producto.tendenciaGeneral = this._calcularTendencia(preciosMismaMoneda)
     producto.porcentajeTendencia = this._calcularPorcentajeTendencia(preciosMismaMoneda)
+    producto.tieneVentajaPorCantidad = preciosVigentes.some(
+      (precio) => precio?.escalasResumen?.tieneMejoras && !precio?.escalasResumen?.tieneSospechosas,
+    )
+    producto.tieneEscalasSospechosas = preciosVigentes.some(
+      (precio) => precio?.escalasResumen?.tieneSospechosas,
+    )
 
     return producto
   }
 
+  _normalizarPrecioConEscalas(precio) {
+    const base = Number(precio?.valor)
+    const precioBase = Number.isFinite(base) ? base : null
+    const activarPreciosMayoristas = Boolean(precio?.activarPreciosMayoristas)
+    const escalasPorCantidad = activarPreciosMayoristas
+      ? normalizarEscalasPorCantidad(precio?.escalasPorCantidad, precioBase)
+      : []
+    const escalasResumen = obtenerResumenEscalas(escalasPorCantidad)
+
+    return {
+      ...precio,
+      activarPreciosMayoristas,
+      escalasPorCantidad,
+      escalasResumen,
+      tieneEscalaMejora: escalasResumen.tieneMejoras,
+      tieneEscalaSospechosa: escalasResumen.tieneSospechosas,
+    }
+  }
+
   /**
-   * 📊 CALCULAR TENDENCIA GENERAL
+   * CALCULAR TENDENCIA GENERAL
    * Compara precios recientes con históricos
    * @private
    */
@@ -435,7 +466,7 @@ class ProductosService {
   }
 
   /**
-   * 📊 CALCULAR PORCENTAJE DE TENDENCIA
+   * CALCULAR PORCENTAJE DE TENDENCIA
    * @private
    */
   _calcularPorcentajeTendencia(precios) {
@@ -460,11 +491,11 @@ class ProductosService {
   }
 
   // ========================================
-  // ✅ VALIDACIONES
+  // VALIDACIONES
   // ========================================
 
   /**
-   * ✅ VALIDAR PRODUCTO
+   * VALIDAR PRODUCTO
    * @private
    */
   _validarProducto(producto) {
@@ -486,14 +517,14 @@ class ProductosService {
   }
 
   // ========================================
-  // 🔧 UTILIDADES
+  // UTILIDADES
   // ========================================
 
   /**
-   * 🆔 GENERAR ID ÚNICO
+   * GENERAR ID ÚNICO
    * @private
    *
-   * 🔥 FIRESTORE: Firestore genera IDs automáticamente con doc().
+   * FIRESTORE: Firestore genera IDs automáticamente con doc().
    * Este método es solo para localStorage/Capacitor.
    */
   _generarId() {
@@ -501,7 +532,7 @@ class ProductosService {
   }
 
   /**
-   * 📊 OBTENER ESTADÍSTICAS GENERALES
+   * OBTENER ESTADÍSTICAS GENERALES
    */
   async obtenerEstadisticas() {
     const productos = await this.obtenerTodos()
@@ -517,3 +548,5 @@ class ProductosService {
 
 // Exportar instancia única (Singleton)
 export default new ProductosService()
+
+

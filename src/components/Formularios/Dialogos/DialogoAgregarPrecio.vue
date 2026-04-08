@@ -57,6 +57,13 @@
           </div>
         </div>
 
+        <BloqueEscalasCantidad
+          ref="refBloqueEscalas"
+          v-model="datosEscalas"
+          :precio-base="parseFloat(precioTexto) || null"
+          class="q-mb-md"
+        />
+
         <!-- Selector de comercio (agrupado por cadenas) -->
         <q-select
           v-model="comercioSeleccionado"
@@ -172,6 +179,7 @@ import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.j
 import { MONEDAS } from '../../../almacenamiento/constantes/Monedas.js'
 import { usePreferenciasStore } from '../../../almacenamiento/stores/preferenciasStore.js'
 import DialogoAgregarComercioRapido from './DialogoAgregarComercioRapido.vue'
+import BloqueEscalasCantidad from '../BloqueEscalasCantidad.vue'
 import { useTecladoVirtual } from '../../../composables/useTecladoVirtual.js'
 import {
   filtrarInputPrecio,
@@ -209,6 +217,7 @@ const dialogoAbierto = computed({
 
 /* Refs del formulario */
 const inputPrecioRef = ref(null)
+const refBloqueEscalas = ref(null)
 // String para preservar ceros finales (ej: "3.30"); el valor numérico se parsea al guardar
 const precioTexto = ref('')
 const monedaSeleccionada = ref(preferenciasStore.monedaDefaultEfectiva)
@@ -218,6 +227,10 @@ const textoComercioEscrito = ref('')
 const comercioTieneFoco = ref(false)
 const guardando = ref(false)
 const dialogoComercioRapidoAbierto = ref(false)
+const datosEscalas = ref({
+  activarPreciosMayoristas: false,
+  escalasPorCantidad: [],
+})
 
 /* Opciones de moneda */
 const opcionesMoneda = MONEDAS
@@ -434,6 +447,7 @@ function alCrearComercioNuevo(comercioCreado) {
 /* Guardar precio */
 async function guardarPrecio() {
   if (!puedeGuardar.value || !productoActual.value) return
+  if (!refBloqueEscalas.value?.validarEscalas()) return
 
   guardando.value = true
 
@@ -457,6 +471,10 @@ async function guardarPrecio() {
       direccion: calleDireccion,
       valor: parseFloat(precioTexto.value),
       moneda: monedaSeleccionada.value,
+      activarPreciosMayoristas: Boolean(datosEscalas.value.activarPreciosMayoristas),
+      escalasPorCantidad: Array.isArray(datosEscalas.value.escalasPorCantidad)
+        ? datosEscalas.value.escalasPorCantidad
+        : [],
       fecha: new Date().toISOString(),
       confirmaciones: 0,
       usuarioId: 'user_actual_123',
@@ -509,6 +527,10 @@ function cerrar() {
   comercioSeleccionado.value = null
   direccionSeleccionada.value = null
   textoComercioEscrito.value = ''
+  datosEscalas.value = {
+    activarPreciosMayoristas: false,
+    escalasPorCantidad: [],
+  }
 }
 </script>
 

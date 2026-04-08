@@ -142,6 +142,12 @@
       </div>
     </div>
 
+    <BloqueEscalasCantidad
+      ref="refBloqueEscalas"
+      v-model="datosEscalas"
+      :precio-base="datosInternos.valor"
+    />
+
     <!-- DIÁLOGO: Agregar Nuevo Comercio Rápido -->
     <DialogoAgregarComercioRapido
       v-model="dialogoNuevoComercioAbierto"
@@ -158,6 +164,7 @@ import { useComerciStore } from '../../almacenamiento/stores/comerciosStore.js'
 import { usePreferenciasStore } from '../../almacenamiento/stores/preferenciasStore.js'
 import { MONEDAS } from '../../almacenamiento/constantes/Monedas.js'
 import DialogoAgregarComercioRapido from './Dialogos/DialogoAgregarComercioRapido.vue'
+import BloqueEscalasCantidad from './BloqueEscalasCantidad.vue'
 import { filtrarInputPrecio, formatearPrecioAlSalir, soloNumerosDecimales } from '../../utils/PrecioUtils.js'
 
 const props = defineProps({
@@ -168,6 +175,8 @@ const props = defineProps({
       direccion: '',
       valor: null,
       moneda: 'UYU',
+      activarPreciosMayoristas: false,
+      escalasPorCantidad: [],
     }),
   },
   modo: {
@@ -211,11 +220,18 @@ const direccionTieneFoco = ref(false) // Si el input tiene foco
 
 // Ref del input de precio (para validación programática)
 const qInputPrecioRef = ref(null)
+const refBloqueEscalas = ref(null)
 // Texto string del precio para preservar ceros finales (ej: "3.30")
 const valorPrecioTexto = ref(formatearPrecioAlSalir(props.modelValue.valor != null ? String(props.modelValue.valor) : ''))
 // Mensaje de error manual del precio (para casos que las rules no cubren, ej: valor null)
 const errorPrecioMsg = ref('')
 const animarShake = ref(false)
+const datosEscalas = ref({
+  activarPreciosMayoristas: Boolean(props.modelValue.activarPreciosMayoristas),
+  escalasPorCantidad: Array.isArray(props.modelValue.escalasPorCantidad)
+    ? props.modelValue.escalasPorCantidad
+    : [],
+})
 
 // Estado del diálogo de nuevo comercio
 const dialogoNuevoComercioAbierto = ref(false)
@@ -505,7 +521,21 @@ watch(
       valor: nuevoValor.valor || null,
       moneda: nuevoValor.moneda || preferenciasStore.monedaDefaultEfectiva,
     }
+    datosEscalas.value = {
+      activarPreciosMayoristas: Boolean(nuevoValor.activarPreciosMayoristas),
+      escalasPorCantidad: Array.isArray(nuevoValor.escalasPorCantidad)
+        ? nuevoValor.escalasPorCantidad
+        : [],
+    }
     valorPrecioTexto.value = formatearPrecioAlSalir(nuevoValor.valor != null ? String(nuevoValor.valor) : '')
+  },
+  { deep: true },
+)
+
+watch(
+  () => datosEscalas.value,
+  () => {
+    emitirCambios()
   },
   { deep: true },
 )
@@ -533,6 +563,10 @@ function emitirCambios() {
     comercio: nombreComercio,
     direccion: nombreDireccion,
     nombreCompleto: nombreCompleto,
+    activarPreciosMayoristas: Boolean(datosEscalas.value.activarPreciosMayoristas),
+    escalasPorCantidad: Array.isArray(datosEscalas.value.escalasPorCantidad)
+      ? datosEscalas.value.escalasPorCantidad
+      : [],
   })
 }
 
@@ -584,6 +618,11 @@ function validarPrecio() {
   // Precio 0 o negativo → dejar que las rules de Quasar muestren el error
   const resultado = qInputPrecioRef.value?.validate()
   if (!resultado) {
+    enfocarYNavegar()
+    return false
+  }
+
+  if (!refBloqueEscalas.value?.validarEscalas()) {
     enfocarYNavegar()
     return false
   }

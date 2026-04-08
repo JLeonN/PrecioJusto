@@ -217,6 +217,13 @@
             />
           </div>
         </div>
+        <BloqueEscalasCantidad
+          ref="refBloqueEscalas"
+          :model-value="datosEscalas"
+          :precio-base="datosEditando.precio"
+          class="q-mt-xs"
+          @update:model-value="alCambiarEscalas"
+        />
         <SelectorComercioDireccion
           ref="refSelectorComercio"
           :model-value="datosEditando.comercio"
@@ -292,7 +299,7 @@
         :color="itemCompleto ? 'primary' : 'grey-4'"
         :text-color="itemCompleto ? 'white' : 'grey-6'"
         :disable="!itemCompleto"
-        @click.stop="$emit('enviar')"
+        @click.stop="emitirEnviar"
       >
         <IconSend :size="14" class="q-mr-xs" />
         Enviar
@@ -315,6 +322,7 @@ import TarjetaBase from '../Tarjetas/TarjetaBase.vue'
 import BotonConfirmacionEliminar from '../Compartidos/BotonConfirmacionEliminar.vue'
 import SelectorComercioDireccion from '../Compartidos/SelectorComercioDireccion.vue'
 import DialogoVerImagen from '../Compartidos/DialogoVerImagen.vue'
+import BloqueEscalasCantidad from '../Formularios/BloqueEscalasCantidad.vue'
 import { MONEDAS } from '../../almacenamiento/constantes/Monedas.js'
 import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
 import {
@@ -374,6 +382,7 @@ const expandidoLocal = ref(false)
 const refInputNombre = ref(null)
 const refInputPrecio = ref(null)
 const refSelectorComercio = ref(null)
+const refBloqueEscalas = ref(null)
 
 // Copia local para edición
 const datosEditando = ref({ ...props.item })
@@ -381,6 +390,10 @@ const datosEditando = ref({ ...props.item })
 const precioTexto = ref(
   formatearPrecioAlSalir(props.item.precio > 0 ? String(props.item.precio) : ''),
 )
+const datosEscalas = ref({
+  activarPreciosMayoristas: Boolean(props.item.activarPreciosMayoristas),
+  escalasPorCantidad: Array.isArray(props.item.escalasPorCantidad) ? props.item.escalasPorCantidad : [],
+})
 
 // Sincroniza si el item cambia externamente (ej. asignación de comercio en bloque)
 watch(
@@ -390,6 +403,10 @@ watch(
     // Evitar sobreescribir mientras el usuario escribe: solo actualizar si el número cambió
     if (parseFloat(precioTexto.value) !== v.precio) {
       precioTexto.value = formatearPrecioAlSalir(v.precio > 0 ? String(v.precio) : '')
+    }
+    datosEscalas.value = {
+      activarPreciosMayoristas: Boolean(v.activarPreciosMayoristas),
+      escalasPorCantidad: Array.isArray(v.escalasPorCantidad) ? v.escalasPorCantidad : [],
     }
   },
   { deep: true },
@@ -431,6 +448,16 @@ function alSalirPrecio() {
 // Actualiza un campo y emite el item completo actualizado
 function actualizar(campo, valor) {
   datosEditando.value = { ...datosEditando.value, [campo]: valor }
+  emit('update:item', { ...datosEditando.value })
+}
+
+function alCambiarEscalas(valor) {
+  datosEscalas.value = valor
+  datosEditando.value = {
+    ...datosEditando.value,
+    activarPreciosMayoristas: Boolean(valor.activarPreciosMayoristas),
+    escalasPorCantidad: Array.isArray(valor.escalasPorCantidad) ? valor.escalasPorCantidad : [],
+  }
   emit('update:item', { ...datosEditando.value })
 }
 
@@ -481,6 +508,11 @@ function irACampo(campo) {
 
 function formatearPrecio(valor, moneda) {
   return formatearPrecioConCodigo(valor, moneda)
+}
+
+function emitirEnviar() {
+  if (!refBloqueEscalas.value?.validarEscalas()) return
+  emit('enviar')
 }
 </script>
 

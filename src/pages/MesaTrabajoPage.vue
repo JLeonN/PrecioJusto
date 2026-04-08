@@ -397,6 +397,8 @@ async function _guardarItem(item) {
     direccion: comercio?.direccionNombre || '',
     valor: item.precio,
     moneda: item.moneda,
+    activarPreciosMayoristas: Boolean(item.activarPreciosMayoristas),
+    escalasPorCantidad: Array.isArray(item.escalasPorCantidad) ? item.escalasPorCantidad : [],
     fecha: new Date().toISOString(),
     confirmaciones: 0,
     usuarioId: 'user_actual_123',

@@ -54,6 +54,8 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
           ...item,
           comercio: item.comercio ?? null,
           sinCoincidencia: item.sinCoincidencia ?? false,
+          activarPreciosMayoristas: item.activarPreciosMayoristas ?? false,
+          escalasPorCantidad: Array.isArray(item.escalasPorCantidad) ? item.escalasPorCantidad : [],
         }))
       }
     } catch (error) {
@@ -75,6 +77,8 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
       imagen: item.imagen || null,
       precio: item.precio || 0,
       moneda: item.moneda || 'UYU',
+      activarPreciosMayoristas: item.activarPreciosMayoristas || false,
+      escalasPorCantidad: Array.isArray(item.escalasPorCantidad) ? item.escalasPorCantidad : [],
       origenApi: item.origenApi || false,
       fuenteDato: item.fuenteDato || null,
       sinCoincidencia: item.sinCoincidencia || false,

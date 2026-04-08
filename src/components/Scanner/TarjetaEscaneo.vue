@@ -188,6 +188,12 @@
             />
           </div>
         </div>
+        <BloqueEscalasCantidad
+          ref="refBloqueEscalas"
+          v-model="datosEscalas"
+          :precio-base="datosForm.precio"
+          class="q-mt-sm"
+        />
         <input
           ref="inputArchivoRef"
           type="file"
@@ -229,6 +235,7 @@ import { useTecladoVirtual } from '../../composables/useTecladoVirtual.js'
 import { MONEDAS } from '../../almacenamiento/constantes/Monedas.js'
 import { usePreferenciasStore } from '../../almacenamiento/stores/preferenciasStore.js'
 import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
+import BloqueEscalasCantidad from '../Formularios/BloqueEscalasCantidad.vue'
 import { filtrarInputPrecio, formatearPrecioAlSalir, soloNumerosDecimales } from '../../utils/PrecioUtils.js'
 import {
   IconShoppingBag,
@@ -264,6 +271,7 @@ const { estiloTarjeta } = useTecladoVirtual()
 
 const $q = useQuasar()
 const inputPrecioRef = ref(null)
+const refBloqueEscalas = ref(null)
 const editando = ref(false)
 // String para preservar ceros finales (ej: "3.30"); datosForm.precio guarda el número
 const precioTexto = ref('')
@@ -279,6 +287,10 @@ const datosForm = ref({
   imagen: null,
   precio: null,
   moneda: preferenciasStore.monedaDefaultEfectiva,
+})
+const datosEscalas = ref({
+  activarPreciosMayoristas: false,
+  escalasPorCantidad: [],
 })
 
 const abierto = computed({
@@ -336,6 +348,12 @@ watch(
       precio: nuevoItem.precio || null,
       moneda: nuevoItem.moneda || preferenciasStore.monedaDefaultEfectiva,
     }
+    datosEscalas.value = {
+      activarPreciosMayoristas: Boolean(nuevoItem.activarPreciosMayoristas),
+      escalasPorCantidad: Array.isArray(nuevoItem.escalasPorCantidad)
+        ? nuevoItem.escalasPorCantidad
+        : [],
+    }
     precioTexto.value = formatearPrecioAlSalir(nuevoItem.precio ? String(nuevoItem.precio) : '')
     editando.value = false
   },
@@ -355,6 +373,10 @@ function alCerrar() {
     imagen: null,
     precio: null,
     moneda: preferenciasStore.monedaDefaultEfectiva,
+  }
+  datosEscalas.value = {
+    activarPreciosMayoristas: false,
+    escalasPorCantidad: [],
   }
   precioTexto.value = ''
   editando.value = false
@@ -411,17 +433,23 @@ function _itemActualizado() {
     imagen: datosForm.value.imagen,
     precio: datosForm.value.precio,
     moneda: datosForm.value.moneda,
+    activarPreciosMayoristas: Boolean(datosEscalas.value.activarPreciosMayoristas),
+    escalasPorCantidad: Array.isArray(datosEscalas.value.escalasPorCantidad)
+      ? datosEscalas.value.escalasPorCantidad
+      : [],
     comercio: null,
   }
 }
 
 function emitSiguiente() {
   if (!formularioValido.value) return
+  if (!refBloqueEscalas.value?.validarEscalas()) return
   emit('siguiente', _itemActualizado())
 }
 
 function emitIrAMesa() {
   if (!formularioValido.value) return
+  if (!refBloqueEscalas.value?.validarEscalas()) return
   emit('ir-a-mesa', _itemActualizado())
 }
 

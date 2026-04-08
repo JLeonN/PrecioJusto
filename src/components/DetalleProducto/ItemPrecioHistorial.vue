@@ -16,6 +16,9 @@
           <span>- {{ textoConfianza }}</span>
         </div>
       </q-badge>
+      <q-badge v-if="mostrarAlertaSospechosa" color="negative" class="q-mt-xs">
+        Precio por cantidad sospechoso
+      </q-badge>
     </div>
 
     <!-- Botón confirmar (solo si es el más reciente y no está confirmado) -->
@@ -87,6 +90,12 @@ const textoConfianza = computed(() => {
   if (props.precio.confirmaciones < 6) return 'Poco confirmado'
   if (props.precio.confirmaciones < 20) return 'Confirmado'
   return 'Muy confiable'
+})
+
+const mostrarAlertaSospechosa = computed(() => {
+  if (props.precio?.tieneEscalaSospechosa) return true
+  if (props.precio?.escalasResumen?.tieneSospechosas) return true
+  return false
 })
 
 // Fecha formateada
