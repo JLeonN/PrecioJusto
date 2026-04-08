@@ -24,6 +24,23 @@ Plan universal para implementar o mantener un sistema de aviso de actualización
 - No editar manualmente `version.json` si el proyecto ya lo genera de forma automática desde la versión del proyecto
 - Si faltan datos críticos, preguntar antes de implementar
 
+## Lecciones del caso real
+
+### Objetivo
+
+Dejar registradas las trampas reales que aparecieron en este proyecto para que futuras apps no repitan el mismo fallo.
+
+- Usar siempre `version.json` con URL absoluta, nunca relativa al frontend
+- Agregar `cache bust` en la consulta remota de `version.json` porque GitHub Pages puede servir caché por varios minutos
+- Re-chequear actualizaciones al abrir la app y también cuando vuelve al foreground
+- Abrir Play Store con fallback en dos pasos: primero `market://details?id=...` y luego `https://play.google.com/store/apps/details?id=...`
+- No depender de que APK o AAB cambie el comportamiento del link; el problema real suele ser el esquema de URL o la app que lo maneja
+- Comparar versiones por segmentos numéricos y no por texto simple
+- Si la versión remota ya existe en el dispositivo, no mostrar aviso
+- Para probar un aviso real, la versión instalada debe ser menor que la publicada en `version.json`
+- Mantener la fuente oficial de versión en un solo lugar y regenerar los archivos derivados antes del build
+- Si la app muestra el aviso en web pero no en Android, revisar primero caché, timing de inicialización y eventos de estado de la app
+
 ## Preguntas obligatorias antes de ejecutar
 
 ### Objetivo
@@ -73,6 +90,7 @@ Evitar el problema clásico donde GitHub Pages funciona en navegador pero la app
 - [x] Verificar que la app Android no dependa de rutas relativas pensadas para GitHub Pages
 - [x] Mantener `version.json` fuera de cualquier lógica de navegación interna
 - [x] Usar siempre una URL absoluta para consultar `version.json`
+- [x] Agregar cache bust en la URL de `version.json` y headers de no-cache si la plataforma lo permite
 - [x] Documentar explícitamente el criterio técnico para no mezclar rutas web y rutas Android
 
 ## FASE 4: Definir y generar version.json
@@ -112,6 +130,8 @@ Mostrar la actualización disponible de una forma visible, simple y consistente 
 - [x] Hacer que ambos usen la misma URL de Play Store
 - [x] Permitir cancelar el modal sin marcar la actualización como descartada permanente
 - [x] Si el usuario cancela y vuelve a abrir la app, decidir si el modal reaparece según la regla del proyecto
+- [x] Reintentar la verificación cuando la app vuelve al foreground
+- [x] Abrir Play Store con fallback `market://` → `https://`
 - [x] Mantener el estilo visual alineado con el proyecto actual
 
 ## FASE 7: Adaptar según tecnología
@@ -152,6 +172,7 @@ Validar que el flujo funcione tanto en web publicada como en Android real.
 - [ ] Probar un escenario sin actualización disponible
 - [ ] Probar un escenario con actualización disponible
 - [ ] Verificar que el modal y el botón del menú abran la URL correcta de Play Store
+- [ ] Confirmar que `market://` abre Play Store en Android y que `https://` funciona como fallback
 - [x] Verificar que si falla la descarga de `version.json` la app siga funcionando sin errores visibles graves
 - [x] Ejecutar lint, build o el proceso equivalente según el stack
 
