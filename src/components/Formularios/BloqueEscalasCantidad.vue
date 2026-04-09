@@ -129,7 +129,8 @@
           no-caps
           color="primary"
           icon="add_circle"
-          label="+ Agregar escalón"
+          label="Agregar escalón"
+          class="full-width q-mt-xs boton-agregar-masivo"
           @click="agregarEscala"
         />
 
@@ -443,6 +444,14 @@ defineExpose({ validarEscalas })
 }
 :deep(.inputPrecioEscala input[type='number']) {
   -moz-appearance: textfield;
+}
+.boton-agregar-masivo {
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+.boton-agregar-masivo:hover {
+  background: color-mix(in srgb, var(--color-primario) 8%, transparent) !important;
 }
 .confirmacionInline {
   display: flex;
