@@ -185,6 +185,21 @@
   --chip-campo-completo-texto: #ffffff;
   --chip-campo-completo-borde: #2a8f58;
   /* ===========================
+     DESTACADOS MAYORISTAS
+     =========================== */
+  --mayorista-destacado-color: var(--color-exito);
+  --mayorista-destacado-borde: color-mix(in srgb, var(--mayorista-destacado-color) 35%, transparent);
+  --mayorista-destacado-borde-fuerte: color-mix(in srgb, var(--mayorista-destacado-color) 45%, transparent);
+  --mayorista-destacado-sombra-suave: color-mix(in srgb, var(--mayorista-destacado-color) 18%, transparent);
+  --mayorista-destacado-sombra-media: color-mix(in srgb, var(--mayorista-destacado-color) 28%, transparent);
+  --mayorista-destacado-sombra-fuerte: color-mix(in srgb, var(--mayorista-destacado-color) 32%, transparent);
+  --mayorista-destacado-texto: var(--mayorista-destacado-color);
+  --mayorista-destacado-texto-sombra: color-mix(
+    in srgb,
+    var(--mayorista-destacado-color) 50%,
+    transparent
+  );
+  /* ===========================
      ANIMACIONES Y SAFE AREA
      =========================== */
   --transicion-carta: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

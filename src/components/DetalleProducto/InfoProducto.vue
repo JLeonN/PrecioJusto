@@ -1,5 +1,5 @@
 <template>
-  <q-card class="info-producto">
+  <q-card :class="['info-producto', { 'info-producto-ventaja-mayorista': hayVentajaMayoristaGlobal }]">
     <q-card-section class="info-contenido q-pb-lg">
 
       <!-- IMAGEN DEL PRODUCTO (editable) -->
@@ -209,7 +209,10 @@
             <div
               v-for="(escalon, indiceEscalon) in escalonesResumenMayoristaPrincipal"
               :key="`resumen_mayorista_principal_${indiceEscalon}`"
-              class="resumen-mayorista-linea"
+              :class="[
+                'resumen-mayorista-linea',
+                { 'resumen-mayorista-linea-ventaja': esEscalonConVentajaPrincipal(escalon) },
+              ]"
             >
               <span>Desde {{ escalon.cantidadMinima }} unidades</span>
               <span>
@@ -252,7 +255,10 @@
                   <div
                     v-for="(escalon, indiceEscalon) in alternativa.escalones"
                     :key="`${alternativa.clave}_escalon_${indiceEscalon}`"
-                    class="resumen-mayorista-linea"
+                    :class="[
+                      'resumen-mayorista-linea',
+                      { 'resumen-mayorista-linea-ventaja': esEscalonConVentajaGlobal(escalon) },
+                    ]"
                   >
                     <span>Desde {{ escalon.cantidadMinima }} unidades</span>
                     <span>
@@ -593,6 +599,9 @@ const mostrarBotonMayoristasAlternativos = computed(() => {
     })
   })
 })
+const hayVentajaMayoristaGlobal = computed(
+  () => mostrarResumenMayoristaPrincipal.value || mostrarBotonMayoristasAlternativos.value,
+)
 
 const mayoristasAlternativos = computed(() => {
   const baseActual = Number(props.producto.precioMejor)
@@ -638,6 +647,20 @@ const mayoristasAlternativos = computed(() => {
 
 function toggleMayoristasAlternativos() {
   verMayoristasAlternativos.value = !verMayoristasAlternativos.value
+}
+
+function esEscalonConVentajaPrincipal(escalon) {
+  const precioBasePrincipal = Number(precioVigenteMejorBase.value?.valor)
+  const precioEscalon = Number(escalon?.precioUnitario)
+  if (!Number.isFinite(precioBasePrincipal) || !Number.isFinite(precioEscalon)) return false
+  return precioEscalon < precioBasePrincipal
+}
+
+function esEscalonConVentajaGlobal(escalon) {
+  const precioBaseGlobal = Number(props.producto?.precioMejor)
+  const precioEscalon = Number(escalon?.precioUnitario)
+  if (!Number.isFinite(precioBaseGlobal) || !Number.isFinite(precioEscalon)) return false
+  return precioEscalon < precioBaseGlobal
 }
 
 // ── Cantidad / Unidad editable ───────────────────────────
@@ -723,6 +746,14 @@ const copiarCodigoBarras = async (codigo) => {
 <style scoped>
 .info-producto {
   border-left: 4px solid var(--color-primario);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.info-producto-ventaja-mayorista {
+  border-left-color: var(--mayorista-destacado-color);
+  box-shadow:
+    0 0 0 1px var(--mayorista-destacado-borde),
+    0 0 18px var(--mayorista-destacado-sombra-media);
+  animation: pulsoVentajaMayorista 2.4s ease-in-out infinite;
 }
 .info-contenido {
   display: grid;
@@ -834,6 +865,11 @@ const copiarCodigoBarras = async (codigo) => {
   font-weight: 600;
   color: var(--texto-primario);
 }
+.resumen-mayorista-linea-ventaja {
+  color: var(--mayorista-destacado-texto);
+  text-shadow: 0 0 12px var(--mayorista-destacado-texto-sombra);
+  animation: pulsoLineaVentaja 1.7s ease-in-out infinite;
+}
 .boton-ver-mayoristas {
   width: fit-content;
   align-self: flex-start;
@@ -875,6 +911,28 @@ const copiarCodigoBarras = async (codigo) => {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+@keyframes pulsoVentajaMayorista {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px var(--mayorista-destacado-borde),
+      0 0 12px var(--mayorista-destacado-sombra-suave);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px var(--mayorista-destacado-borde-fuerte),
+      0 0 24px var(--mayorista-destacado-sombra-fuerte);
+  }
+}
+@keyframes pulsoLineaVentaja {
+  0%, 100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 0.88;
+    transform: translateX(1px);
   }
 }
 .codigo-barras {
