@@ -2,14 +2,38 @@
   <div class="bloque-escalas">
     <div class="row items-center justify-between q-gutter-sm">
       <div class="text-body2 text-weight-medium">Activar precios mayoristas</div>
-      <q-toggle
-        :model-value="estadoLocal.activarPreciosMayoristas"
-        color="primary"
-        @update:model-value="alCambiarSwitch"
-      />
+      <transition name="fadeControl" mode="out-in">
+        <div v-if="confirmacionDesactivarActiva" key="confirmacionInline" class="confirmacionInline">
+          <q-btn
+            flat
+            dense
+            no-caps
+            color="negative"
+            icon="delete"
+            label="Confirmar"
+            @click="confirmarDesactivar"
+          />
+          <q-btn
+            flat
+            dense
+            round
+            color="grey-8"
+            icon="close"
+            aria-label="Cancelar desactivación"
+            @click="cancelarDesactivar"
+          />
+        </div>
+        <q-toggle
+          v-else
+          key="switchMayorista"
+          :model-value="estadoLocal.activarPreciosMayoristas"
+          color="primary"
+          @update:model-value="alCambiarSwitch"
+        />
+      </transition>
     </div>
 
-    <div class="text-caption text-grey-7 q-mt-xs">
+    <div v-if="estadoLocal.activarPreciosMayoristas" class="text-caption text-grey-7 q-mt-xs">
       Agrega escalones de precio para compras por cantidad.
     </div>
 
@@ -74,7 +98,7 @@
         />
 
         <q-banner
-          v-if="erroresEscalas.length > 0"
+          v-if="mostrarErroresEscalas"
           dense
           inline-actions
           class="q-mt-sm bg-orange-1 text-orange-10"
@@ -84,25 +108,6 @@
       </div>
     </q-slide-transition>
 
-    <q-slide-transition>
-      <div v-show="confirmacionDesactivarActiva" class="confirmacion-desactivar q-mt-sm">
-        <q-btn
-          unelevated
-          no-caps
-          color="negative"
-          label="Confirmar borrado"
-          @click="confirmarDesactivar"
-        />
-        <q-btn
-          flat
-          no-caps
-          color="grey-8"
-          icon="close"
-          aria-label="Cancelar desactivación"
-          @click="cancelarDesactivar"
-        />
-      </div>
-    </q-slide-transition>
   </div>
 </template>
 
@@ -128,11 +133,16 @@ const emit = defineEmits(['update:modelValue'])
 const estadoLocal = ref(crearEstado(props.modelValue))
 const confirmacionDesactivarActiva = ref(false)
 const huboEdicion = ref(false)
+const forzarMostrarErrores = ref(false)
+const habiaEscalasPersistidas = ref(tieneEscalasPersistidas(props.modelValue))
 
 watch(
   () => props.modelValue,
   (valor) => {
     estadoLocal.value = crearEstado(valor)
+    habiaEscalasPersistidas.value = tieneEscalasPersistidas(valor)
+    huboEdicion.value = false
+    forzarMostrarErrores.value = false
     if (!estadoLocal.value.activarPreciosMayoristas) {
       confirmacionDesactivarActiva.value = false
     }
@@ -141,6 +151,12 @@ watch(
 )
 
 const erroresEscalas = computed(() => obtenerErroresEscalas(estadoLocal.value.escalasPorCantidad))
+const mostrarErroresEscalas = computed(
+  () =>
+    estadoLocal.value.activarPreciosMayoristas &&
+    erroresEscalas.value.length > 0 &&
+    (huboEdicion.value || forzarMostrarErrores.value),
+)
 
 function crearEstado(valor) {
   const activarPreciosMayoristas = Boolean(valor?.activarPreciosMayoristas)
@@ -168,6 +184,16 @@ function emitirCambios() {
   })
 }
 
+function tieneEscalasPersistidas(valor) {
+  const escalas = Array.isArray(valor?.escalasPorCantidad) ? valor.escalasPorCantidad : []
+  if (!valor?.activarPreciosMayoristas || escalas.length === 0) return false
+  return escalas.some((escala) => {
+    const cantidad = Number(escala?.cantidadMinima)
+    const precio = Number(escala?.precioUnitario)
+    return Number.isFinite(cantidad) && cantidad >= 2 && Number.isFinite(precio) && precio > 0
+  })
+}
+
 function alCambiarSwitch(valor) {
   if (valor) {
     estadoLocal.value.activarPreciosMayoristas = true
@@ -183,22 +209,26 @@ function alCambiarSwitch(valor) {
     return
   }
 
-  const tieneCambios = huboEdicion.value || estadoLocal.value.escalasPorCantidad.length > 0
+  const tieneCambios = huboEdicion.value || habiaEscalasPersistidas.value
   if (!tieneCambios) {
-    estadoLocal.value.activarPreciosMayoristas = false
-    emitirCambios()
+    desactivarSinConfirmacion()
     return
   }
 
   confirmacionDesactivarActiva.value = true
 }
 
-function confirmarDesactivar() {
+function desactivarSinConfirmacion() {
   estadoLocal.value.activarPreciosMayoristas = false
   estadoLocal.value.escalasPorCantidad = []
   huboEdicion.value = false
+  forzarMostrarErrores.value = false
   confirmacionDesactivarActiva.value = false
   emitirCambios()
+}
+
+function confirmarDesactivar() {
+  desactivarSinConfirmacion()
 }
 
 function cancelarDesactivar() {
@@ -307,6 +337,7 @@ function etiquetaEstadoEscala(estadoEscala) {
 
 function validarEscalas() {
   if (!estadoLocal.value.activarPreciosMayoristas) return true
+  forzarMostrarErrores.value = true
   return erroresEscalas.value.length === 0
 }
 
@@ -332,14 +363,19 @@ defineExpose({ validarEscalas })
 .chip-estado {
   margin-right: 2px;
 }
-.confirmacion-desactivar {
-  border: 1px solid var(--color-error-borde);
-  border-radius: 8px;
-  background: var(--color-error-fondo-suave);
-  padding: 6px;
+.confirmacionInline {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   justify-content: flex-end;
   align-items: center;
+}
+.fadeControl-enter-active,
+.fadeControl-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.fadeControl-enter-from,
+.fadeControl-leave-to {
+  opacity: 0;
+  transform: translateY(-2px);
 }
 </style>
