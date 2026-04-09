@@ -53,6 +53,21 @@
             {{ comercio.precios.length }}
             {{ comercio.precios.length === 1 ? 'registro' : 'registros' }}
           </div>
+          <div v-if="mostrarEscaleraResumen" class="escalera-resumen q-mt-xs">
+            <div class="escalera-resumen-titulo">Escalera mayorista</div>
+            <div class="escalera-resumen-linea">
+              <span>1 unidad</span>
+              <span>{{ formatearPrecioConCodigo(precioMasReciente.valor, precioMasReciente.moneda) }}</span>
+            </div>
+            <div
+              v-for="(escalon, indiceEscalon) in escalonesResumen"
+              :key="`resumen_escalon_${comercio.nombreCompleto || comercio.comercio}_${indiceEscalon}`"
+              class="escalera-resumen-linea"
+            >
+              <span>Desde {{ escalon.cantidadMinima }} unidades</span>
+              <span>{{ formatearPrecioConCodigo(escalon.precioUnitario, precioMasReciente.moneda) }}</span>
+            </div>
+          </div>
         </div>
 
         <!-- Ícono expandir/colapsar -->
@@ -185,6 +200,28 @@ const preciosOrdenados = computed(() => {
 // Precio más reciente
 const precioMasReciente = computed(() => {
   return preciosOrdenados.value[0]
+})
+const escalonesResumen = computed(() => {
+  const escalas = Array.isArray(precioMasReciente.value?.escalasPorCantidad)
+    ? precioMasReciente.value.escalasPorCantidad
+    : []
+  return escalas
+    .map((escala) => ({
+      cantidadMinima: Number(escala?.cantidadMinima),
+      precioUnitario: Number(escala?.precioUnitario),
+    }))
+    .filter(
+      (escala) =>
+        Number.isFinite(escala.cantidadMinima) &&
+        escala.cantidadMinima >= 2 &&
+        Number.isFinite(escala.precioUnitario) &&
+        escala.precioUnitario > 0,
+    )
+    .sort((a, b) => a.cantidadMinima - b.cantidadMinima)
+})
+const mostrarEscaleraResumen = computed(() => {
+  if (!precioMasReciente.value?.activarPreciosMayoristas) return false
+  return escalonesResumen.value.length > 0
 })
 
 const monedaReferenciaComercio = computed(() => {
@@ -334,5 +371,21 @@ const textoTendenciaCompleto = computed(() => {
 .icono-editar {
   cursor: pointer;
   flex-shrink: 0;
+}
+.escalera-resumen {
+  border-left: 2px solid var(--color-primario);
+  padding-left: 8px;
+}
+.escalera-resumen-titulo {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--texto-secundario);
+}
+.escalera-resumen-linea {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--texto-primario);
 }
 </style>

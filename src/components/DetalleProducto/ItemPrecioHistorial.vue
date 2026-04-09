@@ -16,6 +16,21 @@
           <span>- {{ textoConfianza }}</span>
         </div>
       </q-badge>
+      <div v-if="mostrarEscalera" class="escalera-precios q-mt-xs">
+        <div class="escalera-titulo">Escalera mayorista</div>
+        <div class="escalera-linea">
+          <span>1 unidad</span>
+          <span>{{ formatearPrecioConCodigo(precio.valor, precio.moneda) }}</span>
+        </div>
+        <div
+          v-for="(escalon, indiceEscalon) in escalonesOrdenados"
+          :key="`${precio.id || precio.fecha || 'precio'}_escalon_${indiceEscalon}`"
+          class="escalera-linea"
+        >
+          <span>Desde {{ escalon.cantidadMinima }} unidades</span>
+          <span>{{ formatearPrecioConCodigo(escalon.precioUnitario, precio.moneda) }}</span>
+        </div>
+      </div>
     </div>
 
     <!-- Botón confirmar (solo si es el más reciente y no está confirmado) -->
@@ -89,6 +104,28 @@ const textoConfianza = computed(() => {
   return 'Muy confiable'
 })
 
+const escalonesOrdenados = computed(() => {
+  const escalas = Array.isArray(props.precio?.escalasPorCantidad) ? props.precio.escalasPorCantidad : []
+  return escalas
+    .map((escala) => ({
+      cantidadMinima: Number(escala?.cantidadMinima),
+      precioUnitario: Number(escala?.precioUnitario),
+    }))
+    .filter(
+      (escala) =>
+        Number.isFinite(escala.cantidadMinima) &&
+        escala.cantidadMinima >= 2 &&
+        Number.isFinite(escala.precioUnitario) &&
+        escala.precioUnitario > 0,
+    )
+    .sort((a, b) => a.cantidadMinima - b.cantidadMinima)
+})
+
+const mostrarEscalera = computed(() => {
+  if (!props.precio?.activarPreciosMayoristas) return false
+  return escalonesOrdenados.value.length > 0
+})
+
 // Fecha formateada
 const fechaFormateada = computed(() => {
   const ahora = new Date()
@@ -133,5 +170,21 @@ const fechaFormateada = computed(() => {
 }
 .precio-acciones {
   flex-shrink: 0;
+}
+.escalera-precios {
+  border-left: 2px solid var(--color-primario);
+  padding-left: 8px;
+}
+.escalera-titulo {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--texto-secundario);
+}
+.escalera-linea {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--texto-primario);
 }
 </style>
