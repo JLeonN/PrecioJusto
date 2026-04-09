@@ -16,16 +16,6 @@
           <IconMapPin :size="14" />
           <span>{{ producto.comercioMejor }}</span>
         </div>
-        <q-chip
-          v-if="producto.tieneVentajaPorCantidad"
-          dense
-          size="sm"
-          color="amber-8"
-          text-color="white"
-          class="chip-mayorista"
-        >
-          Mejor por cantidad
-        </q-chip>
       </div>
     </template>
     <template #placeholder-icono>
@@ -274,9 +264,6 @@ const manejarExpansion = (expandido) => {
   gap: 6px;
   min-width: 0;
 }
-.chip-mayorista {
-  animation: brillo-mayorista 2.2s ease-in-out infinite;
-}
 .codigo-barras {
   display: flex;
   align-items: center;
@@ -389,16 +376,5 @@ const manejarExpansion = (expandido) => {
   font-weight: 600;
   background: var(--color-acento-fondo-suave);
   color: var(--color-acento);
-}
-@keyframes brillo-mayorista {
-  0% {
-    box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.35);
-  }
-  70% {
-    box-shadow: 0 0 0 8px rgba(255, 193, 7, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
-  }
 }
 </style>

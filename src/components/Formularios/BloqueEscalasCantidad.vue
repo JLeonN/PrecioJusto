@@ -46,6 +46,7 @@
         >
           <div class="col-4">
             <q-input
+              class="inputCantidadEscala"
               :model-value="escala.cantidadMinima"
               label="Desde"
               type="number"
@@ -53,7 +54,30 @@
               outlined
               dense
               @update:model-value="(valor) => alCambiarCantidad(indice, valor)"
-            />
+            >
+              <template #append>
+                <div class="controlCantidad">
+                  <q-btn
+                    flat
+                    dense
+                    round
+                    size="sm"
+                    icon="keyboard_arrow_up"
+                    class="botonCantidad"
+                    @click.stop="incrementarCantidad(indice)"
+                  />
+                  <q-btn
+                    flat
+                    dense
+                    round
+                    size="sm"
+                    icon="keyboard_arrow_down"
+                    class="botonCantidad"
+                    @click.stop="decrementarCantidad(indice)"
+                  />
+                </div>
+              </template>
+            </q-input>
           </div>
           <div class="col-5">
             <q-input
@@ -68,14 +92,6 @@
             />
           </div>
           <div class="col-3 columna-acciones">
-            <q-chip
-              dense
-              :color="colorEstadoEscala(escala.estadoEscala)"
-              text-color="white"
-              class="chip-estado"
-            >
-              {{ etiquetaEstadoEscala(escala.estadoEscala) }}
-            </q-chip>
             <q-btn
               flat
               dense
@@ -256,13 +272,26 @@ function eliminarEscala(indice) {
 }
 
 function alCambiarCantidad(indice, valor) {
-  const cantidadMinima = Math.trunc(Number(valor))
-  estadoLocal.value.escalasPorCantidad[indice].cantidadMinima = Number.isFinite(cantidadMinima)
-    ? cantidadMinima
-    : 3
+  estadoLocal.value.escalasPorCantidad[indice].cantidadMinima = normalizarCantidadMinima(valor)
   huboEdicion.value = true
   recalcularEstados(estadoLocal.value)
   emitirCambios()
+}
+
+function incrementarCantidad(indice) {
+  const actual = normalizarCantidadMinima(estadoLocal.value.escalasPorCantidad[indice]?.cantidadMinima)
+  alCambiarCantidad(indice, actual + 1)
+}
+
+function decrementarCantidad(indice) {
+  const actual = normalizarCantidadMinima(estadoLocal.value.escalasPorCantidad[indice]?.cantidadMinima)
+  alCambiarCantidad(indice, Math.max(2, actual - 1))
+}
+
+function normalizarCantidadMinima(valor) {
+  const cantidadMinima = Math.trunc(Number(valor))
+  if (!Number.isFinite(cantidadMinima) || cantidadMinima < 2) return 3
+  return cantidadMinima
 }
 
 function alCambiarPrecio(indice, valor) {
@@ -323,18 +352,6 @@ function obtenerErroresEscalas(escalas) {
   return []
 }
 
-function colorEstadoEscala(estadoEscala) {
-  if (estadoEscala === 'mejora') return 'positive'
-  if (estadoEscala === 'sospechosa') return 'negative'
-  return 'grey-7'
-}
-
-function etiquetaEstadoEscala(estadoEscala) {
-  if (estadoEscala === 'mejora') return 'Mejora'
-  if (estadoEscala === 'sospechosa') return 'Sospechosa'
-  return 'Neutral'
-}
-
 function validarEscalas() {
   if (!estadoLocal.value.activarPreciosMayoristas) return true
   forzarMostrarErrores.value = true
@@ -360,8 +377,21 @@ defineExpose({ validarEscalas })
   justify-content: flex-end;
   gap: 4px;
 }
-.chip-estado {
-  margin-right: 2px;
+.controlCantidad {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.botonCantidad {
+  color: var(--texto-secundario);
+}
+:deep(.inputCantidadEscala input[type='number']) {
+  -moz-appearance: textfield;
+}
+:deep(.inputCantidadEscala input::-webkit-outer-spin-button),
+:deep(.inputCantidadEscala input::-webkit-inner-spin-button) {
+  -webkit-appearance: none;
+  margin: 0;
 }
 .confirmacionInline {
   display: flex;
