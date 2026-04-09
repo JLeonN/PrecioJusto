@@ -198,6 +198,71 @@
             <IconMapPin :size="18" class="text-grey-6" />
             <span class="text-body2 text-grey-7">{{ producto.comercioMejor }}</span>
           </div>
+          <div v-if="mostrarResumenMayoristaPrincipal" class="resumen-mayorista q-mt-sm">
+            <div class="resumen-mayorista-titulo">Precio mayorista disponible</div>
+            <div class="resumen-mayorista-linea">
+              <span>Desde 1 unidad</span>
+              <span>
+                {{ formatearPrecioConCodigo(precioVigenteMejorBase.valor, producto.monedaReferencia) }}
+              </span>
+            </div>
+            <div
+              v-for="(escalon, indiceEscalon) in escalonesResumenMayoristaPrincipal"
+              :key="`resumen_mayorista_principal_${indiceEscalon}`"
+              class="resumen-mayorista-linea"
+            >
+              <span>Desde {{ escalon.cantidadMinima }} unidades</span>
+              <span>
+                {{ formatearPrecioConCodigo(escalon.precioUnitario, producto.monedaReferencia) }}
+              </span>
+            </div>
+          </div>
+          <q-btn
+            v-if="mostrarBotonMayoristasAlternativos"
+            flat
+            dense
+            no-caps
+            color="primary"
+            icon="query_stats"
+            :label="
+              verMayoristasAlternativos
+                ? 'Ocultar mejores precios por cantidad'
+                : 'Ver mejores precios por cantidad'
+            "
+            class="q-mt-sm boton-ver-mayoristas"
+            @click="toggleMayoristasAlternativos"
+          />
+          <q-slide-transition>
+            <div v-show="verMayoristasAlternativos" class="q-mt-sm lista-mayoristas-alternativos">
+              <div class="resumen-mayorista-titulo">Mejores precios por cantidad</div>
+              <transition-group name="entradaEscalon" tag="div">
+                <div
+                  v-for="(alternativa, indiceAlternativa) in mayoristasAlternativos"
+                  :key="alternativa.clave"
+                  class="alternativa-mayorista-item"
+                  :style="{ animationDelay: `${indiceAlternativa * 70}ms` }"
+                >
+                  <div class="alternativa-mayorista-comercio">{{ alternativa.comercio }}</div>
+                  <div class="resumen-mayorista-linea">
+                    <span>Desde 1 unidad</span>
+                    <span>
+                      {{ formatearPrecioConCodigo(alternativa.precioBase, producto.monedaReferencia) }}
+                    </span>
+                  </div>
+                  <div
+                    v-for="(escalon, indiceEscalon) in alternativa.escalones"
+                    :key="`${alternativa.clave}_escalon_${indiceEscalon}`"
+                    class="resumen-mayorista-linea"
+                  >
+                    <span>Desde {{ escalon.cantidadMinima }} unidades</span>
+                    <span>
+                      {{ formatearPrecioConCodigo(escalon.precioUnitario, producto.monedaReferencia) }}
+                    </span>
+                  </div>
+                </div>
+              </transition-group>
+            </div>
+          </q-slide-transition>
         </div>
 
         <!-- Chip de tendencia general -->
@@ -277,6 +342,7 @@ defineEmits(['agregar-precio'])
 
 // ── Visor de imagen ──────────────────────────────────────
 const verFoto = ref(false)
+const verMayoristasAlternativos = ref(false)
 
 // ── Nombre editable ──────────────────────────────────────
 
@@ -445,6 +511,134 @@ const textoTendencia = computed(() => {
   if (tendenciaProducto.value.tipo === 'subiendo') return `Subiendo ${tendenciaProducto.value.porcentaje}% vs visita anterior`
   return 'Precio estable vs visita anterior'
 })
+
+const preciosVigentesComparables = computed(() => {
+  if (!Array.isArray(props.producto.precios) || props.producto.precios.length === 0) return []
+  const monedaRef = props.producto.monedaReferencia || MONEDA_DEFAULT
+  const preciosMismaMoneda = props.producto.precios.filter(
+    (precio) => (precio.moneda || MONEDA_DEFAULT) === monedaRef,
+  )
+  const preciosComparables = preciosMismaMoneda.length > 0 ? preciosMismaMoneda : props.producto.precios
+  const mapaVigentes = {}
+
+  preciosComparables.forEach((precio) => {
+    const clave =
+      precio.comercioId && precio.direccionId
+        ? `${precio.comercioId}_${precio.direccionId}`
+        : precio.nombreCompleto || precio.comercio || 'sin-comercio'
+    const actual = mapaVigentes[clave]
+    if (!actual || new Date(precio.fecha) > new Date(actual.fecha)) {
+      mapaVigentes[clave] = precio
+    }
+  })
+
+  return Object.values(mapaVigentes)
+})
+
+const precioVigenteMejorBase = computed(() => {
+  if (preciosVigentesComparables.value.length === 0) return null
+  return [...preciosVigentesComparables.value].sort((a, b) => Number(a.valor) - Number(b.valor))[0]
+})
+
+const escalonesResumenMayoristaPrincipal = computed(() => {
+  const precioBasePrincipal = precioVigenteMejorBase.value
+  if (!precioBasePrincipal?.activarPreciosMayoristas) return []
+  const escalas = Array.isArray(precioBasePrincipal.escalasPorCantidad)
+    ? precioBasePrincipal.escalasPorCantidad
+    : []
+  return escalas
+    .map((escala) => ({
+      cantidadMinima: Number(escala?.cantidadMinima),
+      precioUnitario: Number(escala?.precioUnitario),
+    }))
+    .filter(
+      (escala) =>
+        Number.isFinite(escala.cantidadMinima) &&
+        escala.cantidadMinima >= 2 &&
+        Number.isFinite(escala.precioUnitario) &&
+        escala.precioUnitario > 0,
+    )
+    .sort((a, b) => a.cantidadMinima - b.cantidadMinima)
+})
+
+const mostrarResumenMayoristaPrincipal = computed(() => {
+  const precioBasePrincipal = precioVigenteMejorBase.value
+  if (!precioBasePrincipal) return false
+
+  const precioBase = Number(precioBasePrincipal.valor)
+  if (!Number.isFinite(precioBase) || precioBase <= 0) return false
+
+  return escalonesResumenMayoristaPrincipal.value.some((escala) => escala.precioUnitario < precioBase)
+})
+
+const mostrarBotonMayoristasAlternativos = computed(() => {
+  if (!Array.isArray(props.producto.precios) || props.producto.precios.length === 0) return false
+
+  const baseActual = Number(props.producto.precioMejor)
+  if (!Number.isFinite(baseActual) || baseActual <= 0) return false
+
+  if (mostrarResumenMayoristaPrincipal.value) return false
+
+  return preciosVigentesComparables.value.some((precioVigente) => {
+    if (!precioVigente?.activarPreciosMayoristas) return false
+    const escalas = Array.isArray(precioVigente?.escalasPorCantidad)
+      ? precioVigente.escalasPorCantidad
+      : []
+    return escalas.some((escala) => {
+      const cantidadMinima = Number(escala?.cantidadMinima)
+      const precioUnitario = Number(escala?.precioUnitario)
+      if (!Number.isFinite(cantidadMinima) || cantidadMinima < 2) return false
+      if (!Number.isFinite(precioUnitario) || precioUnitario <= 0) return false
+      return precioUnitario < baseActual
+    })
+  })
+})
+
+const mayoristasAlternativos = computed(() => {
+  const baseActual = Number(props.producto.precioMejor)
+  if (!Number.isFinite(baseActual) || baseActual <= 0) return []
+
+  return preciosVigentesComparables.value
+    .map((precioVigente) => {
+      const clave =
+        precioVigente.comercioId && precioVigente.direccionId
+          ? `${precioVigente.comercioId}_${precioVigente.direccionId}`
+          : precioVigente.nombreCompleto || precioVigente.comercio || 'sin-comercio'
+      const escalas = Array.isArray(precioVigente?.escalasPorCantidad)
+        ? precioVigente.escalasPorCantidad
+        : []
+      const escalonesValidos = escalas
+        .map((escala) => ({
+          cantidadMinima: Number(escala?.cantidadMinima),
+          precioUnitario: Number(escala?.precioUnitario),
+        }))
+        .filter(
+          (escala) =>
+            Number.isFinite(escala.cantidadMinima) &&
+            escala.cantidadMinima >= 2 &&
+            Number.isFinite(escala.precioUnitario) &&
+            escala.precioUnitario > 0,
+        )
+        .sort((a, b) => a.cantidadMinima - b.cantidadMinima)
+      const tieneVentaja = escalonesValidos.some((escala) => escala.precioUnitario < baseActual)
+
+      return {
+        clave,
+        comercio: precioVigente.nombreCompleto || precioVigente.comercio || 'Sin comercio',
+        precioBase: Number(precioVigente.valor),
+        escalones: escalonesValidos,
+        tieneVentaja,
+        mejorEscalon:
+          escalonesValidos.length > 0 ? Math.min(...escalonesValidos.map((e) => e.precioUnitario)) : null,
+      }
+    })
+    .filter((alternativa) => alternativa.escalones.length > 0 && alternativa.tieneVentaja)
+    .sort((a, b) => Number(a.mejorEscalon) - Number(b.mejorEscalon))
+})
+
+function toggleMayoristasAlternativos() {
+  verMayoristasAlternativos.value = !verMayoristasAlternativos.value
+}
 
 // ── Cantidad / Unidad editable ───────────────────────────
 
@@ -620,6 +814,68 @@ const copiarCodigoBarras = async (codigo) => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.resumen-mayorista {
+  border-left: 3px solid var(--color-primario);
+  padding-left: 10px;
+}
+.resumen-mayorista-titulo {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--texto-secundario);
+}
+.resumen-mayorista-linea {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--texto-primario);
+}
+.boton-ver-mayoristas {
+  width: fit-content;
+  align-self: flex-start;
+}
+.lista-mayoristas-alternativos {
+  border-left: 3px solid var(--color-primario);
+  padding-left: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.alternativa-mayorista-item {
+  background: color-mix(in srgb, var(--color-primario) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-primario) 30%, transparent);
+  border-radius: 8px;
+  padding: 8px;
+  animation: entradaEscalonItem 0.25s ease both;
+}
+.alternativa-mayorista-comercio {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--texto-primario);
+  margin-bottom: 4px;
+}
+.entradaEscalon-enter-active,
+.entradaEscalon-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.entradaEscalon-enter-from,
+.entradaEscalon-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
+}
+@keyframes entradaEscalonItem {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .codigo-barras {
   display: flex;
