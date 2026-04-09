@@ -873,6 +873,20 @@ const copiarCodigoBarras = async (codigo) => {
 .boton-ver-mayoristas {
   width: fit-content;
   align-self: flex-start;
+  border: 1px solid var(--mayorista-destacado-borde-fuerte);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--mayorista-destacado-color) 10%, transparent);
+  color: var(--mayorista-destacado-texto);
+  box-shadow:
+    0 0 0 1px var(--mayorista-destacado-borde),
+    0 0 14px var(--mayorista-destacado-sombra-media);
+  animation: pulsoBotonMayorista 2.4s ease-in-out infinite;
+}
+.boton-ver-mayoristas:hover {
+  background: color-mix(in srgb, var(--mayorista-destacado-color) 18%, transparent) !important;
+  box-shadow:
+    0 0 0 1px var(--mayorista-destacado-borde-fuerte),
+    0 0 18px var(--mayorista-destacado-sombra-fuerte);
 }
 .lista-mayoristas-alternativos {
   border-left: 3px solid var(--color-primario);
@@ -933,6 +947,20 @@ const copiarCodigoBarras = async (codigo) => {
   50% {
     opacity: 0.88;
     transform: translateX(1px);
+  }
+}
+@keyframes pulsoBotonMayorista {
+  0%, 100% {
+    transform: translateY(0);
+    box-shadow:
+      0 0 0 1px var(--mayorista-destacado-borde),
+      0 0 12px var(--mayorista-destacado-sombra-suave);
+  }
+  50% {
+    transform: translateY(-1px);
+    box-shadow:
+      0 0 0 1px var(--mayorista-destacado-borde-fuerte),
+      0 0 20px var(--mayorista-destacado-sombra-fuerte);
   }
 }
 .codigo-barras {
