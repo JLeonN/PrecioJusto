@@ -144,8 +144,9 @@
 
     <BloqueEscalasCantidad
       ref="refBloqueEscalas"
-      v-model="datosEscalas"
+      :model-value="datosEscalas"
       :precio-base="datosInternos.valor"
+      @update:model-value="alCambiarEscalas"
     />
 
     <!-- DIÁLOGO: Agregar Nuevo Comercio Rápido -->
@@ -232,6 +233,7 @@ const datosEscalas = ref({
     ? props.modelValue.escalasPorCantidad
     : [],
 })
+const sincronizandoDesdePadre = ref(false)
 
 // Estado del diálogo de nuevo comercio
 const dialogoNuevoComercioAbierto = ref(false)
@@ -515,6 +517,7 @@ function alCambiarMoneda() {
 watch(
   () => props.modelValue,
   (nuevoValor) => {
+    sincronizandoDesdePadre.value = true
     datosInternos.value = {
       comercio: nuevoValor.comercio || '',
       direccion: nuevoValor.direccion || '',
@@ -528,20 +531,24 @@ watch(
         : [],
     }
     valorPrecioTexto.value = formatearPrecioAlSalir(nuevoValor.valor != null ? String(nuevoValor.valor) : '')
+    sincronizandoDesdePadre.value = false
   },
   { deep: true },
 )
 
-watch(
-  () => datosEscalas.value,
-  () => {
-    emitirCambios()
-  },
-  { deep: true },
-)
+function alCambiarEscalas(valor) {
+  datosEscalas.value = {
+    activarPreciosMayoristas: Boolean(valor?.activarPreciosMayoristas),
+    escalasPorCantidad: Array.isArray(valor?.escalasPorCantidad) ? valor.escalasPorCantidad : [],
+  }
+  if (sincronizandoDesdePadre.value) return
+  emitirCambios()
+}
 
 // Emitir cambios al padre
 function emitirCambios() {
+  if (sincronizandoDesdePadre.value) return
+
   const nombreComercio = esComercioExistente.value
     ? comercioSeleccionado.value.nombre
     : comercioEscrito.value
