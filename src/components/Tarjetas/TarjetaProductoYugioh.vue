@@ -1,5 +1,6 @@
 <template>
   <TarjetaBase
+    :class="{ 'tarjeta-mayorista-ventaja': hayVentajaMayoristaTarjeta }"
     tipo="producto"
     :nombre="producto.nombre"
     :imagen="producto.imagen"
@@ -21,9 +22,66 @@
     <template #placeholder-icono>
       <IconShoppingBag :size="48" class="text-grey-5" />
     </template>
-    <template #overlay-info>
-      <div class="precio-valor">
-        {{ formatearPrecio(precioMejorVigente.valor, precioMejorVigente.moneda) }}
+    <template #imagen>
+      <div class="imagen-contenedor-personalizado">
+        <div v-if="!producto.imagen" class="tarjeta-yugioh__placeholder">
+          <IconShoppingBag :size="48" class="text-grey-5" />
+        </div>
+        <q-img v-else :src="producto.imagen" class="tarjeta-yugioh__imagen" fit="cover" />
+
+        <div v-if="hayVentajaMayoristaTarjeta" class="overlay-mayorista-tarjeta">
+          <div class="precio-base-chip">
+            {{ formatearPrecio(precioMejorVigente.valor, precioMejorVigente.moneda) }}
+          </div>
+          <q-slide-transition>
+            <div v-show="mostrarMayoristasEnTarjeta" class="panel-mayoristas-tarjeta">
+              <transition-group name="entradaEscalon" tag="div">
+                <div
+                  v-for="(alternativa, indiceAlternativa) in mayoristasConVentaja"
+                  :key="alternativa.clave"
+                  class="item-mayorista-tarjeta"
+                  :style="{ animationDelay: `${indiceAlternativa * 70}ms` }"
+                >
+                  <div class="item-mayorista-tarjeta__comercio">{{ alternativa.comercio }}</div>
+                  <div class="item-mayorista-tarjeta__linea">
+                    <span>Desde 1 unidad</span>
+                    <span>{{ formatearPrecio(alternativa.precioBase, precioMejorVigente.moneda) }}</span>
+                  </div>
+                  <div
+                    v-for="(escalon, indiceEscalon) in alternativa.escalones"
+                    :key="`${alternativa.clave}_escalon_${indiceEscalon}`"
+                    :class="[
+                      'item-mayorista-tarjeta__linea',
+                      { 'item-mayorista-tarjeta__linea--ventaja': escalon.precioUnitario < precioMejorVigente.valor },
+                    ]"
+                  >
+                    <span>Desde {{ escalon.cantidadMinima }} unidades</span>
+                    <span>{{ formatearPrecio(escalon.precioUnitario, precioMejorVigente.moneda) }}</span>
+                  </div>
+                </div>
+              </transition-group>
+            </div>
+          </q-slide-transition>
+          <q-btn
+            flat
+            dense
+            no-caps
+            color="primary"
+            icon="query_stats"
+            :label="
+              mostrarMayoristasEnTarjeta
+                ? 'Ocultar mejor precio por cantidad'
+                : 'Ver mejor precio por cantidad'
+            "
+            class="boton-ver-mayoristas-tarjeta"
+            @click.stop="toggleMayoristasTarjeta"
+          />
+        </div>
+        <div v-else class="overlay-precio-normal">
+          <div class="precio-valor">
+            {{ formatearPrecio(precioMejorVigente.valor, precioMejorVigente.moneda) }}
+          </div>
+        </div>
       </div>
     </template>
     <template #info-inferior>
@@ -86,7 +144,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import TarjetaBase from './TarjetaBase.vue'
 import {
@@ -129,6 +187,7 @@ defineEmits(['long-press', 'toggle-seleccion', 'agregar-precio'])
 
 /* Quasar */
 const $q = useQuasar()
+const mostrarMayoristasEnTarjeta = ref(false)
 
 /* TOP de precios vigentes por comercio en la moneda de referencia */
 const preciosVigentesPorComercio = computed(() => {
@@ -184,6 +243,55 @@ const precioMejorVigente = computed(() => {
     moneda: monedaReferencia.value,
   }
 })
+
+const mayoristasConVentaja = computed(() => {
+  const base = Number(precioMejorVigente.value?.valor)
+  if (!Number.isFinite(base) || base <= 0) return []
+
+  return preciosVigentesPorComercio.value
+    .map((precioVigente) => {
+      if (!precioVigente?.activarPreciosMayoristas) {
+        return null
+      }
+      const escalas = Array.isArray(precioVigente.escalasPorCantidad)
+        ? precioVigente.escalasPorCantidad
+        : []
+      const escalones = escalas
+        .map((escala) => ({
+          cantidadMinima: Number(escala?.cantidadMinima),
+          precioUnitario: Number(escala?.precioUnitario),
+        }))
+        .filter(
+          (escala) =>
+            Number.isFinite(escala.cantidadMinima) &&
+            escala.cantidadMinima >= 2 &&
+            Number.isFinite(escala.precioUnitario) &&
+            escala.precioUnitario > 0,
+        )
+        .sort((a, b) => a.cantidadMinima - b.cantidadMinima)
+
+      if (escalones.length === 0) return null
+      const tieneVentaja = escalones.some((escalon) => escalon.precioUnitario < base)
+      if (!tieneVentaja) return null
+
+      const clave =
+        precioVigente.comercioId && precioVigente.direccionId
+          ? `${precioVigente.comercioId}_${precioVigente.direccionId}`
+          : precioVigente.nombreCompleto || precioVigente.comercio || 'sin-comercio'
+
+      return {
+        clave,
+        comercio: precioVigente.comercio || 'Sin comercio',
+        precioBase: Number(precioVigente.valor),
+        escalones,
+        mejorEscalon: Math.min(...escalones.map((e) => e.precioUnitario)),
+      }
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.mejorEscalon - b.mejorEscalon)
+})
+
+const hayVentajaMayoristaTarjeta = computed(() => mayoristasConVentaja.value.length > 0)
 
 /* Calcular días transcurridos desde una fecha */
 const calcularDiasPrecio = (fechaISO) => {
@@ -242,6 +350,10 @@ const copiarCodigoBarras = async () => {
 const manejarExpansion = (expandido) => {
   console.log('Tarjeta expandida:', expandido)
 }
+
+const toggleMayoristasTarjeta = () => {
+  mostrarMayoristasEnTarjeta.value = !mostrarMayoristasEnTarjeta.value
+}
 </script>
 
 <style scoped>
@@ -250,6 +362,115 @@ const manejarExpansion = (expandido) => {
   font-size: 24px;
   font-weight: bold;
   text-shadow: var(--sombra-texto-overlay);
+}
+.imagen-contenedor-personalizado {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.overlay-precio-normal {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 24px 12px 8px 12px;
+  background: var(--degradado-precio-overlay);
+}
+.overlay-mayorista-tarjeta {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--fondo-oscuro) 70%, transparent) 0%,
+    color-mix(in srgb, var(--fondo-oscuro) 25%, transparent) 45%,
+    transparent 100%
+  );
+}
+.precio-base-chip {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--fondo-tarjeta) 75%, transparent);
+  border: 1px solid color-mix(in srgb, var(--borde-color) 85%, transparent);
+  color: var(--texto-sobre-primario);
+  font-size: 14px;
+  font-weight: 700;
+  text-shadow: var(--sombra-texto-overlay);
+}
+.boton-ver-mayoristas-tarjeta {
+  width: fit-content;
+  margin-top: auto;
+  border: 1px solid var(--mayorista-destacado-borde-fuerte);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--overlay-oscuro-intenso) 72%, transparent) !important;
+  color: var(--mayorista-destacado-texto);
+  box-shadow:
+    0 0 0 1px var(--mayorista-destacado-borde),
+    0 0 14px var(--mayorista-destacado-sombra-media);
+  animation: pulsoBotonMayorista 2.4s ease-in-out infinite;
+}
+.panel-mayoristas-tarjeta {
+  margin-top: 34px;
+  width: 100%;
+  max-height: 112px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  background: color-mix(in srgb, var(--fondo-oscuro) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--overlay-blanco-medio) 60%, transparent);
+  border-radius: 10px;
+  backdrop-filter: blur(2px);
+  padding: 8px;
+}
+.panel-mayoristas-tarjeta::-webkit-scrollbar {
+  display: none;
+}
+.item-mayorista-tarjeta {
+  padding: 6px 6px 4px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--overlay-blanco-medio) 40%, transparent);
+  background: color-mix(in srgb, var(--overlay-oscuro-fuerte) 65%, transparent);
+  margin-bottom: 6px;
+  animation: entradaEscalonItem 0.25s ease both;
+}
+.item-mayorista-tarjeta:last-child {
+  margin-bottom: 0;
+}
+.item-mayorista-tarjeta__comercio {
+  color: var(--texto-sobre-primario);
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.item-mayorista-tarjeta__linea {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--texto-sobre-primario);
+  font-size: 12px;
+}
+.item-mayorista-tarjeta__linea--ventaja {
+  color: var(--mayorista-destacado-texto);
+  text-shadow: 0 0 12px var(--mayorista-destacado-texto-sombra);
+  animation: pulsoLineaVentaja 1.7s ease-in-out infinite;
+}
+.tarjeta-mayorista-ventaja:deep(.tarjeta-yugioh) {
+  border-color: var(--mayorista-destacado-color);
+  box-shadow:
+    var(--sombra-carta),
+    0 0 0 1px var(--mayorista-destacado-borde),
+    0 0 18px var(--mayorista-destacado-sombra-media);
+  animation: pulsoVentajaMayorista 2.4s ease-in-out infinite;
 }
 .tipo-direccion {
   display: flex;
@@ -376,5 +597,53 @@ const manejarExpansion = (expandido) => {
   font-weight: 600;
   background: var(--color-acento-fondo-suave);
   color: var(--color-acento);
+}
+@keyframes entradaEscalonItem {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes pulsoVentajaMayorista {
+  0%, 100% {
+    box-shadow:
+      var(--sombra-carta),
+      0 0 0 1px var(--mayorista-destacado-borde),
+      0 0 12px var(--mayorista-destacado-sombra-suave);
+  }
+  50% {
+    box-shadow:
+      var(--sombra-carta-hover),
+      0 0 0 1px var(--mayorista-destacado-borde-fuerte),
+      0 0 24px var(--mayorista-destacado-sombra-fuerte);
+  }
+}
+@keyframes pulsoLineaVentaja {
+  0%, 100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 0.88;
+    transform: translateX(1px);
+  }
+}
+@keyframes pulsoBotonMayorista {
+  0%, 100% {
+    transform: translateY(0);
+    box-shadow:
+      0 0 0 1px var(--mayorista-destacado-borde),
+      0 0 12px var(--mayorista-destacado-sombra-suave);
+  }
+  50% {
+    transform: translateY(-1px);
+    box-shadow:
+      0 0 0 1px var(--mayorista-destacado-borde-fuerte),
+      0 0 20px var(--mayorista-destacado-sombra-fuerte);
+  }
 }
 </style>
