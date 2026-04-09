@@ -56,23 +56,21 @@
               @update:model-value="(valor) => alCambiarCantidad(indice, valor)"
             >
               <template #append>
-                <div class="controlCantidad">
+                <div class="controlInput">
                   <q-btn
                     flat
                     dense
-                    round
                     size="sm"
                     icon="keyboard_arrow_up"
-                    class="botonCantidad"
+                    class="botonControlInput"
                     @click.stop="incrementarCantidad(indice)"
                   />
                   <q-btn
                     flat
                     dense
-                    round
                     size="sm"
                     icon="keyboard_arrow_down"
-                    class="botonCantidad"
+                    class="botonControlInput"
                     @click.stop="decrementarCantidad(indice)"
                   />
                 </div>
@@ -81,6 +79,7 @@
           </div>
           <div class="col-5">
             <q-input
+              class="inputPrecioEscala"
               :model-value="escala.precioUnitario"
               label="Precio"
               type="number"
@@ -89,7 +88,28 @@
               outlined
               dense
               @update:model-value="(valor) => alCambiarPrecio(indice, valor)"
-            />
+            >
+              <template #append>
+                <div class="controlInput">
+                  <q-btn
+                    flat
+                    dense
+                    size="sm"
+                    icon="keyboard_arrow_up"
+                    class="botonControlInput"
+                    @click.stop="incrementarPrecio(indice)"
+                  />
+                  <q-btn
+                    flat
+                    dense
+                    size="sm"
+                    icon="keyboard_arrow_down"
+                    class="botonControlInput"
+                    @click.stop="decrementarPrecio(indice)"
+                  />
+                </div>
+              </template>
+            </q-input>
           </div>
           <div class="col-3 columna-acciones">
             <q-btn
@@ -304,6 +324,18 @@ function alCambiarPrecio(indice, valor) {
   emitirCambios()
 }
 
+function incrementarPrecio(indice) {
+  const actual = Number(estadoLocal.value.escalasPorCantidad[indice]?.precioUnitario)
+  const base = Number.isFinite(actual) ? actual : 0
+  alCambiarPrecio(indice, (base + 1).toFixed(2))
+}
+
+function decrementarPrecio(indice) {
+  const actual = Number(estadoLocal.value.escalasPorCantidad[indice]?.precioUnitario)
+  const base = Number.isFinite(actual) ? actual : 0
+  alCambiarPrecio(indice, Math.max(0, base - 1).toFixed(2))
+}
+
 function recalcularEstados(estado) {
   const base = Number(props.precioBase)
   const precioBase = Number.isFinite(base) ? base : null
@@ -377,21 +409,40 @@ defineExpose({ validarEscalas })
   justify-content: flex-end;
   gap: 4px;
 }
-.controlCantidad {
+.controlInput {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
+  border-radius: 6px;
+  overflow: hidden;
 }
-.botonCantidad {
+.botonControlInput {
   color: var(--texto-secundario);
+  min-width: 18px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+}
+:deep(.inputCantidadEscala .q-field__append),
+:deep(.inputPrecioEscala .q-field__append) {
+  padding-left: 4px;
+}
+:deep(.inputCantidadEscala .q-btn),
+:deep(.inputPrecioEscala .q-btn) {
+  border-radius: 4px;
 }
 :deep(.inputCantidadEscala input[type='number']) {
   -moz-appearance: textfield;
 }
 :deep(.inputCantidadEscala input::-webkit-outer-spin-button),
-:deep(.inputCantidadEscala input::-webkit-inner-spin-button) {
+:deep(.inputCantidadEscala input::-webkit-inner-spin-button),
+:deep(.inputPrecioEscala input::-webkit-outer-spin-button),
+:deep(.inputPrecioEscala input::-webkit-inner-spin-button) {
   -webkit-appearance: none;
   margin: 0;
+}
+:deep(.inputPrecioEscala input[type='number']) {
+  -moz-appearance: textfield;
 }
 .confirmacionInline {
   display: flex;
