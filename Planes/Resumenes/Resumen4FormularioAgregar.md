@@ -181,3 +181,10 @@ const { estiloTarjeta } = useTecladoVirtual()
 - `DialogoAgregarSucursal.vue`
 - `DialogoMotivoEliminacion.vue`
 - `TarjetaEscaneo.vue` (bottom sheet)
+## PRECIOS MAYORISTAS POR CANTIDAD
+- `FormularioPrecio.vue`, `DialogoAgregarProducto.vue`, `DialogoAgregarPrecio.vue`, `TarjetaEscaneo.vue` y `TarjetaProductoBorrador.vue` integran el bloque reutilizable `BloqueEscalasCantidad.vue`.
+- El texto visible unificado es `Activar precios mayoristas`.
+- El precio base de 1 unidad se mantiene en el input principal; las escalas adicionales se cargan como `escalasPorCantidad`.
+- Al activar el bloque se sugiere el primer escalón desde 3 unidades; el usuario puede agregar más filas, reordenadas automáticamente por cantidad mínima.
+- Al desactivar, si hubo edición real, aparece una confirmación inline compacta para borrar las escalas; si no hubo cambios, no se pide confirmación.
+- Los inputs numéricos usan controles propios para subir y bajar valores, con transición suave y sin usar los spinners nativos del navegador.

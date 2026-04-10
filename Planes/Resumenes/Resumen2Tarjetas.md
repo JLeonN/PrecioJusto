@@ -323,3 +323,9 @@ const manejarLongPress = () => {
 - ⏳ Exportar productos seleccionados
 - ⏳ Compartir productos
 - ⏳ Favoritos/listas personalizadas
+## PRECIOS MAYORISTAS POR CANTIDAD
+- `TarjetaProductoYugioh.vue` detecta ventajas reales por cantidad comparando el mejor precio base vigente con escalones mayoristas de otros comercios.
+- La tarjeta mantiene visible el mejor precio base para 1 unidad; si otro comercio solo mejora comprando más, aparece el botón `Ver mejor precio por cantidad`.
+- El bloque mayorista se despliega inline sobre la imagen con transición suave, fondo translúcido y lista completa de escalones disponibles.
+- La tarjeta aplica brillo y borde destacado solo cuando existe una ventaja mayorista real para el usuario.
+- El panel oculta la barra nativa de scroll, pero conserva desplazamiento táctil por gesto en móvil.

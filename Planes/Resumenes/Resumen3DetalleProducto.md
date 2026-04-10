@@ -202,3 +202,9 @@ Cada precio requiere:
 - **Solo nombre en el título:** El encabezado muestra `comercio.comercio` (solo el nombre), no `nombreCompleto`. La dirección ya aparece debajo en texto `caption`.
 - **Navegación a EditarComercioPage:** Ícono `IconExternalLink` al lado del nombre. Al tocar, navega a `/comercios/:nombre` con query `?direccionId=` si hay sucursal, pre-seleccionando la sucursal correcta en la página de edición.
 - **Resolución de foto:** Usa `grupoComercio` computed (búsqueda en `comerciosStore.comerciosAgrupados` por `comercioId`) → busca en `comerciosOriginales[i].direcciones` → retorna `dir.foto`.
+## PRECIOS MAYORISTAS EN DETALLE E HISTORIAL
+- `InfoProducto.vue` muestra un resumen mayorista inline cuando el mismo comercio del mejor precio base también tiene escalones útiles por cantidad.
+- Si la ventaja por cantidad está en otro comercio, aparece el botón `Ver mejores precios por cantidad` y se despliega una lista con todos los escalones relevantes, incluyendo base x1.
+- `HistorialPrecios.vue`, `ItemComercioHistorial.vue` e `ItemPrecioHistorial.vue` muestran la escalera mayorista cuando el registro tiene `activarPreciosMayoristas` y `escalasPorCantidad`.
+- La visualización histórica conserva el precio base como referencia de 1 unidad y ordena los escalones por `cantidadMinima`.
+- Las escalas sospechosas se conservan como dato registrado, pero no generan destaque visual en tarjetas principales.

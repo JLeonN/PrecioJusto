@@ -1074,7 +1074,7 @@ H. Arquitectura y Código
 - Señal "app lista" vía `nextTick()` en `App.vue`
 
 ### Estado Actual
-- **Versión:** 1.2.0
+- **Versión:** 1.2.1
 - **Almacenamiento:** Local (Capacitor Storage)
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
@@ -1094,6 +1094,7 @@ H. Arquitectura y Código
 - **Configuración global:** Completada (moneda predeterminada manual/automática; ver Resumen9Configuracion.md)
 - **Publicidad AdMob:** Integrada y en producción; banner, interstitial y rewarded activos. Los IDs de producción fueron regenerados para corregir fallos de serving en algunas unidades (ver PlanPublicidadAdMob.md)
 - **app-ads.txt:** Publicado en GitHub Pages para ayudar a la verificación de AdMob
+- **Precios mayoristas por cantidad:** Completados en carga, persistencia, historial, detalle y tarjetas; la app conserva el mejor precio base para 1 unidad y destaca ventajas reales por cantidad en otros comercios
 - **Ver detalles del sistema de escaneo:** Resumen8Scanner.md
 - **Ver detalles de configuración:** Resumen9Configuracion.md
 
@@ -1118,4 +1119,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 7 de Abril de 2026 — Se ajustó el sistema de actualizaciones para Android con fallback `market://` → `https://` y se preparó el release `1.2.0`.
+**Última actualización:** 10 de Abril de 2026 — Se preparó el release `1.2.1` con soporte de precios mayoristas por cantidad en formularios, historial, detalle y tarjetas principales.
