@@ -30,9 +30,6 @@
         <q-img v-else :src="producto.imagen" class="tarjeta-yugioh__imagen" fit="cover" />
 
         <div v-if="hayVentajaMayoristaTarjeta" class="overlay-mayorista-tarjeta">
-          <div class="precio-base-chip">
-            {{ formatearPrecio(precioMejorVigente.valor, precioMejorVigente.moneda) }}
-          </div>
           <q-slide-transition>
             <div v-show="mostrarMayoristasEnTarjeta" class="panel-mayoristas-tarjeta">
               <transition-group name="entradaEscalon" tag="div">
@@ -62,6 +59,9 @@
               </transition-group>
             </div>
           </q-slide-transition>
+          <div class="precio-valor precio-valor-mayorista">
+            {{ formatearPrecio(precioMejorVigente.valor, precioMejorVigente.moneda) }}
+          </div>
           <q-btn
             flat
             dense
@@ -382,7 +382,7 @@ const toggleMayoristasTarjeta = () => {
   inset: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 8px;
   padding: 10px;
   background: linear-gradient(
@@ -392,18 +392,15 @@ const toggleMayoristasTarjeta = () => {
     transparent 100%
   );
 }
-.precio-base-chip {
+.precio-valor-mayorista {
   position: absolute;
-  top: 8px;
-  left: 8px;
-  padding: 4px 8px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--fondo-tarjeta) 75%, transparent);
-  border: 1px solid color-mix(in srgb, var(--borde-color) 85%, transparent);
-  color: var(--texto-sobre-primario);
-  font-size: 14px;
-  font-weight: 700;
-  text-shadow: var(--sombra-texto-overlay);
+  right: 12px;
+  bottom: 12px;
+  font-size: 24px;
+  line-height: 1;
+}
+.overlay-precio-normal .precio-valor {
+  font-size: 24px;
 }
 .boton-ver-mayoristas-tarjeta {
   width: fit-content;
@@ -418,7 +415,7 @@ const toggleMayoristasTarjeta = () => {
   animation: pulsoBotonMayorista 2.4s ease-in-out infinite;
 }
 .panel-mayoristas-tarjeta {
-  margin-top: 34px;
+  margin-top: 10px;
   width: 100%;
   max-height: 112px;
   overflow: auto;

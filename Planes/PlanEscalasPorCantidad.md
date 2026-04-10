@@ -45,7 +45,7 @@ Cerrar la estructura mínima de datos y las reglas operativas para soportar esca
 - [x] Confirmar cómo se resuelve la prioridad entre precio base y escalas durante cálculos y visualización
 - [x] Definir cuándo una escala debe considerarse mejora, neutral o sospechosa
 - [x] Definir qué datos adicionales hacen falta para reflejar estado sospechoso en el histórico
-- [ ] Dejar fuera de este plan cualquier lógica de packs o promociones temporales
+- [x] Dejar fuera de este plan cualquier lógica de packs o promociones temporales
 
 ## FASE 2: Diseñar validaciones y flujo de carga
 
@@ -77,13 +77,13 @@ Resolver cómo se informa en la interfaz que un producto tiene mejor precio por 
 
 - [x] Mantener el precio base siempre visible en la tarjeta del producto
 - [x] Definir un indicador visual breve para productos con escalas convenientes en otro comercio aunque no ganen en precio base
-- [ ] Evaluar el uso de color, badge o destaque sutil sin recurrir a animaciones invasivas
-- [ ] Definir un texto corto de apoyo para explicar que existe precio mayorista o mejor precio por cantidad
-- [ ] Definir dónde se muestra el detalle de escalas dentro del producto
-- [ ] Mostrar el detalle de escalas en una lista simple y legible en móvil
+- [x] Evaluar el uso de color, badge o destaque sutil sin recurrir a animaciones invasivas
+- [x] Definir un texto corto de apoyo para explicar que existe precio mayorista o mejor precio por cantidad
+- [x] Definir dónde se muestra el detalle de escalas dentro del producto
+- [x] Mostrar el detalle de escalas en una lista simple y legible en móvil
 - [x] Hacer que la aparición del bloque de precios mayoristas tenga una expansión suave y sin saltos bruscos del layout
 - [x] Proteger la interacción del switch, inputs y controles de escalas para que la tarjeta de mesa de trabajo no se cierre al tocarlos
-- [ ] Definir cómo se muestra al usuario que el brillo o destaque de la tarjeta responde a una ventaja por cantidad y no a un mejor precio base
+- [x] Definir cómo se muestra al usuario que el brillo o destaque de la tarjeta responde a una ventaja por cantidad y no a un mejor precio base
 - [x] Evitar que las escalas sospechosas generen destaque visual en la tarjeta principal
 
 ## FASE 4: Integrar la mecánica en cálculos y comportamiento real
@@ -98,7 +98,7 @@ Definir cómo las escalas impactan en el resto del sistema para que no queden so
 - [x] Definir cómo guardar o reflejar que una escala quedó marcada como sospechosa
 - [ ] Revisar si hace falta agregar datos auxiliares para auditoría o trazabilidad futura
 - [ ] Detectar áreas del sistema que puedan romperse si el producto empieza a tener escalas
-- [ ] Definir en qué vistas alcanza con informar la existencia de escalas y en cuáles hace falta usarlas para cálculos reales
+- [x] Definir en qué vistas alcanza con informar la existencia de escalas y en cuáles hace falta usarlas para cálculos reales
 
 ## FASE 5: Implementación incremental y ajustes
 
@@ -109,9 +109,9 @@ Ejecutar la mecánica por etapas, reduciendo riesgo y permitiendo validar la exp
 - [x] Implementar primero el soporte base de datos y modelo del producto para escalas
 - [x] Implementar después la carga y edición de escalas en la interfaz
 - [x] Implementar luego la visualización en tarjeta y detalle
-- [ ] Integrar finalmente la lógica en comparaciones, historial o puntos donde realmente aporte valor
+- [x] Integrar finalmente la lógica en comparaciones, historial o puntos donde realmente aporte valor
 - [x] Implementar la marca visual o semántica de sospecha en el histórico
-- [ ] Revisar textos, etiquetas y consistencia visual en toda la experiencia
+- [x] Revisar textos, etiquetas y consistencia visual en toda la experiencia
 - [ ] Dejar documentadas las decisiones tomadas para futuras mecánicas como packs o promociones temporales
 
 ## FASE TESTING
@@ -121,33 +121,34 @@ Ejecutar la mecánica por etapas, reduciendo riesgo y permitiendo validar la exp
 Validar de forma ejecutable por IA y revisable por humano que las escalas por cantidad funcionan bien en datos, interfaz y comportamiento real.
 
 - [ ] Crear o editar un producto sin escalas y verificar que el comportamiento actual no cambie
-- [ ] Crear un producto con una escala desde 3 unidades y verificar que se guarde correctamente
-- [ ] Crear varias escalas, por ejemplo 3, 6 y 12 unidades, y verificar que se ordenen correctamente
+- [x] Crear un producto con una escala desde 3 unidades y verificar que se guarde correctamente
+- [x] Crear varias escalas, por ejemplo 3, 6 y 12 unidades, y verificar que se ordenen correctamente
 - [ ] Intentar guardar cantidades duplicadas y verificar que el sistema lo impida
 - [ ] Intentar guardar una escala para 1 unidad y verificar que el sistema la rechace
-- [ ] Verificar que la tarjeta siga mostrando el mejor precio base disponible para 1 unidad
-- [ ] Verificar que la tarjeta se destaque cuando exista una ventaja por cantidad aunque ese comercio no gane en precio base
+- [x] Verificar que la tarjeta siga mostrando el mejor precio base disponible para 1 unidad
+- [x] Verificar que la tarjeta se destaque cuando exista una ventaja por cantidad aunque ese comercio no gane en precio base
 - [ ] Verificar que una escala neutral no genere destaque visual por sí sola
 - [ ] Verificar que una escala sospechosa se guarde pero quede marcada como sospechosa en el histórico
 - [ ] Verificar que una escala sospechosa no genere destaque visual en la tarjeta principal
-- [ ] Verificar que el detalle del producto muestre las escalas en formato de lista simple
-- [ ] Verificar que al activar el switch el campo de precio actual pase a representar el precio base de 1 unidad
-- [ ] Verificar que al desactivar el switch sin haber editado escalas no aparezca confirmación
-- [ ] Verificar que al desactivar el switch con escalas editadas aparezca confirmación inline y permita cancelar o confirmar el borrado
+- [x] Verificar que el detalle del producto muestre las escalas en formato de lista simple
+- [x] Verificar que al activar el switch el campo de precio actual pase a representar el precio base de 1 unidad
+- [x] Verificar que al desactivar el switch sin haber editado escalas no aparezca confirmación
+- [x] Verificar que al desactivar el switch con escalas editadas aparezca confirmación inline y permita cancelar o confirmar el borrado
 - [ ] Verificar que en mesa de trabajo la tarjeta no se cierre al interactuar con el switch ni con los controles del bloque de escalas
 - [ ] Verificar que historial, comparaciones u otras vistas relacionadas no queden inconsistentes cuando existan escalas
+- [x] Ejecutar `npm run build` y verificar compilación exitosa sin errores
 
 ## Progreso del plan
 
-- [ ] Fase 1: Definir estructura de datos y reglas de negocio
-- [ ] Fase 2: Diseñar validaciones y flujo de carga
-- [ ] Fase 3: Definir visualización en tarjetas y detalle de producto
+- [x] Fase 1: Definir estructura de datos y reglas de negocio
+- [x] Fase 2: Diseñar validaciones y flujo de carga
+- [x] Fase 3: Definir visualización en tarjetas y detalle de producto
 - [ ] Fase 4: Integrar la mecánica en cálculos y comportamiento real
 - [ ] Fase 5: Implementación incremental y ajustes
 - [ ] Fase Testing
 
 Fecha de creación: 08 de Abril 2026
-Fecha de última actualización: 08 de Abril 2026
+Fecha de última actualización: 10 de abril 2026
 Estado: EN PROCESO
 
 
