@@ -25,8 +25,11 @@ Crear una nueva sección de la app llamada Mi Compra Justa para que el usuario p
 - El total de gasto visible dentro de la lista debe calcularse solo con productos marcados como comprados y usando el comercio seleccionado por el usuario
 - Si faltan precios, mostrar total parcial y avisos amigables sin interrumpir el flujo
 - Las listas deben actualizar sus totales y referencias automáticamente si cambia un precio relacionado
+- Si cambia un precio de un producto en Mis Productos, la lista debe reflejar automáticamente ese cambio
 - Si un item manual queda completo, debe incorporarse automáticamente a Mis Productos
 - Si un item manual sigue incompleto, debe poder derivarse a Mesa de trabajo
+- Si un item fue enviado a Mesa de trabajo, la lista debe recordar ese estado y avisar cuando luego pase a Mis Productos
+- Si un item ya pasó a Mis Productos, la lista no debe volver a ofrecer enviarlo a Mesa de trabajo
 - Las acciones destructivas de listas e items deben poder resolverse con gesto de deslizamiento hacia la izquierda
 - Un deslizamiento largo hacia la izquierda debe eliminar directamente listas o items
 - Antes de eliminar por swipe largo debe existir feedback visual previo claro
@@ -36,6 +39,11 @@ Crear una nueva sección de la app llamada Mi Compra Justa para que el usuario p
 - Las confirmaciones inline deben seguir el patrón actual del proyecto con cambio de acción a confirmar o cancelar con `X`
 - Un item se considera completo solo si tiene nombre, precio, comercio, cantidad, gramos o litros, marca, código de barras y categoría
 - Las tarjetas de listas deben mostrar hasta 3 comercios de forma visible y, si hay más, permitir scroll táctil interno sin barra nativa visible
+- Dentro de una lista con varios comercios debe existir un chip `Ver todos` además de un chip por cada comercio
+- Al seleccionar un chip de comercio, el usuario debe ver solo los productos asignados a ese comercio
+- Al seleccionar `Ver todos`, los productos deben agruparse por comercio dentro de la misma vista
+- Si un producto existe en más de un comercio de la lista, debe asignarse y mostrarse por defecto en el comercio con mejor precio disponible
+- Debe existir una acción futura o inicial simple para `Comprobar precio` cuando un producto exista en más de un comercio
 - El icono principal de Mi Compra Justa debe ser `IconListDetails`
 - El icono principal de Mis Productos debe actualizarse a `IconClipboardList`
 - El swipe largo destructivo debe usar una interacción inspirada en patrones conocidos como Spotify: desplazamiento progresivo, feedback visual anticipado y ejecución solo al superar un umbral claro
@@ -103,6 +111,7 @@ Permitir que el usuario complete la lista con productos existentes o manuales si
 - [ ] Reutilizar el buscador actual de productos para buscar por nombre, marca, categoría o código de barras
 - [ ] Agregar dentro de la lista un botón sticky siempre visible tipo `Agregar producto` que acompañe el scroll y permita sumar artículos en cualquier momento
 - [ ] Reservar espacio inferior de seguridad para que el botón sticky no tape el último contenido de la lista
+- [ ] Permitir elegir con chips el comercio destino antes o durante la carga de productos dentro de la lista
 - [ ] Permitir agregar productos desde Mis Productos usando una tarjeta simplificada con nombre, foto y acción de carrito
 - [ ] Permitir crear un artículo manual desde cero aunque no tenga foto ni precio
 - [ ] Guardar la cantidad como parte obligatoria del item de lista
@@ -118,6 +127,8 @@ Permitir que el usuario complete la lista con productos existentes o manuales si
 - [ ] Si un item manual queda completo, enviarlo automáticamente a Mis Productos
 - [ ] Considerar un item manual como completo solo si tiene nombre, precio, comercio, cantidad, gramos o litros, marca, código de barras y categoría
 - [ ] Si un item manual queda incompleto, permitir derivarlo a Mesa de trabajo mediante una acción secundaria poco invasiva
+- [ ] Si un item fue enviado a Mesa de trabajo, guardar ese estado dentro de la lista
+- [ ] Si luego ese item pasa a Mis Productos, reflejarlo en la lista y desactivar la acción de enviar a Mesa de trabajo
 - [ ] Si un item se deriva a Mesa de trabajo, mantenerlo visible en la lista con estado pendiente
 
 ## FASE 5: Uso de la lista durante la compra
@@ -135,6 +146,11 @@ Hacer que la lista sea cómoda de usar dentro del supermercado mientras el usuar
 - [ ] Mostrar un resumen de progreso tipo `X de Y comprados`
 - [ ] Aplicar un estilo visual más gris o apagado a los items comprados sin perder legibilidad
 - [ ] Mostrar un mensaje breve de estado vacío cuando la lista exista pero todavía no tenga productos
+- [ ] Mostrar chips por comercio y un chip `Ver todos` en la parte superior de la lista
+- [ ] Al entrar a un chip de comercio, mostrar solo los productos asignados a ese comercio
+- [ ] Al entrar a `Ver todos`, agrupar los productos por comercio con encabezados visibles por bloque
+- [ ] Si un producto existe en dos o más comercios, ubicarlo por defecto en el comercio con mejor precio
+- [ ] Permitir una acción `Comprobar precio` para revisar productos presentes en más de un comercio
 
 ## FASE 6: Totales y mensajes de apoyo
 
@@ -181,6 +197,7 @@ Validar de forma ejecutable por IA y revisable por humano el flujo base de lista
 - [ ] Editar una lista existente y verificar que permite cambiar nombre, comercios y borrar la lista
 - [ ] Intentar agregar un comercio no existente y validar que se abre Agregar Comercio Rápido y luego queda disponible
 - [ ] Agregar productos desde Mis Productos y también crear al menos un item manual desde cero
+- [ ] Verificar que el usuario puede elegir con chips el comercio destino al cargar productos
 - [ ] Verificar que la interfaz usa solo colores existentes del proyecto y responde bien en modo oscuro
 - [ ] Verificar que el botón `Agregar producto` queda siempre accesible dentro de la lista
 - [ ] Verificar que el botón `Agregar producto` se mantiene sticky dentro del contenido
@@ -197,6 +214,10 @@ Validar de forma ejecutable por IA y revisable por humano el flujo base de lista
 - [ ] Verificar que una lista vacía muestra su mensaje y llamada a acción correspondiente
 - [ ] Verificar que el total usa solo productos comprados del comercio seleccionado
 - [ ] Verificar que el selector de comercio activo se muestra arriba en formato chip
+- [ ] Verificar que existe un chip `Ver todos` y que agrupa productos por comercio
+- [ ] Verificar que al elegir un comercio solo se muestran los productos asignados a ese comercio
+- [ ] Verificar que si un producto existe en más de un comercio se asigna por defecto al de mejor precio
+- [ ] Verificar que la acción `Comprobar precio` aparece cuando corresponde
 - [ ] Verificar que la tarjeta de lista muestra un único total si hay un solo comercio y un total por comercio si hay varios
 - [ ] Verificar que los totales mostrados en tarjeta corresponden a total completo por comercio
 - [ ] Verificar que la tarjeta muestra hasta 3 comercios visibles y permite scroll táctil interno si hay más
@@ -206,6 +227,8 @@ Validar de forma ejecutable por IA y revisable por humano el flujo base de lista
 - [ ] Verificar que un item manual completo pasa automáticamente a Mis Productos
 - [ ] Verificar que el criterio de item completo exige nombre, precio, comercio, cantidad, gramos o litros, marca, código de barras y categoría
 - [ ] Verificar que un item manual incompleto puede derivarse a Mesa de trabajo mediante su acción secundaria y permanece en la lista como pendiente
+- [ ] Verificar que un item enviado a Mesa de trabajo conserva ese estado en la lista
+- [ ] Verificar que cuando ese item pasa a Mis Productos la lista lo informa y desactiva el envío a Mesa de trabajo
 - [ ] Verificar que la acción Reiniciar compra deja la lista reutilizable sin perder sus items y usa confirmación inline
 - [ ] Verificar que la acción Reutilizar deja al usuario dentro de la lista y reinicia los checks sin perder items
 - [ ] Verificar que la interfaz responde correctamente en móvil vertical y en tablet sin depender de columnas fijas por supermercado
