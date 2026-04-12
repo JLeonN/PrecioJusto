@@ -15,6 +15,8 @@ Crear una nueva sección de la app llamada Mi Compra Justa para que el usuario p
 - Usar el nombre visible `Mi Compra Justa` en la app
 - La nueva sección debe aparecer en el drawer y en el header con los demás accesos rápidos
 - Usar la línea visual verde de `Variables.css` con `--color-secundario` y `--color-secundario-oscuro`
+- No inventar colores nuevos para esta funcionalidad; usar exclusivamente variables existentes de `Variables.css`
+- Prever desde el diseño y la implementación que la app tiene modo oscuro
 - Mantener prioridad móvil vertical, pero con diseño responsive para tablet y pantallas más anchas
 - Reutilizar la búsqueda actual de productos alineada con Mis Productos
 - Permitir crear productos de lista desde Mis Productos o manualmente desde cero
@@ -22,11 +24,13 @@ Crear una nueva sección de la app llamada Mi Compra Justa para que el usuario p
 - Si un comercio no existe, abrir el flujo de Agregar Comercio Rápido y guardarlo también en Mis Comercios
 - El total de gasto visible dentro de la lista debe calcularse solo con productos marcados como comprados y usando el comercio seleccionado por el usuario
 - Si faltan precios, mostrar total parcial y avisos amigables sin interrumpir el flujo
+- Las listas deben actualizar sus totales y referencias automáticamente si cambia un precio relacionado
 - Si un item manual queda completo, debe incorporarse automáticamente a Mis Productos
 - Si un item manual sigue incompleto, debe poder derivarse a Mesa de trabajo
 - Las acciones destructivas de listas e items deben poder resolverse con gesto de deslizamiento hacia la izquierda
 - Un deslizamiento largo hacia la izquierda debe eliminar directamente listas o items
 - Antes de eliminar por swipe largo debe existir feedback visual previo claro
+- El feedback previo del swipe destructivo debe mostrar fondo rojo usando la paleta existente, icono de papelera y texto breve tipo pregunta como `¿Borrar?`
 - El botón principal para sumar artículos dentro de una lista debe ser sticky dentro del contenido
 - El botón sticky debe respetar espacio de seguridad inferior para no tapar contenido ni gestos del sistema
 - Las confirmaciones inline deben seguir el patrón actual del proyecto con cambio de acción a confirmar o cancelar con `X`
@@ -49,6 +53,7 @@ Preparar la base de datos local, la ruta, la entrada en drawer y header, y la es
 - [ ] Agregar el nuevo acceso rápido al header siguiendo el patrón actual de iconos
 - [ ] Usar `IconListDetails` como icono principal de Mi Compra Justa y mantener consistencia con el resto de la app
 - [ ] Actualizar Mis Productos para usar `IconClipboardList` y mantener coherencia entre accesos principales
+- [ ] Verificar que toda la nueva interfaz use solo colores existentes de `Variables.css` y funcione correctamente en modo oscuro
 
 ## FASE 2: Pantalla de listas del usuario
 
@@ -62,6 +67,7 @@ Construir la primera escena donde el usuario ve sus listas guardadas o un estado
 - [ ] Limitar la vista directa a un máximo de 3 comercios por tarjeta y permitir scroll táctil interno si hay más
 - [ ] Si la lista tiene productos sin precio, avisarlo en la tarjeta de forma clara
 - [ ] Si la lista no tiene ningún producto con precio, avisarlo en la tarjeta de forma clara
+- [ ] Actualizar automáticamente la información visible de una lista si cambia el precio de alguno de sus productos
 - [ ] Mostrar un mensaje breve de estado vacío si no hay listas creadas
 - [ ] Agregar un botón visible para crear una nueva lista aun cuando no existan listas previas
 - [ ] Incluir la acción `Reutilizar` en cada lista como base para recrear una lista más adelante cambiando comercios
@@ -69,6 +75,7 @@ Construir la primera escena donde el usuario ve sus listas guardadas o un estado
 - [ ] Permitir que un deslizamiento largo elimine una lista directamente
 - [ ] Mostrar feedback visual previo durante el swipe antes de ejecutar la eliminación directa de una lista
 - [ ] Implementar el swipe destructivo con desplazamiento progresivo y umbral claro, siguiendo una referencia de interacción tipo Spotify adaptada al estilo del proyecto
+- [ ] Mostrar durante el swipe un fondo rojo de la paleta existente, icono de papelera y texto breve tipo `¿Borrar?`
 - [ ] Dejar preparada la pantalla para sumar más metadatos en otra iteración sin romper la estructura
 
 ## FASE 3: Crear lista nueva
@@ -104,12 +111,14 @@ Permitir que el usuario complete la lista con productos existentes o manuales si
 - [ ] Permitir que un deslizamiento largo elimine un item directamente
 - [ ] Mostrar feedback visual previo durante el swipe antes de ejecutar una eliminación directa
 - [ ] Implementar el swipe destructivo con desplazamiento progresivo y umbral claro, siguiendo una referencia de interacción tipo Spotify adaptada al estilo del proyecto
+- [ ] Mostrar durante el swipe un fondo rojo de la paleta existente, icono de papelera y texto breve tipo `¿Borrar?`
 - [ ] Si faltan datos útiles como precio, marca, gramos, litros o foto, mostrar un aviso amigable dentro del item
 - [ ] Agregar un botón de lápiz para completar o corregir información faltante
 - [ ] Hacer que la edición priorice mostrar lo que falta sin impedir editar el resto si hace falta
 - [ ] Si un item manual queda completo, enviarlo automáticamente a Mis Productos
 - [ ] Considerar un item manual como completo solo si tiene nombre, precio, comercio, cantidad, gramos o litros, marca, código de barras y categoría
 - [ ] Si un item manual queda incompleto, permitir derivarlo a Mesa de trabajo mediante una acción secundaria poco invasiva
+- [ ] Si un item se deriva a Mesa de trabajo, mantenerlo visible en la lista con estado pendiente
 
 ## FASE 5: Uso de la lista durante la compra
 
@@ -144,6 +153,7 @@ Dar al usuario una lectura clara de cuánto gastó y qué parte del cálculo est
 - [ ] Agregar una acción `Reiniciar compra` para desmarcar checks y reutilizar la misma lista sin duplicarla
 - [ ] Si la lista tiene un solo comercio seleccionado, mostrar en la tarjeta de lista el precio total de ese comercio
 - [ ] Si la lista tiene dos o más comercios seleccionados, mostrar junto a cada nombre de comercio su precio correspondiente dentro de la tarjeta de lista
+- [ ] Mostrar esos precios de tarjeta como total completo del comercio correspondiente
 - [ ] Hacer que Reiniciar compra use confirmación inline con el patrón actual del proyecto
 
 ## FASE 7: Reutilizar lista
@@ -154,9 +164,9 @@ Preparar una forma rápida de volver a usar una lista anterior adaptándola a un
 
 - [ ] Definir la acción `Reutilizar` desde la vista de listas guardadas
 - [ ] Crear un flujo para copiar estructura y productos de una lista existente
-- [ ] Permitir cambiar los comercios asociados durante la reutilización
-- [ ] Reiniciar el estado de comprado de todos los items en la nueva lista reutilizada
-- [ ] Confirmar que la nueva lista reutilizada no modifique la lista original
+- [ ] Hacer que Reutilizar deje al usuario dentro de la misma lista reutilizada
+- [ ] Reiniciar el estado de comprado de todos los items al reutilizar la lista
+- [ ] Mantener intactos los productos y la estructura de la lista al reutilizar
 - [ ] Hacer que borrar una lista desde edición use confirmación inline con el patrón actual del proyecto
 
 ## FASE TESTING
@@ -171,6 +181,7 @@ Validar de forma ejecutable por IA y revisable por humano el flujo base de lista
 - [ ] Editar una lista existente y verificar que permite cambiar nombre, comercios y borrar la lista
 - [ ] Intentar agregar un comercio no existente y validar que se abre Agregar Comercio Rápido y luego queda disponible
 - [ ] Agregar productos desde Mis Productos y también crear al menos un item manual desde cero
+- [ ] Verificar que la interfaz usa solo colores existentes del proyecto y responde bien en modo oscuro
 - [ ] Verificar que el botón `Agregar producto` queda siempre accesible dentro de la lista
 - [ ] Verificar que el botón `Agregar producto` se mantiene sticky dentro del contenido
 - [ ] Verificar que el botón sticky respeta espacio de seguridad inferior y no tapa contenido ni gestos del sistema
@@ -180,20 +191,23 @@ Validar de forma ejecutable por IA y revisable por humano el flujo base de lista
 - [ ] Verificar que un swipe largo elimina directamente items y listas
 - [ ] Verificar que el swipe muestra feedback visual previo antes de eliminar
 - [ ] Verificar que el swipe destructivo exige un umbral claro antes de eliminar y no se dispara por gestos cortos accidentales
+- [ ] Verificar que el swipe muestra fondo rojo, papelera y texto `¿Borrar?` usando colores existentes
 - [ ] Marcar y desmarcar productos como comprados y validar transición, cambio visual y reubicación
 - [ ] Verificar que el progreso de compra se actualiza correctamente
 - [ ] Verificar que una lista vacía muestra su mensaje y llamada a acción correspondiente
 - [ ] Verificar que el total usa solo productos comprados del comercio seleccionado
 - [ ] Verificar que el selector de comercio activo se muestra arriba en formato chip
 - [ ] Verificar que la tarjeta de lista muestra un único total si hay un solo comercio y un total por comercio si hay varios
+- [ ] Verificar que los totales mostrados en tarjeta corresponden a total completo por comercio
 - [ ] Verificar que la tarjeta muestra hasta 3 comercios visibles y permite scroll táctil interno si hay más
 - [ ] Verificar que cuando faltan precios se muestra total parcial y aviso amigable
 - [ ] Verificar que cuando un producto no tiene precio en el comercio activo pero sí en otro se informa correctamente
+- [ ] Verificar que si cambia un precio relacionado la lista actualiza automáticamente sus importes y referencias
 - [ ] Verificar que un item manual completo pasa automáticamente a Mis Productos
 - [ ] Verificar que el criterio de item completo exige nombre, precio, comercio, cantidad, gramos o litros, marca, código de barras y categoría
-- [ ] Verificar que un item manual incompleto puede derivarse a Mesa de trabajo mediante su acción secundaria
+- [ ] Verificar que un item manual incompleto puede derivarse a Mesa de trabajo mediante su acción secundaria y permanece en la lista como pendiente
 - [ ] Verificar que la acción Reiniciar compra deja la lista reutilizable sin perder sus items y usa confirmación inline
-- [ ] Verificar que la acción Reutilizar crea una nueva lista sin alterar la original
+- [ ] Verificar que la acción Reutilizar deja al usuario dentro de la lista y reinicia los checks sin perder items
 - [ ] Verificar que la interfaz responde correctamente en móvil vertical y en tablet sin depender de columnas fijas por supermercado
 
 ## Progreso del plan
