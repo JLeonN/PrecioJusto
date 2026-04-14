@@ -1,12 +1,15 @@
 ﻿# RESUMEN GENERAL - PRECIO JUSTO
 
 ## PROPÓSITO
+
 Este documento proporciona una visión general completa de Precio Justo, incluyendo su arquitectura, tecnologías, estructura de archivos y funcionalidades principales. Está diseñado para que desarrolladores y asistentes de IA comprendan rápidamente el proyecto.
 
 ---
 
 ## 1. DESCRIPCIÓN DEL PROYECTO
-**Precio Justo** es una aplicación móvil para Android que permite a los usuarios uruguayos:
+
+**Precio Justo** es una aplicación móvil para Android que permite a los usuarios:
+
 - Registrar precios de productos en diferentes comercios
 - Comparar precios entre comercios
 - Encontrar las mejores ofertas
@@ -19,11 +22,13 @@ La app está desarrollada con **Vue.js 3**, **Quasar Framework** y **Capacitor**
 ## 2. TECNOLOGÍAS Y STACK
 
 ### Frontend
+
 - **Vue.js 3** (Composition API con `<script setup>`)
 - **Quasar Framework v2** (componentes UI y utilidades)
 - **JavaScript** (sin TypeScript)
 
 ### Mobile
+
 - **Capacitor** (wrapper para Android)
 - **Capacitor Storage** (almacenamiento local)
 - **`@capacitor-mlkit/barcode-scanning`** (scanner de código de barras con ML Kit)
@@ -31,10 +36,12 @@ La app está desarrollada con **Vue.js 3**, **Quasar Framework** y **Capacitor**
 - **`@capacitor/network`** (detección nativa de conectividad)
 
 ### Estado y Datos
+
 - **Pinia** (gestión de estado global)
 - **Patrón Strategy** (adaptadores de almacenamiento)
 
 ### APIs Externas
+
 - **BuscadorProductosService** (orquestador por código de barras)
 - **BusquedaProductosHibridaService** (local primero, APIs después — diálogo agregar y política unificada con escaneo)
 - **Open Food Facts** (alimentos), **Open Beauty Facts** (cosméticos), **Open Pet Food Facts** (mascotas), **Open Products Facts** (general)
@@ -43,6 +50,7 @@ La app está desarrollada con **Vue.js 3**, **Quasar Framework** y **Capacitor**
 - Ver detalles en Resumen6
 
 ### Iconos
+
 - **Tabler Icons** (sistema de iconos consistente)
 
 ---
@@ -50,6 +58,7 @@ La app está desarrollada con **Vue.js 3**, **Quasar Framework** y **Capacitor**
 ## 3. ARQUITECTURA
 
 ### Patrón de 3 Capas
+
 ```
 ┌─────────────────────────────────────┐
 │   Capa de Presentación (Vue)        │  ← Componentes, Páginas
@@ -63,6 +72,7 @@ La app está desarrollada con **Vue.js 3**, **Quasar Framework** y **Capacitor**
 ```
 
 ### Flujo de Datos
+
 1. **Usuario interactúa** con componente Vue
 2. **Componente llama** a método del Store (Pinia)
 3. **Store ejecuta** lógica en Service
@@ -73,6 +83,7 @@ La app está desarrollada con **Vue.js 3**, **Quasar Framework** y **Capacitor**
 ---
 
 ## 4. ESTRUCTURA DE ARCHIVOS
+
 ```
 PrecioJusto/
 │
@@ -268,13 +279,16 @@ Planes/                                      # Planes de trabajo e implementaci�
 ## 5. SISTEMA DE DISEÑO (DESIGN SYSTEM)
 
 ### Filosofía
+
 Precio Justo utiliza un **sistema de diseño centralizado** basado en clases CSS globales reutilizables. Esto garantiza:
+
 - ✅ Consistencia visual en toda la app
 - ✅ Mantenimiento centralizado
 - ✅ DRY (Don't Repeat Yourself)
 - ✅ Escalabilidad para futuras secciones
 
 ### Estructura CSS
+
 ```
 src/css/
 ├── Variables.css    # Variables CSS (colores, espaciados, sombras)
@@ -284,6 +298,7 @@ src/css/
 ### Clases Globales Implementadas
 
 #### **CONTENEDORES**
+
 ```css
 .contenedor-pagina {
   max-width: 1200px;
@@ -291,10 +306,12 @@ src/css/
   width: 100%;
 }
 ```
+
 **Uso:** Envuelve todo el contenido de una página
 **Aplicado en:** MisProductosPage.vue, ComerciosPage.vue, DetalleProductoPage.vue
 
 #### **HEADERS DE PÁGINA**
+
 ```css
 .header-pagina {
   margin-bottom: 16px;
@@ -310,8 +327,10 @@ src/css/
   margin-bottom: 0;
 }
 ```
+
 **Uso:** Headers consistentes con título + contador
 **Ejemplo:**
+
 ```vue
 <div class="header-pagina">
   <h5 class="titulo-pagina">Mis Productos</h5>
@@ -320,17 +339,20 @@ src/css/
 ```
 
 #### **BUSCADORES**
+
 ```css
 .buscador-centrado {
   margin-top: 24px;
   margin-bottom: 24px;
 }
 ```
+
 **Uso:** Input de búsqueda reutilizable (sin max-width, ocupa ancho completo)
 **Implementado via:** `InputBusqueda.vue` (componente compartido, prop `color`)
 **Aplicado en:** MisProductosPage.vue (color default) y ComerciosPage.vue (color="orange")
 
 #### **TARJETAS**
+
 ```css
 .tarjeta {
   background-color: var(--fondo-tarjeta);
@@ -339,9 +361,11 @@ src/css/
   padding: var(--espaciado-md);
 }
 ```
+
 **Uso:** Tarjetas genéricas (alternativa a componentes específicos)
 
 #### **BOTONES**
+
 ```css
 .boton-primario {
   background-color: var(--color-primario);
@@ -353,15 +377,17 @@ src/css/
   color: var(--texto-sobre-primario);
 }
 ```
+
 **Uso:** Botones personalizados fuera de Quasar
 
 ### Variables CSS Principales
 
 #### **Colores**
+
 ```css
---color-primario: #2196f3;        /* Azul principal */
---color-secundario: #4caf50;      /* Verde */
---color-acento: #ff9800;          /* Naranja */
+--color-primario: #2196f3; /* Azul principal */
+--color-secundario: #4caf50; /* Verde */
+--color-acento: #ff9800; /* Naranja */
 --color-exito: #4caf50;
 --color-advertencia: #ff9800;
 --color-error: #f44336;
@@ -369,13 +395,15 @@ src/css/
 ```
 
 #### **Fondos**
+
 ```css
---fondo-app: #eeeeee;             /* Gris medio */
---fondo-tarjeta: #ffffff;         /* Blanco */
---fondo-drawer: #f5f5f5;          /* Gris claro */
+--fondo-app: #eeeeee; /* Gris medio */
+--fondo-tarjeta: #ffffff; /* Blanco */
+--fondo-drawer: #f5f5f5; /* Gris claro */
 ```
 
 #### **Texto**
+
 ```css
 --texto-primario: #212121;
 --texto-secundario: #757575;
@@ -384,6 +412,7 @@ src/css/
 ```
 
 #### **Espaciados**
+
 ```css
 --espaciado-xs: 4px;
 --espaciado-sm: 8px;
@@ -393,6 +422,7 @@ src/css/
 ```
 
 #### **Sombras**
+
 ```css
 --sombra-ligera: 0 1px 3px rgba(0, 0, 0, 0.12);
 --sombra-media: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -402,6 +432,7 @@ src/css/
 ### Sistema de Grid Responsivo
 
 Precio Justo utiliza el **sistema de columnas de Quasar** para layouts responsivos:
+
 ```vue
 <div class="row q-col-gutter-md">
   <div class="col-12 col-sm-6 col-md-4 col-xl-3">
@@ -411,12 +442,14 @@ Precio Justo utiliza el **sistema de columnas de Quasar** para layouts responsiv
 ```
 
 **Breakpoints:**
+
 - `col-12`: Móvil (1 columna)
 - `col-sm-6`: Tablet pequeña (2 columnas)
 - `col-md-4`: Tablet/PC (3 columnas)
 - `col-xl-3`: PC grande (4 columnas)
 
 **Aplicado en:**
+
 - ListaProductos.vue
 - ListaComercios.vue
 
@@ -534,7 +567,7 @@ E. Sistema de Almacenamiento
 ✅ Implementación actual: CapacitorStorageAdapter (almacenamiento local)
 ✅ Preparado para migración futura a Firebase/Firestore
 ✅ Métodos estándar: obtenerTodos, obtenerPorId, crear, actualizar, eliminar, existe
-✅ Prefijos de clave organizados: producto_, comercio_, confirmaciones_, preferencias_
+✅ Prefijos de clave organizados: producto*, comercio*, confirmaciones*, preferencias*
 ✅ Manejo de errores consistente con logs detallados
 
 F. Sistema de Diseño (Design System)
@@ -584,12 +617,15 @@ H. Arquitectura y Código
 ## 7. STORES DE PINIA
 
 ### productosStore.js
+
 **Estado:**
+
 - `productos`: Array de productos
 - `cargando`: Boolean de estado de carga
 - `error`: String de mensaje de error
 
 **Acciones:**
+
 - `cargarProductos()`: Carga todos los productos desde storage
 - `agregarProducto(producto)`: Agrega un nuevo producto
 - `agregarPrecioAProducto(productoId, precio)`: Agrega precio a producto existente
@@ -597,18 +633,22 @@ H. Arquitectura y Código
 - `eliminarProducto(id)`: Elimina un producto
 
 **Getters:**
+
 - `productosOrdenados`: Productos ordenados alfabéticamente
 - `productosOrdenadosPorFecha`: Productos ordenados por fecha (más reciente primero)
 - `obtenerProductoPorId(id)`: Busca producto por ID
 - `tieneProductos`: Boolean si hay productos
 
 ### comerciosStore.js
+
 **Estado:**
+
 - `comercios`: Array de comercios
 - `cargando`: Boolean de estado de carga
 - `error`: String de mensaje de error
 
 **Acciones:**
+
 - `cargarComercios()`: Carga todos los comercios desde storage
 - `agregarComercio(comercio)`: Agrega un nuevo comercio
 - `actualizarComercio(id, datos)`: Actualiza comercio existente
@@ -619,6 +659,7 @@ H. Arquitectura y Código
 - `editarDireccion(comercioId, direccionId, datos)`: Edita dirección existente
 
 **Getters:**
+
 - `comerciosOrdenados`: Comercios ordenados alfabéticamente
 - `comerciosPorUso`: Comercios ordenados por uso reciente
 - `comerciosAgrupados`: Comercios agrupados por nombre (cadenas como una sola tarjeta)
@@ -628,13 +669,16 @@ H. Arquitectura y Código
 - `comerciosPorTipo`: Comercios agrupados por tipo
 
 ### confirmacionesStore.js
+
 **Estado:**
+
 - `usuarioActualId`: ID del usuario actual (hardcodeado temporalmente)
 - `preciosConfirmados`: Set de IDs de precios confirmados
 - `cargando`: Boolean de estado de carga
 - `error`: String de mensaje de error
 
 **Acciones:**
+
 - `cargarConfirmaciones()`: Carga confirmaciones del usuario
 - `confirmarPrecio(productoId, precioId)`: Confirma un precio
 - `eliminarConfirmacion(productoId, precioId)`: Des-confirma un precio
@@ -642,14 +686,17 @@ H. Arquitectura y Código
 - `limpiarTodasLasConfirmaciones()`: Reset completo
 
 **Getters:**
+
 - `totalConfirmaciones`: Cantidad de precios confirmados
 - `precioEstaConfirmado(precioId)`: Verifica si precio está confirmado
 - `listaConfirmaciones`: Array de IDs confirmados
 
 ### sesionEscaneoStore.js
+
 **Propósito:** Mesa de trabajo del flujo de escaneo. Cada ítem tiene su propio comercio (no hay un comercio global de sesión). Se persiste en Capacitor Storage.
 
 **Estado:**
+
 - `items`: Array de ítems escaneados, cada uno con:
   `{ id, codigoBarras, nombre, marca, cantidad, unidad, imagen, precio, moneda, origenApi, fuenteDato, productoExistenteId, comercio, datosOriginales }`
   - `comercio`: `null` por defecto → se asigna en la Mesa de trabajo (`{ id, nombre, direccionId, direccionNombre }`)
@@ -657,6 +704,7 @@ H. Arquitectura y Código
 - `cargando`: Boolean mientras se hidrata desde storage
 
 **Acciones:**
+
 - `cargarSesion()`: Hidrata desde Capacitor Storage al iniciar (con migración automática para ítems sin `comercio`)
 - `agregarItem(item)`: Agrega ítem con `comercio: null`
 - `actualizarItem(id, cambios)`: Edita campos de un ítem existente
@@ -665,22 +713,27 @@ H. Arquitectura y Código
 - `limpiarTodo()`: Vacía la mesa y elimina del storage
 
 **Getters:**
+
 - `cantidadItems`: Cantidad de ítems (para badge en drawer)
 - `tieneItemsPendientes`: Boolean
 
 ### preferenciasStore.js
+
 **Propósito:** Fuente única de verdad para las preferencias del usuario. Se inicializa una sola vez al arrancar la app (en `MainLayout.vue`) y queda disponible reactivamente en todos los componentes.
 
 **Estado:**
+
 - `moneda`: String de la moneda preferida ('UYU', 'USD', 'EUR', etc.) — default 'UYU'
 - `unidad`: String de la unidad preferida ('unidad', 'litro', 'kilo', etc.) — default 'unidad'
 
 **Acciones:**
+
 - `inicializar()`: Carga preferencias desde `PreferenciasService` (una vez al arrancar)
 - `guardarMoneda(val)`: Actualiza `moneda` en el store y persiste en storage
 - `guardarUnidad(val)`: Actualiza `unidad` en el store y persiste en storage
 
 **Componentes que lo usan:**
+
 - `FormularioPrecio` — init + guarda al cambiar moneda
 - `FormularioProducto` — init + guarda al cambiar unidad
 - `DialogoAgregarProducto` — init + `limpiarFormulario()` (ahora sync)
@@ -693,7 +746,9 @@ H. Arquitectura y Código
 ## 8. SERVICIOS
 
 ### ProductosService.js
+
 **Responsabilidades:**
+
 - CRUD completo de productos
 - Validaciones de datos (nombre, precio, cantidad, unidad)
 - Gestión de precios asociados a productos
@@ -701,6 +756,7 @@ H. Arquitectura y Código
 - Integración con productosStore
 
 **Métodos principales:**
+
 - `obtenerTodos()`: Obtiene todos los productos
 - `obtenerPorId(id)`: Obtiene un producto específico
 - `crear(producto)`: Crea un nuevo producto
@@ -712,7 +768,9 @@ H. Arquitectura y Código
 - `buscarPorTextoFlexible(termino)`: Búsqueda local alineada al filtro de Mis Productos (nombre, marca, categoría, código)
 
 ### ComerciosService.js
+
 **Responsabilidades:**
+
 - CRUD completo de comercios
 - Validación de duplicados con algoritmo de similitud (3 niveles)
 - Detección de nombres similares (Levenshtein distance < 3)
@@ -723,6 +781,7 @@ H. Arquitectura y Código
 - Integración con comerciosStore
 
 **Métodos principales:**
+
 - `obtenerTodos()`: Obtiene todos los comercios
 - `obtenerPorId(id)`: Obtiene un comercio específico
 - `crear(comercio)`: Crea un nuevo comercio (con validación de duplicados)
@@ -734,13 +793,16 @@ H. Arquitectura y Código
 - `registrarUso(comercioId, direccionId)`: Actualiza fechas de uso
 
 ### ConfirmacionesService.js
+
 **Responsabilidades:**
+
 - Sistema de confirmaciones (upvotes) de precios
 - Validación de confirmaciones únicas por usuario
 - Persistencia de confirmaciones por usuario
 - Integración con confirmacionesStore
 
 **Métodos principales:**
+
 - `confirmarPrecio(usuarioId, productoId, precioId)`: Confirma un precio
 - `usuarioConfirmoPrecio(usuarioId, precioId)`: Verifica si usuario confirmó
 - `registrarConfirmacionUsuario(usuarioId, precioId)`: Guarda confirmación
@@ -748,7 +810,9 @@ H. Arquitectura y Código
 - `eliminarConfirmacion(usuarioId, productoId, precioId)`: Des-confirma precio
 
 ### BuscadorProductosService.js (orquestador)
+
 **Responsabilidades:**
+
 - Único punto de entrada para búsquedas por código de barras
 - Detecta ISBN (978/979) y enruta al flujo correcto
 - Prueba APIs en orden, retorna el primer resultado
@@ -756,13 +820,16 @@ H. Arquitectura y Código
 **Retorna:** `{ producto, fuenteDato }` o `null`
 
 ### BusquedaProductosHibridaService.js
+
 **Responsabilidades:**
+
 - Encapsula la política “base local primero, APIs si hace falta” (plan `Planes/PlanBusquedaLocalPrimeroYEstadosCarga.md`)
 - `buscarPorCodigoConPolitica(codigo, { forzarApi })`: si hay producto local y no se fuerza API, no llama al orquestador; expone `puedeEnriquecerConApi` para el pie del diálogo de resultados
 - `buscarPorNombreConPolitica(texto, { ampliarOpenFoodFacts })`: primero `ProductosService.buscarPorTextoFlexible`; si hay resultados locales, no llama a OFF salvo ampliación explícita; si no hay locales, llama a `OpenFoodFactsService.buscarPorTexto`
 - Exporta `FUENTE_DATO_LOCAL` (`Mis productos`) para etiquetar filas en `DialogoResultadosBusqueda`
 
 ### OpenFoodFactsService.js y familia
+
 - `OpenFoodFactsService` — alimentos; también `buscarPorTexto(texto)` (uso vía capa híbrida en flujos “agregar producto” cuando corresponde)
 - `OpenBeautyFactsService` — cosméticos/perfumes
 - `OpenPetFoodFactsService` — alimentos mascotas
@@ -773,12 +840,15 @@ H. Arquitectura y Código
 - Ver detalles técnicos en Resumen6
 
 ### PreferenciasService.js
+
 **Responsabilidades:**
+
 - Guardar configuraciones del usuario
 - Cargar preferencias al iniciar app
 - Valores por defecto
 
 **Métodos principales:**
+
 - `obtenerPreferencias()`: Retorna preferencias o valores por defecto
 - `guardarMoneda(moneda)`: Actualiza moneda preferida
 - `guardarUnidad(unidad)`: Actualiza unidad preferida
@@ -788,14 +858,17 @@ H. Arquitectura y Código
 ## 9. COMPONENTES PRINCIPALES
 
 ### TarjetaProducto.vue
+
 **Propósito:** Mostrar productos con sus precios en formato de tarjeta expandible
 
 **Props:**
+
 - `producto`: Object (requerido) - Datos del producto
 - `modoSeleccion`: Boolean - Indica si está en modo selección
 - `seleccionado`: Boolean - Indica si está seleccionada
 
 **Características:**
+
 - Muestra top 3 precios más bajos
 - Expandible para ver todos los detalles
 - Imagen del producto (o placeholder)
@@ -806,14 +879,17 @@ H. Arquitectura y Código
 - Checkbox en modo selección
 
 ### TarjetaComercio.vue
+
 **Propósito:** Mostrar comercios en formato de tarjeta expandible
 
 **Props:**
+
 - `comercio`: Object (requerido) - Datos del comercio
 - `modoSeleccion`: Boolean - Indica si está en modo selección
 - `seleccionado`: Boolean - Indica si está seleccionada
 
 **Características:**
+
 - Logo/foto del comercio (o placeholder con IconBuilding)
 - Tipo de comercio con badge
 - Cantidad de direcciones
@@ -824,27 +900,33 @@ H. Arquitectura y Código
 - Expansión flotante (no mueve otras tarjetas)
 
 ### ListaProductos.vue
+
 **Propósito:** Contenedor con grid responsivo de productos
 
 **Props:**
+
 - `productos`: Array (requerido)
 - `modoSeleccion`: Boolean
 - `seleccionados`: Set
 
 **Características:**
+
 - Grid responsivo Quasar (col-12 col-sm-6 col-md-4 col-xl-3)
 - Maneja eventos de selección
 - Sin header (el header está en la página)
 
 ### ListaComercios.vue
+
 **Propósito:** Contenedor con grid responsivo de comercios
 
 **Props:**
+
 - `comercios`: Array (requerido)
 - `modoSeleccion`: Boolean
 - `seleccionados`: Set
 
 **Características:**
+
 - Grid responsivo Quasar (col-12 col-sm-6 col-md-4 col-xl-3)
 - Mensaje si no hay comercios
 - Maneja eventos de selección y edición
@@ -854,15 +936,18 @@ H. Arquitectura y Código
 ## 10. PÁGINAS
 
 ### IndexPage.vue
+
 **Ruta:** `/`
 **Propósito:** Página de inicio/bienvenida
 **Estado:** Vacía por ahora
 
 ### MisProductosPage.vue
+
 **Ruta:** `/` (default)
 **Propósito:** Listado completo de productos
 
 **Características:**
+
 - Header con título y contador
 - Lista de TarjetaProducto
 - Floating Action Button para agregar producto
@@ -874,10 +959,12 @@ H. Arquitectura y Código
 - Estados: cargando, vacío, error
 
 ### DetalleProductoPage.vue
+
 **Ruta:** `/producto/:id`
 **Propósito:** Historial completo de un producto específico
 
 **Características:**
+
 - InfoProducto (cabecera)
 - EstadisticasProducto (métricas)
 - FiltrosHistorial (comercio, período, orden)
@@ -887,10 +974,12 @@ H. Arquitectura y Código
 - Navegación desde TarjetaProducto
 
 ### ComerciosPage.vue
+
 **Ruta:** `/comercios`
 **Propósito:** Listado completo de comercios
 
 **Características:**
+
 - Header con título y contador
 - Buscador centrado (max-width 500px)
 - Lista de TarjetaComercio
@@ -904,6 +993,7 @@ H. Arquitectura y Código
 - Estados: cargando, vacío, sin resultados, error
 
 ### ErrorNotFound.vue
+
 **Ruta:** Catch-all `/:catchAll(.*)*`
 **Propósito:** Página 404
 
@@ -912,10 +1002,12 @@ H. Arquitectura y Código
 ## 11. NAVEGACIÓN (Router)
 
 ### Configuración
+
 - **Modo:** Hash (URLs con #)
 - **Layout:** MainLayout para todas las rutas
 
 ### Header global (MainLayout.vue)
+
 - Menú hamburguesa a la izquierda (mantiene lógica de drawer).
 - Título `Precio Justo` clickeable (navega a `/`).
 - Accesos rápidos a la derecha: Inicio, Comercios y Mesa.
@@ -925,8 +1017,9 @@ H. Arquitectura y Código
 - El badge de cantidad se mantiene en el botón hamburguesa y en el item de Mesa dentro del drawer.
 
 ### Rutas Definidas
+
 ```javascript
-[
+;[
   {
     path: '/',
     component: MainLayout,
@@ -935,13 +1028,13 @@ H. Arquitectura y Código
       { path: 'producto/:id', component: DetalleProductoPage },
       { path: 'comercios', component: ComerciosPage },
       { path: 'comercios/:nombre', component: EditarComercioPage },
-      { path: 'mesa-trabajo', component: MesaTrabajoPage }
-    ]
+      { path: 'mesa-trabajo', component: MesaTrabajoPage },
+    ],
   },
   {
     path: '/:catchAll(.*)*',
-    component: ErrorNotFound
-  }
+    component: ErrorNotFound,
+  },
 ]
 ```
 
@@ -950,6 +1043,7 @@ H. Arquitectura y Código
 ## 12. COLORES Y DISEÑO
 
 ### Paleta de Colores (Variables.css)
+
 - **$primary:** #2196F3 (Azul oscuro) - Color principal de la app
 - **$secondary:** #4CAF50 (Verde) - Indicadores de ahorro y éxito
 - **$accent:** #FF9800 (Naranja) - Alertas y advertencias
@@ -960,6 +1054,7 @@ H. Arquitectura y Código
 - **$warning:** #F2C037 (Amarillo) - Advertencias
 
 ### Principios de Diseño
+
 - Mobile-first (optimizado para portrait)
 - Tarjetas como unidad visual principal
 - Floating Action Buttons para acciones principales
@@ -973,6 +1068,7 @@ H. Arquitectura y Código
 ## 13. CONVENCIONES DE CÓDIGO
 
 ### Nomenclatura
+
 - **Carpetas y Archivos:** PascalCase
   - `GestionUsuarios/`, `TarjetaProducto.vue`
 - **Variables y Funciones:** camelCase en español
@@ -987,6 +1083,7 @@ H. Arquitectura y Código
   - `.contenedor-pagina`, `.buscador-centrado`
 
 ### Estilo de Código
+
 - Vue 3 Composition API con `<script setup>`
 - JavaScript (no TypeScript)
 - Código limpio con mínimos comentarios
@@ -1001,6 +1098,7 @@ H. Arquitectura y Código
 ## 14. ROADMAP Y FASES
 
 ### Fase 1: MVP Local (Mayormente Completada)
+
 - ✅ CRUD de productos y comercios
 - ✅ Integración con Open Food Facts
 - ✅ Sistema de preferencias
@@ -1010,6 +1108,7 @@ H. Arquitectura y Código
 - ✅ Escaneo de código de barras con cámara (Completado - Fases 1-10)
 
 ### Fase 2: Funcionalidades Colaborativas (Futuro)
+
 - ⏳ Migración de CapacitorStorage a Firebase/Firestore
 - ⏳ Sistema de usuarios y autenticación
 - ⏳ Compartir precios entre usuarios
@@ -1017,6 +1116,7 @@ H. Arquitectura y Código
 - ⏳ Confirmaciones comunitarias globales
 
 ### Fase 3: Funcionalidades Avanzadas (Futuro)
+
 - ⏳ Geolocalización para comercios cercanos
 - ⏳ Notificaciones de ofertas
 - ⏳ Historial detallado de evolución de precios
@@ -1029,6 +1129,7 @@ H. Arquitectura y Código
 ## 15. NOTAS PARA ASISTENTES DE IA
 
 ### Contexto de Este Documento
+
 - Diseñado para comprensión rápida del proyecto por parte de IAs
 - Proporciona visión de alto nivel
 - Para detalles técnicos específicos, consultar resúmenes por área:
@@ -1042,6 +1143,7 @@ H. Arquitectura y Código
   - Resumen9Configuracion.md — Configuración global y crecimiento futuro de preferencias
 
 ### Principios del Proyecto
+
 1. **Nomenclatura en Español:** Todo el código usa español descriptivo
 2. **Arquitectura Modular:** Separación clara de responsabilidades
 3. **Mobile-First:** Diseño optimizado para dispositivos móviles
@@ -1052,28 +1154,34 @@ H. Arquitectura y Código
 ### Patrones de integración Android (Capacitor)
 
 **Safe Area (Android 15+ edge-to-edge)**
+
 - Variables en `Variables.css`: `--safe-area-top` y `--safe-area-bottom`
 - Header: `.q-header { padding-top: var(--safe-area-top) }` en `app.css` (global, sin tocar)
 - `BarraAccionesSeleccion.vue` ya tiene `padding-bottom: calc(12px + env(safe-area-inset-bottom))`
 - Diálogos con visor/editor de imagen y formularios modales: `DialogoVerImagen.vue` y `EditorImagen.vue` aplican `var(--safe-area-top)` / `var(--safe-area-bottom)` en header, footer y toolbar; `DialogoAgregarProducto.vue` usa clase `acciones-safe-area` en `q-card-actions` para el pie del modal ante teclado + safe area
 - ⚠️ **Toda página nueva que use `q-page-sticky` con FAB** debe incluir:
   ```html
-  <q-page-sticky ... class="fab-agregar">
+  <q-page-sticky ... class="fab-agregar"></q-page-sticky>
   ```
   ```css
-  .fab-agregar { bottom: calc(18px + var(--safe-area-bottom)) !important; }
+  .fab-agregar {
+    bottom: calc(18px + var(--safe-area-bottom)) !important;
+  }
   ```
 
 **Botón back nativo** → `src/composables/useBotonAtras.js` (integrado en `MainLayout.vue`)
+
 - Requiere `@capacitor/app`. Solo activo en `Capacitor.isNativePlatform()`
 
 **Splash Screen**
+
 - Componente: `src/components/Compartidos/PantallaSplash.vue` (integrado en `App.vue`)
 - Imagen aleatoria de `public/Splash/` con `object-fit: cover` + `object-position` aleatorio
 - Duración: `max(2000ms, tiempo real de carga)` + fade-out de 400ms
 - Señal "app lista" vía `nextTick()` en `App.vue`
 
 ### Estado Actual
+
 - **Versión:** 1.2.1
 - **Almacenamiento:** Local (Capacitor Storage)
 - **Sistema de sucursales:** Completado
@@ -1103,15 +1211,19 @@ H. Arquitectura y Código
 ## 16. INFORMACIÓN ADICIONAL
 
 ### Licencia
+
 Proyecto personal de código propietario
 
 ### Autor
+
 Leo (Desarrollador principal)
 
 ### Repositorio
+
 GitHub: JLeonN/PrecioJusto
 
 ### Stack de Desarrollo
+
 - Node.js
 - Quasar CLI
 - Capacitor CLI
