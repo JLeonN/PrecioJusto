@@ -1,26 +1,26 @@
-# PLAN MI COMPRA JUSTA
+# PLAN LISTA JUSTA
 
 ## Descripcion del plan
 
-Crear una nueva sección de la app llamada Mi Compra Justa para que el usuario pueda crear y usar listas de compras de forma simple, rápida y cómoda en el día a día. La base del apartado debe funcionar primero como lista de compras real, y luego aprovechar la información de Precio Justo para potenciarla con precios, comercios y recomendaciones.
+Crear una nueva sección de la app llamada Lista Justa para que el usuario pueda crear y usar listas de compras de forma simple, rápida y cómoda en el día a día. La base del apartado debe funcionar primero como lista de compras real, y luego aprovechar la información de Precio Justo para potenciarla con precios, comercios y recomendaciones.
 
 ## Objetivo principal
 
-- Incorporar la nueva sección Mi Compra Justa en la navegación principal de la app
+- Incorporar la nueva sección Lista Justa en la navegación principal de la app
 - Permitir crear listas de compras simples y reutilizables
 - Facilitar el uso de la lista durante la compra con checks, avisos de faltantes y control de gasto
 - Preparar el apartado para sumar después inteligencia de precios y comercios sin romper el flujo principal
 
 ## Reglas del plan
 
-- Usar el nombre visible `Mi Compra Justa` en la app
+- Usar el nombre visible `Lista Justa` en la app
 - La nueva sección debe aparecer en el drawer y en el header con los demás accesos rápidos
-- El icono principal de Mi Compra Justa debe ser `IconListDetails`
+- El icono principal de Lista Justa debe ser `IconListDetails`
 - El icono principal de Mis Productos debe actualizarse a `IconClipboardList`
 - No inventar colores nuevos para esta funcionalidad; usar exclusivamente variables existentes de `Variables.css`
 - Prever desde el diseño y la implementación que la app tiene modo oscuro
 - Mantener prioridad móvil vertical, pero con diseño responsive para tablet y pantallas más anchas
-- El flujo principal de Mi Compra Justa debe pensarse primero como lista de compras, no como comparador de comercios
+- El flujo principal de Lista Justa debe pensarse primero como lista de compras, no como comparador de comercios
 - Reutilizar componentes, modales y servicios ya existentes del proyecto siempre que ayuden a mantener consistencia
 - Si cambia un precio de un producto en Mis Productos, la lista debe reflejar automáticamente ese cambio
 - Si un item manual queda completo, debe incorporarse automáticamente a Mis Productos
@@ -42,15 +42,15 @@ Crear una nueva sección de la app llamada Mi Compra Justa para que el usuario p
 
 ### Objetivo
 
-Preparar la base de datos local, la ruta, la entrada en drawer y header, y la estructura mínima de pantallas para Mi Compra Justa.
+Preparar la base de datos local, la ruta, la entrada en drawer y header, y la estructura mínima de pantallas para Lista Justa.
 
 - [ ] Definir el modelo de datos de una lista de compras con nombre, productos, orden, estado general y metadatos mínimos reutilizables
 - [ ] Definir el modelo de datos de cada item de lista con referencia opcional a producto existente, nombre visible, cantidad, estado comprado y banderas de datos faltantes
 - [ ] Definir el estado interno de un item derivado a Mesa de trabajo y su transición posterior a Mis Productos
-- [ ] Crear la nueva ruta de página para Mi Compra Justa dentro del enrutado principal
+- [ ] Crear la nueva ruta de página para Lista Justa dentro del enrutado principal
 - [ ] Agregar la nueva opción al drawer siguiendo el patrón actual de navegación
 - [ ] Agregar el nuevo acceso rápido al header siguiendo el patrón actual de iconos
-- [ ] Usar `IconListDetails` como icono principal de Mi Compra Justa y actualizar Mis Productos a `IconClipboardList`
+- [ ] Usar `IconListDetails` como icono principal de Lista Justa y actualizar Mis Productos a `IconClipboardList`
 - [ ] Verificar que toda la nueva interfaz use solo colores existentes de `Variables.css` y funcione correctamente en modo oscuro
 
 ## FASE 2: Pantalla de listas del usuario
@@ -59,7 +59,7 @@ Preparar la base de datos local, la ruta, la entrada en drawer y header, y la es
 
 Construir la primera escena donde el usuario ve sus listas guardadas o un estado vacío claro.
 
-- [ ] Crear la pantalla principal de Mi Compra Justa con estilo visual basado en los colores ya disponibles del proyecto
+- [ ] Crear la pantalla principal de Lista Justa con estilo visual basado en los colores ya disponibles del proyecto
 - [ ] Mostrar tarjetas de listas guardadas con nombre, cantidad de productos y señales de gasto disponible cuando corresponda
 - [ ] Mostrar en cada tarjeta el total visible de la lista cuando haya información suficiente
 - [ ] Si la lista tiene productos sin precio, avisarlo en la tarjeta de forma clara
@@ -183,9 +183,9 @@ Dejar preparado el camino para potenciar la lista con inteligencia de precios si
 
 ### Objetivo
 
-Validar de forma ejecutable por IA y revisable por humano el flujo base de Mi Compra Justa en móvil y tablet.
+Validar de forma ejecutable por IA y revisable por humano el flujo base de Lista Justa en móvil y tablet.
 
-- [ ] Verificar que Mi Compra Justa aparece en drawer y header y navega correctamente
+- [ ] Verificar que Lista Justa aparece en drawer y header y navega correctamente
 - [ ] Verificar que Mis Productos usa `IconClipboardList`
 - [ ] Verificar que el estado vacío muestra mensaje breve y botón para crear lista
 - [ ] Crear una lista nueva y comprobar que se guarda correctamente
