@@ -27,7 +27,13 @@ Crear una nueva sección de la app llamada Lista Justa para que el usuario pueda
 - Si un item manual sigue incompleto, debe poder derivarse a Mesa de trabajo
 - Si un item fue enviado a Mesa de trabajo, la lista debe recordar ese estado y avisar cuando luego pase a Mis Productos
 - Si un item ya pasó a Mis Productos, la lista no debe volver a ofrecer enviarlo a Mesa de trabajo
-- Un item se considera completo solo si tiene nombre, precio, comercio, cantidad, gramos o litros, marca, código de barras y categoría
+- Para usar un item dentro de la lista, los datos mínimos obligatorios deben ser nombre y cantidad
+- El precio debe ser opcional dentro de la lista, pero importante para el control de gasto
+- Si un producto entra desde Mis Productos, la lista debe mostrar toda la información disponible sin ocultarla innecesariamente
+- Si el usuario agrega un producto por escaneo, se debe conservar también el código de barras cuando exista
+- Un item se considera completo para pasar automáticamente a Mis Productos solo si tiene nombre, precio, comercio, cantidad, gramos o litros, marca, código de barras y categoría
+- No se deben permitir productos duplicados dentro de la misma lista
+- Si el usuario intenta agregar un duplicado, la app debe mostrar una notificación breve y no volver a agregarlo
 - Las acciones destructivas de listas e items deben poder resolverse con gesto de deslizamiento hacia la izquierda
 - Un deslizamiento largo hacia la izquierda debe eliminar directamente listas o items
 - Antes de eliminar por swipe largo debe existir feedback visual previo claro
@@ -37,6 +43,10 @@ Crear una nueva sección de la app llamada Lista Justa para que el usuario pueda
 - El botón sticky debe respetar espacio de seguridad inferior para no tapar contenido ni gestos del sistema
 - Las confirmaciones inline deben seguir el patrón actual del proyecto con cambio de acción a confirmar o cancelar con `X`
 - Los comercios deben integrarse como una capa de apoyo al flujo principal de compra y no como requisito obligatorio para poder usar la lista
+- La acción principal de reutilización debe resolverse con `Reiniciar lista`; no hace falta una acción separada de `Reutilizar`
+- Los productos nuevos deben agregarse siempre arriba del todo
+- El total visible en tarjetas de listas debe mostrarse como `Estimado de la lista`, `Estimado parcial` o `Sin precios` según la información disponible
+- Los comercios deben mostrarse como opción colapsada y opcional, sin romper el uso simple de la lista
 
 ## FASE 1: Definir estructura y navegación
 
@@ -45,8 +55,9 @@ Crear una nueva sección de la app llamada Lista Justa para que el usuario pueda
 Preparar la base de datos local, la ruta, la entrada en drawer y header, y la estructura mínima de pantallas para Lista Justa.
 
 - [ ] Definir el modelo de datos de una lista de compras con nombre, productos, orden, estado general y metadatos mínimos reutilizables
-- [ ] Definir el modelo de datos de cada item de lista con referencia opcional a producto existente, nombre visible, cantidad, estado comprado y banderas de datos faltantes
+- [ ] Definir el modelo de datos de cada item de lista con referencia opcional a producto existente, nombre visible, cantidad, precio opcional, estado comprado y banderas de datos faltantes
 - [ ] Definir el estado interno de un item derivado a Mesa de trabajo y su transición posterior a Mis Productos
+- [ ] Definir la lógica de detección de duplicados por referencia, código de barras o nombre normalizado según el origen del item
 - [ ] Crear la nueva ruta de página para Lista Justa dentro del enrutado principal
 - [ ] Agregar la nueva opción al drawer siguiendo el patrón actual de navegación
 - [ ] Agregar el nuevo acceso rápido al header siguiendo el patrón actual de iconos
@@ -60,13 +71,15 @@ Preparar la base de datos local, la ruta, la entrada en drawer y header, y la es
 Construir la primera escena donde el usuario ve sus listas guardadas o un estado vacío claro.
 
 - [ ] Crear la pantalla principal de Lista Justa con estilo visual basado en los colores ya disponibles del proyecto
-- [ ] Mostrar tarjetas de listas guardadas con nombre, cantidad de productos y señales de gasto disponible cuando corresponda
-- [ ] Mostrar en cada tarjeta el total visible de la lista cuando haya información suficiente
+- [ ] Mostrar tarjetas de listas guardadas con nombre, cantidad de productos y señales de estimado disponible cuando corresponda
+- [ ] Mostrar en cada tarjeta `Estimado de la lista` cuando haya información suficiente
+- [ ] Mostrar `Estimado parcial` cuando falten precios para completar el cálculo
+- [ ] Mostrar `Sin precios` cuando ningún item de la lista tenga precio
 - [ ] Si la lista tiene productos sin precio, avisarlo en la tarjeta de forma clara
 - [ ] Si la lista no tiene ningún producto con precio, avisarlo en la tarjeta de forma clara
 - [ ] Mostrar un mensaje breve de estado vacío si no hay listas creadas
 - [ ] Agregar un botón visible para crear una nueva lista aun cuando no existan listas previas
-- [ ] Incluir la acción `Reutilizar` como base para volver a usar una lista existente
+- [ ] Incluir la acción `Reiniciar lista` como base para volver a usar una lista existente sin perder sus items
 - [ ] Permitir gesto de deslizamiento hacia la izquierda sobre una lista para mostrar y ejecutar la acción de eliminar
 - [ ] Permitir que un deslizamiento largo elimine una lista directamente
 - [ ] Mostrar feedback visual previo durante el swipe antes de ejecutar la eliminación directa de una lista
@@ -83,9 +96,8 @@ Permitir que el usuario cree listas de forma simple y también pueda renombrarla
 - [ ] Permitir editar una lista existente usando la misma interfaz de creación adaptada a modo edición
 - [ ] Agregar en la edición de lista una opción para borrar la lista
 - [ ] Hacer que borrar una lista desde edición use confirmación inline con el patrón actual del proyecto
-- [ ] Hacer que `Reutilizar` deje al usuario dentro de la lista y reinicie los checks sin perder items
-- [ ] Agregar una acción `Reiniciar compra` para desmarcar checks y reutilizar la misma lista sin duplicarla
-- [ ] Hacer que Reiniciar compra use confirmación inline con el patrón actual del proyecto
+- [ ] Agregar una acción `Reiniciar lista` para desmarcar checks y reutilizar la misma lista sin duplicarla
+- [ ] Hacer que Reiniciar lista use confirmación inline con el patrón actual del proyecto
 
 ## FASE 4: Agregar productos a la lista
 
@@ -101,7 +113,9 @@ Permitir que el usuario cargue productos a la lista desde distintas entradas, pr
 - [ ] Integrar la opción de escanear productos con Escaneo rápido
 - [ ] Integrar la opción de escanear múltiples productos con Ráfaga
 - [ ] Guardar la cantidad como parte obligatoria del item de lista
+- [ ] Agregar controles `-` y `+` dentro de la mini tarjeta para reducir o aumentar la cantidad sin abrir edición completa
 - [ ] Permitir editar un item de lista aun después de agregado
+- [ ] Si un usuario intenta agregar un item repetido, mostrar notificación breve y no duplicarlo
 - [ ] Permitir gesto de deslizamiento hacia la izquierda sobre un item para mostrar y ejecutar la acción de eliminar
 - [ ] Permitir que un deslizamiento largo elimine un item directamente
 - [ ] Mostrar feedback visual previo durante el swipe antes de ejecutar una eliminación directa
@@ -136,11 +150,11 @@ Dar al usuario una lectura clara de lo gastado hasta el momento y ayudarlo cuand
 
 - [ ] Mostrar abajo del todo cuánto lleva gastado el usuario hasta el momento
 - [ ] Calcular el gasto usando solo los productos marcados como comprados
-- [ ] Si el usuario marca un producto sin precio, avisarlo o preguntarlo en el momento del check para no perder el control del gasto
+- [ ] Si el usuario marca un producto sin precio, permitir una preferencia simple de sesión para preguntar siempre, solo avisar o no volver a preguntar ese día
 - [ ] Mostrar `total parcial` cuando existan productos comprados sin precio
 - [ ] Avisar de forma visible pero no invasiva que hay productos sin precio registrado
 - [ ] Mostrar un texto aclaratorio tipo estimación de precios para indicar que los valores pueden variar
-- [ ] Si la lista tiene suficiente información, mostrar el total visible también en la tarjeta resumen de la lista
+- [ ] Si la lista tiene suficiente información, mostrar el total visible también en la tarjeta resumen de la lista como estimado
 
 ## FASE 7: Integración con Mesa de trabajo y Mis Productos
 
@@ -162,6 +176,7 @@ Resolver el flujo de productos incompletos sin romper la experiencia principal d
 Integrar la información de comercios sin convertirla en una barrera para usar la lista como lista de compras común.
 
 - [ ] Agregar una opción simple cerca del total para indicar en qué comercio está comprando el usuario en ese momento
+- [ ] Mantener esa opción de comercio colapsada y opcional para no ensuciar el flujo principal
 - [ ] Hacer que esa selección afecte el gasto mostrado cuando exista precio asociado a ese comercio
 - [ ] Permitir que el usuario tenga una lista común aun si no configuró comercio actual
 - [ ] Si un producto no tiene precio en el comercio activo pero sí en otro, mostrar un aviso simple que lo indique
@@ -192,11 +207,15 @@ Validar de forma ejecutable por IA y revisable por humano el flujo base de Lista
 - [ ] Editar una lista existente y verificar que permite cambiar nombre y borrar la lista
 - [ ] Verificar que la interfaz usa solo colores existentes del proyecto y responde bien en modo oscuro
 - [ ] Agregar productos desde Mis Productos, manualmente, con Escaneo rápido y con Ráfaga
+- [ ] Verificar que los datos mínimos obligatorios en lista son nombre y cantidad
+- [ ] Verificar que el precio sigue siendo opcional para usar la lista
 - [ ] Verificar que el botón `Agregar producto` queda siempre accesible dentro de la lista
 - [ ] Verificar que el botón `Agregar producto` se mantiene sticky dentro del contenido
 - [ ] Verificar que el botón sticky respeta espacio de seguridad inferior y no tapa contenido ni gestos del sistema
 - [ ] Confirmar que la búsqueda reutilizada encuentra productos por nombre, marca, categoría y código de barras
 - [ ] Verificar que los items se muestran como mini tarjetas horizontales con prioridad visual en foto, nombre y precio
+- [ ] Verificar que los controles `-` y `+` ajustan cantidad sin abrir edición completa
+- [ ] Verificar que un intento de agregar producto duplicado muestra notificación breve y no duplica el item
 - [ ] Verificar que si faltan datos importantes el item lo informa de forma clara
 - [ ] Eliminar un item con gesto de deslizamiento y validar que la acción responde como se espera
 - [ ] Eliminar una lista con gesto de deslizamiento y validar que la acción responde como se espera
@@ -207,14 +226,15 @@ Validar de forma ejecutable por IA y revisable por humano el flujo base de Lista
 - [ ] Verificar que el progreso de compra se actualiza correctamente
 - [ ] Verificar que una lista vacía muestra su mensaje y llamada a acción correspondiente
 - [ ] Verificar que el total usa solo productos comprados
-- [ ] Verificar que si un producto marcado no tiene precio, la app avisa o pregunta en ese momento
+- [ ] Verificar que si un producto marcado no tiene precio, la app respeta la preferencia de sesión entre preguntar siempre, solo avisar o no volver a preguntar ese día
 - [ ] Verificar que cuando faltan precios se muestra total parcial y aviso amigable
+- [ ] Verificar que la tarjeta de lista usa `Estimado de la lista`, `Estimado parcial` o `Sin precios` según corresponda
 - [ ] Verificar que un item manual completo pasa automáticamente a Mis Productos
-- [ ] Verificar que el criterio de item completo exige nombre, precio, comercio, cantidad, gramos o litros, marca, código de barras y categoría
+- [ ] Verificar que el criterio de item completo para pasar a Mis Productos exige nombre, precio, comercio, cantidad, gramos o litros, marca, código de barras y categoría
 - [ ] Verificar que un item manual incompleto puede derivarse a Mesa de trabajo mediante su acción secundaria y permanece en la lista como pendiente
 - [ ] Verificar que un item enviado a Mesa de trabajo conserva ese estado en la lista
 - [ ] Verificar que cuando ese item pasa a Mis Productos la lista lo informa y desactiva el envío a Mesa de trabajo
-- [ ] Verificar que la acción Reiniciar compra deja la lista reutilizable sin perder sus items y usa confirmación inline
+- [ ] Verificar que la acción Reiniciar lista deja la lista reutilizable sin perder sus items y usa confirmación inline
 - [ ] Verificar que si cambia un precio relacionado en Mis Productos la lista actualiza automáticamente sus importes y referencias
 - [ ] Verificar que la interfaz responde correctamente en móvil vertical y en tablet
 
@@ -232,5 +252,5 @@ Validar de forma ejecutable por IA y revisable por humano el flujo base de Lista
 - [ ] Fase Testing
 
 Fecha de creacion: 11 de Abril 2026
-Fecha de ultima actualizacion: 14 de Abril 2026
+Fecha de ultima actualizacion: 15 de Abril 2026
 Estado: BORRADOR
