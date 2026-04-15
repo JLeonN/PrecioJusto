@@ -34,6 +34,7 @@ Crear una nueva sección de la app llamada Lista Justa para que el usuario pueda
 - Un item se considera completo para pasar automáticamente a Mis Productos solo si tiene nombre, precio, comercio, cantidad, gramos o litros, marca, código de barras y categoría
 - No se deben permitir productos duplicados dentro de la misma lista
 - Si el usuario intenta agregar un duplicado, la app debe mostrar una notificación breve y no volver a agregarlo
+- La edición inline con icono de lápiz debe permitir ajustar solo nombre y precio; la cantidad se cambia únicamente con los botones `+` y `-`
 - Las acciones destructivas de listas e items deben poder resolverse con gesto de deslizamiento hacia la izquierda
 - Un deslizamiento largo hacia la izquierda debe eliminar directamente listas o items
 - Antes de eliminar por swipe largo debe existir feedback visual previo claro
@@ -47,6 +48,9 @@ Crear una nueva sección de la app llamada Lista Justa para que el usuario pueda
 - Los productos nuevos deben agregarse siempre arriba del todo
 - El total visible en tarjetas de listas debe mostrarse como `Estimado de la lista`, `Estimado parcial` o `Sin precios` según la información disponible
 - Los comercios deben mostrarse como opción colapsada y opcional, sin romper el uso simple de la lista
+- Si un producto escaneado ya existe en la lista, debe tratarse como duplicado y no aumentar cantidad automáticamente
+- Un precio cargado manualmente dentro de Lista Justa no debe modificar Mis Productos
+- La selección de comercio actual no debe guardarse al salir de la lista
 
 ## FASE 1: Definir estructura y navegación
 
@@ -118,6 +122,8 @@ Permitir que el usuario cargue productos a la lista desde distintas entradas, pr
 - [ ] Agregar controles `-` y `+` dentro de la mini tarjeta para reducir o aumentar la cantidad sin abrir edición completa
 - [ ] Permitir editar un item de lista aun después de agregado
 - [ ] Permitir editar en la misma fila con icono de lápiz, siguiendo el patrón inline ya usado en ver historial o editar comercios
+- [ ] Limitar la edición inline con lápiz a nombre y precio
+- [ ] Mantener la cantidad editable solo con controles `-` y `+`
 - [ ] Si un usuario intenta agregar un item repetido, mostrar notificación breve y no duplicarlo
 - [ ] Permitir gesto de deslizamiento hacia la izquierda sobre un item para mostrar y ejecutar la acción de eliminar
 - [ ] Permitir que un deslizamiento largo elimine un item directamente
@@ -159,6 +165,7 @@ Dar al usuario una lectura clara de lo gastado hasta el momento y ayudarlo cuand
 - [ ] Avisar de forma visible pero no invasiva que hay productos sin precio registrado
 - [ ] Mostrar un texto aclaratorio tipo estimación de precios para indicar que los valores pueden variar
 - [ ] Si la lista tiene suficiente información, mostrar el total visible también en la tarjeta resumen de la lista como estimado
+- [ ] Mantener cualquier precio cargado manualmente dentro de la lista sin sobrescribir los datos de Mis Productos
 
 ## FASE 7: Integración con Mesa de trabajo y Mis Productos
 
@@ -182,6 +189,7 @@ Integrar la información de comercios sin convertirla en una barrera para usar l
 - [ ] Agregar una opción simple cerca del total para indicar en qué comercio está comprando el usuario en ese momento
 - [ ] Mantener esa opción de comercio colapsada y opcional para no ensuciar el flujo principal
 - [ ] Hacer que esa selección afecte el gasto mostrado cuando exista precio asociado a ese comercio
+- [ ] No guardar la selección de comercio actual al salir de la lista
 - [ ] Permitir que el usuario tenga una lista común aun si no configuró comercio actual
 - [ ] Si un producto no tiene precio en el comercio activo pero sí en otro, mostrar un aviso simple que lo indique
 - [ ] Crear un bloque `Sin precio` para productos que no tengan precio disponible donde corresponda
@@ -222,7 +230,10 @@ Validar de forma ejecutable por IA y revisable por humano el flujo base de Lista
 - [ ] Verificar que los items se muestran como mini tarjetas horizontales con prioridad visual en foto, nombre y precio
 - [ ] Verificar que los controles `-` y `+` ajustan cantidad sin abrir edición completa
 - [ ] Verificar que el icono de lápiz permite edición inline en la misma fila
+- [ ] Verificar que la edición inline con lápiz solo permite cambiar nombre y precio
+- [ ] Verificar que la cantidad no se edita inline y solo cambia con `-` y `+`
 - [ ] Verificar que un intento de agregar producto duplicado muestra notificación breve y no duplica el item
+- [ ] Verificar que un producto escaneado repetido también se trata como duplicado y no aumenta cantidad automáticamente
 - [ ] Verificar que si faltan datos importantes el item lo informa de forma clara
 - [ ] Eliminar un item con gesto de deslizamiento y validar que la acción responde como se espera
 - [ ] Eliminar una lista con gesto de deslizamiento y validar que la acción responde como se espera
@@ -237,6 +248,7 @@ Validar de forma ejecutable por IA y revisable por humano el flujo base de Lista
 - [ ] Verificar que al reiniciar la lista también se reinicia esa preferencia
 - [ ] Verificar que cuando faltan precios se muestra total parcial y aviso amigable
 - [ ] Verificar que la tarjeta de lista usa `Estimado de la lista`, `Estimado parcial` o `Sin precios` según corresponda
+- [ ] Verificar que un precio cargado manualmente en Lista Justa no modifica Mis Productos
 - [ ] Verificar que un item manual completo pasa automáticamente a Mis Productos
 - [ ] Verificar que el criterio de item completo para pasar a Mis Productos exige nombre, precio, comercio, cantidad, gramos o litros, marca, código de barras y categoría
 - [ ] Verificar que un item manual incompleto puede derivarse a Mesa de trabajo mediante su acción secundaria y permanece en la lista como pendiente
@@ -244,6 +256,7 @@ Validar de forma ejecutable por IA y revisable por humano el flujo base de Lista
 - [ ] Verificar que cuando ese item pasa a Mis Productos la lista lo informa y desactiva el envío a Mesa de trabajo
 - [ ] Verificar que la acción Reiniciar lista deja la lista reutilizable sin perder sus items y usa confirmación inline
 - [ ] Verificar que si cambia un precio relacionado en Mis Productos la lista actualiza automáticamente sus importes y referencias
+- [ ] Verificar que la selección de comercio actual se pierde al salir de la lista
 - [ ] Verificar que la interfaz responde correctamente en móvil vertical y en tablet
 
 ## Progreso del plan
