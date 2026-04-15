@@ -35,6 +35,7 @@ Crear una nueva sección de la app llamada Lista Justa para que el usuario pueda
 - No se deben permitir productos duplicados dentro de la misma lista
 - Si el usuario intenta agregar un duplicado, la app debe mostrar una notificación breve y no volver a agregarlo
 - La edición inline con icono de lápiz debe permitir ajustar solo nombre y precio; la cantidad se cambia únicamente con los botones `+` y `-`
+- La edición inline debe poder guardarse tanto al confirmar explícitamente como al tocar fuera cuando corresponda
 - Las acciones destructivas de listas e items deben poder resolverse con gesto de deslizamiento hacia la izquierda
 - Un deslizamiento largo hacia la izquierda debe eliminar directamente listas o items
 - Antes de eliminar por swipe largo debe existir feedback visual previo claro
@@ -48,6 +49,7 @@ Crear una nueva sección de la app llamada Lista Justa para que el usuario pueda
 - Los productos nuevos deben agregarse siempre arriba del todo
 - El total visible en tarjetas de listas debe mostrarse como `Estimado de la lista`, `Estimado parcial` o `Sin precios` según la información disponible
 - Los comercios deben mostrarse como opción colapsada y opcional, sin romper el uso simple de la lista
+- El bloque de comercio opcional debe estar siempre visible en modo colapsado
 - Si un producto escaneado ya existe en la lista, debe tratarse como duplicado y no aumentar cantidad automáticamente
 - Un precio cargado manualmente dentro de Lista Justa no debe modificar Mis Productos
 - La selección de comercio actual no debe guardarse al salir de la lista
@@ -124,6 +126,7 @@ Permitir que el usuario cargue productos a la lista desde distintas entradas, pr
 - [ ] Permitir editar en la misma fila con icono de lápiz, siguiendo el patrón inline ya usado en ver historial o editar comercios
 - [ ] Limitar la edición inline con lápiz a nombre y precio
 - [ ] Mantener la cantidad editable solo con controles `-` y `+`
+- [ ] Permitir que la edición inline se guarde al confirmar o al tocar fuera cuando corresponda
 - [ ] Si un usuario intenta agregar un item repetido, mostrar notificación breve y no duplicarlo
 - [ ] Permitir gesto de deslizamiento hacia la izquierda sobre un item para mostrar y ejecutar la acción de eliminar
 - [ ] Permitir que un deslizamiento largo elimine un item directamente
@@ -143,6 +146,7 @@ Hacer que la lista sea cómoda de usar dentro del supermercado mientras el usuar
 - [ ] Hacer que la edición priorice mostrar lo que falta sin impedir editar el resto si hace falta
 - [ ] Hacer que la edición inline en la misma fila permita ajustar campos rápidos sin sacar al usuario del flujo de compra
 - [ ] Agregar un control visual de check a la derecha de cada item para marcarlo como comprado
+- [ ] Permitir marcar como comprado incluso items incompletos si el usuario decide seguir con la compra
 - [ ] Al marcar un item como comprado, mostrar una transición suave y moverlo hacia la zona de comprados
 - [ ] Mantener una breve ventana de arrepentimiento antes de dejar el item al final del bloque de comprados
 - [ ] Permitir desmarcar un item comprado y devolverlo al estado pendiente
@@ -188,6 +192,7 @@ Integrar la información de comercios sin convertirla en una barrera para usar l
 
 - [ ] Agregar una opción simple cerca del total para indicar en qué comercio está comprando el usuario en ese momento
 - [ ] Mantener esa opción de comercio colapsada y opcional para no ensuciar el flujo principal
+- [ ] Mostrar siempre el bloque de comercio en estado colapsado, aun cuando la lista no tenga comercio activo seleccionado
 - [ ] Hacer que esa selección afecte el gasto mostrado cuando exista precio asociado a ese comercio
 - [ ] No guardar la selección de comercio actual al salir de la lista
 - [ ] Permitir que el usuario tenga una lista común aun si no configuró comercio actual
@@ -232,6 +237,7 @@ Validar de forma ejecutable por IA y revisable por humano el flujo base de Lista
 - [ ] Verificar que el icono de lápiz permite edición inline en la misma fila
 - [ ] Verificar que la edición inline con lápiz solo permite cambiar nombre y precio
 - [ ] Verificar que la cantidad no se edita inline y solo cambia con `-` y `+`
+- [ ] Verificar que la edición inline se guarda tanto al confirmar como al tocar fuera cuando corresponde
 - [ ] Verificar que un intento de agregar producto duplicado muestra notificación breve y no duplica el item
 - [ ] Verificar que un producto escaneado repetido también se trata como duplicado y no aumenta cantidad automáticamente
 - [ ] Verificar que si faltan datos importantes el item lo informa de forma clara
@@ -241,6 +247,7 @@ Validar de forma ejecutable por IA y revisable por humano el flujo base de Lista
 - [ ] Verificar que el swipe muestra fondo rojo, papelera y texto `¿Borrar?` usando colores existentes
 - [ ] Verificar que el swipe destructivo exige un umbral claro antes de eliminar y no se dispara por gestos cortos accidentales
 - [ ] Marcar y desmarcar productos como comprados y validar transición, cambio visual y reubicación
+- [ ] Verificar que un item incompleto igual puede marcarse como comprado
 - [ ] Verificar que el progreso de compra se actualiza correctamente
 - [ ] Verificar que una lista vacía muestra su mensaje y llamada a acción correspondiente
 - [ ] Verificar que el total usa solo productos comprados
@@ -257,6 +264,7 @@ Validar de forma ejecutable por IA y revisable por humano el flujo base de Lista
 - [ ] Verificar que la acción Reiniciar lista deja la lista reutilizable sin perder sus items y usa confirmación inline
 - [ ] Verificar que si cambia un precio relacionado en Mis Productos la lista actualiza automáticamente sus importes y referencias
 - [ ] Verificar que la selección de comercio actual se pierde al salir de la lista
+- [ ] Verificar que el bloque de comercio aparece siempre colapsado aunque no haya selección activa
 - [ ] Verificar que la interfaz responde correctamente en móvil vertical y en tablet
 
 ## Progreso del plan
