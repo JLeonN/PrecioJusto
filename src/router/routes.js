@@ -18,6 +18,10 @@ const routes = [
       // Mesa de trabajo (solo accesible con ítems pendientes)
       { path: 'mesa-trabajo', component: () => import('pages/MesaTrabajoPage.vue') },
 
+      // Lista Justa
+      { path: 'lista-justa', component: () => import('pages/ListaJusta/ListaJustaPage.vue') },
+      { path: 'lista-justa/:id', component: () => import('pages/ListaJusta/DetalleListaJustaPage.vue') },
+
       // Página de configuración global
       { path: 'configuracion', component: () => import('pages/ConfiguracionPage.vue') },
 

@@ -20,7 +20,7 @@
             no-caps
             class="title-link"
             :color="colorTituloHeader"
-            @click="irAInicio"
+            @click="irAMisProductos"
           >
             <span class="title-text">Precio Justo</span>
           </q-btn>
@@ -33,10 +33,21 @@
             round
             class="quick-access-btn"
             :color="obtenerColorAccion(esInicioActivo)"
-            aria-label="Ir a Inicio"
-            @click="irAInicio"
+            aria-label="Ir a Mis Productos"
+            @click="irAMisProductos"
           >
-            <IconHome :size="22" />
+            <IconClipboardList :size="22" />
+          </q-btn>
+
+          <q-btn
+            flat
+            round
+            class="quick-access-btn"
+            :color="obtenerColorAccion(esListaJustaActiva)"
+            aria-label="Ir a Lista Justa"
+            @click="irAListaJusta"
+          >
+            <IconListDetails :size="22" />
           </q-btn>
 
           <q-btn
@@ -99,10 +110,19 @@
           <!-- Opciones del menú -->
           <q-item clickable v-ripple to="/" exact>
             <q-item-section avatar>
-              <IconHome :size="24" />
+              <IconClipboardList :size="24" />
             </q-item-section>
             <q-item-section>
               <q-item-label>Mis Productos</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple to="/lista-justa">
+            <q-item-section avatar>
+              <IconListDetails :size="24" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Lista Justa</q-item-label>
             </q-item-section>
           </q-item>
 
@@ -204,7 +224,15 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { IconHome, IconMapPin, IconBriefcase, IconHeart, IconSettings, IconRefresh } from '@tabler/icons-vue'
+import {
+  IconClipboardList,
+  IconListDetails,
+  IconMapPin,
+  IconBriefcase,
+  IconHeart,
+  IconSettings,
+  IconRefresh,
+} from '@tabler/icons-vue'
 import { useQuasar } from 'quasar'
 import { App } from '@capacitor/app'
 import { useBotonAtras } from '../composables/useBotonAtras.js'
@@ -230,6 +258,7 @@ const toggleDrawer = () => {
 }
 
 const esInicioActivo = computed(() => route.path === '/')
+const esListaJustaActiva = computed(() => route.path.startsWith('/lista-justa'))
 const esComerciosActivo = computed(() => route.path.startsWith('/comercios'))
 const esMesaActivo = computed(() => route.path === '/mesa-trabajo')
 const clasesHeader = computed(() => {
@@ -268,9 +297,14 @@ const obtenerColorAccion = (estaActivo) => {
   return estaActivo.value ? 'primary' : 'grey-6'
 }
 
-const irAInicio = () => {
+const irAMisProductos = () => {
   if (esInicioActivo.value) return
   router.push('/')
+}
+
+const irAListaJusta = () => {
+  if (esListaJustaActiva.value) return
+  router.push('/lista-justa')
 }
 
 const irAComercios = () => {

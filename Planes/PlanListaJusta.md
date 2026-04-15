@@ -61,16 +61,16 @@ Crear una nueva sección de la app llamada Lista Justa para que el usuario pueda
 
 Preparar la base de datos local, la ruta, la entrada en drawer y header, y la estructura mínima de pantallas para Lista Justa.
 
-- [ ] Definir el modelo de datos de una lista de compras con nombre, productos, orden, estado general y metadatos mínimos reutilizables
-- [ ] Definir el modelo de datos de cada item de lista con referencia opcional a producto existente, nombre visible, cantidad, precio opcional, estado comprado y banderas de datos faltantes
-- [ ] Definir el estado interno de un item derivado a Mesa de trabajo y su transición posterior a Mis Productos
-- [ ] Definir la lógica de detección de duplicados por referencia o código de barras según el origen del item
-- [ ] No tratar productos parecidos por nombre como duplicados si no hay coincidencia real
-- [ ] Crear la nueva ruta de página para Lista Justa dentro del enrutado principal
-- [ ] Agregar la nueva opción al drawer siguiendo el patrón actual de navegación
-- [ ] Agregar el nuevo acceso rápido al header siguiendo el patrón actual de iconos
-- [ ] Usar `IconListDetails` como icono principal de Lista Justa y actualizar Mis Productos a `IconClipboardList`
-- [ ] Verificar que toda la nueva interfaz use solo colores existentes de `Variables.css` y funcione correctamente en modo oscuro
+- [x] Definir el modelo de datos de una lista de compras con nombre, productos, orden, estado general y metadatos mínimos reutilizables
+- [x] Definir el modelo de datos de cada item de lista con referencia opcional a producto existente, nombre visible, cantidad, precio opcional, estado comprado y banderas de datos faltantes
+- [x] Definir el estado interno de un item derivado a Mesa de trabajo y su transición posterior a Mis Productos
+- [x] Definir la lógica de detección de duplicados por referencia o código de barras según el origen del item
+- [x] No tratar productos parecidos por nombre como duplicados si no hay coincidencia real
+- [x] Crear la nueva ruta de página para Lista Justa dentro del enrutado principal
+- [x] Agregar la nueva opción al drawer siguiendo el patrón actual de navegación
+- [x] Agregar el nuevo acceso rápido al header siguiendo el patrón actual de iconos
+- [x] Usar `IconListDetails` como icono principal de Lista Justa y actualizar Mis Productos a `IconClipboardList`
+- [x] Verificar que toda la nueva interfaz use solo colores existentes de `Variables.css` y funcione correctamente en modo oscuro
 
 ## FASE 2: Pantalla de listas del usuario
 
@@ -78,19 +78,19 @@ Preparar la base de datos local, la ruta, la entrada en drawer y header, y la es
 
 Construir la primera escena donde el usuario ve sus listas guardadas o un estado vacío claro.
 
-- [ ] Crear la pantalla principal de Lista Justa con estilo visual basado en los colores ya disponibles del proyecto
-- [ ] Mostrar tarjetas de listas guardadas con nombre, cantidad de productos y señales de estimado disponible cuando corresponda
-- [ ] Mostrar en cada tarjeta `Estimado de la lista` cuando haya información suficiente
-- [ ] Mostrar `Estimado parcial` cuando falten precios para completar el cálculo
-- [ ] Mostrar `Sin precios` cuando ningún item de la lista tenga precio
-- [ ] Si la lista tiene productos sin precio, avisarlo en la tarjeta de forma clara
-- [ ] Si la lista no tiene ningún producto con precio, avisarlo en la tarjeta de forma clara
-- [ ] Mostrar un mensaje breve de estado vacío si no hay listas creadas
-- [ ] Agregar un botón visible para crear una nueva lista aun cuando no existan listas previas
-- [ ] Incluir la acción `Reiniciar lista` como base para volver a usar una lista existente sin perder sus items
-- [ ] Permitir gesto de deslizamiento hacia la izquierda sobre una lista para mostrar y ejecutar la acción de eliminar
-- [ ] Permitir que un deslizamiento largo elimine una lista directamente
-- [ ] Mostrar feedback visual previo durante el swipe antes de ejecutar la eliminación directa de una lista
+- [x] Crear la pantalla principal de Lista Justa con estilo visual basado en los colores ya disponibles del proyecto
+- [x] Mostrar tarjetas de listas guardadas con nombre, cantidad de productos y señales de estimado disponible cuando corresponda
+- [x] Mostrar en cada tarjeta `Estimado de la lista` cuando haya información suficiente
+- [x] Mostrar `Estimado parcial` cuando falten precios para completar el cálculo
+- [x] Mostrar `Sin precios` cuando ningún item de la lista tenga precio
+- [x] Si la lista tiene productos sin precio, avisarlo en la tarjeta de forma clara
+- [x] Si la lista no tiene ningún producto con precio, avisarlo en la tarjeta de forma clara
+- [x] Mostrar un mensaje breve de estado vacío si no hay listas creadas
+- [x] Agregar un botón visible para crear una nueva lista aun cuando no existan listas previas
+- [x] Incluir la acción `Reiniciar lista` como base para volver a usar una lista existente sin perder sus items
+- [x] Permitir gesto de deslizamiento hacia la izquierda sobre una lista para mostrar y ejecutar la acción de eliminar
+- [x] Permitir que un deslizamiento largo elimine una lista directamente
+- [x] Mostrar feedback visual previo durante el swipe antes de ejecutar la eliminación directa de una lista
 
 ## FASE 3: Crear y editar listas
 
@@ -98,14 +98,14 @@ Construir la primera escena donde el usuario ve sus listas guardadas o un estado
 
 Permitir que el usuario cree listas de forma simple y también pueda renombrarlas, reiniciarlas o eliminarlas después.
 
-- [ ] Crear la interfaz de alta de lista con campo para nombre libre
-- [ ] Agregar placeholder sugerente para el nombre de la lista con ejemplos variables de uso cotidiano o eventos
-- [ ] Crear la lista vacía y redirigir al detalle de esa lista para empezar a cargar artículos
-- [ ] Permitir editar una lista existente usando la misma interfaz de creación adaptada a modo edición
+- [x] Crear la interfaz de alta de lista con campo para nombre libre
+- [x] Agregar placeholder sugerente para el nombre de la lista con ejemplos variables de uso cotidiano o eventos
+- [x] Crear la lista vacía y redirigir al detalle de esa lista para empezar a cargar artículos
+- [x] Permitir editar una lista existente usando la misma interfaz de creación adaptada a modo edición
 - [ ] Agregar en la edición de lista una opción para borrar la lista
 - [ ] Hacer que borrar una lista desde edición use confirmación inline con el patrón actual del proyecto
-- [ ] Agregar una acción `Reiniciar lista` para desmarcar checks sin modificar el resto de la información de la lista
-- [ ] Hacer que Reiniciar lista use confirmación inline con el patrón actual del proyecto
+- [x] Agregar una acción `Reiniciar lista` para desmarcar checks sin modificar el resto de la información de la lista
+- [x] Hacer que Reiniciar lista use confirmación inline con el patrón actual del proyecto
 
 ## FASE 4: Agregar productos a la lista
 
@@ -114,25 +114,25 @@ Permitir que el usuario cree listas de forma simple y también pueda renombrarla
 Permitir que el usuario cargue productos a la lista desde distintas entradas, priorizando velocidad y consistencia con el resto de la app.
 
 - [ ] Reutilizar el buscador actual de productos para buscar por nombre, marca, categoría o código de barras
-- [ ] Agregar dentro de la lista un botón sticky siempre visible tipo `Agregar producto` que acompañe el scroll y permita sumar artículos en cualquier momento
-- [ ] Reservar espacio inferior de seguridad para que el botón sticky no tape el último contenido de la lista
-- [ ] Permitir agregar productos desde Mis Productos usando una tarjeta simplificada
-- [ ] Permitir crear un artículo manual desde cero aunque no tenga foto ni precio
+- [x] Agregar dentro de la lista un botón sticky siempre visible tipo `Agregar producto` que acompañe el scroll y permita sumar artículos en cualquier momento
+- [x] Reservar espacio inferior de seguridad para que el botón sticky no tape el último contenido de la lista
+- [x] Permitir agregar productos desde Mis Productos usando una tarjeta simplificada
+- [x] Permitir crear un artículo manual desde cero aunque no tenga foto ni precio
 - [ ] Integrar la opción de escanear productos con Escaneo rápido
 - [ ] Mantener en Escaneo rápido el flujo completo que ya existe hoy antes de agregar el producto a la lista
 - [ ] Integrar la opción de escanear múltiples productos con Ráfaga
 - [ ] Hacer que Ráfaga agregue productos directamente a la lista
-- [ ] Guardar la cantidad como parte obligatoria del item de lista
-- [ ] Agregar controles `-` y `+` dentro de la mini tarjeta para reducir o aumentar la cantidad sin abrir edición completa
-- [ ] Permitir editar un item de lista aun después de agregado
-- [ ] Permitir editar en la misma fila con icono de lápiz, siguiendo el patrón inline ya usado en ver historial o editar comercios
-- [ ] Limitar la edición inline con lápiz a nombre y precio
-- [ ] Mantener la cantidad editable solo con controles `-` y `+`
-- [ ] Permitir que la edición inline se guarde al confirmar o al tocar fuera cuando corresponda
-- [ ] Si un usuario intenta agregar un item repetido, mostrar notificación breve y no duplicarlo
-- [ ] Permitir gesto de deslizamiento hacia la izquierda sobre un item para mostrar y ejecutar la acción de eliminar
-- [ ] Permitir que un deslizamiento largo elimine un item directamente
-- [ ] Mostrar feedback visual previo durante el swipe antes de ejecutar una eliminación directa
+- [x] Guardar la cantidad como parte obligatoria del item de lista
+- [x] Agregar controles `-` y `+` dentro de la mini tarjeta para reducir o aumentar la cantidad sin abrir edición completa
+- [x] Permitir editar un item de lista aun después de agregado
+- [x] Permitir editar en la misma fila con icono de lápiz, siguiendo el patrón inline ya usado en ver historial o editar comercios
+- [x] Limitar la edición inline con lápiz a nombre y precio
+- [x] Mantener la cantidad editable solo con controles `-` y `+`
+- [x] Permitir que la edición inline se guarde al confirmar o al tocar fuera cuando corresponda
+- [x] Si un usuario intenta agregar un item repetido, mostrar notificación breve y no duplicarlo
+- [x] Permitir gesto de deslizamiento hacia la izquierda sobre un item para mostrar y ejecutar la acción de eliminar
+- [x] Permitir que un deslizamiento largo elimine un item directamente
+- [x] Mostrar feedback visual previo durante el swipe antes de ejecutar una eliminación directa
 
 ## FASE 5: Visualización y uso de la lista
 
@@ -140,23 +140,23 @@ Permitir que el usuario cargue productos a la lista desde distintas entradas, pr
 
 Hacer que la lista sea cómoda de usar dentro del supermercado mientras el usuario agrega, revisa y marca productos.
 
-- [ ] Mostrar cada producto como mini tarjeta horizontal
-- [ ] Priorizar visualmente foto, nombre y precio dentro de cada item
-- [ ] Mostrar también marca, cantidad y otros datos útiles cuando existan
-- [ ] Si faltan datos importantes como foto, nombre o precio, avisarlo dentro del item de forma clara
-- [ ] Agregar un botón de lápiz para completar o corregir información faltante
+- [x] Mostrar cada producto como mini tarjeta horizontal
+- [x] Priorizar visualmente foto, nombre y precio dentro de cada item
+- [x] Mostrar también marca, cantidad y otros datos útiles cuando existan
+- [x] Si faltan datos importantes como foto, nombre o precio, avisarlo dentro del item de forma clara
+- [x] Agregar un botón de lápiz para completar o corregir información faltante
 - [ ] Hacer que la edición priorice mostrar lo que falta sin impedir editar el resto si hace falta
-- [ ] Hacer que la edición inline en la misma fila permita ajustar campos rápidos sin sacar al usuario del flujo de compra
-- [ ] Agregar un control visual de check a la derecha de cada item para marcarlo como comprado
-- [ ] Permitir marcar como comprado incluso items incompletos si el usuario decide seguir con la compra
+- [x] Hacer que la edición inline en la misma fila permita ajustar campos rápidos sin sacar al usuario del flujo de compra
+- [x] Agregar un control visual de check a la derecha de cada item para marcarlo como comprado
+- [x] Permitir marcar como comprado incluso items incompletos si el usuario decide seguir con la compra
 - [ ] Al marcar un item como comprado, mostrar una transición suave y moverlo hacia la zona de comprados
-- [ ] Mantener una breve ventana de arrepentimiento antes de dejar el item al final del bloque de comprados
-- [ ] Permitir desmarcar un item comprado y devolverlo al estado pendiente
-- [ ] Agregar filtro para ver pendientes, comprados o ambos
+- [x] Mantener una breve ventana de arrepentimiento antes de dejar el item al final del bloque de comprados
+- [x] Permitir desmarcar un item comprado y devolverlo al estado pendiente
+- [x] Agregar filtro para ver pendientes, comprados o ambos
 - [ ] Permitir reordenar productos manualmente dentro de la lista
-- [ ] Mostrar un resumen de progreso tipo `X de Y comprados`
-- [ ] Aplicar un estilo visual más gris o apagado a los items comprados sin perder legibilidad
-- [ ] Mostrar un mensaje breve de estado vacío cuando la lista exista pero todavía no tenga productos
+- [x] Mostrar un resumen de progreso tipo `X de Y comprados`
+- [x] Aplicar un estilo visual más gris o apagado a los items comprados sin perder legibilidad
+- [x] Mostrar un mensaje breve de estado vacío cuando la lista exista pero todavía no tenga productos
 
 ## FASE 6: Gasto y control durante la compra
 
@@ -164,14 +164,14 @@ Hacer que la lista sea cómoda de usar dentro del supermercado mientras el usuar
 
 Dar al usuario una lectura clara de lo gastado hasta el momento y ayudarlo cuando faltan datos necesarios para calcular.
 
-- [ ] Mostrar abajo del todo cuánto lleva gastado el usuario hasta el momento
-- [ ] Calcular el gasto usando solo los productos marcados como comprados
-- [ ] Si el usuario marca un producto sin precio, permitir una preferencia simple por lista para preguntar siempre, solo avisar o no volver a preguntar hasta que esa lista se reinicie
-- [ ] Mostrar `total parcial` cuando existan productos comprados sin precio
-- [ ] Avisar de forma visible pero no invasiva que hay productos sin precio registrado
-- [ ] Mostrar un texto aclaratorio tipo estimación de precios para indicar que los valores pueden variar
-- [ ] Si la lista tiene suficiente información, mostrar el total visible también en la tarjeta resumen de la lista como estimado
-- [ ] Mantener cualquier precio cargado manualmente dentro de la lista sin sobrescribir los datos de Mis Productos
+- [x] Mostrar abajo del todo cuánto lleva gastado el usuario hasta el momento
+- [x] Calcular el gasto usando solo los productos marcados como comprados
+- [x] Si el usuario marca un producto sin precio, permitir una preferencia simple por lista para preguntar siempre, solo avisar o no volver a preguntar hasta que esa lista se reinicie
+- [x] Mostrar `total parcial` cuando existan productos comprados sin precio
+- [x] Avisar de forma visible pero no invasiva que hay productos sin precio registrado
+- [x] Mostrar un texto aclaratorio tipo estimación de precios para indicar que los valores pueden variar
+- [x] Si la lista tiene suficiente información, mostrar el total visible también en la tarjeta resumen de la lista como estimado
+- [x] Mantener cualquier precio cargado manualmente dentro de la lista sin sobrescribir los datos de Mis Productos
 
 ## FASE 7: Integración con Mesa de trabajo y Mis Productos
 
@@ -179,13 +179,13 @@ Dar al usuario una lectura clara de lo gastado hasta el momento y ayudarlo cuand
 
 Resolver el flujo de productos incompletos sin romper la experiencia principal de compra.
 
-- [ ] Si un item manual queda completo, enviarlo automáticamente a Mis Productos
-- [ ] Si un item no existe en Mis Productos, mostrar un botón para enviarlo a Mesa de trabajo y terminar de editarlo allí
-- [ ] Si un item ya existe en Mis Productos, no mostrar esa acción por este motivo
-- [ ] Si un item fue enviado a Mesa de trabajo, guardar ese estado dentro de la lista
-- [ ] Si luego ese item pasa a Mis Productos, reflejarlo en la lista y desactivar la acción de enviar a Mesa de trabajo
-- [ ] Mantener el item visible en la lista aunque haya sido derivado a Mesa de trabajo
-- [ ] Verificar que si cambia un precio relacionado en Mis Productos la lista actualiza automáticamente sus importes y referencias
+- [x] Si un item manual queda completo, enviarlo automáticamente a Mis Productos
+- [x] Si un item no existe en Mis Productos, mostrar un botón para enviarlo a Mesa de trabajo y terminar de editarlo allí
+- [x] Si un item ya existe en Mis Productos, no mostrar esa acción por este motivo
+- [x] Si un item fue enviado a Mesa de trabajo, guardar ese estado dentro de la lista
+- [x] Si luego ese item pasa a Mis Productos, reflejarlo en la lista y desactivar la acción de enviar a Mesa de trabajo
+- [x] Mantener el item visible en la lista aunque haya sido derivado a Mesa de trabajo
+- [x] Verificar que si cambia un precio relacionado en Mis Productos la lista actualiza automáticamente sus importes y referencias
 
 ## FASE 8: Comercios como capa de apoyo
 
@@ -193,12 +193,12 @@ Resolver el flujo de productos incompletos sin romper la experiencia principal d
 
 Integrar la información de comercios sin convertirla en una barrera para usar la lista como lista de compras común.
 
-- [ ] Agregar una opción simple cerca del total para indicar en qué comercio está comprando el usuario en ese momento
-- [ ] Mantener esa opción de comercio colapsada y opcional para no ensuciar el flujo principal
-- [ ] Mostrar siempre el bloque de comercio en estado colapsado, aun cuando la lista no tenga comercio activo seleccionado
-- [ ] Hacer que esa selección afecte el gasto mostrado cuando exista precio asociado a ese comercio
-- [ ] No guardar la selección de comercio actual al salir de la lista
-- [ ] Permitir que el usuario tenga una lista común aun si no configuró comercio actual
+- [x] Agregar una opción simple cerca del total para indicar en qué comercio está comprando el usuario en ese momento
+- [x] Mantener esa opción de comercio colapsada y opcional para no ensuciar el flujo principal
+- [x] Mostrar siempre el bloque de comercio en estado colapsado, aun cuando la lista no tenga comercio activo seleccionado
+- [x] Hacer que esa selección afecte el gasto mostrado cuando exista precio asociado a ese comercio
+- [x] No guardar la selección de comercio actual al salir de la lista
+- [x] Permitir que el usuario tenga una lista común aun si no configuró comercio actual
 - [ ] Si un producto no tiene precio en el comercio activo pero sí en otro, mostrar un aviso simple que lo indique
 - [ ] Crear un bloque `Sin precio` para productos que no tengan precio disponible donde corresponda
 - [ ] Reutilizar el modal de precio ya existente en las tarjetas de Mesa de trabajo para una futura acción `Comprobar precio`
@@ -289,3 +289,10 @@ Validar de forma ejecutable por IA y revisable por humano el flujo base de Lista
 Fecha de creacion: 11 de Abril 2026
 Fecha de ultima actualizacion: 15 de Abril 2026
 Estado: BORRADOR
+
+
+## Avance ejecutado (15 de Abril 2026)
+
+- Implementada base funcional de Lista Justa en navegación, persistencia local y flujo de uso diario.
+- Quedan pendientes del plan: integración completa de escaneo rápido/ráfaga en Lista Justa, reordenado manual, recomendaciones futuras y batería de testing detallada.
+
