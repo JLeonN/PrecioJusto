@@ -53,6 +53,7 @@ Crear una nueva sección de la app llamada Lista Justa para que el usuario pueda
 - Si un producto escaneado ya existe en la lista, debe tratarse como duplicado y no aumentar cantidad automáticamente
 - Un precio cargado manualmente dentro de Lista Justa no debe modificar Mis Productos
 - La selección de comercio actual no debe guardarse al salir de la lista
+- Lista Justa no debe modificar datos de Mis Productos; la relación permitida es solo desde Mis Productos hacia Lista Justa
 
 ## FASE 1: Definir estructura y navegación
 
@@ -63,7 +64,8 @@ Preparar la base de datos local, la ruta, la entrada en drawer y header, y la es
 - [ ] Definir el modelo de datos de una lista de compras con nombre, productos, orden, estado general y metadatos mínimos reutilizables
 - [ ] Definir el modelo de datos de cada item de lista con referencia opcional a producto existente, nombre visible, cantidad, precio opcional, estado comprado y banderas de datos faltantes
 - [ ] Definir el estado interno de un item derivado a Mesa de trabajo y su transición posterior a Mis Productos
-- [ ] Definir la lógica de detección de duplicados por referencia, código de barras o nombre normalizado según el origen del item
+- [ ] Definir la lógica de detección de duplicados por referencia o código de barras según el origen del item
+- [ ] No tratar productos parecidos por nombre como duplicados si no hay coincidencia real
 - [ ] Crear la nueva ruta de página para Lista Justa dentro del enrutado principal
 - [ ] Agregar la nueva opción al drawer siguiendo el patrón actual de navegación
 - [ ] Agregar el nuevo acceso rápido al header siguiendo el patrón actual de iconos
@@ -102,7 +104,7 @@ Permitir que el usuario cree listas de forma simple y también pueda renombrarla
 - [ ] Permitir editar una lista existente usando la misma interfaz de creación adaptada a modo edición
 - [ ] Agregar en la edición de lista una opción para borrar la lista
 - [ ] Hacer que borrar una lista desde edición use confirmación inline con el patrón actual del proyecto
-- [ ] Agregar una acción `Reiniciar lista` para desmarcar checks y reutilizar la misma lista sin duplicarla
+- [ ] Agregar una acción `Reiniciar lista` para desmarcar checks sin modificar el resto de la información de la lista
 - [ ] Hacer que Reiniciar lista use confirmación inline con el patrón actual del proyecto
 
 ## FASE 4: Agregar productos a la lista
@@ -178,7 +180,8 @@ Dar al usuario una lectura clara de lo gastado hasta el momento y ayudarlo cuand
 Resolver el flujo de productos incompletos sin romper la experiencia principal de compra.
 
 - [ ] Si un item manual queda completo, enviarlo automáticamente a Mis Productos
-- [ ] Si un item manual queda incompleto, permitir derivarlo a Mesa de trabajo mediante una acción secundaria poco invasiva
+- [ ] Si un item no existe en Mis Productos, mostrar un botón para enviarlo a Mesa de trabajo y terminar de editarlo allí
+- [ ] Si un item ya existe en Mis Productos, no mostrar esa acción por este motivo
 - [ ] Si un item fue enviado a Mesa de trabajo, guardar ese estado dentro de la lista
 - [ ] Si luego ese item pasa a Mis Productos, reflejarlo en la lista y desactivar la acción de enviar a Mesa de trabajo
 - [ ] Mantener el item visible en la lista aunque haya sido derivado a Mesa de trabajo
@@ -239,6 +242,7 @@ Validar de forma ejecutable por IA y revisable por humano el flujo base de Lista
 - [ ] Verificar que la cantidad no se edita inline y solo cambia con `-` y `+`
 - [ ] Verificar que la edición inline se guarda tanto al confirmar como al tocar fuera cuando corresponde
 - [ ] Verificar que un intento de agregar producto duplicado muestra notificación breve y no duplica el item
+- [ ] Verificar que productos parecidos por nombre, sin coincidencia real, no se bloquean como duplicados
 - [ ] Verificar que un producto escaneado repetido también se trata como duplicado y no aumenta cantidad automáticamente
 - [ ] Verificar que si faltan datos importantes el item lo informa de forma clara
 - [ ] Eliminar un item con gesto de deslizamiento y validar que la acción responde como se espera
@@ -258,10 +262,12 @@ Validar de forma ejecutable por IA y revisable por humano el flujo base de Lista
 - [ ] Verificar que un precio cargado manualmente en Lista Justa no modifica Mis Productos
 - [ ] Verificar que un item manual completo pasa automáticamente a Mis Productos
 - [ ] Verificar que el criterio de item completo para pasar a Mis Productos exige nombre, precio, comercio, cantidad, gramos o litros, marca, código de barras y categoría
-- [ ] Verificar que un item manual incompleto puede derivarse a Mesa de trabajo mediante su acción secundaria y permanece en la lista como pendiente
+- [ ] Verificar que un item que no existe en Mis Productos muestra la acción para enviarlo a Mesa de trabajo
+- [ ] Verificar que un item que ya existe en Mis Productos no muestra esa acción por este motivo
+- [ ] Verificar que un item enviado a Mesa de trabajo permanece en la lista como pendiente
 - [ ] Verificar que un item enviado a Mesa de trabajo conserva ese estado en la lista
 - [ ] Verificar que cuando ese item pasa a Mis Productos la lista lo informa y desactiva el envío a Mesa de trabajo
-- [ ] Verificar que la acción Reiniciar lista deja la lista reutilizable sin perder sus items y usa confirmación inline
+- [ ] Verificar que la acción Reiniciar lista solo desmarca checks y usa confirmación inline
 - [ ] Verificar que si cambia un precio relacionado en Mis Productos la lista actualiza automáticamente sus importes y referencias
 - [ ] Verificar que la selección de comercio actual se pierde al salir de la lista
 - [ ] Verificar que el bloque de comercio aparece siempre colapsado aunque no haya selección activa
