@@ -12,14 +12,14 @@
           <q-btn flat round dense icon="arrow_back" color="secondary" @click="router.push('/lista-justa')" />
           <div class="encabezado-detalle-texto">
             <h5 class="titulo-pagina">{{ listaActual.nombre }}</h5>
-            <p class="contador-items">{{ resumen.comprados }} de {{ resumen.totalItems }} comprados</p>
+            <div class="fila-contadores">
+              <p class="contador-items q-mb-none">{{ resumen.comprados }} de {{ resumen.totalItems }} comprados</p>
+              <p class="contador-items contador-items-derecha q-mb-none">
+                {{ contadorItemsComprados }} de {{ contadorItemsTotales }} ítems
+              </p>
+            </div>
           </div>
-          <q-btn flat round dense icon="edit" color="secondary" @click="abrirDialogoRenombrar" />
         </div>
-
-        <q-banner v-if="itemsFiltrados.length === 0" class="q-mb-md" rounded>
-          {{ mensajeFiltro }}
-        </q-banner>
 
         <div class="q-mb-sm fila-filtros">
           <q-btn-toggle
@@ -31,6 +31,10 @@
             :options="opcionesFiltro"
           />
         </div>
+
+        <q-banner v-if="itemsFiltrados.length === 0" class="q-mb-md" rounded>
+          {{ mensajeFiltro }}
+        </q-banner>
 
         <q-expansion-item
           class="bloque-comercio q-mb-sm"
@@ -226,21 +230,6 @@
       />
     </div>
 
-    <q-dialog v-model="dialogoRenombrarAbierto">
-      <q-card class="dialogo-basico">
-        <q-card-section>
-          <div class="text-h6">Renombrar lista</div>
-        </q-card-section>
-        <q-card-section class="q-pt-none">
-          <q-input v-model="nombreListaEditable" outlined dense autofocus label="Nombre" @keyup.enter="guardarNombreLista" />
-        </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat no-caps label="Cancelar" color="grey-7" @click="dialogoRenombrarAbierto = false" />
-          <q-btn unelevated no-caps label="Guardar" color="secondary" :disable="!nombreListaEditable.trim()" @click="guardarNombreLista" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
     <q-dialog v-model="dialogoAgregarItemAbierto" @hide="limpiarFormularioItem">
       <q-card class="dialogo-agregar-item">
         <q-card-section>
@@ -325,8 +314,6 @@ const comerciosStore = useComerciStore()
 
 const filtroEstado = ref('pendientes')
 const comercioSesion = ref(null)
-const dialogoRenombrarAbierto = ref(false)
-const nombreListaEditable = ref('')
 
 const dialogoAgregarItemAbierto = ref(false)
 const modoAlta = ref('misProductos')
@@ -370,6 +357,16 @@ const resumen = computed(() => {
   }
 
   return listaJustaStore.resumenCompra(listaActual.value)
+})
+const contadorItemsTotales = computed(() => {
+  if (!listaActual.value) return 0
+  return listaActual.value.items.reduce((acumulado, item) => acumulado + Number(item.cantidad || 0), 0)
+})
+const contadorItemsComprados = computed(() => {
+  if (!listaActual.value) return 0
+  return listaActual.value.items
+    .filter((item) => item.comprado)
+    .reduce((acumulado, item) => acumulado + Number(item.cantidad || 0), 0)
 })
 
 const itemsOrdenados = computed(() => {
@@ -564,19 +561,6 @@ async function enviarAMesa(itemId) {
   quasar.notify({ type: 'info', message: 'Item enviado a Mesa de trabajo.', position: 'top' })
 }
 
-function abrirDialogoRenombrar() {
-  if (!listaActual.value) return
-  nombreListaEditable.value = listaActual.value.nombre
-  dialogoRenombrarAbierto.value = true
-}
-
-async function guardarNombreLista() {
-  if (!listaActual.value || !nombreListaEditable.value.trim()) return
-
-  await listaJustaStore.actualizarNombreLista(listaActual.value.id, nombreListaEditable.value)
-  dialogoRenombrarAbierto.value = false
-}
-
 function seleccionarProductoOrigen(producto) {
   productoSeleccionado.value = producto
 }
@@ -680,12 +664,22 @@ onMounted(async () => {
 }
 .encabezado-detalle {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr;
   align-items: center;
   gap: 10px;
 }
 .encabezado-detalle-texto {
   min-width: 0;
+}
+.fila-contadores {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.contador-items-derecha {
+  margin-left: auto;
+  text-align: right;
 }
 .fila-filtros {
   margin-bottom: 10px;
@@ -826,10 +820,6 @@ onMounted(async () => {
   min-width: min(100%, 380px);
   box-shadow: var(--sombra-media);
 }
-.dialogo-basico {
-  width: min(92vw, 420px);
-  border-radius: 14px;
-}
 .dialogo-agregar-item {
   width: min(92vw, 620px);
   border-radius: 14px;
@@ -843,6 +833,11 @@ onMounted(async () => {
   background: color-mix(in srgb, var(--color-secundario) 14%, transparent);
 }
 @media (max-width: 760px) {
+  .contador-items-derecha {
+    margin-left: 0;
+    width: 100%;
+    text-align: left;
+  }
   .fila-item {
     grid-template-columns: 56px 1fr auto;
   }
