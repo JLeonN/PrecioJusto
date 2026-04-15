@@ -111,10 +111,13 @@ Permitir que el usuario cargue productos a la lista desde distintas entradas, pr
 - [ ] Permitir agregar productos desde Mis Productos usando una tarjeta simplificada
 - [ ] Permitir crear un artículo manual desde cero aunque no tenga foto ni precio
 - [ ] Integrar la opción de escanear productos con Escaneo rápido
+- [ ] Mantener en Escaneo rápido el flujo completo que ya existe hoy antes de agregar el producto a la lista
 - [ ] Integrar la opción de escanear múltiples productos con Ráfaga
+- [ ] Hacer que Ráfaga agregue productos directamente a la lista
 - [ ] Guardar la cantidad como parte obligatoria del item de lista
 - [ ] Agregar controles `-` y `+` dentro de la mini tarjeta para reducir o aumentar la cantidad sin abrir edición completa
 - [ ] Permitir editar un item de lista aun después de agregado
+- [ ] Permitir editar en la misma fila con icono de lápiz, siguiendo el patrón inline ya usado en ver historial o editar comercios
 - [ ] Si un usuario intenta agregar un item repetido, mostrar notificación breve y no duplicarlo
 - [ ] Permitir gesto de deslizamiento hacia la izquierda sobre un item para mostrar y ejecutar la acción de eliminar
 - [ ] Permitir que un deslizamiento largo elimine un item directamente
@@ -132,6 +135,7 @@ Hacer que la lista sea cómoda de usar dentro del supermercado mientras el usuar
 - [ ] Si faltan datos importantes como foto, nombre o precio, avisarlo dentro del item de forma clara
 - [ ] Agregar un botón de lápiz para completar o corregir información faltante
 - [ ] Hacer que la edición priorice mostrar lo que falta sin impedir editar el resto si hace falta
+- [ ] Hacer que la edición inline en la misma fila permita ajustar campos rápidos sin sacar al usuario del flujo de compra
 - [ ] Agregar un control visual de check a la derecha de cada item para marcarlo como comprado
 - [ ] Al marcar un item como comprado, mostrar una transición suave y moverlo hacia la zona de comprados
 - [ ] Mantener una breve ventana de arrepentimiento antes de dejar el item al final del bloque de comprados
@@ -150,7 +154,7 @@ Dar al usuario una lectura clara de lo gastado hasta el momento y ayudarlo cuand
 
 - [ ] Mostrar abajo del todo cuánto lleva gastado el usuario hasta el momento
 - [ ] Calcular el gasto usando solo los productos marcados como comprados
-- [ ] Si el usuario marca un producto sin precio, permitir una preferencia simple de sesión para preguntar siempre, solo avisar o no volver a preguntar ese día
+- [ ] Si el usuario marca un producto sin precio, permitir una preferencia simple por lista para preguntar siempre, solo avisar o no volver a preguntar hasta que esa lista se reinicie
 - [ ] Mostrar `total parcial` cuando existan productos comprados sin precio
 - [ ] Avisar de forma visible pero no invasiva que hay productos sin precio registrado
 - [ ] Mostrar un texto aclaratorio tipo estimación de precios para indicar que los valores pueden variar
@@ -207,6 +211,8 @@ Validar de forma ejecutable por IA y revisable por humano el flujo base de Lista
 - [ ] Editar una lista existente y verificar que permite cambiar nombre y borrar la lista
 - [ ] Verificar que la interfaz usa solo colores existentes del proyecto y responde bien en modo oscuro
 - [ ] Agregar productos desde Mis Productos, manualmente, con Escaneo rápido y con Ráfaga
+- [ ] Verificar que Ráfaga agrega productos directo a la lista
+- [ ] Verificar que Escaneo rápido mantiene su proceso actual antes de agregar a la lista
 - [ ] Verificar que los datos mínimos obligatorios en lista son nombre y cantidad
 - [ ] Verificar que el precio sigue siendo opcional para usar la lista
 - [ ] Verificar que el botón `Agregar producto` queda siempre accesible dentro de la lista
@@ -215,6 +221,7 @@ Validar de forma ejecutable por IA y revisable por humano el flujo base de Lista
 - [ ] Confirmar que la búsqueda reutilizada encuentra productos por nombre, marca, categoría y código de barras
 - [ ] Verificar que los items se muestran como mini tarjetas horizontales con prioridad visual en foto, nombre y precio
 - [ ] Verificar que los controles `-` y `+` ajustan cantidad sin abrir edición completa
+- [ ] Verificar que el icono de lápiz permite edición inline en la misma fila
 - [ ] Verificar que un intento de agregar producto duplicado muestra notificación breve y no duplica el item
 - [ ] Verificar que si faltan datos importantes el item lo informa de forma clara
 - [ ] Eliminar un item con gesto de deslizamiento y validar que la acción responde como se espera
@@ -226,7 +233,8 @@ Validar de forma ejecutable por IA y revisable por humano el flujo base de Lista
 - [ ] Verificar que el progreso de compra se actualiza correctamente
 - [ ] Verificar que una lista vacía muestra su mensaje y llamada a acción correspondiente
 - [ ] Verificar que el total usa solo productos comprados
-- [ ] Verificar que si un producto marcado no tiene precio, la app respeta la preferencia de sesión entre preguntar siempre, solo avisar o no volver a preguntar ese día
+- [ ] Verificar que si un producto marcado no tiene precio, la app respeta la preferencia por lista entre preguntar siempre, solo avisar o no volver a preguntar hasta reiniciar la lista
+- [ ] Verificar que al reiniciar la lista también se reinicia esa preferencia
 - [ ] Verificar que cuando faltan precios se muestra total parcial y aviso amigable
 - [ ] Verificar que la tarjeta de lista usa `Estimado de la lista`, `Estimado parcial` o `Sin precios` según corresponda
 - [ ] Verificar que un item manual completo pasa automáticamente a Mis Productos
