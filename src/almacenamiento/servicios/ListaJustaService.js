@@ -11,9 +11,7 @@ class ListaJustaService {
     try {
       const datos = await this.adaptador.obtener(CLAVE_LISTAS)
       const listas = Array.isArray(datos?.listas) ? datos.listas : []
-      return listas
-        .map((lista) => this._normalizarLista(lista))
-        .sort((a, b) => Number(a.orden || 0) - Number(b.orden || 0))
+      return listas.map((lista) => this._normalizarLista(lista))
     } catch (error) {
       console.error('Error al obtener listas de Lista Justa:', error)
       return []
@@ -29,7 +27,7 @@ class ListaJustaService {
     }
   }
 
-  crearListaVacia(nombre, orden) {
+  crearListaVacia(nombre, orden = 0) {
     const ahora = new Date().toISOString()
 
     return {
@@ -40,6 +38,7 @@ class ListaJustaService {
       preferenciaPrecioFaltante: 'preguntar',
       fechaCreacion: ahora,
       fechaActualizacion: ahora,
+      fechaUltimoUso: ahora,
       items: [],
       metadatos: {
         version: 1,
@@ -87,6 +86,7 @@ class ListaJustaService {
       preferenciaPrecioFaltante: lista.preferenciaPrecioFaltante || 'preguntar',
       fechaCreacion: lista.fechaCreacion || new Date().toISOString(),
       fechaActualizacion: lista.fechaActualizacion || new Date().toISOString(),
+      fechaUltimoUso: lista.fechaUltimoUso || lista.fechaActualizacion || lista.fechaCreacion || new Date().toISOString(),
       items: items.map((item) => this.normalizarItem(item)),
       metadatos: {
         version: lista.metadatos?.version || 1,

@@ -669,6 +669,7 @@ watch(
 
 onMounted(async () => {
   await Promise.all([listaJustaStore.cargarListas(), productosStore.cargarProductos(), comerciosStore.cargarComercios()])
+  await listaJustaStore.registrarUsoLista(route.params.id)
   await listaJustaStore.sincronizarRelacionConMisProductos()
 })
 </script>

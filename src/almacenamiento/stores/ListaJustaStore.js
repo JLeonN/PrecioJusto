@@ -18,7 +18,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
   const tieneListas = computed(() => listas.value.length > 0)
   const totalListas = computed(() => listas.value.length)
   const listasOrdenadas = computed(() => {
-    return [...listas.value].sort((a, b) => Number(a.orden || 0) - Number(b.orden || 0))
+    return [...listas.value].sort((a, b) => obtenerMarcaUso(b) - obtenerMarcaUso(a))
   })
 
   function obtenerListaPorId(listaId) {
@@ -45,10 +45,8 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
       throw new Error('El nombre de la lista es obligatorio.')
     }
 
-    const ordenSiguiente = listas.value.length
-    const nuevaLista = ListaJustaService.crearListaVacia(nombreLimpio, ordenSiguiente)
+    const nuevaLista = ListaJustaService.crearListaVacia(nombreLimpio, listas.value.length)
     listas.value.unshift(nuevaLista)
-    reordenarInternamente()
     await persistir()
 
     return nuevaLista
@@ -83,7 +81,17 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
 
   async function eliminarLista(listaId) {
     listas.value = listas.value.filter((lista) => lista.id !== listaId)
-    reordenarInternamente()
+    await persistir()
+    return true
+  }
+
+  async function registrarUsoLista(listaId) {
+    const lista = obtenerListaPorId(listaId)
+    if (!lista) return false
+
+    const ahora = new Date().toISOString()
+    lista.fechaUltimoUso = ahora
+    lista.fechaActualizacion = ahora
     await persistir()
     return true
   }
@@ -457,11 +465,10 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     )
   }
 
-  function reordenarInternamente() {
-    listas.value = listas.value.map((lista, indice) => ({
-      ...lista,
-      orden: indice,
-    }))
+  function obtenerMarcaUso(lista) {
+    const base = lista.fechaUltimoUso || lista.fechaActualizacion || lista.fechaCreacion || 0
+    const marca = new Date(base).getTime()
+    return Number.isFinite(marca) ? marca : 0
   }
 
   async function persistir() {
@@ -495,5 +502,6 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     resumenCompra,
     obtenerPrecioVisualItem,
     sincronizarRelacionConMisProductos,
+    registrarUsoLista,
   }
 })

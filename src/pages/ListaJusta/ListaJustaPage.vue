@@ -182,7 +182,8 @@ async function guardarLista() {
   }
 }
 
-function abrirLista(listaId) {
+async function abrirLista(listaId) {
+  await listaJustaStore.registrarUsoLista(listaId)
   router.push(`/lista-justa/${listaId}`)
 }
 
