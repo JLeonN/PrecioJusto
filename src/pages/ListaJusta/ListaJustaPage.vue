@@ -51,7 +51,24 @@
                   </div>
                 </div>
 
-                <q-btn flat round dense icon="chevron_right" color="secondary" @click="abrirLista(lista.id)" />
+                <div class="acciones-superiores-lista">
+                  <BotonConfirmacionEliminar
+                    icono="reiniciar"
+                    texto-confirmacion="Reiniciar"
+                    tooltip-inicial="Reiniciar lista"
+                    @confirmar="reiniciarLista(lista.id)"
+                  />
+                  <q-btn
+                    flat
+                    round
+                    dense
+                    color="secondary"
+                    aria-label="Editar lista"
+                    @click="abrirDialogoLista(lista)"
+                  >
+                    <IconEdit :size="18" />
+                  </q-btn>
+                </div>
               </div>
             </q-card-section>
 
@@ -70,17 +87,6 @@
 
             <q-card-actions align="between" class="q-pt-none q-pb-sm acciones-lista">
               <q-btn flat no-caps color="secondary" label="Abrir" @click="abrirLista(lista.id)" />
-              <q-btn flat no-caps color="secondary" label="Editar" @click="abrirDialogoLista(lista)" />
-              <BotonConfirmacionEliminar
-                texto-confirmacion="Reiniciar"
-                tooltip-inicial="Reiniciar lista"
-                @confirmar="reiniciarLista(lista.id)"
-              />
-              <BotonConfirmacionEliminar
-                texto-confirmacion="Eliminar"
-                tooltip-inicial="Eliminar lista"
-                @confirmar="eliminarLista(lista.id)"
-              />
             </q-card-actions>
           </q-card>
         </q-slide-item>
@@ -125,7 +131,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
-import { IconListDetails, IconTrash } from '@tabler/icons-vue'
+import { IconEdit, IconListDetails, IconTrash } from '@tabler/icons-vue'
 import { useListaJustaStore } from '../../almacenamiento/stores/ListaJustaStore.js'
 import BotonConfirmacionEliminar from '../../components/Compartidos/BotonConfirmacionEliminar.vue'
 
@@ -253,6 +259,11 @@ onMounted(async () => {
   justify-content: space-between;
   gap: 12px;
 }
+.acciones-superiores-lista {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 .fila-estimado {
   display: flex;
   align-items: baseline;
@@ -268,7 +279,7 @@ onMounted(async () => {
   color: var(--texto-primario);
 }
 .acciones-lista {
-  gap: 6px;
+  gap: 4px;
   align-items: center;
 }
 .swipe-destruccion {

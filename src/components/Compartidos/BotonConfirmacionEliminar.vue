@@ -20,7 +20,7 @@
         class="boton-confirmacion-eliminar__accion boton-confirmacion-eliminar__accion--inicial"
         @click.stop="abrirConfirmacion"
       >
-        <IconTrash :size="18" />
+        <component :is="iconoBoton" :size="18" />
         <q-tooltip v-if="tooltipInicial">{{ tooltipInicial }}</q-tooltip>
       </q-btn>
 
@@ -58,8 +58,8 @@
 </template>
 
 <script setup>
-import { ref, watch, onBeforeUnmount } from 'vue'
-import { IconTrash, IconX } from '@tabler/icons-vue'
+import { computed, ref, watch, onBeforeUnmount } from 'vue'
+import { IconRefresh, IconTrash, IconX } from '@tabler/icons-vue'
 
 const props = defineProps({
   textoConfirmacion: {
@@ -74,12 +74,17 @@ const props = defineProps({
     type: String,
     default: 'Eliminar',
   },
+  icono: {
+    type: String,
+    default: 'eliminar',
+  },
 })
 
 const emit = defineEmits(['confirmar', 'cancelar', 'abrir-confirmacion'])
 
 const contenedorBotonRef = ref(null)
 const confirmacionActiva = ref(false)
+const iconoBoton = computed(() => (props.icono === 'reiniciar' ? IconRefresh : IconTrash))
 
 function abrirConfirmacion() {
   if (props.deshabilitado || confirmacionActiva.value) return
