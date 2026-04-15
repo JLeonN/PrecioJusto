@@ -13,7 +13,7 @@
           <div class="encabezado-detalle-texto">
             <h5 class="titulo-pagina">{{ listaActual.nombre }}</h5>
             <div class="fila-contadores">
-              <p class="contador-items q-mb-none">{{ resumen.comprados }} de {{ resumen.totalItems }} comprados</p>
+              <p class="contador-items q-mb-none">{{ productosComprados }} de {{ totalProductos }} comprados</p>
               <p class="contador-items contador-items-derecha q-mb-none">
                 {{ contadorItemsComprados }} de {{ contadorItemsTotales }} ítems
               </p>
@@ -42,20 +42,12 @@
           dense-toggle
           icon="store"
           label="Comercio actual (opcional)"
-          caption="Esta selección no se guarda al salir"
         >
           <div class="q-pa-sm">
-            <q-select
+            <SelectorComercioDireccion
               v-model="comercioSesion"
-              outlined
-              dense
-              clearable
-              emit-value
-              map-options
-              :options="opcionesComercios"
-              option-value="value"
-              option-label="label"
-              label="Seleccionar comercio"
+              label-comercio="Comercio actual"
+              label-direccion="Dirección actual (opcional)"
             />
           </div>
         </q-expansion-item>
@@ -202,15 +194,15 @@
           </q-slide-item>
         </div>
 
-        <q-banner v-if="resumen.compradosSinPrecio > 0" class="q-mt-md" rounded>
-          Hay {{ resumen.compradosSinPrecio }} producto{{ resumen.compradosSinPrecio > 1 ? 's' : '' }} comprado{{ resumen.compradosSinPrecio > 1 ? 's' : '' }} sin precio. Se muestra total parcial.
+        <q-banner v-if="compradosSinPrecio > 0" class="q-mt-md" rounded>
+          Hay {{ compradosSinPrecio }} producto{{ compradosSinPrecio > 1 ? 's' : '' }} comprado{{ compradosSinPrecio > 1 ? 's' : '' }} sin precio. Se muestra total parcial.
         </q-banner>
 
         <q-card flat bordered class="resumen-gasto q-mt-md">
           <q-card-section>
             <div class="fila-resumen-gasto">
-              <span>{{ resumen.etiquetaTotal }}</span>
-              <strong>{{ formatearMoneda(resumen.totalComprado) }}</strong>
+              <span>{{ etiquetaTotalCalculada }}</span>
+              <strong>{{ formatearMoneda(totalCompradoCalculado) }}</strong>
             </div>
             <div class="text-caption text-grey-7">Estimación de precios: los valores pueden variar.</div>
           </q-card-section>
@@ -300,9 +292,9 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { IconShoppingBag, IconTrash } from '@tabler/icons-vue'
+import SelectorComercioDireccion from '../../components/Compartidos/SelectorComercioDireccion.vue'
 import { useListaJustaStore } from '../../almacenamiento/stores/ListaJustaStore.js'
 import { useProductosStore } from '../../almacenamiento/stores/productosStore.js'
-import { useComerciStore } from '../../almacenamiento/stores/comerciosStore.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -310,7 +302,6 @@ const quasar = useQuasar()
 
 const listaJustaStore = useListaJustaStore()
 const productosStore = useProductosStore()
-const comerciosStore = useComerciStore()
 
 const filtroEstado = ref('pendientes')
 const comercioSesion = ref(null)
@@ -345,18 +336,10 @@ const opcionesFiltro = [
 
 const listaActual = computed(() => listaJustaStore.obtenerListaPorId(route.params.id))
 
-const resumen = computed(() => {
-  if (!listaActual.value) {
-    return {
-      totalItems: 0,
-      comprados: 0,
-      totalComprado: 0,
-      compradosSinPrecio: 0,
-      etiquetaTotal: 'Total',
-    }
-  }
-
-  return listaJustaStore.resumenCompra(listaActual.value)
+const totalProductos = computed(() => (listaActual.value ? listaActual.value.items.length : 0))
+const productosComprados = computed(() => {
+  if (!listaActual.value) return 0
+  return listaActual.value.items.filter((item) => item.comprado).length
 })
 const contadorItemsTotales = computed(() => {
   if (!listaActual.value) return 0
@@ -368,6 +351,29 @@ const contadorItemsComprados = computed(() => {
     .filter((item) => item.comprado)
     .reduce((acumulado, item) => acumulado + Number(item.cantidad || 0), 0)
 })
+const totalCompradoCalculado = computed(() => {
+  if (!listaActual.value) return 0
+
+  return listaActual.value.items.reduce((acumulado, item) => {
+    if (!item.comprado) return acumulado
+
+    const precio = Number(precioVisual(item))
+    if (!Number.isFinite(precio) || precio <= 0) return acumulado
+
+    const cantidad = Number(item.cantidad || 0)
+    return acumulado + precio * cantidad
+  }, 0)
+})
+const compradosSinPrecio = computed(() => {
+  if (!listaActual.value) return 0
+
+  return listaActual.value.items.filter((item) => {
+    if (!item.comprado) return false
+    const precio = Number(precioVisual(item))
+    return !Number.isFinite(precio) || precio <= 0
+  }).length
+})
+const etiquetaTotalCalculada = computed(() => (compradosSinPrecio.value > 0 ? 'Total parcial' : 'Total'))
 
 const itemsOrdenados = computed(() => {
   if (!listaActual.value) return []
@@ -407,13 +413,6 @@ const mensajeFiltro = computed(() => {
   return 'No hay items para mostrar.'
 })
 
-const opcionesComercios = computed(() => {
-  return comerciosStore.comerciosPorUso.map((comercio) => ({
-    label: comercio.nombre,
-    value: comercio.id,
-  }))
-})
-
 const productosFiltrados = computed(() => {
   const texto = textoBusquedaProducto.value.trim().toLowerCase()
 
@@ -447,9 +446,15 @@ function formatearMoneda(valor) {
 }
 
 function precioVisual(item) {
-  if (comercioSesion.value) {
+  if (comercioSesion.value?.id || comercioSesion.value?.direccionId) {
     const producto = item.productoId ? productosStore.obtenerProductoPorId(item.productoId) : null
-    const precioComercioActivo = producto?.precios?.find((precio) => precio.comercioId === comercioSesion.value)
+    const precioComercioActivo = producto?.precios?.find((precio) => {
+      const coincideComercio = comercioSesion.value?.id ? precio.comercioId === comercioSesion.value.id : true
+      const coincideDireccion = comercioSesion.value?.direccionId
+        ? precio.direccionId === comercioSesion.value.direccionId
+        : true
+      return coincideComercio && coincideDireccion
+    })
 
     if (precioComercioActivo?.valor) {
       return Number(precioComercioActivo.valor)
@@ -652,7 +657,7 @@ watch(
 )
 
 onMounted(async () => {
-  await Promise.all([listaJustaStore.cargarListas(), productosStore.cargarProductos(), comerciosStore.cargarComercios()])
+  await Promise.all([listaJustaStore.cargarListas(), productosStore.cargarProductos()])
   await listaJustaStore.registrarUsoLista(route.params.id)
   await listaJustaStore.sincronizarRelacionConMisProductos()
 })
@@ -799,6 +804,7 @@ onMounted(async () => {
 .resumen-gasto {
   border-radius: 12px;
   border-color: var(--borde-color);
+  margin-bottom: calc(96px + var(--safe-area-bottom));
 }
 .fila-resumen-gasto {
   display: flex;
@@ -808,7 +814,7 @@ onMounted(async () => {
 }
 .contenedor-boton-sticky {
   position: sticky;
-  bottom: calc(14px + var(--safe-area-bottom));
+  bottom: calc(24px + var(--safe-area-bottom));
   z-index: 20;
   padding: 0 16px;
   display: flex;
