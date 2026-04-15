@@ -7,11 +7,11 @@
       </div>
 
       <div class="q-mb-md fila-acciones-principales">
-        <q-btn unelevated color="primary" no-caps label="Crear lista" icon="add" @click="abrirDialogoLista()" />
+        <q-btn unelevated color="secondary" no-caps label="Crear lista" icon="add" @click="abrirDialogoLista()" />
       </div>
 
       <div v-if="listaJustaStore.cargando" class="text-center q-pa-xl">
-        <q-spinner color="primary" size="42px" />
+        <q-spinner color="secondary" size="42px" />
         <p class="text-grey-7 q-mt-md">Cargando listas...</p>
       </div>
 
@@ -23,7 +23,7 @@
         <IconListDetails :size="56" class="text-grey-5" />
         <p class="text-h6 q-mt-md q-mb-xs">Todavía no tenés listas</p>
         <p class="text-grey-6 q-mb-md">Creá una lista para usarla en tus compras diarias.</p>
-        <q-btn unelevated color="primary" no-caps label="Crear mi primera lista" @click="abrirDialogoLista()" />
+        <q-btn unelevated color="secondary" no-caps label="Crear mi primera lista" @click="abrirDialogoLista()" />
       </div>
 
       <div v-else class="columna-listas">
@@ -51,7 +51,7 @@
                   </div>
                 </div>
 
-                <q-btn flat round dense icon="chevron_right" color="primary" @click="abrirLista(lista.id)" />
+                <q-btn flat round dense icon="chevron_right" color="secondary" @click="abrirLista(lista.id)" />
               </div>
             </q-card-section>
 
@@ -69,8 +69,8 @@
             </q-card-section>
 
             <q-card-actions align="between" class="q-pt-none q-pb-sm acciones-lista">
-              <q-btn flat no-caps color="primary" label="Abrir" @click="abrirLista(lista.id)" />
-              <q-btn flat no-caps color="primary" label="Editar" @click="abrirDialogoLista(lista)" />
+              <q-btn flat no-caps color="secondary" label="Abrir" @click="abrirLista(lista.id)" />
+              <q-btn flat no-caps color="secondary" label="Editar" @click="abrirDialogoLista(lista)" />
               <BotonConfirmacionEliminar
                 texto-confirmacion="Reiniciar"
                 tooltip-inicial="Reiniciar lista"
@@ -110,7 +110,7 @@
           <q-btn
             unelevated
             no-caps
-            color="primary"
+            color="secondary"
             :label="listaEnEdicion ? 'Guardar' : 'Crear'"
             :disable="!nombreLista.trim()"
             @click="guardarLista"

@@ -4,17 +4,17 @@
       <div v-if="!listaActual" class="text-center q-pa-xl">
         <q-icon name="error_outline" size="52px" color="negative" />
         <p class="text-h6 q-mt-md q-mb-sm">No se encontró la lista</p>
-        <q-btn flat no-caps color="primary" label="Volver a Lista Justa" @click="router.push('/lista-justa')" />
+        <q-btn flat no-caps color="secondary" label="Volver a Lista Justa" @click="router.push('/lista-justa')" />
       </div>
 
       <template v-else>
         <div class="encabezado-detalle q-mb-md">
-          <q-btn flat round dense icon="arrow_back" color="primary" @click="router.push('/lista-justa')" />
+          <q-btn flat round dense icon="arrow_back" color="secondary" @click="router.push('/lista-justa')" />
           <div class="encabezado-detalle-texto">
             <h5 class="titulo-pagina">{{ listaActual.nombre }}</h5>
             <p class="contador-items">{{ resumen.comprados }} de {{ resumen.totalItems }} comprados</p>
           </div>
-          <q-btn flat round dense icon="edit" color="primary" @click="abrirDialogoRenombrar" />
+          <q-btn flat round dense icon="edit" color="secondary" @click="abrirDialogoRenombrar" />
         </div>
 
         <q-banner v-if="itemsFiltrados.length === 0" class="q-mb-md" rounded>
@@ -27,7 +27,7 @@
             spread
             unelevated
             no-caps
-            toggle-color="primary"
+            toggle-color="secondary"
             :options="opcionesFiltro"
           />
         </div>
@@ -114,7 +114,7 @@
                       flat
                       round
                       dense
-                      color="primary"
+                      color="secondary"
                       :icon="itemEditandoId === item.id ? 'check' : 'edit'"
                       @click="toggleEdicionInline(item)"
                     />
@@ -151,9 +151,9 @@
 
                   <div class="fila-acciones-item">
                     <div class="control-cantidad">
-                      <q-btn flat round dense icon="remove" color="primary" @click="ajustarCantidad(item.id, -1)" />
+                      <q-btn flat round dense icon="remove" color="secondary" @click="ajustarCantidad(item.id, -1)" />
                       <span>{{ item.cantidad }}</span>
-                      <q-btn flat round dense icon="add" color="primary" @click="ajustarCantidad(item.id, 1)" />
+                      <q-btn flat round dense icon="add" color="secondary" @click="ajustarCantidad(item.id, 1)" />
                     </div>
 
                     <q-btn
@@ -217,7 +217,7 @@
     <div v-if="listaActual" class="contenedor-boton-sticky">
       <q-btn
         unelevated
-        color="primary"
+        color="secondary"
         no-caps
         icon="add"
         label="Agregar producto"
@@ -236,7 +236,7 @@
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat no-caps label="Cancelar" color="grey-7" @click="dialogoRenombrarAbierto = false" />
-          <q-btn unelevated no-caps label="Guardar" color="primary" :disable="!nombreListaEditable.trim()" @click="guardarNombreLista" />
+          <q-btn unelevated no-caps label="Guardar" color="secondary" :disable="!nombreListaEditable.trim()" @click="guardarNombreLista" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -248,7 +248,7 @@
         </q-card-section>
 
         <q-card-section class="q-pt-none q-gutter-sm">
-          <q-tabs v-model="modoAlta" dense no-caps class="text-primary">
+          <q-tabs v-model="modoAlta" dense no-caps class="text-secondary">
             <q-tab name="misProductos" label="Desde Mis Productos" />
             <q-tab name="manual" label="Manual" />
           </q-tabs>
@@ -299,7 +299,7 @@
 
         <q-card-actions align="right" class="acciones-safe-area-publicidad">
           <q-btn flat no-caps label="Cancelar" color="grey-7" @click="dialogoAgregarItemAbierto = false" />
-          <q-btn unelevated no-caps label="Agregar" color="primary" :disable="!formularioValido" @click="confirmarAgregarItem" />
+          <q-btn unelevated no-caps label="Agregar" color="secondary" :disable="!formularioValido" @click="confirmarAgregarItem" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -752,7 +752,7 @@ onMounted(async () => {
 }
 .precio-item {
   font-weight: 700;
-  color: var(--color-primario);
+  color: var(--color-secundario);
 }
 .fila-datos-secundarios {
   margin-top: 6px;
@@ -839,7 +839,7 @@ onMounted(async () => {
   border-radius: 10px;
 }
 .producto-seleccionado {
-  background: color-mix(in srgb, var(--color-primario) 14%, transparent);
+  background: color-mix(in srgb, var(--color-secundario) 14%, transparent);
 }
 @media (max-width: 760px) {
   .fila-item {

@@ -43,7 +43,7 @@
             flat
             round
             class="quick-access-btn"
-            :color="obtenerColorAccion(esListaJustaActiva)"
+            :color="obtenerColorListaJusta()"
             aria-label="Ir a Lista Justa"
             @click="irAListaJusta"
           >
@@ -119,10 +119,10 @@
 
           <q-item clickable v-ripple to="/lista-justa">
             <q-item-section avatar>
-              <IconListDetails :size="24" />
+              <IconListDetails :size="24" class="text-secondary" />
             </q-item-section>
             <q-item-section>
-              <q-item-label>Lista Justa</q-item-label>
+              <q-item-label class="text-secondary text-weight-medium">Lista Justa</q-item-label>
             </q-item-section>
           </q-item>
 
@@ -295,6 +295,12 @@ const obtenerColorAccion = (estaActivo) => {
   if (MODO_PRUEBA) return estaActivo.value ? 'white' : 'grey-3'
   if (quasar.dark.isActive) return estaActivo.value ? 'primary' : 'grey-4'
   return estaActivo.value ? 'primary' : 'grey-6'
+}
+
+const obtenerColorListaJusta = () => {
+  if (MODO_PRUEBA) return esListaJustaActiva.value ? 'white' : 'grey-3'
+  if (quasar.dark.isActive) return esListaJustaActiva.value ? 'secondary' : 'grey-4'
+  return esListaJustaActiva.value ? 'secondary' : 'grey-6'
 }
 
 const irAMisProductos = () => {
