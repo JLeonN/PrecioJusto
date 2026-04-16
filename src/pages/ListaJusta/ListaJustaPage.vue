@@ -6,10 +6,6 @@
         <p class="contador-items">{{ listaJustaStore.totalListas }} listas guardadas</p>
       </div>
 
-      <div class="q-mb-md fila-acciones-principales">
-        <q-btn unelevated color="secondary" no-caps label="Crear lista" icon="add" @click="abrirDialogoLista()" />
-      </div>
-
       <div v-if="listaJustaStore.cargando" class="text-center q-pa-xl">
         <q-spinner color="secondary" size="42px" />
         <p class="text-grey-7 q-mt-md">Cargando listas...</p>
@@ -99,6 +95,13 @@
       </div>
     </div>
 
+    <BotonAccionSticky
+      etiqueta="Crear lista"
+      icono="add"
+      class="boton-crear-lista-sticky"
+      @click="abrirDialogoLista()"
+    />
+
     <q-dialog v-model="dialogoListaAbierto" @hide="limpiarDialogo">
       <q-card class="dialogo-lista">
         <q-card-section>
@@ -140,6 +143,7 @@ import { useQuasar } from 'quasar'
 import { IconEdit, IconListDetails, IconTrash } from '@tabler/icons-vue'
 import { useListaJustaStore } from '../../almacenamiento/stores/ListaJustaStore.js'
 import BotonConfirmacionEliminar from '../../components/Compartidos/BotonConfirmacionEliminar.vue'
+import BotonAccionSticky from '../../components/Compartidos/BotonAccionSticky.vue'
 
 const router = useRouter()
 const quasar = useQuasar()
@@ -245,11 +249,7 @@ onMounted(async () => {
 
 <style scoped>
 .pagina-lista-justa {
-  padding-bottom: calc(24px + var(--safe-area-bottom));
-}
-.fila-acciones-principales {
-  display: flex;
-  justify-content: flex-end;
+  padding-bottom: calc(128px + var(--safe-area-bottom));
 }
 .estado-vacio {
   text-align: center;
@@ -328,12 +328,7 @@ onMounted(async () => {
   width: min(92vw, 420px);
   border-radius: 14px;
 }
-@media (max-width: 640px) {
-  .fila-acciones-principales {
-    justify-content: stretch;
-  }
-  .fila-acciones-principales .q-btn {
-    width: 100%;
-  }
+.boton-crear-lista-sticky {
+  margin-top: 12px;
 }
 </style>

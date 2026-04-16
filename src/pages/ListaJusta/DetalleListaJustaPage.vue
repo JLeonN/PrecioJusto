@@ -216,17 +216,12 @@
       </template>
     </div>
 
-    <div v-if="listaActual" class="contenedor-boton-sticky">
-      <q-btn
-        unelevated
-        color="secondary"
-        no-caps
-        icon="add"
-        label="Agregar producto"
-        class="boton-sticky"
-        @click="dialogoAgregarItemAbierto = true"
-      />
-    </div>
+    <BotonAccionSticky
+      v-if="listaActual"
+      etiqueta="Agregar producto"
+      icono="add"
+      @click="dialogoAgregarItemAbierto = true"
+    />
 
     <q-dialog v-model="dialogoAgregarItemAbierto" @hide="limpiarFormularioItem">
       <q-card class="dialogo-agregar-item">
@@ -299,6 +294,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { IconShoppingBag, IconTrash } from '@tabler/icons-vue'
 import SelectorComercioDireccion from '../../components/Compartidos/SelectorComercioDireccion.vue'
+import BotonAccionSticky from '../../components/Compartidos/BotonAccionSticky.vue'
 import { useListaJustaStore } from '../../almacenamiento/stores/ListaJustaStore.js'
 import { useProductosStore } from '../../almacenamiento/stores/productosStore.js'
 
@@ -855,20 +851,6 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: baseline;
   margin-bottom: 4px;
-}
-.contenedor-boton-sticky {
-  position: sticky;
-  bottom: calc(24px + var(--safe-area-bottom));
-  z-index: 20;
-  padding: 0 16px;
-  display: flex;
-  justify-content: center;
-  pointer-events: none;
-}
-.boton-sticky {
-  pointer-events: auto;
-  min-width: min(100%, 380px);
-  box-shadow: var(--sombra-media);
 }
 .dialogo-agregar-item {
   width: min(92vw, 620px);
