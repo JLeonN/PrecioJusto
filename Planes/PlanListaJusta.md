@@ -294,11 +294,3 @@ Estado: BORRADOR
 
 - Implementada base funcional de Lista Justa en navegación, persistencia local y flujo de uso diario.
 - Quedan pendientes del plan: integración completa de escaneo rápido/ráfaga en Lista Justa, reordenado manual, recomendaciones futuras y batería de testing detallada.
-
-Ahora vamos a la tarjeta de los productos
-vamos a separar los productos en 2
-1 las tarjetas de productos que vienen de Mis productos
-2 las tarjetas de productos que son agregadas de forma manual desde Lista justa
-
-Las tarjetas de productos que vienen de Mis productos SOLO a estas tarjetas
-Solo podra ser editado el precio

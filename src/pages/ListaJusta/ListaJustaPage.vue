@@ -49,6 +49,12 @@
                   <div class="text-caption text-grey-7">
                     {{ lista.items.length }} {{ lista.items.length === 1 ? 'producto' : 'productos' }}
                   </div>
+                  <div v-if="resumenComercioLista(lista).tieneComercio" class="resumen-comercio-lista q-mt-xs">
+                    <div class="resumen-comercio-lista-nombre">{{ resumenComercioLista(lista).nombre }}</div>
+                    <div v-if="resumenComercioLista(lista).direccion" class="resumen-comercio-lista-direccion">
+                      {{ resumenComercioLista(lista).direccion }}
+                    </div>
+                  </div>
                 </div>
 
                 <div class="acciones-superiores-lista">
@@ -190,6 +196,16 @@ async function abrirLista(listaId) {
 function estimadoDeLista(lista) {
   return listaJustaStore.estimadoLista(lista)
 }
+function resumenComercioLista(lista) {
+  const nombre = String(lista?.comercioActual?.nombre || '').trim()
+  const direccion = String(lista?.comercioActual?.direccionNombre || '').trim()
+
+  return {
+    tieneComercio: Boolean(nombre),
+    nombre,
+    direccion,
+  }
+}
 
 function formatearMoneda(valor) {
   return new Intl.NumberFormat('es-UY', {
@@ -264,6 +280,21 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+.resumen-comercio-lista {
+  margin-top: 2px;
+}
+.resumen-comercio-lista-nombre {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--texto-primario);
+  line-height: 1.2;
+}
+.resumen-comercio-lista-direccion {
+  margin-top: 1px;
+  font-size: 11px;
+  color: var(--texto-secundario);
+  line-height: 1.2;
 }
 .fila-estimado {
   display: flex;

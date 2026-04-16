@@ -44,6 +44,12 @@
           label="Comercio actual (opcional)"
         >
           <div class="q-pa-sm">
+            <div v-if="resumenComercioActual.tieneComercio" class="resumen-comercio-actual q-mb-sm">
+              <div class="resumen-comercio-actual-nombre">{{ resumenComercioActual.nombre }}</div>
+              <div v-if="resumenComercioActual.direccion" class="resumen-comercio-actual-direccion">
+                {{ resumenComercioActual.direccion }}
+              </div>
+            </div>
             <SelectorComercioDireccion
               v-model="comercioSesionLista"
               label-comercio="Comercio actual"
@@ -342,6 +348,16 @@ const comercioSesionLista = computed({
     if (!listaActual.value) return
     listaJustaStore.actualizarComercioLista(listaActual.value.id, valor)
   },
+})
+const resumenComercioActual = computed(() => {
+  const nombre = String(comercioSesionLista.value?.nombre || '').trim()
+  const direccion = String(comercioSesionLista.value?.direccionNombre || '').trim()
+
+  return {
+    tieneComercio: Boolean(nombre),
+    nombre,
+    direccion,
+  }
 })
 
 const totalProductos = computed(() => (listaActual.value ? listaActual.value.items.length : 0))
@@ -703,6 +719,24 @@ onMounted(async () => {
   border: 1px solid var(--borde-color);
   border-radius: 12px;
   background: var(--fondo-tarjeta);
+}
+.resumen-comercio-actual {
+  padding: 8px 10px;
+  border: 1px solid var(--borde-color);
+  border-radius: 10px;
+  background: var(--fondo-app-secundario);
+}
+.resumen-comercio-actual-nombre {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--texto-primario);
+  line-height: 1.25;
+}
+.resumen-comercio-actual-direccion {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--texto-secundario);
+  line-height: 1.2;
 }
 .lista-items {
   display: flex;
