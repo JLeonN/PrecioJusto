@@ -39,6 +39,7 @@ class ListaJustaService {
       fechaCreacion: ahora,
       fechaActualizacion: ahora,
       fechaUltimoUso: ahora,
+      comercioActual: null,
       items: [],
       metadatos: {
         version: 1,
@@ -87,6 +88,7 @@ class ListaJustaService {
       fechaCreacion: lista.fechaCreacion || new Date().toISOString(),
       fechaActualizacion: lista.fechaActualizacion || new Date().toISOString(),
       fechaUltimoUso: lista.fechaUltimoUso || lista.fechaActualizacion || lista.fechaCreacion || new Date().toISOString(),
+      comercioActual: lista.comercioActual || null,
       items: items.map((item) => this.normalizarItem(item)),
       metadatos: {
         version: lista.metadatos?.version || 1,

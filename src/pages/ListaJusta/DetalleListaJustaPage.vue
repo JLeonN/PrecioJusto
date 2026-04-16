@@ -45,7 +45,7 @@
         >
           <div class="q-pa-sm">
             <SelectorComercioDireccion
-              v-model="comercioSesion"
+              v-model="comercioSesionLista"
               label-comercio="Comercio actual"
               label-direccion="Dirección actual (opcional)"
             />
@@ -304,7 +304,6 @@ const listaJustaStore = useListaJustaStore()
 const productosStore = useProductosStore()
 
 const filtroEstado = ref('pendientes')
-const comercioSesion = ref(null)
 
 const dialogoAgregarItemAbierto = ref(false)
 const modoAlta = ref('misProductos')
@@ -335,6 +334,15 @@ const opcionesFiltro = [
 ]
 
 const listaActual = computed(() => listaJustaStore.obtenerListaPorId(route.params.id))
+const comercioSesionLista = computed({
+  get() {
+    return listaActual.value?.comercioActual || null
+  },
+  set(valor) {
+    if (!listaActual.value) return
+    listaJustaStore.actualizarComercioLista(listaActual.value.id, valor)
+  },
+})
 
 const totalProductos = computed(() => (listaActual.value ? listaActual.value.items.length : 0))
 const productosComprados = computed(() => {
@@ -446,12 +454,14 @@ function formatearMoneda(valor) {
 }
 
 function precioVisual(item) {
-  if (comercioSesion.value?.id || comercioSesion.value?.direccionId) {
+  if (comercioSesionLista.value?.id || comercioSesionLista.value?.direccionId) {
     const producto = item.productoId ? productosStore.obtenerProductoPorId(item.productoId) : null
     const precioComercioActivo = producto?.precios?.find((precio) => {
-      const coincideComercio = comercioSesion.value?.id ? precio.comercioId === comercioSesion.value.id : true
-      const coincideDireccion = comercioSesion.value?.direccionId
-        ? precio.direccionId === comercioSesion.value.direccionId
+      const coincideComercio = comercioSesionLista.value?.id
+        ? precio.comercioId === comercioSesionLista.value.id
+        : true
+      const coincideDireccion = comercioSesionLista.value?.direccionId
+        ? precio.direccionId === comercioSesionLista.value.direccionId
         : true
       return coincideComercio && coincideDireccion
     })

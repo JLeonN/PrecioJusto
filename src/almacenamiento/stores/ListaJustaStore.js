@@ -74,6 +74,17 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
       comprado: false,
     }))
     lista.preferenciaPrecioFaltante = 'preguntar'
+    lista.comercioActual = null
+    lista.fechaActualizacion = new Date().toISOString()
+    await persistir()
+    return true
+  }
+
+  async function actualizarComercioLista(listaId, comercioActual) {
+    const lista = obtenerListaPorId(listaId)
+    if (!lista) return false
+
+    lista.comercioActual = comercioActual || null
     lista.fechaActualizacion = new Date().toISOString()
     await persistir()
     return true
@@ -503,5 +514,6 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     obtenerPrecioVisualItem,
     sincronizarRelacionConMisProductos,
     registrarUsoLista,
+    actualizarComercioLista,
   }
 })
