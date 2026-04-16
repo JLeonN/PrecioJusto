@@ -67,7 +67,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
 
   // Agrega un item escaneado a la mesa de trabajo
   function agregarItem(item) {
-    items.value.push({
+    const itemAgregado = {
       id: _generarId(),
       codigoBarras: item.codigoBarras || null,
       nombre: item.nombre || '',
@@ -84,6 +84,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
       sinCoincidencia: item.sinCoincidencia || false,
       productoExistenteId: item.productoExistenteId || null,
       comercio: item.comercio ?? null, // { id, nombre, direccionId, direccionNombre } | null
+      origenListaJusta: item.origenListaJusta || null,
       // Snapshot inmutable del estado original (para poder recuperar foto/datos)
       datosOriginales: (item.origenApi || item.productoExistenteId)
         ? {
@@ -94,7 +95,10 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
             imagen: item.imagen || null,
           }
         : null,
-    })
+    }
+
+    items.value.push(itemAgregado)
+    return itemAgregado
   }
 
   // Actualiza campos de un item existente por su id

@@ -98,19 +98,21 @@
 
                 <div class="columna-info">
                   <div class="fila-nombre">
-                    <template v-if="itemEditandoId === item.id">
-                      <q-input
-                        v-model="edicionInline.nombre"
-                        dense
-                        outlined
-                        label="Nombre"
-                        @keyup.enter="guardarEdicionInline(item.id)"
-                        @blur="guardarEdicionInline(item.id)"
-                      />
-                    </template>
-                    <template v-else>
-                      <div class="nombre-item">{{ item.nombre || 'Sin nombre' }}</div>
-                    </template>
+                    <div class="contenido-nombre-item">
+                      <span class="chip-tipo-item">{{ etiquetaTipoItem(item) }}</span>
+                      <template v-if="itemEditandoId === item.id && esItemManual(item)">
+                        <q-input
+                          v-model="edicionInline.nombre"
+                          dense
+                          outlined
+                          label="Nombre"
+                          @keyup.enter="guardarEdicionInline(item.id)"
+                        />
+                      </template>
+                      <template v-else>
+                        <div class="nombre-item">{{ item.nombre || 'Sin nombre' }}</div>
+                      </template>
+                    </div>
 
                     <q-btn
                       flat
@@ -124,27 +126,33 @@
 
                   <div class="fila-precio">
                     <template v-if="itemEditandoId === item.id">
-                      <q-input
-                        v-model.number="edicionInline.precioManual"
-                        dense
-                        outlined
-                        type="number"
-                        min="0"
-                        step="1"
-                        label="Precio"
-                        @keyup.enter="guardarEdicionInline(item.id)"
-                        @blur="guardarEdicionInline(item.id)"
-                      />
+                      <div class="fila-edicion-precio">
+                        <q-input
+                          v-model="edicionInline.precioTexto"
+                          dense
+                          outlined
+                          type="text"
+                          inputmode="decimal"
+                          label="Precio"
+                          @update:model-value="(valor) => { edicionInline.precioTexto = filtrarInputPrecio(valor) }"
+                          @blur="edicionInline.precioTexto = formatearPrecioAlSalir(edicionInline.precioTexto)"
+                          @keydown="soloNumerosDecimales"
+                          @keyup.enter="guardarEdicionInline(item.id)"
+                        />
+                        <q-select
+                          v-model="edicionInline.moneda"
+                          dense
+                          outlined
+                          emit-value
+                          map-options
+                          label="Moneda"
+                          :options="opcionesMoneda"
+                        />
+                      </div>
                     </template>
                     <template v-else>
                       <span class="precio-item">{{ precioFormateado(item) }}</span>
                     </template>
-                  </div>
-
-                  <div class="fila-datos-secundarios">
-                    <span v-if="item.marca" class="chip-info">{{ item.marca }}</span>
-                    <span class="chip-info">Cant. {{ item.cantidad }}</span>
-                    <span v-if="item.codigoBarras" class="chip-info">{{ item.codigoBarras }}</span>
                   </div>
 
                   <div v-if="mostrarAvisoFaltantes(item)" class="texto-faltante">
@@ -175,14 +183,6 @@
                     >
                       En Mesa de trabajo
                     </q-chip>
-                    <q-chip
-                      v-if="item.estadoDerivacion === 'enMisProductos'"
-                      dense
-                      color="positive"
-                      text-color="white"
-                    >
-                      Ya está en Mis Productos
-                    </q-chip>
                   </div>
                 </div>
 
@@ -204,11 +204,15 @@
           Hay {{ compradosSinPrecio }} producto{{ compradosSinPrecio > 1 ? 's' : '' }} comprado{{ compradosSinPrecio > 1 ? 's' : '' }} sin precio. Se muestra total parcial.
         </q-banner>
 
+        <q-banner v-if="tieneMultiplesMonedasCompradas" class="q-mt-md" rounded>
+          Hay productos comprados con distintas monedas. El total mezcla valores sin conversión.
+        </q-banner>
+
         <q-card flat bordered class="resumen-gasto q-mt-md">
           <q-card-section>
             <div class="fila-resumen-gasto">
               <span>{{ etiquetaTotalCalculada }}</span>
-              <strong>{{ formatearMoneda(totalCompradoCalculado) }}</strong>
+              <strong>{{ formatearMoneda(totalCompradoCalculado, monedaTotalCalculada) }}</strong>
             </div>
             <div class="text-caption text-grey-7">Estimación de precios: los valores pueden variar.</div>
           </q-card-section>
@@ -251,7 +255,9 @@
                   <q-item-label caption>{{ producto.marca || 'Sin marca' }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                  <span class="text-caption text-grey-7">{{ formatearMoneda(producto.precioMejor || 0) }}</span>
+                  <span class="text-caption text-grey-7">
+                    {{ formatearMoneda(producto.precioMejor || 0, producto.monedaReferencia || preferenciasStore.monedaDefaultEfectiva) }}
+                  </span>
                 </q-item-section>
               </q-item>
             </q-list>
@@ -270,7 +276,28 @@
           <div v-else class="q-mt-sm q-gutter-sm">
             <q-input v-model="formularioItem.nombre" outlined dense label="Nombre *" />
             <q-input v-model.number="formularioItem.cantidad" outlined dense type="number" min="1" step="1" label="Cantidad *" />
-            <q-input v-model.number="formularioItem.precioManual" outlined dense type="number" min="0" step="1" label="Precio (opcional)" />
+            <div class="fila-edicion-precio">
+              <q-input
+                v-model="formularioItem.precioTexto"
+                outlined
+                dense
+                type="text"
+                inputmode="decimal"
+                label="Precio (opcional)"
+                @update:model-value="(valor) => { formularioItem.precioTexto = filtrarInputPrecio(valor) }"
+                @blur="formularioItem.precioTexto = formatearPrecioAlSalir(formularioItem.precioTexto)"
+                @keydown="soloNumerosDecimales"
+              />
+              <q-select
+                v-model="formularioItem.moneda"
+                outlined
+                dense
+                emit-value
+                map-options
+                label="Moneda"
+                :options="opcionesMoneda"
+              />
+            </div>
             <q-input v-model="formularioItem.marca" outlined dense label="Marca" />
             <q-input v-model="formularioItem.categoria" outlined dense label="Categoría" />
             <q-input v-model="formularioItem.codigoBarras" outlined dense label="Código de barras" />
@@ -293,10 +320,19 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { IconShoppingBag, IconTrash } from '@tabler/icons-vue'
+import { MONEDAS } from '../../almacenamiento/constantes/Monedas.js'
 import SelectorComercioDireccion from '../../components/Compartidos/SelectorComercioDireccion.vue'
 import BotonAccionSticky from '../../components/Compartidos/BotonAccionSticky.vue'
 import { useListaJustaStore } from '../../almacenamiento/stores/ListaJustaStore.js'
 import { useProductosStore } from '../../almacenamiento/stores/productosStore.js'
+import { usePreferenciasStore } from '../../almacenamiento/stores/preferenciasStore.js'
+import { useSesionEscaneoStore } from '../../almacenamiento/stores/sesionEscaneoStore.js'
+import {
+  filtrarInputPrecio,
+  formatearPrecioAlSalir,
+  formatearPrecioConCodigo,
+  soloNumerosDecimales,
+} from '../../utils/PrecioUtils.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -304,6 +340,8 @@ const quasar = useQuasar()
 
 const listaJustaStore = useListaJustaStore()
 const productosStore = useProductosStore()
+const preferenciasStore = usePreferenciasStore()
+const sesionEscaneoStore = useSesionEscaneoStore()
 
 const filtroEstado = ref('pendientes')
 
@@ -315,13 +353,15 @@ const productoSeleccionado = ref(null)
 const itemEditandoId = ref(null)
 const edicionInline = reactive({
   nombre: '',
-  precioManual: null,
+  precioTexto: '',
+  moneda: 'UYU',
 })
 
 const formularioItem = reactive({
   nombre: '',
   cantidad: 1,
-  precioManual: null,
+  precioTexto: '',
+  moneda: 'UYU',
   marca: '',
   categoria: '',
   codigoBarras: '',
@@ -334,6 +374,7 @@ const opcionesFiltro = [
   { label: 'Comprados', value: 'comprados' },
   { label: 'Todos', value: 'todos' },
 ]
+const opcionesMoneda = MONEDAS
 
 const listaActual = computed(() => listaJustaStore.obtenerListaPorId(route.params.id))
 const comercioSesionLista = computed({
@@ -393,7 +434,10 @@ const compradosSinPrecio = computed(() => {
     return !Number.isFinite(precio) || precio <= 0
   }).length
 })
-const etiquetaTotalCalculada = computed(() => (compradosSinPrecio.value > 0 ? 'Total parcial' : 'Total'))
+const etiquetaTotalCalculada = computed(() => {
+  if (tieneMultiplesMonedasCompradas.value) return 'Total mixto'
+  return compradosSinPrecio.value > 0 ? 'Total parcial' : 'Total'
+})
 
 const itemsOrdenados = computed(() => {
   if (!listaActual.value) return []
@@ -456,16 +500,27 @@ const formularioValido = computed(() => {
 
   return Boolean(formularioItem.nombre.trim()) && Number(formularioItem.cantidad) > 0
 })
+const monedasCompradas = computed(() => {
+  if (!listaActual.value) return []
 
-function formatearMoneda(valor) {
-  return new Intl.NumberFormat('es-UY', {
-    style: 'currency',
-    currency: 'UYU',
-    maximumFractionDigits: 0,
-  }).format(Number(valor || 0))
+  const monedas = listaActual.value.items
+    .filter((item) => item.comprado)
+    .map((item) => precioVisualDetallado(item).moneda)
+    .filter(Boolean)
+
+  return [...new Set(monedas)]
+})
+const tieneMultiplesMonedasCompradas = computed(() => monedasCompradas.value.length > 1)
+const monedaTotalCalculada = computed(() => {
+  if (monedasCompradas.value.length === 1) return monedasCompradas.value[0]
+  return preferenciasStore.monedaDefaultEfectiva
+})
+
+function formatearMoneda(valor, moneda = preferenciasStore.monedaDefaultEfectiva) {
+  return formatearPrecioConCodigo(valor, moneda)
 }
 
-function precioVisual(item) {
+function precioVisualDetallado(item) {
   if (comercioSesionLista.value?.id || comercioSesionLista.value?.direccionId) {
     const producto = item.productoId ? productosStore.obtenerProductoPorId(item.productoId) : null
     const precioComercioActivo = producto?.precios?.find((precio) => {
@@ -479,25 +534,61 @@ function precioVisual(item) {
     })
 
     if (precioComercioActivo?.valor) {
-      return Number(precioComercioActivo.valor)
+      return {
+        valor: Number(precioComercioActivo.valor),
+        moneda: precioComercioActivo.moneda || producto?.monedaReferencia || item.moneda || preferenciasStore.monedaDefaultEfectiva,
+      }
     }
   }
 
-  return listaJustaStore.obtenerPrecioVisualItem(item)
+  if (Number.isFinite(Number(item.precioManual)) && Number(item.precioManual) > 0) {
+    return {
+      valor: Number(item.precioManual),
+      moneda: item.moneda || preferenciasStore.monedaDefaultEfectiva,
+    }
+  }
+
+  if (!item.productoId) {
+    return {
+      valor: null,
+      moneda: item.moneda || preferenciasStore.monedaDefaultEfectiva,
+    }
+  }
+
+  const producto = productosStore.obtenerProductoPorId(item.productoId)
+  const precioProducto = listaJustaStore.obtenerPrecioVisualItem(item)
+
+  return {
+    valor: precioProducto,
+    moneda: producto?.monedaReferencia || item.moneda || preferenciasStore.monedaDefaultEfectiva,
+  }
+}
+
+function precioVisual(item) {
+  return precioVisualDetallado(item).valor
 }
 
 function precioFormateado(item) {
-  const precio = precioVisual(item)
-  if (!Number.isFinite(precio)) return 'Sin precio'
-  return formatearMoneda(precio)
+  const precio = precioVisualDetallado(item)
+  if (!Number.isFinite(precio.valor)) return 'Sin precio'
+  return formatearMoneda(precio.valor, precio.moneda)
 }
 
 function mostrarAvisoFaltantes(item) {
   return !item.nombre || !Number.isFinite(precioVisual(item))
 }
 
+function esItemManual(item) {
+  return item.origen !== 'misProductos'
+}
+
+function etiquetaTipoItem(item) {
+  return esItemManual(item) ? 'Manual' : 'Mis Productos'
+}
+
 function puedeEnviarAMesa(item) {
-  if (item.productoId) return false
+  if (!esItemManual(item)) return false
+  if (item.estadoDerivacion === 'enMesa') return false
   if (item.estadoDerivacion === 'enMisProductos') return false
   return true
 }
@@ -541,15 +632,27 @@ function toggleEdicionInline(item) {
 
   itemEditandoId.value = item.id
   edicionInline.nombre = item.nombre
-  edicionInline.precioManual = item.precioManual
+  edicionInline.precioTexto = formatearPrecioAlSalir(
+    item.precioManual != null ? String(item.precioManual) : String(precioVisual(item) || ''),
+  )
+  edicionInline.moneda = precioVisualDetallado(item).moneda || preferenciasStore.monedaDefaultEfectiva
 }
 
 async function guardarEdicionInline(itemId) {
   if (!listaActual.value) return
 
+  const item = listaActual.value.items.find((actual) => actual.id === itemId)
+  if (!item) return
+
+  const precioNumero = parseFloat(edicionInline.precioTexto)
+
   const cambios = {
-    nombre: edicionInline.nombre,
-    precioManual: edicionInline.precioManual,
+    precioManual: Number.isFinite(precioNumero) && precioNumero > 0 ? precioNumero : null,
+    moneda: edicionInline.moneda || preferenciasStore.monedaDefaultEfectiva,
+  }
+
+  if (esItemManual(item)) {
+    cambios.nombre = edicionInline.nombre
   }
 
   const actualizado = await listaJustaStore.actualizarItem(listaActual.value.id, itemId, cambios)
@@ -605,6 +708,7 @@ async function confirmarAgregarItem() {
       nombre: producto.nombre,
       cantidad: formularioItem.cantidad,
       precioManual: null,
+      moneda: producto.monedaReferencia || preferenciasStore.monedaDefaultEfectiva,
       codigoBarras: producto.codigoBarras,
       marca: producto.marca,
       categoria: producto.categoria,
@@ -620,7 +724,8 @@ async function confirmarAgregarItem() {
       origen: 'manual',
       nombre: formularioItem.nombre,
       cantidad: formularioItem.cantidad,
-      precioManual: formularioItem.precioManual,
+      precioManual: parseFloat(formularioItem.precioTexto) || null,
+      moneda: formularioItem.moneda || preferenciasStore.monedaDefaultEfectiva,
       codigoBarras: formularioItem.codigoBarras,
       marca: formularioItem.marca,
       categoria: formularioItem.categoria,
@@ -662,7 +767,8 @@ function limpiarFormularioItem() {
   productoSeleccionado.value = null
   formularioItem.nombre = ''
   formularioItem.cantidad = 1
-  formularioItem.precioManual = null
+  formularioItem.precioTexto = ''
+  formularioItem.moneda = preferenciasStore.monedaDefaultEfectiva
   formularioItem.marca = ''
   formularioItem.categoria = ''
   formularioItem.codigoBarras = ''
@@ -678,10 +784,25 @@ watch(
   { deep: true },
 )
 
+watch(
+  () => sesionEscaneoStore.items,
+  async () => {
+    await listaJustaStore.sincronizarEstadosMesaTrabajo()
+  },
+  { deep: true },
+)
+
 onMounted(async () => {
-  await Promise.all([listaJustaStore.cargarListas(), productosStore.cargarProductos()])
+  await Promise.all([
+    listaJustaStore.cargarListas(),
+    productosStore.cargarProductos(),
+    preferenciasStore.inicializar(),
+    sesionEscaneoStore.cargarSesion(),
+  ])
   await listaJustaStore.registrarUsoLista(route.params.id)
   await listaJustaStore.sincronizarRelacionConMisProductos()
+  await listaJustaStore.sincronizarEstadosMesaTrabajo()
+  formularioItem.moneda = preferenciasStore.monedaDefaultEfectiva
 })
 </script>
 
@@ -782,6 +903,20 @@ onMounted(async () => {
   gap: 6px;
   align-items: center;
 }
+.contenido-nombre-item {
+  min-width: 0;
+}
+.chip-tipo-item {
+  display: inline-flex;
+  margin-bottom: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--texto-secundario);
+  background: var(--fondo-app-secundario);
+  border: 1px solid var(--borde-color);
+}
 .nombre-item {
   font-weight: 700;
   font-size: 15px;
@@ -790,23 +925,14 @@ onMounted(async () => {
 .fila-precio {
   margin-top: 4px;
 }
+.fila-edicion-precio {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 132px;
+  gap: 8px;
+}
 .precio-item {
   font-weight: 700;
   color: var(--color-secundario);
-}
-.fila-datos-secundarios {
-  margin-top: 6px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.chip-info {
-  padding: 3px 8px;
-  border-radius: 999px;
-  font-size: 11px;
-  color: var(--texto-secundario);
-  background: var(--fondo-app-secundario);
-  border: 1px solid var(--borde-color);
 }
 .texto-faltante {
   margin-top: 6px;
@@ -872,6 +998,9 @@ onMounted(async () => {
   }
   .fila-item {
     grid-template-columns: 56px 1fr auto;
+  }
+  .fila-edicion-precio {
+    grid-template-columns: 1fr;
   }
   .imagen-item {
     width: 56px;

@@ -57,6 +57,7 @@ class ListaJustaService {
       precioManual: Number.isFinite(Number(nuevoItem.precioManual)) && Number(nuevoItem.precioManual) > 0
         ? Number(nuevoItem.precioManual)
         : null,
+      moneda: (nuevoItem.moneda || '').trim() || 'UYU',
       comprado: Boolean(nuevoItem.comprado),
       codigoBarras: (nuevoItem.codigoBarras || '').trim() || null,
       marca: (nuevoItem.marca || '').trim() || null,
@@ -66,6 +67,7 @@ class ListaJustaService {
       unidad: (nuevoItem.unidad || '').trim() || 'unidad',
       imagen: nuevoItem.imagen || null,
       estadoDerivacion: nuevoItem.estadoDerivacion || 'ninguno',
+      mesaTrabajoItemId: nuevoItem.mesaTrabajoItemId || null,
       creadoEn: nuevoItem.creadoEn || new Date().toISOString(),
       actualizadoEn: new Date().toISOString(),
       origenEscaneo: nuevoItem.origenEscaneo || null,

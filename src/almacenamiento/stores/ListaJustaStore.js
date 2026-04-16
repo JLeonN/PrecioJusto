@@ -179,6 +179,11 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
       }
     }
 
+    if (cambios.moneda !== undefined) {
+      const monedaNormalizada = String(cambios.moneda || '').trim().toUpperCase()
+      cambios.moneda = monedaNormalizada || itemActual.moneda || 'UYU'
+    }
+
     const itemActualizado = {
       ...itemActual,
       ...cambios,
@@ -248,7 +253,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     const item = lista.items.find((actual) => actual.id === itemId)
     if (!item || item.productoId || item.estadoDerivacion === 'enMisProductos') return false
 
-    sesionEscaneoStore.agregarItem({
+    const itemMesa = sesionEscaneoStore.agregarItem({
       codigoBarras: item.codigoBarras,
       nombre: item.nombre,
       marca: item.marca,
@@ -256,10 +261,14 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
       unidad: item.unidad,
       imagen: item.imagen,
       precio: item.precioManual || 0,
-      moneda: 'UYU',
+      moneda: item.moneda || 'UYU',
       origenApi: false,
       productoExistenteId: null,
       sinCoincidencia: true,
+      origenListaJusta: {
+        listaId,
+        itemId,
+      },
       comercio: item.comercio
         ? {
             id: 'lista-justa',
@@ -271,6 +280,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     })
 
     item.estadoDerivacion = 'enMesa'
+    item.mesaTrabajoItemId = itemMesa?.id || null
     item.actualizadoEn = new Date().toISOString()
     lista.fechaActualizacion = new Date().toISOString()
     await persistir()
@@ -361,6 +371,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
 
         item.productoId = productoCoincidente.id
         item.estadoDerivacion = 'enMisProductos'
+        item.mesaTrabajoItemId = null
         item.actualizadoEn = new Date().toISOString()
         huboCambios = true
       }
@@ -435,7 +446,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
         {
           id: `precio_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
           valor: Number(item.precioManual),
-          moneda: 'UYU',
+          moneda: item.moneda || 'UYU',
           comercio: item.comercio,
           direccion: item.comercio,
           nombreCompleto: item.comercio,
@@ -450,8 +461,49 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
 
     item.productoId = productoGuardado.id
     item.estadoDerivacion = 'enMisProductos'
+    item.mesaTrabajoItemId = null
     item.actualizadoEn = new Date().toISOString()
     lista.fechaActualizacion = new Date().toISOString()
+  }
+
+  async function sincronizarEstadosMesaTrabajo() {
+    const idsMesa = new Set(sesionEscaneoStore.items.map((item) => item.id))
+    let huboCambios = false
+
+    for (const lista of listas.value) {
+      for (const item of lista.items) {
+        if (!item.mesaTrabajoItemId) continue
+        if (idsMesa.has(item.mesaTrabajoItemId)) continue
+
+        item.estadoDerivacion = item.productoId ? 'enMisProductos' : 'ninguno'
+        item.mesaTrabajoItemId = null
+        item.actualizadoEn = new Date().toISOString()
+        lista.fechaActualizacion = new Date().toISOString()
+        huboCambios = true
+      }
+    }
+
+    if (!huboCambios) return
+
+    await persistir()
+  }
+
+  async function marcarItemComoEnMisProductos(listaId, itemId, productoId = null) {
+    const lista = obtenerListaPorId(listaId)
+    if (!lista) return false
+
+    const item = lista.items.find((actual) => actual.id === itemId)
+    if (!item) return false
+
+    item.estadoDerivacion = 'enMisProductos'
+    item.mesaTrabajoItemId = null
+    if (productoId) {
+      item.productoId = productoId
+    }
+    item.actualizadoEn = new Date().toISOString()
+    lista.fechaActualizacion = new Date().toISOString()
+    await persistir()
+    return true
   }
 
   function validarItemManualCompleto(item) {
@@ -513,7 +565,9 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     resumenCompra,
     obtenerPrecioVisualItem,
     sincronizarRelacionConMisProductos,
+    sincronizarEstadosMesaTrabajo,
     registrarUsoLista,
     actualizarComercioLista,
+    marcarItemComoEnMisProductos,
   }
 })

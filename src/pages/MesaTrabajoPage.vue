@@ -279,6 +279,7 @@ import SelectorComercioDireccion from '../components/Compartidos/SelectorComerci
 import DialogoAgregarComercioRapido from '../components/Formularios/Dialogos/DialogoAgregarComercioRapido.vue'
 import InputBusqueda from '../components/Compartidos/InputBusqueda.vue'
 import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
+import { useListaJustaStore } from '../almacenamiento/stores/ListaJustaStore.js'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
 import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
 import { useSeleccionMultiple } from '../composables/useSeleccionMultiple.js'
@@ -295,6 +296,7 @@ const OPCIONES_ORDEN = [
 const router = useRouter()
 const $q = useQuasar()
 const sesionStore = useSesionEscaneoStore()
+const listaJustaStore = useListaJustaStore()
 const productosStore = useProductosStore()
 const comerciosStore = useComerciStore()
 const seleccion = useSeleccionMultiple()
@@ -387,6 +389,7 @@ const itemsFiltrados = computed(() => {
 
 async function _guardarItem(item) {
   const comercio = item.comercio
+  let productoDestinoId = item.productoExistenteId || null
   const datoPrecio = {
     comercioId: comercio?.id || null,
     direccionId: comercio?.direccionId || null,
@@ -413,7 +416,7 @@ async function _guardarItem(item) {
       unidad: item.unidad,
     })
   } else {
-    await productosStore.agregarProducto({
+    const productoGuardado = await productosStore.agregarProducto({
       codigoBarras: item.codigoBarras,
       nombre: item.nombre,
       imagen: item.imagen,
@@ -422,7 +425,17 @@ async function _guardarItem(item) {
       unidad: item.unidad,
       precios: [datoPrecio],
     })
+    productoDestinoId = productoGuardado?.id || null
   }
+
+  if (item.origenListaJusta?.listaId && item.origenListaJusta?.itemId) {
+    await listaJustaStore.marcarItemComoEnMisProductos(
+      item.origenListaJusta.listaId,
+      item.origenListaJusta.itemId,
+      productoDestinoId,
+    )
+  }
+
   if (comercio?.id) comerciosStore.registrarUso(comercio.id, comercio.direccionId)
   sesionStore.eliminarItem(item.id)
 }
