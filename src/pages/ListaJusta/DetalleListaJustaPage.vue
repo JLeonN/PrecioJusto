@@ -99,7 +99,6 @@
                 <div class="columna-info">
                   <div class="fila-nombre">
                     <div class="contenido-nombre-item">
-                      <span class="chip-tipo-item">{{ etiquetaTipoItem(item) }}</span>
                       <template v-if="itemEditandoId === item.id && esItemManual(item)">
                         <q-input
                           v-model="edicionInline.nombre"
@@ -229,8 +228,11 @@
 
     <q-dialog v-model="dialogoAgregarItemAbierto" @hide="limpiarFormularioItem">
       <q-card class="dialogo-agregar-item">
-        <q-card-section>
+        <q-card-section class="encabezado-dialogo-agregar-item">
           <div class="text-h6">Agregar producto</div>
+          <div v-if="modoAlta === 'misProductos'" class="contador-productos-seleccionados">
+            <span class="contador-productos-seleccionados-valor">{{ cantidadProductosSeleccionados }}</span>
+          </div>
         </q-card-section>
 
         <q-card-section class="q-pt-none q-gutter-sm">
@@ -240,42 +242,44 @@
           </q-tabs>
 
           <div v-if="modoAlta === 'misProductos'" class="q-mt-sm">
-            <q-input v-model="textoBusquedaProducto" outlined dense label="Buscar producto" />
+            <div class="encabezado-seleccion-productos">
+              <q-input v-model="textoBusquedaProducto" outlined dense label="Buscar producto" class="buscador-productos-dialogo" />
+            </div>
             <q-list bordered separator class="lista-productos-origen q-mt-sm">
               <q-item
                 v-for="producto in productosFiltrados"
                 :key="producto.id"
                 clickable
                 v-ripple
-                @click="seleccionarProductoOrigen(producto)"
-                :class="{ 'producto-seleccionado': productoSeleccionado?.id === producto.id }"
+                class="item-producto-seleccionable"
+                :class="{ 'producto-seleccionado': productoEstaSeleccionado(producto.id) }"
+                @click="alternarSeleccionProducto(producto.id)"
               >
-                <q-item-section>
-                  <q-item-label>{{ producto.nombre }}</q-item-label>
-                  <q-item-label caption>{{ producto.marca || 'Sin marca' }}</q-item-label>
+                <q-item-section class="contenido-item-producto-dialogo">
+                  <div class="fila-superior-item-dialogo">
+                    <span class="precio-producto-dialogo">
+                      {{ precioProductoSeleccion(producto) }}
+                    </span>
+                  </div>
+                  <div class="nombre-producto-dialogo">{{ producto.nombre }}</div>
                 </q-item-section>
                 <q-item-section side>
-                  <span class="text-caption text-grey-7">
-                    {{ formatearMoneda(producto.precioMejor || 0, producto.monedaReferencia || preferenciasStore.monedaDefaultEfectiva) }}
-                  </span>
+                  <div class="control-cantidad control-cantidad-dialogo" @click.stop>
+                    <q-btn flat round dense icon="remove" color="secondary" @click.stop="ajustarCantidadSeleccion(producto.id, -1)" />
+                    <span>{{ cantidadSeleccionadaProducto(producto.id) }}</span>
+                    <q-btn flat round dense icon="add" color="secondary" @click.stop="ajustarCantidadSeleccion(producto.id, 1)" />
+                  </div>
                 </q-item-section>
               </q-item>
             </q-list>
-            <q-input
-              v-model.number="formularioItem.cantidad"
-              outlined
-              dense
-              type="number"
-              min="1"
-              step="1"
-              label="Cantidad"
-              class="q-mt-sm"
-            />
           </div>
 
           <div v-else class="q-mt-sm q-gutter-sm">
             <q-input v-model="formularioItem.nombre" outlined dense label="Nombre *" />
-            <q-input v-model.number="formularioItem.cantidad" outlined dense type="number" min="1" step="1" label="Cantidad *" />
+            <q-input v-model="formularioItem.marca" outlined dense label="Marca" />
+            <q-input v-model="formularioItem.codigoBarras" outlined dense label="Código de barras" />
+            <q-input v-model="formularioItem.categoria" outlined dense label="Categoría" />
+            <q-input v-model="formularioItem.gramosOLitros" outlined dense label="Gramos o litros" />
             <div class="fila-edicion-precio">
               <q-input
                 v-model="formularioItem.precioTexto"
@@ -298,11 +302,15 @@
                 :options="opcionesMoneda"
               />
             </div>
-            <q-input v-model="formularioItem.marca" outlined dense label="Marca" />
-            <q-input v-model="formularioItem.categoria" outlined dense label="Categoría" />
-            <q-input v-model="formularioItem.codigoBarras" outlined dense label="Código de barras" />
-            <q-input v-model="formularioItem.gramosOLitros" outlined dense label="Gramos o litros" />
             <q-input v-model="formularioItem.comercio" outlined dense label="Comercio" />
+            <div class="bloque-cantidad-manual">
+              <span class="etiqueta-cantidad-manual">Cantidad</span>
+              <div class="control-cantidad control-cantidad-manual">
+                <q-btn flat round dense icon="remove" color="secondary" @click="ajustarCantidadManual(-1)" />
+                <span>{{ formularioItem.cantidad }}</span>
+                <q-btn flat round dense icon="add" color="secondary" @click="ajustarCantidadManual(1)" />
+              </div>
+            </div>
           </div>
         </q-card-section>
 
@@ -348,7 +356,7 @@ const filtroEstado = ref('pendientes')
 const dialogoAgregarItemAbierto = ref(false)
 const modoAlta = ref('misProductos')
 const textoBusquedaProducto = ref('')
-const productoSeleccionado = ref(null)
+const productosSeleccionados = ref({})
 
 const itemEditandoId = ref(null)
 const edicionInline = reactive({
@@ -492,10 +500,21 @@ const productosFiltrados = computed(() => {
     })
     .slice(0, 40)
 })
+const cantidadProductosSeleccionados = computed(
+  () => Object.keys(productosSeleccionados.value).filter((productoId) => Number(productosSeleccionados.value[productoId]) > 0).length,
+)
+const productosSeleccionadosParaAgregar = computed(() => {
+  return productosStore.productosPorInteraccion
+    .filter((producto) => Number(productosSeleccionados.value[producto.id]) > 0)
+    .map((producto) => ({
+      ...producto,
+      cantidadSeleccionada: Number(productosSeleccionados.value[producto.id]) || 0,
+    }))
+})
 
 const formularioValido = computed(() => {
   if (modoAlta.value === 'misProductos') {
-    return Boolean(productoSeleccionado.value?.id) && Number(formularioItem.cantidad) > 0
+    return cantidadProductosSeleccionados.value > 0
   }
 
   return Boolean(formularioItem.nombre.trim()) && Number(formularioItem.cantidad) > 0
@@ -582,15 +601,59 @@ function esItemManual(item) {
   return item.origen !== 'misProductos'
 }
 
-function etiquetaTipoItem(item) {
-  return esItemManual(item) ? 'Manual' : 'Mis Productos'
-}
-
 function puedeEnviarAMesa(item) {
   if (!esItemManual(item)) return false
   if (item.estadoDerivacion === 'enMesa') return false
   if (item.estadoDerivacion === 'enMisProductos') return false
   return true
+}
+
+function productoEstaSeleccionado(productoId) {
+  return Number(productosSeleccionados.value[productoId]) > 0
+}
+
+function cantidadSeleccionadaProducto(productoId) {
+  const cantidad = Number(productosSeleccionados.value[productoId] || 0)
+  return cantidad > 0 ? cantidad : 1
+}
+
+function alternarSeleccionProducto(productoId) {
+  const copia = { ...productosSeleccionados.value }
+  if (Number(copia[productoId]) > 0) {
+    delete copia[productoId]
+  } else {
+    copia[productoId] = 1
+  }
+  productosSeleccionados.value = copia
+}
+
+function ajustarCantidadSeleccion(productoId, variacion) {
+  const cantidadActual = Number(productosSeleccionados.value[productoId] || 0)
+  if (cantidadActual <= 0 && variacion < 0) return
+
+  const cantidadSiguiente = cantidadActual <= 0
+    ? 1
+    : cantidadActual + variacion
+
+  const copia = { ...productosSeleccionados.value }
+  if (cantidadSiguiente <= 0) {
+    delete copia[productoId]
+  } else {
+    copia[productoId] = cantidadSiguiente
+  }
+  productosSeleccionados.value = copia
+}
+
+function precioProductoSeleccion(producto) {
+  const cantidad = cantidadSeleccionadaProducto(producto.id)
+  const precioBase = Number(producto.precioMejor || 0)
+  const total = precioBase > 0 ? precioBase * cantidad : 0
+  return formatearMoneda(total, producto.monedaReferencia || preferenciasStore.monedaDefaultEfectiva)
+}
+
+function ajustarCantidadManual(variacion) {
+  const cantidadActual = Number(formularioItem.cantidad || 1)
+  formularioItem.cantidad = Math.max(1, cantidadActual + variacion)
 }
 
 async function alternarComprado(itemId) {
@@ -691,50 +754,29 @@ async function enviarAMesa(itemId) {
   quasar.notify({ type: 'info', message: 'Item enviado a Mesa de trabajo.', position: 'top' })
 }
 
-function seleccionarProductoOrigen(producto) {
-  productoSeleccionado.value = producto
-}
-
 async function confirmarAgregarItem() {
   if (!listaActual.value || !formularioValido.value) return
 
-  let payload
-
   if (modoAlta.value === 'misProductos') {
-    const producto = productoSeleccionado.value
-    payload = {
-      productoId: producto.id,
-      origen: 'misProductos',
-      nombre: producto.nombre,
-      cantidad: formularioItem.cantidad,
-      precioManual: null,
-      moneda: producto.monedaReferencia || preferenciasStore.monedaDefaultEfectiva,
-      codigoBarras: producto.codigoBarras,
-      marca: producto.marca,
-      categoria: producto.categoria,
-      gramosOLitros: producto.gramosOLitros,
-      comercio: producto.comercioMejor,
-      unidad: producto.unidad || 'unidad',
-      imagen: producto.imagen,
-      estadoDerivacion: 'enMisProductos',
-    }
-  } else {
-    payload = {
-      productoId: null,
-      origen: 'manual',
-      nombre: formularioItem.nombre,
-      cantidad: formularioItem.cantidad,
-      precioManual: parseFloat(formularioItem.precioTexto) || null,
-      moneda: formularioItem.moneda || preferenciasStore.monedaDefaultEfectiva,
-      codigoBarras: formularioItem.codigoBarras,
-      marca: formularioItem.marca,
-      categoria: formularioItem.categoria,
-      gramosOLitros: formularioItem.gramosOLitros,
-      comercio: formularioItem.comercio,
-      unidad: 'unidad',
-      imagen: null,
-      estadoDerivacion: 'ninguno',
-    }
+    await confirmarAgregarProductosMultiples()
+    return
+  }
+
+  const payload = {
+    productoId: null,
+    origen: 'manual',
+    nombre: formularioItem.nombre,
+    cantidad: formularioItem.cantidad,
+    precioManual: parseFloat(formularioItem.precioTexto) || null,
+    moneda: formularioItem.moneda || preferenciasStore.monedaDefaultEfectiva,
+    codigoBarras: formularioItem.codigoBarras,
+    marca: formularioItem.marca,
+    categoria: formularioItem.categoria,
+    gramosOLitros: formularioItem.gramosOLitros,
+    comercio: formularioItem.comercio,
+    unidad: 'unidad',
+    imagen: null,
+    estadoDerivacion: 'ninguno',
   }
 
   const resultado = await listaJustaStore.agregarItem(listaActual.value.id, payload)
@@ -761,10 +803,65 @@ async function confirmarAgregarItem() {
   limpiarFormularioItem()
 }
 
+async function confirmarAgregarProductosMultiples() {
+  let agregados = 0
+  let duplicados = 0
+
+  for (const producto of productosSeleccionadosParaAgregar.value) {
+    const resultado = await listaJustaStore.agregarItem(listaActual.value.id, {
+      productoId: producto.id,
+      origen: 'misProductos',
+      nombre: producto.nombre,
+      cantidad: producto.cantidadSeleccionada,
+      precioManual: null,
+      moneda: producto.monedaReferencia || preferenciasStore.monedaDefaultEfectiva,
+      codigoBarras: producto.codigoBarras,
+      marca: producto.marca,
+      categoria: producto.categoria,
+      gramosOLitros: producto.gramosOLitros,
+      comercio: producto.comercioMejor,
+      unidad: producto.unidad || 'unidad',
+      imagen: producto.imagen,
+      estadoDerivacion: 'enMisProductos',
+    })
+
+    if (resultado.exito) {
+      agregados += 1
+      continue
+    }
+
+    if (resultado.motivo === 'duplicado') {
+      duplicados += 1
+    }
+  }
+
+  if (agregados === 0 && duplicados > 0) {
+    quasar.notify({
+      type: 'warning',
+      message: duplicados === 1 ? 'Ese producto ya está en la lista.' : `${duplicados} productos ya estaban en la lista.`,
+      position: 'top',
+    })
+    return
+  }
+
+  if (agregados > 0) {
+    quasar.notify({
+      type: duplicados > 0 ? 'info' : 'positive',
+      message: duplicados > 0
+        ? `Se agregaron ${agregados} productos. ${duplicados} ya estaban en la lista.`
+        : `Se agregaron ${agregados} productos.`,
+      position: 'top',
+    })
+  }
+
+  dialogoAgregarItemAbierto.value = false
+  limpiarFormularioItem()
+}
+
 function limpiarFormularioItem() {
   modoAlta.value = 'misProductos'
   textoBusquedaProducto.value = ''
-  productoSeleccionado.value = null
+  productosSeleccionados.value = {}
   formularioItem.nombre = ''
   formularioItem.cantidad = 1
   formularioItem.precioTexto = ''
@@ -906,17 +1003,6 @@ onMounted(async () => {
 .contenido-nombre-item {
   min-width: 0;
 }
-.chip-tipo-item {
-  display: inline-flex;
-  margin-bottom: 4px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--texto-secundario);
-  background: var(--fondo-app-secundario);
-  border: 1px solid var(--borde-color);
-}
 .nombre-item {
   font-weight: 700;
   font-size: 15px;
@@ -982,13 +1068,98 @@ onMounted(async () => {
   width: min(92vw, 620px);
   border-radius: 14px;
 }
+.encabezado-dialogo-agregar-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.encabezado-seleccion-productos {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+.buscador-productos-dialogo {
+  min-width: 0;
+  width: 100%;
+}
+.contador-productos-seleccionados {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  min-width: 42px;
+  margin-left: auto;
+}
+.contador-productos-seleccionados-valor {
+  min-width: 42px;
+  text-align: right;
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-secundario);
+}
 .lista-productos-origen {
-  max-height: 220px;
+  max-height: 320px;
   overflow: auto;
   border-radius: 10px;
 }
+.item-producto-seleccionable {
+  align-items: center;
+  gap: 10px;
+  padding-left: 10px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.contenido-item-producto-dialogo {
+  min-width: 0;
+}
+.fila-superior-item-dialogo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.nombre-producto-dialogo {
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.2;
+  color: var(--texto-primario);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-wrap: balance;
+}
+.precio-producto-dialogo {
+  flex-shrink: 0;
+  font-weight: 700;
+  color: var(--color-secundario);
+}
 .producto-seleccionado {
   background: color-mix(in srgb, var(--color-secundario) 14%, transparent);
+  border-left: 3px solid var(--color-secundario);
+}
+.control-cantidad-dialogo {
+  min-width: 88px;
+  justify-content: center;
+}
+.bloque-cantidad-manual {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--borde-color);
+  border-radius: 12px;
+  background: var(--fondo-app-secundario);
+}
+.etiqueta-cantidad-manual {
+  font-weight: 700;
+  color: var(--texto-primario);
+}
+.control-cantidad-manual {
+  min-width: 104px;
+  justify-content: center;
 }
 @media (max-width: 760px) {
   .contador-items-derecha {
@@ -1001,6 +1172,21 @@ onMounted(async () => {
   }
   .fila-edicion-precio {
     grid-template-columns: 1fr;
+  }
+  .encabezado-dialogo-agregar-item {
+    align-items: center;
+  }
+  .item-producto-seleccionable {
+    align-items: flex-start;
+  }
+  .fila-superior-item-dialogo {
+    gap: 8px;
+  }
+  .precio-producto-dialogo {
+    font-size: 13px;
+  }
+  .control-cantidad-dialogo {
+    min-width: 82px;
   }
   .imagen-item {
     width: 56px;
