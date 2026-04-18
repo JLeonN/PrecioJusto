@@ -2,6 +2,7 @@
   <div class="formulario-precio">
     <!-- COMERCIO (Selector con autocompletado) -->
     <q-select
+      v-if="mostrarComercio"
       v-model="comercioSeleccionado"
       :options="comerciosFiltrados"
       :display-value="textoVisibleComercio"
@@ -50,6 +51,7 @@
 
     <!-- DIRECCIÓN / SUCURSAL (Selector dinámico) -->
     <q-select
+      v-if="mostrarComercio"
       v-model="direccionSeleccionada"
       :options="direccionesDisponibles"
       :display-value="textoVisibleDireccion"
@@ -95,6 +97,7 @@
 
     <!-- Botón para agregar nuevo comercio -->
     <q-btn
+      v-if="mostrarComercio"
       flat
       dense
       no-caps
@@ -112,7 +115,7 @@
         <q-input
           ref="qInputPrecioRef"
           :model-value="valorPrecioTexto"
-          label="Precio"
+          :label="etiquetaPrecio"
           outlined
           dense
           type="text"
@@ -184,6 +187,18 @@ const props = defineProps({
     type: String,
     default: 'local',
     validator: (value) => ['local', 'comunidad'].includes(value),
+  },
+  mostrarComercio: {
+    type: Boolean,
+    default: true,
+  },
+  precioObligatorio: {
+    type: Boolean,
+    default: true,
+  },
+  etiquetaPrecio: {
+    type: String,
+    default: 'Precio',
   },
 })
 
@@ -612,6 +627,10 @@ function alSalirPrecio() {
  * @returns {boolean} true si el precio es válido
  */
 function validarPrecio() {
+  if (!props.precioObligatorio && (!valorPrecioTexto.value || valorPrecioTexto.value.trim() === '')) {
+    return refBloqueEscalas.value?.validarEscalas() ?? true
+  }
+
   const val = valorPrecioTexto.value
   errorPrecioMsg.value = ''
 

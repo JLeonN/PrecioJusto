@@ -275,42 +275,22 @@
           </div>
 
           <div v-else class="q-mt-sm q-gutter-sm">
-            <q-input v-model="formularioItem.nombre" outlined dense label="Nombre *" />
-            <q-input v-model="formularioItem.marca" outlined dense label="Marca" />
-            <q-input v-model="formularioItem.codigoBarras" outlined dense label="Código de barras" />
-            <q-input v-model="formularioItem.categoria" outlined dense label="Categoría" />
-            <q-input v-model="formularioItem.gramosOLitros" outlined dense label="Gramos o litros" />
-            <div class="fila-edicion-precio">
-              <q-input
-                v-model="formularioItem.precioTexto"
-                outlined
-                dense
-                type="text"
-                inputmode="decimal"
-                label="Precio (opcional)"
-                @update:model-value="(valor) => { formularioItem.precioTexto = filtrarInputPrecio(valor) }"
-                @blur="formularioItem.precioTexto = formatearPrecioAlSalir(formularioItem.precioTexto)"
-                @keydown="soloNumerosDecimales"
-              />
-              <q-select
-                v-model="formularioItem.moneda"
-                outlined
-                dense
-                emit-value
-                map-options
-                label="Moneda"
-                :options="opcionesMoneda"
-              />
-            </div>
-            <q-input v-model="formularioItem.comercio" outlined dense label="Comercio" />
-            <div class="bloque-cantidad-manual">
-              <span class="etiqueta-cantidad-manual">Cantidad</span>
-              <div class="control-cantidad control-cantidad-manual">
-                <q-btn flat round dense icon="remove" color="secondary" @click="ajustarCantidadManual(-1)" />
-                <span>{{ formularioItem.cantidad }}</span>
-                <q-btn flat round dense icon="add" color="secondary" @click="ajustarCantidadManual(1)" />
-              </div>
-            </div>
+            <FormularioProducto
+              ref="refFormularioProductoManual"
+              v-model="formularioProductoManual"
+              :mostrar-marca="false"
+              :mostrar-foto="false"
+              @buscar-codigo="buscarManualPorCodigo"
+              @buscar-nombre="buscarManualPorNombre"
+              @escanear-codigo="activarEscanerManual"
+            />
+            <FormularioPrecio
+              ref="refFormularioPrecioManual"
+              v-model="formularioPrecioManual"
+              :mostrar-comercio="false"
+              :precio-obligatorio="false"
+              etiqueta-precio="Precio (opcional)"
+            />
           </div>
         </q-card-section>
 
@@ -326,6 +306,22 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+
+    <DialogoResultadosBusqueda
+      v-model="dialogoResultadosManualAbierto"
+      :resultados="resultadosBusquedaManual"
+      :variante-pie="variantePieBusquedaManual"
+      :pie-acciones-loading="pieAccionesBusquedaManual"
+      @producto-seleccionado="autocompletarFormularioManual"
+      @ampliar-busqueda="ampliarBusquedaManual"
+    />
+
+    <EscaneadorCodigo
+      :activo="escanerManualActivo"
+      @codigo-detectado="alDetectarCodigoManual"
+      @cerrar="escanerManualActivo = false"
+      @no-disponible="alEscanerManualNoDisponible"
+    />
   </q-page>
 </template>
 
@@ -337,10 +333,15 @@ import { IconShoppingBag, IconTrash } from '@tabler/icons-vue'
 import { MONEDAS } from '../../almacenamiento/constantes/Monedas.js'
 import SelectorComercioDireccion from '../../components/Compartidos/SelectorComercioDireccion.vue'
 import BotonAccionSticky from '../../components/Compartidos/BotonAccionSticky.vue'
+import FormularioProducto from '../../components/Formularios/FormularioProducto.vue'
+import FormularioPrecio from '../../components/Formularios/FormularioPrecio.vue'
+import DialogoResultadosBusqueda from '../../components/Formularios/Dialogos/DialogoResultadosBusqueda.vue'
+import EscaneadorCodigo from '../../components/Scanner/EscaneadorCodigo.vue'
 import { useListaJustaStore } from '../../almacenamiento/stores/ListaJustaStore.js'
 import { useProductosStore } from '../../almacenamiento/stores/productosStore.js'
 import { usePreferenciasStore } from '../../almacenamiento/stores/preferenciasStore.js'
 import { useSesionEscaneoStore } from '../../almacenamiento/stores/sesionEscaneoStore.js'
+import busquedaProductosHibridaService from '../../almacenamiento/servicios/BusquedaProductosHibridaService.js'
 import {
   filtrarInputPrecio,
   formatearPrecioAlSalir,
@@ -363,6 +364,16 @@ const dialogoAgregarItemAbierto = ref(false)
 const modoAlta = ref('misProductos')
 const textoBusquedaProducto = ref('')
 const productosSeleccionados = ref({})
+const refFormularioProductoManual = ref(null)
+const refFormularioPrecioManual = ref(null)
+const dialogoResultadosManualAbierto = ref(false)
+const resultadosBusquedaManual = ref([])
+const variantePieBusquedaManual = ref(null)
+const pieAccionesBusquedaManual = ref(false)
+const buscandoConsultaManual = ref(false)
+const ultimoCodigoBusquedaManual = ref('')
+const ultimoNombreBusquedaManual = ref('')
+const escanerManualActivo = ref(false)
 
 const itemEditandoId = ref(null)
 const edicionInline = reactive({
@@ -371,16 +382,25 @@ const edicionInline = reactive({
   moneda: 'UYU',
 })
 
-const formularioItem = reactive({
+const formularioProductoManual = reactive({
   nombre: '',
   cantidad: 1,
-  precioTexto: '',
-  moneda: 'UYU',
+  unidad: 'unidad',
+  codigoBarras: '',
   marca: '',
   categoria: '',
-  codigoBarras: '',
-  gramosOLitros: '',
+  imagen: null,
+})
+const formularioPrecioManual = reactive({
   comercio: '',
+  direccion: '',
+  valor: null,
+  moneda: 'UYU',
+  comercioId: null,
+  direccionId: null,
+  nombreCompleto: '',
+  activarPreciosMayoristas: false,
+  escalasPorCantidad: [],
 })
 
 const opcionesFiltro = [
@@ -550,7 +570,7 @@ const formularioValido = computed(() => {
     return cantidadProductosSeleccionados.value > 0
   }
 
-  return Boolean(formularioItem.nombre.trim()) && Number(formularioItem.cantidad) > 0
+  return Boolean(formularioProductoManual.nombre.trim()) && Number(formularioProductoManual.cantidad) > 0
 })
 const monedasCompradas = computed(() => {
   if (!listaActual.value) return []
@@ -684,11 +704,6 @@ function precioProductoSeleccion(producto) {
   return formatearMoneda(total, producto.monedaReferencia || preferenciasStore.monedaDefaultEfectiva)
 }
 
-function ajustarCantidadManual(variacion) {
-  const cantidadActual = Number(formularioItem.cantidad || 1)
-  formularioItem.cantidad = Math.max(1, cantidadActual + variacion)
-}
-
 async function alternarComprado(itemId) {
   if (!listaActual.value) return
 
@@ -795,20 +810,29 @@ async function confirmarAgregarItem() {
     return
   }
 
+  const productoValido = refFormularioProductoManual.value?.validarFormulario()
+  if (!productoValido) return
+
   const payload = {
     productoId: null,
     origen: 'manual',
-    nombre: formularioItem.nombre,
-    cantidad: formularioItem.cantidad,
-    precioManual: parseFloat(formularioItem.precioTexto) || null,
-    moneda: formularioItem.moneda || preferenciasStore.monedaDefaultEfectiva,
-    codigoBarras: formularioItem.codigoBarras,
-    marca: formularioItem.marca,
-    categoria: formularioItem.categoria,
-    gramosOLitros: formularioItem.gramosOLitros,
-    comercio: formularioItem.comercio,
-    unidad: 'unidad',
-    imagen: null,
+    nombre: formularioProductoManual.nombre,
+    cantidad: formularioProductoManual.cantidad,
+    precioManual: Number.isFinite(Number(formularioPrecioManual.valor))
+      ? Number(formularioPrecioManual.valor)
+      : null,
+    moneda: formularioPrecioManual.moneda || preferenciasStore.monedaDefaultEfectiva,
+    codigoBarras: formularioProductoManual.codigoBarras,
+    marca: '',
+    categoria: '',
+    gramosOLitros: null,
+    comercio: '',
+    unidad: formularioProductoManual.unidad || 'unidad',
+    imagen: formularioProductoManual.imagen || null,
+    activarPreciosMayoristas: Boolean(formularioPrecioManual.activarPreciosMayoristas),
+    escalasPorCantidad: Array.isArray(formularioPrecioManual.escalasPorCantidad)
+      ? formularioPrecioManual.escalasPorCantidad
+      : [],
     estadoDerivacion: 'ninguno',
   }
 
@@ -895,15 +919,174 @@ function limpiarFormularioItem() {
   modoAlta.value = 'misProductos'
   textoBusquedaProducto.value = ''
   productosSeleccionados.value = {}
-  formularioItem.nombre = ''
-  formularioItem.cantidad = 1
-  formularioItem.precioTexto = ''
-  formularioItem.moneda = preferenciasStore.monedaDefaultEfectiva
-  formularioItem.marca = ''
-  formularioItem.categoria = ''
-  formularioItem.codigoBarras = ''
-  formularioItem.gramosOLitros = ''
-  formularioItem.comercio = ''
+  formularioProductoManual.nombre = ''
+  formularioProductoManual.cantidad = 1
+  formularioProductoManual.unidad = preferenciasStore.unidad || 'unidad'
+  formularioProductoManual.codigoBarras = ''
+  formularioProductoManual.marca = ''
+  formularioProductoManual.categoria = ''
+  formularioProductoManual.imagen = null
+  formularioPrecioManual.comercio = ''
+  formularioPrecioManual.direccion = ''
+  formularioPrecioManual.valor = null
+  formularioPrecioManual.moneda = preferenciasStore.monedaDefaultEfectiva
+  formularioPrecioManual.comercioId = null
+  formularioPrecioManual.direccionId = null
+  formularioPrecioManual.nombreCompleto = ''
+  formularioPrecioManual.activarPreciosMayoristas = false
+  formularioPrecioManual.escalasPorCantidad = []
+  dialogoResultadosManualAbierto.value = false
+  resultadosBusquedaManual.value = []
+  variantePieBusquedaManual.value = null
+  pieAccionesBusquedaManual.value = false
+  buscandoConsultaManual.value = false
+  ultimoCodigoBusquedaManual.value = ''
+  ultimoNombreBusquedaManual.value = ''
+  escanerManualActivo.value = false
+}
+
+async function buscarManualPorCodigo(codigo, callbackFinalizar) {
+  try {
+    const codigoLimpio = String(codigo || '').trim()
+    ultimoCodigoBusquedaManual.value = codigoLimpio
+    if (!codigoLimpio) return
+
+    const respuesta = await busquedaProductosHibridaService.buscarPorCodigoConPolitica(codigoLimpio, {
+      forzarApi: false,
+      onAntesLlamadaApi: () => {
+        buscandoConsultaManual.value = true
+      },
+    })
+
+    resultadosBusquedaManual.value = respuesta.itemsParaDialogo
+    variantePieBusquedaManual.value = respuesta.puedeEnriquecerConApi ? 'codigo-local' : null
+
+    if (respuesta.itemsParaDialogo.length > 0) {
+      dialogoResultadosManualAbierto.value = true
+      return
+    }
+
+    quasar.notify({
+      type: 'warning',
+      message: 'No se encontró el producto.',
+      position: 'top',
+    })
+  } catch (error) {
+    console.error('Error al buscar por código en Lista Justa:', error)
+    quasar.notify({
+      type: 'negative',
+      message: 'Error al buscar producto.',
+      position: 'top',
+    })
+  } finally {
+    buscandoConsultaManual.value = false
+    if (callbackFinalizar) callbackFinalizar()
+  }
+}
+
+async function buscarManualPorNombre(nombre, callbackFinalizar) {
+  try {
+    const nombreLimpio = String(nombre || '').trim()
+    ultimoNombreBusquedaManual.value = nombreLimpio
+    if (!nombreLimpio) return
+
+    const respuesta = await busquedaProductosHibridaService.buscarPorNombreConPolitica(nombreLimpio, {
+      ampliarOpenFoodFacts: false,
+      onAntesLlamadaApi: () => {
+        buscandoConsultaManual.value = true
+      },
+    })
+
+    resultadosBusquedaManual.value = respuesta.itemsParaDialogo
+    variantePieBusquedaManual.value = respuesta.puedeAmpliarOpenFoodFacts ? 'nombre-local' : null
+
+    if (respuesta.itemsParaDialogo.length > 0) {
+      dialogoResultadosManualAbierto.value = true
+      return
+    }
+
+    quasar.notify({
+      type: 'warning',
+      message: 'No se encontraron productos.',
+      position: 'top',
+    })
+  } catch (error) {
+    console.error('Error al buscar por nombre en Lista Justa:', error)
+    quasar.notify({
+      type: 'negative',
+      message: 'Error al buscar producto.',
+      position: 'top',
+    })
+  } finally {
+    buscandoConsultaManual.value = false
+    if (callbackFinalizar) callbackFinalizar()
+  }
+}
+
+async function ampliarBusquedaManual() {
+  const tipo = variantePieBusquedaManual.value
+  if (!tipo) return
+
+  pieAccionesBusquedaManual.value = true
+  buscandoConsultaManual.value = true
+  try {
+    if (tipo === 'codigo-local') {
+      const respuesta = await busquedaProductosHibridaService.buscarPorCodigoConPolitica(ultimoCodigoBusquedaManual.value, {
+        forzarApi: true,
+        onAntesLlamadaApi: () => {},
+      })
+      resultadosBusquedaManual.value = respuesta.itemsParaDialogo
+      variantePieBusquedaManual.value = null
+    }
+
+    if (tipo === 'nombre-local') {
+      const respuesta = await busquedaProductosHibridaService.buscarPorNombreConPolitica(ultimoNombreBusquedaManual.value, {
+        ampliarOpenFoodFacts: true,
+        onAntesLlamadaApi: () => {},
+      })
+      resultadosBusquedaManual.value = respuesta.itemsParaDialogo
+      variantePieBusquedaManual.value = null
+    }
+  } catch (error) {
+    console.error('Error al ampliar búsqueda en Lista Justa:', error)
+    quasar.notify({
+      type: 'negative',
+      message: 'Error al consultar fuentes externas.',
+      position: 'top',
+    })
+  } finally {
+    pieAccionesBusquedaManual.value = false
+    buscandoConsultaManual.value = false
+  }
+}
+
+function autocompletarFormularioManual(producto) {
+  formularioProductoManual.nombre = producto.nombre || formularioProductoManual.nombre
+  formularioProductoManual.codigoBarras = producto.codigoBarras || formularioProductoManual.codigoBarras
+  formularioProductoManual.cantidad = producto.cantidad || formularioProductoManual.cantidad
+  formularioProductoManual.unidad = producto.unidad || formularioProductoManual.unidad
+  formularioProductoManual.marca = producto.marca || formularioProductoManual.marca
+  formularioProductoManual.categoria = producto.categoria || formularioProductoManual.categoria
+  formularioProductoManual.imagen = producto.imagen || formularioProductoManual.imagen
+}
+
+function activarEscanerManual() {
+  escanerManualActivo.value = true
+}
+
+function alEscanerManualNoDisponible() {
+  escanerManualActivo.value = false
+  quasar.notify({
+    type: 'info',
+    message: 'En web escribí el código de barras manualmente.',
+    position: 'top',
+  })
+}
+
+async function alDetectarCodigoManual(codigo) {
+  escanerManualActivo.value = false
+  formularioProductoManual.codigoBarras = codigo
+  await buscarManualPorCodigo(codigo)
 }
 
 watch(
@@ -932,7 +1115,8 @@ onMounted(async () => {
   await listaJustaStore.registrarUsoLista(route.params.id)
   await listaJustaStore.sincronizarRelacionConMisProductos()
   await listaJustaStore.sincronizarEstadosMesaTrabajo()
-  formularioItem.moneda = preferenciasStore.monedaDefaultEfectiva
+  formularioProductoManual.unidad = preferenciasStore.unidad || 'unidad'
+  formularioPrecioManual.moneda = preferenciasStore.monedaDefaultEfectiva
 })
 </script>
 

@@ -66,6 +66,18 @@ class ListaJustaService {
       comercio: (nuevoItem.comercio || '').trim() || null,
       unidad: (nuevoItem.unidad || '').trim() || 'unidad',
       imagen: nuevoItem.imagen || null,
+      activarPreciosMayoristas: Boolean(nuevoItem.activarPreciosMayoristas),
+      escalasPorCantidad: Array.isArray(nuevoItem.escalasPorCantidad)
+        ? nuevoItem.escalasPorCantidad
+          .map((escala) => ({
+            cantidadMinima: Number(escala?.cantidadMinima) || 0,
+            precioUnitario: Number.isFinite(Number(escala?.precioUnitario))
+              ? Number(escala.precioUnitario)
+              : null,
+            estadoEscala: escala?.estadoEscala || 'neutral',
+          }))
+          .filter((escala) => escala.cantidadMinima >= 2 && escala.precioUnitario !== null)
+        : [],
       estadoDerivacion: nuevoItem.estadoDerivacion || 'ninguno',
       mesaTrabajoItemId: nuevoItem.mesaTrabajoItemId || null,
       creadoEn: nuevoItem.creadoEn || new Date().toISOString(),

@@ -34,6 +34,7 @@
 
     <!-- MARCA -->
     <q-input
+      v-if="mostrarMarca"
       v-model="datosInternos.marca"
       label="Marca"
       outlined
@@ -110,7 +111,7 @@
     </div>
 
     <!-- FOTO DEL PRODUCTO (compacta) -->
-    <div class="foto-fila">
+    <div v-if="mostrarFoto" class="foto-fila">
       <div class="foto-fila__izquierda">
         <IconPhoto :size="18" class="text-grey-6" />
         <span class="text-caption text-grey-7 q-ml-xs">Foto</span>
@@ -169,6 +170,14 @@ const props = defineProps({
     type: String,
     default: 'local',
     validator: (value) => ['local', 'comunidad'].includes(value),
+  },
+  mostrarMarca: {
+    type: Boolean,
+    default: true,
+  },
+  mostrarFoto: {
+    type: Boolean,
+    default: true,
   },
 })
 
