@@ -314,7 +314,13 @@
           </div>
         </q-card-section>
 
-        <q-card-actions align="right" class="acciones-safe-area-publicidad">
+        <q-card-actions class="acciones-dialogo-agregar acciones-safe-area-publicidad">
+          <div v-if="modoAlta === 'misProductos' && cantidadProductosSeleccionados > 0" class="resumen-total-seleccion">
+            <span class="resumen-total-seleccion-etiqueta">{{ etiquetaTotalSeleccionado }}</span>
+            <strong class="resumen-total-seleccion-valor">
+              {{ textoTotalProductosSeleccionados }}
+            </strong>
+          </div>
           <q-btn flat no-caps label="Cancelar" color="grey-7" @click="dialogoAgregarItemAbierto = false" />
           <q-btn unelevated no-caps label="Agregar" color="secondary" :disable="!formularioValido" @click="confirmarAgregarItem" />
         </q-card-actions>
@@ -510,6 +516,33 @@ const productosSeleccionadosParaAgregar = computed(() => {
       ...producto,
       cantidadSeleccionada: Number(productosSeleccionados.value[producto.id]) || 0,
     }))
+})
+const monedasProductosSeleccionados = computed(() => {
+  const monedas = productosSeleccionadosParaAgregar.value
+    .map((producto) => producto.monedaReferencia || preferenciasStore.monedaDefaultEfectiva)
+    .filter(Boolean)
+
+  return [...new Set(monedas)]
+})
+const tieneMultiplesMonedasSeleccionadas = computed(() => monedasProductosSeleccionados.value.length > 1)
+const monedaTotalSeleccionado = computed(() => {
+  if (monedasProductosSeleccionados.value.length === 1) return monedasProductosSeleccionados.value[0]
+  return preferenciasStore.monedaDefaultEfectiva
+})
+const totalProductosSeleccionados = computed(() => {
+  return productosSeleccionadosParaAgregar.value.reduce((acumulado, producto) => {
+    const precioBase = Number(producto.precioMejor || 0)
+    const cantidad = Number(producto.cantidadSeleccionada || 0)
+    if (!Number.isFinite(precioBase) || precioBase <= 0) return acumulado
+    if (!Number.isFinite(cantidad) || cantidad <= 0) return acumulado
+    return acumulado + precioBase * cantidad
+  }, 0)
+})
+const etiquetaTotalSeleccionado = computed(() => {
+  return tieneMultiplesMonedasSeleccionadas.value ? 'Total mixto' : 'Total'
+})
+const textoTotalProductosSeleccionados = computed(() => {
+  return formatearMoneda(totalProductosSeleccionados.value, monedaTotalSeleccionado.value)
 })
 
 const formularioValido = computed(() => {
@@ -1161,6 +1194,34 @@ onMounted(async () => {
   min-width: 104px;
   justify-content: center;
 }
+.acciones-dialogo-agregar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+.resumen-total-seleccion {
+  margin-right: auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+.resumen-total-seleccion-etiqueta {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--texto-secundario);
+  text-transform: uppercase;
+}
+.resumen-total-seleccion-valor {
+  font-size: 15px;
+  line-height: 1.2;
+  color: var(--color-secundario);
+  white-space: nowrap;
+}
 @media (max-width: 760px) {
   .contador-items-derecha {
     margin-left: 0;
@@ -1187,6 +1248,15 @@ onMounted(async () => {
   }
   .control-cantidad-dialogo {
     min-width: 82px;
+  }
+  .acciones-dialogo-agregar {
+    gap: 6px;
+  }
+  .resumen-total-seleccion-etiqueta {
+    font-size: 10px;
+  }
+  .resumen-total-seleccion-valor {
+    font-size: 14px;
   }
   .imagen-item {
     width: 56px;
