@@ -150,8 +150,44 @@
                       </div>
                     </template>
                     <template v-else>
-                      <span class="precio-item">{{ precioFormateado(item) }}</span>
+                      <div class="bloque-precio-item">
+                        <span class="precio-item">{{ precioFormateado(item) }}</span>
+                        <q-btn
+                          v-if="tieneMayoristasParaMostrar(item)"
+                          flat
+                          dense
+                          no-caps
+                          color="secondary"
+                          class="boton-mayoristas-item"
+                          :label="textoBotonMayoristas(item)"
+                          @click="toggleMayoristasItem(item.id)"
+                        />
+                      </div>
                     </template>
+                  </div>
+
+                  <div
+                    v-if="itemEditandoId !== item.id && mostrarDetalleMayoristas(item)"
+                    class="detalle-mayoristas-item"
+                  >
+                    <div
+                      v-for="grupo in gruposMayoristasItem(item)"
+                      :key="grupo.clave"
+                      class="grupo-mayorista-item"
+                    >
+                      <div v-if="grupo.etiqueta" class="grupo-mayorista-item-etiqueta">
+                        {{ grupo.etiqueta }}
+                      </div>
+                      <div
+                        v-for="escala in grupo.escalas"
+                        :key="`${grupo.clave}_${escala.cantidadMinima}_${escala.precioUnitario}`"
+                        class="fila-mayorista-item"
+                        :class="{ 'fila-mayorista-item-activa': escala.activa }"
+                      >
+                        <span>{{ escala.cantidadMinima }}+ {{ abreviarUnidad(item.unidad) }}</span>
+                        <strong>{{ formatearMoneda(escala.precioUnitario, grupo.moneda) }}</strong>
+                      </div>
+                    </div>
                   </div>
 
                   <div v-if="mostrarAvisoFaltantes(item)" class="texto-faltante">
@@ -374,6 +410,7 @@ const buscandoConsultaManual = ref(false)
 const ultimoCodigoBusquedaManual = ref('')
 const ultimoNombreBusquedaManual = ref('')
 const escanerManualActivo = ref(false)
+const itemsMayoristasExpandidos = ref({})
 
 const itemEditandoId = ref(null)
 const edicionInline = reactive({
@@ -381,6 +418,16 @@ const edicionInline = reactive({
   precioTexto: '',
   moneda: 'UYU',
 })
+
+const ABREVIATURAS_UNIDAD = {
+  unidad: 'u.',
+  litro: 'L',
+  mililitro: 'ml',
+  kilo: 'kg',
+  gramo: 'g',
+  metro: 'm',
+  pack: 'pack',
+}
 
 const formularioProductoManual = ref({
   nombre: '',
@@ -551,7 +598,7 @@ const monedaTotalSeleccionado = computed(() => {
 })
 const totalProductosSeleccionados = computed(() => {
   return productosSeleccionadosParaAgregar.value.reduce((acumulado, producto) => {
-    const precioBase = Number(producto.precioMejor || 0)
+    const precioBase = Number(obtenerPrecioProductoSeleccion(producto, Number(producto.cantidadSeleccionada || 0)).valor || 0)
     const cantidad = Number(producto.cantidadSeleccionada || 0)
     if (!Number.isFinite(precioBase) || precioBase <= 0) return acumulado
     if (!Number.isFinite(cantidad) || cantidad <= 0) return acumulado
@@ -592,48 +639,206 @@ function formatearMoneda(valor, moneda = preferenciasStore.monedaDefaultEfectiva
   return formatearPrecioConCodigo(valor, moneda)
 }
 
-function precioVisualDetallado(item) {
-  if (comercioSesionLista.value?.id || comercioSesionLista.value?.direccionId) {
-    const producto = item.productoId ? productosStore.obtenerProductoPorId(item.productoId) : null
-    const precioComercioActivo = producto?.precios?.find((precio) => {
-      const coincideComercio = comercioSesionLista.value?.id
-        ? precio.comercioId === comercioSesionLista.value.id
-        : true
-      const coincideDireccion = comercioSesionLista.value?.direccionId
-        ? precio.direccionId === comercioSesionLista.value.direccionId
-        : true
-      return coincideComercio && coincideDireccion
-    })
+function abreviarUnidad(unidad) {
+  return ABREVIATURAS_UNIDAD[unidad] || 'u.'
+}
 
-    if (precioComercioActivo?.valor) {
-      return {
-        valor: Number(precioComercioActivo.valor),
-        moneda: precioComercioActivo.moneda || producto?.monedaReferencia || item.moneda || preferenciasStore.monedaDefaultEfectiva,
+function normalizarEscalasValidas(escalas) {
+  return (Array.isArray(escalas) ? escalas : [])
+    .map((escala) => ({
+      cantidadMinima: Number(escala?.cantidadMinima),
+      precioUnitario: Number(escala?.precioUnitario),
+    }))
+    .filter(
+      (escala) =>
+        Number.isFinite(escala.cantidadMinima) &&
+        escala.cantidadMinima >= 2 &&
+        Number.isFinite(escala.precioUnitario) &&
+        escala.precioUnitario > 0,
+    )
+    .sort((a, b) => a.cantidadMinima - b.cantidadMinima)
+}
+
+function aplicarPrecioPorCantidad(precioBase, escalas, cantidad) {
+  const base = Number(precioBase)
+  const cantidadNormalizada = Number(cantidad)
+  const escalasValidas = normalizarEscalasValidas(escalas)
+  let valor = Number.isFinite(base) && base > 0 ? base : null
+  let usaMayorista = false
+
+  if (Number.isFinite(cantidadNormalizada) && cantidadNormalizada > 0) {
+    for (const escala of escalasValidas) {
+      if (cantidadNormalizada < escala.cantidadMinima) continue
+      if (valor === null || escala.precioUnitario < valor) {
+        valor = escala.precioUnitario
+        usaMayorista = true
       }
     }
   }
 
-  if (Number.isFinite(Number(item.precioManual)) && Number(item.precioManual) > 0) {
-    return {
-      valor: Number(item.precioManual),
-      moneda: item.moneda || preferenciasStore.monedaDefaultEfectiva,
+  return {
+    valor,
+    usaMayorista,
+    escalas: escalasValidas.map((escala) => ({
+      ...escala,
+      activa: Number.isFinite(cantidadNormalizada) && cantidadNormalizada >= escala.cantidadMinima,
+    })),
+  }
+}
+
+function obtenerPreciosVigentesProducto(producto) {
+  if (!Array.isArray(producto?.precios) || producto.precios.length === 0) return []
+
+  const mapaVigentes = new Map()
+
+  for (const precio of producto.precios) {
+    const clave =
+      precio?.comercioId && precio?.direccionId
+        ? `${precio.comercioId}_${precio.direccionId}`
+        : precio?.nombreCompleto || precio?.comercio || precio?.id
+    const actual = mapaVigentes.get(clave)
+    if (!actual || new Date(precio.fecha) > new Date(actual.fecha)) {
+      mapaVigentes.set(clave, precio)
     }
   }
 
-  if (!item.productoId) {
+  return [...mapaVigentes.values()]
+}
+
+function filtrarPreciosPorComercio(precios) {
+  if (!comercioSesionLista.value?.id && !comercioSesionLista.value?.direccionId) {
+    return precios
+  }
+
+  return precios.filter((precio) => {
+    const coincideComercio = comercioSesionLista.value?.id
+      ? precio.comercioId === comercioSesionLista.value.id
+      : true
+    const coincideDireccion = comercioSesionLista.value?.direccionId
+      ? precio.direccionId === comercioSesionLista.value.direccionId
+      : true
+    return coincideComercio && coincideDireccion
+  })
+}
+
+function construirGrupoMayorista({ clave, etiqueta, moneda, escalas, precioBase, cantidad }) {
+  const resultado = aplicarPrecioPorCantidad(precioBase, escalas, cantidad)
+  if (resultado.escalas.length === 0) return null
+
+  return {
+    clave,
+    etiqueta,
+    moneda,
+    precioBase: Number(precioBase),
+    usaMayorista: resultado.usaMayorista,
+    escalas: resultado.escalas,
+    mejorPrecioGrupo: resultado.valor,
+  }
+}
+
+function resolverPrecioProducto(producto, cantidad = 1) {
+  const preciosVigentes = obtenerPreciosVigentesProducto(producto)
+  const preciosFiltrados = filtrarPreciosPorComercio(preciosVigentes)
+
+  if (preciosFiltrados.length === 0) {
     return {
       valor: null,
-      moneda: item.moneda || preferenciasStore.monedaDefaultEfectiva,
+      moneda: producto?.monedaReferencia || preferenciasStore.monedaDefaultEfectiva,
+      usaMayorista: false,
+      gruposMayoristas: [],
     }
+  }
+
+  const monedaReferencia = producto?.monedaReferencia || preciosFiltrados[0]?.moneda || preferenciasStore.monedaDefaultEfectiva
+  const comparables = preciosFiltrados.filter((precio) => (precio.moneda || monedaReferencia) === monedaReferencia)
+  const candidatos = comparables.length > 0 ? comparables : preciosFiltrados
+
+  const gruposMayoristas = candidatos
+    .map((precio) =>
+      construirGrupoMayorista({
+        clave:
+          precio.comercioId && precio.direccionId
+            ? `${precio.comercioId}_${precio.direccionId}`
+            : precio.nombreCompleto || precio.comercio || precio.id,
+        etiqueta: comercioSesionLista.value?.id || comercioSesionLista.value?.direccionId
+          ? ''
+          : precio.nombreCompleto || precio.comercio || 'Sin comercio',
+        moneda: precio.moneda || monedaReferencia,
+        escalas: precio.escalasPorCantidad,
+        precioBase: precio.valor,
+        cantidad,
+      }),
+    )
+    .filter(Boolean)
+
+  const mejorCandidato = candidatos
+    .map((precio) => {
+      const aplicacion = aplicarPrecioPorCantidad(precio.valor, precio.escalasPorCantidad, cantidad)
+      return {
+        valor: aplicacion.valor,
+        moneda: precio.moneda || monedaReferencia,
+        usaMayorista: aplicacion.usaMayorista,
+      }
+    })
+    .filter((precio) => Number.isFinite(Number(precio.valor)) && Number(precio.valor) > 0)
+    .sort((a, b) => Number(a.valor) - Number(b.valor))[0]
+
+  if (!mejorCandidato) {
+    return {
+      valor: null,
+      moneda: monedaReferencia,
+      usaMayorista: false,
+      gruposMayoristas,
+    }
+  }
+
+  return {
+    valor: Number(mejorCandidato.valor),
+    moneda: mejorCandidato.moneda,
+    usaMayorista: mejorCandidato.usaMayorista,
+    gruposMayoristas,
+  }
+}
+
+function resolverPrecioManual(item) {
+  const resultado = aplicarPrecioPorCantidad(item.precioManual, item.escalasPorCantidad, item.cantidad)
+
+  return {
+    valor: resultado.valor,
+    moneda: item.moneda || preferenciasStore.monedaDefaultEfectiva,
+    usaMayorista: resultado.usaMayorista,
+    gruposMayoristas: resultado.escalas.length > 0
+      ? [
+          {
+            clave: `manual_${item.id}`,
+            etiqueta: '',
+            moneda: item.moneda || preferenciasStore.monedaDefaultEfectiva,
+            precioBase: Number(item.precioManual),
+            usaMayorista: resultado.usaMayorista,
+            escalas: resultado.escalas,
+            mejorPrecioGrupo: resultado.valor,
+          },
+        ]
+      : [],
+  }
+}
+
+function precioVisualDetallado(item) {
+  if (!item.productoId) {
+    return resolverPrecioManual(item)
   }
 
   const producto = productosStore.obtenerProductoPorId(item.productoId)
-  const precioProducto = listaJustaStore.obtenerPrecioVisualItem(item)
-
-  return {
-    valor: precioProducto,
-    moneda: producto?.monedaReferencia || item.moneda || preferenciasStore.monedaDefaultEfectiva,
+  if (!producto) {
+    return {
+      valor: null,
+      moneda: item.moneda || preferenciasStore.monedaDefaultEfectiva,
+      usaMayorista: false,
+      gruposMayoristas: [],
+    }
   }
+
+  return resolverPrecioProducto(producto, item.cantidad)
 }
 
 function precioVisual(item) {
@@ -644,6 +849,29 @@ function precioFormateado(item) {
   const precio = precioVisualDetallado(item)
   if (!Number.isFinite(precio.valor)) return 'Sin precio'
   return formatearMoneda(precio.valor, precio.moneda)
+}
+
+function gruposMayoristasItem(item) {
+  return precioVisualDetallado(item).gruposMayoristas || []
+}
+
+function tieneMayoristasParaMostrar(item) {
+  return gruposMayoristasItem(item).length > 0
+}
+
+function mostrarDetalleMayoristas(item) {
+  return Boolean(itemsMayoristasExpandidos.value[item.id]) && tieneMayoristasParaMostrar(item)
+}
+
+function toggleMayoristasItem(itemId) {
+  itemsMayoristasExpandidos.value = {
+    ...itemsMayoristasExpandidos.value,
+    [itemId]: !itemsMayoristasExpandidos.value[itemId],
+  }
+}
+
+function textoBotonMayoristas(item) {
+  return precioVisualDetallado(item).usaMayorista ? 'Mayorista aplicado' : 'Ver mayoristas'
 }
 
 function mostrarAvisoFaltantes(item) {
@@ -699,9 +927,13 @@ function ajustarCantidadSeleccion(productoId, variacion) {
 
 function precioProductoSeleccion(producto) {
   const cantidad = cantidadSeleccionadaProducto(producto.id)
-  const precioBase = Number(producto.precioMejor || 0)
-  const total = precioBase > 0 ? precioBase * cantidad : 0
-  return formatearMoneda(total, producto.monedaReferencia || preferenciasStore.monedaDefaultEfectiva)
+  const precio = obtenerPrecioProductoSeleccion(producto, cantidad)
+  const total = Number(precio.valor || 0) * cantidad
+  return formatearMoneda(total, precio.moneda || producto.monedaReferencia || preferenciasStore.monedaDefaultEfectiva)
+}
+
+function obtenerPrecioProductoSeleccion(producto, cantidad) {
+  return resolverPrecioProducto(producto, cantidad)
 }
 
 async function alternarComprado(itemId) {
@@ -951,6 +1183,7 @@ function limpiarFormularioItem() {
   ultimoCodigoBusquedaManual.value = ''
   ultimoNombreBusquedaManual.value = ''
   escanerManualActivo.value = false
+  itemsMayoristasExpandidos.value = {}
 }
 
 async function buscarManualPorCodigo(codigo, callbackFinalizar) {
@@ -1248,6 +1481,12 @@ onMounted(async () => {
 .fila-precio {
   margin-top: 4px;
 }
+.bloque-precio-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 .fila-edicion-precio {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 132px;
@@ -1256,6 +1495,48 @@ onMounted(async () => {
 .precio-item {
   font-weight: 700;
   color: var(--color-secundario);
+}
+.boton-mayoristas-item {
+  min-height: 28px;
+  padding: 0 8px;
+  border: 1px solid color-mix(in srgb, var(--color-secundario) 30%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-secundario) 10%, transparent);
+  font-size: 11px;
+  font-weight: 700;
+}
+.detalle-mayoristas-item {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--borde-color);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--fondo-app-secundario) 88%, transparent);
+}
+.grupo-mayorista-item + .grupo-mayorista-item {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--borde-color);
+}
+.grupo-mayorista-item-etiqueta {
+  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--texto-secundario);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.fila-mayorista-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--texto-secundario);
+}
+.fila-mayorista-item + .fila-mayorista-item {
+  margin-top: 4px;
+}
+.fila-mayorista-item-activa {
+  color: var(--texto-primario);
 }
 .texto-faltante {
   margin-top: 6px;
