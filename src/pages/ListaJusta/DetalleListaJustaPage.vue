@@ -154,8 +154,7 @@
                         <span class="precio-item">{{ precioFormateado(item) }}</span>
                         <q-btn
                           v-if="tieneMayoristasParaMostrar(item)"
-                          flat
-                          dense
+                          unelevated
                           no-caps
                           color="secondary"
                           class="boton-mayoristas-item"
@@ -190,10 +189,6 @@
                     </div>
                   </div>
 
-                  <div v-if="mostrarAvisoFaltantes(item)" class="texto-faltante">
-                    Faltan datos importantes para completar este producto.
-                  </div>
-
                   <div class="fila-acciones-item">
                     <div class="control-cantidad">
                       <q-btn flat round dense icon="remove" color="secondary" @click="ajustarCantidad(item.id, -1)" />
@@ -201,23 +196,27 @@
                       <q-btn flat round dense icon="add" color="secondary" @click="ajustarCantidad(item.id, 1)" />
                     </div>
 
-                    <q-btn
-                      v-if="puedeEnviarAMesa(item)"
-                      flat
-                      no-caps
-                      color="warning"
-                      label="Enviar a Mesa de trabajo"
-                      @click="enviarAMesa(item.id)"
-                    />
+                    <div class="acciones-secundarias-item">
+                      <q-btn
+                        v-if="puedeEnviarAMesa(item)"
+                        unelevated
+                        no-caps
+                        color="warning"
+                        class="boton-enviar-mesa"
+                        label="Enviar a Mesa de trabajo"
+                        @click="enviarAMesa(item.id)"
+                      />
 
-                    <q-chip
-                      v-if="item.estadoDerivacion === 'enMesa'"
-                      dense
-                      color="orange"
-                      text-color="white"
-                    >
-                      En Mesa de trabajo
-                    </q-chip>
+                      <q-chip
+                        v-if="item.estadoDerivacion === 'enMesa'"
+                        dense
+                        color="orange"
+                        text-color="white"
+                        class="chip-mesa-trabajo"
+                      >
+                        En Mesa de trabajo
+                      </q-chip>
+                    </div>
                   </div>
                 </div>
 
@@ -847,8 +846,16 @@ function precioVisual(item) {
 
 function precioFormateado(item) {
   const precio = precioVisualDetallado(item)
-  if (!Number.isFinite(precio.valor)) return 'Sin precio'
+  if (!Number.isFinite(precio.valor)) return textoSinPrecio(item)
   return formatearMoneda(precio.valor, precio.moneda)
+}
+
+function textoSinPrecio(item) {
+  if (comercioSesionLista.value?.id || comercioSesionLista.value?.direccionId) {
+    return 'Sin precio para este comercio'
+  }
+
+  return item.productoId ? 'Sin precio disponible' : 'Sin precio cargado'
 }
 
 function gruposMayoristasItem(item) {
@@ -871,11 +878,7 @@ function toggleMayoristasItem(itemId) {
 }
 
 function textoBotonMayoristas(item) {
-  return precioVisualDetallado(item).usaMayorista ? 'Mayorista aplicado' : 'Ver mayoristas'
-}
-
-function mostrarAvisoFaltantes(item) {
-  return !item.nombre || !Number.isFinite(precioVisual(item))
+  return precioVisualDetallado(item).usaMayorista ? 'Mayorista aplicado' : 'Ver mayorista'
 }
 
 function esItemManual(item) {
@@ -1482,10 +1485,10 @@ onMounted(async () => {
   margin-top: 4px;
 }
 .bloque-precio-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
 }
 .fila-edicion-precio {
   display: grid;
@@ -1495,15 +1498,17 @@ onMounted(async () => {
 .precio-item {
   font-weight: 700;
   color: var(--color-secundario);
+  line-height: 1.2;
 }
 .boton-mayoristas-item {
-  min-height: 28px;
-  padding: 0 8px;
-  border: 1px solid color-mix(in srgb, var(--color-secundario) 30%, transparent);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--color-secundario) 10%, transparent);
-  font-size: 11px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid color-mix(in srgb, var(--color-secundario) 24%, var(--borde-color));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-secundario) 10%, var(--fondo-app-secundario));
+  font-size: 12px;
   font-weight: 700;
+  white-space: nowrap;
 }
 .detalle-mayoristas-item {
   margin-top: 8px;
@@ -1538,17 +1543,30 @@ onMounted(async () => {
 .fila-mayorista-item-activa {
   color: var(--texto-primario);
 }
-.texto-faltante {
-  margin-top: 6px;
-  color: var(--color-advertencia);
-  font-size: 12px;
-}
 .fila-acciones-item {
   margin-top: 8px;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+  justify-content: space-between;
+}
+.acciones-secundarias-item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.boton-enviar-mesa {
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.chip-mesa-trabajo {
+  min-height: 30px;
+  border-radius: 10px;
 }
 .control-cantidad {
   display: inline-flex;
@@ -1719,6 +1737,10 @@ onMounted(async () => {
   .fila-edicion-precio {
     grid-template-columns: 1fr;
   }
+  .bloque-precio-item {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
   .encabezado-dialogo-agregar-item {
     align-items: center;
   }
@@ -1733,6 +1755,13 @@ onMounted(async () => {
   }
   .control-cantidad-dialogo {
     min-width: 82px;
+  }
+  .fila-acciones-item {
+    align-items: stretch;
+  }
+  .acciones-secundarias-item {
+    width: 100%;
+    justify-content: flex-start;
   }
   .acciones-dialogo-agregar {
     gap: 6px;
