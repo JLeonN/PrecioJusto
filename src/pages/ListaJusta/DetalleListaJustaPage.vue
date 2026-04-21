@@ -116,7 +116,7 @@
                   </div>
                 </div>
 
-                <div class="columna-info">
+                <div class="columna-info-principal">
                   <div class="fila-nombre">
                     <div class="contenido-nombre-item">
                       <template v-if="itemEditandoId === item.id && esItemManual(item)">
@@ -180,19 +180,21 @@
                     <template v-else>
                       <div class="bloque-precio-item">
                         <span class="precio-item">{{ precioFormateado(item) }}</span>
-                        <q-btn
-                          v-if="tieneMayoristasParaMostrar(item)"
-                          unelevated
-                          no-caps
-                          color="secondary"
-                          class="boton-mayoristas-item"
-                          :label="textoBotonMayoristas(item)"
-                          @click="toggleMayoristasItem(item.id)"
-                        />
                       </div>
                     </template>
                   </div>
+                </div>
 
+                <div class="contenido-secundario-item">
+                  <q-btn
+                    v-if="itemEditandoId !== item.id && tieneMayoristasParaMostrar(item)"
+                    unelevated
+                    no-caps
+                    color="secondary"
+                    class="boton-mayoristas-item"
+                    :label="textoBotonMayoristas(item)"
+                    @click="toggleMayoristasItem(item.id)"
+                  />
                   <div
                     v-if="itemEditandoId !== item.id && mostrarDetalleMayoristas(item)"
                     class="detalle-mayoristas-item"
@@ -1627,8 +1629,15 @@ onMounted(async () => {
   color: var(--texto-secundario);
   background: var(--fondo-app-secundario);
 }
-.columna-info {
+.columna-info-principal {
   min-width: 0;
+  grid-column: 2;
+  grid-row: 1;
+}
+.contenido-secundario-item {
+  min-width: 0;
+  grid-column: 2;
+  grid-row: 2;
 }
 .fila-nombre {
   display: grid;
@@ -1649,9 +1658,9 @@ onMounted(async () => {
 }
 .bloque-precio-item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
 }
 .fila-edicion-precio {
   display: grid;
@@ -1659,23 +1668,26 @@ onMounted(async () => {
   gap: 8px;
 }
 .precio-item {
+  display: block;
   font-weight: 700;
+  font-size: 22px;
   color: var(--color-secundario);
   line-height: 1.2;
 }
 .boton-mayoristas-item {
-  min-height: 32px;
-  padding: 0 12px;
+  width: 100%;
+  min-height: 38px;
+  padding: 0 14px;
+  margin-top: 8px;
   border: 1px solid color-mix(in srgb, var(--color-secundario) 24%, var(--borde-color));
   border-radius: 10px;
   background: color-mix(in srgb, var(--color-secundario) 10%, var(--fondo-app-secundario));
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
-  white-space: nowrap;
 }
 .detalle-mayoristas-item {
   margin-top: 8px;
-  padding: 8px 10px;
+  padding: 10px 12px;
   border: 1px solid var(--borde-color);
   border-radius: 10px;
   background: color-mix(in srgb, var(--fondo-app-secundario) 88%, transparent);
@@ -1696,15 +1708,20 @@ onMounted(async () => {
 .fila-mayorista-item {
   display: flex;
   justify-content: space-between;
-  gap: 8px;
+  align-items: baseline;
+  gap: 12px;
   font-size: 12px;
   color: var(--texto-secundario);
 }
 .fila-mayorista-item + .fila-mayorista-item {
-  margin-top: 4px;
+  margin-top: 6px;
+}
+.fila-mayorista-item span {
+  min-width: 0;
 }
 .fila-mayorista-item strong {
   flex-shrink: 0;
+  text-align: right;
 }
 .fila-mayorista-item-activa {
   color: var(--texto-primario);
@@ -1713,24 +1730,25 @@ onMounted(async () => {
   margin-top: 8px;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
   justify-content: space-between;
 }
 .fila-cantidad-y-subtotal {
   display: flex;
-  flex-wrap: wrap;
+  width: 100%;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 10px;
 }
 .acciones-secundarias-item {
   display: flex;
   flex-wrap: wrap;
+  width: 100%;
   gap: 8px;
-  justify-content: flex-end;
-  margin-left: auto;
 }
 .subtotal-item {
+  flex-shrink: 0;
   padding: 6px 10px;
   border: 1px solid color-mix(in srgb, var(--color-secundario) 24%, var(--borde-color));
   border-radius: 10px;
@@ -1742,11 +1760,11 @@ onMounted(async () => {
   white-space: nowrap;
 }
 .boton-enviar-mesa {
-  min-height: 34px;
-  padding: 0 12px;
+  width: 100%;
+  min-height: 38px;
+  padding: 0 14px;
   border-radius: 10px;
   font-weight: 700;
-  white-space: nowrap;
 }
 .chip-mesa-trabajo {
   min-height: 30px;
@@ -1759,8 +1777,11 @@ onMounted(async () => {
   border: 1px solid var(--borde-color);
   border-radius: 999px;
   padding: 2px 6px;
+  margin-right: auto;
 }
 .columna-check {
+  grid-column: 3;
+  grid-row: 1;
   padding-top: 2px;
 }
 .swipe-destruccion {
@@ -1920,12 +1941,17 @@ onMounted(async () => {
   .fila-item {
     grid-template-columns: 56px 1fr auto;
   }
+  .columna-info-principal {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .contenido-secundario-item {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin-top: 10px;
+  }
   .fila-edicion-precio {
     grid-template-columns: 1fr;
-  }
-  .bloque-precio-item {
-    grid-template-columns: 1fr;
-    align-items: start;
   }
   .encabezado-dialogo-agregar-item {
     align-items: center;
@@ -1947,11 +1973,20 @@ onMounted(async () => {
   }
   .fila-cantidad-y-subtotal {
     width: 100%;
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+    flex-wrap: nowrap;
   }
   .acciones-secundarias-item {
     width: 100%;
-    justify-content: flex-start;
-    margin-left: 0;
+  }
+  .subtotal-item {
+    flex-shrink: 1;
+    min-width: 0;
+    padding: 6px 8px;
+    font-size: 12px;
+    text-align: center;
   }
   .acciones-dialogo-agregar {
     gap: 6px;
@@ -1961,6 +1996,9 @@ onMounted(async () => {
   }
   .resumen-total-seleccion-valor {
     font-size: 14px;
+  }
+  .precio-item {
+    font-size: 20px;
   }
   .imagen-item {
     width: 56px;
