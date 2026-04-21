@@ -128,9 +128,10 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     if (!lista) return { exito: false }
 
     const nombre = (datosItem.nombre || '').trim()
-    const cantidad = Number(datosItem.cantidad)
+    const cantidadOriginal = Number(datosItem.cantidad)
+    const cantidad = Number.isFinite(cantidadOriginal) && cantidadOriginal > 0 ? cantidadOriginal : 1
 
-    if (!nombre || !Number.isFinite(cantidad) || cantidad <= 0) {
+    if (!nombre) {
       return { exito: false, motivo: 'datos-minimos' }
     }
 
@@ -138,7 +139,10 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
       return { exito: false, motivo: 'duplicado' }
     }
 
-    const itemNormalizado = ListaJustaService.normalizarItem(datosItem)
+    const itemNormalizado = ListaJustaService.normalizarItem({
+      ...datosItem,
+      cantidad,
+    })
     lista.items.unshift(itemNormalizado)
     lista.fechaActualizacion = new Date().toISOString()
 

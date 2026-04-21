@@ -382,7 +382,7 @@ const edicionInline = reactive({
   moneda: 'UYU',
 })
 
-const formularioProductoManual = reactive({
+const formularioProductoManual = ref({
   nombre: '',
   cantidad: 1,
   unidad: 'unidad',
@@ -391,7 +391,7 @@ const formularioProductoManual = reactive({
   categoria: '',
   imagen: null,
 })
-const formularioPrecioManual = reactive({
+const formularioPrecioManual = ref({
   comercio: '',
   direccion: '',
   valor: null,
@@ -570,7 +570,7 @@ const formularioValido = computed(() => {
     return cantidadProductosSeleccionados.value > 0
   }
 
-  return Boolean(formularioProductoManual.nombre.trim()) && Number(formularioProductoManual.cantidad) > 0
+  return Boolean(formularioProductoManual.value.nombre.trim())
 })
 const monedasCompradas = computed(() => {
   if (!listaActual.value) return []
@@ -813,25 +813,29 @@ async function confirmarAgregarItem() {
   const productoValido = refFormularioProductoManual.value?.validarFormulario()
   if (!productoValido) return
 
+  const cantidadNormalizada = Number.isFinite(Number(formularioProductoManual.value.cantidad)) && Number(formularioProductoManual.value.cantidad) > 0
+    ? Number(formularioProductoManual.value.cantidad)
+    : 1
+
   const payload = {
     productoId: null,
     origen: 'manual',
-    nombre: formularioProductoManual.nombre,
-    cantidad: formularioProductoManual.cantidad,
-    precioManual: Number.isFinite(Number(formularioPrecioManual.valor))
-      ? Number(formularioPrecioManual.valor)
+    nombre: formularioProductoManual.value.nombre,
+    cantidad: cantidadNormalizada,
+    precioManual: Number.isFinite(Number(formularioPrecioManual.value.valor))
+      ? Number(formularioPrecioManual.value.valor)
       : null,
-    moneda: formularioPrecioManual.moneda || preferenciasStore.monedaDefaultEfectiva,
-    codigoBarras: formularioProductoManual.codigoBarras,
+    moneda: formularioPrecioManual.value.moneda || preferenciasStore.monedaDefaultEfectiva,
+    codigoBarras: formularioProductoManual.value.codigoBarras,
     marca: '',
     categoria: '',
     gramosOLitros: null,
     comercio: '',
-    unidad: formularioProductoManual.unidad || 'unidad',
-    imagen: formularioProductoManual.imagen || null,
-    activarPreciosMayoristas: Boolean(formularioPrecioManual.activarPreciosMayoristas),
-    escalasPorCantidad: Array.isArray(formularioPrecioManual.escalasPorCantidad)
-      ? formularioPrecioManual.escalasPorCantidad
+    unidad: formularioProductoManual.value.unidad || 'unidad',
+    imagen: formularioProductoManual.value.imagen || null,
+    activarPreciosMayoristas: Boolean(formularioPrecioManual.value.activarPreciosMayoristas),
+    escalasPorCantidad: Array.isArray(formularioPrecioManual.value.escalasPorCantidad)
+      ? formularioPrecioManual.value.escalasPorCantidad
       : [],
     estadoDerivacion: 'ninguno',
   }
@@ -850,7 +854,7 @@ async function confirmarAgregarItem() {
 
     quasar.notify({
       type: 'warning',
-      message: 'Completá al menos nombre y cantidad.',
+      message: 'Completá al menos el nombre del producto.',
       position: 'top',
     })
     return
@@ -919,22 +923,26 @@ function limpiarFormularioItem() {
   modoAlta.value = 'misProductos'
   textoBusquedaProducto.value = ''
   productosSeleccionados.value = {}
-  formularioProductoManual.nombre = ''
-  formularioProductoManual.cantidad = 1
-  formularioProductoManual.unidad = preferenciasStore.unidad || 'unidad'
-  formularioProductoManual.codigoBarras = ''
-  formularioProductoManual.marca = ''
-  formularioProductoManual.categoria = ''
-  formularioProductoManual.imagen = null
-  formularioPrecioManual.comercio = ''
-  formularioPrecioManual.direccion = ''
-  formularioPrecioManual.valor = null
-  formularioPrecioManual.moneda = preferenciasStore.monedaDefaultEfectiva
-  formularioPrecioManual.comercioId = null
-  formularioPrecioManual.direccionId = null
-  formularioPrecioManual.nombreCompleto = ''
-  formularioPrecioManual.activarPreciosMayoristas = false
-  formularioPrecioManual.escalasPorCantidad = []
+  formularioProductoManual.value = {
+    nombre: '',
+    cantidad: 1,
+    unidad: preferenciasStore.unidad || 'unidad',
+    codigoBarras: '',
+    marca: '',
+    categoria: '',
+    imagen: null,
+  }
+  formularioPrecioManual.value = {
+    comercio: '',
+    direccion: '',
+    valor: null,
+    moneda: preferenciasStore.monedaDefaultEfectiva,
+    comercioId: null,
+    direccionId: null,
+    nombreCompleto: '',
+    activarPreciosMayoristas: false,
+    escalasPorCantidad: [],
+  }
   dialogoResultadosManualAbierto.value = false
   resultadosBusquedaManual.value = []
   variantePieBusquedaManual.value = null
@@ -1061,13 +1069,16 @@ async function ampliarBusquedaManual() {
 }
 
 function autocompletarFormularioManual(producto) {
-  formularioProductoManual.nombre = producto.nombre || formularioProductoManual.nombre
-  formularioProductoManual.codigoBarras = producto.codigoBarras || formularioProductoManual.codigoBarras
-  formularioProductoManual.cantidad = producto.cantidad || formularioProductoManual.cantidad
-  formularioProductoManual.unidad = producto.unidad || formularioProductoManual.unidad
-  formularioProductoManual.marca = producto.marca || formularioProductoManual.marca
-  formularioProductoManual.categoria = producto.categoria || formularioProductoManual.categoria
-  formularioProductoManual.imagen = producto.imagen || formularioProductoManual.imagen
+  formularioProductoManual.value = {
+    ...formularioProductoManual.value,
+    nombre: producto.nombre || formularioProductoManual.value.nombre,
+    codigoBarras: producto.codigoBarras || formularioProductoManual.value.codigoBarras,
+    cantidad: producto.cantidad || formularioProductoManual.value.cantidad,
+    unidad: producto.unidad || formularioProductoManual.value.unidad,
+    marca: producto.marca || formularioProductoManual.value.marca,
+    categoria: producto.categoria || formularioProductoManual.value.categoria,
+    imagen: producto.imagen || formularioProductoManual.value.imagen,
+  }
 }
 
 function activarEscanerManual() {
@@ -1085,7 +1096,10 @@ function alEscanerManualNoDisponible() {
 
 async function alDetectarCodigoManual(codigo) {
   escanerManualActivo.value = false
-  formularioProductoManual.codigoBarras = codigo
+  formularioProductoManual.value = {
+    ...formularioProductoManual.value,
+    codigoBarras: codigo,
+  }
   await buscarManualPorCodigo(codigo)
 }
 
@@ -1115,8 +1129,14 @@ onMounted(async () => {
   await listaJustaStore.registrarUsoLista(route.params.id)
   await listaJustaStore.sincronizarRelacionConMisProductos()
   await listaJustaStore.sincronizarEstadosMesaTrabajo()
-  formularioProductoManual.unidad = preferenciasStore.unidad || 'unidad'
-  formularioPrecioManual.moneda = preferenciasStore.monedaDefaultEfectiva
+  formularioProductoManual.value = {
+    ...formularioProductoManual.value,
+    unidad: preferenciasStore.unidad || 'unidad',
+  }
+  formularioPrecioManual.value = {
+    ...formularioPrecioManual.value,
+    moneda: preferenciasStore.monedaDefaultEfectiva,
+  }
 })
 </script>
 
