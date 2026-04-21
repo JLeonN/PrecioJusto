@@ -4,16 +4,31 @@
       <div v-if="!listaActual" class="text-center q-pa-xl">
         <q-icon name="error_outline" size="52px" color="negative" />
         <p class="text-h6 q-mt-md q-mb-sm">No se encontró la lista</p>
-        <q-btn flat no-caps color="secondary" label="Volver a Lista Justa" @click="router.push('/lista-justa')" />
+        <q-btn
+          flat
+          no-caps
+          color="secondary"
+          label="Volver a Lista Justa"
+          @click="router.push('/lista-justa')"
+        />
       </div>
 
       <template v-else>
         <div class="encabezado-detalle q-mb-md">
-          <q-btn flat round dense icon="arrow_back" color="secondary" @click="router.push('/lista-justa')" />
+          <q-btn
+            flat
+            round
+            dense
+            icon="arrow_back"
+            color="secondary"
+            @click="router.push('/lista-justa')"
+          />
           <div class="encabezado-detalle-texto">
             <h5 class="titulo-pagina">{{ listaActual.nombre }}</h5>
             <div class="fila-contadores">
-              <p class="contador-items q-mb-none">{{ productosComprados }} de {{ totalProductos }} comprados</p>
+              <p class="contador-items q-mb-none">
+                {{ productosComprados }} de {{ totalProductos }} comprados
+              </p>
               <p class="contador-items contador-items-derecha q-mb-none">
                 {{ contadorItemsComprados }} de {{ contadorItemsTotales }} ítems
               </p>
@@ -81,7 +96,12 @@
               </div>
             </template>
 
-            <q-card flat bordered class="tarjeta-item" :class="{ 'tarjeta-item-comprado': item.comprado }">
+            <q-card
+              flat
+              bordered
+              class="tarjeta-item"
+              :class="{ 'tarjeta-item-comprado': item.comprado }"
+            >
               <q-card-section class="q-pa-sm fila-item">
                 <div class="columna-imagen">
                   <q-img
@@ -133,8 +153,16 @@
                           type="text"
                           inputmode="decimal"
                           label="Precio"
-                          @update:model-value="(valor) => { edicionInline.precioTexto = filtrarInputPrecio(valor) }"
-                          @blur="edicionInline.precioTexto = formatearPrecioAlSalir(edicionInline.precioTexto)"
+                          @update:model-value="
+                            (valor) => {
+                              edicionInline.precioTexto = filtrarInputPrecio(valor)
+                            }
+                          "
+                          @blur="
+                            edicionInline.precioTexto = formatearPrecioAlSalir(
+                              edicionInline.precioTexto,
+                            )
+                          "
                           @keydown="soloNumerosDecimales"
                           @keyup.enter="guardarEdicionInline(item.id)"
                         />
@@ -183,17 +211,37 @@
                         class="fila-mayorista-item"
                         :class="{ 'fila-mayorista-item-activa': escala.activa }"
                       >
-                        <span>{{ escala.cantidadMinima }}+ {{ abreviarUnidad(item.unidad) }}</span>
-                        <strong>{{ formatearMoneda(escala.precioUnitario, grupo.moneda) }}</strong>
+                        <span>{{ textoEscalaMayorista(escala) }}</span>
+                        <strong>{{ textoPrecioEscalaMayorista(escala, grupo.moneda) }}</strong>
                       </div>
                     </div>
                   </div>
 
                   <div class="fila-acciones-item">
-                    <div class="control-cantidad">
-                      <q-btn flat round dense icon="remove" color="secondary" @click="ajustarCantidad(item.id, -1)" />
-                      <span>{{ item.cantidad }}</span>
-                      <q-btn flat round dense icon="add" color="secondary" @click="ajustarCantidad(item.id, 1)" />
+                    <div class="fila-cantidad-y-subtotal">
+                      <div class="control-cantidad">
+                        <q-btn
+                          flat
+                          round
+                          dense
+                          icon="remove"
+                          color="secondary"
+                          @click="ajustarCantidad(item.id, -1)"
+                        />
+                        <span>{{ item.cantidad }}</span>
+                        <q-btn
+                          flat
+                          round
+                          dense
+                          icon="add"
+                          color="secondary"
+                          @click="ajustarCantidad(item.id, 1)"
+                        />
+                      </div>
+
+                      <div v-if="mostrarSubtotalItem(item)" class="subtotal-item">
+                        {{ subtotalItemFormateado(item) }}
+                      </div>
                     </div>
 
                     <div class="acciones-secundarias-item">
@@ -235,7 +283,10 @@
         </div>
 
         <q-banner v-if="compradosSinPrecio > 0" class="q-mt-md" rounded>
-          Hay {{ compradosSinPrecio }} producto{{ compradosSinPrecio > 1 ? 's' : '' }} comprado{{ compradosSinPrecio > 1 ? 's' : '' }} sin precio. Se muestra total parcial.
+          Hay {{ compradosSinPrecio }} producto{{ compradosSinPrecio > 1 ? 's' : '' }} comprado{{
+            compradosSinPrecio > 1 ? 's' : ''
+          }}
+          sin precio. Se muestra total parcial.
         </q-banner>
 
         <q-banner v-if="tieneMultiplesMonedasCompradas" class="q-mt-md" rounded>
@@ -248,7 +299,9 @@
               <span>{{ etiquetaTotalCalculada }}</span>
               <strong>{{ formatearMoneda(totalCompradoCalculado, monedaTotalCalculada) }}</strong>
             </div>
-            <div class="text-caption text-grey-7">Estimación de precios: los valores pueden variar.</div>
+            <div class="text-caption text-grey-7">
+              Estimación de precios: los valores pueden variar.
+            </div>
           </q-card-section>
         </q-card>
       </template>
@@ -266,7 +319,9 @@
         <q-card-section class="encabezado-dialogo-agregar-item">
           <div class="text-h6">Agregar producto</div>
           <div v-if="modoAlta === 'misProductos'" class="contador-productos-seleccionados">
-            <span class="contador-productos-seleccionados-valor">{{ cantidadProductosSeleccionados }}</span>
+            <span class="contador-productos-seleccionados-valor">{{
+              cantidadProductosSeleccionados
+            }}</span>
           </div>
         </q-card-section>
 
@@ -278,7 +333,13 @@
 
           <div v-if="modoAlta === 'misProductos'" class="q-mt-sm">
             <div class="encabezado-seleccion-productos">
-              <q-input v-model="textoBusquedaProducto" outlined dense label="Buscar producto" class="buscador-productos-dialogo" />
+              <q-input
+                v-model="textoBusquedaProducto"
+                outlined
+                dense
+                label="Buscar producto"
+                class="buscador-productos-dialogo"
+              />
             </div>
             <q-list bordered separator class="lista-productos-origen q-mt-sm">
               <q-item
@@ -300,9 +361,23 @@
                 </q-item-section>
                 <q-item-section side>
                   <div class="control-cantidad control-cantidad-dialogo" @click.stop>
-                    <q-btn flat round dense icon="remove" color="secondary" @click.stop="ajustarCantidadSeleccion(producto.id, -1)" />
+                    <q-btn
+                      flat
+                      round
+                      dense
+                      icon="remove"
+                      color="secondary"
+                      @click.stop="ajustarCantidadSeleccion(producto.id, -1)"
+                    />
                     <span>{{ cantidadSeleccionadaProducto(producto.id) }}</span>
-                    <q-btn flat round dense icon="add" color="secondary" @click.stop="ajustarCantidadSeleccion(producto.id, 1)" />
+                    <q-btn
+                      flat
+                      round
+                      dense
+                      icon="add"
+                      color="secondary"
+                      @click.stop="ajustarCantidadSeleccion(producto.id, 1)"
+                    />
                   </div>
                 </q-item-section>
               </q-item>
@@ -330,14 +405,30 @@
         </q-card-section>
 
         <q-card-actions class="acciones-dialogo-agregar acciones-safe-area-publicidad">
-          <div v-if="modoAlta === 'misProductos' && cantidadProductosSeleccionados > 0" class="resumen-total-seleccion">
+          <div
+            v-if="modoAlta === 'misProductos' && cantidadProductosSeleccionados > 0"
+            class="resumen-total-seleccion"
+          >
             <span class="resumen-total-seleccion-etiqueta">{{ etiquetaTotalSeleccionado }}</span>
             <strong class="resumen-total-seleccion-valor">
               {{ textoTotalProductosSeleccionados }}
             </strong>
           </div>
-          <q-btn flat no-caps label="Cancelar" color="grey-7" @click="dialogoAgregarItemAbierto = false" />
-          <q-btn unelevated no-caps label="Agregar" color="secondary" :disable="!formularioValido" @click="confirmarAgregarItem" />
+          <q-btn
+            flat
+            no-caps
+            label="Cancelar"
+            color="grey-7"
+            @click="dialogoAgregarItemAbierto = false"
+          />
+          <q-btn
+            unelevated
+            no-caps
+            label="Agregar"
+            color="secondary"
+            :disable="!formularioValido"
+            @click="confirmarAgregarItem"
+          />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -418,16 +509,6 @@ const edicionInline = reactive({
   moneda: 'UYU',
 })
 
-const ABREVIATURAS_UNIDAD = {
-  unidad: 'u.',
-  litro: 'L',
-  mililitro: 'ml',
-  kilo: 'kg',
-  gramo: 'g',
-  metro: 'm',
-  pack: 'pack',
-}
-
 const formularioProductoManual = ref({
   nombre: '',
   cantidad: 1,
@@ -484,7 +565,10 @@ const productosComprados = computed(() => {
 })
 const contadorItemsTotales = computed(() => {
   if (!listaActual.value) return 0
-  return listaActual.value.items.reduce((acumulado, item) => acumulado + Number(item.cantidad || 0), 0)
+  return listaActual.value.items.reduce(
+    (acumulado, item) => acumulado + Number(item.cantidad || 0),
+    0,
+  )
 })
 const contadorItemsComprados = computed(() => {
   if (!listaActual.value) return 0
@@ -568,12 +652,20 @@ const productosFiltrados = computed(() => {
       const marca = String(producto.marca || '').toLowerCase()
       const categoria = String(producto.categoria || '').toLowerCase()
       const codigo = String(producto.codigoBarras || '').toLowerCase()
-      return nombre.includes(texto) || marca.includes(texto) || categoria.includes(texto) || codigo.includes(texto)
+      return (
+        nombre.includes(texto) ||
+        marca.includes(texto) ||
+        categoria.includes(texto) ||
+        codigo.includes(texto)
+      )
     })
     .slice(0, 40)
 })
 const cantidadProductosSeleccionados = computed(
-  () => Object.keys(productosSeleccionados.value).filter((productoId) => Number(productosSeleccionados.value[productoId]) > 0).length,
+  () =>
+    Object.keys(productosSeleccionados.value).filter(
+      (productoId) => Number(productosSeleccionados.value[productoId]) > 0,
+    ).length,
 )
 const productosSeleccionadosParaAgregar = computed(() => {
   return productosStore.productosPorInteraccion
@@ -590,14 +682,20 @@ const monedasProductosSeleccionados = computed(() => {
 
   return [...new Set(monedas)]
 })
-const tieneMultiplesMonedasSeleccionadas = computed(() => monedasProductosSeleccionados.value.length > 1)
+const tieneMultiplesMonedasSeleccionadas = computed(
+  () => monedasProductosSeleccionados.value.length > 1,
+)
 const monedaTotalSeleccionado = computed(() => {
-  if (monedasProductosSeleccionados.value.length === 1) return monedasProductosSeleccionados.value[0]
+  if (monedasProductosSeleccionados.value.length === 1)
+    return monedasProductosSeleccionados.value[0]
   return preferenciasStore.monedaDefaultEfectiva
 })
 const totalProductosSeleccionados = computed(() => {
   return productosSeleccionadosParaAgregar.value.reduce((acumulado, producto) => {
-    const precioBase = Number(obtenerPrecioProductoSeleccion(producto, Number(producto.cantidadSeleccionada || 0)).valor || 0)
+    const precioBase = Number(
+      obtenerPrecioProductoSeleccion(producto, Number(producto.cantidadSeleccionada || 0)).valor ||
+        0,
+    )
     const cantidad = Number(producto.cantidadSeleccionada || 0)
     if (!Number.isFinite(precioBase) || precioBase <= 0) return acumulado
     if (!Number.isFinite(cantidad) || cantidad <= 0) return acumulado
@@ -636,10 +734,6 @@ const monedaTotalCalculada = computed(() => {
 
 function formatearMoneda(valor, moneda = preferenciasStore.monedaDefaultEfectiva) {
   return formatearPrecioConCodigo(valor, moneda)
-}
-
-function abreviarUnidad(unidad) {
-  return ABREVIATURAS_UNIDAD[unidad] || 'u.'
 }
 
 function normalizarEscalasValidas(escalas) {
@@ -748,8 +842,13 @@ function resolverPrecioProducto(producto, cantidad = 1) {
     }
   }
 
-  const monedaReferencia = producto?.monedaReferencia || preciosFiltrados[0]?.moneda || preferenciasStore.monedaDefaultEfectiva
-  const comparables = preciosFiltrados.filter((precio) => (precio.moneda || monedaReferencia) === monedaReferencia)
+  const monedaReferencia =
+    producto?.monedaReferencia ||
+    preciosFiltrados[0]?.moneda ||
+    preferenciasStore.monedaDefaultEfectiva
+  const comparables = preciosFiltrados.filter(
+    (precio) => (precio.moneda || monedaReferencia) === monedaReferencia,
+  )
   const candidatos = comparables.length > 0 ? comparables : preciosFiltrados
 
   const gruposMayoristas = candidatos
@@ -759,9 +858,10 @@ function resolverPrecioProducto(producto, cantidad = 1) {
           precio.comercioId && precio.direccionId
             ? `${precio.comercioId}_${precio.direccionId}`
             : precio.nombreCompleto || precio.comercio || precio.id,
-        etiqueta: comercioSesionLista.value?.id || comercioSesionLista.value?.direccionId
-          ? ''
-          : precio.nombreCompleto || precio.comercio || 'Sin comercio',
+        etiqueta:
+          comercioSesionLista.value?.id || comercioSesionLista.value?.direccionId
+            ? ''
+            : precio.nombreCompleto || precio.comercio || 'Sin comercio',
         moneda: precio.moneda || monedaReferencia,
         escalas: precio.escalasPorCantidad,
         precioBase: precio.valor,
@@ -800,25 +900,30 @@ function resolverPrecioProducto(producto, cantidad = 1) {
 }
 
 function resolverPrecioManual(item) {
-  const resultado = aplicarPrecioPorCantidad(item.precioManual, item.escalasPorCantidad, item.cantidad)
+  const resultado = aplicarPrecioPorCantidad(
+    item.precioManual,
+    item.escalasPorCantidad,
+    item.cantidad,
+  )
 
   return {
     valor: resultado.valor,
     moneda: item.moneda || preferenciasStore.monedaDefaultEfectiva,
     usaMayorista: resultado.usaMayorista,
-    gruposMayoristas: resultado.escalas.length > 0
-      ? [
-          {
-            clave: `manual_${item.id}`,
-            etiqueta: '',
-            moneda: item.moneda || preferenciasStore.monedaDefaultEfectiva,
-            precioBase: Number(item.precioManual),
-            usaMayorista: resultado.usaMayorista,
-            escalas: resultado.escalas,
-            mejorPrecioGrupo: resultado.valor,
-          },
-        ]
-      : [],
+    gruposMayoristas:
+      resultado.escalas.length > 0
+        ? [
+            {
+              clave: `manual_${item.id}`,
+              etiqueta: '',
+              moneda: item.moneda || preferenciasStore.monedaDefaultEfectiva,
+              precioBase: Number(item.precioManual),
+              usaMayorista: resultado.usaMayorista,
+              escalas: resultado.escalas,
+              mejorPrecioGrupo: resultado.valor,
+            },
+          ]
+        : [],
   }
 }
 
@@ -856,6 +961,40 @@ function textoSinPrecio(item) {
   }
 
   return item.productoId ? 'Sin precio disponible' : 'Sin precio cargado'
+}
+
+function textoEscalaMayorista(escala) {
+  const cantidadMinima = Number(escala?.cantidadMinima || 0)
+  if (!Number.isFinite(cantidadMinima) || cantidadMinima <= 1) return 'Precio mayorista'
+  return `Comprando ${cantidadMinima}`
+}
+
+function textoPrecioEscalaMayorista(escala, moneda) {
+  return `${formatearMoneda(escala?.precioUnitario, moneda)} c/u`
+}
+
+function subtotalItem(item) {
+  const precio = precioVisualDetallado(item)
+  const valor = Number(precio.valor || 0)
+  const cantidad = Number(item?.cantidad || 0)
+
+  if (!Number.isFinite(valor) || valor <= 0) return null
+  if (!Number.isFinite(cantidad) || cantidad <= 0) return null
+
+  return {
+    valor: valor * cantidad,
+    moneda: precio.moneda,
+  }
+}
+
+function mostrarSubtotalItem(item) {
+  return Number(item?.cantidad || 0) > 1 && Boolean(subtotalItem(item))
+}
+
+function subtotalItemFormateado(item) {
+  const subtotal = subtotalItem(item)
+  if (!subtotal) return ''
+  return formatearMoneda(subtotal.valor, subtotal.moneda)
 }
 
 function gruposMayoristasItem(item) {
@@ -915,9 +1054,7 @@ function ajustarCantidadSeleccion(productoId, variacion) {
   const cantidadActual = Number(productosSeleccionados.value[productoId] || 0)
   if (cantidadActual <= 0 && variacion < 0) return
 
-  const cantidadSiguiente = cantidadActual <= 0
-    ? 1
-    : cantidadActual + variacion
+  const cantidadSiguiente = cantidadActual <= 0 ? 1 : cantidadActual + variacion
 
   const copia = { ...productosSeleccionados.value }
   if (cantidadSiguiente <= 0) {
@@ -932,7 +1069,10 @@ function precioProductoSeleccion(producto) {
   const cantidad = cantidadSeleccionadaProducto(producto.id)
   const precio = obtenerPrecioProductoSeleccion(producto, cantidad)
   const total = Number(precio.valor || 0) * cantidad
-  return formatearMoneda(total, precio.moneda || producto.monedaReferencia || preferenciasStore.monedaDefaultEfectiva)
+  return formatearMoneda(
+    total,
+    precio.moneda || producto.monedaReferencia || preferenciasStore.monedaDefaultEfectiva,
+  )
 }
 
 function obtenerPrecioProductoSeleccion(producto, cantidad) {
@@ -981,7 +1121,8 @@ function toggleEdicionInline(item) {
   edicionInline.precioTexto = formatearPrecioAlSalir(
     item.precioManual != null ? String(item.precioManual) : String(precioVisual(item) || ''),
   )
-  edicionInline.moneda = precioVisualDetallado(item).moneda || preferenciasStore.monedaDefaultEfectiva
+  edicionInline.moneda =
+    precioVisualDetallado(item).moneda || preferenciasStore.monedaDefaultEfectiva
 }
 
 async function guardarEdicionInline(itemId) {
@@ -1030,7 +1171,11 @@ async function enviarAMesa(itemId) {
   const enviado = await listaJustaStore.enviarItemAMesaTrabajo(listaActual.value.id, itemId)
 
   if (!enviado) {
-    quasar.notify({ type: 'warning', message: 'No se pudo enviar a Mesa de trabajo.', position: 'top' })
+    quasar.notify({
+      type: 'warning',
+      message: 'No se pudo enviar a Mesa de trabajo.',
+      position: 'top',
+    })
     return
   }
 
@@ -1048,9 +1193,11 @@ async function confirmarAgregarItem() {
   const productoValido = refFormularioProductoManual.value?.validarFormulario()
   if (!productoValido) return
 
-  const cantidadNormalizada = Number.isFinite(Number(formularioProductoManual.value.cantidad)) && Number(formularioProductoManual.value.cantidad) > 0
-    ? Number(formularioProductoManual.value.cantidad)
-    : 1
+  const cantidadNormalizada =
+    Number.isFinite(Number(formularioProductoManual.value.cantidad)) &&
+    Number(formularioProductoManual.value.cantidad) > 0
+      ? Number(formularioProductoManual.value.cantidad)
+      : 1
 
   const payload = {
     productoId: null,
@@ -1134,7 +1281,10 @@ async function confirmarAgregarProductosMultiples() {
   if (agregados === 0 && duplicados > 0) {
     quasar.notify({
       type: 'warning',
-      message: duplicados === 1 ? 'Ese producto ya está en la lista.' : `${duplicados} productos ya estaban en la lista.`,
+      message:
+        duplicados === 1
+          ? 'Ese producto ya está en la lista.'
+          : `${duplicados} productos ya estaban en la lista.`,
       position: 'top',
     })
     return
@@ -1143,9 +1293,10 @@ async function confirmarAgregarProductosMultiples() {
   if (agregados > 0) {
     quasar.notify({
       type: duplicados > 0 ? 'info' : 'positive',
-      message: duplicados > 0
-        ? `Se agregaron ${agregados} productos. ${duplicados} ya estaban en la lista.`
-        : `Se agregaron ${agregados} productos.`,
+      message:
+        duplicados > 0
+          ? `Se agregaron ${agregados} productos. ${duplicados} ya estaban en la lista.`
+          : `Se agregaron ${agregados} productos.`,
       position: 'top',
     })
   }
@@ -1195,12 +1346,15 @@ async function buscarManualPorCodigo(codigo, callbackFinalizar) {
     ultimoCodigoBusquedaManual.value = codigoLimpio
     if (!codigoLimpio) return
 
-    const respuesta = await busquedaProductosHibridaService.buscarPorCodigoConPolitica(codigoLimpio, {
-      forzarApi: false,
-      onAntesLlamadaApi: () => {
-        buscandoConsultaManual.value = true
+    const respuesta = await busquedaProductosHibridaService.buscarPorCodigoConPolitica(
+      codigoLimpio,
+      {
+        forzarApi: false,
+        onAntesLlamadaApi: () => {
+          buscandoConsultaManual.value = true
+        },
       },
-    })
+    )
 
     resultadosBusquedaManual.value = respuesta.itemsParaDialogo
     variantePieBusquedaManual.value = respuesta.puedeEnriquecerConApi ? 'codigo-local' : null
@@ -1234,12 +1388,15 @@ async function buscarManualPorNombre(nombre, callbackFinalizar) {
     ultimoNombreBusquedaManual.value = nombreLimpio
     if (!nombreLimpio) return
 
-    const respuesta = await busquedaProductosHibridaService.buscarPorNombreConPolitica(nombreLimpio, {
-      ampliarOpenFoodFacts: false,
-      onAntesLlamadaApi: () => {
-        buscandoConsultaManual.value = true
+    const respuesta = await busquedaProductosHibridaService.buscarPorNombreConPolitica(
+      nombreLimpio,
+      {
+        ampliarOpenFoodFacts: false,
+        onAntesLlamadaApi: () => {
+          buscandoConsultaManual.value = true
+        },
       },
-    })
+    )
 
     resultadosBusquedaManual.value = respuesta.itemsParaDialogo
     variantePieBusquedaManual.value = respuesta.puedeAmpliarOpenFoodFacts ? 'nombre-local' : null
@@ -1275,19 +1432,25 @@ async function ampliarBusquedaManual() {
   buscandoConsultaManual.value = true
   try {
     if (tipo === 'codigo-local') {
-      const respuesta = await busquedaProductosHibridaService.buscarPorCodigoConPolitica(ultimoCodigoBusquedaManual.value, {
-        forzarApi: true,
-        onAntesLlamadaApi: () => {},
-      })
+      const respuesta = await busquedaProductosHibridaService.buscarPorCodigoConPolitica(
+        ultimoCodigoBusquedaManual.value,
+        {
+          forzarApi: true,
+          onAntesLlamadaApi: () => {},
+        },
+      )
       resultadosBusquedaManual.value = respuesta.itemsParaDialogo
       variantePieBusquedaManual.value = null
     }
 
     if (tipo === 'nombre-local') {
-      const respuesta = await busquedaProductosHibridaService.buscarPorNombreConPolitica(ultimoNombreBusquedaManual.value, {
-        ampliarOpenFoodFacts: true,
-        onAntesLlamadaApi: () => {},
-      })
+      const respuesta = await busquedaProductosHibridaService.buscarPorNombreConPolitica(
+        ultimoNombreBusquedaManual.value,
+        {
+          ampliarOpenFoodFacts: true,
+          onAntesLlamadaApi: () => {},
+        },
+      )
       resultadosBusquedaManual.value = respuesta.itemsParaDialogo
       variantePieBusquedaManual.value = null
     }
@@ -1540,6 +1703,9 @@ onMounted(async () => {
 .fila-mayorista-item + .fila-mayorista-item {
   margin-top: 4px;
 }
+.fila-mayorista-item strong {
+  flex-shrink: 0;
+}
 .fila-mayorista-item-activa {
   color: var(--texto-primario);
 }
@@ -1551,11 +1717,29 @@ onMounted(async () => {
   align-items: center;
   justify-content: space-between;
 }
+.fila-cantidad-y-subtotal {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
 .acciones-secundarias-item {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   justify-content: flex-end;
+  margin-left: auto;
+}
+.subtotal-item {
+  padding: 6px 10px;
+  border: 1px solid color-mix(in srgb, var(--color-secundario) 24%, var(--borde-color));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-secundario) 8%, var(--fondo-app-secundario));
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--color-secundario);
+  white-space: nowrap;
 }
 .boton-enviar-mesa {
   min-height: 34px;
@@ -1643,7 +1827,9 @@ onMounted(async () => {
   align-items: center;
   gap: 10px;
   padding-left: 10px;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 .contenido-item-producto-dialogo {
   min-width: 0;
@@ -1759,9 +1945,13 @@ onMounted(async () => {
   .fila-acciones-item {
     align-items: stretch;
   }
+  .fila-cantidad-y-subtotal {
+    width: 100%;
+  }
   .acciones-secundarias-item {
     width: 100%;
     justify-content: flex-start;
+    margin-left: 0;
   }
   .acciones-dialogo-agregar {
     gap: 6px;
