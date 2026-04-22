@@ -188,10 +188,41 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
       cambios.moneda = monedaNormalizada || itemActual.moneda || 'UYU'
     }
 
+    if (cambios.activarPreciosMayoristas !== undefined) {
+      cambios.activarPreciosMayoristas = Boolean(cambios.activarPreciosMayoristas)
+    }
+
+    if (cambios.escalasPorCantidad !== undefined) {
+      cambios.escalasPorCantidad = Array.isArray(cambios.escalasPorCantidad)
+        ? ListaJustaService.normalizarItem({ escalasPorCantidad: cambios.escalasPorCantidad }).escalasPorCantidad
+        : []
+    }
+
     const itemActualizado = {
       ...itemActual,
       ...cambios,
       actualizadoEn: new Date().toISOString(),
+    }
+
+    const cambioPrecioLocal =
+      itemActual.productoId &&
+      (
+        cambios.precioManual !== undefined ||
+        cambios.moneda !== undefined ||
+        cambios.activarPreciosMayoristas !== undefined ||
+        cambios.escalasPorCantidad !== undefined
+      )
+
+    if (cambioPrecioLocal) {
+      const comparacionPrecio = compararConPrecioOriginal(itemActualizado)
+      itemActualizado.usaPreciosLocales = comparacionPrecio.usaPreciosLocales
+      itemActualizado.precioManual = comparacionPrecio.precioManual
+      itemActualizado.moneda = comparacionPrecio.moneda
+      itemActualizado.activarPreciosMayoristas = comparacionPrecio.activarPreciosMayoristas
+      itemActualizado.escalasPorCantidad = comparacionPrecio.escalasPorCantidad
+      itemActualizado.estadoDerivacion = itemActualizado.mesaTrabajoItemId
+        ? 'enMesa'
+        : 'enMisProductos'
     }
 
     itemActualizado.advertencias = {
@@ -255,7 +286,13 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     if (!lista) return false
 
     const item = lista.items.find((actual) => actual.id === itemId)
-    if (!item || item.productoId || item.estadoDerivacion === 'enMisProductos') return false
+    if (!item) return false
+
+    const puedeDerivarDesdeMisProductos = Boolean(item.productoId && item.usaPreciosLocales)
+    const puedeDerivarManual = !item.productoId && item.estadoDerivacion !== 'enMisProductos'
+    if (!puedeDerivarDesdeMisProductos && !puedeDerivarManual) return false
+
+    const escalasPorCantidad = Array.isArray(item.escalasPorCantidad) ? item.escalasPorCantidad : []
 
     const itemMesa = sesionEscaneoStore.agregarItem({
       codigoBarras: item.codigoBarras,
@@ -267,8 +304,10 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
       precio: item.precioManual || 0,
       moneda: item.moneda || 'UYU',
       origenApi: false,
-      productoExistenteId: null,
-      sinCoincidencia: true,
+      productoExistenteId: item.productoId || null,
+      sinCoincidencia: !item.productoId,
+      activarPreciosMayoristas: Boolean(item.activarPreciosMayoristas) && escalasPorCantidad.length > 0,
+      escalasPorCantidad,
       origenListaJusta: {
         listaId,
         itemId,
@@ -501,6 +540,10 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
 
     item.estadoDerivacion = 'enMisProductos'
     item.mesaTrabajoItemId = null
+    item.usaPreciosLocales = false
+    item.precioManual = null
+    item.activarPreciosMayoristas = false
+    item.escalasPorCantidad = []
     if (productoId) {
       item.productoId = productoId
     }
@@ -530,6 +573,147 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
       tieneCodigo &&
       tieneCategoria
     )
+  }
+
+  async function restaurarPreciosOriginales(listaId, itemId) {
+    const lista = obtenerListaPorId(listaId)
+    if (!lista) return false
+
+    const item = lista.items.find((actual) => actual.id === itemId)
+    if (!item || !item.productoId) return false
+
+    item.usaPreciosLocales = false
+    item.precioManual = null
+    item.activarPreciosMayoristas = false
+    item.escalasPorCantidad = []
+    item.estadoDerivacion = item.mesaTrabajoItemId ? 'enMesa' : 'enMisProductos'
+    item.actualizadoEn = new Date().toISOString()
+    lista.fechaActualizacion = new Date().toISOString()
+    await persistir()
+    return true
+  }
+
+  function compararConPrecioOriginal(item) {
+    const precioLocal = normalizarPrecioComparable(item)
+    const precioOriginal = obtenerPrecioOriginalComparable(item.productoId)
+
+    if (!precioOriginal) {
+      return {
+        usaPreciosLocales: true,
+        precioManual: precioLocal.precioManual,
+        moneda: precioLocal.moneda,
+        activarPreciosMayoristas: precioLocal.activarPreciosMayoristas,
+        escalasPorCantidad: precioLocal.escalasPorCantidad,
+      }
+    }
+
+    const coincidePrecio = precioLocal.precioManual === precioOriginal.precioManual
+    const coincideMoneda = precioLocal.moneda === precioOriginal.moneda
+    const coincideActivacion =
+      precioLocal.activarPreciosMayoristas === precioOriginal.activarPreciosMayoristas
+    const coincideEscalas = sonEscalasIguales(
+      precioLocal.escalasPorCantidad,
+      precioOriginal.escalasPorCantidad,
+    )
+
+    if (coincidePrecio && coincideMoneda && coincideActivacion && coincideEscalas) {
+      return {
+        usaPreciosLocales: false,
+        precioManual: null,
+        moneda: item.moneda || precioOriginal.moneda || 'UYU',
+        activarPreciosMayoristas: false,
+        escalasPorCantidad: [],
+      }
+    }
+
+    return {
+      usaPreciosLocales: true,
+      precioManual: precioLocal.precioManual,
+      moneda: precioLocal.moneda,
+      activarPreciosMayoristas: precioLocal.activarPreciosMayoristas,
+      escalasPorCantidad: precioLocal.escalasPorCantidad,
+    }
+  }
+
+  function normalizarPrecioComparable(origen = {}) {
+    const precioBase = Number(origen.precioManual)
+    const precioManual = Number.isFinite(precioBase) && precioBase > 0 ? precioBase : null
+    const moneda = String(origen.moneda || '').trim().toUpperCase() || 'UYU'
+    const escalasPorCantidad = Array.isArray(origen.escalasPorCantidad)
+      ? ListaJustaService.normalizarItem({ escalasPorCantidad: origen.escalasPorCantidad }).escalasPorCantidad
+      : []
+    const activarPreciosMayoristas =
+      Boolean(origen.activarPreciosMayoristas) && escalasPorCantidad.length > 0
+
+    return {
+      precioManual,
+      moneda,
+      activarPreciosMayoristas,
+      escalasPorCantidad,
+    }
+  }
+
+  function obtenerPrecioOriginalComparable(productoId) {
+    if (!productoId) return null
+
+    const producto = productosStore.obtenerProductoPorId(productoId)
+    if (!producto) return null
+
+    const precioOriginal = obtenerMejorPrecioProducto(producto)
+    if (!precioOriginal) return null
+
+    return normalizarPrecioComparable({
+      precioManual: precioOriginal.valor,
+      moneda: precioOriginal.moneda || producto.monedaReferencia || 'UYU',
+      activarPreciosMayoristas: precioOriginal.activarPreciosMayoristas,
+      escalasPorCantidad: precioOriginal.escalasPorCantidad,
+    })
+  }
+
+  function obtenerMejorPrecioProducto(producto) {
+    if (!Array.isArray(producto?.precios) || producto.precios.length === 0) return null
+
+    const preciosVigentes = new Map()
+
+    for (const precio of producto.precios) {
+      const clave =
+        precio?.comercioId && precio?.direccionId
+          ? `${precio.comercioId}_${precio.direccionId}`
+          : precio?.nombreCompleto || precio?.comercio || precio?.id
+      const actual = preciosVigentes.get(clave)
+      if (!actual || new Date(precio.fecha) > new Date(actual.fecha)) {
+        preciosVigentes.set(clave, precio)
+      }
+    }
+
+    const candidatos = [...preciosVigentes.values()]
+      .map((precio) => ({
+        ...precio,
+        moneda: precio?.moneda || producto.monedaReferencia || 'UYU',
+        valor: Number(precio?.valor),
+      }))
+      .filter((precio) => Number.isFinite(precio.valor) && precio.valor > 0)
+
+    if (candidatos.length === 0) return null
+
+    const monedaReferencia =
+      producto.monedaReferencia || candidatos[0]?.moneda || 'UYU'
+    const comparables = candidatos.filter((precio) => precio.moneda === monedaReferencia)
+    const baseComparacion = comparables.length > 0 ? comparables : candidatos
+
+    return [...baseComparacion].sort((a, b) => a.valor - b.valor)[0]
+  }
+
+  function sonEscalasIguales(escalasA = [], escalasB = []) {
+    if (escalasA.length !== escalasB.length) return false
+
+    return escalasA.every((escala, indice) => {
+      const otraEscala = escalasB[indice]
+      return (
+        Number(escala?.cantidadMinima) === Number(otraEscala?.cantidadMinima) &&
+        Number(escala?.precioUnitario) === Number(otraEscala?.precioUnitario)
+      )
+    })
   }
 
   function obtenerMarcaUso(lista) {
@@ -573,5 +757,6 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     registrarUsoLista,
     actualizarComercioLista,
     marcarItemComoEnMisProductos,
+    restaurarPreciosOriginales,
   }
 })

@@ -48,6 +48,8 @@ class ListaJustaService {
   }
 
   normalizarItem(nuevoItem = {}) {
+    const escalasPorCantidad = this._normalizarEscalasPorCantidad(nuevoItem.escalasPorCantidad)
+
     return {
       id: nuevoItem.id || this._generarId('itemLista'),
       productoId: nuevoItem.productoId || null,
@@ -66,18 +68,9 @@ class ListaJustaService {
       comercio: (nuevoItem.comercio || '').trim() || null,
       unidad: (nuevoItem.unidad || '').trim() || 'unidad',
       imagen: nuevoItem.imagen || null,
-      activarPreciosMayoristas: Boolean(nuevoItem.activarPreciosMayoristas),
-      escalasPorCantidad: Array.isArray(nuevoItem.escalasPorCantidad)
-        ? nuevoItem.escalasPorCantidad
-          .map((escala) => ({
-            cantidadMinima: Number(escala?.cantidadMinima) || 0,
-            precioUnitario: Number.isFinite(Number(escala?.precioUnitario))
-              ? Number(escala.precioUnitario)
-              : null,
-            estadoEscala: escala?.estadoEscala || 'neutral',
-          }))
-          .filter((escala) => escala.cantidadMinima >= 2 && escala.precioUnitario !== null)
-        : [],
+      usaPreciosLocales: Boolean(nuevoItem.usaPreciosLocales),
+      activarPreciosMayoristas: Boolean(nuevoItem.activarPreciosMayoristas) && escalasPorCantidad.length > 0,
+      escalasPorCantidad,
       estadoDerivacion: nuevoItem.estadoDerivacion || 'ninguno',
       mesaTrabajoItemId: nuevoItem.mesaTrabajoItemId || null,
       creadoEn: nuevoItem.creadoEn || new Date().toISOString(),
@@ -112,6 +105,20 @@ class ListaJustaService {
 
   _generarId(prefijo) {
     return `${prefijo}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+  }
+
+  _normalizarEscalasPorCantidad(escalas) {
+    return Array.isArray(escalas)
+      ? escalas
+        .map((escala) => ({
+          cantidadMinima: Number(escala?.cantidadMinima) || 0,
+          precioUnitario: Number.isFinite(Number(escala?.precioUnitario))
+            ? Number(escala.precioUnitario)
+            : null,
+          estadoEscala: escala?.estadoEscala || 'neutral',
+        }))
+        .filter((escala) => escala.cantidadMinima >= 2 && escala.precioUnitario !== null)
+      : []
   }
 }
 

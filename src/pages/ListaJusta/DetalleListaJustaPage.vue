@@ -133,48 +133,83 @@
                       </template>
                     </div>
 
-                    <q-btn
-                      flat
-                      round
-                      dense
-                      color="secondary"
-                      :icon="itemEditandoId === item.id ? 'check' : 'edit'"
-                      @click="toggleEdicionInline(item)"
-                    />
+                    <div class="fila-botones-nombre">
+                      <q-btn
+                        v-if="puedeRestaurarPrecios(item)"
+                        flat
+                        round
+                        dense
+                        color="grey-7"
+                        icon="restart_alt"
+                        @click="restaurarPreciosItem(item.id)"
+                      />
+                      <q-btn
+                        flat
+                        round
+                        dense
+                        color="secondary"
+                        :icon="itemEditandoId === item.id ? 'check' : 'edit'"
+                        @click="toggleEdicionInline(item)"
+                      />
+                    </div>
                   </div>
 
                   <div class="fila-precio">
                     <template v-if="itemEditandoId === item.id">
-                      <div class="fila-edicion-precio">
-                        <q-input
-                          v-model="edicionInline.precioTexto"
-                          dense
-                          outlined
-                          type="text"
-                          inputmode="decimal"
-                          label="Precio"
-                          @update:model-value="
-                            (valor) => {
-                              edicionInline.precioTexto = filtrarInputPrecio(valor)
-                            }
-                          "
-                          @blur="
-                            edicionInline.precioTexto = formatearPrecioAlSalir(
-                              edicionInline.precioTexto,
-                            )
-                          "
-                          @keydown="soloNumerosDecimales"
-                          @keyup.enter="guardarEdicionInline(item.id)"
+                      <div class="editor-inline-item">
+                        <div class="fila-edicion-precio">
+                          <q-input
+                            v-model="edicionInline.precioTexto"
+                            dense
+                            outlined
+                            type="text"
+                            inputmode="decimal"
+                            label="Precio"
+                            @update:model-value="
+                              (valor) => {
+                                edicionInline.precioTexto = filtrarInputPrecio(valor)
+                              }
+                            "
+                            @blur="
+                              edicionInline.precioTexto = formatearPrecioAlSalir(
+                                edicionInline.precioTexto,
+                              )
+                            "
+                            @keydown="soloNumerosDecimales"
+                            @keyup.enter="guardarEdicionInline(item.id)"
+                          />
+                          <q-select
+                            v-model="edicionInline.moneda"
+                            dense
+                            outlined
+                            emit-value
+                            map-options
+                            label="Moneda"
+                            :options="opcionesMoneda"
+                          />
+                        </div>
+                        <BloqueEscalasCantidad
+                          :ref="asignarRefBloqueEscalasEdicion"
+                          v-model="datosEscalasEdicion"
+                          :precio-base="precioBaseEdicion"
+                          class="q-mt-sm"
                         />
-                        <q-select
-                          v-model="edicionInline.moneda"
-                          dense
-                          outlined
-                          emit-value
-                          map-options
-                          label="Moneda"
-                          :options="opcionesMoneda"
-                        />
+                        <div class="fila-acciones-edicion">
+                          <q-btn
+                            flat
+                            no-caps
+                            color="grey-7"
+                            label="Cancelar"
+                            @click="cancelarEdicionInline"
+                          />
+                          <q-btn
+                            unelevated
+                            no-caps
+                            color="secondary"
+                            label="Guardar"
+                            @click="guardarEdicionInline(item.id)"
+                          />
+                        </div>
                       </div>
                     </template>
                     <template v-else>
@@ -461,6 +496,7 @@ import { IconShoppingBag, IconTrash } from '@tabler/icons-vue'
 import { MONEDAS } from '../../almacenamiento/constantes/Monedas.js'
 import SelectorComercioDireccion from '../../components/Compartidos/SelectorComercioDireccion.vue'
 import BotonAccionSticky from '../../components/Compartidos/BotonAccionSticky.vue'
+import BloqueEscalasCantidad from '../../components/Formularios/BloqueEscalasCantidad.vue'
 import FormularioProducto from '../../components/Formularios/FormularioProducto.vue'
 import FormularioPrecio from '../../components/Formularios/FormularioPrecio.vue'
 import DialogoResultadosBusqueda from '../../components/Formularios/Dialogos/DialogoResultadosBusqueda.vue'
@@ -494,6 +530,7 @@ const textoBusquedaProducto = ref('')
 const productosSeleccionados = ref({})
 const refFormularioProductoManual = ref(null)
 const refFormularioPrecioManual = ref(null)
+const refBloqueEscalasEdicion = ref(null)
 const dialogoResultadosManualAbierto = ref(false)
 const resultadosBusquedaManual = ref([])
 const variantePieBusquedaManual = ref(null)
@@ -509,6 +546,28 @@ const edicionInline = reactive({
   nombre: '',
   precioTexto: '',
   moneda: 'UYU',
+  activarPreciosMayoristas: false,
+  escalasPorCantidad: [],
+})
+const datosEscalasEdicion = computed({
+  get() {
+    return {
+      activarPreciosMayoristas: Boolean(edicionInline.activarPreciosMayoristas),
+      escalasPorCantidad: Array.isArray(edicionInline.escalasPorCantidad)
+        ? edicionInline.escalasPorCantidad
+        : [],
+    }
+  },
+  set(valor) {
+    edicionInline.activarPreciosMayoristas = Boolean(valor?.activarPreciosMayoristas)
+    edicionInline.escalasPorCantidad = Array.isArray(valor?.escalasPorCantidad)
+      ? valor.escalasPorCantidad
+      : []
+  },
+})
+const precioBaseEdicion = computed(() => {
+  const precio = parseFloat(edicionInline.precioTexto)
+  return Number.isFinite(precio) && precio > 0 ? precio : null
 })
 
 const formularioProductoManual = ref({
@@ -838,9 +897,12 @@ function resolverPrecioProducto(producto, cantidad = 1) {
   if (preciosFiltrados.length === 0) {
     return {
       valor: null,
+      precioBase: null,
       moneda: producto?.monedaReferencia || preferenciasStore.monedaDefaultEfectiva,
       usaMayorista: false,
       gruposMayoristas: [],
+      activarPreciosMayoristas: false,
+      escalasPorCantidad: [],
     }
   }
 
@@ -877,8 +939,13 @@ function resolverPrecioProducto(producto, cantidad = 1) {
       const aplicacion = aplicarPrecioPorCantidad(precio.valor, precio.escalasPorCantidad, cantidad)
       return {
         valor: aplicacion.valor,
+        precioBase: Number(precio.valor),
         moneda: precio.moneda || monedaReferencia,
         usaMayorista: aplicacion.usaMayorista,
+        activarPreciosMayoristas:
+          Boolean(precio.activarPreciosMayoristas) &&
+          normalizarEscalasValidas(precio.escalasPorCantidad).length > 0,
+        escalasPorCantidad: normalizarEscalasValidas(precio.escalasPorCantidad),
       }
     })
     .filter((precio) => Number.isFinite(Number(precio.valor)) && Number(precio.valor) > 0)
@@ -887,29 +954,37 @@ function resolverPrecioProducto(producto, cantidad = 1) {
   if (!mejorCandidato) {
     return {
       valor: null,
+      precioBase: null,
       moneda: monedaReferencia,
       usaMayorista: false,
       gruposMayoristas,
+      activarPreciosMayoristas: false,
+      escalasPorCantidad: [],
     }
   }
 
   return {
     valor: Number(mejorCandidato.valor),
+    precioBase: Number(mejorCandidato.precioBase),
     moneda: mejorCandidato.moneda,
     usaMayorista: mejorCandidato.usaMayorista,
     gruposMayoristas,
+    activarPreciosMayoristas: mejorCandidato.activarPreciosMayoristas,
+    escalasPorCantidad: mejorCandidato.escalasPorCantidad,
   }
 }
 
 function resolverPrecioManual(item) {
+  const escalasValidas = normalizarEscalasValidas(item.escalasPorCantidad)
   const resultado = aplicarPrecioPorCantidad(
     item.precioManual,
-    item.escalasPorCantidad,
+    escalasValidas,
     item.cantidad,
   )
 
   return {
     valor: resultado.valor,
+    precioBase: Number.isFinite(Number(item.precioManual)) ? Number(item.precioManual) : null,
     moneda: item.moneda || preferenciasStore.monedaDefaultEfectiva,
     usaMayorista: resultado.usaMayorista,
     gruposMayoristas:
@@ -926,11 +1001,13 @@ function resolverPrecioManual(item) {
             },
           ]
         : [],
+    activarPreciosMayoristas: Boolean(item.activarPreciosMayoristas) && escalasValidas.length > 0,
+    escalasPorCantidad: escalasValidas,
   }
 }
 
 function precioVisualDetallado(item) {
-  if (!item.productoId) {
+  if (!item.productoId || item.usaPreciosLocales) {
     return resolverPrecioManual(item)
   }
 
@@ -938,9 +1015,12 @@ function precioVisualDetallado(item) {
   if (!producto) {
     return {
       valor: null,
+      precioBase: null,
       moneda: item.moneda || preferenciasStore.monedaDefaultEfectiva,
       usaMayorista: false,
       gruposMayoristas: [],
+      activarPreciosMayoristas: false,
+      escalasPorCantidad: [],
     }
   }
 
@@ -1027,10 +1107,14 @@ function esItemManual(item) {
 }
 
 function puedeEnviarAMesa(item) {
-  if (!esItemManual(item)) return false
   if (item.estadoDerivacion === 'enMesa') return false
+  if (item.productoId) return Boolean(item.usaPreciosLocales)
   if (item.estadoDerivacion === 'enMisProductos') return false
   return true
+}
+
+function puedeRestaurarPrecios(item) {
+  return Boolean(item.productoId && item.usaPreciosLocales)
 }
 
 function productoEstaSeleccionado(productoId) {
@@ -1118,13 +1202,25 @@ function toggleEdicionInline(item) {
     return
   }
 
+  const precioEditable = precioVisualDetallado(item)
   itemEditandoId.value = item.id
   edicionInline.nombre = item.nombre
   edicionInline.precioTexto = formatearPrecioAlSalir(
-    item.precioManual != null ? String(item.precioManual) : String(precioVisual(item) || ''),
+    precioEditable.precioBase != null ? String(precioEditable.precioBase) : '',
   )
-  edicionInline.moneda =
-    precioVisualDetallado(item).moneda || preferenciasStore.monedaDefaultEfectiva
+  edicionInline.moneda = precioEditable.moneda || preferenciasStore.monedaDefaultEfectiva
+  edicionInline.activarPreciosMayoristas = Boolean(precioEditable.activarPreciosMayoristas)
+  edicionInline.escalasPorCantidad = Array.isArray(precioEditable.escalasPorCantidad)
+    ? precioEditable.escalasPorCantidad.map((escala) => ({ ...escala }))
+    : []
+}
+
+function asignarRefBloqueEscalasEdicion(instancia) {
+  refBloqueEscalasEdicion.value = instancia || null
+}
+
+function cancelarEdicionInline() {
+  itemEditandoId.value = null
 }
 
 async function guardarEdicionInline(itemId) {
@@ -1134,10 +1230,16 @@ async function guardarEdicionInline(itemId) {
   if (!item) return
 
   const precioNumero = parseFloat(edicionInline.precioTexto)
+  const escalasValidas = refBloqueEscalasEdicion.value?.validarEscalas?.()
+  if (!escalasValidas) return
 
   const cambios = {
     precioManual: Number.isFinite(precioNumero) && precioNumero > 0 ? precioNumero : null,
     moneda: edicionInline.moneda || preferenciasStore.monedaDefaultEfectiva,
+    activarPreciosMayoristas: Boolean(edicionInline.activarPreciosMayoristas),
+    escalasPorCantidad: Array.isArray(edicionInline.escalasPorCantidad)
+      ? edicionInline.escalasPorCantidad
+      : [],
   }
 
   if (esItemManual(item)) {
@@ -1155,6 +1257,24 @@ async function guardarEdicionInline(itemId) {
   }
 
   itemEditandoId.value = null
+}
+
+async function restaurarPreciosItem(itemId) {
+  if (!listaActual.value) return
+
+  const restaurado = await listaJustaStore.restaurarPreciosOriginales(listaActual.value.id, itemId)
+  if (!restaurado) {
+    quasar.notify({
+      type: 'warning',
+      message: 'No se pudieron restaurar los precios.',
+      position: 'top',
+    })
+    return
+  }
+
+  if (itemEditandoId.value === itemId) {
+    cancelarEdicionInline()
+  }
 }
 
 async function eliminarItem(itemId) {
@@ -1645,6 +1765,11 @@ onMounted(async () => {
   gap: 6px;
   align-items: center;
 }
+.fila-botones-nombre {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
 .contenido-nombre-item {
   min-width: 0;
 }
@@ -1662,9 +1787,18 @@ onMounted(async () => {
   align-items: start;
   gap: 10px;
 }
+.editor-inline-item {
+  display: grid;
+  gap: 8px;
+}
 .fila-edicion-precio {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 132px;
+  gap: 8px;
+}
+.fila-acciones-edicion {
+  display: flex;
+  justify-content: flex-end;
   gap: 8px;
 }
 .precio-item {
