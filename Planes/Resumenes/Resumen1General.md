@@ -117,6 +117,7 @@ src/
 │   │   ├── ComerciosService.js             # CRUD de comercios + validación duplicados
 │   │   ├── ConfirmacionesService.js        # Gestión de confirmaciones de precios
 │   │   ├── PreferenciasService.js          # Preferencias del usuario (moneda, unidad)
+│   │   ├── ListaJustaService.js            # Persistencia y normalización de listas de compras
 │   │   ├── BuscadorProductosService.js     # Orquestador multi-API por código de barras
 │   │   ├── BusquedaProductosHibridaService.js  # Local primero + API (código y nombre); ver PlanBusquedaLocalPrimeroYEstadosCarga
 │   │   ├── OpenFoodFactsService.js         # Alimentos (Open Food Facts API)
@@ -131,6 +132,7 @@ src/
 │       ├── productosStore.js               # Estado global de productos (Pinia)
 │       ├── comerciosStore.js               # Estado global de comercios (Pinia)
 │       ├── confirmacionesStore.js          # Estado global de confirmaciones (Pinia)
+│       ├── ListaJustaStore.js              # Estado global de listas de compras, totales y sincronización
 │       ├── sesionEscaneoStore.js           # Borradores de escaneo con persistencia (Pinia)
 │       └── preferenciasStore.js           # Preferencias del usuario (moneda, unidad) — carga única al iniciar
 │
@@ -140,6 +142,7 @@ src/
 │   │   ├── BarraAccionesSeleccion.vue      # Barra fixed bottom con botones (eliminar, cancelar)
 │   │   ├── InputBusqueda.vue              # Input de búsqueda reutilizable con prop color
 │   │   ├── PantallaSplash.vue             # Splash screen con imagen aleatoria al iniciar
+│   │   ├── BotonAccionSticky.vue          # Botón sticky reutilizable para acciones principales en páginas largas
 │   │   ├── FabAcciones.vue               # FAB genérico reutilizable: Speed Dial multi-acción o botón directo
 │   │   ├── SelectorComercioDireccion.vue  # Selector de comercio + dirección reutilizable (emite { id, nombre, direccionId, direccionNombre } | null)
 │   │   ├── PieAtribucion.vue              # Pie de atribución de fuentes; props: fuentesApi[], fuentesUsuario[]; muestra origen de datos (API o usuario)
@@ -213,12 +216,15 @@ src/
 │   ├── ComerciosPage.vue                    # Página de gestión de comercios
 │   ├── EditarComercioPage.vue               # Página de edición de comercio individual
 │   ├── DetalleProductoPage.vue              # Página de detalle individual de producto
+│   ├── ListaJusta/                          # Sección de listas de compras
+│   │   ├── ListaJustaPage.vue              # Listado de listas guardadas y acceso de alta
+│   │   └── DetalleListaJustaPage.vue       # Pantalla operativa de compra por lista
 │   ├── MisProductosPage.vue                 # Página principal de productos (orquestador del flujo de escaneo)
 │   └── MesaTrabajoPage.vue                  # Página Mesa de trabajo (/mesa-trabajo) — borradores de escaneo
 │
 ├── router/
 │   ├── index.js                             # Configuración del router de Vue
-│   └── routes.js                            # Definición de rutas (/, /producto/:id, /comercios, /comercios/:nombre, /mesa-trabajo)
+│   └── routes.js                            # Definición de rutas (/, /producto/:id, /comercios, /comercios/:nombre, /mesa-trabajo, /lista-justa, /configuracion, /gracias)
 │
 ├── App.vue                                  # Componente raíz de Vue
 └── main.js                                  # Punto de entrada de la aplicación
@@ -252,7 +258,10 @@ Resúmenes de Documentación/                  # En raíz del proyecto
 ├── Resumen4FormularioAgregar.md             # Documentación de formularios
 ├── Resumen5Comercios.md                     # Documentación de sección comercios
 ├── Resumen6OpenFoodFacts.md                 # Documentación de integración API
-└── Resumen7LocalStorage.md                  # Documentación de almacenamiento
+├── Resumen7LocalStorage.md                  # Documentación de almacenamiento
+├── Resumen8Scanner.md                       # Documentación del flujo de escaneo y Mesa de trabajo
+├── Resumen9Configuracion.md                 # Documentación de configuración global
+└── Resumen10ListaJusta.md                   # Documentación técnica de Lista Justa
 
 Planes/                                      # Planes de trabajo e implementación
 ├── PlanPublicidadAdMob.md                   # 🔧 Integración AdMob (activo — en curso)
@@ -1010,8 +1019,9 @@ H. Arquitectura y Código
 
 - Menú hamburguesa a la izquierda (mantiene lógica de drawer).
 - Título `Precio Justo` clickeable (navega a `/`).
-- Accesos rápidos a la derecha: Inicio, Comercios y Mesa.
+- Accesos rápidos a la derecha: Inicio, Lista Justa, Comercios y Mesa.
 - Estado activo por color según ruta actual.
+- `Lista Justa` usa color `secondary` como identidad visual en header y drawer.
 - El acceso a Mesa aparece solo si `sesionEscaneoStore.tieneItemsPendientes`.
 - No hay badge numérico en el botón de Mesa del header para evitar duplicación visual.
 - El badge de cantidad se mantiene en el botón hamburguesa y en el item de Mesa dentro del drawer.
@@ -1029,6 +1039,10 @@ H. Arquitectura y Código
       { path: 'comercios', component: ComerciosPage },
       { path: 'comercios/:nombre', component: EditarComercioPage },
       { path: 'mesa-trabajo', component: MesaTrabajoPage },
+      { path: 'lista-justa', component: ListaJustaPage },
+      { path: 'lista-justa/:id', component: DetalleListaJustaPage },
+      { path: 'configuracion', component: ConfiguracionPage },
+      { path: 'gracias', component: GraciasPage },
     ],
   },
   {
@@ -1141,6 +1155,7 @@ H. Arquitectura y Código
   - Resumen7LocalStorage.md — Sistema de almacenamiento (adaptadores, stores)
   - Resumen8Scanner.md — Sistema de escaneo completo (Ráfaga, Escaneo rápido, Mesa de trabajo)
   - Resumen9Configuracion.md — Configuración global y crecimiento futuro de preferencias
+  - Resumen10ListaJusta.md — Sistema de listas de compras, integración con Mis Productos y Mesa de trabajo
 
 ### Principios del Proyecto
 
@@ -1182,7 +1197,7 @@ H. Arquitectura y Código
 
 ### Estado Actual
 
-- **Versión:** 1.2.1
+- **Versión:** 1.2.2
 - **Almacenamiento:** Local (Capacitor Storage)
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
@@ -1191,7 +1206,8 @@ H. Arquitectura y Código
 - **Flujo de escaneo — Modo A (Escaneo rápido):** Completado (TarjetaEscaneo, foto, edición inline)
 - **Flujo de escaneo — Modo B (Ráfaga):** Completado (cámara continua, búsqueda background, aviso sobre cámara)
 - **Mesa de trabajo:** Completada (reemplaza BandejaBorradores; ordenamiento, selección, envío parcial, filtro de búsqueda por nombre/marca/categoría)
-- **Header global con accesos rápidos:** Completado (Inicio/Comercios/Mesa, estado activo por color, Mesa condicional, sin contador duplicado en el botón de Mesa)
+- **Lista Justa:** Completada en su base funcional (listas persistentes, detalle de compra, alta manual y desde Mis Productos, integración con Mesa de trabajo, comercio actual opcional y precios mayoristas por cantidad; ver Resumen10ListaJusta.md)
+- **Header global con accesos rápidos:** Completado (Inicio/Lista Justa/Comercios/Mesa, estado activo por color, Mesa condicional, sin contador duplicado en el botón de Mesa)
 - **APIs de búsqueda:** Completado (7 APIs orquestadas, libros por ISBN, fuenteDato en UI)
 - **Safe area:** Completada (Android 15+ edge-to-edge)
 - **Botón back nativo:** Completado
@@ -1205,6 +1221,7 @@ H. Arquitectura y Código
 - **Precios mayoristas por cantidad:** Completados en carga, persistencia, historial, detalle y tarjetas; la app conserva el mejor precio base para 1 unidad y destaca ventajas reales por cantidad en otros comercios
 - **Ver detalles del sistema de escaneo:** Resumen8Scanner.md
 - **Ver detalles de configuración:** Resumen9Configuracion.md
+- **Ver detalles de Lista Justa:** Resumen10ListaJusta.md
 
 ---
 
@@ -1231,4 +1248,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 10 de Abril de 2026 — Se preparó el release `1.2.1` con soporte de precios mayoristas por cantidad en formularios, historial, detalle y tarjetas principales.
+**Última actualización:** 23 de Abril de 2026 — Se preparó el release `1.2.2` con la incorporación funcional de `Lista Justa`, mejoras móviles en sus tarjetas, soporte de precios mayoristas por cantidad dentro de la lista y sincronización más clara con Mesa de trabajo y Mis Productos.
