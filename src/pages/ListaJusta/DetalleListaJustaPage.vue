@@ -9,7 +9,7 @@
           no-caps
           color="secondary"
           label="Volver a Lista Justa"
-          @click="router.push('/lista-justa')"
+          @click="router.push('/')"
         />
       </div>
 
@@ -21,7 +21,7 @@
             dense
             icon="arrow_back"
             color="secondary"
-            @click="router.push('/lista-justa')"
+            @click="router.push('/')"
           />
           <div class="encabezado-detalle-texto">
             <h5 class="titulo-pagina">{{ listaActual.nombre }}</h5>

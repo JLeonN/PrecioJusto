@@ -19,8 +19,8 @@
             flat
             no-caps
             class="title-link"
-            :color="colorTituloHeader"
-            @click="irAMisProductos"
+            :style="estiloTituloHeader"
+            @click="irAListaJusta"
           >
             <span class="title-text">Precio Justo</span>
           </q-btn>
@@ -32,33 +32,30 @@
             flat
             round
             class="quick-access-btn"
-            :color="obtenerColorAccion(esInicioActivo)"
-            aria-label="Ir a Mis Productos"
-            @click="irAMisProductos"
-          >
-            <IconClipboardList :size="22" />
-          </q-btn>
-
-          <q-btn
-            flat
-            round
-            class="quick-access-btn"
-            :color="obtenerColorListaJusta()"
             aria-label="Ir a Lista Justa"
             @click="irAListaJusta"
           >
-            <IconListDetails :size="22" />
+            <IconListDetails :size="22" :style="obtenerEstiloIconoHeader(esListaJustaActiva, 'listaJusta')" />
           </q-btn>
 
           <q-btn
             flat
             round
             class="quick-access-btn"
-            :color="obtenerColorAccion(esComerciosActivo)"
+            aria-label="Ir a Mis Productos"
+            @click="irAMisProductos"
+          >
+            <IconClipboardList :size="22" :style="obtenerEstiloIconoHeader(esMisProductosActivo, 'misProductos')" />
+          </q-btn>
+
+          <q-btn
+            flat
+            round
+            class="quick-access-btn"
             aria-label="Ir a Comercios"
             @click="irAComercios"
           >
-            <IconMapPin :size="22" />
+            <IconMapPin :size="22" :style="obtenerEstiloIconoHeader(esComerciosActivo, 'comercios')" />
           </q-btn>
 
           <transition name="mesa-action">
@@ -67,11 +64,10 @@
                 flat
                 round
                 class="quick-access-btn"
-                :color="obtenerColorAccion(esMesaActivo)"
                 aria-label="Ir a Mesa de trabajo"
                 @click="irAMesaTrabajo"
               >
-                <IconBriefcase :size="22" />
+                <IconBriefcase :size="22" :style="obtenerEstiloIconoHeader(esMesaActivo, 'mesa')" />
               </q-btn>
             </div>
           </transition>
@@ -92,69 +88,73 @@
       <div class="fit drawer-contenedor">
         <q-scroll-area class="drawer-scroll">
           <q-list padding class="drawer-lista">
-          <!-- Header del drawer -->
-          <q-item class="q-mb-md">
-            <q-item-section avatar>
-              <div class="logo-app-drawer-box">
-                <img src="/icons/PrecioJusto-Icono.png" alt="Icono de Precio Justo" class="logo-app-drawer" />
-              </div>
-            </q-item-section>
-            <q-item-section>
-              <q-item-label class="text-h6 text-weight-bold"> Precio Justo </q-item-label>
-              <q-item-label caption> Compará y ahorrá </q-item-label>
-            </q-item-section>
-          </q-item>
+            <!-- Header del drawer -->
+            <q-item class="q-mb-md">
+              <q-item-section avatar>
+                <div class="logo-app-drawer-box">
+                  <img
+                    src="/icons/PrecioJusto-Icono.png"
+                    alt="Icono de Precio Justo"
+                    class="logo-app-drawer"
+                  />
+                </div>
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="text-h6 text-weight-bold"> Precio Justo </q-item-label>
+                <q-item-label caption> Compará y ahorrá </q-item-label>
+              </q-item-section>
+            </q-item>
 
-          <q-separator class="q-mb-md" />
+            <q-separator class="q-mb-md" />
 
-          <!-- Opciones del menú -->
-          <q-item clickable v-ripple to="/" exact>
-            <q-item-section avatar>
-              <IconClipboardList :size="24" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Mis Productos</q-item-label>
-            </q-item-section>
-          </q-item>
+            <!-- Opciones del menú -->
+            <q-item clickable v-ripple to="/" exact>
+              <q-item-section avatar>
+                <IconListDetails :size="24" class="text-secondary" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="text-secondary text-weight-medium">Lista Justa</q-item-label>
+              </q-item-section>
+            </q-item>
 
-          <q-item clickable v-ripple to="/lista-justa">
-            <q-item-section avatar>
-              <IconListDetails :size="24" class="text-secondary" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label class="text-secondary text-weight-medium">Lista Justa</q-item-label>
-            </q-item-section>
-          </q-item>
+            <q-item clickable v-ripple to="/mis-productos">
+              <q-item-section avatar>
+                <IconClipboardList :size="24" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>Mis Productos</q-item-label>
+              </q-item-section>
+            </q-item>
 
-          <q-item clickable v-ripple to="/comercios">
-            <q-item-section avatar>
-              <IconMapPin :size="24" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Comercios</q-item-label>
-            </q-item-section>
-          </q-item>
+            <q-item clickable v-ripple to="/comercios">
+              <q-item-section avatar>
+                <IconMapPin :size="24" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>Comercios</q-item-label>
+              </q-item-section>
+            </q-item>
 
-          <!-- Mesa de trabajo (solo visible con items pendientes) -->
-          <q-item
-            v-if="sesionEscaneoStore.tieneItemsPendientes"
-            clickable
-            v-ripple
-            to="/mesa-trabajo"
-            class="bandeja-drawer-item"
-          >
-            <q-item-section avatar>
-              <IconBriefcase :size="24" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label class="text-primary text-weight-medium">Mesa de trabajo</q-item-label>
-            </q-item-section>
-            <q-item-section side>
-              <q-chip color="primary" text-color="white" dense>
-                {{ sesionEscaneoStore.cantidadItems }}
-              </q-chip>
-            </q-item-section>
-          </q-item>
+            <!-- Mesa de trabajo (solo visible con items pendientes) -->
+            <q-item
+              v-if="sesionEscaneoStore.tieneItemsPendientes"
+              clickable
+              v-ripple
+              to="/mesa-trabajo"
+              class="bandeja-drawer-item"
+            >
+              <q-item-section avatar>
+                <IconBriefcase :size="24" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="text-primary text-weight-medium">Mesa de trabajo</q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-chip color="primary" text-color="white" dense>
+                  {{ sesionEscaneoStore.cantidadItems }}
+                </q-chip>
+              </q-item-section>
+            </q-item>
             <q-item clickable v-ripple to="/gracias">
               <q-item-section avatar>
                 <IconHeart :size="24" />
@@ -214,7 +214,13 @@
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat no-caps label="Más tarde" @click="cerrarModalActualizacion" />
-          <q-btn color="primary" unelevated no-caps label="Ir a Play Store" @click="actualizarAppAhora" />
+          <q-btn
+            color="primary"
+            unelevated
+            no-caps
+            label="Ir a Play Store"
+            @click="actualizarAppAhora"
+          />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -249,26 +255,28 @@ const drawerAbierto = ref(false)
 const sesionEscaneoStore = useSesionEscaneoStore()
 const preferenciasStore = usePreferenciasStore()
 const { inicializar, mostrarBanner, precargarInterstitial, altoBanner } = usePublicidad()
-const { estadoActualizacion, modalActualizacionAbierto, refrescarEstadoActualizacion, cerrarModalActualizacion, abrirUrlPlayStore } =
-  useActualizacionApp()
+const {
+  estadoActualizacion,
+  modalActualizacionAbierto,
+  refrescarEstadoActualizacion,
+  cerrarModalActualizacion,
+  abrirUrlPlayStore,
+} = useActualizacionApp()
 let removerListenerEstadoApp = null
 
 const toggleDrawer = () => {
   drawerAbierto.value = !drawerAbierto.value
 }
 
-const esInicioActivo = computed(() => route.path === '/')
-const esListaJustaActiva = computed(() => route.path.startsWith('/lista-justa'))
+const esListaJustaActiva = computed(
+  () => route.path === '/' || route.path.startsWith('/lista-justa'),
+)
+const esMisProductosActivo = computed(() => route.path === '/mis-productos')
 const esComerciosActivo = computed(() => route.path.startsWith('/comercios'))
 const esMesaActivo = computed(() => route.path === '/mesa-trabajo')
 const clasesHeader = computed(() => {
   if (MODO_PRUEBA) return 'bg-orange-8 text-white'
   return quasar.dark.isActive ? 'header-tema-oscuro text-white' : 'header-tema-claro text-primary'
-})
-const colorTituloHeader = computed(() => {
-  if (MODO_PRUEBA) return 'white'
-  if (quasar.dark.isActive) return esInicioActivo.value ? 'primary' : 'grey-3'
-  return esInicioActivo.value ? 'primary' : 'grey-8'
 })
 const clasesDrawer = computed(() =>
   quasar.dark.isActive ? 'drawer-tema drawer-tema-oscuro' : 'drawer-tema drawer-tema-claro',
@@ -291,26 +299,44 @@ const textoActualizacionDrawer = computed(() => {
   return 'Buscar versión nueva'
 })
 
-const obtenerColorAccion = (estaActivo) => {
-  if (MODO_PRUEBA) return estaActivo.value ? 'white' : 'grey-3'
-  if (quasar.dark.isActive) return estaActivo.value ? 'primary' : 'grey-4'
-  return estaActivo.value ? 'primary' : 'grey-6'
+const colorInactivoHeader = computed(() => (quasar.dark.isActive ? '#b0bec5' : '#757575'))
+const coloresHeaderPorSeccion = {
+  listaJusta: 'var(--color-secundario)',
+  misProductos: 'var(--color-primario)',
+  comercios: 'var(--color-acento)',
+  mesa: 'var(--color-primario)',
 }
+const seccionHeaderActiva = computed(() => {
+  if (esListaJustaActiva.value) return 'listaJusta'
+  if (esMisProductosActivo.value) return 'misProductos'
+  if (esComerciosActivo.value) return 'comercios'
+  if (esMesaActivo.value) return 'mesa'
+  return null
+})
+const estiloTituloHeader = computed(() => {
+  if (MODO_PRUEBA) return { color: 'white' }
+  const colorActivo = coloresHeaderPorSeccion[seccionHeaderActiva.value]
+  return { color: colorActivo || colorInactivoHeader.value }
+})
 
-const obtenerColorListaJusta = () => {
-  if (MODO_PRUEBA) return esListaJustaActiva.value ? 'white' : 'grey-3'
-  if (quasar.dark.isActive) return esListaJustaActiva.value ? 'secondary' : 'grey-4'
-  return esListaJustaActiva.value ? 'secondary' : 'grey-6'
+const obtenerEstiloIconoHeader = (estaActivo, seccion) => {
+  if (MODO_PRUEBA) {
+    return { color: estaActivo.value ? 'white' : '#e0e0e0' }
+  }
+
+  return {
+    color: estaActivo.value ? coloresHeaderPorSeccion[seccion] : colorInactivoHeader.value,
+  }
 }
 
 const irAMisProductos = () => {
-  if (esInicioActivo.value) return
-  router.push('/')
+  if (esMisProductosActivo.value) return
+  router.push('/mis-productos')
 }
 
 const irAListaJusta = () => {
   if (esListaJustaActiva.value) return
-  router.push('/lista-justa')
+  router.push('/')
 }
 
 const irAComercios = () => {
@@ -442,7 +468,10 @@ useBotonAtras({ drawerAbierto, router, route })
 }
 .mesa-action-enter-active,
 .mesa-action-leave-active {
-  transition: max-width 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    max-width 0.2s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 .mesa-action-enter-from,
 .mesa-action-leave-to {

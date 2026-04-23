@@ -3,34 +3,34 @@ const routes = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      // Página principal - Lista de productos del usuario
-      { path: '', component: () => import('pages/MisProductosPage.vue') },
+      // Página principal
+      { path: '', component: () => import('pages/ListaJusta/ListaJustaPage.vue') },
 
-      // Página de detalle - Historial completo de un producto específico
+      // Mis Productos
+      { path: 'mis-productos', component: () => import('pages/MisProductosPage.vue') },
+
+      // Detalle de producto
       { path: 'producto/:id', component: () => import('pages/DetalleProductoPage.vue') },
 
-      // Página de comercios - Gestión de comercios
+      // Comercios
       { path: 'comercios', component: () => import('pages/ComerciosPage.vue') },
 
-      // Página de edición de comercio
+      // Edición de comercio
       { path: 'comercios/:nombre', component: () => import('pages/EditarComercioPage.vue') },
 
-      // Mesa de trabajo (solo accesible con ítems pendientes)
+      // Mesa de trabajo
       { path: 'mesa-trabajo', component: () => import('pages/MesaTrabajoPage.vue') },
 
       // Lista Justa
-      { path: 'lista-justa', component: () => import('pages/ListaJusta/ListaJustaPage.vue') },
       { path: 'lista-justa/:id', component: () => import('pages/ListaJusta/DetalleListaJustaPage.vue') },
 
-      // Página de configuración global
+      // Configuración
       { path: 'configuracion', component: () => import('pages/ConfiguracionPage.vue') },
 
-      // Página de agradecimiento
+      // Gracias
       { path: 'gracias', component: () => import('pages/GraciasPage.vue') },
     ],
   },
-
-  // Página 404 - Siempre debe ir al final
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),
