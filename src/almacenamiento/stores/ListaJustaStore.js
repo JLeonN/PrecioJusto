@@ -293,6 +293,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     if (!puedeDerivarDesdeMisProductos && !puedeDerivarManual) return false
 
     const escalasPorCantidad = Array.isArray(item.escalasPorCantidad) ? item.escalasPorCantidad : []
+    const comercioMesa = resolverComercioParaMesa(lista, item)
 
     const itemMesa = sesionEscaneoStore.agregarItem({
       codigoBarras: item.codigoBarras,
@@ -312,14 +313,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
         listaId,
         itemId,
       },
-      comercio: item.comercio
-        ? {
-            id: 'lista-justa',
-            nombre: item.comercio,
-            direccionId: 'lista-justa',
-            direccionNombre: item.comercio,
-          }
-        : null,
+      comercio: comercioMesa,
     })
 
     item.estadoDerivacion = 'enMesa'
@@ -329,6 +323,30 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     await persistir()
 
     return true
+  }
+
+  function resolverComercioParaMesa(lista, item) {
+    const comercioActual = lista?.comercioActual
+    const nombreComercioActual = String(comercioActual?.nombre || '').trim()
+
+    if (nombreComercioActual) {
+      return {
+        id: comercioActual.id || 'lista-justa',
+        nombre: nombreComercioActual,
+        direccionId: comercioActual.direccionId || 'lista-justa',
+        direccionNombre: String(comercioActual.direccionNombre || '').trim(),
+      }
+    }
+
+    const comercioItem = String(item?.comercio || '').trim()
+    if (!comercioItem) return null
+
+    return {
+      id: 'lista-justa',
+      nombre: comercioItem,
+      direccionId: 'lista-justa',
+      direccionNombre: comercioItem,
+    }
   }
 
   function obtenerPrecioVisualItem(item) {
