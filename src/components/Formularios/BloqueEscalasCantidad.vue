@@ -1,24 +1,35 @@
 <template>
   <div class="bloque-escalas">
-    <div class="row items-center justify-between q-gutter-sm">
-      <div class="text-body2 text-weight-medium">Activar precios mayoristas</div>
+    <div class="encabezado-bloque-escalas">
+      <div
+        class="titulo-bloque-escalas"
+        :class="{ 'titulo-bloque-escalas-compacto': confirmacionDesactivarActiva }"
+      >
+        Activar precios mayoristas
+      </div>
       <transition name="fadeControl" mode="out-in">
-        <div v-if="confirmacionDesactivarActiva" key="confirmacionInline" class="confirmacionInline">
+        <div
+          v-if="confirmacionDesactivarActiva"
+          key="confirmacionInline"
+          class="confirmacionInline"
+        >
           <q-btn
             flat
             dense
             no-caps
             color="negative"
             icon="delete"
+            class="botonConfirmacionInline"
             label="Confirmar"
             @click="confirmarDesactivar"
           />
           <q-btn
             flat
             dense
-            round
+            size="sm"
             color="grey-8"
             icon="close"
+            class="botonCancelarInline"
             aria-label="Cancelar desactivación"
             @click="cancelarDesactivar"
           />
@@ -32,11 +43,9 @@
         />
       </transition>
     </div>
-
     <div v-if="estadoLocal.activarPreciosMayoristas" class="text-caption text-grey-7 q-mt-xs">
       Agrega escalones de precio para compras por cantidad.
     </div>
-
     <q-slide-transition>
       <div v-show="estadoLocal.activarPreciosMayoristas" class="q-mt-sm">
         <div
@@ -122,7 +131,6 @@
             />
           </div>
         </div>
-
         <q-btn
           flat
           dense
@@ -133,7 +141,6 @@
           class="full-width q-mt-xs boton-agregar-masivo"
           @click="agregarEscala"
         />
-
         <q-banner
           v-if="mostrarErroresEscalas"
           dense
@@ -144,7 +151,6 @@
         </q-banner>
       </div>
     </q-slide-transition>
-
   </div>
 </template>
 
@@ -401,6 +407,50 @@ defineExpose({ validarEscalas })
   padding: 10px;
   background: var(--fondo-tarjeta);
 }
+.encabezado-bloque-escalas {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+.titulo-bloque-escalas {
+  min-width: 0;
+  flex: 1 1 auto;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition:
+    font-size 0.18s ease,
+    letter-spacing 0.18s ease,
+    opacity 0.18s ease;
+}
+.titulo-bloque-escalas-compacto {
+  font-size: 14px;
+  letter-spacing: -0.01em;
+}
+.confirmacionInline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  flex: 0 0 auto;
+  min-width: 0;
+  white-space: nowrap;
+}
+.botonConfirmacionInline {
+  min-width: auto;
+  padding: 0 6px;
+}
+.botonCancelarInline {
+  min-width: 28px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+}
 .fila-escala {
   align-items: center;
 }
@@ -452,12 +502,6 @@ defineExpose({ validarEscalas })
 }
 .boton-agregar-masivo:hover {
   background: color-mix(in srgb, var(--color-primario) 8%, transparent) !important;
-}
-.confirmacionInline {
-  display: flex;
-  gap: 4px;
-  justify-content: flex-end;
-  align-items: center;
 }
 .fadeControl-enter-active,
 .fadeControl-leave-active {

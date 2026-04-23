@@ -100,7 +100,10 @@
               flat
               bordered
               class="tarjeta-item"
-              :class="{ 'tarjeta-item-comprado': item.comprado }"
+              :class="{
+                'tarjeta-item-comprado': item.comprado,
+                'tarjeta-item-editando': itemEditandoId === item.id,
+              }"
             >
               <q-card-section class="q-pa-sm fila-item">
                 <div class="columna-imagen">
@@ -188,12 +191,6 @@
                             :options="opcionesMoneda"
                           />
                         </div>
-                        <BloqueEscalasCantidad
-                          :ref="asignarRefBloqueEscalasEdicion"
-                          v-model="datosEscalasEdicion"
-                          :precio-base="precioBaseEdicion"
-                          class="q-mt-sm"
-                        />
                         <div class="fila-acciones-edicion">
                           <q-btn
                             flat
@@ -221,6 +218,16 @@
                 </div>
 
                 <div class="contenido-secundario-item">
+                  <div
+                    v-if="itemEditandoId === item.id"
+                    class="bloque-mayoristas-edicion q-mb-sm"
+                  >
+                    <BloqueEscalasCantidad
+                      :ref="asignarRefBloqueEscalasEdicion"
+                      v-model="datosEscalasEdicion"
+                      :precio-base="precioBaseEdicion"
+                    />
+                  </div>
                   <q-btn
                     v-if="itemEditandoId !== item.id && tieneMayoristasParaMostrar(item)"
                     unelevated
@@ -1791,6 +1798,9 @@ onMounted(async () => {
   display: grid;
   gap: 8px;
 }
+.bloque-mayoristas-edicion {
+  width: 100%;
+}
 .fila-edicion-precio {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 132px;
@@ -1825,6 +1835,9 @@ onMounted(async () => {
   border: 1px solid var(--borde-color);
   border-radius: 10px;
   background: color-mix(in srgb, var(--fondo-app-secundario) 88%, transparent);
+}
+.tarjeta-item-editando .contenido-secundario-item {
+  grid-column: 1 / 4;
 }
 .grupo-mayorista-item + .grupo-mayorista-item {
   margin-top: 8px;
