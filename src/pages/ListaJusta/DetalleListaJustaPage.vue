@@ -1670,7 +1670,7 @@ onMounted(async () => {
 
 <style scoped>
 .pagina-detalle-lista {
-  padding-bottom: calc(104px + var(--safe-area-bottom));
+  padding-bottom: calc(84px + var(--safe-area-bottom, 0px) + var(--espacio-publicidad, 0px));
 }
 .encabezado-detalle {
   display: grid;
@@ -1944,7 +1944,7 @@ onMounted(async () => {
 .resumen-gasto {
   border-radius: 12px;
   border-color: var(--borde-color);
-  margin-bottom: calc(96px + var(--safe-area-bottom));
+  margin-bottom: 12px;
 }
 .fila-resumen-gasto {
   display: flex;

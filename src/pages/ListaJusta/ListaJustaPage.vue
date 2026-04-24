@@ -249,7 +249,7 @@ onMounted(async () => {
 
 <style scoped>
 .pagina-lista-justa {
-  padding-bottom: calc(128px + var(--safe-area-bottom));
+  padding-bottom: calc(84px + var(--safe-area-bottom, 0px) + var(--espacio-publicidad, 0px));
 }
 .estado-vacio {
   text-align: center;
@@ -329,6 +329,6 @@ onMounted(async () => {
   border-radius: 14px;
 }
 .boton-crear-lista-sticky {
-  margin-top: 12px;
+  margin-top: 8px;
 }
 </style>

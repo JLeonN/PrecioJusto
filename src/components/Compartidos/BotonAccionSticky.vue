@@ -44,7 +44,7 @@ const emit = defineEmits(['click'])
 <style scoped>
 .contenedor-boton-sticky {
   position: sticky;
-  bottom: calc(24px + var(--safe-area-bottom));
+  bottom: calc(12px + var(--safe-area-bottom, 0px) + var(--espacio-publicidad, 0px));
   z-index: 20;
   padding: 0 16px;
   display: flex;
