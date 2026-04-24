@@ -51,13 +51,13 @@
           {{ mensajeFiltro }}
         </q-banner>
 
-        <q-expansion-item
-          class="bloque-comercio q-mb-sm"
-          dense
-          dense-toggle
-          icon="store"
-          label="Comercio actual (opcional)"
-        >
+<q-expansion-item
+  class="bloque-comercio q-mb-sm"
+  dense
+  dense-toggle
+  icon="store"
+  :label="resumenComercioActual.tieneComercio ? resumenComercioActual.nombre : 'Seleccione comercio aquí'"
+>
           <div class="q-pa-sm">
             <div v-if="resumenComercioActual.tieneComercio" class="resumen-comercio-actual q-mb-sm">
               <div class="resumen-comercio-actual-nombre">{{ resumenComercioActual.nombre }}</div>
