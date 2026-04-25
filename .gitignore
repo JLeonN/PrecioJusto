@@ -33,6 +33,7 @@ dev-server.err.log
 
 # local .env files
 .env.local*
+DatosLocalesProyectos.md
 
 # Claude Code local settings
 .claude/

@@ -12,6 +12,45 @@ Responsable: Leo + CH
 > para minimizar lecturas, escrituras y almacenamiento. Esta restricción no es
 > negociable y debe tenerse en cuenta en cada decisión de arquitectura.
 
+## ESTADO ACTUAL DE AVANCE
+
+### Ya realizado en esta pausa
+
+- [x] Se creó el proyecto de Firebase de pruebas: `PrecioJustoPruebas`
+- [x] Se definió el ID del proyecto: `preciojustopruebas`
+- [x] Se registró la app web en Firebase Console
+- [x] Se registró la app Android en Firebase Console
+- [x] Se descargó `google-services.json`
+- [x] Se movió `google-services.json` a `android/app/google-services.json`
+- [x] Se verificó que el proyecto Android usa Gradle Groovy, no Kotlin
+- [x] Se verificó que la integración base de Google Services ya estaba presente en Gradle
+- [x] Se ejecutó validación local de Android: `:app:processDebugGoogleServices`
+
+### Decisiones tomadas
+
+- [x] Se avanza primero con configuración de Firebase y aprendizaje básico, no con implementación completa
+- [x] Se registran ambas apps: web y Android
+- [x] La configuración concreta del proyecto Firebase se guarda en `DatosLocalesProyectos.md` y no en este plan
+- [x] Por ahora no se toca Auth, Storage ni pantallas de login
+- [x] El siguiente servicio a abrir en consola será Firestore
+
+### Próximo punto exacto para retomar
+
+1. Ir en Firebase Console a `Bases de datos y almacenamiento`
+2. Entrar a `Firestore Database`
+3. Crear la base de datos
+4. Elegir `modo de prueba` solo para aprendizaje inicial
+5. Elegir región
+6. Pausar antes de tocar `Authentication` o `Storage`
+
+### Recordatorios importantes para retomar
+
+- La configuración web de Firebase no es un secreto por sí sola
+- La seguridad real va por `Security Rules`
+- No seguir con implementación real hasta cerrar la Fase 1 del modelo de datos
+- Antes de Google Sign-In real en Android faltará registrar SHA-1 de debug y de producción
+- Conviene aprender primero Firestore básico antes de abrir Auth
+
 ═══════════════════════════════════════════════════════════════
 
 ## 📖 DESCRIPCIÓN DEL PLAN
@@ -173,8 +212,11 @@ comunidad/
 
 ## 📋 FASE 2: CONFIGURACIÓN DE FIREBASE
 
-[ ] Crear proyecto en Firebase Console
-[ ] Configurar app Android (google-services.json)
+[x] Crear proyecto en Firebase Console
+[x] Configurar app Android (google-services.json)
+[x] Registrar app web en Firebase Console
+[x] Registrar app Android en Firebase Console
+[x] Validar integración base Android con `google-services.json`
 [ ] Instalar dependencias: firebase-js-sdk o CapacitorFirebase
 [ ] Configurar Firebase Emulator Suite para desarrollo local
 [ ] Activar Firestore, Auth (Google + Email), Storage
@@ -454,5 +496,5 @@ service cloud.firestore {
 ═══════════════════════════════════════════════════════════════
 
 **CREADO:** 14 de Marzo 2026
-**ÚLTIMA ACTUALIZACIÓN:** 14 de Marzo 2026
+**ÚLTIMA ACTUALIZACIÓN:** 25 de Abril 2026
 **ESTADO:** 🔍 EN INVESTIGACIÓN — No comenzar hasta completar Fase 1
