@@ -79,11 +79,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useComerciStore } from '../../almacenamiento/stores/comerciosStore.js'
 import { IconBuildingStore, IconMapPin } from '@tabler/icons-vue'
 
-defineProps({
+const props = defineProps({
   // { id, nombre, direccionId, direccionNombre } | null
   modelValue: {
     type: Object,
@@ -96,6 +96,10 @@ defineProps({
   labelDireccion: {
     type: String,
     default: 'Dirección / Sucursal',
+  },
+  autoSeleccionarDireccion: {
+    type: Boolean,
+    default: true,
   },
 })
 
@@ -125,6 +129,7 @@ onMounted(async () => {
   await comerciosStore.cargarComercios()
   // Muestra top 3 más recientes por defecto
   comerciosFiltrados.value = comerciosStore.comerciosAgrupados.slice(0, 3)
+  sincronizarDesdeModelValue(props.modelValue)
 })
 
 // ========================================
@@ -188,32 +193,114 @@ function resolverComercioId(comercioOGrupo, idDireccion) {
   return sucursal ? sucursal.id : comercioOGrupo.id
 }
 
+function encontrarComercioAgrupado(modelValue) {
+  if (!modelValue) return null
+
+  return comerciosStore.comerciosAgrupados.find((comercio) => {
+    if (modelValue.id && comercio.id === modelValue.id) return true
+
+    if (Array.isArray(comercio.comerciosOriginales)) {
+      return comercio.comerciosOriginales.some((original) => original.id === modelValue.id)
+    }
+
+    return comercio.nombre === modelValue.nombre
+  }) || null
+}
+
+function sincronizarDesdeModelValue(modelValue) {
+  if (!modelValue) {
+    comercioSeleccionado.value = null
+    comercioId.value = null
+    comercioEscrito.value = ''
+    textoTemporalComercio.value = ''
+    direccionSeleccionada.value = null
+    direccionId.value = null
+    direccionEscrita.value = ''
+    textoTemporalDireccion.value = ''
+    return
+  }
+
+  const comercioAgrupado = encontrarComercioAgrupado(modelValue)
+  const nombre = String(modelValue.nombre || '').trim()
+  const direccionNombre = String(modelValue.direccionNombre || '').trim()
+
+  if (comercioAgrupado) {
+    comercioSeleccionado.value = comercioAgrupado
+    comercioId.value = String(modelValue.id || '').trim() || comercioAgrupado.id || null
+    comercioEscrito.value = ''
+    textoTemporalComercio.value = ''
+
+    const direccion = (comercioAgrupado.direcciones || []).find(
+      (actual) =>
+        actual.id === modelValue.direccionId ||
+        actual.calle === direccionNombre ||
+        actual.nombreCompleto === direccionNombre,
+    )
+
+    if (direccion) {
+      direccionSeleccionada.value = direccion
+      direccionId.value = direccion.id
+      direccionEscrita.value = ''
+      textoTemporalDireccion.value = ''
+      comercioId.value = resolverComercioId(comercioAgrupado, direccion.id)
+    } else {
+      direccionSeleccionada.value = null
+      direccionId.value = String(modelValue.direccionId || '').trim() || null
+      direccionEscrita.value = direccionNombre
+      textoTemporalDireccion.value = ''
+    }
+
+    return
+  }
+
+  comercioSeleccionado.value = null
+  comercioId.value = String(modelValue.id || '').trim() || null
+  comercioEscrito.value = nombre
+  textoTemporalComercio.value = ''
+  direccionSeleccionada.value = null
+  direccionId.value = String(modelValue.direccionId || '').trim() || null
+  direccionEscrita.value = direccionNombre
+  textoTemporalDireccion.value = ''
+}
+
 function alSeleccionarComercio(comercio) {
   if (!comercio) {
     comercioId.value = null
     comercioSeleccionado.value = null
     direccionSeleccionada.value = null
     direccionId.value = null
+    direccionEscrita.value = ''
+    textoTemporalDireccion.value = ''
     comercioEscrito.value = ''
     textoTemporalComercio.value = ''
-    emitir()
+    emitir({ direccionSeleccionadaManual: false })
     return
   }
   comercioSeleccionado.value = comercio
   comercioEscrito.value = ''
   textoTemporalComercio.value = ''
   // Auto-selecciona la dirección principal
-  if (comercio.direcciones?.length > 0) {
+  if (props.autoSeleccionarDireccion && comercio.direcciones?.length > 0) {
     const dir = comercio.direccionPrincipal || comercio.direcciones[0]
     direccionSeleccionada.value = dir
     direccionId.value = dir.id
+    direccionEscrita.value = ''
+    textoTemporalDireccion.value = ''
     comercioId.value = resolverComercioId(comercio, dir.id)
+  } else if (comercio.direcciones?.length > 0) {
+    direccionSeleccionada.value = null
+    direccionId.value = null
+    direccionEscrita.value = ''
+    textoTemporalDireccion.value = ''
+    comercioId.value = comercio.id
   } else {
     direccionSeleccionada.value = null
     direccionId.value = null
+    direccionEscrita.value = ''
+    textoTemporalDireccion.value = ''
     comercioId.value = comercio.id
   }
-  emitir()
+  emitir({ direccionSeleccionadaManual: false })
 }
 
 function alEscribirComercio(val) {
@@ -237,7 +324,7 @@ function alSeleccionarDireccion(direccion) {
     direccionSeleccionada.value = null
     direccionEscrita.value = ''
     textoTemporalDireccion.value = ''
-    emitir()
+    emitir({ direccionSeleccionadaManual: false })
     return
   }
   direccionId.value = direccion.id
@@ -247,7 +334,7 @@ function alSeleccionarDireccion(direccion) {
   if (esComercioExistente.value) {
     comercioId.value = resolverComercioId(comercioSeleccionado.value, direccion.id)
   }
-  emitir()
+  emitir({ direccionSeleccionadaManual: true })
 }
 
 function guardarDireccionEscrita() {
@@ -261,7 +348,7 @@ function guardarDireccionEscrita() {
 // EMIT
 // ========================================
 
-function emitir() {
+function emitir(meta = {}) {
   const nombre = esComercioExistente.value
     ? comercioSeleccionado.value.nombre
     : comercioEscrito.value
@@ -279,8 +366,22 @@ function emitir() {
     nombre,
     direccionId: direccionId.value,
     direccionNombre,
+    tieneMultiplesDirecciones: Boolean(
+      esComercioExistente.value &&
+      Array.isArray(comercioSeleccionado.value?.direcciones) &&
+      comercioSeleccionado.value.direcciones.length > 1,
+    ),
+    direccionSeleccionadaManual: Boolean(meta.direccionSeleccionadaManual),
   })
 }
+
+watch(
+  () => props.modelValue,
+  (valor) => {
+    sincronizarDesdeModelValue(valor)
+  },
+  { deep: true },
+)
 </script>
 
 <style scoped>

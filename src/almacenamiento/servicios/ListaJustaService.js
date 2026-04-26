@@ -128,8 +128,18 @@ class ListaJustaService {
   }
 
   _normalizarConfiguracionInteligente(configuracion, comercioActual = null) {
+    const heredarComercioActual =
+      configuracion?.heredarComercioActual !== undefined
+        ? Boolean(configuracion.heredarComercioActual)
+        : true
+    const comercioBaseFuente =
+      configuracion && Object.prototype.hasOwnProperty.call(configuracion, 'comercioBase')
+        ? configuracion.comercioBase
+        : heredarComercioActual
+          ? comercioActual || null
+          : null
     const comercioBaseNormalizado = this._normalizarComercioInteligente(
-      configuracion?.comercioBase || comercioActual || null,
+      comercioBaseFuente,
     )
     const comerciosComparacion = Array.isArray(configuracion?.comerciosComparacion)
       ? configuracion.comerciosComparacion
@@ -154,6 +164,7 @@ class ListaJustaService {
     return {
       comercioBase: comercioBaseNormalizado,
       comerciosComparacion: comerciosComparacionNormalizados,
+      heredarComercioActual,
     }
   }
 

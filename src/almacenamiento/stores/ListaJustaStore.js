@@ -91,6 +91,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
         {
           ...lista.configuracionInteligente,
           comercioBase: comercioActual,
+          heredarComercioActual: true,
         },
         comercioActual,
       )
@@ -119,12 +120,14 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
   async function sincronizarComercioBaseInteligente(listaId) {
     const lista = obtenerListaPorId(listaId)
     if (!lista) return false
+    if (lista.configuracionInteligente?.heredarComercioActual === false) return false
     if (lista.configuracionInteligente?.comercioBase || !lista.comercioActual) return false
 
     lista.configuracionInteligente = ListaJustaService._normalizarConfiguracionInteligente(
       {
         ...lista.configuracionInteligente,
         comercioBase: lista.comercioActual,
+        heredarComercioActual: true,
       },
       lista.comercioActual,
     )

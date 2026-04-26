@@ -31,93 +31,208 @@
 
         <q-card flat bordered class="bloque-inteligente q-mb-md">
           <q-card-section>
-            <div class="encabezado-comercio-base q-mb-sm">
-              <div class="bloque-titulo">{{ textoEncabezadoComercioBase }}</div>
-              <div v-if="textoDireccionComercioBase" class="bloque-subtitulo">
-                {{ textoDireccionComercioBase }}
-              </div>
-            </div>
-            <q-btn
-              flat
-              no-caps
-              color="secondary"
-              class="boton-cambiar-comercio-base"
-              :icon="mostrarEditorComercioBase ? 'expand_less' : 'edit_location_alt'"
-              :label="mostrarEditorComercioBase ? 'Ocultar selector' : textoBotonComercioBase"
-              @click="toggleEditorComercioBase"
-            />
-            <q-slide-transition>
-              <div v-show="debeMostrarEditorComercioBase" class="contenedor-editor-comercio-base">
-                <SelectorComercioDireccion
-                  :model-value="comercioBase"
-                  label-comercio="Comercio base"
-                  label-direccion="Sucursal base"
-                  @update:model-value="actualizarComercioBase"
-                />
-              </div>
-            </q-slide-transition>
-          </q-card-section>
-        </q-card>
-
-        <q-card flat bordered class="bloque-inteligente q-mb-md">
-          <q-card-section>
             <div class="fila-encabezado-bloque">
               <div>
                 <div class="bloque-titulo">Comercios a comparar</div>
+                <q-slide-transition>
+                  <div
+                    v-show="descripcionComparacionVisible"
+                    class="descripcion-comparacion-inteligente"
+                  >
+                    Esta sección es para comparar precios entre comercios y ayudarte a elegir dónde comprar de forma más inteligente según los precios disponibles.
+                  </div>
+                </q-slide-transition>
                 <div class="text-caption text-grey-7">
                   Elegí los otros comercios que querés poner frente al comercio base.
                 </div>
               </div>
+              <q-btn
+                v-if="puedeColapsarDescripcionComparacion"
+                flat
+                no-caps
+                dense
+                color="grey-7"
+                class="boton-toggle-descripcion-comparacion"
+                :icon="descripcionComparacionExpandida ? 'expand_less' : 'expand_more'"
+                :label="descripcionComparacionExpandida ? 'Ocultar ayuda' : 'Mostrar ayuda'"
+                @click="toggleDescripcionComparacion"
+              />
+            </div>
+
+            <div
+              v-if="false"
+              class="estado-vacio-comparacion"
+            >
+              <q-icon name="storefront" size="26px" color="secondary" />
+              <span>Agregá al menos un comercio más para comparar precios.</span>
+            </div>
+
+            <div
+              v-if="esComercioValido(comercioBase) || mostrarEditorComercioBase || filasComparacion.length > 0"
+              class="columna-comparacion"
+            >
+              <div
+                v-if="esComercioValido(comercioBase) || mostrarEditorComercioBase"
+                class="tarjeta-comercio-comparacion"
+              >
+                <template v-if="esComercioValido(comercioBase) && !mostrarEditorComercioBase">
+                  <div class="encabezado-comercio-base">
+                    <div class="bloque-titulo">{{ textoEncabezadoComercioBase }}</div>
+                    <div v-if="textoDireccionComercioBase" class="bloque-subtitulo">
+                      {{ textoDireccionComercioBase }}
+                    </div>
+                  </div>
+                  <div class="fila-acciones-comercio-comparacion">
+                    <q-btn
+                      flat
+                      no-caps
+                      color="secondary"
+                      class="boton-cambiar-comercio-base"
+                      icon="edit_location_alt"
+                      label="Cambiar comercio elegido"
+                      @click="toggleEditorComercioBase"
+                    />
+                    <q-btn
+                      flat
+                      no-caps
+                      color="negative"
+                      icon="delete"
+                      label="Quitar comercio"
+                      @click="eliminarComercioBase"
+                    />
+                  </div>
+                </template>
+                <template v-else>
+                  <SelectorComercioDireccion
+                    :model-value="comercioBase"
+                    label-comercio="Primer comercio"
+                    label-direccion="Sucursal"
+                    :auto-seleccionar-direccion="true"
+                    @update:model-value="actualizarComercioBase"
+                  />
+                  <div
+                    v-if="esComercioValido(comercioBase)"
+                    class="fila-acciones-comercio-comparacion fila-acciones-comercio-comparacion-editor"
+                  >
+                    <q-btn
+                      flat
+                      no-caps
+                      color="grey-7"
+                      icon="expand_less"
+                      label="Ocultar selector"
+                      @click="toggleEditorComercioBase"
+                    />
+                    <q-btn
+                      flat
+                      no-caps
+                      color="negative"
+                      icon="delete"
+                      label="Quitar comercio"
+                      @click="eliminarComercioBase"
+                    />
+                  </div>
+                </template>
+              </div>
+
+              <div
+                v-for="fila in filasComparacion"
+                :key="fila.id"
+                class="tarjeta-comercio-comparacion"
+              >
+                <template v-if="esComercioValido(fila.comercio) && !fila.mostrarEditor">
+                  <div class="encabezado-comercio-base">
+                    <div class="bloque-titulo">{{ obtenerNombreComercio(fila.comercio) }}</div>
+                    <div
+                      v-if="obtenerDireccionComercio(fila.comercio)"
+                      class="bloque-subtitulo"
+                    >
+                      {{ obtenerDireccionComercio(fila.comercio) }}
+                    </div>
+                  </div>
+                  <div class="fila-acciones-comercio-comparacion">
+                    <q-btn
+                      flat
+                      no-caps
+                      color="secondary"
+                      class="boton-cambiar-comercio-base"
+                      icon="edit_location_alt"
+                      label="Cambiar comercio elegido"
+                      @click="toggleEditorComercioComparacion(fila.id)"
+                    />
+                    <q-btn
+                      flat
+                      no-caps
+                      color="negative"
+                      icon="delete"
+                      label="Quitar comercio"
+                      @click="eliminarFilaComparacion(fila.id)"
+                    />
+                  </div>
+                </template>
+                <template v-else>
+                  <SelectorComercioDireccion
+                    :model-value="fila.comercio"
+                    label-comercio="Comercio a comparar"
+                    label-direccion="Sucursal a comparar"
+                    :auto-seleccionar-direccion="true"
+                    @update:model-value="(valor) => actualizarFilaComparacion(fila.id, valor)"
+                  />
+                  <div class="fila-acciones-comercio-comparacion fila-acciones-comercio-comparacion-editor">
+                    <q-btn
+                      v-if="esComercioValido(fila.comercio)"
+                      flat
+                      no-caps
+                      color="grey-7"
+                      icon="expand_less"
+                      label="Ocultar selector"
+                      @click="toggleEditorComercioComparacion(fila.id)"
+                    />
+                    <q-btn
+                      flat
+                      no-caps
+                      color="negative"
+                      icon="delete"
+                      label="Quitar comercio"
+                      @click="eliminarFilaComparacion(fila.id)"
+                    />
+                  </div>
+                </template>
+              </div>
+
               <q-btn
                 flat
                 no-caps
                 color="secondary"
                 label="Agregar comercio"
                 icon="add"
+                class="boton-agregar-comercio-inferior"
+                :disable="!puedeAgregarComercioComparacion"
                 @click="agregarFilaComparacion"
               />
             </div>
-
-            <div v-if="filasComparacion.length === 0" class="estado-vacio-comparacion">
-              <q-icon name="storefront" size="26px" color="secondary" />
-              <span>Agregá al menos un comercio más para comparar precios.</span>
-            </div>
-
-            <div v-else class="columna-comparacion">
-              <div
-                v-for="fila in filasComparacion"
-                :key="fila.id"
-                class="fila-comercio-comparacion"
-              >
-                <SelectorComercioDireccion
-                  :model-value="fila.comercio"
-                  label-comercio="Comercio a comparar"
-                  label-direccion="Sucursal a comparar"
-                  @update:model-value="(valor) => actualizarFilaComparacion(fila.id, valor)"
-                />
-                <q-btn
-                  flat
-                  round
-                  dense
-                  color="negative"
-                  icon="delete"
-                  aria-label="Eliminar comercio"
-                  @click="eliminarFilaComparacion(fila.id)"
-                />
-              </div>
-            </div>
+            <q-btn
+              v-else
+              flat
+              no-caps
+              color="secondary"
+              label="Agregar comercio"
+              icon="add"
+              class="boton-agregar-comercio-inicial q-mt-md"
+              :disable="!puedeAgregarComercioComparacion"
+              @click="agregarFilaComparacion"
+            />
 
             <q-banner
-              v-if="mensajeComparacionIncompleta"
+              v-if="mensajeComparacionInteligente"
               rounded
               class="q-mt-md bg-warning text-black"
             >
-              {{ mensajeComparacionIncompleta }}
+              {{ mensajeComparacionInteligente }}
             </q-banner>
           </q-card-section>
         </q-card>
 
-        <q-card flat bordered class="bloque-inteligente q-mb-md">
+        <q-card v-if="comerciosSeleccionados.length > 0" flat bordered class="bloque-inteligente q-mb-md">
           <q-card-section>
             <div class="bloque-titulo">Resumen general</div>
 
@@ -127,13 +242,13 @@
 
             <div class="grid-resumen">
               <div class="tarjeta-resumen">
-                <span class="tarjeta-resumen-etiqueta">Comercio base</span>
+                <span class="tarjeta-resumen-etiqueta">Primer comercio</span>
                 <strong class="tarjeta-resumen-valor">
                   {{ resultadoInteligente.resumen.textoComercioBase }}
                 </strong>
               </div>
               <div class="tarjeta-resumen">
-                <span class="tarjeta-resumen-etiqueta">Total en comercio base</span>
+                <span class="tarjeta-resumen-etiqueta">Total del primer comercio</span>
                 <strong class="tarjeta-resumen-valor">
                   {{ resultadoInteligente.resumen.totalBaseTexto }}
                 </strong>
@@ -167,7 +282,7 @@
           </q-card-section>
         </q-card>
 
-        <q-card flat bordered class="bloque-inteligente q-mb-md">
+        <q-card v-if="comerciosSeleccionados.length > 0" flat bordered class="bloque-inteligente q-mb-md">
           <q-card-section>
             <div class="bloque-titulo">Comprar todo en un solo comercio</div>
             <div class="columna-ranking">
@@ -192,7 +307,7 @@
           </q-card-section>
         </q-card>
 
-        <q-card flat bordered class="bloque-inteligente q-mb-md">
+        <q-card v-if="comerciosSeleccionados.length > 0" flat bordered class="bloque-inteligente q-mb-md">
           <q-card-section>
             <div class="bloque-titulo">Compra optimizada por producto</div>
             <div
@@ -226,7 +341,7 @@
           </q-card-section>
         </q-card>
 
-        <q-card flat bordered class="bloque-inteligente">
+        <q-card v-if="comerciosSeleccionados.length > 0" flat bordered class="bloque-inteligente">
           <q-card-section>
             <div class="bloque-titulo">Detalle por producto</div>
             <div class="columna-detalle-productos">
@@ -312,6 +427,7 @@ const preferenciasStore = usePreferenciasStore()
 
 const filasComparacion = ref([])
 const mostrarEditorComercioBase = ref(false)
+const descripcionComparacionExpandida = ref(true)
 let contadorFilaComparacion = 0
 
 const listaActual = computed(() => listaJustaStore.obtenerListaPorId(route.params.id))
@@ -326,11 +442,13 @@ const textoEncabezadoComercioBase = computed(() => {
 const textoDireccionComercioBase = computed(() =>
   String(comercioBase.value?.direccionNombre || '').trim(),
 )
-const debeMostrarEditorComercioBase = computed(
-  () => mostrarEditorComercioBase.value || !esComercioValido(comercioBase.value),
-)
-const textoBotonComercioBase = computed(() =>
-  esComercioValido(comercioBase.value) ? 'Cambiar comercio elegido' : 'Elegir comercio base',
+const puedeAgregarComercioComparacion = computed(() => {
+  if (!esComercioValido(comercioBase.value)) return true
+  return filasComparacion.value.every((fila) => esComercioValido(fila.comercio))
+})
+const puedeColapsarDescripcionComparacion = computed(() => comerciosSeleccionados.value.length >= 2)
+const descripcionComparacionVisible = computed(
+  () => !puedeColapsarDescripcionComparacion.value || descripcionComparacionExpandida.value,
 )
 
 const comerciosSeleccionados = computed(() => {
@@ -362,6 +480,19 @@ const mensajeComparacionIncompleta = computed(() => {
 
   return ''
 })
+
+const mensajeComparacionInteligente = computed(() => {
+  if (!esComercioValido(comercioBase.value)) {
+    return 'Elegí el primer comercio para activar la comparación inteligente.'
+  }
+
+  if (comerciosSeleccionados.value.length < 2) {
+    return `Agregá al menos otro comercio para comparar con ${obtenerNombreComercio(comercioBase.value)}.`
+  }
+
+  return ''
+})
+void mensajeComparacionIncompleta.value
 
 const resultadoInteligente = computed(() => {
   if (!listaActual.value) {
@@ -499,6 +630,7 @@ function crearFilaComparacion(comercio = null) {
   return {
     id: `filaComparacion${contadorFilaComparacion}`,
     comercio,
+    mostrarEditor: !(esComercioValido(comercio) && comercio?.direccionId),
   }
 }
 
@@ -510,9 +642,10 @@ function sincronizarFilasComparacion() {
 async function actualizarComercioBase(valor) {
   await listaJustaStore.actualizarConfiguracionInteligente(listaActual.value.id, {
     comercioBase: valor,
+    heredarComercioActual: esComercioValido(valor),
   })
 
-  if (esComercioValido(valor)) {
+  if (debeColapsarSelectorPorSeleccion(valor)) {
     mostrarEditorComercioBase.value = false
   }
 }
@@ -521,7 +654,20 @@ function toggleEditorComercioBase() {
   mostrarEditorComercioBase.value = !mostrarEditorComercioBase.value
 }
 
+async function eliminarComercioBase() {
+  await listaJustaStore.actualizarConfiguracionInteligente(listaActual.value.id, {
+    comercioBase: null,
+    heredarComercioActual: false,
+  })
+  mostrarEditorComercioBase.value = false
+}
+
 function agregarFilaComparacion() {
+  if (!esComercioValido(comercioBase.value)) {
+    mostrarEditorComercioBase.value = true
+    return
+  }
+
   filasComparacion.value.push(crearFilaComparacion(null))
 }
 
@@ -530,6 +676,7 @@ async function actualizarFilaComparacion(filaId, valor) {
   if (!fila) return
 
   fila.comercio = valor
+  fila.mostrarEditor = !debeColapsarSelectorPorSeleccion(valor)
   await persistirComerciosComparacion()
 }
 
@@ -546,6 +693,31 @@ async function persistirComerciosComparacion() {
   await listaJustaStore.actualizarConfiguracionInteligente(listaActual.value.id, {
     comerciosComparacion: comercios,
   })
+}
+
+function toggleEditorComercioComparacion(filaId) {
+  const fila = filasComparacion.value.find((actual) => actual.id === filaId)
+  if (!fila) return
+  fila.mostrarEditor = !fila.mostrarEditor
+}
+
+function obtenerNombreComercio(comercio) {
+  return String(comercio?.nombre || '').trim() || 'Elegí un comercio'
+}
+
+function obtenerDireccionComercio(comercio) {
+  return String(comercio?.direccionNombre || '').trim()
+}
+
+function debeColapsarSelectorPorSeleccion(valor) {
+  if (!esComercioValido(valor) || !valor?.direccionId) return false
+  if (!valor?.tieneMultiplesDirecciones) return true
+  return Boolean(valor?.direccionSeleccionadaManual)
+}
+
+function toggleDescripcionComparacion() {
+  if (!puedeColapsarDescripcionComparacion.value) return
+  descripcionComparacionExpandida.value = !descripcionComparacionExpandida.value
 }
 
 function construirAnalisisItem(item, comercios, comercioBaseActual) {
@@ -698,6 +870,16 @@ function textoEstadoItem(estado) {
 
 watch(comerciosComparacionGuardados, sincronizarFilasComparacion, { immediate: true })
 
+watch(
+  puedeColapsarDescripcionComparacion,
+  (puedeColapsar) => {
+    if (!puedeColapsar) {
+      descripcionComparacionExpandida.value = true
+    }
+  },
+  { immediate: true },
+)
+
 onMounted(async () => {
   await Promise.all([
     listaJustaStore.cargarListas(),
@@ -765,6 +947,24 @@ onMounted(async () => {
   gap: 12px;
   flex-wrap: wrap;
 }
+.acciones-encabezado-comparacion {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.descripcion-comparacion-inteligente {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--texto-secundario);
+}
+.boton-toggle-descripcion-comparacion {
+  align-self: center;
+}
+.fila-encabezado-bloque > div > .text-caption.text-grey-7 {
+  display: none;
+}
 .estado-vacio-comparacion {
   display: flex;
   align-items: center;
@@ -782,11 +982,28 @@ onMounted(async () => {
   gap: 12px;
   margin-top: 12px;
 }
-.fila-comercio-comparacion {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px;
-  align-items: start;
+.boton-agregar-comercio-inferior {
+  align-self: flex-start;
+}
+.boton-agregar-comercio-inicial {
+  align-self: flex-start;
+}
+.tarjeta-comercio-comparacion {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--borde-color);
+  border-radius: 12px;
+  background: var(--fondo-app-secundario);
+}
+.fila-acciones-comercio-comparacion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.fila-acciones-comercio-comparacion-editor {
+  justify-content: space-between;
 }
 .grid-resumen {
   display: grid;
@@ -926,9 +1143,6 @@ onMounted(async () => {
   color: var(--texto-secundario);
 }
 @media (max-width: 760px) {
-  .fila-comercio-comparacion {
-    grid-template-columns: 1fr;
-  }
   .grid-resumen {
     grid-template-columns: 1fr;
   }
