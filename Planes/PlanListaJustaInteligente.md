@@ -29,11 +29,11 @@ Agregar una vista inteligente dentro de cada lista de `Lista Justa` para ayudar 
 
 Integrar la entrada a la nueva experiencia sin romper el flujo actual de `Lista Justa`.
 
-- [ ] Identificar en `ListaJustaPage.vue` el punto correcto para agregar un botón nuevo hacia la vista inteligente de cada lista
-- [ ] Definir la ruta o navegación de la vista inteligente respetando la estructura actual de `Lista Justa`
-- [ ] Confirmar que cada lista tenga su propia vista inteligente asociada a su mismo `id`
-- [ ] Definir qué datos nuevos deben persistirse por lista para la configuración inteligente sin duplicar `items`
-- [ ] Verificar cómo se hereda `comercioActual` como comercio base inicial cuando el usuario entra al modo inteligente
+- [x] Identificar en `ListaJustaPage.vue` el punto correcto para agregar un botón nuevo hacia la vista inteligente de cada lista
+- [x] Definir la ruta o navegación de la vista inteligente respetando la estructura actual de `Lista Justa`
+- [x] Confirmar que cada lista tenga su propia vista inteligente asociada a su mismo `id`
+- [x] Definir qué datos nuevos deben persistirse por lista para la configuración inteligente sin duplicar `items`
+- [x] Verificar cómo se hereda `comercioActual` como comercio base inicial cuando el usuario entra al modo inteligente
 
 ## FASE 2: Modelar configuración y persistencia de la inteligencia
 
@@ -41,11 +41,11 @@ Integrar la entrada a la nueva experiencia sin romper el flujo actual de `Lista 
 
 Guardar por lista la configuración necesaria para comparar comercios y recalcular resultados de forma consistente.
 
-- [ ] Extender el modelo de la lista para soportar datos de `Lista Justa Inteligente` sin romper listas ya guardadas
-- [ ] Definir persistencia del comercio base editable dentro de la vista inteligente
-- [ ] Definir persistencia de comercios adicionales seleccionados usando el selector existente de comercio y dirección
-- [ ] Asegurar migración o valores por defecto para listas existentes que todavía no tengan configuración inteligente
-- [ ] Revisar `ListaJustaStore` y `ListaJustaService` para mantener compatibilidad con el almacenamiento actual
+- [x] Extender el modelo de la lista para soportar datos de `Lista Justa Inteligente` sin romper listas ya guardadas
+- [x] Definir persistencia del comercio base editable dentro de la vista inteligente
+- [x] Definir persistencia de comercios adicionales seleccionados usando el selector existente de comercio y dirección
+- [x] Asegurar migración o valores por defecto para listas existentes que todavía no tengan configuración inteligente
+- [x] Revisar `ListaJustaStore` y `ListaJustaService` para mantener compatibilidad con el almacenamiento actual
 
 ## FASE 3: Resolver formulario y selección de comercios
 
@@ -53,11 +53,11 @@ Guardar por lista la configuración necesaria para comparar comercios y recalcul
 
 Permitir que el usuario configure de forma simple los comercios que quiere comparar.
 
-- [ ] Reutilizar `SelectorComercioDireccion.vue` o la lógica asociada para elegir el comercio base y los comercios a comparar
-- [ ] Permitir cambiar el comercio base heredado dentro de la vista inteligente
-- [ ] Permitir agregar múltiples comercios adicionales a la comparación
-- [ ] Validar que la interfaz explique claramente qué comercio es base y cuáles son comercios adicionales
-- [ ] Definir mensajes claros cuando faltan comercios suficientes para una comparación útil
+- [x] Reutilizar `SelectorComercioDireccion.vue` o la lógica asociada para elegir el comercio base y los comercios a comparar
+- [x] Permitir cambiar el comercio base heredado dentro de la vista inteligente
+- [x] Permitir agregar múltiples comercios adicionales a la comparación
+- [x] Validar que la interfaz explique claramente qué comercio es base y cuáles son comercios adicionales
+- [x] Definir mensajes claros cuando faltan comercios suficientes para una comparación útil
 
 ## FASE 4: Implementar motor de comparación por precios base
 
@@ -65,12 +65,12 @@ Permitir que el usuario configure de forma simple los comercios que quiere compa
 
 Calcular resultados comparables usando solo precios base disponibles por producto y por comercio.
 
-- [ ] Identificar de dónde se obtiene el precio base por producto y por comercio dentro de la arquitectura actual
-- [ ] Calcular cuánto costaría comprar toda la lista en cada comercio seleccionado
-- [ ] Calcular la recomendación optimizada por producto tomando siempre el precio base más bajo disponible
-- [ ] Usar el comercio base heredado o seleccionado como referencia principal para comparar ahorro estimado
-- [ ] Preparar estructura de resultados para agrupar productos por comercio recomendado
-- [ ] Excluir del cálculo comparativo los productos sin datos suficientes y marcarlos como casos a informar
+- [x] Identificar de dónde se obtiene el precio base por producto y por comercio dentro de la arquitectura actual
+- [x] Calcular cuánto costaría comprar toda la lista en cada comercio seleccionado
+- [x] Calcular la recomendación optimizada por producto tomando siempre el precio base más bajo disponible
+- [x] Usar el comercio base heredado o seleccionado como referencia principal para comparar ahorro estimado
+- [x] Preparar estructura de resultados para agrupar productos por comercio recomendado
+- [x] Excluir del cálculo comparativo los productos sin datos suficientes y marcarlos como casos a informar
 
 ## FASE 5: Diseñar manejo de precios faltantes y comparación parcial
 
@@ -78,12 +78,12 @@ Calcular resultados comparables usando solo precios base disponibles por product
 
 Mostrar recomendaciones honestas cuando la información esté incompleta.
 
-- [ ] Definir regla `Sin precios para comparar` cuando un producto no tenga precio en ninguno de los comercios elegidos
-- [ ] Definir regla `Solo hay precio en X comercio` cuando un producto tenga precio en un único comercio seleccionado
-- [ ] Definir comparación parcial cuando un producto tenga precio en algunos comercios seleccionados pero no en todos
-- [ ] Mostrar recomendación provisoria basada solo en los comercios con precio disponible
-- [ ] Agregar avisos generales de faltantes en el resumen de la pantalla
-- [ ] Agregar avisos por producto para que el usuario sepa cuándo la comparación no es exacta
+- [x] Definir regla `Sin precios para comparar` cuando un producto no tenga precio en ninguno de los comercios elegidos
+- [x] Definir regla `Solo hay precio en X comercio` cuando un producto tenga precio en un único comercio seleccionado
+- [x] Definir comparación parcial cuando un producto tenga precio en algunos comercios seleccionados pero no en todos
+- [x] Mostrar recomendación provisoria basada solo en los comercios con precio disponible
+- [x] Agregar avisos generales de faltantes en el resumen de la pantalla
+- [x] Agregar avisos por producto para que el usuario sepa cuándo la comparación no es exacta
 
 ## FASE 6: Construir la interfaz de resultados inteligentes
 
@@ -91,12 +91,12 @@ Mostrar recomendaciones honestas cuando la información esté incompleta.
 
 Presentar la comparación de forma clara, útil y alineada visualmente con `Lista Justa`.
 
-- [ ] Diseñar un bloque de resumen con comercio base, total del comercio base, mejor total detectado y ahorro estimado
-- [ ] Diseñar un bloque con ranking de `comprar todo en un solo comercio`
-- [ ] Diseñar un bloque de `compra optimizada por producto` agrupando productos por comercio recomendado
-- [ ] Destacar diferencias importantes por producto cuando la comparación muestre oportunidades claras de ahorro
-- [ ] Mantener consistencia visual con colores, tipografía, espaciados y componentes existentes de `Lista Justa`
-- [ ] Resolver visualización cómoda en web, tablet y celular, tanto en vertical como en horizontal
+- [x] Diseñar un bloque de resumen con comercio base, total del comercio base, mejor total detectado y ahorro estimado
+- [x] Diseñar un bloque con ranking de `comprar todo en un solo comercio`
+- [x] Diseñar un bloque de `compra optimizada por producto` agrupando productos por comercio recomendado
+- [x] Destacar diferencias importantes por producto cuando la comparación muestre oportunidades claras de ahorro
+- [x] Mantener consistencia visual con colores, tipografía, espaciados y componentes existentes de `Lista Justa`
+- [x] Resolver visualización cómoda en web, tablet y celular, tanto en vertical como en horizontal
 
 ## FASE 7: Integrar navegación, reutilización y coherencia funcional
 
@@ -104,10 +104,10 @@ Presentar la comparación de forma clara, útil y alineada visualmente con `List
 
 Cerrar la integración completa sin duplicar lógica innecesaria y manteniendo el comportamiento actual estable.
 
-- [ ] Revisar si conviene extraer bloques reutilizables desde la lista normal para compartirlos con la vista inteligente
-- [ ] Evitar duplicación de lógica de totales, encabezados, estados vacíos y componentes visuales cuando ya exista una base reutilizable
+- [x] Revisar si conviene extraer bloques reutilizables desde la lista normal para compartirlos con la vista inteligente
+- [x] Evitar duplicación de lógica de totales, encabezados, estados vacíos y componentes visuales cuando ya exista una base reutilizable
 - [ ] Verificar que la lista normal siga funcionando igual después de integrar la vista inteligente
-- [ ] Confirmar que el botón nuevo y la nueva vista no rompan rutas, accesos rápidos ni persistencia actual
+- [x] Confirmar que el botón nuevo y la nueva vista no rompan rutas, accesos rápidos ni persistencia actual
 - [ ] Actualizar la documentación relacionada si cambian flujos, modelo o navegación de `Lista Justa`
 
 ## FASE TESTING
@@ -129,15 +129,15 @@ Validar de forma ejecutable por IA y revisable por humano que la vista inteligen
 
 ## Progreso del plan
 
-- [ ] Fase 1: Definir acceso y estructura de la vista inteligente
-- [ ] Fase 2: Modelar configuración y persistencia de la inteligencia
-- [ ] Fase 3: Resolver formulario y selección de comercios
-- [ ] Fase 4: Implementar motor de comparación por precios base
-- [ ] Fase 5: Diseñar manejo de precios faltantes y comparación parcial
-- [ ] Fase 6: Construir la interfaz de resultados inteligentes
+- [x] Fase 1: Definir acceso y estructura de la vista inteligente
+- [x] Fase 2: Modelar configuración y persistencia de la inteligencia
+- [x] Fase 3: Resolver formulario y selección de comercios
+- [x] Fase 4: Implementar motor de comparación por precios base
+- [x] Fase 5: Diseñar manejo de precios faltantes y comparación parcial
+- [x] Fase 6: Construir la interfaz de resultados inteligentes
 - [ ] Fase 7: Integrar navegación, reutilización y coherencia funcional
 - [ ] Fase Testing
 
 Fecha de creacion: 25 de Abril 2026
-Fecha de ultima actualizacion: 25 de Abril 2026
-Estado: BORRADOR
+Fecha de ultima actualizacion: 26 de Abril 2026
+Estado: EN PROCESO

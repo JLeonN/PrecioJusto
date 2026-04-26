@@ -40,9 +40,10 @@ class ListaJustaService {
       fechaActualizacion: ahora,
       fechaUltimoUso: ahora,
       comercioActual: null,
+      configuracionInteligente: this._normalizarConfiguracionInteligente(null, null),
       items: [],
       metadatos: {
-        version: 1,
+        version: 2,
       },
     }
   }
@@ -85,6 +86,7 @@ class ListaJustaService {
 
   _normalizarLista(lista = {}) {
     const items = Array.isArray(lista.items) ? lista.items : []
+    const comercioActual = lista.comercioActual || null
 
     return {
       id: lista.id || this._generarId('listaJusta'),
@@ -95,10 +97,14 @@ class ListaJustaService {
       fechaCreacion: lista.fechaCreacion || new Date().toISOString(),
       fechaActualizacion: lista.fechaActualizacion || new Date().toISOString(),
       fechaUltimoUso: lista.fechaUltimoUso || lista.fechaActualizacion || lista.fechaCreacion || new Date().toISOString(),
-      comercioActual: lista.comercioActual || null,
+      comercioActual,
+      configuracionInteligente: this._normalizarConfiguracionInteligente(
+        lista.configuracionInteligente,
+        comercioActual,
+      ),
       items: items.map((item) => this.normalizarItem(item)),
       metadatos: {
-        version: lista.metadatos?.version || 1,
+        version: Math.max(Number(lista.metadatos?.version || 1), 2),
       },
     }
   }
@@ -119,6 +125,69 @@ class ListaJustaService {
         }))
         .filter((escala) => escala.cantidadMinima >= 2 && escala.precioUnitario !== null)
       : []
+  }
+
+  _normalizarConfiguracionInteligente(configuracion, comercioActual = null) {
+    const comercioBaseNormalizado = this._normalizarComercioInteligente(
+      configuracion?.comercioBase || comercioActual || null,
+    )
+    const comerciosComparacion = Array.isArray(configuracion?.comerciosComparacion)
+      ? configuracion.comerciosComparacion
+        .map((comercio) => this._normalizarComercioInteligente(comercio))
+        .filter(Boolean)
+      : []
+
+    const clavesUsadas = new Set()
+    const comercioBaseClave = this._obtenerClaveComercioInteligente(comercioBaseNormalizado)
+
+    if (comercioBaseClave) {
+      clavesUsadas.add(comercioBaseClave)
+    }
+
+    const comerciosComparacionNormalizados = comerciosComparacion.filter((comercio) => {
+      const clave = this._obtenerClaveComercioInteligente(comercio)
+      if (!clave || clavesUsadas.has(clave)) return false
+      clavesUsadas.add(clave)
+      return true
+    })
+
+    return {
+      comercioBase: comercioBaseNormalizado,
+      comerciosComparacion: comerciosComparacionNormalizados,
+    }
+  }
+
+  _normalizarComercioInteligente(comercio) {
+    if (!comercio) return null
+
+    const nombre = String(comercio.nombre || '').trim()
+    const id = String(comercio.id || '').trim() || null
+    const direccionId = String(comercio.direccionId || '').trim() || null
+    const direccionNombre = String(comercio.direccionNombre || '').trim() || ''
+
+    if (!nombre && !id) return null
+
+    return {
+      id,
+      nombre,
+      direccionId,
+      direccionNombre,
+    }
+  }
+
+  _obtenerClaveComercioInteligente(comercio) {
+    if (!comercio) return ''
+
+    if (comercio.id && comercio.direccionId) {
+      return `${comercio.id}_${comercio.direccionId}`
+    }
+
+    if (comercio.id) return comercio.id
+    if (comercio.nombre && comercio.direccionNombre) {
+      return `${comercio.nombre}_${comercio.direccionNombre}`
+    }
+
+    return comercio.nombre || ''
   }
 }
 

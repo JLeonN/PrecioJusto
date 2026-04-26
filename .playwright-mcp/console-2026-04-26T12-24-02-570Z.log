@@ -1,0 +1,555 @@
+[     430ms] [INFO] [Quasar] Running SPA. @ http://127.0.0.1:9000/.quasar/dev-spa/client-entry.js:46
+[     584ms] [LOG] 📱 CapacitorAdapter inicializado @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/CapacitorAdapter.js:28
+[     586ms] [LOG] ℹ️ No existe: preferencias_usuario @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:72
+[    1092ms] [LOG] ProductosService inicializado con LocalStorageAdapter @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:26
+[    1356ms] [LOG] ℹ️ No existe: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:72
+[    1357ms] [LOG] ℹ️ No existe: sesion_escaneo @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:72
+[    1358ms] [LOG] ℹ️ No existe: preferencias_usuario @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:72
+[    1370ms] [LOG] ℹ️ No existe: preferencias_usuario @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:72
+[    1374ms] [LOG] ✅ Guardado: preferencias_usuario @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[    1897ms] [ERROR] Access to fetch at 'https://jleonn.github.io/PrecioJusto/version.json?t=1777206244072' from origin 'http://127.0.0.1:9000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://127.0.0.1:9000/#/:0
+[    1898ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://jleonn.github.io/PrecioJusto/version.json?t=1777206244072:0
+[    7262ms] [LOG] ℹ️ No existe: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:72
+[    7267ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[    7267ms] [LOG] ✅ Listados 0 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[    7267ms] [LOG] Obtenidos 0 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[    7267ms] [LOG] ✅ 0 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[   36945ms] [LOG] 💾 Guardando comercio nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarComercio.vue:176
+[   36946ms] [LOG] ℹ️ No existe: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:72
+[   36947ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[   36949ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   37002ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[   37002ms] [LOG] ✅ Listados 0 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[   37003ms] [LOG] Obtenidos 0 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[   37003ms] [LOG] ✅ 0 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[   37973ms] [LOG] 💾 Guardando comercio nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarComercio.vue:176
+[   37974ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   37974ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[   37975ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   38029ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[   38029ms] [LOG] ✅ Listados 0 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[   38029ms] [LOG] Obtenidos 0 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[   38030ms] [LOG] ✅ 0 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[   39116ms] [LOG] 💾 Guardando comercio nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarComercio.vue:176
+[   39116ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   39116ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[   39117ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   39163ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[   39163ms] [LOG] ✅ Listados 0 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[   39163ms] [LOG] Obtenidos 0 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[   39163ms] [LOG] ✅ 0 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[   40114ms] [LOG] 💾 Guardando comercio nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarComercio.vue:176
+[   40114ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   40115ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[   40116ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   40176ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[   40177ms] [LOG] ✅ Listados 0 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[   40177ms] [LOG] Obtenidos 0 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[   40177ms] [LOG] ✅ 0 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[   46770ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[   46772ms] [LOG] ✅ Listados 0 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[   46775ms] [LOG] Obtenidos 0 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[   46775ms] [LOG] ✅ 0 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[   57693ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   78647ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   79477ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   79520ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   80343ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   80398ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   81238ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   81276ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   82073ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   82105ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   82894ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   82927ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   83762ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   83840ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   84630ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   84672ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   85455ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   85491ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   86287ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   86325ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   87117ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   87159ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   87940ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   87980ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   88789ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   88838ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   89641ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   89679ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   90475ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   90513ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   91301ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   91348ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   92158ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   92207ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   93008ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   93047ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   93842ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   93880ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   94665ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[   94698ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  112860ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  112988ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  113075ms] [LOG] Creando producto nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:362
+[  113075ms] [LOG] ➕ Agregando producto: Mermelada Frutilla 450g @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:166
+[  113078ms] [LOG] ✅ Guardado: producto_1777206355645kposygn5x @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  113086ms] [LOG] Producto guardado: Mermelada Frutilla 450g (ID: 1777206355645kposygn5x) @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:68
+[  113087ms] [LOG] ✅ Producto agregado al store @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:173
+[  113135ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  113135ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  113136ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  113137ms] [LOG] ✅ Listados 1 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  113144ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  113145ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  113165ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  113165ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  113167ms] [LOG] Obtenidos 1 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  113168ms] [LOG] ✅ 1 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  134570ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  134665ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  135145ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  135240ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  135348ms] [LOG] Creando producto nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:362
+[  135349ms] [LOG] ➕ Agregando producto: Arroz Integral 1kg @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:166
+[  135349ms] [LOG] ✅ Guardado: producto_177720637791814ambih5t @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  135357ms] [LOG] Producto guardado: Arroz Integral 1kg (ID: 177720637791814ambih5t) @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:68
+[  135358ms] [LOG] ✅ Producto agregado al store @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:173
+[  135429ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  135429ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  135430ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  135431ms] [LOG] ✅ Listados 2 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  135440ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  135441ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  135463ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  135464ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  135464ms] [LOG] Obtenidos 2 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  135465ms] [LOG] ✅ 2 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  136370ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  136434ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  136899ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  136989ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  137054ms] [LOG] Creando producto nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:362
+[  137054ms] [LOG] ➕ Agregando producto: Fideos Spaghetti 500g @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:166
+[  137054ms] [LOG] ✅ Guardado: producto_1777206379624pi5bfk2kh @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  137061ms] [LOG] Producto guardado: Fideos Spaghetti 500g (ID: 1777206379624pi5bfk2kh) @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:68
+[  137061ms] [LOG] ✅ Producto agregado al store @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:173
+[  137096ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  137096ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  137097ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  137098ms] [LOG] ✅ Listados 3 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  137110ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  137110ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  137121ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  137121ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  137130ms] [LOG] Obtenidos 3 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  137130ms] [LOG] ✅ 3 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  137926ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  138031ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  138422ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  138484ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  138542ms] [LOG] Creando producto nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:362
+[  138542ms] [LOG] ➕ Agregando producto: Azúcar Morena 1kg @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:166
+[  138543ms] [LOG] ✅ Guardado: producto_1777206381112vrrsc99ca @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  138550ms] [LOG] Producto guardado: Azúcar Morena 1kg (ID: 1777206381112vrrsc99ca) @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:68
+[  138550ms] [LOG] ✅ Producto agregado al store @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:173
+[  138595ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  138595ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  138595ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  138596ms] [LOG] ✅ Listados 4 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  138607ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  138607ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  138616ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  138616ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  138623ms] [LOG] Obtenidos 4 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  138624ms] [LOG] ✅ 4 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  139539ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  139601ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  140041ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  140093ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  140169ms] [LOG] Creando producto nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:362
+[  140170ms] [LOG] ➕ Agregando producto: Yerba Mate Suave 1kg @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:166
+[  140170ms] [LOG] ✅ Guardado: producto_17772063827399ikjdwfvu @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  140177ms] [LOG] Producto guardado: Yerba Mate Suave 1kg (ID: 17772063827399ikjdwfvu) @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:68
+[  140178ms] [LOG] ✅ Producto agregado al store @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:173
+[  140226ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  140226ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  140226ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  140227ms] [LOG] ✅ Listados 5 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  140239ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  140239ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  140248ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  140248ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  140255ms] [LOG] Obtenidos 5 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  140256ms] [LOG] ✅ 5 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  141061ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  141164ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  141639ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  141705ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  141759ms] [LOG] Creando producto nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:362
+[  141759ms] [LOG] ➕ Agregando producto: Aceite Girasol 900ml @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:166
+[  141760ms] [LOG] ✅ Guardado: producto_1777206384329l8pyoh04x @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  141767ms] [LOG] Producto guardado: Aceite Girasol 900ml (ID: 1777206384329l8pyoh04x) @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:68
+[  141767ms] [LOG] ✅ Producto agregado al store @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:173
+[  141824ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  141824ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  141825ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  141825ms] [LOG] ✅ Listados 6 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  141837ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  141837ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  141845ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  141845ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  141855ms] [LOG] Obtenidos 6 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  141855ms] [LOG] ✅ 6 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  142702ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  142770ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  143220ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  143310ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  143381ms] [LOG] Creando producto nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:362
+[  143381ms] [LOG] ➕ Agregando producto: Harina Trigo 0000 1kg @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:166
+[  143382ms] [LOG] ✅ Guardado: producto_17772063859515gkal79fw @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  143389ms] [LOG] Producto guardado: Harina Trigo 0000 1kg (ID: 17772063859515gkal79fw) @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:68
+[  143390ms] [LOG] ✅ Producto agregado al store @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:173
+[  143524ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  143524ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  143525ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  143525ms] [LOG] ✅ Listados 7 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  143538ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  143538ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  143546ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  143546ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  143554ms] [LOG] Obtenidos 7 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  143554ms] [LOG] ✅ 7 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  144478ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  144546ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  144989ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  145044ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  145088ms] [LOG] Creando producto nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:362
+[  145089ms] [LOG] ➕ Agregando producto: Sal Fina 1kg @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:166
+[  145089ms] [LOG] ✅ Guardado: producto_1777206387658cvz6uth0g @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  145094ms] [LOG] Producto guardado: Sal Fina 1kg (ID: 1777206387658cvz6uth0g) @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:68
+[  145094ms] [LOG] ✅ Producto agregado al store @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:173
+[  145156ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  145156ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  145156ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  145156ms] [LOG] ✅ Listados 8 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  145168ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  145169ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  145178ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  145178ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  145187ms] [LOG] Obtenidos 8 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  145188ms] [LOG] ✅ 8 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  146094ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  146180ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  146639ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  146689ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  146744ms] [LOG] Creando producto nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:362
+[  146744ms] [LOG] ➕ Agregando producto: Leche Entera Larga Vida 1L @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:166
+[  146745ms] [LOG] ✅ Guardado: producto_1777206389314mlvb52c9b @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  146754ms] [LOG] Producto guardado: Leche Entera Larga Vida 1L (ID: 1777206389314mlvb52c9b) @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:68
+[  146755ms] [LOG] ✅ Producto agregado al store @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:173
+[  146829ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  146829ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  146830ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  146830ms] [LOG] ✅ Listados 9 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  146842ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  146842ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  146850ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  146850ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  146859ms] [LOG] Obtenidos 9 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  146859ms] [LOG] ✅ 9 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  147727ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  147825ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  148228ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  148298ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  148365ms] [LOG] Creando producto nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:362
+[  148365ms] [LOG] ➕ Agregando producto: Queso Rallado 200g @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:166
+[  148365ms] [LOG] ✅ Guardado: producto_1777206390935ho5v3qpck @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  148374ms] [LOG] Producto guardado: Queso Rallado 200g (ID: 1777206390935ho5v3qpck) @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:68
+[  148374ms] [LOG] ✅ Producto agregado al store @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:173
+[  148470ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  148470ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  148470ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  148471ms] [LOG] ✅ Listados 10 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  148487ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  148487ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  148497ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  148497ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  148506ms] [LOG] Obtenidos 10 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  148506ms] [LOG] ✅ 10 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  149363ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  149443ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  149862ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  149915ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  149967ms] [LOG] Creando producto nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:362
+[  149967ms] [LOG] ➕ Agregando producto: Galletitas Avena 250g @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:166
+[  149968ms] [LOG] ✅ Guardado: producto_1777206392537uqhvsmyfu @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  149975ms] [LOG] Producto guardado: Galletitas Avena 250g (ID: 1777206392537uqhvsmyfu) @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:68
+[  149975ms] [LOG] ✅ Producto agregado al store @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:173
+[  150147ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  150147ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  150148ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  150149ms] [LOG] ✅ Listados 11 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  150170ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  150170ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  150184ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  150185ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  150198ms] [LOG] Obtenidos 11 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  150199ms] [LOG] ✅ 11 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  151013ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  151090ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  151541ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  151596ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  151656ms] [LOG] Creando producto nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:362
+[  151656ms] [LOG] ➕ Agregando producto: Atún En Agua 170g @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:166
+[  151657ms] [LOG] ✅ Guardado: producto_17772063942268971sj2n7 @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  151668ms] [LOG] Producto guardado: Atún En Agua 170g (ID: 17772063942268971sj2n7) @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:68
+[  151668ms] [LOG] ✅ Producto agregado al store @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:173
+[  151772ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  151773ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  151773ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  151774ms] [LOG] ✅ Listados 12 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  151790ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  151790ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  151801ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  151801ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  151809ms] [LOG] Obtenidos 12 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  151810ms] [LOG] ✅ 12 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  152742ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  152864ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  153285ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  153365ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  153418ms] [LOG] Creando producto nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:362
+[  153419ms] [LOG] ➕ Agregando producto: Tomate Triturado 520g @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:166
+[  153419ms] [LOG] ✅ Guardado: producto_1777206395988ib5wa66wd @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  153427ms] [LOG] Producto guardado: Tomate Triturado 520g (ID: 1777206395988ib5wa66wd) @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:68
+[  153427ms] [LOG] ✅ Producto agregado al store @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:173
+[  153540ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  153540ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  153540ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  153541ms] [LOG] ✅ Listados 13 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  153561ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  153562ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  153573ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  153573ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  153582ms] [LOG] Obtenidos 13 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  153582ms] [LOG] ✅ 13 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  154520ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  154597ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  155081ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  155130ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  155180ms] [LOG] Creando producto nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:362
+[  155181ms] [LOG] ➕ Agregando producto: Lentejas Secas 500g @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:166
+[  155181ms] [LOG] ✅ Guardado: producto_17772063977508nmlb1ysf @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  155191ms] [LOG] Producto guardado: Lentejas Secas 500g (ID: 17772063977508nmlb1ysf) @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:68
+[  155191ms] [LOG] ✅ Producto agregado al store @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:173
+[  155297ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  155297ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  155298ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  155298ms] [LOG] ✅ Listados 14 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  155318ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  155319ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  155328ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  155328ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  155333ms] [LOG] Obtenidos 14 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  155334ms] [LOG] ✅ 14 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  156247ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  156330ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  156733ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  156787ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  156840ms] [LOG] Creando producto nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:362
+[  156841ms] [LOG] ➕ Agregando producto: Jabón En Barra 3u @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:166
+[  156842ms] [LOG] ✅ Guardado: producto_1777206399411jh2oim4ue @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  156850ms] [LOG] Producto guardado: Jabón En Barra 3u (ID: 1777206399411jh2oim4ue) @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:68
+[  156851ms] [LOG] ✅ Producto agregado al store @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:173
+[  156959ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  156960ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  156960ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  156961ms] [LOG] ✅ Listados 15 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  156977ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  156978ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  156987ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  156987ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  156995ms] [LOG] Obtenidos 15 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  156995ms] [LOG] ✅ 15 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  157940ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  158042ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  158449ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  158506ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  158564ms] [LOG] Creando producto nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:362
+[  158564ms] [LOG] ➕ Agregando producto: Detergente Limón 750ml @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:166
+[  158565ms] [LOG] ✅ Guardado: producto_1777206401134jnjszt6eu @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  158573ms] [LOG] Producto guardado: Detergente Limón 750ml (ID: 1777206401134jnjszt6eu) @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:68
+[  158573ms] [LOG] ✅ Producto agregado al store @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:173
+[  158693ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  158693ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  158694ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  158695ms] [LOG] ✅ Listados 16 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  158714ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  158714ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  158723ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  158724ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  158733ms] [LOG] Obtenidos 16 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  158733ms] [LOG] ✅ 16 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  159641ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  159733ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  160148ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  160199ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  160259ms] [LOG] Creando producto nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:362
+[  160259ms] [LOG] ➕ Agregando producto: Papel Higiénico 12u @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:166
+[  160260ms] [LOG] ✅ Guardado: producto_1777206402829s3a1o4uvk @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  160268ms] [LOG] Producto guardado: Papel Higiénico 12u (ID: 1777206402829s3a1o4uvk) @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:68
+[  160268ms] [LOG] ✅ Producto agregado al store @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:173
+[  160401ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  160401ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  160402ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  160402ms] [LOG] ✅ Listados 17 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  160427ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  160427ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  160438ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  160439ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  160448ms] [LOG] Obtenidos 17 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  160448ms] [LOG] ✅ 17 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  161343ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  161439ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  161855ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  161923ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  161974ms] [LOG] Creando producto nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:362
+[  161975ms] [LOG] ➕ Agregando producto: Shampoo Uso Diario 400ml @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:166
+[  161975ms] [LOG] ✅ Guardado: producto_1777206404544zavhmf7qy @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  161984ms] [LOG] Producto guardado: Shampoo Uso Diario 400ml (ID: 1777206404544zavhmf7qy) @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:68
+[  161984ms] [LOG] ✅ Producto agregado al store @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:173
+[  162129ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  162129ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  162129ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  162130ms] [LOG] ✅ Listados 18 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  162159ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  162160ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  162169ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  162169ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  162177ms] [LOG] Obtenidos 18 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  162177ms] [LOG] ✅ 18 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  163150ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  163248ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  163595ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  163651ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  163715ms] [LOG] Creando producto nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:362
+[  163716ms] [LOG] ➕ Agregando producto: Acondicionador Suave 400ml @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:166
+[  163716ms] [LOG] ✅ Guardado: producto_1777206406286g7e5plhmz @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  163727ms] [LOG] Producto guardado: Acondicionador Suave 400ml (ID: 1777206406286g7e5plhmz) @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:68
+[  163727ms] [LOG] ✅ Producto agregado al store @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:173
+[  163881ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  163881ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  163882ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  163883ms] [LOG] ✅ Listados 19 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  163922ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  163922ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  163933ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  163933ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  163943ms] [LOG] Obtenidos 19 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  163943ms] [LOG] ✅ 19 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  164839ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  164952ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  165407ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  165468ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  165525ms] [LOG] Creando producto nuevo... @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:362
+[  165526ms] [LOG] ➕ Agregando producto: Café Molido Clásico 250g @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:166
+[  165527ms] [LOG] ✅ Guardado: producto_1777206408095n2wcj5wid @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  165537ms] [LOG] Producto guardado: Café Molido Clásico 250g (ID: 1777206408095n2wcj5wid) @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:68
+[  165538ms] [LOG] ✅ Producto agregado al store @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:173
+[  165721ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  165722ms] [LOG] ✅ Guardado: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  165722ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  165723ms] [LOG] ✅ Listados 20 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  165742ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  165743ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  165753ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  165753ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  165760ms] [LOG] Obtenidos 20 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  165760ms] [LOG] ✅ 20 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  172395ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  172422ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  172422ms] [LOG] ✅ Listados 20 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  172422ms] [LOG] Obtenidos 20 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  172422ms] [LOG] ✅ 20 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  193257ms] [LOG] Comercio expandido: true @ http://127.0.0.1:9000/src/components/Tarjetas/TarjetaComercioYugioh.vue:57
+[  194148ms] [LOG] Comercio expandido: false @ http://127.0.0.1:9000/src/components/Tarjetas/TarjetaComercioYugioh.vue:57
+[  197113ms] [LOG] Comercio expandido: true @ http://127.0.0.1:9000/src/components/Tarjetas/TarjetaComercioYugioh.vue:57
+[  203978ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  204008ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  204008ms] [LOG] ✅ Listados 20 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  204008ms] [LOG] Obtenidos 20 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  204008ms] [LOG] ✅ 20 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  208143ms] [LOG] ℹ️ No existe: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:72
+[  212345ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  212346ms] [LOG] ✅ Listados 20 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  212357ms] [LOG] Obtenidos 20 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  212358ms] [LOG] ✅ 20 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  215695ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  219801ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  219802ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  219809ms] [LOG] 📝 Datos producto actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:113
+[  219809ms] [LOG] 💰 Datos precio actualizados: Proxy(Object) @ http://127.0.0.1:9000/src/components/Formularios/Dialogos/DialogoAgregarProducto.vue:121
+[  223769ms] [LOG] Tarjeta expandida: true @ http://127.0.0.1:9000/src/components/Tarjetas/TarjetaProductoYugioh.vue:212
+[  226057ms] [LOG] 👍 ConfirmacionesService inicializado con LocalStorageAdapter @ http://127.0.0.1:9000/src/almacenamiento/servicios/ConfirmacionesService.js:34
+[  226102ms] [LOG] 📥 Cargando confirmaciones de user_actual_123... @ http://127.0.0.1:9000/src/almacenamiento/stores/confirmacionesStore.js:106
+[  226102ms] [LOG] ℹ️ No existe: confirmaciones_user_actual_123 @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:72
+[  226103ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  226103ms] [LOG] 📥 Cargando producto 1777206406286g7e5plhmz... @ http://127.0.0.1:9000/src/pages/DetalleProductoPage.vue:158
+[  226106ms] [LOG] ✅ Producto cargado: Acondicionador Suave 400ml @ http://127.0.0.1:9000/src/pages/DetalleProductoPage.vue:168
+[  226116ms] [WARNING] [Vue warn]: Extraneous non-props attributes (class) were passed to component but could not be automatically inherited because component renders fragment or text or teleport root nodes. 
+  at <InfoProducto producto= {nombre: Acondicionador Suave 400ml, marca: , codigoBarras: , cantidad: 1, unidad: unidad} class="q-mb-xl" onAgregarPrecio=fn > 
+  at <QPage class="q-pa-md" > 
+  at <DetalleProductoPage onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > 
+  at <RouterView> 
+  at <QPageContainer style= {paddingBottom: calc(0px + var(--safe-area-bottom, 0px) + 8px)} > 
+  at <QLayout view="hHh lpR fFf" style= {--espacio-publicidad: 0px} > 
+  at <MainLayout onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > 
+  at <RouterView> 
+  at <App> @ http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:2194
+[  226191ms] [LOG] ✅ 0 confirmaciones cargadas @ http://127.0.0.1:9000/src/almacenamiento/stores/confirmacionesStore.js:114
+[  226194ms] [LOG] ✅ Guardado: producto_1777206406286g7e5plhmz @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  226194ms] [LOG] Producto guardado: Acondicionador Suave 400ml (ID: 1777206406286g7e5plhmz) @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:68
+[  226196ms] [WARNING] [Vue warn]: Extraneous non-props attributes (class) were passed to component but could not be automatically inherited because component renders fragment or text or teleport root nodes. 
+  at <InfoProducto producto= {nombre: Acondicionador Suave 400ml, marca: , codigoBarras: , cantidad: 1, unidad: unidad} class="q-mb-xl" onAgregarPrecio=fn > 
+  at <QPage class="q-pa-md" > 
+  at <DetalleProductoPage onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > 
+  at <RouterView> 
+  at <QPageContainer style= {paddingBottom: calc(0px + var(--safe-area-bottom, 0px) + 8px)} > 
+  at <QLayout view="hHh lpR fFf" style= {--espacio-publicidad: 0px} > 
+  at <MainLayout onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > 
+  at <RouterView> 
+  at <App> @ http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:2194
+[  237360ms] [LOG] 📥 Cargando confirmaciones de user_actual_123... @ http://127.0.0.1:9000/src/almacenamiento/stores/confirmacionesStore.js:106
+[  237360ms] [LOG] ℹ️ No existe: confirmaciones_user_actual_123 @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:72
+[  237361ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  237361ms] [LOG] 📥 Cargando producto 1777206406286g7e5plhmz... @ http://127.0.0.1:9000/src/pages/DetalleProductoPage.vue:158
+[  237362ms] [LOG] ✅ Producto cargado: Acondicionador Suave 400ml @ http://127.0.0.1:9000/src/pages/DetalleProductoPage.vue:168
+[  237366ms] [WARNING] [Vue warn]: Extraneous non-props attributes (class) were passed to component but could not be automatically inherited because component renders fragment or text or teleport root nodes. 
+  at <InfoProducto producto= {nombre: Acondicionador Suave 400ml, marca: , codigoBarras: , cantidad: 1, unidad: unidad} class="q-mb-xl" onAgregarPrecio=fn > 
+  at <QPage class="q-pa-md" > 
+  at <DetalleProductoPage onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > 
+  at <RouterView> 
+  at <QPageContainer style= {paddingBottom: calc(0px + var(--safe-area-bottom, 0px) + 8px)} > 
+  at <QLayout view="hHh lpR fFf" style= {--espacio-publicidad: 0px} > 
+  at <MainLayout onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > 
+  at <RouterView> 
+  at <App> @ http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:2194
+[  237407ms] [LOG] ✅ 0 confirmaciones cargadas @ http://127.0.0.1:9000/src/almacenamiento/stores/confirmacionesStore.js:114
+[  237409ms] [LOG] ✅ Guardado: producto_1777206406286g7e5plhmz @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  237409ms] [LOG] Producto guardado: Acondicionador Suave 400ml (ID: 1777206406286g7e5plhmz) @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:68
+[  237411ms] [WARNING] [Vue warn]: Extraneous non-props attributes (class) were passed to component but could not be automatically inherited because component renders fragment or text or teleport root nodes. 
+  at <InfoProducto producto= {nombre: Acondicionador Suave 400ml, marca: , codigoBarras: , cantidad: 1, unidad: unidad} class="q-mb-xl" onAgregarPrecio=fn > 
+  at <QPage class="q-pa-md" > 
+  at <DetalleProductoPage onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > 
+  at <RouterView> 
+  at <QPageContainer style= {paddingBottom: calc(0px + var(--safe-area-bottom, 0px) + 8px)} > 
+  at <QLayout view="hHh lpR fFf" style= {--espacio-publicidad: 0px} > 
+  at <MainLayout onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > 
+  at <RouterView> 
+  at <App> @ http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:2194
+[  238510ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  238510ms] [LOG] ✅ Listados 20 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  238517ms] [LOG] Obtenidos 20 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  238517ms] [LOG] ✅ 20 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133

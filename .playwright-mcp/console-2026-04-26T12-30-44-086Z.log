@@ -1,0 +1,46 @@
+[  193946ms] [LOG] Tarjeta expandida: true @ http://127.0.0.1:9000/src/components/Tarjetas/TarjetaProductoYugioh.vue:212
+[  195251ms] [LOG] 📥 Cargando confirmaciones de user_actual_123... @ http://127.0.0.1:9000/src/almacenamiento/stores/confirmacionesStore.js:106
+[  195251ms] [LOG] ℹ️ No existe: confirmaciones_user_actual_123 @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:72
+[  195251ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  195252ms] [LOG] 📥 Cargando producto 1777206404544zavhmf7qy... @ http://127.0.0.1:9000/src/pages/DetalleProductoPage.vue:158
+[  195252ms] [LOG] ✅ Producto cargado: Shampoo Uso Diario 400ml @ http://127.0.0.1:9000/src/pages/DetalleProductoPage.vue:168
+[  195258ms] [WARNING] [Vue warn]: Extraneous non-props attributes (class) were passed to component but could not be automatically inherited because component renders fragment or text or teleport root nodes. 
+  at <InfoProducto producto= {nombre: Shampoo Uso Diario 400ml, marca: , codigoBarras: , cantidad: 1, unidad: unidad} class="q-mb-xl" onAgregarPrecio=fn > 
+  at <QPage class="q-pa-md" > 
+  at <DetalleProductoPage onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > 
+  at <RouterView> 
+  at <QPageContainer style= {paddingBottom: calc(0px + var(--safe-area-bottom, 0px) + 8px)} > 
+  at <QLayout view="hHh lpR fFf" style= {--espacio-publicidad: 0px} > 
+  at <MainLayout onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > 
+  at <RouterView> 
+  at <App> @ http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:2194
+[  195313ms] [LOG] ✅ 0 confirmaciones cargadas @ http://127.0.0.1:9000/src/almacenamiento/stores/confirmacionesStore.js:114
+[  195315ms] [LOG] ✅ Guardado: producto_1777206404544zavhmf7qy @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  195315ms] [LOG] Producto guardado: Shampoo Uso Diario 400ml (ID: 1777206404544zavhmf7qy) @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:68
+[  195317ms] [WARNING] [Vue warn]: Extraneous non-props attributes (class) were passed to component but could not be automatically inherited because component renders fragment or text or teleport root nodes. 
+  at <InfoProducto producto= {nombre: Shampoo Uso Diario 400ml, marca: , codigoBarras: , cantidad: 1, unidad: unidad} class="q-mb-xl" onAgregarPrecio=fn > 
+  at <QPage class="q-pa-md" > 
+  at <DetalleProductoPage onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > 
+  at <RouterView> 
+  at <QPageContainer style= {paddingBottom: calc(0px + var(--safe-area-bottom, 0px) + 8px)} > 
+  at <QLayout view="hHh lpR fFf" style= {--espacio-publicidad: 0px} > 
+  at <MainLayout onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > 
+  at <RouterView> 
+  at <App> @ http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:2194
+[  200580ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  200581ms] [LOG] ✅ Listados 20 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  200594ms] [LOG] Obtenidos 20 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  200595ms] [LOG] ✅ 20 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  201570ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  201598ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  201599ms] [LOG] ✅ Listados 20 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  201599ms] [LOG] Obtenidos 20 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  201599ms] [LOG] ✅ 20 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  202947ms] [LOG] Comercio expandido: true @ http://127.0.0.1:9000/src/components/Tarjetas/TarjetaComercioYugioh.vue:57
+[  209695ms] [LOG] Comercio expandido: false @ http://127.0.0.1:9000/src/components/Tarjetas/TarjetaComercioYugioh.vue:57
+[  213487ms] [LOG] Comercio expandido: true @ http://127.0.0.1:9000/src/components/Tarjetas/TarjetaComercioYugioh.vue:57
+[  220677ms] [LOG] ℹ️ No existe: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:72
+[  227335ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  227336ms] [LOG] ✅ Listados 20 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  227342ms] [LOG] Obtenidos 20 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  227343ms] [LOG] ✅ 20 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133

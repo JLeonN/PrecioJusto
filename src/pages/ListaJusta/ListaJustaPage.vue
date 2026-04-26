@@ -89,6 +89,13 @@
 
             <q-card-actions align="between" class="q-pt-none q-pb-sm acciones-lista">
               <q-btn flat no-caps color="secondary" label="Abrir" @click="abrirLista(lista.id)" />
+              <q-btn
+                outline
+                no-caps
+                color="secondary"
+                label="Lista Inteligente"
+                @click="abrirListaInteligente(lista.id)"
+              />
             </q-card-actions>
           </q-card>
         </q-slide-item>
@@ -195,6 +202,12 @@ async function guardarLista() {
 async function abrirLista(listaId) {
   await listaJustaStore.registrarUsoLista(listaId)
   router.push(`/lista-justa/${listaId}`)
+}
+
+async function abrirListaInteligente(listaId) {
+  await listaJustaStore.registrarUsoLista(listaId)
+  await listaJustaStore.sincronizarComercioBaseInteligente(listaId)
+  router.push(`/lista-justa/${listaId}/inteligente`)
 }
 
 function estimadoDeLista(lista) {
@@ -313,6 +326,7 @@ onMounted(async () => {
 .acciones-lista {
   gap: 4px;
   align-items: center;
+  flex-wrap: wrap;
 }
 .swipe-destruccion {
   height: 100%;

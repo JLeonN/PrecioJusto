@@ -75,6 +75,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     }))
     lista.preferenciaPrecioFaltante = 'preguntar'
     lista.comercioActual = null
+    lista.configuracionInteligente = ListaJustaService._normalizarConfiguracionInteligente(null, null)
     lista.fechaActualizacion = new Date().toISOString()
     await persistir()
     return true
@@ -85,6 +86,48 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     if (!lista) return false
 
     lista.comercioActual = comercioActual || null
+    if (!lista.configuracionInteligente?.comercioBase && comercioActual) {
+      lista.configuracionInteligente = ListaJustaService._normalizarConfiguracionInteligente(
+        {
+          ...lista.configuracionInteligente,
+          comercioBase: comercioActual,
+        },
+        comercioActual,
+      )
+    }
+    lista.fechaActualizacion = new Date().toISOString()
+    await persistir()
+    return true
+  }
+
+  async function actualizarConfiguracionInteligente(listaId, cambios = {}) {
+    const lista = obtenerListaPorId(listaId)
+    if (!lista) return false
+
+    lista.configuracionInteligente = ListaJustaService._normalizarConfiguracionInteligente(
+      {
+        ...lista.configuracionInteligente,
+        ...cambios,
+      },
+      lista.comercioActual,
+    )
+    lista.fechaActualizacion = new Date().toISOString()
+    await persistir()
+    return true
+  }
+
+  async function sincronizarComercioBaseInteligente(listaId) {
+    const lista = obtenerListaPorId(listaId)
+    if (!lista) return false
+    if (lista.configuracionInteligente?.comercioBase || !lista.comercioActual) return false
+
+    lista.configuracionInteligente = ListaJustaService._normalizarConfiguracionInteligente(
+      {
+        ...lista.configuracionInteligente,
+        comercioBase: lista.comercioActual,
+      },
+      lista.comercioActual,
+    )
     lista.fechaActualizacion = new Date().toISOString()
     await persistir()
     return true
@@ -774,6 +817,8 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     sincronizarEstadosMesaTrabajo,
     registrarUsoLista,
     actualizarComercioLista,
+    actualizarConfiguracionInteligente,
+    sincronizarComercioBaseInteligente,
     marcarItemComoEnMisProductos,
     restaurarPreciosOriginales,
   }

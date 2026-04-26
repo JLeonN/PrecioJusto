@@ -1,0 +1,87 @@
+- generic [ref=e4]:
+  - banner [ref=e5]:
+    - toolbar [ref=e6]:
+      - generic [ref=e7]:
+        - button "Menu" [ref=e8] [cursor=pointer]:
+          - generic [ref=e10]: menu
+        - button "Precio Justo" [ref=e11] [cursor=pointer]:
+          - generic [ref=e13]: Precio Justo
+      - generic [ref=e14]:
+        - button "Ir a Lista Justa" [ref=e15] [cursor=pointer]:
+          - img [ref=e17]
+        - button "Ir a Mis Productos" [ref=e20] [cursor=pointer]:
+          - img [ref=e22]
+        - button "Ir a Comercios" [ref=e25] [cursor=pointer]:
+          - img [ref=e27]
+  - main [ref=e1214]:
+    - generic [ref=e1215]:
+      - generic [ref=e1216]:
+        - heading "Mis Comercios" [level=5] [ref=e1217]
+        - paragraph [ref=e1218]: 4 comercios
+      - generic [ref=e1222]:
+        - generic [ref=e1224]: search
+        - textbox [ref=e1226]:
+          - /placeholder: Buscar comercio...
+      - generic [ref=e1227]:
+        - generic [ref=e1229] [cursor=pointer]:
+          - generic [ref=e1231]: Maxi Compras Centro
+          - generic [ref=e1235]: Supermercado
+          - generic [ref=e1237]:
+            - img [ref=e1239]
+            - generic [ref=e1242]:
+              - img [ref=e1244]
+              - generic [ref=e1247]:
+                - generic [ref=e1248]: 18 de Julio 1265
+                - generic [ref=e1249]: Centro
+          - generic [ref=e1251]:
+            - generic [ref=e1252]:
+              - img [ref=e1253]
+              - generic [ref=e1256]: 1 sucursal
+            - generic [ref=e1257]:
+              - img [ref=e1258]
+              - generic [ref=e1263]: 20 usos
+          - generic [ref=e1265]: expand_more
+        - generic [ref=e1267] [cursor=pointer]:
+          - generic [ref=e1269]: Despensa Rio Plata
+          - generic [ref=e1273]: Supermercado
+          - generic [ref=e1275]:
+            - img [ref=e1277]
+            - generic [ref=e1280]:
+              - img [ref=e1282]
+              - generic [ref=e1285]:
+                - generic [ref=e1286]: Bulevar Artigas 3150
+                - generic [ref=e1287]: La Blanqueada
+          - generic [ref=e1290]:
+            - img [ref=e1291]
+            - generic [ref=e1294]: 1 sucursal
+          - generic [ref=e1296]: expand_more
+        - generic [ref=e1298] [cursor=pointer]:
+          - generic [ref=e1300]: Mercado Del Barrio Sur
+          - generic [ref=e1304]: Supermercado
+          - generic [ref=e1306]:
+            - img [ref=e1308]
+            - generic [ref=e1311]:
+              - img [ref=e1313]
+              - generic [ref=e1316]:
+                - generic [ref=e1317]: Carlos Gardel 1912
+                - generic [ref=e1318]: Barrio Sur
+          - generic [ref=e1321]:
+            - img [ref=e1322]
+            - generic [ref=e1325]: 1 sucursal
+          - generic [ref=e1327]: expand_more
+        - generic [ref=e1329] [cursor=pointer]:
+          - generic [ref=e1331]: Super Ahorro Norte
+          - generic [ref=e1335]: Supermercado
+          - generic [ref=e1337]:
+            - img [ref=e1339]
+            - generic [ref=e1342]:
+              - img [ref=e1344]
+              - generic [ref=e1347]:
+                - generic [ref=e1348]: Av. Italia 4821
+                - generic [ref=e1349]: Unión
+          - generic [ref=e1352]:
+            - img [ref=e1353]
+            - generic [ref=e1356]: 1 sucursal
+          - generic [ref=e1358]: expand_more
+    - button [ref=e1360] [cursor=pointer]:
+      - img [ref=e1362]

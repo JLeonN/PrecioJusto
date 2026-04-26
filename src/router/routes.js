@@ -23,6 +23,10 @@ const routes = [
 
       // Lista Justa
       { path: 'lista-justa/:id', component: () => import('pages/ListaJusta/DetalleListaJustaPage.vue') },
+      {
+        path: 'lista-justa/:id/inteligente',
+        component: () => import('pages/ListaJusta/DetalleListaJustaInteligentePage.vue'),
+      },
 
       // Configuración
       { path: 'configuracion', component: () => import('pages/ConfiguracionPage.vue') },

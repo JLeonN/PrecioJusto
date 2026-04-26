@@ -1,0 +1,86 @@
+- generic [ref=e1]:
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - toolbar [ref=e6]:
+        - generic [ref=e7]:
+          - button "Menu" [ref=e8] [cursor=pointer]:
+            - generic [ref=e10]: menu
+          - button "Precio Justo" [ref=e11] [cursor=pointer]:
+            - generic [ref=e13]: Precio Justo
+        - generic [ref=e14]:
+          - button "Ir a Lista Justa" [ref=e15] [cursor=pointer]:
+            - img [ref=e17]
+          - button "Ir a Mis Productos" [ref=e20] [cursor=pointer]:
+            - img [ref=e22]
+          - button "Ir a Comercios" [ref=e25] [cursor=pointer]:
+            - img [ref=e27]
+    - main [ref=e50]:
+      - generic [ref=e51]:
+        - generic [ref=e52]:
+          - heading "Mis Comercios" [level=5] [ref=e53]
+          - paragraph [ref=e54]: 0 comercios
+        - generic [ref=e58]:
+          - generic [ref=e60]: search
+          - textbox [ref=e62]:
+            - /placeholder: Buscar comercio...
+        - generic [ref=e63]:
+          - generic [ref=e64]: store
+          - paragraph [ref=e65]: No tienes comercios guardados
+          - paragraph [ref=e66]: Presiona el botón + para agregar tu primer comercio
+      - button [ref=e68] [cursor=pointer]:
+        - img [ref=e70]
+  - generic:
+    - dialog:
+      - generic [ref=e72]:
+        - generic [ref=e73]:
+          - generic [ref=e74]: Agregar Comercio
+          - button [ref=e75] [cursor=pointer]:
+            - img [ref=e77]: close
+        - generic [ref=e79]:
+          - generic [ref=e82]:
+            - generic [ref=e84]: store
+            - generic [ref=e85]:
+              - generic: Nombre del comercio *
+              - textbox "Nombre del comercio *" [ref=e86]:
+                - /placeholder: "Ej: TATA, DISCO, Almacén Don Pedro"
+          - generic [ref=e90] [cursor=pointer]:
+            - generic [ref=e92]: category
+            - generic [ref=e93]:
+              - generic: Tipo de comercio (opcional)
+              - generic [ref=e94]:
+                - generic [ref=e95]: Supermercado
+                - combobox "Tipo de comercio (opcional)" [ref=e96]: Supermercado
+            - generic [ref=e98]: arrow_drop_down
+          - separator [ref=e99]
+          - generic [ref=e100]:
+            - generic [ref=e101]: location_on
+            - generic [ref=e102]: Dirección
+          - generic [ref=e105]:
+            - generic [ref=e107]: signpost
+            - generic [ref=e108]:
+              - generic: Calle y número *
+              - textbox "Calle y número *" [ref=e109]:
+                - /placeholder: "Ej: Av. Brasil 2550"
+          - generic [ref=e113]:
+            - generic [ref=e115]: apartment
+            - generic [ref=e116]:
+              - generic: Barrio (opcional)
+              - textbox "Barrio (opcional)" [ref=e117]:
+                - /placeholder: "Ej: Centro, Pocitos, Cordón"
+          - generic [ref=e120]:
+            - generic [ref=e122]: location_city
+            - generic [ref=e123]:
+              - generic: Ciudad (opcional)
+              - textbox "Ciudad (opcional)" [ref=e124]:
+                - /placeholder: "Ej: Montevideo, Punta del Este"
+          - generic [ref=e125]:
+            - button "Agregar foto del local" [ref=e126] [cursor=pointer]:
+              - generic [ref=e127]:
+                - img [ref=e128]
+                - text: Agregar foto del local
+            - paragraph [ref=e131]: Opcional. Podés cambiarla o quitarla después desde el detalle del comercio
+        - generic [ref=e132]:
+          - button "Cancelar" [ref=e133] [cursor=pointer]:
+            - generic [ref=e135]: Cancelar
+          - button "Guardar Comercio" [disabled] [ref=e136]:
+            - generic [ref=e138]: Guardar Comercio

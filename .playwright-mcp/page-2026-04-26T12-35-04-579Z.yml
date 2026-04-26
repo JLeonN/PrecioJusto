@@ -1,0 +1,30 @@
+- generic [ref=e4]:
+  - banner [ref=e5]:
+    - toolbar [ref=e6]:
+      - generic [ref=e7]:
+        - button "Menu" [ref=e8] [cursor=pointer]:
+          - generic [ref=e10]: menu
+        - button "Precio Justo" [ref=e11] [cursor=pointer]:
+          - generic [ref=e13]: Precio Justo
+      - generic [ref=e14]:
+        - button "Ir a Lista Justa" [ref=e15] [cursor=pointer]:
+          - img [ref=e17]
+        - button "Ir a Mis Productos" [ref=e20] [cursor=pointer]:
+          - img [ref=e22]
+        - button "Ir a Comercios" [ref=e25] [cursor=pointer]:
+          - img [ref=e27]
+  - main [ref=e2063]:
+    - generic [ref=e2064]:
+      - generic [ref=e2065]:
+        - heading "Lista Justa" [level=5] [ref=e2066]
+        - paragraph [ref=e2067]: 0 listas guardadas
+      - generic [ref=e2068]:
+        - img [ref=e2069]
+        - paragraph [ref=e2072]: Todavía no tenés listas
+        - paragraph [ref=e2073]: Creá una lista para usarla en tus compras diarias.
+        - button "Crear mi primera lista" [ref=e2074] [cursor=pointer]:
+          - generic [ref=e2076]: Crear mi primera lista
+    - button "Crear lista" [ref=e2077] [cursor=pointer]:
+      - generic [ref=e2078]:
+        - img [ref=e2079]: add
+        - generic [ref=e2080]: Crear lista
