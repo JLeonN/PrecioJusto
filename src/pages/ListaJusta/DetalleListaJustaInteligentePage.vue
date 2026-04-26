@@ -31,16 +31,31 @@
 
         <q-card flat bordered class="bloque-inteligente q-mb-md">
           <q-card-section>
-            <div class="bloque-titulo">Comercio base</div>
-            <div class="text-caption text-grey-7 q-mb-sm">
-              Se hereda desde la lista normal si ya había un comercio actual, pero lo podés cambiar.
+            <div class="encabezado-comercio-base q-mb-sm">
+              <div class="bloque-titulo">{{ textoEncabezadoComercioBase }}</div>
+              <div v-if="textoDireccionComercioBase" class="bloque-subtitulo">
+                {{ textoDireccionComercioBase }}
+              </div>
             </div>
-            <SelectorComercioDireccion
-              :model-value="comercioBase"
-              label-comercio="Comercio base"
-              label-direccion="Sucursal base"
-              @update:model-value="actualizarComercioBase"
+            <q-btn
+              flat
+              no-caps
+              color="secondary"
+              class="boton-cambiar-comercio-base"
+              :icon="mostrarEditorComercioBase ? 'expand_less' : 'edit_location_alt'"
+              :label="mostrarEditorComercioBase ? 'Ocultar selector' : textoBotonComercioBase"
+              @click="toggleEditorComercioBase"
             />
+            <q-slide-transition>
+              <div v-show="debeMostrarEditorComercioBase" class="contenedor-editor-comercio-base">
+                <SelectorComercioDireccion
+                  :model-value="comercioBase"
+                  label-comercio="Comercio base"
+                  label-direccion="Sucursal base"
+                  @update:model-value="actualizarComercioBase"
+                />
+              </div>
+            </q-slide-transition>
           </q-card-section>
         </q-card>
 
@@ -296,12 +311,26 @@ const productosStore = useProductosStore()
 const preferenciasStore = usePreferenciasStore()
 
 const filasComparacion = ref([])
+const mostrarEditorComercioBase = ref(false)
 let contadorFilaComparacion = 0
 
 const listaActual = computed(() => listaJustaStore.obtenerListaPorId(route.params.id))
 const comercioBase = computed(() => listaActual.value?.configuracionInteligente?.comercioBase || null)
 const comerciosComparacionGuardados = computed(
   () => listaActual.value?.configuracionInteligente?.comerciosComparacion || [],
+)
+const textoEncabezadoComercioBase = computed(() => {
+  const nombre = String(comercioBase.value?.nombre || '').trim()
+  return nombre || 'Elegí un comercio'
+})
+const textoDireccionComercioBase = computed(() =>
+  String(comercioBase.value?.direccionNombre || '').trim(),
+)
+const debeMostrarEditorComercioBase = computed(
+  () => mostrarEditorComercioBase.value || !esComercioValido(comercioBase.value),
+)
+const textoBotonComercioBase = computed(() =>
+  esComercioValido(comercioBase.value) ? 'Cambiar comercio elegido' : 'Elegir comercio base',
 )
 
 const comerciosSeleccionados = computed(() => {
@@ -482,6 +511,14 @@ async function actualizarComercioBase(valor) {
   await listaJustaStore.actualizarConfiguracionInteligente(listaActual.value.id, {
     comercioBase: valor,
   })
+
+  if (esComercioValido(valor)) {
+    mostrarEditorComercioBase.value = false
+  }
+}
+
+function toggleEditorComercioBase() {
+  mostrarEditorComercioBase.value = !mostrarEditorComercioBase.value
 }
 
 function agregarFilaComparacion() {
@@ -697,6 +734,29 @@ onMounted(async () => {
   font-size: 15px;
   font-weight: 700;
   color: var(--texto-primario);
+}
+.encabezado-comercio-base {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.bloque-subtitulo {
+  font-size: 12px;
+  color: var(--texto-secundario);
+  line-height: 1.2;
+}
+.boton-cambiar-comercio-base {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid color-mix(in srgb, var(--color-secundario) 24%, var(--borde-color));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-secundario) 8%, var(--fondo-app-secundario));
+  font-weight: 700;
+}
+.contenedor-editor-comercio-base {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--borde-color) 82%, transparent);
 }
 .fila-encabezado-bloque {
   display: flex;
