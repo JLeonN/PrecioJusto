@@ -23,3 +23,77 @@
 [   34865ms] [LOG] Obtenidos 50 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
 [   34865ms] [LOG] ✅ 50 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
 [   34922ms] [LOG] ✅ Guardado: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  479517ms] [LOG] ✅ Obtenido: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  479517ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[  479518ms] [LOG] ✅ Listados 50 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[  479519ms] [LOG] ✅ Obtenido: preferencias_usuario @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[  479519ms] [LOG] Obtenidos 50 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[  479520ms] [LOG] ✅ 50 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[  479612ms] [LOG] ✅ Guardado: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[  903999ms] [WARNING] [Vue warn]: Property "claseTarjetaDetalle" was accessed during render but is not defined on instance. 
+  at <QCardSection> 
+  at <QCard key=2 flat="" bordered=""  ... > 
+  at <QPage class="q-pa-md pagina-lista-justa-inteligente" > 
+  at <DetalleListaJustaInteligentePage onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > 
+  at <RouterView> 
+  at <QPageContainer style= {paddingBottom: calc(0px + var(--safe-area-bottom, 0px) + 8px)} > 
+  at <QLayout view="hHh lpR fFf" style= {--espacio-publicidad: 0px} > 
+  at <MainLayout onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > 
+  at <RouterView> 
+  at <App> @ http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:2194
+[  904002ms] [WARNING] [Vue warn]: Unhandled error during execution of render function 
+  at <QCardSection> 
+  at <QCard key=2 flat="" bordered=""  ... > 
+  at <QPage class="q-pa-md pagina-lista-justa-inteligente" > 
+  at <DetalleListaJustaInteligentePage onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > 
+  at <RouterView> 
+  at <QPageContainer style= {paddingBottom: calc(0px + var(--safe-area-bottom, 0px) + 8px)} > 
+  at <QLayout view="hHh lpR fFf" style= {--espacio-publicidad: 0px} > 
+  at <MainLayout onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > 
+  at <RouterView> 
+  at <App> @ http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:2194
+[  904003ms] [ERROR] TypeError: _ctx.claseTarjetaDetalle is not a function
+    at http://127.0.0.1:9000/src/pages/ListaJusta/DetalleListaJustaInteligentePage.vue?t=1777284800145:1030:90
+    at renderList (http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:5310:16)
+    at http://127.0.0.1:9000/src/pages/ListaJusta/DetalleListaJustaInteligentePage.vue?t=1777284800145:1027:85
+    at renderFnWithContext (http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:2846:13)
+    at hSlot (http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/quasar_dist_quasar__client__js.js?v=f1d36ad9:1702:28)
+    at Proxy.<anonymous> (http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/quasar_dist_quasar__client__js.js?v=f1d36ad9:4793:58)
+    at renderComponentRoot (http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:6650:17)
+    at ReactiveEffect.componentUpdateFn [as fn] (http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:8283:26)
+    at ReactiveEffect.run (http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:505:19)
+    at updateComponent (http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:8143:18) @ http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:2707
+[  904003ms] [WARNING] [HMR] Something went wrong during Vue component hot-reload. Full reload required. @ http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:2708
+[  920587ms] [WARNING] [Vue warn]: Unhandled error during execution of scheduler flush 
+  at <RouterView> 
+  at <QPageContainer style= {paddingBottom: calc(0px + var(--safe-area-bottom, 0px) + 8px)} > 
+  at <QLayout view="hHh lpR fFf" style= {--espacio-publicidad: 0px} > 
+  at <MainLayout onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > 
+  at <RouterView> 
+  at <App> @ http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:2194
+[  920598ms] TypeError: Cannot read properties of null (reading 'type')
+    at unmountComponent (http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:8830:18)
+    at unmount (http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:8737:7)
+    at unmountChildren (http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:8856:7)
+    at unmount (http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:8769:9)
+    at unmountComponent (http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:8842:7)
+    at unmount (http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:8737:7)
+    at unmountComponent (http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:8842:7)
+    at unmount (http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:8737:7)
+    at patch (http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:7513:7)
+    at ReactiveEffect.componentUpdateFn [as fn] (http://127.0.0.1:9000/node_modules/.q-cache/dev-spa/vite-spa/deps/chunk-OOUBHEZD.js?v=f1d36ad9:8292:9)
+[ 1176113ms] [INFO] [Quasar] Running SPA. @ http://127.0.0.1:9000/.quasar/dev-spa/client-entry.js?t=1777284852825:46
+[ 1176165ms] [LOG] 📱 CapacitorAdapter inicializado @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/CapacitorAdapter.js:28
+[ 1176165ms] [LOG] ✅ Obtenido: preferencias_usuario @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[ 1176304ms] [LOG] ProductosService inicializado con LocalStorageAdapter @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:26
+[ 1176421ms] [LOG] ✅ Obtenido: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[ 1176422ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[ 1176423ms] [LOG] ✅ Listados 50 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[ 1176424ms] [LOG] ✅ Obtenido: preferencias_usuario @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[ 1176424ms] [LOG] ℹ️ No existe: sesion_escaneo @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:72
+[ 1176425ms] [LOG] ✅ Obtenido: preferencias_usuario @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[ 1176427ms] [LOG] Obtenidos 50 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[ 1176428ms] [LOG] ✅ 50 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[ 1176545ms] [LOG] ✅ Guardado: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[ 1176650ms] [ERROR] Access to fetch at 'https://jleonn.github.io/PrecioJusto/version.json?t=1777285072990' from origin 'http://127.0.0.1:9000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://127.0.0.1:9000/#/lista-justa/listaJusta_1777283891615_nu3rdj/inteligente:0
+[ 1176650ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://jleonn.github.io/PrecioJusto/version.json?t=1777285072990:0

@@ -234,7 +234,25 @@
 
         <q-card v-if="comerciosSeleccionados.length > 0" flat bordered class="bloque-inteligente q-mb-md">
           <q-card-section>
-            <div class="bloque-titulo">Resumen general</div>
+            <div class="fila-encabezado-ayuda">
+              <div class="bloque-titulo">Resumen general</div>
+              <q-btn
+                flat
+                no-caps
+                dense
+                color="grey-7"
+                class="boton-toggle-ayuda-seccion"
+                :icon="mostrarAyudaResumen ? 'expand_less' : 'expand_more'"
+                :label="mostrarAyudaResumen ? 'Ocultar ayuda' : 'Mostrar ayuda'"
+                @click="mostrarAyudaResumen = !mostrarAyudaResumen"
+              />
+            </div>
+            <q-slide-transition>
+              <div v-show="mostrarAyudaResumen" class="descripcion-bloque-inteligente">
+                Esta sección compara cuánto te costaría comprar toda la lista en cada comercio.
+                Te ayuda a elegir rápido la opción más barata para resolver todo en un solo lugar.
+              </div>
+            </q-slide-transition>
 
             <div v-if="resultadoInteligente.resumen.mezclaMonedas" class="text-caption text-warning q-mb-sm">
               Hay monedas mezcladas en la comparación. Los totales se muestran, pero no se calcula ahorro global.
@@ -270,7 +288,33 @@
 
         <q-card v-if="comerciosSeleccionados.length > 0" flat bordered class="bloque-inteligente q-mb-md">
           <q-card-section>
-            <div class="bloque-titulo">Compra optimizada por producto</div>
+            <div class="fila-encabezado-ayuda">
+              <div class="bloque-titulo">Compra optimizada por producto</div>
+              <q-btn
+                flat
+                no-caps
+                dense
+                color="grey-7"
+                class="boton-toggle-ayuda-seccion"
+                :icon="mostrarAyudaOptimizacion ? 'expand_less' : 'expand_more'"
+                :label="mostrarAyudaOptimizacion ? 'Ocultar ayuda' : 'Mostrar ayuda'"
+                @click="mostrarAyudaOptimizacion = !mostrarAyudaOptimizacion"
+              />
+            </div>
+            <q-slide-transition>
+              <div v-show="mostrarAyudaOptimizacion" class="descripcion-bloque-inteligente">
+                Esta sección te muestra en qué comercio conviene comprar cada producto para bajar el total de la lista.
+                Te ayuda a decidir rápido si te conviene optimizar el ahorro o priorizar comodidad.
+              </div>
+            </q-slide-transition>
+            <div class="resumen-ahorro-optimizacion q-mt-sm q-mb-sm">
+              <span class="resumen-ahorro-optimizacion-etiqueta">
+                Ahorro estimado vs comprar todo en el primer comercio:
+              </span>
+              <strong class="resumen-ahorro-optimizacion-valor">
+                {{ resultadoInteligente.resumen.ahorroTexto }}
+              </strong>
+            </div>
             <div
               v-if="resultadoInteligente.recomendacionesAgrupadas.length === 0"
               class="estado-vacio-comparacion"
@@ -304,51 +348,103 @@
 
         <q-card v-if="comerciosSeleccionados.length > 0" flat bordered class="bloque-inteligente">
           <q-card-section>
-            <div class="bloque-titulo">Detalle por producto</div>
+            <div class="fila-encabezado-ayuda">
+              <div class="bloque-titulo">Detalle por producto</div>
+              <q-btn
+                flat
+                no-caps
+                dense
+                color="grey-7"
+                class="boton-toggle-ayuda-seccion"
+                :icon="mostrarAyudaDetalle ? 'expand_less' : 'expand_more'"
+                :label="mostrarAyudaDetalle ? 'Ocultar ayuda' : 'Mostrar ayuda'"
+                @click="mostrarAyudaDetalle = !mostrarAyudaDetalle"
+              />
+            </div>
+            <q-slide-transition>
+              <div v-show="mostrarAyudaDetalle" class="descripcion-bloque-inteligente">
+                Esta sección muestra el detalle completo por producto, con precios disponibles por comercio y la recomendación puntual.
+                Te permite ver rápido qué datos faltan y en qué casos conviene ajustar la compra.
+              </div>
+            </q-slide-transition>
             <div class="columna-detalle-productos">
               <div
                 v-for="item in resultadoInteligente.items"
                 :key="item.id"
                 class="tarjeta-detalle-producto"
+                :class="claseTarjetaDetalle(item.estado)"
               >
                 <div class="fila-detalle-superior">
                   <div>
                     <div class="detalle-producto-nombre">{{ item.nombre }}</div>
-                    <div class="detalle-producto-meta">Cantidad: {{ item.cantidad }}</div>
                   </div>
-                  <q-chip
+                  <q-btn
+                    flat
                     dense
-                    :color="colorEstadoItem(item.estado)"
-                    :text-color="textoEstadoItem(item.estado)"
-                  >
-                    {{ item.estadoTexto }}
-                  </q-chip>
+                    no-caps
+                    color="grey-7"
+                    class="boton-toggle-detalle-producto"
+                    :icon="estaTarjetaColapsada(item.id) ? 'expand_more' : 'expand_less'"
+                    :label="estaTarjetaColapsada(item.id) ? 'Ver detalles' : 'Ocultar detalles'"
+                    @click="toggleTarjetaDetalle(item.id)"
+                  />
                 </div>
 
-                <div class="detalle-producto-mensaje q-mt-xs">{{ item.mensaje }}</div>
-
-                <div v-if="item.recomendacion" class="detalle-recomendacion q-mt-sm">
-                  <strong>Recomendación:</strong>
-                  {{ item.recomendacion.etiqueta }} · {{ item.recomendacion.totalTexto }}
-                </div>
-
-                <div
-                  v-if="item.ahorroVsBaseTexto"
-                  class="detalle-ahorro q-mt-xs"
-                >
-                  {{ item.ahorroVsBaseTexto }}
-                </div>
-
-                <div class="detalle-precios-comercio q-mt-sm">
+                <div v-if="estaTarjetaColapsada(item.id)" class="resumen-tarjeta-colapsada q-mt-xs">
+                  <div v-if="item.recomendacion" class="detalle-recomendacion-cerrada">
+                    <strong>Recomendación:</strong>
+                    {{ item.recomendacion.etiqueta }} · {{ item.recomendacion.totalTexto }}
+                  </div>
                   <div
-                    v-for="precio in item.preciosPorComercio"
-                    :key="precio.clave"
-                    class="fila-precio-comercio"
+                    v-if="item.mensaje && item.estado !== 'completo'"
+                    class="detalle-producto-mensaje q-mt-xs"
                   >
-                    <span>{{ precio.etiqueta }}</span>
-                    <strong>{{ precio.totalTexto }}</strong>
+                    {{ item.mensaje }}
+                  </div>
+                  <div
+                    v-if="obtenerTextoMayorista(item)"
+                    class="detalle-mayorista q-mt-xs"
+                  >
+                    {{ obtenerTextoMayorista(item) }}
                   </div>
                 </div>
+
+                <q-slide-transition>
+                  <div v-show="!estaTarjetaColapsada(item.id)">
+                    <div
+                      v-if="item.mensaje"
+                      class="detalle-producto-mensaje q-mt-xs"
+                    >
+                      {{ item.mensaje }}
+                    </div>
+                    <div
+                      v-if="obtenerTextoMayorista(item)"
+                      class="detalle-mayorista q-mt-xs"
+                    >
+                      {{ obtenerTextoMayorista(item) }}
+                    </div>
+
+                    <div class="detalle-precios-comercio q-mt-sm">
+                      <div
+                        v-for="precio in item.preciosPorComercio"
+                        :key="precio.clave"
+                        class="fila-precio-comercio"
+                        :class="precio.disponible ? 'fila-precio-comercio-con-precio' : 'fila-precio-comercio-sin-precio'"
+                      >
+                        <div class="fila-precio-comercio-info">
+                          <span class="fila-precio-comercio-nombre">{{ precio.nombreComercio }}</span>
+                          <span
+                            v-if="precio.mostrarDireccion && precio.direccionComercio"
+                            class="fila-precio-comercio-direccion"
+                          >
+                            {{ precio.direccionComercio }}
+                          </span>
+                        </div>
+                        <strong>{{ precio.totalTexto }}</strong>
+                      </div>
+                    </div>
+                  </div>
+                </q-slide-transition>
               </div>
             </div>
           </q-card-section>
@@ -389,6 +485,10 @@ const preferenciasStore = usePreferenciasStore()
 const filasComparacion = ref([])
 const mostrarEditorComercioBase = ref(false)
 const descripcionComparacionExpandida = ref(true)
+const mostrarAyudaResumen = ref(true)
+const mostrarAyudaOptimizacion = ref(true)
+const mostrarAyudaDetalle = ref(true)
+const estadoTarjetasDetalle = ref({})
 let contadorFilaComparacion = 0
 
 const listaActual = computed(() => listaJustaStore.obtenerListaPorId(route.params.id))
@@ -484,7 +584,7 @@ const resultadoInteligente = computed(() => {
   }
 
   const itemsAnalizados = listaActual.value.items.map((item) =>
-    construirAnalisisItem(item, comercios, base),
+    construirAnalisisItem(item, comercios, conteoPorNombreComercio),
   )
 
   const rankingTodoEnUno = comercios.map((comercio) => {
@@ -568,6 +668,8 @@ const resultadoInteligente = computed(() => {
       ? itemBase.total - totalOptimizado
       : null
 
+  const itemsOrdenados = ordenarItemsDetalle(itemsAnalizados)
+
   return {
     resumen: {
       textoComercioBase: esComercioValido(base) ? obtenerEtiquetaComercio(base) : 'Sin definir',
@@ -598,7 +700,7 @@ const resultadoInteligente = computed(() => {
     },
     rankingTodoEnUno,
     recomendacionesAgrupadas,
-    items: itemsAnalizados,
+    items: itemsOrdenados,
   }
 })
 
@@ -701,7 +803,56 @@ function toggleDescripcionComparacion() {
   descripcionComparacionExpandida.value = !descripcionComparacionExpandida.value
 }
 
-function construirAnalisisItem(item, comercios, comercioBaseActual) {
+function construirEtiquetaComercioDetalle(comercio, conteoPorNombreComercio) {
+  const nombreComercio = String(comercio?.nombre || '').trim() || 'Comercio sin nombre'
+  const direccionComercio = String(comercio?.direccionNombre || '').trim()
+  const claveNombre = nombreComercio.toLowerCase()
+  const mostrarDireccion =
+    Boolean(direccionComercio) && (conteoPorNombreComercio.get(claveNombre) || 0) > 1
+
+  return {
+    nombreComercio,
+    direccionComercio,
+    mostrarDireccion,
+    etiqueta: mostrarDireccion ? `${nombreComercio} - ${direccionComercio}` : nombreComercio,
+  }
+}
+
+function ordenarPreciosPorComercio(precios) {
+  return [...precios].sort((a, b) => {
+    if (a.disponible !== b.disponible) return a.disponible ? -1 : 1
+    if (a.disponible && b.disponible) {
+      const totalA = Number(a.valorTotal)
+      const totalB = Number(b.valorTotal)
+      if (totalA !== totalB) return totalA - totalB
+    }
+    const ordenNombre = a.nombreComercio.localeCompare(b.nombreComercio, 'es')
+    if (ordenNombre !== 0) return ordenNombre
+    return a.direccionComercio.localeCompare(b.direccionComercio, 'es')
+  })
+}
+
+function obtenerPrioridadEstadoDetalle(item) {
+  if (item.estado === 'completo') return 4
+  if (item.estado === 'parcial') return 3
+  if (item.estado === 'unicoPrecio') return 2
+  if (item.estado === 'sinDatos') return 1
+  return 0
+}
+
+function ordenarItemsDetalle(items) {
+  return [...items].sort((a, b) => {
+    if (a.cantidadPreciosDisponibles !== b.cantidadPreciosDisponibles) {
+      return b.cantidadPreciosDisponibles - a.cantidadPreciosDisponibles
+    }
+    const prioridadA = obtenerPrioridadEstadoDetalle(a)
+    const prioridadB = obtenerPrioridadEstadoDetalle(b)
+    if (prioridadA !== prioridadB) return prioridadB - prioridadA
+    return a.nombre.localeCompare(b.nombre, 'es')
+  })
+}
+
+function construirAnalisisItem(item, comercios, conteoPorNombreComercio) {
   const itemBase = {
     id: item.id,
     nombre: item.nombre || 'Producto sin nombre',
@@ -710,11 +861,14 @@ function construirAnalisisItem(item, comercios, comercioBaseActual) {
     estadoTexto: 'Sin precios',
     mensaje: 'Sin precios para comparar.',
     recomendacion: null,
-    ahorroVsBaseTexto: '',
+    cantidadPreciosDisponibles: 0,
     preciosPorComercio: comercios.map((comercio) => ({
       clave: obtenerClaveComercioSeleccionado(comercio),
-      etiqueta: obtenerEtiquetaComercio(comercio),
+      ...construirEtiquetaComercioDetalle(comercio, conteoPorNombreComercio),
       totalTexto: 'Sin precio',
+      disponible: false,
+      valorTotal: null,
+      moneda: preferenciasStore.monedaDefaultEfectiva,
     })),
     mapaPreciosPorComercio: new Map(),
   }
@@ -745,10 +899,11 @@ function construirAnalisisItem(item, comercios, comercioBaseActual) {
       comercio,
       preferenciasStore.monedaDefaultEfectiva,
     )
+    const etiquetaComercio = construirEtiquetaComercioDetalle(comercio, conteoPorNombreComercio)
 
     return {
       clave: obtenerClaveComercioSeleccionado(comercio),
-      etiqueta: obtenerEtiquetaComercio(comercio),
+      ...etiquetaComercio,
       comercio,
       ...precio,
       totalTexto: precio.disponible
@@ -757,6 +912,7 @@ function construirAnalisisItem(item, comercios, comercioBaseActual) {
     }
   })
 
+  const resultadosPorComercioOrdenados = ordenarPreciosPorComercio(resultadosPorComercio)
   const mapaPreciosPorComercio = new Map(
     resultadosPorComercio.filter((precio) => precio.disponible).map((precio) => [precio.clave, precio]),
   )
@@ -766,36 +922,28 @@ function construirAnalisisItem(item, comercios, comercioBaseActual) {
   if (disponibles.length === 0) {
     return {
       ...itemBase,
-      preciosPorComercio: resultadosPorComercio,
+      cantidadPreciosDisponibles: 0,
+      preciosPorComercio: resultadosPorComercioOrdenados,
       mapaPreciosPorComercio,
       mensaje: 'Sin precios para comparar en los comercios elegidos.',
     }
   }
 
   const recomendacion = [...disponibles].sort((a, b) => Number(a.valorTotal) - Number(b.valorTotal))[0]
-  const claveBase = obtenerClaveComercioSeleccionado(comercioBaseActual)
-  const precioBase = mapaPreciosPorComercio.get(claveBase)
-  const ahorroVsBase =
-    precioBase && recomendacion && recomendacion.clave !== claveBase
-      ? Number(precioBase.valorTotal) - Number(recomendacion.valorTotal)
-      : 0
 
   if (disponibles.length === 1) {
     return {
       ...itemBase,
       estado: 'unicoPrecio',
       estadoTexto: 'Comparación parcial',
-      mensaje: `Solo hay precio en ${disponibles[0].etiqueta}.`,
+      mensaje: 'Comparación parcial con un solo precio disponible.',
       recomendacion: {
         ...recomendacion,
         etiqueta: recomendacion.etiqueta,
         totalTexto: recomendacion.totalTexto,
       },
-      ahorroVsBaseTexto:
-        ahorroVsBase > 0
-          ? `Ahorro frente al comercio base: ${formatearPrecioConCodigo(ahorroVsBase, recomendacion.moneda)}`
-          : '',
-      preciosPorComercio: resultadosPorComercio,
+      cantidadPreciosDisponibles: disponibles.length,
+      preciosPorComercio: resultadosPorComercioOrdenados,
       mapaPreciosPorComercio,
     }
   }
@@ -805,17 +953,14 @@ function construirAnalisisItem(item, comercios, comercioBaseActual) {
       ...itemBase,
       estado: 'parcial',
       estadoTexto: 'Comparación parcial',
-      mensaje: `Faltan precios en ${cantidadComercios - disponibles.length} comercio${cantidadComercios - disponibles.length === 1 ? '' : 's'}. Recomendación provisoria: ${recomendacion.etiqueta}.`,
+      mensaje: 'Comparación parcial con precios disponibles.',
       recomendacion: {
         ...recomendacion,
         etiqueta: recomendacion.etiqueta,
         totalTexto: recomendacion.totalTexto,
       },
-      ahorroVsBaseTexto:
-        ahorroVsBase > 0
-          ? `Ahorro frente al comercio base: ${formatearPrecioConCodigo(ahorroVsBase, recomendacion.moneda)}`
-          : '',
-      preciosPorComercio: resultadosPorComercio,
+      cantidadPreciosDisponibles: disponibles.length,
+      preciosPorComercio: resultadosPorComercioOrdenados,
       mapaPreciosPorComercio,
     }
   }
@@ -824,29 +969,47 @@ function construirAnalisisItem(item, comercios, comercioBaseActual) {
     ...itemBase,
     estado: 'completo',
     estadoTexto: 'Comparación completa',
-    mensaje: `Mejor opción actual: ${recomendacion.etiqueta}.`,
+    mensaje: '',
     recomendacion: {
       ...recomendacion,
       etiqueta: recomendacion.etiqueta,
       totalTexto: recomendacion.totalTexto,
     },
-    ahorroVsBaseTexto:
-      ahorroVsBase > 0
-        ? `Ahorro frente al comercio base: ${formatearPrecioConCodigo(ahorroVsBase, recomendacion.moneda)}`
-        : '',
-    preciosPorComercio: resultadosPorComercio,
+    cantidadPreciosDisponibles: disponibles.length,
+    preciosPorComercio: resultadosPorComercioOrdenados,
     mapaPreciosPorComercio,
   }
 }
 
-function colorEstadoItem(estado) {
-  if (estado === 'completo') return 'positive'
-  if (estado === 'parcial' || estado === 'unicoPrecio') return 'warning'
-  return 'grey-6'
+function claseTarjetaDetalle(estado) {
+  if (estado === 'completo') return 'tarjeta-detalle-producto-completo'
+  if (estado === 'parcial' || estado === 'unicoPrecio') return 'tarjeta-detalle-producto-parcial'
+  if (estado === 'sinDatos' || estado === 'sinProducto') return 'tarjeta-detalle-producto-sin-datos'
+  return ''
 }
 
-function textoEstadoItem(estado) {
-  return estado === 'parcial' || estado === 'unicoPrecio' ? 'black' : 'white'
+function obtenerTextoMayorista(item) {
+  const recomendacion = item?.recomendacion
+  if (!recomendacion?.usaMayorista) return ''
+
+  const cantidad = Number(item?.cantidad)
+  const escalas = Array.isArray(recomendacion?.escalas) ? recomendacion.escalas : []
+  const escalasAplicables = escalas
+    .filter((escala) => Number.isFinite(Number(escala?.cantidadMinima)))
+    .filter((escala) => Number.isFinite(cantidad) && cantidad >= Number(escala.cantidadMinima))
+    .sort((a, b) => Number(a.cantidadMinima) - Number(b.cantidadMinima))
+  const escalaActiva = escalasAplicables[0]
+
+  if (!escalaActiva) return 'Precio mayorista aplicado por cantidad.'
+  return `Precio mayorista aplicado desde ${escalaActiva.cantidadMinima} unidades.`
+}
+
+function estaTarjetaColapsada(itemId) {
+  return estadoTarjetasDetalle.value[itemId] !== false
+}
+
+function toggleTarjetaDetalle(itemId) {
+  estadoTarjetasDetalle.value[itemId] = !estaTarjetaColapsada(itemId)
 }
 
 watch(comerciosComparacionGuardados, sincronizarFilasComparacion, { immediate: true })
@@ -897,6 +1060,39 @@ onMounted(async () => {
   font-size: 15px;
   font-weight: 700;
   color: var(--texto-primario);
+}
+.descripcion-bloque-inteligente {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--texto-secundario);
+}
+.fila-encabezado-ayuda {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.boton-toggle-ayuda-seccion {
+  align-self: center;
+}
+.resumen-ahorro-optimizacion {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--color-secundario) 30%, var(--borde-color));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-secundario-claro) 25%, var(--fondo-app-secundario));
+}
+.resumen-ahorro-optimizacion-etiqueta {
+  font-size: 12px;
+  color: var(--texto-secundario);
+}
+.resumen-ahorro-optimizacion-valor {
+  font-size: 16px;
+  color: var(--color-secundario);
 }
 .encabezado-comercio-base {
   display: flex;
@@ -1057,20 +1253,41 @@ onMounted(async () => {
   border-radius: 12px;
   background: var(--fondo-app-secundario);
 }
+.tarjeta-detalle-producto-completo {
+  background: color-mix(in srgb, var(--color-secundario-claro) 32%, var(--fondo-app-secundario));
+  border-color: color-mix(in srgb, var(--color-secundario) 36%, var(--borde-color));
+}
+.tarjeta-detalle-producto-parcial {
+  background: color-mix(in srgb, var(--color-acento-fondo-suave) 45%, var(--fondo-app-secundario));
+  border-color: color-mix(in srgb, var(--color-advertencia) 38%, var(--borde-color));
+}
+.tarjeta-detalle-producto-sin-datos {
+  background: color-mix(in srgb, var(--color-error-fondo-suave) 42%, var(--fondo-app-secundario));
+  border-color: color-mix(in srgb, var(--color-error) 35%, var(--borde-color));
+}
 .fila-detalle-superior {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
 }
+.boton-toggle-detalle-producto {
+  align-self: flex-start;
+}
 .detalle-producto-nombre {
   font-weight: 700;
   color: var(--texto-primario);
 }
-.detalle-producto-meta {
-  margin-top: 2px;
-  font-size: 12px;
-  color: var(--texto-secundario);
+.resumen-tarjeta-colapsada {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.detalle-recomendacion-cerrada {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--texto-primario);
+  line-height: 1.3;
 }
 .detalle-producto-mensaje {
   font-size: 13px;
@@ -1079,23 +1296,49 @@ onMounted(async () => {
 .detalle-recomendacion {
   color: var(--texto-primario);
 }
-.detalle-ahorro {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--color-secundario);
+.detalle-mayorista {
+  font-size: 12px;
+  color: var(--texto-secundario);
 }
 .detalle-precios-comercio {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 0;
 }
 .fila-precio-comercio {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  font-size: 13px;
+  padding: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--borde-color) 85%, transparent);
+  border-radius: 8px;
   color: var(--texto-secundario);
+}
+.fila-precio-comercio:first-child {
+  border-top: none;
+}
+.fila-precio-comercio-con-precio {
+  background: transparent;
+}
+.fila-precio-comercio-sin-precio {
+  background: color-mix(in srgb, var(--color-error-fondo-suave) 38%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-error-borde) 78%, var(--borde-color));
+}
+.fila-precio-comercio-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.fila-precio-comercio-nombre {
+  font-size: 13px;
+  color: var(--texto-primario);
+}
+.fila-precio-comercio-direccion {
+  font-size: 11px;
+  color: var(--texto-secundario);
+  line-height: 1.25;
 }
 @media (max-width: 760px) {
   .fila-ranking {
