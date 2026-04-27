@@ -43,11 +43,12 @@
 
       <!-- BUSCADOR + LISTA (cuando hay productos) -->
       <template v-else>
-        <InputBusqueda
-          v-model="textoBusqueda"
-          placeholder="Buscar por nombre, marca, categoría o código..."
-          class="q-mb-md"
-        />
+        <ContenedorStickySuperior :top-extra="seleccion.modoSeleccion.value ? 56 : 0">
+          <InputBusqueda
+            v-model="textoBusqueda"
+            placeholder="Buscar por nombre, marca, categoría o código..."
+          />
+        </ContenedorStickySuperior>
 
         <!-- Sin resultados de búsqueda -->
         <div v-if="productosFiltrados.length === 0" class="text-center q-pa-xl">
@@ -236,6 +237,7 @@ import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
 import { IconPlus, IconScan, IconBolt, IconShoppingBag } from '@tabler/icons-vue'
 import ListaProductos from '../components/MisProductos/ListaProductos.vue'
 import InputBusqueda from '../components/Compartidos/InputBusqueda.vue'
+import ContenedorStickySuperior from '../components/Compartidos/ContenedorStickySuperior.vue'
 import DialogoAgregarProducto from '../components/Formularios/Dialogos/DialogoAgregarProducto.vue'
 import DialogoAgregarPrecio from '../components/Formularios/Dialogos/DialogoAgregarPrecio.vue'
 import BarraSeleccion from '../components/Compartidos/BarraSeleccion.vue'

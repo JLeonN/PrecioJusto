@@ -33,7 +33,7 @@
         </div>
       </div>
 
-      <!-- Filtro de ordenamiento + buscador -->
+      <!-- Filtro de ordenamiento -->
       <div class="contenedor-pagina q-px-md q-pt-sm q-pb-xs">
         <q-select
           v-model="ordenActual"
@@ -44,11 +44,16 @@
           map-options
           style="max-width: 280px"
         />
-        <InputBusqueda
-          v-model="textoBusqueda"
-          placeholder="Buscar por nombre, marca o código..."
-          class="q-mt-sm"
-        />
+      </div>
+
+      <!-- Buscador sticky -->
+      <div class="buscador-mesa-sticky">
+        <div class="contenedor-pagina q-px-md q-pb-xs">
+          <InputBusqueda
+            v-model="textoBusqueda"
+            placeholder="Buscar por nombre, marca o código..."
+          />
+        </div>
       </div>
 
       <!-- Lista de borradores -->
@@ -594,6 +599,12 @@ function alCrearComercio(comercioCreado) {
 }
 .mesa-trabajo-barra .contenedor-pagina {
   min-height: 60px;
+}
+.buscador-mesa-sticky {
+  position: sticky;
+  top: 60px;
+  z-index: 11;
+  background: var(--fondo-app);
 }
 .seleccion-barra-flotante {
   position: fixed;

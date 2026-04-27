@@ -26,9 +26,11 @@
       </div>
 
       <!-- BARRA DE BÚSQUEDA CENTRADA -->
-      <div class="buscador-centrado">
-        <InputBusqueda v-model="textoBusqueda" placeholder="Buscar comercio..." color="orange" />
-      </div>
+      <ContenedorStickySuperior :top-extra="seleccion.modoSeleccion.value ? 56 : 0">
+        <div class="buscador-centrado">
+          <InputBusqueda v-model="textoBusqueda" placeholder="Buscar comercio..." color="orange" />
+        </div>
+      </ContenedorStickySuperior>
 
       <!-- INDICADOR DE CARGA -->
       <div v-if="comerciosStore.cargando" class="text-center q-pa-xl">
@@ -118,6 +120,7 @@ import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
 import { useSeleccionMultiple } from '../composables/useSeleccionMultiple.js'
 import { IconPlus } from '@tabler/icons-vue'
 import InputBusqueda from '../components/Compartidos/InputBusqueda.vue'
+import ContenedorStickySuperior from '../components/Compartidos/ContenedorStickySuperior.vue'
 import FabAcciones from '../components/Compartidos/FabAcciones.vue'
 import DialogoAgregarComercio from '../components/Formularios/Dialogos/DialogoAgregarComercio.vue'
 import DialogoMotivoEliminacion from '../components/Formularios/Dialogos/DialogoMotivoEliminacion.vue'
