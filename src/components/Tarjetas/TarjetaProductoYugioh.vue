@@ -68,11 +68,7 @@
             no-caps
             color="primary"
             icon="query_stats"
-            :label="
-              mostrarMayoristasEnTarjeta
-                ? 'Ocultar mejor precio por cantidad'
-                : 'Ver mejor precio por cantidad'
-            "
+            :label="textoBotonMayorista"
             class="boton-ver-mayoristas-tarjeta"
             @click.stop="toggleMayoristasTarjeta"
           />
@@ -354,6 +350,12 @@ const manejarExpansion = (expandido) => {
 const toggleMayoristasTarjeta = () => {
   mostrarMayoristasEnTarjeta.value = !mostrarMayoristasEnTarjeta.value
 }
+
+const textoBotonMayorista = computed(() => {
+  return mostrarMayoristasEnTarjeta.value
+    ? 'Ocultar mayorista'
+    : 'Ver mayorista'
+})
 </script>
 
 <style scoped>
@@ -405,6 +407,8 @@ const toggleMayoristasTarjeta = () => {
 .boton-ver-mayoristas-tarjeta {
   width: fit-content;
   margin-top: auto;
+  max-width: calc(100% - 132px);
+  min-height: 28px;
   border: 1px solid var(--mayorista-destacado-borde-fuerte);
   border-radius: 8px;
   background: color-mix(in srgb, var(--overlay-oscuro-intenso) 72%, transparent) !important;
@@ -413,6 +417,11 @@ const toggleMayoristasTarjeta = () => {
     0 0 0 1px var(--mayorista-destacado-borde),
     0 0 14px var(--mayorista-destacado-sombra-media);
   animation: pulsoBotonMayorista 2.4s ease-in-out infinite;
+}
+.boton-ver-mayoristas-tarjeta:deep(.q-btn__content) {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .panel-mayoristas-tarjeta {
   margin-top: 10px;
@@ -641,6 +650,17 @@ const toggleMayoristasTarjeta = () => {
     box-shadow:
       0 0 0 1px var(--mayorista-destacado-borde-fuerte),
       0 0 20px var(--mayorista-destacado-sombra-fuerte);
+  }
+}
+@media (max-width: 420px) {
+  .boton-ver-mayoristas-tarjeta {
+    max-width: calc(100% - 116px);
+    font-size: 11px;
+  }
+  .precio-valor-mayorista {
+    right: 10px;
+    bottom: 10px;
+    font-size: 22px;
   }
 }
 </style>
