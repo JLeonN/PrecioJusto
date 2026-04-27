@@ -944,15 +944,15 @@ H. Arquitectura y Código
 
 ## 10. PÁGINAS
 
-### IndexPage.vue
+### ListaJustaPage.vue
 
 **Ruta:** `/`
-**Propósito:** Página de inicio/bienvenida
-**Estado:** Vacía por ahora
+**Propósito:** Pantalla principal de listas de compra
+**Estado:** Activa como inicio de la app
 
 ### MisProductosPage.vue
 
-**Ruta:** `/` (default)
+**Ruta:** `/mis-productos`
 **Propósito:** Listado completo de productos
 
 **Características:**
@@ -1034,13 +1034,14 @@ H. Arquitectura y Código
     path: '/',
     component: MainLayout,
     children: [
-      { path: '', component: MisProductosPage },
+      { path: '', component: ListaJustaPage },
+      { path: 'mis-productos', component: MisProductosPage },
       { path: 'producto/:id', component: DetalleProductoPage },
       { path: 'comercios', component: ComerciosPage },
       { path: 'comercios/:nombre', component: EditarComercioPage },
       { path: 'mesa-trabajo', component: MesaTrabajoPage },
-      { path: 'lista-justa', component: ListaJustaPage },
       { path: 'lista-justa/:id', component: DetalleListaJustaPage },
+      { path: 'lista-justa/:id/inteligente', component: DetalleListaJustaInteligentePage },
       { path: 'configuracion', component: ConfiguracionPage },
       { path: 'gracias', component: GraciasPage },
     ],
@@ -1197,7 +1198,7 @@ H. Arquitectura y Código
 
 ### Estado Actual
 
-- **Versión:** 1.2.2
+- **Versión:** 1.2.3
 - **Almacenamiento:** Local (Capacitor Storage)
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
@@ -1207,6 +1208,7 @@ H. Arquitectura y Código
 - **Flujo de escaneo — Modo B (Ráfaga):** Completado (cámara continua, búsqueda background, aviso sobre cámara)
 - **Mesa de trabajo:** Completada (reemplaza BandejaBorradores; ordenamiento, selección, envío parcial, filtro de búsqueda por nombre/marca/categoría)
 - **Lista Justa:** Completada en su base funcional (listas persistentes, detalle de compra, alta manual y desde Mis Productos, integración con Mesa de trabajo, comercio actual opcional y precios mayoristas por cantidad; ver Resumen10ListaJusta.md)
+- **Lista Justa Inteligente:** Completada (comparación por comercios seleccionados, ranking todo en uno, recomendación por producto y resumen de ahorro estimado)
 - **Header global con accesos rápidos:** Completado (Inicio/Lista Justa/Comercios/Mesa, estado activo por color, Mesa condicional, sin contador duplicado en el botón de Mesa)
 - **APIs de búsqueda:** Completado (7 APIs orquestadas, libros por ISBN, fuenteDato en UI)
 - **Safe area:** Completada (Android 15+ edge-to-edge)
@@ -1248,4 +1250,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 23 de Abril de 2026 — Se preparó el release `1.2.2` con la incorporación funcional de `Lista Justa`, mejoras móviles en sus tarjetas, soporte de precios mayoristas por cantidad dentro de la lista y sincronización más clara con Mesa de trabajo y Mis Productos.
+**Última actualización:** 27 de Abril de 2026 — Se preparó el release `1.2.3` con ajustes de navegación y sticky en buscadores, mejoras visuales y funcionales en Lista Justa Inteligente, validación más estricta al agregar productos (precio + comercio), soporte robusto para decimales con `.` y `,`, y corrección del botón mayorista para evitar solapes con el precio.
