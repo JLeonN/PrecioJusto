@@ -454,6 +454,7 @@
 
     <BotonAccionSticky
       v-if="listaActual"
+      class="boton-volver-lista-inteligente"
       etiqueta="Volver a la lista"
       icono="arrow_back"
       @click="router.push(`/lista-justa/${listaActual.id}`)"
@@ -1303,7 +1304,7 @@ onMounted(async () => {
 .detalle-precios-comercio {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 6px;
 }
 .fila-precio-comercio {
   display: flex;
@@ -1311,15 +1312,12 @@ onMounted(async () => {
   justify-content: space-between;
   gap: 12px;
   padding: 8px;
-  border-top: 1px solid color-mix(in srgb, var(--borde-color) 85%, transparent);
+  border: 1px solid color-mix(in srgb, var(--borde-color) 85%, transparent);
   border-radius: 8px;
   color: var(--texto-secundario);
 }
-.fila-precio-comercio:first-child {
-  border-top: none;
-}
 .fila-precio-comercio-con-precio {
-  background: transparent;
+  background: color-mix(in srgb, var(--fondo-tarjeta) 20%, transparent);
 }
 .fila-precio-comercio-sin-precio {
   background: color-mix(in srgb, var(--color-error-fondo-suave) 38%, transparent);
@@ -1339,6 +1337,9 @@ onMounted(async () => {
   font-size: 11px;
   color: var(--texto-secundario);
   line-height: 1.25;
+}
+.boton-volver-lista-inteligente {
+  margin-top: 10px;
 }
 @media (max-width: 760px) {
   .fila-ranking {

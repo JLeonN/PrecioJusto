@@ -34,17 +34,29 @@
               </p>
             </div>
           </div>
+          <q-btn
+            flat
+            round
+            dense
+            icon="auto_awesome"
+            color="secondary"
+            class="boton-lista-inteligente"
+            aria-label="Abrir lista inteligente"
+            @click="irAListaInteligente"
+          />
         </div>
 
-        <div class="q-mb-sm fila-filtros">
-          <q-btn-toggle
-            v-model="filtroEstado"
-            spread
-            unelevated
-            no-caps
-            toggle-color="secondary"
-            :options="opcionesFiltro"
-          />
+        <div class="fila-filtros-sticky">
+          <div class="q-mb-sm fila-filtros">
+            <q-btn-toggle
+              v-model="filtroEstado"
+              spread
+              unelevated
+              no-caps
+              toggle-color="secondary"
+              :options="opcionesFiltro"
+            />
+          </div>
         </div>
 
         <q-banner v-if="itemsFiltrados.length === 0" class="q-mb-md" rounded>
@@ -1631,6 +1643,11 @@ async function alDetectarCodigoManual(codigo) {
   await buscarManualPorCodigo(codigo)
 }
 
+function irAListaInteligente() {
+  if (!listaActual.value?.id) return
+  router.push(`/lista-justa/${listaActual.value.id}/inteligente`)
+}
+
 watch(
   () => productosStore.productos,
   async () => {
@@ -1674,12 +1691,15 @@ onMounted(async () => {
 }
 .encabezado-detalle {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 10px;
 }
 .encabezado-detalle-texto {
   min-width: 0;
+}
+.boton-lista-inteligente {
+  align-self: flex-start;
 }
 .fila-contadores {
   display: flex;
@@ -1691,8 +1711,22 @@ onMounted(async () => {
   margin-left: auto;
   text-align: right;
 }
-.fila-filtros {
+.fila-filtros-sticky {
+  position: sticky;
+  top: calc(var(--safe-area-top, 0px) + 56px + 4px);
+  z-index: 24;
   margin-bottom: 10px;
+  padding-top: 2px;
+  background: var(--fondo-app);
+}
+.fila-filtros {
+  margin-bottom: 0;
+}
+.fila-filtros :deep(.q-btn-toggle) {
+  border: 1px solid var(--borde-color);
+  border-radius: 10px;
+  background: var(--fondo-tarjeta);
+  box-shadow: var(--sombra-ligera);
 }
 .bloque-comercio {
   border: 1px solid var(--borde-color);
