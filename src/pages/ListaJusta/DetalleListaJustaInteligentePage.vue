@@ -240,51 +240,6 @@
               Hay monedas mezcladas en la comparación. Los totales se muestran, pero no se calcula ahorro global.
             </div>
 
-            <div class="grid-resumen">
-              <div class="tarjeta-resumen">
-                <span class="tarjeta-resumen-etiqueta">Primer comercio</span>
-                <strong class="tarjeta-resumen-valor">
-                  {{ resultadoInteligente.resumen.textoComercioBase }}
-                </strong>
-              </div>
-              <div class="tarjeta-resumen">
-                <span class="tarjeta-resumen-etiqueta">Total del primer comercio</span>
-                <strong class="tarjeta-resumen-valor">
-                  {{ resultadoInteligente.resumen.totalBaseTexto }}
-                </strong>
-              </div>
-              <div class="tarjeta-resumen">
-                <span class="tarjeta-resumen-etiqueta">Total optimizado</span>
-                <strong class="tarjeta-resumen-valor">
-                  {{ resultadoInteligente.resumen.totalOptimizadoTexto }}
-                </strong>
-              </div>
-              <div class="tarjeta-resumen">
-                <span class="tarjeta-resumen-etiqueta">Ahorro estimado</span>
-                <strong class="tarjeta-resumen-valor">
-                  {{ resultadoInteligente.resumen.ahorroTexto }}
-                </strong>
-              </div>
-            </div>
-
-            <div class="fila-metricas-secundarias">
-              <q-chip dense color="secondary" text-color="white">
-                {{ resultadoInteligente.resumen.productosComparables }} productos comparables
-              </q-chip>
-              <q-chip
-                dense
-                :color="resultadoInteligente.resumen.productosConFaltantes > 0 ? 'warning' : 'positive'"
-                :text-color="resultadoInteligente.resumen.productosConFaltantes > 0 ? 'black' : 'white'"
-              >
-                {{ resultadoInteligente.resumen.productosConFaltantes }} con faltantes
-              </q-chip>
-            </div>
-          </q-card-section>
-        </q-card>
-
-        <q-card v-if="comerciosSeleccionados.length > 0" flat bordered class="bloque-inteligente q-mb-md">
-          <q-card-section>
-            <div class="bloque-titulo">Comprar todo en un solo comercio</div>
             <div class="columna-ranking">
               <div
                 v-for="resultado in resultadoInteligente.rankingTodoEnUno"
@@ -292,12 +247,18 @@
                 class="fila-ranking"
               >
                 <div class="fila-ranking-texto">
-                  <div class="fila-ranking-nombre">{{ resultado.etiqueta }}</div>
+                  <div class="fila-ranking-nombre">{{ resultado.nombreComercio }}</div>
+                  <div
+                    v-if="resultado.mostrarDireccion && resultado.direccionComercio"
+                    class="fila-ranking-direccion"
+                  >
+                    {{ resultado.direccionComercio }}
+                  </div>
                   <div class="fila-ranking-detalle">
                     {{
                       resultado.faltantes > 0
-                        ? `Total parcial. Faltan ${resultado.faltantes} productos.`
-                        : 'Tiene precio para toda la lista comparable.'
+                        ? `Sin precio en ${resultado.faltantes} producto${resultado.faltantes === 1 ? '' : 's'}.`
+                        : 'Tiene precio para todos los productos comparables.'
                     }}
                   </div>
                 </div>
@@ -514,12 +475,23 @@ const resultadoInteligente = computed(() => {
 
   const comercios = comerciosSeleccionados.value
   const base = comercioBase.value
+  const conteoPorNombreComercio = new Map()
+
+  for (const comercio of comercios) {
+    const claveNombre = String(comercio?.nombre || '').trim().toLowerCase()
+    if (!claveNombre) continue
+    conteoPorNombreComercio.set(claveNombre, (conteoPorNombreComercio.get(claveNombre) || 0) + 1)
+  }
+
   const itemsAnalizados = listaActual.value.items.map((item) =>
     construirAnalisisItem(item, comercios, base),
   )
 
   const rankingTodoEnUno = comercios.map((comercio) => {
     const clave = obtenerClaveComercioSeleccionado(comercio)
+    const nombreComercio = String(comercio?.nombre || '').trim() || 'Comercio sin nombre'
+    const direccionComercio = String(comercio?.direccionNombre || '').trim()
+    const claveNombre = nombreComercio.toLowerCase()
     const itemsComparables = itemsAnalizados.filter(
       (item) => item.estado !== 'sinDatos' && item.estado !== 'sinProducto',
     )
@@ -535,6 +507,9 @@ const resultadoInteligente = computed(() => {
 
     return {
       clave,
+      nombreComercio,
+      direccionComercio,
+      mostrarDireccion: Boolean(direccionComercio) && (conteoPorNombreComercio.get(claveNombre) || 0) > 1,
       etiqueta: obtenerEtiquetaComercio(comercio),
       faltantes,
       mezclaMonedas,
@@ -546,6 +521,12 @@ const resultadoInteligente = computed(() => {
           ? 'Sin datos'
           : formatearPrecioConCodigo(total, monedas[0] || preferenciasStore.monedaDefaultEfectiva),
     }
+  }).sort((a, b) => {
+    const totalA = Number.isFinite(a.total) ? Number(a.total) : Number.POSITIVE_INFINITY
+    const totalB = Number.isFinite(b.total) ? Number(b.total) : Number.POSITIVE_INFINITY
+    if (totalA !== totalB) return totalA - totalB
+    if (a.faltantes !== b.faltantes) return a.faltantes - b.faltantes
+    return a.nombreComercio.localeCompare(b.nombreComercio, 'es')
   })
 
   const itemsRecomendados = itemsAnalizados.filter((item) => item.recomendacion)
@@ -1005,37 +986,6 @@ onMounted(async () => {
 .fila-acciones-comercio-comparacion-editor {
   justify-content: space-between;
 }
-.grid-resumen {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-.tarjeta-resumen {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 12px;
-  border: 1px solid var(--borde-color);
-  border-radius: 12px;
-  background: var(--fondo-app-secundario);
-}
-.tarjeta-resumen-etiqueta {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--texto-secundario);
-  text-transform: uppercase;
-}
-.tarjeta-resumen-valor {
-  font-size: 16px;
-  color: var(--texto-primario);
-  line-height: 1.25;
-}
-.fila-metricas-secundarias {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
-}
 .columna-ranking {
   display: flex;
   flex-direction: column;
@@ -1057,6 +1007,11 @@ onMounted(async () => {
 .fila-ranking-nombre {
   font-weight: 700;
   color: var(--texto-primario);
+}
+.fila-ranking-direccion {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--texto-secundario);
 }
 .fila-ranking-detalle {
   margin-top: 2px;
@@ -1143,9 +1098,6 @@ onMounted(async () => {
   color: var(--texto-secundario);
 }
 @media (max-width: 760px) {
-  .grid-resumen {
-    grid-template-columns: 1fr;
-  }
   .fila-ranking {
     flex-direction: column;
     align-items: flex-start;

@@ -1,0 +1,48 @@
+- generic [ref=e4]:
+  - banner [ref=e5]:
+    - toolbar [ref=e6]:
+      - generic [ref=e7]:
+        - button "Menu" [ref=e8] [cursor=pointer]:
+          - generic [ref=e10]: menu
+        - button "Precio Justo" [ref=e11] [cursor=pointer]:
+          - generic [ref=e13]: Precio Justo
+      - generic [ref=e14]:
+        - button "Ir a Lista Justa" [ref=e15] [cursor=pointer]:
+          - img [ref=e17]
+        - button "Ir a Mis Productos" [ref=e20] [cursor=pointer]:
+          - img [ref=e22]
+        - button "Ir a Comercios" [ref=e25] [cursor=pointer]:
+          - img [ref=e27]
+  - main [ref=e2674]:
+    - generic [ref=e2675]:
+      - generic [ref=e2676]:
+        - heading "Lista Justa" [level=5] [ref=e2677]
+        - paragraph [ref=e2678]: 1 listas guardadas
+      - generic [ref=e2682] [cursor=pointer]:
+        - generic [ref=e2684]:
+          - generic [ref=e2685]:
+            - generic [ref=e2686]: Lista Compras 15 Articulos
+            - generic [ref=e2687]: 15 productos
+            - generic [ref=e2688]:
+              - generic [ref=e2689]: Super Ahorro Norte
+              - generic [ref=e2690]: Av. Italia 4821
+          - generic [ref=e2691]:
+            - generic [ref=e2719]:
+              - button "Reiniciar" [ref=e2720]:
+                - generic [ref=e2721]: Reiniciar
+              - button [ref=e2722]:
+                - img [ref=e2724]
+            - button "Editar lista" [ref=e2698]:
+              - img [ref=e2700]
+        - generic [ref=e2705]:
+          - generic [ref=e2706]: Estimado de la lista
+          - generic [ref=e2707]: $ 1.634
+        - generic [ref=e2708]:
+          - button "Abrir" [ref=e2709]:
+            - generic [ref=e2711]: Abrir
+          - button "Lista Inteligente" [ref=e2712]:
+            - generic [ref=e2714]: Lista Inteligente
+    - button "Crear lista" [ref=e2715] [cursor=pointer]:
+      - generic [ref=e2716]:
+        - img [ref=e2717]: add
+        - generic [ref=e2718]: Crear lista

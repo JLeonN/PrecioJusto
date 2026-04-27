@@ -1,0 +1,12 @@
+[     314ms] [INFO] [Quasar] Running SPA. @ http://127.0.0.1:9000/.quasar/dev-spa/client-entry.js?t=1777283384102:46
+[     416ms] [LOG] 📱 CapacitorAdapter inicializado @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/CapacitorAdapter.js:28
+[     417ms] [LOG] ✅ Obtenido: preferencias_usuario @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[     847ms] [LOG] ProductosService inicializado con LocalStorageAdapter @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:26
+[    1141ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[    1144ms] [LOG] ✅ Listados 20 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[    1146ms] [LOG] ℹ️ No existe: sesion_escaneo @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:72
+[    1148ms] [LOG] ✅ Obtenido: preferencias_usuario @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[    1171ms] [LOG] Obtenidos 20 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[    1173ms] [LOG] ✅ 20 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[    1971ms] [ERROR] Access to fetch at 'https://jleonn.github.io/PrecioJusto/version.json?t=1777283633998' from origin 'http://127.0.0.1:9000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://127.0.0.1:9000/#/mis-productos:0
+[    1972ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://jleonn.github.io/PrecioJusto/version.json?t=1777283633998:0

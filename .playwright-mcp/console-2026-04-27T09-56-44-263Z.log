@@ -1,0 +1,19 @@
+[      54ms] [LOG] ✅ Obtenido: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[    6485ms] [LOG] ✅ Guardado: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[    6622ms] [LOG] ✅ Obtenido: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[    6623ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[    6626ms] [LOG] ✅ Listados 50 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[    6626ms] [LOG] ✅ Obtenido: preferencias_usuario @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[    6627ms] [LOG] Obtenidos 50 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[    6627ms] [LOG] ✅ 50 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[    6648ms] [LOG] ✅ Guardado: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[   26563ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   26564ms] [LOG] ✅ Obtenido: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   26564ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[   26565ms] [LOG] ✅ Listados 50 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[   26566ms] [LOG] ✅ Obtenido: preferencias_usuario @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   26566ms] [LOG] ℹ️ No existe: sesion_escaneo @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:72
+[   26567ms] [LOG] Obtenidos 50 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[   26567ms] [LOG] ✅ 50 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[   26646ms] [LOG] ✅ Guardado: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[   36214ms] [LOG] ✅ Obtenido: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77

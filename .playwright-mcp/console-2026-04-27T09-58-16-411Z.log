@@ -1,0 +1,25 @@
+[   13525ms] [LOG] ✅ Obtenido: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   13525ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[   13527ms] [LOG] ✅ Listados 50 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[   13527ms] [LOG] ✅ Obtenido: preferencias_usuario @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   13528ms] [LOG] Obtenidos 50 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[   13528ms] [LOG] ✅ 50 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[   13637ms] [LOG] ✅ Guardado: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[   30499ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   30500ms] [LOG] ✅ Obtenido: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   30500ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[   30501ms] [LOG] ✅ Listados 50 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[   30501ms] [LOG] ✅ Obtenido: preferencias_usuario @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   30502ms] [LOG] ℹ️ No existe: sesion_escaneo @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:72
+[   30502ms] [LOG] Obtenidos 50 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[   30503ms] [LOG] ✅ 50 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[   30675ms] [LOG] ✅ Guardado: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[   31496ms] [LOG] ✅ Obtenido: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   34780ms] [LOG] ✅ Guardado: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[   34863ms] [LOG] ✅ Obtenido: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   34863ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[   34864ms] [LOG] ✅ Listados 50 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[   34864ms] [LOG] ✅ Obtenido: preferencias_usuario @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   34865ms] [LOG] Obtenidos 50 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[   34865ms] [LOG] ✅ 50 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[   34922ms] [LOG] ✅ Guardado: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43

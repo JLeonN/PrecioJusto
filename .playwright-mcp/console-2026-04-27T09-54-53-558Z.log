@@ -1,0 +1,30 @@
+[   11445ms] [INFO] [Quasar] Running SPA. @ http://127.0.0.1:9000/.quasar/dev-spa/client-entry.js?t=1777283384102:46
+[   11516ms] [LOG] 📱 CapacitorAdapter inicializado @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/CapacitorAdapter.js:28
+[   11516ms] [LOG] ✅ Obtenido: preferencias_usuario @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   11722ms] [LOG] ProductosService inicializado con LocalStorageAdapter @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:26
+[   11848ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[   11850ms] [LOG] ✅ Listados 50 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[   11850ms] [LOG] ℹ️ No existe: sesion_escaneo @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:72
+[   11851ms] [LOG] ✅ Obtenido: preferencias_usuario @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   11855ms] [LOG] Obtenidos 50 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[   11856ms] [LOG] ✅ 50 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[   12571ms] [ERROR] Access to fetch at 'https://jleonn.github.io/PrecioJusto/version.json?t=1777283706114' from origin 'http://127.0.0.1:9000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://127.0.0.1:9000/#/mis-productos:0
+[   12571ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://jleonn.github.io/PrecioJusto/version.json?t=1777283706114:0
+[   35671ms] [LOG] Tarjeta expandida: true @ http://127.0.0.1:9000/src/components/Tarjetas/TarjetaProductoYugioh.vue:212
+[   41783ms] [LOG] Tarjeta expandida: false @ http://127.0.0.1:9000/src/components/Tarjetas/TarjetaProductoYugioh.vue:212
+[   43687ms] [LOG] ✅ Obtenido: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   53773ms] [LOG] ✅ Guardado: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[   54062ms] [LOG] ✅ Obtenido: comercios @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   54063ms] [LOG] ✅ Obtenido: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   54063ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[   54064ms] [LOG] ✅ Listados 50 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[   54064ms] [LOG] ✅ Obtenido: preferencias_usuario @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   54064ms] [LOG] ℹ️ No existe: sesion_escaneo @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:72
+[   54065ms] [LOG] Obtenidos 50 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[   54065ms] [LOG] ✅ 50 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133
+[   54140ms] [LOG] ✅ Guardado: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:43
+[   62564ms] [LOG] ✅ Obtenido: lista_justa @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:77
+[   66951ms] [LOG] 📥 Cargando productos... @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:128
+[   66951ms] [LOG] ✅ Listados 50 registros (filtro: 'producto_') @ http://127.0.0.1:9000/src/almacenamiento/adaptadores/LocalStorageAdapter.js:142
+[   66965ms] [LOG] Obtenidos 50 productos @ http://127.0.0.1:9000/src/almacenamiento/servicios/ProductosService.js:182
+[   66965ms] [LOG] ✅ 50 productos cargados @ http://127.0.0.1:9000/src/almacenamiento/stores/productosStore.js:133

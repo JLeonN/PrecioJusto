@@ -1,0 +1,286 @@
+- generic [ref=e4]:
+  - banner [ref=e5]:
+    - toolbar [ref=e6]:
+      - generic [ref=e7]:
+        - button "Menu" [ref=e8] [cursor=pointer]:
+          - generic [ref=e10]: menu
+        - button "Precio Justo" [ref=e11] [cursor=pointer]:
+          - generic [ref=e13]: Precio Justo
+      - generic [ref=e14]:
+        - button "Ir a Lista Justa" [ref=e15] [cursor=pointer]:
+          - img [ref=e17]
+        - button "Ir a Mis Productos" [ref=e20] [cursor=pointer]:
+          - img [ref=e22]
+        - button "Ir a Comercios" [ref=e25] [cursor=pointer]:
+          - img [ref=e27]
+  - main [ref=e2092]:
+    - generic [ref=e2093]:
+      - generic [ref=e2094]:
+        - button [ref=e2095] [cursor=pointer]:
+          - img [ref=e2097]: arrow_back
+        - generic [ref=e2098]:
+          - heading "Lista Compras 15 Articulos" [level=5] [ref=e2099]
+          - generic [ref=e2100]:
+            - paragraph [ref=e2101]: 0 de 15 comprados
+            - paragraph [ref=e2102]: 0 de 15 ítems
+      - generic [ref=e2104]:
+        - button "Pendientes" [pressed] [ref=e2105] [cursor=pointer]:
+          - generic [ref=e2107]: Pendientes
+        - button "Comprados" [ref=e2108] [cursor=pointer]:
+          - generic [ref=e2110]: Comprados
+        - button "Todos" [ref=e2111] [cursor=pointer]:
+          - generic [ref=e2113]: Todos
+      - button "Expand \"Super Ahorro Norte\"" [ref=e2116] [cursor=pointer]:
+        - generic [ref=e2118]: store
+        - generic [ref=e2120]: Super Ahorro Norte
+        - generic [ref=e2122]: arrow_drop_down
+      - generic [ref=e2123]:
+        - generic [ref=e2127] [cursor=pointer]:
+          - img [ref=e2130]
+          - generic [ref=e2133]:
+            - generic [ref=e2134]:
+              - generic [ref=e2136]: Aceite Girasol 900ml
+              - button [ref=e2138]:
+                - img [ref=e2140]: edit
+            - generic [ref=e2143]: $152 UYU
+          - generic [ref=e2147]:
+            - button [ref=e2148]:
+              - img [ref=e2150]: remove
+            - generic [ref=e2151]: "1"
+            - button [ref=e2152]:
+              - img [ref=e2154]: add
+          - checkbox [ref=e2156]:
+            - generic [ref=e2159]: radio_button_unchecked
+        - generic [ref=e2163] [cursor=pointer]:
+          - img [ref=e2166]
+          - generic [ref=e2169]:
+            - generic [ref=e2170]:
+              - generic [ref=e2172]: Harina Trigo 0000 1kg
+              - button [ref=e2174]:
+                - img [ref=e2176]: edit
+            - generic [ref=e2179]: $57 UYU
+          - generic [ref=e2183]:
+            - button [ref=e2184]:
+              - img [ref=e2186]: remove
+            - generic [ref=e2187]: "1"
+            - button [ref=e2188]:
+              - img [ref=e2190]: add
+          - checkbox [ref=e2192]:
+            - generic [ref=e2195]: radio_button_unchecked
+        - generic [ref=e2199] [cursor=pointer]:
+          - img [ref=e2202]
+          - generic [ref=e2205]:
+            - generic [ref=e2206]:
+              - generic [ref=e2208]: Yerba Mate Suave 1kg
+              - button [ref=e2210]:
+                - img [ref=e2212]: edit
+            - generic [ref=e2215]: $306 UYU
+          - generic [ref=e2219]:
+            - button [ref=e2220]:
+              - img [ref=e2222]: remove
+            - generic [ref=e2223]: "1"
+            - button [ref=e2224]:
+              - img [ref=e2226]: add
+          - checkbox [ref=e2228]:
+            - generic [ref=e2231]: radio_button_unchecked
+        - generic [ref=e2235] [cursor=pointer]:
+          - img [ref=e2238]
+          - generic [ref=e2241]:
+            - generic [ref=e2242]:
+              - generic [ref=e2244]: Tomate Triturado 520g
+              - button [ref=e2246]:
+                - img [ref=e2248]: edit
+            - generic [ref=e2251]: $68 UYU
+          - generic [ref=e2255]:
+            - button [ref=e2256]:
+              - img [ref=e2258]: remove
+            - generic [ref=e2259]: "1"
+            - button [ref=e2260]:
+              - img [ref=e2262]: add
+          - checkbox [ref=e2264]:
+            - generic [ref=e2267]: radio_button_unchecked
+        - generic [ref=e2271] [cursor=pointer]:
+          - img [ref=e2274]
+          - generic [ref=e2277]:
+            - generic [ref=e2278]:
+              - generic [ref=e2280]: Leche Entera Larga Vida 1L
+              - button [ref=e2282]:
+                - img [ref=e2284]: edit
+            - generic [ref=e2287]: $55 UYU
+          - generic [ref=e2291]:
+            - button [ref=e2292]:
+              - img [ref=e2294]: remove
+            - generic [ref=e2295]: "1"
+            - button [ref=e2296]:
+              - img [ref=e2298]: add
+          - checkbox [ref=e2300]:
+            - generic [ref=e2303]: radio_button_unchecked
+        - generic [ref=e2307] [cursor=pointer]:
+          - img [ref=e2310]
+          - generic [ref=e2313]:
+            - generic [ref=e2314]:
+              - generic [ref=e2316]: Mermelada Frutilla 450g
+              - button [ref=e2318]:
+                - img [ref=e2320]: edit
+            - generic [ref=e2323]: $137 UYU
+          - generic [ref=e2327]:
+            - button [ref=e2328]:
+              - img [ref=e2330]: remove
+            - generic [ref=e2331]: "1"
+            - button [ref=e2332]:
+              - img [ref=e2334]: add
+          - checkbox [ref=e2336]:
+            - generic [ref=e2339]: radio_button_unchecked
+        - generic [ref=e2343] [cursor=pointer]:
+          - img [ref=e2346]
+          - generic [ref=e2349]:
+            - generic [ref=e2350]:
+              - generic [ref=e2352]: Café Molido Clásico 250g
+              - button [ref=e2354]:
+                - img [ref=e2356]: edit
+            - generic [ref=e2359]: $224 UYU
+          - generic [ref=e2363]:
+            - button [ref=e2364]:
+              - img [ref=e2366]: remove
+            - generic [ref=e2367]: "1"
+            - button [ref=e2368]:
+              - img [ref=e2370]: add
+          - checkbox [ref=e2372]:
+            - generic [ref=e2375]: radio_button_unchecked
+        - generic [ref=e2379] [cursor=pointer]:
+          - img [ref=e2382]
+          - generic [ref=e2385]:
+            - generic [ref=e2386]:
+              - generic [ref=e2388]: Queso Rallado 200g
+              - button [ref=e2390]:
+                - img [ref=e2392]: edit
+            - generic [ref=e2395]: $125 UYU
+          - generic [ref=e2399]:
+            - button [ref=e2400]:
+              - img [ref=e2402]: remove
+            - generic [ref=e2403]: "1"
+            - button [ref=e2404]:
+              - img [ref=e2406]: add
+          - checkbox [ref=e2408]:
+            - generic [ref=e2411]: radio_button_unchecked
+        - generic [ref=e2415] [cursor=pointer]:
+          - img [ref=e2418]
+          - generic [ref=e2421]:
+            - generic [ref=e2422]:
+              - generic [ref=e2424]: Galletitas Avena 250g
+              - button [ref=e2426]:
+                - img [ref=e2428]: edit
+            - generic [ref=e2431]: $91 UYU
+          - generic [ref=e2435]:
+            - button [ref=e2436]:
+              - img [ref=e2438]: remove
+            - generic [ref=e2439]: "1"
+            - button [ref=e2440]:
+              - img [ref=e2442]: add
+          - checkbox [ref=e2444]:
+            - generic [ref=e2447]: radio_button_unchecked
+        - generic [ref=e2451] [cursor=pointer]:
+          - img [ref=e2454]
+          - generic [ref=e2457]:
+            - generic [ref=e2458]:
+              - generic [ref=e2460]: Fideos Spaghetti 500g
+              - button [ref=e2462]:
+                - img [ref=e2464]: edit
+            - generic [ref=e2467]: $76 UYU
+          - generic [ref=e2471]:
+            - button [ref=e2472]:
+              - img [ref=e2474]: remove
+            - generic [ref=e2475]: "1"
+            - button [ref=e2476]:
+              - img [ref=e2478]: add
+          - checkbox [ref=e2480]:
+            - generic [ref=e2483]: radio_button_unchecked
+        - generic [ref=e2487] [cursor=pointer]:
+          - img [ref=e2490]
+          - generic [ref=e2493]:
+            - generic [ref=e2494]:
+              - generic [ref=e2496]: Detergente Limón 750ml
+              - button [ref=e2498]:
+                - img [ref=e2500]: edit
+            - generic [ref=e2503]: $88 UYU
+          - generic [ref=e2507]:
+            - button [ref=e2508]:
+              - img [ref=e2510]: remove
+            - generic [ref=e2511]: "1"
+            - button [ref=e2512]:
+              - img [ref=e2514]: add
+          - checkbox [ref=e2516]:
+            - generic [ref=e2519]: radio_button_unchecked
+        - generic [ref=e2523] [cursor=pointer]:
+          - img [ref=e2526]
+          - generic [ref=e2529]:
+            - generic [ref=e2530]:
+              - generic [ref=e2532]: Azúcar Morena 1kg
+              - button [ref=e2534]:
+                - img [ref=e2536]: edit
+            - generic [ref=e2539]: $72 UYU
+          - generic [ref=e2543]:
+            - button [ref=e2544]:
+              - img [ref=e2546]: remove
+            - generic [ref=e2547]: "1"
+            - button [ref=e2548]:
+              - img [ref=e2550]: add
+          - checkbox [ref=e2552]:
+            - generic [ref=e2555]: radio_button_unchecked
+        - generic [ref=e2559] [cursor=pointer]:
+          - img [ref=e2562]
+          - generic [ref=e2565]:
+            - generic [ref=e2566]:
+              - generic [ref=e2568]: Sal Fina 1kg
+              - button [ref=e2570]:
+                - img [ref=e2572]: edit
+            - generic [ref=e2575]: $41 UYU
+          - generic [ref=e2579]:
+            - button [ref=e2580]:
+              - img [ref=e2582]: remove
+            - generic [ref=e2583]: "1"
+            - button [ref=e2584]:
+              - img [ref=e2586]: add
+          - checkbox [ref=e2588]:
+            - generic [ref=e2591]: radio_button_unchecked
+        - generic [ref=e2595] [cursor=pointer]:
+          - img [ref=e2598]
+          - generic [ref=e2601]:
+            - generic [ref=e2602]:
+              - generic [ref=e2604]: Lentejas Secas 500g
+              - button [ref=e2606]:
+                - img [ref=e2608]: edit
+            - generic [ref=e2611]: $82 UYU
+          - generic [ref=e2615]:
+            - button [ref=e2616]:
+              - img [ref=e2618]: remove
+            - generic [ref=e2619]: "1"
+            - button [ref=e2620]:
+              - img [ref=e2622]: add
+          - checkbox [ref=e2624]:
+            - generic [ref=e2627]: radio_button_unchecked
+        - generic [ref=e2631] [cursor=pointer]:
+          - img [ref=e2634]
+          - generic [ref=e2637]:
+            - generic [ref=e2638]:
+              - generic [ref=e2640]: Shampoo Uso Diario 400ml
+              - button [ref=e2642]:
+                - img [ref=e2644]: edit
+            - generic [ref=e2647]: Sin precio para este comercio
+          - generic [ref=e2651]:
+            - button [ref=e2652]:
+              - img [ref=e2654]: remove
+            - generic [ref=e2655]: "1"
+            - button [ref=e2656]:
+              - img [ref=e2658]: add
+          - checkbox [ref=e2660]:
+            - generic [ref=e2663]: radio_button_unchecked
+      - generic [ref=e2665]:
+        - generic [ref=e2666]:
+          - generic [ref=e2667]: Total
+          - strong [ref=e2668]: $0 UYU
+        - generic [ref=e2669]: "Estimación de precios: los valores pueden variar."
+    - button "Agregar producto" [ref=e2670] [cursor=pointer]:
+      - generic [ref=e2671]:
+        - img [ref=e2672]: add
+        - generic [ref=e2673]: Agregar producto
