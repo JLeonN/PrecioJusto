@@ -249,6 +249,7 @@ const datosEscalas = ref({
     : [],
 })
 const sincronizandoDesdePadre = ref(false)
+const actualizacionInternaPendiente = ref(false)
 
 // Estado del diálogo de nuevo comercio
 const dialogoNuevoComercioAbierto = ref(false)
@@ -385,6 +386,10 @@ function alEnfocarComercio() {
  */
 function alEscribirComercio(val) {
   textoTemporalComercio.value = val || ''
+  if (!comercioSeleccionado.value) {
+    comercioEscrito.value = textoTemporalComercio.value
+    emitirCambios()
+  }
 }
 
 /**
@@ -532,6 +537,11 @@ function alCambiarMoneda() {
 watch(
   () => props.modelValue,
   (nuevoValor) => {
+    if (actualizacionInternaPendiente.value) {
+      actualizacionInternaPendiente.value = false
+      return
+    }
+
     sincronizandoDesdePadre.value = true
     datosInternos.value = {
       comercio: nuevoValor.comercio || '',
@@ -578,6 +588,7 @@ function emitirCambios() {
       ? direccionSeleccionada.value.nombreCompleto
       : ''
 
+  actualizacionInternaPendiente.value = true
   emit('update:modelValue', {
     ...datosInternos.value,
     comercioId: comercioId.value,

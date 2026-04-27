@@ -47,13 +47,14 @@ export function formatearPrecioConCodigo(valor, codigoMoneda = MONEDA_DEFAULT, o
 
 // Previene teclas no numéricas en inputs de precio; usar en @keydown
 export function soloNumerosDecimales(event) {
+  const esDecimalTecladoNumerico = event.key === 'Decimal' || event.code === 'NumpadDecimal'
   const teclaValida = /^[0-9.,]$/.test(event.key)
   const teclaControl = [
     'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
     'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End',
   ].includes(event.key)
   const esAtajo = event.ctrlKey || event.metaKey // Permitir Ctrl+C, Ctrl+V, etc.
-  if (!teclaValida && !teclaControl && !esAtajo) {
+  if (!teclaValida && !teclaControl && !esAtajo && !esDecimalTecladoNumerico) {
     event.preventDefault()
   }
 }
@@ -63,7 +64,7 @@ export function filtrarInputPrecio(val) {
   if (!val) return ''
   let limpio = String(val).replace(/[^0-9.,]/g, '')
   // Convertir coma a punto (teclados hispanohablantes usan coma como separador)
-  limpio = limpio.replace(',', '.')
+  limpio = limpio.replace(/,/g, '.')
   // Evitar múltiples puntos decimales
   const partes = limpio.split('.')
   if (partes.length > 2) {

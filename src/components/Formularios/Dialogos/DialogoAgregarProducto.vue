@@ -57,6 +57,7 @@
           label="Guardar Producto"
           color="primary"
           :loading="guardando"
+          :disable="!puedeGuardarProducto"
           @click="guardarProducto"
         />
       </q-card-actions>
@@ -182,6 +183,19 @@ const clasesResponsivas = computed(() => {
   return {
     'dialogo-landscape': $q.screen.width > $q.screen.height && $q.screen.lt.sm,
   }
+})
+
+const tieneComercioValido = computed(() => {
+  return (datosPrecio.value.comercio || '').trim() !== ''
+})
+
+const tienePrecioValido = computed(() => {
+  const precio = Number(datosPrecio.value.valor)
+  return Number.isFinite(precio) && precio >= 1
+})
+
+const puedeGuardarProducto = computed(() => {
+  return tieneComercioValido.value && tienePrecioValido.value && !guardando.value
 })
 
 // Watchers para sincronizar datos
@@ -354,6 +368,15 @@ function autoCompletarFormulario(producto) {
 
 // Guardar producto
 async function guardarProducto() {
+  if (!puedeGuardarProducto.value) {
+    $q.notify({
+      type: 'warning',
+      message: 'Para guardar, ingresá comercio y precio válido',
+      position: 'top',
+    })
+    return
+  }
+
   guardando.value = true
 
   // 1. Validar datos del producto (nombre obligatorio en local)
