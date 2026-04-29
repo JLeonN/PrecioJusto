@@ -247,6 +247,7 @@ import { useActualizacionApp } from '../composables/useActualizacionApp.js'
 import { MODO_PRUEBA } from '../almacenamiento/constantes/ConfigPublicidad.js'
 import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
+import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -254,6 +255,7 @@ const quasar = useQuasar()
 const drawerAbierto = ref(false)
 const sesionEscaneoStore = useSesionEscaneoStore()
 const preferenciasStore = usePreferenciasStore()
+const usuarioStore = useUsuarioStore()
 const { inicializar, mostrarBanner, precargarInterstitial, altoBanner } = usePublicidad()
 const {
   estadoActualizacion,
@@ -369,7 +371,11 @@ const actualizarAppAhora = async () => {
 
 // Carga datos persistidos al iniciar la app
 onMounted(async () => {
-  await Promise.all([sesionEscaneoStore.cargarSesion(), preferenciasStore.inicializar()])
+  await Promise.all([
+    usuarioStore.inicializarSesion(),
+    sesionEscaneoStore.cargarSesion(),
+    preferenciasStore.inicializar(),
+  ])
   await refrescarEstadoActualizacion({ mostrarModalSiHay: true })
 
   try {
