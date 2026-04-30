@@ -40,11 +40,11 @@ Dejar estable la base de autenticacion y perfil en `PrecioJustoPruebas`.
 
 Agregar inicio de sesion real con Google en web sobre la base ya estable.
 
-- [ ] Habilitar proveedor Google en Firebase Authentication
-- [ ] Implementar `iniciarSesionConGoogle()` en servicio de auth
-- [ ] Mantener fallback anonimo solo para desarrollo controlado
-- [ ] Actualizar `users/{uid}/perfil/principal` al iniciar con Google (nombre, email, foto, tipoCuenta)
-- [ ] Confirmar en Firebase Authentication que el proveedor cambie de anonimo a Google
+- [x] Habilitar proveedor Google en Firebase Authentication
+- [x] Implementar `iniciarSesionConGoogle()` en servicio de auth
+- [x] Mantener fallback anonimo solo para desarrollo controlado
+- [x] Actualizar `users/{uid}/perfil/principal` al iniciar con Google (nombre, email, foto, tipoCuenta)
+- [x] Confirmar en Firebase Authentication que el proveedor cambie de anonimo a Google
 
 ## FASE 3: Migracion desde LocalStorageAdapter
 
@@ -52,8 +52,8 @@ Agregar inicio de sesion real con Google en web sobre la base ya estable.
 
 Definir y ejecutar migracion segura de datos locales a Firestore por usuario.
 
-- [ ] Auditar estructura actual en `src/almacenamiento/adaptadores/LocalStorageAdapter.js`
-- [ ] Documentar mapeo exacto local -> Firestore (`productos`, `comercios`, relaciones)
+- [x] Auditar estructura actual en `src/almacenamiento/adaptadores/LocalStorageAdapter.js`
+- [x] Documentar mapeo exacto local -> Firestore (`productos`, `comercios`, relaciones)
 - [ ] Diseñar estrategia de migracion idempotente con backup local temporal
 - [ ] Implementar migracion inicial con confirmacion del usuario
 - [ ] Registrar errores de migracion y reintento seguro sin perdida de datos
@@ -86,11 +86,11 @@ Validar flujo completo de autenticacion, perfil y persistencia en Firestore.
 ## Progreso del plan
 
 - [x] Fase 1: Consolidar base Firebase en pruebas
-- [ ] Fase 2: Login Google web
+- [x] Fase 2: Login Google web
 - [ ] Fase 3: Migracion desde LocalStorageAdapter
 - [ ] Fase 4: Preparar corte a produccion
 - [ ] Fase Testing
 
 Fecha de creacion: 14 de Marzo 2026
-Fecha de ultima actualizacion: 29 de Abril 2026
+Fecha de ultima actualizacion: 30 de Abril 2026
 Estado: EN PROCESO
