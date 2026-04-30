@@ -67,6 +67,7 @@ Replicar configuracion validada de pruebas a proyecto productivo sin improvisaci
 - [ ] Confirmar existencia y estado del proyecto `PrecioJustoProd`
 - [ ] Replicar Auth, Firestore y reglas desde pruebas
 - [ ] Configurar variables de entorno separadas para Prod
+- [ ] Actualizar el correo electronico de asistencia del proyecto antes de salida a produccion
 - [ ] Verificar comportamiento completo en entorno productivo controlado
 - [ ] Definir criterio formal para cambiar la app de Pruebas a Prod
 

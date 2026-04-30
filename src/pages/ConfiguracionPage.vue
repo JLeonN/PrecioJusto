@@ -89,6 +89,37 @@
       </q-card>
       <q-card flat bordered class="q-mt-md">
         <q-card-section>
+          <div class="text-subtitle1 text-weight-medium">Cuenta</div>
+          <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
+            Podés usar la app con Google o como invitado.
+          </p>
+        </q-card-section>
+        <q-separator />
+        <q-card-section class="column q-gutter-sm">
+          <q-banner rounded class="banner-cuenta">
+            Estado:
+            <strong>{{ etiquetaEstadoCuenta }}</strong>
+          </q-banner>
+          <q-btn
+            color="primary"
+            unelevated
+            no-caps
+            label="Entrar con Google"
+            :loading="cargandoAccionCuenta"
+            @click="manejarEntrarConGoogle"
+          />
+          <q-btn
+            outline
+            color="primary"
+            no-caps
+            label="Continuar como invitado"
+            :loading="cargandoAccionCuenta"
+            @click="manejarContinuarComoInvitado"
+          />
+        </q-card-section>
+      </q-card>
+      <q-card flat bordered class="q-mt-md">
+        <q-card-section>
           <div class="text-subtitle2">Importante</div>
           <p class="text-body2 q-mt-sm q-mb-none">
             Cambiar la moneda en un precio puntual solo afecta ese registro. No modifica esta
@@ -106,11 +137,14 @@ import { useQuasar } from 'quasar'
 import { MONEDAS } from '../almacenamiento/constantes/Monedas.js'
 import { usePublicidad } from '../composables/usePublicidad.js'
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
+import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
 
 const quasar = useQuasar()
 const preferenciasStore = usePreferenciasStore()
+const usuarioStore = useUsuarioStore()
 const { mostrarInterstitial } = usePublicidad()
 const ultimoIntersticialMostrado = ref(0)
+const cargandoAccionCuenta = ref(false)
 const TIEMPO_ESPERA_INTERSTICIAL_MS = 60000
 const opcionesModoTema = [
   { label: 'Claro', value: 'claro' },
@@ -120,6 +154,11 @@ const opcionesModoTema = [
 
 const esModoAutomatico = computed(() => preferenciasStore.modoMoneda === 'automatica')
 const etiquetaTemaActivo = computed(() => (quasar.dark.isActive ? 'Oscuro' : 'Claro'))
+const etiquetaEstadoCuenta = computed(() => {
+  if (!usuarioStore.autenticado) return 'Sin sesión'
+  if (usuarioStore.esAnonimo) return 'Invitado'
+  return usuarioStore.perfil?.email ? `Google (${usuarioStore.perfil.email})` : 'Google'
+})
 
 async function mostrarPublicidadConfiguracion() {
   const ahora = Date.now()
@@ -149,6 +188,38 @@ async function cambiarModoAutomatico(valor) {
 
 async function cambiarMonedaManual(moneda) {
   await preferenciasStore.guardarMonedaManual(moneda)
+}
+
+async function manejarEntrarConGoogle() {
+  cargandoAccionCuenta.value = true
+  const loginOk = await usuarioStore.iniciarSesionConGoogle()
+
+  if (loginOk) {
+    quasar.notify({ type: 'positive', message: 'Sesión con Google iniciada.' })
+  } else {
+    quasar.notify({
+      type: 'negative',
+      message: usuarioStore.errorSesion || 'No se pudo iniciar sesión con Google.',
+    })
+  }
+
+  cargandoAccionCuenta.value = false
+}
+
+async function manejarContinuarComoInvitado() {
+  cargandoAccionCuenta.value = true
+  const invitadoOk = await usuarioStore.continuarComoInvitado()
+
+  if (invitadoOk) {
+    quasar.notify({ type: 'positive', message: 'Modo invitado activo.' })
+  } else {
+    quasar.notify({
+      type: 'negative',
+      message: usuarioStore.errorSesion || 'No se pudo activar modo invitado.',
+    })
+  }
+
+  cargandoAccionCuenta.value = false
 }
 
 onMounted(async () => {
@@ -191,6 +262,11 @@ onMounted(async () => {
   border: 1px solid var(--borde-color);
 }
 .banner-moneda-efectiva {
+  background: var(--fondo-banner-suave);
+  color: var(--texto-primario);
+  border: 1px solid var(--borde-color);
+}
+.banner-cuenta {
   background: var(--fondo-banner-suave);
   color: var(--texto-primario);
   border: 1px solid var(--borde-color);

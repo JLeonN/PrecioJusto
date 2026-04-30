@@ -106,6 +106,39 @@ export const useUsuarioStore = defineStore('usuario', () => {
     return promesaInicializacion
   }
 
+  async function iniciarSesionConGoogle() {
+    errorSesion.value = null
+
+    try {
+      const usuario = await servicioAuthFirebase.iniciarSesionConGoogle()
+      await sincronizarPerfilUsuario(usuario)
+      aplicarEstadoUsuario(usuario)
+      return true
+    } catch (error) {
+      console.error('Error al iniciar sesión con Google:', error)
+      errorSesion.value = 'No se pudo iniciar sesión con Google'
+      return false
+    }
+  }
+
+  async function continuarComoInvitado() {
+    errorSesion.value = null
+
+    if (esAnonimo.value && autenticado.value) {
+      return true
+    }
+
+    try {
+      await servicioAuthFirebase.cerrarSesionActual()
+      await servicioAuthFirebase.iniciarSesionAnonimaSiNoExiste()
+      return true
+    } catch (error) {
+      console.error('Error al continuar como invitado:', error)
+      errorSesion.value = 'No se pudo continuar como invitado'
+      return false
+    }
+  }
+
   async function cerrarSesion() {
     await servicioAuthFirebase.cerrarSesionActual()
   }
@@ -133,6 +166,8 @@ export const useUsuarioStore = defineStore('usuario', () => {
     errorSesion,
     tieneSesionActiva,
     inicializarSesion,
+    iniciarSesionConGoogle,
+    continuarComoInvitado,
     cerrarSesion,
     limpiarSesionLocal,
   }
