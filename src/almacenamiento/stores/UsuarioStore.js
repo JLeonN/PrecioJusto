@@ -34,24 +34,14 @@ export const useUsuarioStore = defineStore('usuario', () => {
     const perfilActual = await servicioFirestoreUsuarios.obtenerPerfilUsuario(usuario.uid)
 
     if (!perfilActual) {
-      await servicioFirestoreUsuarios.guardarPerfilInicial(usuario)
-      perfil.value = {
-        usuarioId: usuario.uid,
-        tipoCuenta: usuario.isAnonymous ? 'anonima' : 'registrada',
-        nombre: usuario.displayName || 'Usuario anónimo',
-        email: usuario.email || null,
-        foto: usuario.photoURL || null,
-      }
+      perfil.value = await servicioFirestoreUsuarios.guardarPerfilInicial(usuario)
       return
     }
 
-    await servicioFirestoreUsuarios.actualizarPerfilSesion(usuario)
+    const perfilSesion = await servicioFirestoreUsuarios.actualizarPerfilSesion(usuario)
     perfil.value = {
       ...perfilActual,
-      tipoCuenta: usuario.isAnonymous ? 'anonima' : 'registrada',
-      nombre: usuario.displayName || 'Usuario anónimo',
-      email: usuario.email || null,
-      foto: usuario.photoURL || null,
+      ...perfilSesion,
     }
   }
 
