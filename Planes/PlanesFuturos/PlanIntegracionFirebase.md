@@ -58,7 +58,60 @@ Definir y ejecutar migracion segura de datos locales a Firestore por usuario.
 - [x] Implementar migracion inicial con confirmacion del usuario
 - [x] Registrar errores de migracion y reintento seguro sin perdida de datos
 
-## FASE 4: Preparar corte a produccion
+## FASE 4A: Auth robusta
+
+### Objetivo
+
+Implementar una autenticacion robusta y segura (correo, Google, invitado), con manejo correcto de errores, recuperacion de contraseña y control de acceso por sesion.
+
+- [ ] Diseñar UX de acceso inicial al abrir app (correo, Google, invitado)
+- [ ] Definir comportamiento de cada entrada:
+  - [ ] Entrar con Google
+  - [ ] Entrar con correo y contraseña
+  - [ ] Continuar como invitado
+- [ ] Implementar login/registro con correo y contraseña en Firebase Auth
+- [ ] Mantener login con Google y fallback invitado ya existente
+- [ ] Implementar modal reutilizable de aviso para modo invitado:
+  - [ ] Mensaje amigable: al continuar como invitado, los datos se guardan en el celular
+  - [ ] Aclarar que, si luego se registra/inicia sesion, debera migrar datos para mantenerlos
+  - [ ] Boton principal `Aceptar`
+  - [ ] Boton secundario `Registrarme ahora`
+  - [ ] Diseñar como componente reutilizable para futuros avisos/confirmaciones
+- [ ] Manejar errores de autenticacion en UI (ej.: contraseña incorrecta, usuario inexistente, correo invalido)
+- [ ] Implementar recuperacion de contraseña por correo
+- [ ] Definir flujo completo de recuperacion de contraseña:
+  - [ ] Pantalla/accion `Olvide mi contraseña`
+  - [ ] Envio de correo de recuperacion
+  - [ ] Mensaje de confirmacion de envio
+  - [ ] Manejo de errores comunes (correo invalido/no registrado)
+- [ ] Implementar guardas de ruta por estado de sesion (acceso controlado en UI)
+- [ ] Verificar que ningun flujo permita acceso a datos de otro usuario
+
+## FASE 4B: Perfil editable y datos personales
+
+### Objetivo
+
+Implementar perfil editable con datos precargados desde Google y formulario de datos personales (incluyendo fecha de nacimiento para calcular edad), respetando el sistema visual actual.
+
+- [ ] Definir estructura de perfil editable en Firestore:
+  - [ ] `origenGoogle` (solo referencia del proveedor)
+  - [ ] `perfilEditable` (campos editables por usuario)
+- [ ] Precargar por defecto desde Google:
+  - [ ] foto (`photoURL`)
+  - [ ] nombre (`displayName`)
+  - [ ] email (`email`)
+  - [ ] usuarioId (`uid`)
+- [ ] Permitir edicion manual de perfil por usuario sin perder seguridad por `uid`
+- [ ] Implementar formulario de datos personales en perfil (fase final de esta etapa):
+  - [ ] fecha de nacimiento (opcional, para calcular edad)
+  - [ ] edad calculada en app (no tomada de Google)
+- [ ] Agregar validaciones minimas de formulario (perfil + fecha)
+- [ ] Mostrar estados y errores amigables en UI (carga, exito, fallo)
+- [ ] Respetar sistema de diseño actual:
+  - [ ] solo usar colores y variables ya definidas en `src/css/Variables.css`
+  - [ ] asegurar soporte en modo oscuro
+
+## FASE 5: Preparar corte a produccion
 
 ### Objetivo
 
@@ -70,27 +123,69 @@ Replicar configuracion validada de pruebas a proyecto productivo sin improvisaci
 - [ ] Actualizar el correo electronico de asistencia del proyecto antes de salida a produccion
 - [ ] Verificar comportamiento completo en entorno productivo controlado
 - [ ] Definir criterio formal para cambiar la app de Pruebas a Prod
+- [ ] Definir checklist Go/No-Go de salida a produccion:
+  - [ ] Reglas de Firestore publicadas y verificadas
+  - [ ] Auth (Google, correo y recuperacion) funcionando en Prod
+  - [ ] Pruebas E2E criticas en verde
+  - [ ] Variables de entorno Prod confirmadas
+  - [ ] Plan de rollback confirmado
+- [ ] Definir plan de rollback operativo:
+  - [ ] Volver `VITE_FIREBASE_ENTORNO=pruebas` si falla Prod
+  - [ ] Mantener release estable anterior lista para restaurar
+  - [ ] Registrar incidente y causa raiz antes de reintentar
+- [ ] Definir control de costos en Spark (gratis):
+  - [ ] Revisar consumo semanal (Auth/Firestore)
+  - [ ] Configurar alertas de uso en consola
+  - [ ] Revisar consultas costosas antes de escalar usuarios
 
 ## FASE TESTING
 
 ### Objetivo
 
-Validar flujo completo de autenticacion, perfil y persistencia en Firestore.
+Validar flujo completo de autenticacion, perfil y persistencia con ejecucion guiada por IA (Playwright) y confirmacion humana en datos sensibles.
 
-- [ ] Iniciar app y verificar sesion valida sin errores de permisos
-- [ ] Verificar lectura/escritura de `users/{uid}/perfil/principal`
-- [ ] Probar login Google web y confirmar actualizacion de perfil
-- [ ] Verificar que usuario A no pueda leer/escribir datos de usuario B
-- [ ] Probar reinicio de app y confirmar persistencia de sesion y perfil
+- [ ] Ejecutar suite E2E con Playwright para login/perfil/migracion.
+- [ ] Antes de pruebas con cuenta real, la IA debe pedir confirmacion y credenciales temporales al usuario.
+- [ ] Probar acceso como invitado:
+  - [ ] Entrar como invitado
+  - [ ] Confirmar aviso de guardado local en celular
+  - [ ] Confirmar creacion/actualizacion de perfil anonimo
+- [ ] Probar acceso con Google:
+  - [ ] Iniciar sesion con Google (con credenciales provistas en el momento)
+  - [ ] Confirmar actualizacion de nombre/email/foto en perfil
+- [ ] Probar acceso con correo:
+  - [ ] Registro nuevo
+  - [ ] Login correcto
+  - [ ] Login con contraseña incorrecta
+- [ ] Probar recuperacion de contraseña:
+  - [ ] Enviar correo de recuperacion
+  - [ ] Confirmar feedback correcto en UI
+- [ ] Probar seguridad de sesion y guardas:
+  - [ ] Navegacion con sesion activa
+  - [ ] Bloqueo/redireccion con sesion inactiva
+  - [ ] Verificar que usuario A no pueda leer/escribir datos de usuario B
+- [ ] Probar migracion local -> Firestore:
+  - [ ] Ejecutar migracion inicial
+  - [ ] Ejecutar segunda migracion y confirmar que no duplica
+  - [ ] Forzar error controlado y verificar reintento seguro
+- [ ] Probar perfil editable:
+  - [ ] Editar datos manuales y confirmar persistencia
+  - [ ] Probar formulario de fecha de nacimiento y calculo de edad
+- [ ] Criterio de salida de testing:
+  - [ ] No hay errores bloqueantes
+  - [ ] Flujos criticos en verde
+  - [ ] Evidencia guardada (logs/capturas/resumen)
 
 ## Progreso del plan
 
 - [x] Fase 1: Consolidar base Firebase en pruebas
 - [x] Fase 2: Login Google web
 - [x] Fase 3: Migracion desde LocalStorageAdapter
-- [ ] Fase 4: Preparar corte a produccion
+- [ ] Fase 4A: Auth robusta
+- [ ] Fase 4B: Perfil editable y datos personales
+- [ ] Fase 5: Preparar corte a produccion
 - [ ] Fase Testing
 
 Fecha de creacion: 14 de Marzo 2026
-Fecha de ultima actualizacion: 30 de Abril 2026
+Fecha de ultima actualizacion: 1 de Mayo 2026
 Estado: EN PROCESO
