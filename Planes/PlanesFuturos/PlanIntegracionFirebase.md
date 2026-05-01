@@ -54,7 +54,7 @@ Definir y ejecutar migracion segura de datos locales a Firestore por usuario.
 
 - [x] Auditar estructura actual en `src/almacenamiento/adaptadores/LocalStorageAdapter.js`
 - [x] Documentar mapeo exacto local -> Firestore (`productos`, `comercios`, relaciones)
-- [ ] Diseñar estrategia de migracion idempotente con backup local temporal
+- [x] Diseñar estrategia de migracion idempotente con backup local temporal
 - [x] Implementar migracion inicial con confirmacion del usuario
 - [x] Registrar errores de migracion y reintento seguro sin perdida de datos
 
@@ -66,7 +66,7 @@ Replicar configuracion validada de pruebas a proyecto productivo sin improvisaci
 
 - [ ] Confirmar existencia y estado del proyecto `PrecioJustoProd`
 - [ ] Replicar Auth, Firestore y reglas desde pruebas
-- [ ] Configurar variables de entorno separadas para Prod
+- [x] Configurar variables de entorno separadas para Prod
 - [ ] Actualizar el correo electronico de asistencia del proyecto antes de salida a produccion
 - [ ] Verificar comportamiento completo en entorno productivo controlado
 - [ ] Definir criterio formal para cambiar la app de Pruebas a Prod
@@ -87,7 +87,7 @@ Validar flujo completo de autenticacion, perfil y persistencia en Firestore.
 
 - [x] Fase 1: Consolidar base Firebase en pruebas
 - [x] Fase 2: Login Google web
-- [ ] Fase 3: Migracion desde LocalStorageAdapter
+- [x] Fase 3: Migracion desde LocalStorageAdapter
 - [ ] Fase 4: Preparar corte a produccion
 - [ ] Fase Testing
 
