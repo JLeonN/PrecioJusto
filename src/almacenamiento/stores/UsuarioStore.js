@@ -20,6 +20,10 @@ export const useUsuarioStore = defineStore('usuario', () => {
 
   const tieneSesionActiva = computed(() => autenticado.value && !!usuarioId.value)
 
+  function esErrorPermisosFirestore(error) {
+    return error?.code === 'permission-denied' || error?.message?.includes('Missing or insufficient permissions')
+  }
+
   function aplicarEstadoUsuario(usuario) {
     if (!usuario) {
       usuarioId.value = null
@@ -49,6 +53,20 @@ export const useUsuarioStore = defineStore('usuario', () => {
     }
   }
 
+  async function sincronizarPerfilConReintento(usuario) {
+    try {
+      await sincronizarPerfilUsuario(usuario)
+      return
+    } catch (error) {
+      if (!esErrorPermisosFirestore(error)) {
+        throw error
+      }
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 350))
+    await sincronizarPerfilUsuario(usuario)
+  }
+
   async function asegurarSesionAnonima() {
     try {
       await servicioAuthFirebase.iniciarSesionAnonimaSiNoExiste()
@@ -66,24 +84,56 @@ export const useUsuarioStore = defineStore('usuario', () => {
     cargandoSesion.value = true
     errorSesion.value = null
 
+    try {
+      const usuarioRedirect = await servicioAuthFirebase.procesarResultadoRedirectGoogle()
+      if (usuarioRedirect) {
+        aplicarEstadoUsuario(usuarioRedirect)
+        await sincronizarPerfilConReintento(usuarioRedirect)
+      }
+    } catch (error) {
+      console.warn('No se pudo procesar redirect de Google:', error?.code || error?.message || error)
+    }
+
     promesaInicializacion = new Promise((resolve) => {
       let primerEventoRecibido = false
 
       if (!detenerEscuchaSesion) {
         detenerEscuchaSesion = servicioAuthFirebase.escucharCambioSesion(async (usuario) => {
-          aplicarEstadoUsuario(usuario)
+          try {
+            aplicarEstadoUsuario(usuario)
 
-          if (!usuario) {
-            await asegurarSesionAnonima()
-            return
-          }
+            if (!usuario) {
+              await asegurarSesionAnonima()
+              return
+            }
 
-          await sincronizarPerfilUsuario(usuario)
+            await sincronizarPerfilConReintento(usuario)
 
-          if (!primerEventoRecibido) {
-            primerEventoRecibido = true
-            cargandoSesion.value = false
-            resolve(usuario)
+            if (!primerEventoRecibido) {
+              primerEventoRecibido = true
+              cargandoSesion.value = false
+              resolve(usuario)
+            }
+          } catch (error) {
+            if (esErrorPermisosFirestore(error)) {
+              console.warn('Permisos transitorios durante cambio de sesión:', error?.code || error?.message)
+
+              if (!primerEventoRecibido) {
+                primerEventoRecibido = true
+                cargandoSesion.value = false
+                resolve(usuario || null)
+              }
+              return
+            }
+
+            console.error('Error al procesar cambio de sesión:', error)
+            errorSesion.value = 'No se pudo sincronizar la sesión'
+
+            if (!primerEventoRecibido) {
+              primerEventoRecibido = true
+              cargandoSesion.value = false
+              resolve(null)
+            }
           }
         })
         return
@@ -105,12 +155,58 @@ export const useUsuarioStore = defineStore('usuario', () => {
 
     try {
       const usuario = await servicioAuthFirebase.iniciarSesionConGoogle()
+      if (!usuario) {
+        return true
+      }
       await sincronizarPerfilUsuario(usuario)
       aplicarEstadoUsuario(usuario)
       return true
     } catch (error) {
       console.error('Error al iniciar sesión con Google:', error)
       errorSesion.value = 'No se pudo iniciar sesión con Google'
+      return false
+    }
+  }
+
+  async function iniciarSesionConCorreo(email, contrasena) {
+    errorSesion.value = null
+
+    try {
+      const usuario = await servicioAuthFirebase.iniciarSesionConCorreo(email, contrasena)
+      await sincronizarPerfilUsuario(usuario)
+      aplicarEstadoUsuario(usuario)
+      return true
+    } catch (error) {
+      console.error('Error al iniciar sesión con correo:', error)
+      errorSesion.value = 'No se pudo iniciar sesión con correo y contraseña'
+      return false
+    }
+  }
+
+  async function registrarConCorreo(email, contrasena) {
+    errorSesion.value = null
+
+    try {
+      const usuario = await servicioAuthFirebase.registrarConCorreo(email, contrasena)
+      await sincronizarPerfilUsuario(usuario)
+      aplicarEstadoUsuario(usuario)
+      return true
+    } catch (error) {
+      console.error('Error al registrar con correo:', error)
+      errorSesion.value = 'No se pudo crear la cuenta con correo y contraseña'
+      return false
+    }
+  }
+
+  async function recuperarContrasena(email) {
+    errorSesion.value = null
+
+    try {
+      await servicioAuthFirebase.enviarRecuperacionContrasena(email)
+      return true
+    } catch (error) {
+      console.error('Error al enviar recuperación de contraseña:', error)
+      errorSesion.value = 'No se pudo enviar el correo de recuperación'
       return false
     }
   }
@@ -189,6 +285,9 @@ export const useUsuarioStore = defineStore('usuario', () => {
     tieneSesionActiva,
     inicializarSesion,
     iniciarSesionConGoogle,
+    iniciarSesionConCorreo,
+    registrarConCorreo,
+    recuperarContrasena,
     continuarComoInvitado,
     migrarDatosLocales,
     cerrarSesion,

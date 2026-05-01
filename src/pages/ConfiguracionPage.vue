@@ -2,14 +2,14 @@
   <q-page class="q-pa-md configuracion-page">
     <div class="contenedor-configuracion">
       <div class="q-mb-md">
-        <h5 class="q-my-none">Configuración</h5>
+        <h5 class="q-my-none">ConfiguraciÃ³n</h5>
         <p class="text-grey-7 q-mt-xs q-mb-none">Preferencias globales de la app</p>
       </div>
       <q-card flat bordered>
         <q-card-section>
           <div class="text-subtitle1 text-weight-medium">Modo oscuro</div>
           <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
-            Elegí cómo querés que se vea la app: claro, oscuro o automático según el sistema.
+            ElegÃ­ cÃ³mo querÃ©s que se vea la app: claro, oscuro o automÃ¡tico segÃºn el sistema.
           </p>
         </q-card-section>
         <q-separator />
@@ -33,13 +33,13 @@
           </div>
           <div class="q-mt-sm">
             <q-banner rounded class="banner-tema-info">
-              Si elegís Claro u Oscuro, esa preferencia manual se mantiene hasta volver a Seguir
+              Si elegÃ­s Claro u Oscuro, esa preferencia manual se mantiene hasta volver a Seguir
               sistema.
             </q-banner>
           </div>
         </q-card-section>
       </q-card>
-      <q-card flat bordered class="q-mt-md">
+      <q-card flat bordered class="q-mt-md" ref="tarjetaCuentaCorreoRef">
         <q-card-section>
           <div class="text-subtitle1 text-weight-medium">Moneda predeterminada</div>
           <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
@@ -50,7 +50,7 @@
         <q-card-section>
           <q-toggle
             :model-value="esModoAutomatico"
-            label="Usar moneda automática según país"
+            label="Usar moneda automÃ¡tica segÃºn paÃ­s"
             color="primary"
             @update:model-value="cambiarModoAutomatico"
           />
@@ -62,15 +62,15 @@
           </div>
           <div v-if="esModoAutomatico" class="q-mt-md column q-gutter-sm">
             <q-banner rounded class="bg-blue-1 text-blue-10">
-              País detectado:
+              PaÃ­s detectado:
               <strong>{{ preferenciasStore.paisDetectado || 'No detectado' }}</strong>
             </q-banner>
             <q-banner v-if="preferenciasStore.monedaDetectada" rounded class="bg-positive text-white">
-              Moneda detectada automáticamente:
+              Moneda detectada automÃ¡ticamente:
               <strong>{{ preferenciasStore.monedaDetectada }}</strong>
             </q-banner>
             <q-banner v-else rounded class="bg-warning text-dark">
-              No se pudo detectar una moneda por región. Se usa la última moneda manual guardada.
+              No se pudo detectar una moneda por regiÃ³n. Se usa la Ãºltima moneda manual guardada.
             </q-banner>
           </div>
           <div v-else class="q-mt-md">
@@ -91,7 +91,7 @@
         <q-card-section>
           <div class="text-subtitle1 text-weight-medium">Cuenta</div>
           <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
-            Podés usar la app con Google o como invitado.
+            PodÃ©s usar la app con Google o como invitado.
           </p>
         </q-card-section>
         <q-separator />
@@ -120,7 +120,75 @@
       </q-card>
       <q-card flat bordered class="q-mt-md">
         <q-card-section>
-          <div class="text-subtitle1 text-weight-medium">Migración a Firebase</div>
+          <div class="text-subtitle1 text-weight-medium">Cuenta por correo</div>
+          <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
+            ProbÃ¡ iniciar sesiÃ³n, crear cuenta o recuperar contraseÃ±a por correo.
+          </p>
+        </q-card-section>
+        <q-separator />
+        <q-card-section class="column q-gutter-sm">
+          <q-input
+            v-model="correoCuenta"
+            label="Correo"
+            type="email"
+            autocomplete="email"
+            outlined
+            dense
+          />
+          <q-input
+            v-model="contrasenaCuenta"
+            label="ContraseÃ±a"
+            :type="mostrarContrasenaCuenta ? 'text' : 'password'"
+            autocomplete="current-password"
+            outlined
+            dense
+          >
+            <template #append>
+              <q-btn
+                flat
+                round
+                dense
+                :icon="mostrarContrasenaCuenta ? 'visibility_off' : 'visibility'"
+                @click="mostrarContrasenaCuenta = !mostrarContrasenaCuenta"
+              />
+            </template>
+          </q-input>
+          <div class="row q-col-gutter-sm">
+            <div class="col-12 col-sm-6">
+              <q-btn
+                class="full-width"
+                color="primary"
+                no-caps
+                label="Entrar con correo"
+                :loading="cargandoAccionCuenta"
+                @click="manejarEntrarConCorreo"
+              />
+            </div>
+            <div class="col-12 col-sm-6">
+              <q-btn
+                class="full-width"
+                outline
+                color="primary"
+                no-caps
+                label="Crear cuenta"
+                :loading="cargandoAccionCuenta"
+                @click="manejarCrearCuentaConCorreo"
+              />
+            </div>
+          </div>
+          <q-btn
+            flat
+            no-caps
+            color="secondary"
+            label="Recuperar contraseÃ±a"
+            :loading="cargandoAccionCuenta"
+            @click="manejarRecuperarContrasena"
+          />
+        </q-card-section>
+      </q-card>
+      <q-card flat bordered class="q-mt-md">
+        <q-card-section>
+          <div class="text-subtitle1 text-weight-medium">MigraciÃ³n a Firebase</div>
           <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
             Copia tus datos locales actuales a Firestore sin borrar el almacenamiento local.
           </p>
@@ -150,6 +218,15 @@
         </q-card-section>
       </q-card>
     </div>
+    <ModalConfirmacionReutilizable
+      v-model="modalInvitadoAbierto"
+      titulo="Modo invitado"
+      mensaje="Si continuÃ¡s como invitado, tus datos se guardarÃ¡n en este celular. Cuando te registres mÃ¡s adelante, tendrÃ¡s que migrarlos para mantenerlos."
+      texto-principal="Aceptar"
+      texto-secundario="Registrarme ahora"
+      @accion-principal="confirmarModoInvitado"
+      @accion-secundaria="irARegistroDesdeModal"
+    />
   </q-page>
 </template>
 
@@ -160,6 +237,7 @@ import { MONEDAS } from '../almacenamiento/constantes/Monedas.js'
 import { usePublicidad } from '../composables/usePublicidad.js'
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
 import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
+import ModalConfirmacionReutilizable from '../components/Compartidos/ModalConfirmacionReutilizable.vue'
 
 const quasar = useQuasar()
 const preferenciasStore = usePreferenciasStore()
@@ -167,6 +245,11 @@ const usuarioStore = useUsuarioStore()
 const { mostrarInterstitial } = usePublicidad()
 const ultimoIntersticialMostrado = ref(0)
 const cargandoAccionCuenta = ref(false)
+const correoCuenta = ref('')
+const contrasenaCuenta = ref('')
+const mostrarContrasenaCuenta = ref(false)
+const modalInvitadoAbierto = ref(false)
+const tarjetaCuentaCorreoRef = ref(null)
 const TIEMPO_ESPERA_INTERSTICIAL_MS = 60000
 const opcionesModoTema = [
   { label: 'Claro', value: 'claro' },
@@ -177,7 +260,7 @@ const opcionesModoTema = [
 const esModoAutomatico = computed(() => preferenciasStore.modoMoneda === 'automatica')
 const etiquetaTemaActivo = computed(() => (quasar.dark.isActive ? 'Oscuro' : 'Claro'))
 const etiquetaEstadoCuenta = computed(() => {
-  if (!usuarioStore.autenticado) return 'Sin sesión'
+  if (!usuarioStore.autenticado) return 'Sin sesiÃ³n'
   if (usuarioStore.esAnonimo) return 'Invitado'
   return usuarioStore.perfil?.email ? `Google (${usuarioStore.perfil.email})` : 'Google'
 })
@@ -185,7 +268,7 @@ const textoResumenMigracion = computed(() => {
   const resumen = usuarioStore.ultimoResumenMigracion
   if (!resumen) return ''
 
-  return `Migración completada. Productos: ${resumen.totalProductos}, comercios: ${resumen.totalComercios}, listas: ${resumen.totalListas}.`
+  return `MigraciÃ³n completada. Productos: ${resumen.totalProductos}, comercios: ${resumen.totalComercios}, listas: ${resumen.totalListas}.`
 })
 
 async function mostrarPublicidadConfiguracion() {
@@ -223,11 +306,14 @@ async function manejarEntrarConGoogle() {
   const loginOk = await usuarioStore.iniciarSesionConGoogle()
 
   if (loginOk) {
-    quasar.notify({ type: 'positive', message: 'Sesión con Google iniciada.' })
+    quasar.notify({
+      type: 'positive',
+      message: 'Continuá con Google si se abrió redirección o popup.',
+    })
   } else {
     quasar.notify({
       type: 'negative',
-      message: usuarioStore.errorSesion || 'No se pudo iniciar sesión con Google.',
+      message: usuarioStore.errorSesion || 'No se pudo iniciar sesiÃ³n con Google.',
     })
   }
 
@@ -235,6 +321,11 @@ async function manejarEntrarConGoogle() {
 }
 
 async function manejarContinuarComoInvitado() {
+  modalInvitadoAbierto.value = true
+}
+
+async function confirmarModoInvitado() {
+  modalInvitadoAbierto.value = false
   cargandoAccionCuenta.value = true
   const invitadoOk = await usuarioStore.continuarComoInvitado()
 
@@ -250,19 +341,116 @@ async function manejarContinuarComoInvitado() {
   cargandoAccionCuenta.value = false
 }
 
+function irARegistroDesdeModal() {
+  modalInvitadoAbierto.value = false
+
+  const elemento = tarjetaCuentaCorreoRef.value?.$el || tarjetaCuentaCorreoRef.value
+  if (elemento?.scrollIntoView) {
+    elemento.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
+}
+
+function validarCorreoCuenta() {
+  if (!correoCuenta.value.trim()) {
+    quasar.notify({ type: 'warning', message: 'IngresÃ¡ un correo.' })
+    return false
+  }
+
+  return true
+}
+
+function validarCredencialesCuenta() {
+  if (!validarCorreoCuenta()) return false
+
+  if (!contrasenaCuenta.value.trim()) {
+    quasar.notify({ type: 'warning', message: 'IngresÃ¡ una contraseÃ±a.' })
+    return false
+  }
+
+  if (contrasenaCuenta.value.length < 6) {
+    quasar.notify({ type: 'warning', message: 'La contraseÃ±a debe tener al menos 6 caracteres.' })
+    return false
+  }
+
+  return true
+}
+
+async function manejarEntrarConCorreo() {
+  if (!validarCredencialesCuenta()) return
+
+  cargandoAccionCuenta.value = true
+  const loginOk = await usuarioStore.iniciarSesionConCorreo(
+    correoCuenta.value.trim(),
+    contrasenaCuenta.value,
+  )
+
+  if (loginOk) {
+    quasar.notify({ type: 'positive', message: 'SesiÃ³n iniciada con correo.' })
+  } else {
+    quasar.notify({
+      type: 'negative',
+      message: usuarioStore.errorSesion || 'No se pudo iniciar sesiÃ³n con correo.',
+    })
+  }
+
+  cargandoAccionCuenta.value = false
+}
+
+async function manejarCrearCuentaConCorreo() {
+  if (!validarCredencialesCuenta()) return
+
+  cargandoAccionCuenta.value = true
+  const registroOk = await usuarioStore.registrarConCorreo(
+    correoCuenta.value.trim(),
+    contrasenaCuenta.value,
+  )
+
+  if (registroOk) {
+    quasar.notify({ type: 'positive', message: 'Cuenta creada correctamente.' })
+  } else {
+    quasar.notify({
+      type: 'negative',
+      message: usuarioStore.errorSesion || 'No se pudo crear la cuenta.',
+    })
+  }
+
+  cargandoAccionCuenta.value = false
+}
+
+async function manejarRecuperarContrasena() {
+  if (!validarCorreoCuenta()) return
+
+  cargandoAccionCuenta.value = true
+  const envioOk = await usuarioStore.recuperarContrasena(correoCuenta.value.trim())
+
+  if (envioOk) {
+    quasar.notify({
+      type: 'positive',
+      message: 'Te enviamos un correo para recuperar la contraseÃ±a.',
+    })
+  } else {
+    quasar.notify({
+      type: 'negative',
+      message: usuarioStore.errorSesion || 'No se pudo enviar el correo de recuperaciÃ³n.',
+    })
+  }
+
+  cargandoAccionCuenta.value = false
+}
+
 async function manejarMigracionDatos() {
   if (!usuarioStore.tieneSesionActiva) {
     quasar.notify({
       type: 'warning',
-      message: 'Necesitas una sesión activa antes de migrar datos.',
+      message: 'Necesitas una sesiÃ³n activa antes de migrar datos.',
     })
     return
   }
 
   quasar
     .dialog({
-      title: 'Confirmar migración',
-      message: 'Se copiarán tus datos locales actuales hacia Firestore. ¿Continuar?',
+      title: 'Confirmar migraciÃ³n',
+      message: 'Se copiarÃ¡n tus datos locales actuales hacia Firestore. Â¿Continuar?',
       persistent: true,
       ok: { label: 'Migrar', color: 'secondary' },
       cancel: { label: 'Cancelar', flat: true },
@@ -271,13 +459,13 @@ async function manejarMigracionDatos() {
       const resumen = await usuarioStore.migrarDatosLocales()
 
       if (resumen) {
-        quasar.notify({ type: 'positive', message: 'Migración completada en Firebase.' })
+        quasar.notify({ type: 'positive', message: 'MigraciÃ³n completada en Firebase.' })
         return
       }
 
       quasar.notify({
         type: 'negative',
-        message: usuarioStore.errorMigracion || 'No se pudo completar la migración.',
+        message: usuarioStore.errorMigracion || 'No se pudo completar la migraciÃ³n.',
       })
     })
 }

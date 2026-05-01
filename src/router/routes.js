@@ -2,6 +2,7 @@ const routes = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
+    meta: { requiereSesion: true },
     children: [
       // Página principal
       { path: '', component: () => import('pages/ListaJusta/ListaJustaPage.vue') },

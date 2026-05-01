@@ -67,24 +67,24 @@ Implementar una autenticacion robusta y segura (correo, Google, invitado), con m
 - [ ] Diseñar UX de acceso inicial al abrir app (correo, Google, invitado)
 - [ ] Definir comportamiento de cada entrada:
   - [ ] Entrar con Google
-  - [ ] Entrar con correo y contraseña
+  - [x] Entrar con correo y contraseña
   - [ ] Continuar como invitado
-- [ ] Implementar login/registro con correo y contraseña en Firebase Auth
+- [x] Implementar login/registro con correo y contraseña en Firebase Auth
 - [ ] Mantener login con Google y fallback invitado ya existente
 - [ ] Implementar modal reutilizable de aviso para modo invitado:
-  - [ ] Mensaje amigable: al continuar como invitado, los datos se guardan en el celular
-  - [ ] Aclarar que, si luego se registra/inicia sesion, debera migrar datos para mantenerlos
-  - [ ] Boton principal `Aceptar`
-  - [ ] Boton secundario `Registrarme ahora`
-  - [ ] Diseñar como componente reutilizable para futuros avisos/confirmaciones
+  - [x] Mensaje amigable: al continuar como invitado, los datos se guardan en el celular
+  - [x] Aclarar que, si luego se registra/inicia sesion, debera migrar datos para mantenerlos
+  - [x] Boton principal `Aceptar`
+  - [x] Boton secundario `Registrarme ahora`
+  - [x] Diseñar como componente reutilizable para futuros avisos/confirmaciones
 - [ ] Manejar errores de autenticacion en UI (ej.: contraseña incorrecta, usuario inexistente, correo invalido)
-- [ ] Implementar recuperacion de contraseña por correo
+- [x] Implementar recuperacion de contraseña por correo
 - [ ] Definir flujo completo de recuperacion de contraseña:
-  - [ ] Pantalla/accion `Olvide mi contraseña`
-  - [ ] Envio de correo de recuperacion
-  - [ ] Mensaje de confirmacion de envio
+  - [x] Pantalla/accion `Olvide mi contraseña`
+  - [x] Envio de correo de recuperacion
+  - [x] Mensaje de confirmacion de envio
   - [ ] Manejo de errores comunes (correo invalido/no registrado)
-- [ ] Implementar guardas de ruta por estado de sesion (acceso controlado en UI)
+- [x] Implementar guardas de ruta por estado de sesion (acceso controlado en UI)
 - [ ] Verificar que ningun flujo permita acceso a datos de otro usuario
 
 ## FASE 4B: Perfil editable y datos personales

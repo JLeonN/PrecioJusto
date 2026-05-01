@@ -5,6 +5,7 @@ import {
   createWebHistory,
   createWebHashHistory,
 } from 'vue-router'
+import { useUsuarioStore } from 'src/almacenamiento/stores/UsuarioStore.js'
 import routes from './routes'
 
 /*
@@ -31,6 +32,21 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE),
+  })
+
+  Router.beforeEach(async (to) => {
+    if (!to.matched.some((registro) => registro.meta?.requiereSesion)) {
+      return true
+    }
+
+    const usuarioStore = useUsuarioStore()
+    await usuarioStore.inicializarSesion()
+
+    if (!usuarioStore.tieneSesionActiva) {
+      return { path: '/configuracion' }
+    }
+
+    return true
   })
 
   return Router
