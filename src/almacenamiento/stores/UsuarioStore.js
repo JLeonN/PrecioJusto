@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import servicioAuthFirebase from '../../Firebase/ServicioAuthFirebase.js'
 import servicioFirestoreUsuarios from '../../Firebase/ServicioFirestoreUsuarios.js'
+import servicioMigracionLocalFirestore from '../../Firebase/ServicioMigracionLocalFirestore.js'
 
 export const useUsuarioStore = defineStore('usuario', () => {
   const usuarioId = ref(null)
@@ -10,6 +11,9 @@ export const useUsuarioStore = defineStore('usuario', () => {
   const perfil = ref(null)
   const cargandoSesion = ref(false)
   const errorSesion = ref(null)
+  const cargandoMigracion = ref(false)
+  const errorMigracion = ref(null)
+  const ultimoResumenMigracion = ref(null)
 
   let detenerEscuchaSesion = null
   let promesaInicializacion = null
@@ -133,6 +137,28 @@ export const useUsuarioStore = defineStore('usuario', () => {
     await servicioAuthFirebase.cerrarSesionActual()
   }
 
+  async function migrarDatosLocales() {
+    if (!usuarioId.value) {
+      errorMigracion.value = 'No hay sesión activa para migrar datos'
+      return null
+    }
+
+    cargandoMigracion.value = true
+    errorMigracion.value = null
+
+    try {
+      const resumen = await servicioMigracionLocalFirestore.migrarDatosLocalesAFirestore(usuarioId.value)
+      ultimoResumenMigracion.value = resumen
+      return resumen
+    } catch (error) {
+      console.error('Error al migrar datos locales:', error)
+      errorMigracion.value = 'No se pudo migrar los datos locales a Firebase'
+      return null
+    } finally {
+      cargandoMigracion.value = false
+    }
+  }
+
   function limpiarSesionLocal() {
     if (detenerEscuchaSesion) {
       detenerEscuchaSesion()
@@ -145,6 +171,9 @@ export const useUsuarioStore = defineStore('usuario', () => {
     perfil.value = null
     cargandoSesion.value = false
     errorSesion.value = null
+    cargandoMigracion.value = false
+    errorMigracion.value = null
+    ultimoResumenMigracion.value = null
   }
 
   return {
@@ -154,10 +183,14 @@ export const useUsuarioStore = defineStore('usuario', () => {
     perfil,
     cargandoSesion,
     errorSesion,
+    cargandoMigracion,
+    errorMigracion,
+    ultimoResumenMigracion,
     tieneSesionActiva,
     inicializarSesion,
     iniciarSesionConGoogle,
     continuarComoInvitado,
+    migrarDatosLocales,
     cerrarSesion,
     limpiarSesionLocal,
   }

@@ -55,8 +55,8 @@ Definir y ejecutar migracion segura de datos locales a Firestore por usuario.
 - [x] Auditar estructura actual en `src/almacenamiento/adaptadores/LocalStorageAdapter.js`
 - [x] Documentar mapeo exacto local -> Firestore (`productos`, `comercios`, relaciones)
 - [ ] Diseñar estrategia de migracion idempotente con backup local temporal
-- [ ] Implementar migracion inicial con confirmacion del usuario
-- [ ] Registrar errores de migracion y reintento seguro sin perdida de datos
+- [x] Implementar migracion inicial con confirmacion del usuario
+- [x] Registrar errores de migracion y reintento seguro sin perdida de datos
 
 ## FASE 4: Preparar corte a produccion
 

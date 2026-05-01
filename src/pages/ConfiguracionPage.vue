@@ -120,6 +120,28 @@
       </q-card>
       <q-card flat bordered class="q-mt-md">
         <q-card-section>
+          <div class="text-subtitle1 text-weight-medium">Migración a Firebase</div>
+          <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
+            Copia tus datos locales actuales a Firestore sin borrar el almacenamiento local.
+          </p>
+        </q-card-section>
+        <q-separator />
+        <q-card-section class="column q-gutter-sm">
+          <q-btn
+            color="secondary"
+            unelevated
+            no-caps
+            label="Migrar datos locales ahora"
+            :loading="usuarioStore.cargandoMigracion"
+            @click="manejarMigracionDatos"
+          />
+          <q-banner v-if="textoResumenMigracion" rounded class="banner-cuenta">
+            {{ textoResumenMigracion }}
+          </q-banner>
+        </q-card-section>
+      </q-card>
+      <q-card flat bordered class="q-mt-md">
+        <q-card-section>
           <div class="text-subtitle2">Importante</div>
           <p class="text-body2 q-mt-sm q-mb-none">
             Cambiar la moneda en un precio puntual solo afecta ese registro. No modifica esta
@@ -158,6 +180,12 @@ const etiquetaEstadoCuenta = computed(() => {
   if (!usuarioStore.autenticado) return 'Sin sesión'
   if (usuarioStore.esAnonimo) return 'Invitado'
   return usuarioStore.perfil?.email ? `Google (${usuarioStore.perfil.email})` : 'Google'
+})
+const textoResumenMigracion = computed(() => {
+  const resumen = usuarioStore.ultimoResumenMigracion
+  if (!resumen) return ''
+
+  return `Migración completada. Productos: ${resumen.totalProductos}, comercios: ${resumen.totalComercios}, listas: ${resumen.totalListas}.`
 })
 
 async function mostrarPublicidadConfiguracion() {
@@ -220,6 +248,38 @@ async function manejarContinuarComoInvitado() {
   }
 
   cargandoAccionCuenta.value = false
+}
+
+async function manejarMigracionDatos() {
+  if (!usuarioStore.tieneSesionActiva) {
+    quasar.notify({
+      type: 'warning',
+      message: 'Necesitas una sesión activa antes de migrar datos.',
+    })
+    return
+  }
+
+  quasar
+    .dialog({
+      title: 'Confirmar migración',
+      message: 'Se copiarán tus datos locales actuales hacia Firestore. ¿Continuar?',
+      persistent: true,
+      ok: { label: 'Migrar', color: 'secondary' },
+      cancel: { label: 'Cancelar', flat: true },
+    })
+    .onOk(async () => {
+      const resumen = await usuarioStore.migrarDatosLocales()
+
+      if (resumen) {
+        quasar.notify({ type: 'positive', message: 'Migración completada en Firebase.' })
+        return
+      }
+
+      quasar.notify({
+        type: 'negative',
+        message: usuarioStore.errorMigracion || 'No se pudo completar la migración.',
+      })
+    })
 }
 
 onMounted(async () => {
