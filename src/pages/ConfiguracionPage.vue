@@ -2,14 +2,14 @@
   <q-page class="q-pa-md configuracion-page">
     <div class="contenedor-configuracion">
       <div class="q-mb-md">
-        <h5 class="q-my-none">ConfiguraciÃ³n</h5>
+        <h5 class="q-my-none">Configuración</h5>
         <p class="text-grey-7 q-mt-xs q-mb-none">Preferencias globales de la app</p>
       </div>
       <q-card flat bordered>
         <q-card-section>
           <div class="text-subtitle1 text-weight-medium">Modo oscuro</div>
           <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
-            ElegÃ­ cÃ³mo querÃ©s que se vea la app: claro, oscuro o automÃ¡tico segÃºn el sistema.
+            Elegí cómo querés que se vea la app: claro, oscuro o automático según el sistema.
           </p>
         </q-card-section>
         <q-separator />
@@ -33,7 +33,7 @@
           </div>
           <div class="q-mt-sm">
             <q-banner rounded class="banner-tema-info">
-              Si elegÃ­s Claro u Oscuro, esa preferencia manual se mantiene hasta volver a Seguir
+              Si elegís Claro u Oscuro, esa preferencia manual se mantiene hasta volver a Seguir
               sistema.
             </q-banner>
           </div>
@@ -50,7 +50,7 @@
         <q-card-section>
           <q-toggle
             :model-value="esModoAutomatico"
-            label="Usar moneda automÃ¡tica segÃºn paÃ­s"
+            label="Usar moneda automática según país"
             color="primary"
             @update:model-value="cambiarModoAutomatico"
           />
@@ -62,15 +62,15 @@
           </div>
           <div v-if="esModoAutomatico" class="q-mt-md column q-gutter-sm">
             <q-banner rounded class="bg-blue-1 text-blue-10">
-              PaÃ­s detectado:
+              País detectado:
               <strong>{{ preferenciasStore.paisDetectado || 'No detectado' }}</strong>
             </q-banner>
             <q-banner v-if="preferenciasStore.monedaDetectada" rounded class="bg-positive text-white">
-              Moneda detectada automÃ¡ticamente:
+              Moneda detectada automáticamente:
               <strong>{{ preferenciasStore.monedaDetectada }}</strong>
             </q-banner>
             <q-banner v-else rounded class="bg-warning text-dark">
-              No se pudo detectar una moneda por regiÃ³n. Se usa la Ãºltima moneda manual guardada.
+              No se pudo detectar una moneda por región. Se usa la última moneda manual guardada.
             </q-banner>
           </div>
           <div v-else class="q-mt-md">
@@ -91,7 +91,7 @@
         <q-card-section>
           <div class="text-subtitle1 text-weight-medium">Cuenta</div>
           <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
-            PodÃ©s usar la app con Google o como invitado.
+            Podés usar la app con Google o como invitado.
           </p>
         </q-card-section>
         <q-separator />
@@ -122,7 +122,7 @@
         <q-card-section>
           <div class="text-subtitle1 text-weight-medium">Cuenta por correo</div>
           <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
-            ProbÃ¡ iniciar sesiÃ³n, crear cuenta o recuperar contraseÃ±a por correo.
+            Probá iniciar sesión, crear cuenta o recuperar contraseña por correo.
           </p>
         </q-card-section>
         <q-separator />
@@ -137,7 +137,7 @@
           />
           <q-input
             v-model="contrasenaCuenta"
-            label="ContraseÃ±a"
+            label="Contraseña"
             :type="mostrarContrasenaCuenta ? 'text' : 'password'"
             autocomplete="current-password"
             outlined
@@ -180,7 +180,7 @@
             flat
             no-caps
             color="secondary"
-            label="Recuperar contraseÃ±a"
+            label="Recuperar contraseña"
             :loading="cargandoAccionCuenta"
             @click="manejarRecuperarContrasena"
           />
@@ -188,7 +188,7 @@
       </q-card>
       <q-card flat bordered class="q-mt-md">
         <q-card-section>
-          <div class="text-subtitle1 text-weight-medium">MigraciÃ³n a Firebase</div>
+          <div class="text-subtitle1 text-weight-medium">Migración a Firebase</div>
           <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
             Copia tus datos locales actuales a Firestore sin borrar el almacenamiento local.
           </p>
@@ -221,7 +221,7 @@
     <ModalConfirmacionReutilizable
       v-model="modalInvitadoAbierto"
       titulo="Modo invitado"
-      mensaje="Si continuÃ¡s como invitado, tus datos se guardarÃ¡n en este celular. Cuando te registres mÃ¡s adelante, tendrÃ¡s que migrarlos para mantenerlos."
+      mensaje="Si continuás como invitado, tus datos se guardarán en este celular. Cuando te registres más adelante, tendrás que migrarlos para mantenerlos."
       texto-principal="Aceptar"
       texto-secundario="Registrarme ahora"
       @accion-principal="confirmarModoInvitado"
@@ -260,7 +260,7 @@ const opcionesModoTema = [
 const esModoAutomatico = computed(() => preferenciasStore.modoMoneda === 'automatica')
 const etiquetaTemaActivo = computed(() => (quasar.dark.isActive ? 'Oscuro' : 'Claro'))
 const etiquetaEstadoCuenta = computed(() => {
-  if (!usuarioStore.autenticado) return 'Sin sesiÃ³n'
+  if (!usuarioStore.autenticado) return 'Sin sesión'
   if (usuarioStore.esAnonimo) return 'Invitado'
   return usuarioStore.perfil?.email ? `Google (${usuarioStore.perfil.email})` : 'Google'
 })
@@ -268,7 +268,7 @@ const textoResumenMigracion = computed(() => {
   const resumen = usuarioStore.ultimoResumenMigracion
   if (!resumen) return ''
 
-  return `MigraciÃ³n completada. Productos: ${resumen.totalProductos}, comercios: ${resumen.totalComercios}, listas: ${resumen.totalListas}.`
+  return `Migración completada. Productos: ${resumen.totalProductos}, comercios: ${resumen.totalComercios}, listas: ${resumen.totalListas}.`
 })
 
 async function mostrarPublicidadConfiguracion() {
@@ -313,7 +313,7 @@ async function manejarEntrarConGoogle() {
   } else {
     quasar.notify({
       type: 'negative',
-      message: usuarioStore.errorSesion || 'No se pudo iniciar sesiÃ³n con Google.',
+      message: usuarioStore.errorSesion || 'No se pudo iniciar sesión con Google.',
     })
   }
 
@@ -352,7 +352,7 @@ function irARegistroDesdeModal() {
 
 function validarCorreoCuenta() {
   if (!correoCuenta.value.trim()) {
-    quasar.notify({ type: 'warning', message: 'IngresÃ¡ un correo.' })
+    quasar.notify({ type: 'warning', message: 'Ingresá un correo.' })
     return false
   }
 
@@ -363,12 +363,12 @@ function validarCredencialesCuenta() {
   if (!validarCorreoCuenta()) return false
 
   if (!contrasenaCuenta.value.trim()) {
-    quasar.notify({ type: 'warning', message: 'IngresÃ¡ una contraseÃ±a.' })
+    quasar.notify({ type: 'warning', message: 'Ingresá una contraseña.' })
     return false
   }
 
   if (contrasenaCuenta.value.length < 6) {
-    quasar.notify({ type: 'warning', message: 'La contraseÃ±a debe tener al menos 6 caracteres.' })
+    quasar.notify({ type: 'warning', message: 'La contraseña debe tener al menos 6 caracteres.' })
     return false
   }
 
@@ -385,11 +385,11 @@ async function manejarEntrarConCorreo() {
   )
 
   if (loginOk) {
-    quasar.notify({ type: 'positive', message: 'SesiÃ³n iniciada con correo.' })
+    quasar.notify({ type: 'positive', message: 'Sesión iniciada con correo.' })
   } else {
     quasar.notify({
       type: 'negative',
-      message: usuarioStore.errorSesion || 'No se pudo iniciar sesiÃ³n con correo.',
+      message: usuarioStore.errorSesion || 'No se pudo iniciar sesión con correo.',
     })
   }
 
@@ -426,12 +426,12 @@ async function manejarRecuperarContrasena() {
   if (envioOk) {
     quasar.notify({
       type: 'positive',
-      message: 'Te enviamos un correo para recuperar la contraseÃ±a.',
+      message: 'Te enviamos un correo para recuperar la contraseña.',
     })
   } else {
     quasar.notify({
       type: 'negative',
-      message: usuarioStore.errorSesion || 'No se pudo enviar el correo de recuperaciÃ³n.',
+      message: usuarioStore.errorSesion || 'No se pudo enviar el correo de recuperación.',
     })
   }
 
@@ -442,15 +442,15 @@ async function manejarMigracionDatos() {
   if (!usuarioStore.tieneSesionActiva) {
     quasar.notify({
       type: 'warning',
-      message: 'Necesitas una sesiÃ³n activa antes de migrar datos.',
+      message: 'Necesitas una sesión activa antes de migrar datos.',
     })
     return
   }
 
   quasar
     .dialog({
-      title: 'Confirmar migraciÃ³n',
-      message: 'Se copiarÃ¡n tus datos locales actuales hacia Firestore. Â¿Continuar?',
+      title: 'Confirmar migración',
+      message: 'Se copiarán tus datos locales actuales hacia Firestore. ¿Continuar?',
       persistent: true,
       ok: { label: 'Migrar', color: 'secondary' },
       cancel: { label: 'Cancelar', flat: true },
@@ -459,13 +459,13 @@ async function manejarMigracionDatos() {
       const resumen = await usuarioStore.migrarDatosLocales()
 
       if (resumen) {
-        quasar.notify({ type: 'positive', message: 'MigraciÃ³n completada en Firebase.' })
+        quasar.notify({ type: 'positive', message: 'Migración completada en Firebase.' })
         return
       }
 
       quasar.notify({
         type: 'negative',
-        message: usuarioStore.errorMigracion || 'No se pudo completar la migraciÃ³n.',
+        message: usuarioStore.errorMigracion || 'No se pudo completar la migración.',
       })
     })
 }
