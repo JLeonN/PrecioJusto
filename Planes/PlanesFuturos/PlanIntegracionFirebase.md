@@ -151,8 +151,8 @@ Validar flujo completo de autenticacion, perfil y persistencia con ejecucion gui
   - [x] Confirmar aviso de guardado local en celular
   - [x] Confirmar creacion/actualizacion de perfil anonimo
 - [ ] Probar acceso con Google:
-  - [ ] Iniciar sesion con Google (con credenciales provistas en el momento)
-  - [ ] Confirmar actualizacion de nombre/email/foto en perfil
+  - [x] Iniciar sesion con Google (con credenciales provistas en el momento)
+  - [x] Confirmar actualizacion de nombre/email/foto en perfil
 - [ ] Probar acceso con correo:
   - [x] Registro nuevo
   - [x] Login correcto
