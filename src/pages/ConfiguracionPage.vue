@@ -39,6 +39,7 @@
           </div>
         </q-card-section>
       </q-card>
+
       <q-card flat bordered class="q-mt-md" ref="tarjetaCuentaCorreoRef">
         <q-card-section>
           <div class="text-subtitle1 text-weight-medium">Moneda predeterminada</div>
@@ -87,6 +88,7 @@
           </div>
         </q-card-section>
       </q-card>
+
       <q-card flat bordered class="q-mt-md">
         <q-card-section>
           <div class="text-subtitle1 text-weight-medium">Cuenta</div>
@@ -118,6 +120,7 @@
           />
         </q-card-section>
       </q-card>
+
       <q-card flat bordered class="q-mt-md">
         <q-card-section>
           <div class="text-subtitle1 text-weight-medium">Perfil</div>
@@ -156,6 +159,7 @@
           />
         </q-card-section>
       </q-card>
+
       <q-card flat bordered class="q-mt-md">
         <q-card-section>
           <div class="text-subtitle1 text-weight-medium">Cuenta por correo</div>
@@ -224,6 +228,7 @@
           />
         </q-card-section>
       </q-card>
+
       <q-card flat bordered class="q-mt-md">
         <q-card-section>
           <div class="text-subtitle1 text-weight-medium">Migración a Firebase</div>
@@ -246,6 +251,7 @@
           </q-banner>
         </q-card-section>
       </q-card>
+
       <q-card flat bordered class="q-mt-md">
         <q-card-section>
           <div class="text-subtitle2">Importante</div>
@@ -256,6 +262,7 @@
         </q-card-section>
       </q-card>
     </div>
+
     <ModalConfirmacionReutilizable
       v-model="modalInvitadoAbierto"
       titulo="Modo invitado"
@@ -303,7 +310,7 @@ const etiquetaTemaActivo = computed(() => (quasar.dark.isActive ? 'Oscuro' : 'Cl
 const etiquetaEstadoCuenta = computed(() => {
   if (!usuarioStore.autenticado) return 'Sin sesión'
   if (usuarioStore.esAnonimo) return 'Invitado'
-  return usuarioStore.perfil?.email ? `Google (${usuarioStore.perfil.email})` : 'Google'
+  return usuarioStore.perfil?.email ? `Registrada (${usuarioStore.perfil.email})` : 'Registrada'
 })
 const textoResumenMigracion = computed(() => {
   const resumen = usuarioStore.ultimoResumenMigracion
@@ -332,10 +339,51 @@ function calcularEdadDesdeFecha(fechaNacimientoIso) {
   return edad >= 0 ? edad : null
 }
 
+function esUrlValida(textoUrl) {
+  if (!textoUrl) return true
+
+  try {
+    const url = new URL(textoUrl)
+    return ['http:', 'https:'].includes(url.protocol)
+  } catch {
+    return false
+  }
+}
+
 function sincronizarFormularioPerfil(perfil) {
   perfilEditableNombre.value = perfil?.nombre || ''
   perfilEditableFoto.value = perfil?.foto || ''
   perfilEditableFechaNacimiento.value = perfil?.fechaNacimiento || ''
+}
+
+function validarPerfilEditable() {
+  const nombreNormalizado = perfilEditableNombre.value.trim()
+  const fotoNormalizada = perfilEditableFoto.value.trim()
+  const fechaNacimiento = perfilEditableFechaNacimiento.value
+
+  if (!nombreNormalizado) {
+    quasar.notify({ type: 'warning', message: 'El nombre es obligatorio.' })
+    return false
+  }
+
+  if (!esUrlValida(fotoNormalizada)) {
+    quasar.notify({ type: 'warning', message: 'La foto debe ser una URL válida (http/https).' })
+    return false
+  }
+
+  if (fechaNacimiento) {
+    const hoy = new Date()
+    const hoyIso = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(
+      hoy.getDate(),
+    ).padStart(2, '0')}`
+
+    if (fechaNacimiento > hoyIso) {
+      quasar.notify({ type: 'warning', message: 'La fecha de nacimiento no puede ser futura.' })
+      return false
+    }
+  }
+
+  return true
 }
 
 async function mostrarPublicidadConfiguracion() {
@@ -509,7 +557,7 @@ async function manejarMigracionDatos() {
   if (!usuarioStore.tieneSesionActiva) {
     quasar.notify({
       type: 'warning',
-      message: 'Necesitas una sesión activa antes de migrar datos.',
+      message: 'Necesitás una sesión activa antes de migrar datos.',
     })
     return
   }
@@ -539,13 +587,17 @@ async function manejarMigracionDatos() {
 
 async function manejarGuardarPerfilEditable() {
   if (!usuarioStore.tieneSesionActiva) {
-    quasar.notify({ type: 'warning', message: 'Necesitas una sesión activa para guardar perfil.' })
+    quasar.notify({ type: 'warning', message: 'Necesitás una sesión activa para guardar perfil.' })
+    return
+  }
+
+  if (!validarPerfilEditable()) {
     return
   }
 
   const perfilOk = await usuarioStore.actualizarPerfilEditable({
-    nombre: perfilEditableNombre.value,
-    foto: perfilEditableFoto.value,
+    nombre: perfilEditableNombre.value.trim(),
+    foto: perfilEditableFoto.value.trim(),
     fechaNacimiento: perfilEditableFechaNacimiento.value,
   })
 

@@ -40,6 +40,27 @@ export const useUsuarioStore = defineStore('usuario', () => {
     esAnonimo.value = !!usuario.isAnonymous
   }
 
+  function resolverMensajeErrorAuth(error, accion) {
+    const codigo = error?.code || ''
+
+    if (codigo === 'auth/popup-blocked') return 'El navegador bloqueó la ventana de Google. Habilitá popups e intentá de nuevo.'
+    if (codigo === 'auth/popup-closed-by-user') return 'Cerraste la ventana de Google antes de terminar el inicio de sesión.'
+    if (codigo === 'auth/invalid-email') return 'El correo ingresado no tiene un formato válido.'
+    if (codigo === 'auth/user-not-found') return 'No existe una cuenta con ese correo.'
+    if (codigo === 'auth/wrong-password' || codigo === 'auth/invalid-credential') return 'Correo o contraseña incorrectos.'
+    if (codigo === 'auth/email-already-in-use') return 'Ese correo ya está registrado. Probá iniciar sesión.'
+    if (codigo === 'auth/weak-password') return 'La contraseña es débil. Usá al menos 6 caracteres.'
+    if (codigo === 'auth/account-exists-with-different-credential') return 'Ese correo ya existe con otro método de acceso.'
+    if (codigo === 'auth/too-many-requests') return 'Demasiados intentos. Esperá un momento y volvé a intentar.'
+    if (codigo === 'auth/network-request-failed') return 'Sin conexión o red inestable. Revisá internet e intentá de nuevo.'
+
+    if (accion === 'google') return 'No se pudo iniciar sesión con Google.'
+    if (accion === 'loginCorreo') return 'No se pudo iniciar sesión con correo y contraseña.'
+    if (accion === 'registroCorreo') return 'No se pudo crear la cuenta con correo y contraseña.'
+    if (accion === 'recuperarContrasena') return 'No se pudo enviar el correo de recuperación.'
+    return 'No se pudo completar la operación de autenticación.'
+  }
+
   async function sincronizarPerfilUsuario(usuario) {
     const perfilActual = await servicioFirestoreUsuarios.obtenerPerfilUsuario(usuario.uid)
 
@@ -165,7 +186,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
       return true
     } catch (error) {
       console.error('Error al iniciar sesión con Google:', error)
-      errorSesion.value = 'No se pudo iniciar sesión con Google'
+      errorSesion.value = resolverMensajeErrorAuth(error, 'google')
       return false
     }
   }
@@ -180,7 +201,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
       return true
     } catch (error) {
       console.error('Error al iniciar sesión con correo:', error)
-      errorSesion.value = 'No se pudo iniciar sesión con correo y contraseña'
+      errorSesion.value = resolverMensajeErrorAuth(error, 'loginCorreo')
       return false
     }
   }
@@ -195,7 +216,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
       return true
     } catch (error) {
       console.error('Error al registrar con correo:', error)
-      errorSesion.value = 'No se pudo crear la cuenta con correo y contraseña'
+      errorSesion.value = resolverMensajeErrorAuth(error, 'registroCorreo')
       return false
     }
   }
@@ -208,7 +229,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
       return true
     } catch (error) {
       console.error('Error al enviar recuperación de contraseña:', error)
-      errorSesion.value = 'No se pudo enviar el correo de recuperación'
+      errorSesion.value = resolverMensajeErrorAuth(error, 'recuperarContrasena')
       return false
     }
   }

@@ -10,6 +10,7 @@ function resolverDatosPerfilDesdeUsuario(usuario) {
   const nombre = usuario.displayName || proveedorPrincipal.displayName || 'Usuario anónimo'
   const email = usuario.email || proveedorPrincipal.email || null
   const foto = usuario.photoURL || proveedorPrincipal.photoURL || null
+  const proveedorId = proveedorPrincipal.providerId || (usuario.isAnonymous ? 'anonymous' : 'password')
 
   return {
     usuarioId: usuario.uid,
@@ -17,6 +18,12 @@ function resolverDatosPerfilDesdeUsuario(usuario) {
     nombre,
     email,
     foto,
+    origenGoogle: {
+      proveedorId,
+      nombreOriginal: proveedorPrincipal.displayName || null,
+      emailOriginal: proveedorPrincipal.email || null,
+      fotoOriginal: proveedorPrincipal.photoURL || null,
+    },
   }
 }
 
@@ -55,6 +62,12 @@ async function guardarPerfilInicial(usuario) {
     referenciaPerfil,
     {
       ...datosPerfil,
+      perfilEditable: {
+        nombre: datosPerfil.nombre,
+        foto: datosPerfil.foto,
+        fechaNacimiento: null,
+        edad: null,
+      },
       fechaCreacion: serverTimestamp(),
       fechaActualizacion: serverTimestamp(),
     },
@@ -90,6 +103,12 @@ async function guardarPerfilEditable(usuarioId, datosPerfilEditable) {
     foto: (datosPerfilEditable.foto || '').trim() || null,
     fechaNacimiento,
     edad,
+    perfilEditable: {
+      nombre: (datosPerfilEditable.nombre || '').trim(),
+      foto: (datosPerfilEditable.foto || '').trim() || null,
+      fechaNacimiento,
+      edad,
+    },
     fechaActualizacion: serverTimestamp(),
   }
 

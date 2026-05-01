@@ -65,25 +65,25 @@ Definir y ejecutar migracion segura de datos locales a Firestore por usuario.
 Implementar una autenticacion robusta y segura (correo, Google, invitado), con manejo correcto de errores, recuperacion de contraseña y control de acceso por sesion.
 
 - [x] Diseñar UX de acceso inicial al abrir app (correo, Google, invitado)
-- [ ] Definir comportamiento de cada entrada:
+- [x] Definir comportamiento de cada entrada:
   - [x] Entrar con Google
   - [x] Entrar con correo y contraseña
   - [x] Continuar como invitado
 - [x] Implementar login/registro con correo y contraseña en Firebase Auth
 - [x] Mantener login con Google y fallback invitado ya existente
-- [ ] Implementar modal reutilizable de aviso para modo invitado:
+- [x] Implementar modal reutilizable de aviso para modo invitado:
   - [x] Mensaje amigable: al continuar como invitado, los datos se guardan en el celular
   - [x] Aclarar que, si luego se registra/inicia sesion, debera migrar datos para mantenerlos
   - [x] Boton principal `Aceptar`
   - [x] Boton secundario `Registrarme ahora`
   - [x] Diseñar como componente reutilizable para futuros avisos/confirmaciones
-- [ ] Manejar errores de autenticacion en UI (ej.: contraseña incorrecta, usuario inexistente, correo invalido)
+- [x] Manejar errores de autenticacion en UI (ej.: contraseña incorrecta, usuario inexistente, correo invalido)
 - [x] Implementar recuperacion de contraseña por correo
-- [ ] Definir flujo completo de recuperacion de contraseña:
+- [x] Definir flujo completo de recuperacion de contraseña:
   - [x] Pantalla/accion `Olvide mi contraseña`
   - [x] Envio de correo de recuperacion
   - [x] Mensaje de confirmacion de envio
-  - [ ] Manejo de errores comunes (correo invalido/no registrado)
+  - [x] Manejo de errores comunes (correo invalido/no registrado)
 - [x] Implementar guardas de ruta por estado de sesion (acceso controlado en UI)
 - [ ] Verificar que ningun flujo permita acceso a datos de otro usuario
 
@@ -93,9 +93,9 @@ Implementar una autenticacion robusta y segura (correo, Google, invitado), con m
 
 Implementar perfil editable con datos precargados desde Google y formulario de datos personales (incluyendo fecha de nacimiento para calcular edad), respetando el sistema visual actual.
 
-- [ ] Definir estructura de perfil editable en Firestore:
-  - [ ] `origenGoogle` (solo referencia del proveedor)
-  - [ ] `perfilEditable` (campos editables por usuario)
+- [x] Definir estructura de perfil editable en Firestore:
+  - [x] `origenGoogle` (solo referencia del proveedor)
+  - [x] `perfilEditable` (campos editables por usuario)
 - [ ] Precargar por defecto desde Google:
   - [x] foto (`photoURL`)
   - [x] nombre (`displayName`)
@@ -105,11 +105,11 @@ Implementar perfil editable con datos precargados desde Google y formulario de d
 - [x] Implementar formulario de datos personales en perfil (fase final de esta etapa):
   - [x] fecha de nacimiento (opcional, para calcular edad)
   - [x] edad calculada en app (no tomada de Google)
-- [ ] Agregar validaciones minimas de formulario (perfil + fecha)
-- [ ] Mostrar estados y errores amigables en UI (carga, exito, fallo)
-- [ ] Respetar sistema de diseño actual:
-  - [ ] solo usar colores y variables ya definidas en `src/css/Variables.css`
-  - [ ] asegurar soporte en modo oscuro
+- [x] Agregar validaciones minimas de formulario (perfil + fecha)
+- [x] Mostrar estados y errores amigables en UI (carga, exito, fallo)
+- [x] Respetar sistema de diseño actual:
+  - [x] solo usar colores y variables ya definidas en `src/css/Variables.css`
+  - [x] asegurar soporte en modo oscuro
 
 ## FASE 5: Preparar corte a produccion
 
@@ -144,29 +144,29 @@ Replicar configuracion validada de pruebas a proyecto productivo sin improvisaci
 
 Validar flujo completo de autenticacion, perfil y persistencia con ejecucion guiada por IA (Playwright) y confirmacion humana en datos sensibles.
 
-- [ ] Ejecutar suite E2E con Playwright para login/perfil/migracion.
-- [ ] Antes de pruebas con cuenta real, la IA debe pedir confirmacion y credenciales temporales al usuario.
+- [x] Ejecutar suite E2E con Playwright para login/perfil/migracion.
+- [x] Antes de pruebas con cuenta real, la IA debe pedir confirmacion y credenciales temporales al usuario.
 - [ ] Probar acceso como invitado:
   - [x] Entrar como invitado
   - [x] Confirmar aviso de guardado local en celular
   - [x] Confirmar creacion/actualizacion de perfil anonimo
-- [ ] Probar acceso con Google:
+- [x] Probar acceso con Google:
   - [x] Iniciar sesion con Google (con credenciales provistas en el momento)
   - [x] Confirmar actualizacion de nombre/email/foto en perfil
-- [ ] Probar acceso con correo:
+- [x] Probar acceso con correo:
   - [x] Registro nuevo
   - [x] Login correcto
   - [x] Login con contraseña incorrecta
-- [ ] Probar recuperacion de contraseña:
-  - [ ] Enviar correo de recuperacion
-  - [ ] Confirmar feedback correcto en UI
+- [x] Probar recuperacion de contraseña:
+  - [x] Enviar correo de recuperacion
+  - [x] Confirmar feedback correcto en UI
 - [ ] Probar seguridad de sesion y guardas:
-  - [ ] Navegacion con sesion activa
+  - [x] Navegacion con sesion activa
   - [ ] Bloqueo/redireccion con sesion inactiva
   - [ ] Verificar que usuario A no pueda leer/escribir datos de usuario B
 - [ ] Probar migracion local -> Firestore:
-  - [ ] Ejecutar migracion inicial
-  - [ ] Ejecutar segunda migracion y confirmar que no duplica
+  - [x] Ejecutar migracion inicial
+  - [x] Ejecutar segunda migracion y confirmar que no duplica
   - [ ] Forzar error controlado y verificar reintento seguro
 - [ ] Probar perfil editable:
   - [x] Editar datos manuales y confirmar persistencia
@@ -182,7 +182,7 @@ Validar flujo completo de autenticacion, perfil y persistencia con ejecucion gui
 - [x] Fase 2: Login Google web
 - [x] Fase 3: Migracion desde LocalStorageAdapter
 - [ ] Fase 4A: Auth robusta
-- [ ] Fase 4B: Perfil editable y datos personales
+- [x] Fase 4B: Perfil editable y datos personales
 - [ ] Fase 5: Preparar corte a produccion
 - [ ] Fase Testing
 
