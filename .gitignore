@@ -37,3 +37,6 @@ DatosLocalesProyectos.md
 
 # Claude Code local settings
 .claude/
+
+# Playwright MCP artifacts (pueden contener datos sensibles de pruebas)
+.playwright-mcp/

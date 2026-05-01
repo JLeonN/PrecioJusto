@@ -20,6 +20,22 @@ function resolverDatosPerfilDesdeUsuario(usuario) {
   }
 }
 
+function calcularEdadDesdeFecha(fechaNacimientoIso) {
+  if (!fechaNacimientoIso) return null
+
+  const fechaNacimiento = new Date(`${fechaNacimientoIso}T00:00:00`)
+  if (Number.isNaN(fechaNacimiento.getTime())) return null
+
+  const hoy = new Date()
+  let edad = hoy.getFullYear() - fechaNacimiento.getFullYear()
+  const aunNoCumplio =
+    hoy.getMonth() < fechaNacimiento.getMonth() ||
+    (hoy.getMonth() === fechaNacimiento.getMonth() && hoy.getDate() < fechaNacimiento.getDate())
+
+  if (aunNoCumplio) edad -= 1
+  return edad >= 0 ? edad : null
+}
+
 async function obtenerPerfilUsuario(usuarioId) {
   const referenciaPerfil = crearReferenciaPerfil(usuarioId)
   const snapshotPerfil = await getDoc(referenciaPerfil)
@@ -64,9 +80,28 @@ async function actualizarPerfilSesion(usuario) {
   return datosPerfil
 }
 
+async function guardarPerfilEditable(usuarioId, datosPerfilEditable) {
+  const referenciaPerfil = crearReferenciaPerfil(usuarioId)
+  const fechaNacimiento = datosPerfilEditable.fechaNacimiento || null
+  const edad = calcularEdadDesdeFecha(fechaNacimiento)
+
+  const datosNormalizados = {
+    nombre: (datosPerfilEditable.nombre || '').trim(),
+    foto: (datosPerfilEditable.foto || '').trim() || null,
+    fechaNacimiento,
+    edad,
+    fechaActualizacion: serverTimestamp(),
+  }
+
+  await setDoc(referenciaPerfil, datosNormalizados, { merge: true })
+  return { ...datosNormalizados }
+}
+
 export default {
   resolverDatosPerfilDesdeUsuario,
+  calcularEdadDesdeFecha,
   obtenerPerfilUsuario,
   guardarPerfilInicial,
   actualizarPerfilSesion,
+  guardarPerfilEditable,
 }

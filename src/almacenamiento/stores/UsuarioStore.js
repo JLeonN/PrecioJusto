@@ -14,6 +14,8 @@ export const useUsuarioStore = defineStore('usuario', () => {
   const cargandoMigracion = ref(false)
   const errorMigracion = ref(null)
   const ultimoResumenMigracion = ref(null)
+  const cargandoPerfil = ref(false)
+  const errorPerfil = ref(null)
 
   let detenerEscuchaSesion = null
   let promesaInicializacion = null
@@ -255,6 +257,36 @@ export const useUsuarioStore = defineStore('usuario', () => {
     }
   }
 
+  async function actualizarPerfilEditable(datosPerfilEditable) {
+    if (!usuarioId.value) {
+      errorPerfil.value = 'No hay sesión activa para actualizar el perfil'
+      return false
+    }
+
+    cargandoPerfil.value = true
+    errorPerfil.value = null
+
+    try {
+      const datosGuardados = await servicioFirestoreUsuarios.guardarPerfilEditable(
+        usuarioId.value,
+        datosPerfilEditable,
+      )
+
+      perfil.value = {
+        ...(perfil.value || {}),
+        ...datosGuardados,
+      }
+
+      return true
+    } catch (error) {
+      console.error('Error al actualizar perfil editable:', error)
+      errorPerfil.value = 'No se pudo guardar el perfil'
+      return false
+    } finally {
+      cargandoPerfil.value = false
+    }
+  }
+
   function limpiarSesionLocal() {
     if (detenerEscuchaSesion) {
       detenerEscuchaSesion()
@@ -270,6 +302,8 @@ export const useUsuarioStore = defineStore('usuario', () => {
     cargandoMigracion.value = false
     errorMigracion.value = null
     ultimoResumenMigracion.value = null
+    cargandoPerfil.value = false
+    errorPerfil.value = null
   }
 
   return {
@@ -282,6 +316,8 @@ export const useUsuarioStore = defineStore('usuario', () => {
     cargandoMigracion,
     errorMigracion,
     ultimoResumenMigracion,
+    cargandoPerfil,
+    errorPerfil,
     tieneSesionActiva,
     inicializarSesion,
     iniciarSesionConGoogle,
@@ -290,6 +326,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
     recuperarContrasena,
     continuarComoInvitado,
     migrarDatosLocales,
+    actualizarPerfilEditable,
     cerrarSesion,
     limpiarSesionLocal,
   }

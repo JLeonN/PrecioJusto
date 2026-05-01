@@ -120,6 +120,44 @@
       </q-card>
       <q-card flat bordered class="q-mt-md">
         <q-card-section>
+          <div class="text-subtitle1 text-weight-medium">Perfil</div>
+          <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
+            Datos visibles de tu cuenta. Podés editarlos cuando quieras.
+          </p>
+        </q-card-section>
+        <q-separator />
+        <q-card-section class="column q-gutter-sm">
+          <q-input v-model="perfilEditableNombre" label="Nombre" outlined dense />
+          <q-input
+            v-model="perfilEditableFoto"
+            label="Foto (URL)"
+            type="url"
+            autocomplete="photo"
+            outlined
+            dense
+          />
+          <q-input
+            v-model="perfilEditableFechaNacimiento"
+            label="Fecha de nacimiento"
+            type="date"
+            outlined
+            dense
+          />
+          <q-banner rounded class="banner-cuenta">
+            Edad calculada: <strong>{{ etiquetaEdadPerfil }}</strong>
+          </q-banner>
+          <q-btn
+            color="primary"
+            unelevated
+            no-caps
+            label="Guardar perfil"
+            :loading="usuarioStore.cargandoPerfil"
+            @click="manejarGuardarPerfilEditable"
+          />
+        </q-card-section>
+      </q-card>
+      <q-card flat bordered class="q-mt-md">
+        <q-card-section>
           <div class="text-subtitle1 text-weight-medium">Cuenta por correo</div>
           <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
             Probá iniciar sesión, crear cuenta o recuperar contraseña por correo.
@@ -231,7 +269,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import { MONEDAS } from '../almacenamiento/constantes/Monedas.js'
 import { usePublicidad } from '../composables/usePublicidad.js'
@@ -250,6 +288,9 @@ const contrasenaCuenta = ref('')
 const mostrarContrasenaCuenta = ref(false)
 const modalInvitadoAbierto = ref(false)
 const tarjetaCuentaCorreoRef = ref(null)
+const perfilEditableNombre = ref('')
+const perfilEditableFoto = ref('')
+const perfilEditableFechaNacimiento = ref('')
 const TIEMPO_ESPERA_INTERSTICIAL_MS = 60000
 const opcionesModoTema = [
   { label: 'Claro', value: 'claro' },
@@ -270,6 +311,32 @@ const textoResumenMigracion = computed(() => {
 
   return `Migración completada. Productos: ${resumen.totalProductos}, comercios: ${resumen.totalComercios}, listas: ${resumen.totalListas}.`
 })
+const etiquetaEdadPerfil = computed(() => {
+  const edad = calcularEdadDesdeFecha(perfilEditableFechaNacimiento.value)
+  return Number.isInteger(edad) ? `${edad} años` : 'Sin definir'
+})
+
+function calcularEdadDesdeFecha(fechaNacimientoIso) {
+  if (!fechaNacimientoIso) return null
+
+  const fechaNacimiento = new Date(`${fechaNacimientoIso}T00:00:00`)
+  if (Number.isNaN(fechaNacimiento.getTime())) return null
+
+  const hoy = new Date()
+  let edad = hoy.getFullYear() - fechaNacimiento.getFullYear()
+  const aunNoCumplio =
+    hoy.getMonth() < fechaNacimiento.getMonth() ||
+    (hoy.getMonth() === fechaNacimiento.getMonth() && hoy.getDate() < fechaNacimiento.getDate())
+
+  if (aunNoCumplio) edad -= 1
+  return edad >= 0 ? edad : null
+}
+
+function sincronizarFormularioPerfil(perfil) {
+  perfilEditableNombre.value = perfil?.nombre || ''
+  perfilEditableFoto.value = perfil?.foto || ''
+  perfilEditableFechaNacimiento.value = perfil?.fechaNacimiento || ''
+}
 
 async function mostrarPublicidadConfiguracion() {
   const ahora = Date.now()
@@ -469,6 +536,37 @@ async function manejarMigracionDatos() {
       })
     })
 }
+
+async function manejarGuardarPerfilEditable() {
+  if (!usuarioStore.tieneSesionActiva) {
+    quasar.notify({ type: 'warning', message: 'Necesitas una sesión activa para guardar perfil.' })
+    return
+  }
+
+  const perfilOk = await usuarioStore.actualizarPerfilEditable({
+    nombre: perfilEditableNombre.value,
+    foto: perfilEditableFoto.value,
+    fechaNacimiento: perfilEditableFechaNacimiento.value,
+  })
+
+  if (perfilOk) {
+    quasar.notify({ type: 'positive', message: 'Perfil actualizado correctamente.' })
+    return
+  }
+
+  quasar.notify({
+    type: 'negative',
+    message: usuarioStore.errorPerfil || 'No se pudo guardar el perfil.',
+  })
+}
+
+watch(
+  () => usuarioStore.perfil,
+  (perfil) => {
+    sincronizarFormularioPerfil(perfil)
+  },
+  { immediate: true },
+)
 
 onMounted(async () => {
   if (preferenciasStore.modoMoneda === 'automatica' && !preferenciasStore.paisDetectado) {

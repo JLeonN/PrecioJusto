@@ -64,13 +64,13 @@ Definir y ejecutar migracion segura de datos locales a Firestore por usuario.
 
 Implementar una autenticacion robusta y segura (correo, Google, invitado), con manejo correcto de errores, recuperacion de contraseña y control de acceso por sesion.
 
-- [ ] Diseñar UX de acceso inicial al abrir app (correo, Google, invitado)
+- [x] Diseñar UX de acceso inicial al abrir app (correo, Google, invitado)
 - [ ] Definir comportamiento de cada entrada:
-  - [ ] Entrar con Google
+  - [x] Entrar con Google
   - [x] Entrar con correo y contraseña
-  - [ ] Continuar como invitado
+  - [x] Continuar como invitado
 - [x] Implementar login/registro con correo y contraseña en Firebase Auth
-- [ ] Mantener login con Google y fallback invitado ya existente
+- [x] Mantener login con Google y fallback invitado ya existente
 - [ ] Implementar modal reutilizable de aviso para modo invitado:
   - [x] Mensaje amigable: al continuar como invitado, los datos se guardan en el celular
   - [x] Aclarar que, si luego se registra/inicia sesion, debera migrar datos para mantenerlos
@@ -97,14 +97,14 @@ Implementar perfil editable con datos precargados desde Google y formulario de d
   - [ ] `origenGoogle` (solo referencia del proveedor)
   - [ ] `perfilEditable` (campos editables por usuario)
 - [ ] Precargar por defecto desde Google:
-  - [ ] foto (`photoURL`)
-  - [ ] nombre (`displayName`)
-  - [ ] email (`email`)
-  - [ ] usuarioId (`uid`)
-- [ ] Permitir edicion manual de perfil por usuario sin perder seguridad por `uid`
-- [ ] Implementar formulario de datos personales en perfil (fase final de esta etapa):
-  - [ ] fecha de nacimiento (opcional, para calcular edad)
-  - [ ] edad calculada en app (no tomada de Google)
+  - [x] foto (`photoURL`)
+  - [x] nombre (`displayName`)
+  - [x] email (`email`)
+  - [x] usuarioId (`uid`)
+- [x] Permitir edicion manual de perfil por usuario sin perder seguridad por `uid`
+- [x] Implementar formulario de datos personales en perfil (fase final de esta etapa):
+  - [x] fecha de nacimiento (opcional, para calcular edad)
+  - [x] edad calculada en app (no tomada de Google)
 - [ ] Agregar validaciones minimas de formulario (perfil + fecha)
 - [ ] Mostrar estados y errores amigables en UI (carga, exito, fallo)
 - [ ] Respetar sistema de diseño actual:
@@ -147,16 +147,16 @@ Validar flujo completo de autenticacion, perfil y persistencia con ejecucion gui
 - [ ] Ejecutar suite E2E con Playwright para login/perfil/migracion.
 - [ ] Antes de pruebas con cuenta real, la IA debe pedir confirmacion y credenciales temporales al usuario.
 - [ ] Probar acceso como invitado:
-  - [ ] Entrar como invitado
-  - [ ] Confirmar aviso de guardado local en celular
-  - [ ] Confirmar creacion/actualizacion de perfil anonimo
+  - [x] Entrar como invitado
+  - [x] Confirmar aviso de guardado local en celular
+  - [x] Confirmar creacion/actualizacion de perfil anonimo
 - [ ] Probar acceso con Google:
   - [ ] Iniciar sesion con Google (con credenciales provistas en el momento)
   - [ ] Confirmar actualizacion de nombre/email/foto en perfil
 - [ ] Probar acceso con correo:
-  - [ ] Registro nuevo
-  - [ ] Login correcto
-  - [ ] Login con contraseña incorrecta
+  - [x] Registro nuevo
+  - [x] Login correcto
+  - [x] Login con contraseña incorrecta
 - [ ] Probar recuperacion de contraseña:
   - [ ] Enviar correo de recuperacion
   - [ ] Confirmar feedback correcto en UI
@@ -169,8 +169,8 @@ Validar flujo completo de autenticacion, perfil y persistencia con ejecucion gui
   - [ ] Ejecutar segunda migracion y confirmar que no duplica
   - [ ] Forzar error controlado y verificar reintento seguro
 - [ ] Probar perfil editable:
-  - [ ] Editar datos manuales y confirmar persistencia
-  - [ ] Probar formulario de fecha de nacimiento y calculo de edad
+  - [x] Editar datos manuales y confirmar persistencia
+  - [x] Probar formulario de fecha de nacimiento y calculo de edad
 - [ ] Criterio de salida de testing:
   - [ ] No hay errores bloqueantes
   - [ ] Flujos criticos en verde
