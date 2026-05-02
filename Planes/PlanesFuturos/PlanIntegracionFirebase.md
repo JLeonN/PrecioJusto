@@ -117,28 +117,28 @@ Implementar perfil editable con datos precargados desde Google y formulario de d
 
 Reordenar la pantalla de Configuracion para que sea clara, agrupada y escalable, sin romper logica existente de Firebase/Auth/Perfil/Migracion.
 
-- [ ] Mantener una sola pagina de Configuracion (sin separar en rutas nuevas en esta fase)
-- [ ] Reorganizar la UI en bloques desplegables (acordeon), con enfoque mobile-first
-- [ ] Definir orden final de bloques:
-  - [ ] Cuenta y perfil
-  - [ ] Tema
-  - [ ] Moneda y region
-  - [ ] Datos y sincronizacion
-  - [ ] Informacion
-- [ ] Unificar `Cuenta` + `Perfil` en un mismo bloque con subtitulos internos
-- [ ] Renombrar etiquetas para mejorar claridad:
-  - [ ] `Modo oscuro` -> `Tema`
-  - [ ] `Moneda predeterminada` -> `Moneda y region`
-- [ ] Agregar resumen corto por bloque cerrado (estado actual visible sin abrir):
-  - [ ] Tema activo
-  - [ ] Moneda efectiva y modo (automatica/manual)
-  - [ ] Estado de cuenta (invitado/google/correo)
-- [ ] Eliminar textos repetidos o fuera de lugar (ejemplo: mensajes de moneda dispersos)
-- [ ] Mantener toda la logica actual sin cambios funcionales (solo reorganizacion visual/UX)
-- [ ] Respetar sistema visual actual:
-  - [ ] solo variables de `src/css/Variables.css`
-  - [ ] soporte modo oscuro
-  - [ ] sin inventar paleta nueva
+- [x] Mantener una sola pagina de Configuracion (sin separar en rutas nuevas en esta fase)
+- [x] Reorganizar la UI en bloques desplegables (acordeon), con enfoque mobile-first
+- [x] Definir orden final de bloques:
+  - [x] Cuenta y perfil
+  - [x] Tema
+  - [x] Moneda y region
+  - [x] Datos y sincronizacion
+  - [x] Informacion
+- [x] Unificar `Cuenta` + `Perfil` en un mismo bloque con subtitulos internos
+- [x] Renombrar etiquetas para mejorar claridad:
+  - [x] `Modo oscuro` -> `Tema`
+  - [x] `Moneda predeterminada` -> `Moneda y region`
+- [x] Agregar resumen corto por bloque cerrado (estado actual visible sin abrir):
+  - [x] Tema activo
+  - [x] Moneda efectiva y modo (automatica/manual)
+  - [x] Estado de cuenta (invitado/google/correo)
+- [x] Eliminar textos repetidos o fuera de lugar (ejemplo: mensajes de moneda dispersos)
+- [x] Mantener toda la logica actual sin cambios funcionales (solo reorganizacion visual/UX)
+- [x] Respetar sistema visual actual:
+  - [x] solo variables de `src/css/Variables.css`
+  - [x] soporte modo oscuro
+  - [x] sin inventar paleta nueva
 - [ ] Definir criterio de cierre de fase UX:
   - [ ] navegacion mas clara en mobile
   - [ ] usuario encuentra `Cuenta`, `Perfil`, `Tema` y `Moneda` en menos de 2 toques
