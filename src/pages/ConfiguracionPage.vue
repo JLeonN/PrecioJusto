@@ -753,6 +753,9 @@ onMounted(async () => {
   border-radius: 8px;
   border: 1px solid color-mix(in srgb, var(--color-primario) 28%, var(--borde-color));
   min-height: 44px;
+  overflow: hidden;
+  padding-left: 0;
+  padding-right: 0;
 }
 .input-cuenta :deep(.q-field:hover .q-field__control),
 .input-cuenta :deep(.q-field.q-field--highlighted .q-field__control),
@@ -784,10 +787,16 @@ onMounted(async () => {
 .input-cuenta :deep(.q-field__label) {
   color: var(--texto-primario);
 }
+.input-cuenta :deep(.q-field__native) {
+  padding-left: 12px;
+  padding-right: 12px;
+}
 .input-cuenta :deep(.q-field__label) {
   opacity: 0.8;
+  left: 12px;
 }
 .input-cuenta :deep(.q-field__append) {
+  padding-left: 6px;
   padding-right: 6px;
 }
 .input-cuenta :deep(.q-field--filled .q-field__control:before),
@@ -802,6 +811,9 @@ onMounted(async () => {
   background: color-mix(in srgb, var(--color-primario) 14%, transparent);
   color: var(--texto-primario);
   border: 1px solid color-mix(in srgb, var(--color-primario) 34%, var(--borde-color));
+}
+.input-cuenta :deep(.q-field__append .q-btn) {
+  margin: 0;
 }
 .input-cuenta :deep(.q-btn.q-btn--round .q-icon) {
   font-size: 18px;
