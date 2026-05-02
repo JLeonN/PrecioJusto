@@ -246,6 +246,15 @@
             :loading="usuarioStore.cargandoMigracion"
             @click="manejarMigracionDatos"
           />
+          <q-btn
+            v-if="esModoDesarrollo"
+            color="warning"
+            outline
+            no-caps
+            label="Forzar error controlado de migración (debug)"
+            :loading="usuarioStore.cargandoMigracion"
+            @click="manejarMigracionConErrorControlado"
+          />
           <q-banner v-if="textoResumenMigracion" rounded class="banner-cuenta">
             {{ textoResumenMigracion }}
           </q-banner>
@@ -298,6 +307,7 @@ const tarjetaCuentaCorreoRef = ref(null)
 const perfilEditableNombre = ref('')
 const perfilEditableFoto = ref('')
 const perfilEditableFechaNacimiento = ref('')
+const esModoDesarrollo = import.meta.env.DEV
 const TIEMPO_ESPERA_INTERSTICIAL_MS = 60000
 const opcionesModoTema = [
   { label: 'Claro', value: 'claro' },
@@ -583,6 +593,29 @@ async function manejarMigracionDatos() {
         message: usuarioStore.errorMigracion || 'No se pudo completar la migración.',
       })
     })
+}
+async function manejarMigracionConErrorControlado() {
+  if (!usuarioStore.tieneSesionActiva) {
+    quasar.notify({
+      type: 'warning',
+      message: 'Necesitás una sesión activa antes de migrar datos.',
+    })
+    return
+  }
+
+  const resumen = await usuarioStore.migrarDatosLocales({ forzarErrorControlado: true })
+  if (resumen) {
+    quasar.notify({
+      type: 'warning',
+      message: 'La prueba de error controlado no falló como se esperaba.',
+    })
+    return
+  }
+
+  quasar.notify({
+    type: 'info',
+    message: 'Error controlado de migración ejecutado correctamente.',
+  })
 }
 
 async function manejarGuardarPerfilEditable() {

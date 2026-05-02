@@ -256,7 +256,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
     await servicioAuthFirebase.cerrarSesionActual()
   }
 
-  async function migrarDatosLocales() {
+  async function migrarDatosLocales(opciones = {}) {
     if (!usuarioId.value) {
       errorMigracion.value = 'No hay sesión activa para migrar datos'
       return null
@@ -266,7 +266,10 @@ export const useUsuarioStore = defineStore('usuario', () => {
     errorMigracion.value = null
 
     try {
-      const resumen = await servicioMigracionLocalFirestore.migrarDatosLocalesAFirestore(usuarioId.value)
+      const resumen = await servicioMigracionLocalFirestore.migrarDatosLocalesAFirestore(
+        usuarioId.value,
+        opciones,
+      )
       ultimoResumenMigracion.value = resumen
       return resumen
     } catch (error) {

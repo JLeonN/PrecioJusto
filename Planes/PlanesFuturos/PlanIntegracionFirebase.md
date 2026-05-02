@@ -146,7 +146,7 @@ Validar flujo completo de autenticacion, perfil y persistencia con ejecucion gui
 
 - [x] Ejecutar suite E2E con Playwright para login/perfil/migracion.
 - [x] Antes de pruebas con cuenta real, la IA debe pedir confirmacion y credenciales temporales al usuario.
-- [ ] Probar acceso como invitado:
+- [x] Probar acceso como invitado:
   - [x] Entrar como invitado
   - [x] Confirmar aviso de guardado local en celular
   - [x] Confirmar creacion/actualizacion de perfil anonimo
@@ -163,18 +163,19 @@ Validar flujo completo de autenticacion, perfil y persistencia con ejecucion gui
 - [ ] Probar seguridad de sesion y guardas:
   - [x] Navegacion con sesion activa
   - [ ] Bloqueo/redireccion con sesion inactiva
-  - [ ] Verificar que usuario A no pueda leer/escribir datos de usuario B
+    - Nota: pendiente de definicion funcional. Hoy la app recrea sesion anonima en caliente (`inicializarSesion` + `iniciarSesionAnonimaSiNoExiste`), por lo que casi no existe un estado inactivo estable para redirigir.
+  - [x] Verificar que usuario A no pueda leer/escribir datos de usuario B
 - [ ] Probar migracion local -> Firestore:
   - [x] Ejecutar migracion inicial
   - [x] Ejecutar segunda migracion y confirmar que no duplica
-  - [ ] Forzar error controlado y verificar reintento seguro
-- [ ] Probar perfil editable:
+  - [x] Forzar error controlado y verificar reintento seguro
+- [x] Probar perfil editable:
   - [x] Editar datos manuales y confirmar persistencia
   - [x] Probar formulario de fecha de nacimiento y calculo de edad
 - [ ] Criterio de salida de testing:
   - [ ] No hay errores bloqueantes
   - [ ] Flujos criticos en verde
-  - [ ] Evidencia guardada (logs/capturas/resumen)
+  - [x] Evidencia guardada (logs/capturas/resumen)
 
 ## Progreso del plan
 
@@ -187,5 +188,5 @@ Validar flujo completo de autenticacion, perfil y persistencia con ejecucion gui
 - [ ] Fase Testing
 
 Fecha de creacion: 14 de Marzo 2026
-Fecha de ultima actualizacion: 1 de Mayo 2026
+Fecha de ultima actualizacion: 2 de Mayo 2026
 Estado: EN PROCESO

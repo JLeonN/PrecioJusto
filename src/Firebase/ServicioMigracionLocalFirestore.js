@@ -40,7 +40,7 @@ function crearResumenMigracion(datosLocales) {
   }
 }
 
-async function migrarDatosLocalesAFirestore(usuarioId) {
+async function migrarDatosLocalesAFirestore(usuarioId, opciones = {}) {
   const datosLocales = await obtenerDatosLocalesActuales()
   const resumen = crearResumenMigracion(datosLocales)
   const intentoId = `migracion_${Date.now()}`
@@ -57,6 +57,10 @@ async function migrarDatosLocalesAFirestore(usuarioId) {
   const respaldoGuardado = await adaptadorActual.guardar(claveRespaldo, respaldoTemporal)
   if (!respaldoGuardado) {
     throw new Error('No se pudo crear respaldo temporal antes de migrar')
+  }
+
+  if (opciones.forzarErrorControlado === true) {
+    throw new Error('Error controlado de migración (prueba)')
   }
 
   try {
