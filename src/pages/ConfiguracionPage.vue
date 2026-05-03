@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <q-page class="q-pa-md configuracion-page">
     <div class="contenedor-configuracion">
       <div class="q-mb-md">
@@ -58,21 +58,11 @@
               </q-avatar>
             </div>
             <div class="column q-gutter-sm">
-              <q-input v-model="perfilEditableNombre" label="Nombre" outlined dense />
-              <q-input
-                v-model="perfilEditableFoto"
-                label="Foto de perfil (URL)"
-                type="url"
-                autocomplete="photo"
-                outlined
-                dense
-              />
-              <q-input
+              <InputFormularioReutilizable v-model="perfilEditableNombre" label="Nombre" />
+              <InputFormularioReutilizable
                 v-model="perfilEditableFechaNacimiento"
                 label="Fecha de nacimiento"
                 type="date"
-                outlined
-                dense
               />
               <q-banner rounded class="banner-cuenta">
                 Edad calculada: <strong>{{ etiquetaEdadPerfil }}</strong>
@@ -96,23 +86,17 @@
               Probá iniciar sesión, crear cuenta o recuperar contraseña por correo.
             </p>
             <div class="column q-gutter-sm bloque-correo-form">
-              <q-input
-                class="input-cuenta"
+              <InputFormularioReutilizable
                 v-model="correoCuenta"
                 label="Correo"
                 type="email"
                 autocomplete="email"
-                filled
-                dense
               />
-              <q-input
-                class="input-cuenta"
+              <InputFormularioReutilizable
                 v-model="contrasenaCuenta"
                 label="Contraseña"
                 :type="mostrarContrasenaCuenta ? 'text' : 'password'"
                 autocomplete="current-password"
-                filled
-                dense
               >
                 <template #append>
                   <q-btn
@@ -125,7 +109,7 @@
                     @click="mostrarContrasenaCuenta = !mostrarContrasenaCuenta"
                   />
                 </template>
-              </q-input>
+              </InputFormularioReutilizable>
               <div class="acciones-correo">
                 <q-btn
                   class="full-width boton-accion-correo"
@@ -315,6 +299,7 @@ import { usePublicidad } from '../composables/usePublicidad.js'
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
 import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
 import ModalConfirmacionReutilizable from '../components/Compartidos/ModalConfirmacionReutilizable.vue'
+import InputFormularioReutilizable from '../components/Compartidos/InputFormularioReutilizable.vue'
 
 const quasar = useQuasar()
 const preferenciasStore = usePreferenciasStore()
@@ -328,7 +313,6 @@ const mostrarContrasenaCuenta = ref(false)
 const modalInvitadoAbierto = ref(false)
 const tarjetaCuentaCorreoRef = ref(null)
 const perfilEditableNombre = ref('')
-const perfilEditableFoto = ref('')
 const perfilEditableFechaNacimiento = ref('')
 const esModoDesarrollo = import.meta.env.DEV
 const TIEMPO_ESPERA_INTERSTICIAL_MS = 60000
@@ -374,7 +358,7 @@ const resumenSincronizacion = computed(() => {
   if (textoResumenMigracion.value) return 'Última migración completada'
   return 'Sin migración reciente'
 })
-const fotoPreviewPerfil = computed(() => perfilEditableFoto.value?.trim() || null)
+const fotoPreviewPerfil = computed(() => usuarioStore.perfil?.foto?.trim() || null)
 const inicialesPerfil = computed(() => {
   const nombre = perfilEditableNombre.value?.trim()
   if (!nombre) return 'U'
@@ -398,35 +382,17 @@ function calcularEdadDesdeFecha(fechaNacimientoIso) {
   return edad >= 0 ? edad : null
 }
 
-function esUrlValida(textoUrl) {
-  if (!textoUrl) return true
-
-  try {
-    const url = new URL(textoUrl)
-    return ['http:', 'https:'].includes(url.protocol)
-  } catch {
-    return false
-  }
-}
-
 function sincronizarFormularioPerfil(perfil) {
   perfilEditableNombre.value = perfil?.nombre || ''
-  perfilEditableFoto.value = perfil?.foto || ''
   perfilEditableFechaNacimiento.value = perfil?.fechaNacimiento || ''
 }
 
 function validarPerfilEditable() {
   const nombreNormalizado = perfilEditableNombre.value.trim()
-  const fotoNormalizada = perfilEditableFoto.value.trim()
   const fechaNacimiento = perfilEditableFechaNacimiento.value
 
   if (!nombreNormalizado) {
     quasar.notify({ type: 'warning', message: 'El nombre es obligatorio.' })
-    return false
-  }
-
-  if (!esUrlValida(fotoNormalizada)) {
-    quasar.notify({ type: 'warning', message: 'La foto debe ser una URL válida (http/https).' })
     return false
   }
 
@@ -680,7 +646,7 @@ async function manejarGuardarPerfilEditable() {
 
   const perfilOk = await usuarioStore.actualizarPerfilEditable({
     nombre: perfilEditableNombre.value.trim(),
-    foto: perfilEditableFoto.value.trim(),
+    foto: usuarioStore.perfil?.foto || '',
     fechaNacimiento: perfilEditableFechaNacimiento.value,
   })
 
@@ -773,88 +739,8 @@ onMounted(async () => {
   border-radius: 10px;
   background: var(--fondo-banner-suave);
 }
-.input-cuenta :deep(.q-field__control) {
-  background: var(--fondo-tarjeta) !important;
-  border-radius: 8px;
-  border: 1px solid color-mix(in srgb, var(--color-primario) 28%, var(--borde-color));
-  min-height: 44px;
-  overflow: hidden;
-  padding-left: 0;
-  padding-right: 0;
-}
-.input-cuenta :deep(.q-field:hover .q-field__control),
-.input-cuenta :deep(.q-field.q-field--highlighted .q-field__control),
-.input-cuenta :deep(.q-field.q-field--focused .q-field__control) {
-  background: var(--fondo-tarjeta) !important;
-}
-.input-cuenta :deep(.q-field__control-container),
-.input-cuenta :deep(.q-field__native),
-.input-cuenta :deep(.q-field__append),
-.input-cuenta :deep(.q-field__prepend),
-.input-cuenta :deep(.q-field__marginal) {
-  background: var(--fondo-tarjeta) !important;
-}
-.input-cuenta :deep(.q-field:hover .q-field__control-container),
-.input-cuenta :deep(.q-field.q-field--highlighted .q-field__control-container),
-.input-cuenta :deep(.q-field.q-field--focused .q-field__control-container),
-.input-cuenta :deep(.q-field:hover .q-field__native),
-.input-cuenta :deep(.q-field.q-field--highlighted .q-field__native),
-.input-cuenta :deep(.q-field.q-field--focused .q-field__native),
-.input-cuenta :deep(.q-field:hover .q-field__append),
-.input-cuenta :deep(.q-field.q-field--highlighted .q-field__append),
-.input-cuenta :deep(.q-field.q-field--focused .q-field__append),
-.input-cuenta :deep(.q-field:hover .q-field__marginal),
-.input-cuenta :deep(.q-field.q-field--highlighted .q-field__marginal),
-.input-cuenta :deep(.q-field.q-field--focused .q-field__marginal) {
-  background: var(--fondo-tarjeta) !important;
-}
-.input-cuenta :deep(.q-field__native),
-.input-cuenta :deep(.q-field__label) {
-  color: var(--texto-primario);
-}
-.input-cuenta :deep(.q-field__native) {
-  padding-left: 12px;
-  padding-right: 12px;
-}
-.input-cuenta :deep(.q-field__label) {
-  opacity: 0.8;
-  left: 12px;
-}
-.input-cuenta :deep(.q-field__append) {
-  padding-left: 6px;
-  padding-right: 6px;
-}
-.input-cuenta :deep(.q-field--filled .q-field__control:before),
-.input-cuenta :deep(.q-field--filled .q-field__control:after) {
-  display: none;
-}
-.input-cuenta :deep(.q-field--focused .q-field__control) {
-  border-color: var(--color-primario);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primario) 40%, transparent);
-}
-.input-cuenta :deep(.q-btn.q-btn--round) {
-  background: color-mix(in srgb, var(--color-primario) 14%, transparent);
-  color: var(--texto-primario);
-  border: 1px solid color-mix(in srgb, var(--color-primario) 34%, var(--borde-color));
-}
-.input-cuenta :deep(.q-field__append .q-btn) {
-  margin: 0;
-}
-.input-cuenta :deep(.q-btn.q-btn--round .q-icon) {
-  font-size: 18px;
-}
-.input-cuenta :deep(.q-focus-helper) {
-  display: none;
-}
 .boton-ojo-cuenta {
   box-shadow: none;
-}
-.input-cuenta :deep(input:-webkit-autofill),
-.input-cuenta :deep(input:-webkit-autofill:hover),
-.input-cuenta :deep(input:-webkit-autofill:focus) {
-  -webkit-text-fill-color: var(--texto-primario);
-  -webkit-box-shadow: 0 0 0 1000px var(--fondo-tarjeta) inset;
-  transition: background-color 9999s ease-out 0s;
 }
 .acciones-correo {
   display: grid;
@@ -920,3 +806,5 @@ onMounted(async () => {
   }
 }
 </style>
+
+

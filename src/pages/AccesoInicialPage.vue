@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <q-page class="acceso-page flex flex-center q-pa-md">
     <q-card class="tarjeta-acceso">
       <q-card-section class="q-pb-none">
@@ -18,21 +18,17 @@
           :loading="cargandoAcceso"
           @click="manejarEntrarConGoogle"
         />
-        <q-input
+        <InputFormularioReutilizable
           v-model="correoCuenta"
           label="Correo"
           type="email"
           autocomplete="email"
-          outlined
-          dense
         />
-        <q-input
+        <InputFormularioReutilizable
           v-model="contrasenaCuenta"
           label="Contraseña"
           :type="mostrarContrasena ? 'text' : 'password'"
           autocomplete="current-password"
-          outlined
-          dense
         >
           <template #append>
             <q-btn
@@ -43,7 +39,7 @@
               @click="mostrarContrasena = !mostrarContrasena"
             />
           </template>
-        </q-input>
+        </InputFormularioReutilizable>
         <div class="acciones-correo">
           <q-btn
             color="primary"
@@ -82,6 +78,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useUsuarioStore } from 'src/almacenamiento/stores/UsuarioStore.js'
+import InputFormularioReutilizable from 'src/components/Compartidos/InputFormularioReutilizable.vue'
 
 const quasar = useQuasar()
 const router = useRouter()
@@ -175,3 +172,4 @@ async function manejarInvitado() {
   }
 }
 </style>
+
