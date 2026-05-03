@@ -312,11 +312,28 @@ const textoActualizacionDrawer = computed(() => {
 const mostrarIdentidadUsuario = computed(
   () => usuarioStore.tieneSesionActiva && !usuarioStore.esAnonimo,
 )
+function esNombreGenericoAnonimo(nombre) {
+  return String(nombre || '').trim().toLowerCase() === 'usuario anónimo'
+}
+function construirNombreDesdeEmail(email) {
+  if (!email) return null
+  const local = String(email).split('@')[0] || ''
+  const normalizado = local.replace(/[._-]+/g, ' ').trim()
+  if (!normalizado) return null
+  return normalizado
+    .split(' ')
+    .filter(Boolean)
+    .map((parte) => parte.charAt(0).toUpperCase() + parte.slice(1))
+    .join(' ')
+}
 const nombreUsuarioDrawer = computed(() => {
   const nombrePerfilEditable = usuarioStore.perfil?.perfilEditable?.nombre?.trim()
-  if (nombrePerfilEditable) return nombrePerfilEditable
+  if (nombrePerfilEditable && !esNombreGenericoAnonimo(nombrePerfilEditable)) return nombrePerfilEditable
   const nombrePerfil = usuarioStore.perfil?.nombre?.trim()
-  if (nombrePerfil) return nombrePerfil
+  if (nombrePerfil && !esNombreGenericoAnonimo(nombrePerfil)) return nombrePerfil
+  const emailPerfil = usuarioStore.perfil?.email?.trim()
+  const nombreDesdeEmail = construirNombreDesdeEmail(emailPerfil)
+  if (nombreDesdeEmail) return nombreDesdeEmail
   return 'Usuario registrado'
 })
 const fotoUsuarioDrawer = computed(() => {

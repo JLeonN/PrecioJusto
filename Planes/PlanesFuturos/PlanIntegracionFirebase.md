@@ -284,8 +284,10 @@ Validar flujo completo de autenticacion, perfil y persistencia con ejecucion gui
 Validar por IA (Playwright) los nuevos flujos de pantalla inicial, sincronizacion automatica y aislamiento multiusuario.
 
 - [ ] Probar flujo inicial de sesion:
-  - [ ] Usuario real entra y no vuelve a ver pantalla de acceso al reabrir
-  - [ ] Usuario invitado entra y mantiene estado de invitado
+  - [x] Usuario real entra y no vuelve a ver pantalla de acceso al reabrir
+    - Validado en Playwright: con sesion real activa, navegar a `/#/acceso` redirige automaticamente a `/#/`.
+  - [x] Usuario invitado entra y mantiene estado de invitado
+    - Validado en Playwright con recarga (`F5`) y permanencia en `/#/` sin redireccion a `/#/acceso` cuando ya existe estado invitado activo.
 - [ ] Probar comportamiento offline:
   - [ ] Crear/editar datos sin internet (guardado local)
   - [ ] Reconectar internet y verificar sincronizacion automatica a Firestore
@@ -293,8 +295,14 @@ Validar por IA (Playwright) los nuevos flujos de pantalla inicial, sincronizacio
   - [ ] Perfil manual sobreescribe datos de proveedor
   - [ ] Si no hay perfil manual, se usan datos del proveedor
 - [ ] Probar cabecera de usuario en drawer:
-  - [ ] Logueado: muestra nombre y avatar/fallback
-  - [ ] Invitado: mantiene cabecera neutra sin datos personales
+  - [x] Logueado: muestra nombre y avatar/fallback
+    - Validado en Playwright con cuenta por correo: drawer muestra iniciales y nombre visible del usuario.
+  - [x] Invitado: mantiene cabecera neutra sin datos personales
+- [x] Validar UI de inputs reutilizables en Acceso inicial y Configuracion:
+  - [x] Tema claro/oscuro en Configuracion sin regresion visual
+  - [x] Foco y hover en inputs reutilizables
+  - [x] Ojo de contraseña operativo en Acceso inicial y Configuracion
+  - [ ] Autofill validado manualmente por usuario en navegador principal (pendiente confirmacion visual final)
 - [ ] Probar multiusuario en mismo dispositivo:
   - [ ] Login A -> logout -> login B, sin ver datos de A
   - [ ] Login B -> logout -> login A, conserva datos de A

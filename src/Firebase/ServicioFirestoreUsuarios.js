@@ -5,10 +5,25 @@ function crearReferenciaPerfil(usuarioId) {
   return doc(firestoreDb, 'users', usuarioId, 'perfil', 'principal')
 }
 
+function construirNombreDesdeEmail(email) {
+  if (!email) return null
+  const local = String(email).split('@')[0] || ''
+  const nombreBase = local.replace(/[._-]+/g, ' ').trim()
+  if (!nombreBase) return null
+  return nombreBase
+    .split(' ')
+    .filter(Boolean)
+    .map((parte) => parte.charAt(0).toUpperCase() + parte.slice(1))
+    .join(' ')
+}
+
 function resolverDatosPerfilDesdeUsuario(usuario) {
   const proveedorPrincipal = usuario.providerData?.[0] || {}
-  const nombre = usuario.displayName || proveedorPrincipal.displayName || 'Usuario anónimo'
   const email = usuario.email || proveedorPrincipal.email || null
+  const nombre =
+    usuario.displayName ||
+    proveedorPrincipal.displayName ||
+    (usuario.isAnonymous ? 'Usuario anónimo' : construirNombreDesdeEmail(email) || 'Usuario registrado')
   const foto = usuario.photoURL || proveedorPrincipal.photoURL || null
   const proveedorId = proveedorPrincipal.providerId || (usuario.isAnonymous ? 'anonymous' : 'password')
 
