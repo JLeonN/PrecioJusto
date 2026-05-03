@@ -150,35 +150,35 @@ Reordenar la pantalla de Configuracion para que sea clara, agrupada y escalable,
 Agregar una experiencia de acceso inicial clara y mejorar la identidad visual del usuario en la app, manteniendo el flujo actual de invitado.
 
 - [ ] Implementar pantalla de acceso inicial al abrir la app por primera vez:
-  - [ ] Entrar con Google
-  - [ ] Entrar con correo
-  - [ ] Continuar como invitado
+  - [x] Entrar con Google
+  - [x] Entrar con correo
+  - [x] Continuar como invitado
 - [ ] Definir prioridad de sesion al iniciar:
-  - [ ] Si existe usuario real (Google/correo), usar siempre sesion real
-  - [ ] Si no existe usuario real, iniciar/continuar como invitado
+  - [x] Si existe usuario real (Google/correo), usar siempre sesion real
+  - [x] Si no existe usuario real, iniciar/continuar como invitado
 - [ ] Mantener sesion persistente:
-  - [ ] Si el usuario ya esta autenticado, no mostrar pantalla de acceso nuevamente
-  - [ ] Solo volver a mostrar acceso si el usuario cierra sesion o se pierde la sesion
+  - [x] Si el usuario ya esta autenticado, no mostrar pantalla de acceso nuevamente
+  - [x] Solo volver a mostrar acceso si el usuario cierra sesion o se pierde la sesion
 - [ ] Definir comportamiento en perdida de sesion:
   - [ ] Error temporal de red: no cerrar sesion, mostrar aviso y reintentar
   - [ ] Token invalido/revocado: cerrar sesion real y volver a modo invitado
 - [ ] Mejorar visualizacion de foto de perfil:
-  - [ ] Mostrar avatar visible en Configuracion (no solo URL)
-  - [ ] Mantener `foto` como URL en Firestore, pero renderizar imagen en UI
-  - [ ] Definir fallback visual cuando la imagen no cargue (inicial del nombre)
+  - [x] Mostrar avatar visible en Configuracion (no solo URL)
+  - [x] Mantener `foto` como URL en Firestore, pero renderizar imagen en UI
+  - [x] Definir fallback visual cuando la imagen no cargue (inicial del nombre)
 - [ ] Mejorar cabecera del drawer (menu lateral):
-  - [ ] Mantener titulo actual de la app
-  - [ ] Mostrar nombre del usuario debajo del encabezado cuando este logueado
-  - [ ] No mostrar correo en el drawer
-  - [ ] Si el usuario esta en modo invitado, mantener comportamiento actual sin datos personales
+  - [x] Mantener titulo actual de la app
+  - [x] Mostrar nombre del usuario debajo del encabezado cuando este logueado
+  - [x] No mostrar correo en el drawer
+  - [x] Si el usuario esta en modo invitado, mantener comportamiento actual sin datos personales
 - [ ] Mantener consistencia de estados:
-  - [ ] Usuario logueado ve su identidad (nombre/foto)
+  - [x] Usuario logueado ve su identidad (nombre/foto)
   - [ ] Usuario invitado ve UI neutra de invitado
-  - [ ] Sincronizar automaticamente cambios locales cuando vuelva internet (sin accion manual)
+  - [x] Sincronizar automaticamente cambios locales cuando vuelva internet (sin accion manual)
   - [ ] No romper migracion local -> Firestore ni flujos de auth ya validados
 - [ ] Definir origen de nombre y foto visibles:
-  - [ ] Prioridad: perfil editable manual > proveedor (Google/correo) > fallback invitado
-  - [ ] Si usuario edita manualmente, mantener ese valor hasta nuevo cambio manual
+  - [x] Prioridad: perfil editable manual > proveedor (Google/correo) > fallback invitado
+  - [x] Si usuario edita manualmente, mantener ese valor hasta nuevo cambio manual
 - [ ] Extender edicion de perfil:
   - [ ] Permitir cambiar foto de perfil desde UI (reutilizando flujo de imagen existente del proyecto)
   - [ ] Permitir cambiar nombre visible desde UI y persistirlo en Firestore
@@ -194,11 +194,11 @@ Agregar una experiencia de acceso inicial clara y mejorar la identidad visual de
 Evitar mezcla de datos entre cuentas distintas en un mismo celular/navegador y asegurar cambio de cuenta limpio.
 
 - [ ] Definir politica de cierre de sesion:
-  - [ ] Al cerrar sesion real, volver a modo invitado automaticamente
-  - [ ] Mantener experiencia usable para invitado sin bloquear la app
+  - [x] Al cerrar sesion real, volver a modo invitado automaticamente
+  - [x] Mantener experiencia usable para invitado sin bloquear la app
 - [ ] Aislar estado local por `uid`:
-  - [ ] Separar o limpiar caches de sesion al cambiar de cuenta
-  - [ ] Evitar que usuario B vea datos sincronizados por usuario A
+  - [x] Separar o limpiar caches de sesion al cambiar de cuenta
+  - [x] Evitar que usuario B vea datos sincronizados por usuario A
 - [ ] Definir comportamiento de migracion en cambio de cuenta:
   - [ ] Migracion local -> Firestore automatica al iniciar sesion real
   - [ ] No duplicar datos si el proceso se ejecuta mas de una vez

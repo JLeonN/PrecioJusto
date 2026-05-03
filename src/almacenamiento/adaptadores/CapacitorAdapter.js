@@ -24,7 +24,8 @@ import { Preferences } from '@capacitor/preferences'
 
 class CapacitorAdapter {
   constructor() {
-    this.prefijo = 'precio_justo_' // Prefijo para organizar las claves
+    this.prefijoBase = 'precio_justo_' // Prefijo para organizar las claves
+    this.espacioTrabajo = 'compartido'
 
     console.log('📱 CapacitorAdapter inicializado')
 
@@ -144,13 +145,14 @@ class CapacitorAdapter {
       const { keys } = await Preferences.keys()
       const resultados = []
 
-      // Filtrar claves que pertenecen a nuestra app
-      const clavesApp = keys.filter((claveCompleta) => claveCompleta.startsWith(this.prefijo))
+      const prefijoActivo = this._construirPrefijoActivo()
+      // Filtrar claves que pertenecen al espacio activo
+      const clavesApp = keys.filter((claveCompleta) => claveCompleta.startsWith(prefijoActivo))
 
       // Procesar cada clave
       for (const claveCompleta of clavesApp) {
         // Extraer la clave sin prefijo
-        const clave = claveCompleta.replace(this.prefijo, '')
+        const clave = claveCompleta.replace(prefijoActivo, '')
 
         // Aplicar filtro adicional si existe
         if (prefijoBusqueda && !clave.startsWith(prefijoBusqueda)) continue
@@ -231,7 +233,7 @@ class CapacitorAdapter {
       let contador = 0
 
       for (const claveCompleta of keys) {
-        if (claveCompleta.startsWith(this.prefijo)) {
+        if (claveCompleta.startsWith(this.prefijoBase)) {
           await Preferences.remove({ key: claveCompleta })
           contador++
         }
@@ -271,7 +273,24 @@ class CapacitorAdapter {
    * @private
    */
   _construirClave(clave) {
-    return `${this.prefijo}${clave}`
+    return `${this._construirPrefijoActivo()}${clave}`
+  }
+
+  _construirPrefijoActivo() {
+    if (this.espacioTrabajo === 'compartido') {
+      return this.prefijoBase
+    }
+
+    return `${this.prefijoBase}${this.espacioTrabajo}_`
+  }
+
+  configurarEspacioTrabajo(espacioTrabajo) {
+    const valorNormalizado = String(espacioTrabajo || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, '')
+
+    this.espacioTrabajo = valorNormalizado || 'compartido'
   }
 }
 

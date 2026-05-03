@@ -57,6 +57,8 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
           activarPreciosMayoristas: item.activarPreciosMayoristas ?? false,
           escalasPorCantidad: Array.isArray(item.escalasPorCantidad) ? item.escalasPorCantidad : [],
         }))
+      } else {
+        items.value = []
       }
     } catch (error) {
       console.error('Error al cargar sesión de escaneo:', error)

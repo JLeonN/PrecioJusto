@@ -52,6 +52,12 @@ if (!adaptadores[ADAPTADOR_ACTIVO]) {
  */
 export const adaptadorActual = adaptadores[ADAPTADOR_ACTIVO]
 
+export const configurarEspacioTrabajoAlmacenamiento = (espacioTrabajo = 'compartido') => {
+  if (typeof adaptadorActual.configurarEspacioTrabajo === 'function') {
+    adaptadorActual.configurarEspacioTrabajo(espacioTrabajo)
+  }
+}
+
 /**
  * 📊 INFO DEL ADAPTADOR ACTIVO (útil para debugging)
  */

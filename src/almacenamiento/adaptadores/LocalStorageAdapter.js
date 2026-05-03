@@ -17,7 +17,8 @@
 
 class LocalStorageAdapter {
   constructor() {
-    this.prefijo = 'precio_justo_' // Prefijo para evitar colisiones con otras apps
+    this.prefijoBase = 'precio_justo_' // Prefijo para evitar colisiones con otras apps
+    this.espacioTrabajo = 'compartido'
 
     // Verificar que localStorage esté disponible
     if (typeof window === 'undefined' || !window.localStorage) {
@@ -118,12 +119,13 @@ class LocalStorageAdapter {
       const resultados = []
       const claves = Object.keys(localStorage)
 
+      const prefijoActivo = this._construirPrefijoActivo()
       for (const claveCompleta of claves) {
-        // Filtrar solo claves de nuestra app
-        if (!claveCompleta.startsWith(this.prefijo)) continue
+        // Filtrar solo claves del espacio activo
+        if (!claveCompleta.startsWith(prefijoActivo)) continue
 
         // Extraer la clave sin prefijo
-        const clave = claveCompleta.replace(this.prefijo, '')
+        const clave = claveCompleta.replace(prefijoActivo, '')
 
         // Aplicar filtro adicional si existe
         if (prefijoBusqueda && !clave.startsWith(prefijoBusqueda)) continue
@@ -190,7 +192,7 @@ class LocalStorageAdapter {
       let contador = 0
 
       for (const claveCompleta of claves) {
-        if (claveCompleta.startsWith(this.prefijo)) {
+        if (claveCompleta.startsWith(this.prefijoBase)) {
           localStorage.removeItem(claveCompleta)
           contador++
         }
@@ -228,7 +230,24 @@ class LocalStorageAdapter {
    * @private
    */
   _construirClave(clave) {
-    return `${this.prefijo}${clave}`
+    return `${this._construirPrefijoActivo()}${clave}`
+  }
+
+  _construirPrefijoActivo() {
+    if (this.espacioTrabajo === 'compartido') {
+      return this.prefijoBase
+    }
+
+    return `${this.prefijoBase}${this.espacioTrabajo}_`
+  }
+
+  configurarEspacioTrabajo(espacioTrabajo) {
+    const valorNormalizado = String(espacioTrabajo || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, '')
+
+    this.espacioTrabajo = valorNormalizado || 'compartido'
   }
 }
 

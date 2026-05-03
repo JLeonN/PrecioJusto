@@ -4,6 +4,7 @@ const routes = [
     component: () => import('layouts/MainLayout.vue'),
     meta: { requiereSesion: true },
     children: [
+      { path: 'acceso', component: () => import('pages/AccesoInicialPage.vue') },
       // Página principal
       { path: '', component: () => import('pages/ListaJusta/ListaJustaPage.vue') },
 

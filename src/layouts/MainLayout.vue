@@ -88,10 +88,16 @@
       <div class="fit drawer-contenedor">
         <q-scroll-area class="drawer-scroll">
           <q-list padding class="drawer-lista">
-            <!-- Header del drawer -->
+                        <!-- Header del drawer -->
             <q-item class="q-mb-md">
               <q-item-section avatar>
-                <div class="logo-app-drawer-box">
+                <div v-if="mostrarIdentidadUsuario" class="avatar-usuario-drawer-box">
+                  <q-avatar size="56px" class="avatar-usuario-drawer">
+                    <img v-if="fotoUsuarioDrawer" :src="fotoUsuarioDrawer" alt="Foto de perfil" />
+                    <span v-else class="iniciales-usuario-drawer">{{ inicialesUsuarioDrawer }}</span>
+                  </q-avatar>
+                </div>
+                <div v-else class="logo-app-drawer-box">
                   <img
                     src="/icons/PrecioJusto-Icono.png"
                     alt="Icono de Precio Justo"
@@ -102,6 +108,9 @@
               <q-item-section>
                 <q-item-label class="text-h6 text-weight-bold"> Precio Justo </q-item-label>
                 <q-item-label caption> Compará y ahorrá </q-item-label>
+                <q-item-label v-if="mostrarIdentidadUsuario" class="q-mt-xs text-caption text-weight-medium">
+                  {{ nombreUsuarioDrawer }}
+                </q-item-label>
               </q-item-section>
             </q-item>
 
@@ -299,6 +308,27 @@ const textoActualizacionDrawer = computed(() => {
   }
 
   return 'Buscar versión nueva'
+})
+const mostrarIdentidadUsuario = computed(
+  () => usuarioStore.tieneSesionActiva && !usuarioStore.esAnonimo,
+)
+const nombreUsuarioDrawer = computed(() => {
+  const nombrePerfilEditable = usuarioStore.perfil?.perfilEditable?.nombre?.trim()
+  if (nombrePerfilEditable) return nombrePerfilEditable
+  const nombrePerfil = usuarioStore.perfil?.nombre?.trim()
+  if (nombrePerfil) return nombrePerfil
+  return 'Usuario registrado'
+})
+const fotoUsuarioDrawer = computed(() => {
+  const fotoPerfilEditable = usuarioStore.perfil?.perfilEditable?.foto?.trim()
+  if (fotoPerfilEditable) return fotoPerfilEditable
+  return usuarioStore.perfil?.foto || null
+})
+const inicialesUsuarioDrawer = computed(() => {
+  const nombre = nombreUsuarioDrawer.value
+  if (!nombre) return 'U'
+  const partes = nombre.split(' ').filter(Boolean).slice(0, 2)
+  return partes.map((parte) => parte.charAt(0).toUpperCase()).join('') || 'U'
 })
 
 const colorInactivoHeader = computed(() => (quasar.dark.isActive ? '#b0bec5' : '#757575'))
@@ -517,6 +547,20 @@ useBotonAtras({ drawerAbierto, router, route })
   border-radius: 12px;
   overflow: hidden;
   background: var(--color-primario);
+}
+.avatar-usuario-drawer-box {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+}
+.avatar-usuario-drawer {
+  background: color-mix(in srgb, var(--color-primario) 22%, var(--fondo-tarjeta));
+  color: var(--texto-primario);
+  border: 1px solid color-mix(in srgb, var(--color-primario) 40%, var(--borde-color));
+}
+.iniciales-usuario-drawer {
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 .logo-app-drawer {
   width: 100%;

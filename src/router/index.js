@@ -35,15 +35,26 @@ export default defineRouter(function (/* { store, ssrContext } */) {
   })
 
   Router.beforeEach(async (to) => {
+    const usuarioStore = useUsuarioStore()
+    await usuarioStore.inicializarSesion()
+
+    if (to.path === '/acceso') {
+      if (usuarioStore.tieneSesionRealActiva) {
+        return { path: '/' }
+      }
+      return true
+    }
+
     if (!to.matched.some((registro) => registro.meta?.requiereSesion)) {
       return true
     }
 
-    const usuarioStore = useUsuarioStore()
-    await usuarioStore.inicializarSesion()
-
     if (!usuarioStore.tieneSesionActiva) {
       return { path: '/configuracion' }
+    }
+
+    if (!usuarioStore.accesoInicialCompletado && !usuarioStore.tieneSesionRealActiva) {
+      return { path: '/acceso' }
     }
 
     return true

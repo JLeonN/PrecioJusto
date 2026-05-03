@@ -51,11 +51,17 @@
             <p class="text-caption text-grey-7 q-mt-xs q-mb-sm">
               Datos visibles de tu cuenta. Podés editarlos cuando quieras.
             </p>
+            <div class="preview-avatar-perfil q-mb-sm">
+              <q-avatar size="64px" class="avatar-perfil">
+                <img v-if="fotoPreviewPerfil" :src="fotoPreviewPerfil" alt="Foto de perfil" />
+                <span v-else class="iniciales-perfil">{{ inicialesPerfil }}</span>
+              </q-avatar>
+            </div>
             <div class="column q-gutter-sm">
               <q-input v-model="perfilEditableNombre" label="Nombre" outlined dense />
               <q-input
                 v-model="perfilEditableFoto"
-                label="Foto (URL)"
+                label="Foto de perfil (URL)"
                 type="url"
                 autocomplete="photo"
                 outlined
@@ -367,6 +373,13 @@ const resumenMoneda = computed(() => {
 const resumenSincronizacion = computed(() => {
   if (textoResumenMigracion.value) return 'Última migración completada'
   return 'Sin migración reciente'
+})
+const fotoPreviewPerfil = computed(() => perfilEditableFoto.value?.trim() || null)
+const inicialesPerfil = computed(() => {
+  const nombre = perfilEditableNombre.value?.trim()
+  if (!nombre) return 'U'
+  const partes = nombre.split(' ').filter(Boolean).slice(0, 2)
+  return partes.map((parte) => parte.charAt(0).toUpperCase()).join('') || 'U'
 })
 
 function calcularEdadDesdeFecha(fechaNacimientoIso) {
@@ -731,6 +744,19 @@ onMounted(async () => {
 }
 .bloque-contenido .q-banner {
   border-radius: 10px;
+}
+.preview-avatar-perfil {
+  display: flex;
+  justify-content: center;
+}
+.avatar-perfil {
+  background: color-mix(in srgb, var(--color-primario) 20%, var(--fondo-tarjeta));
+  color: var(--texto-primario);
+  border: 1px solid color-mix(in srgb, var(--color-primario) 40%, var(--borde-color));
+}
+.iniciales-perfil {
+  font-size: 1rem;
+  font-weight: 700;
 }
 .bloque-ayuda-moneda {
   margin-top: 14px;
