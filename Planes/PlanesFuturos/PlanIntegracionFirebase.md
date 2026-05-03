@@ -124,7 +124,6 @@ Reordenar la pantalla de Configuracion para que sea clara, agrupada y escalable,
   - [x] Tema
   - [x] Moneda y region
   - [x] Datos y sincronizacion
-  - [x] Informacion
 - [x] Unificar `Cuenta` + `Perfil` en un mismo bloque con subtitulos internos
 - [x] Renombrar etiquetas para mejorar claridad:
   - [x] `Modo oscuro` -> `Tema`
@@ -143,6 +142,73 @@ Reordenar la pantalla de Configuracion para que sea clara, agrupada y escalable,
   - [ ] navegacion mas clara en mobile
   - [ ] usuario encuentra `Cuenta`, `Perfil`, `Tema` y `Moneda` en menos de 2 toques
   - [ ] no hay regresion en login, perfil, migracion ni preferencias
+
+## FASE 4D: Pantalla de acceso y cabecera de usuario
+
+### Objetivo
+
+Agregar una experiencia de acceso inicial clara y mejorar la identidad visual del usuario en la app, manteniendo el flujo actual de invitado.
+
+- [ ] Implementar pantalla de acceso inicial al abrir la app por primera vez:
+  - [ ] Entrar con Google
+  - [ ] Entrar con correo
+  - [ ] Continuar como invitado
+- [ ] Definir prioridad de sesion al iniciar:
+  - [ ] Si existe usuario real (Google/correo), usar siempre sesion real
+  - [ ] Si no existe usuario real, iniciar/continuar como invitado
+- [ ] Mantener sesion persistente:
+  - [ ] Si el usuario ya esta autenticado, no mostrar pantalla de acceso nuevamente
+  - [ ] Solo volver a mostrar acceso si el usuario cierra sesion o se pierde la sesion
+- [ ] Definir comportamiento en perdida de sesion:
+  - [ ] Error temporal de red: no cerrar sesion, mostrar aviso y reintentar
+  - [ ] Token invalido/revocado: cerrar sesion real y volver a modo invitado
+- [ ] Mejorar visualizacion de foto de perfil:
+  - [ ] Mostrar avatar visible en Configuracion (no solo URL)
+  - [ ] Mantener `foto` como URL en Firestore, pero renderizar imagen en UI
+  - [ ] Definir fallback visual cuando la imagen no cargue (inicial del nombre)
+- [ ] Mejorar cabecera del drawer (menu lateral):
+  - [ ] Mantener titulo actual de la app
+  - [ ] Mostrar nombre del usuario debajo del encabezado cuando este logueado
+  - [ ] No mostrar correo en el drawer
+  - [ ] Si el usuario esta en modo invitado, mantener comportamiento actual sin datos personales
+- [ ] Mantener consistencia de estados:
+  - [ ] Usuario logueado ve su identidad (nombre/foto)
+  - [ ] Usuario invitado ve UI neutra de invitado
+  - [ ] Sincronizar automaticamente cambios locales cuando vuelva internet (sin accion manual)
+  - [ ] No romper migracion local -> Firestore ni flujos de auth ya validados
+- [ ] Definir origen de nombre y foto visibles:
+  - [ ] Prioridad: perfil editable manual > proveedor (Google/correo) > fallback invitado
+  - [ ] Si usuario edita manualmente, mantener ese valor hasta nuevo cambio manual
+- [ ] Extender edicion de perfil:
+  - [ ] Permitir cambiar foto de perfil desde UI (reutilizando flujo de imagen existente del proyecto)
+  - [ ] Permitir cambiar nombre visible desde UI y persistirlo en Firestore
+- [ ] Criterio de cierre de fase:
+  - [ ] Flujo inicial probado en login Google, correo e invitado
+  - [ ] Reapertura de app conserva sesion correctamente
+  - [ ] Drawer muestra nombre del usuario logueado y fallback correcto en invitado
+
+## FASE 4E: Aislamiento multiusuario en mismo dispositivo
+
+### Objetivo
+
+Evitar mezcla de datos entre cuentas distintas en un mismo celular/navegador y asegurar cambio de cuenta limpio.
+
+- [ ] Definir politica de cierre de sesion:
+  - [ ] Al cerrar sesion real, volver a modo invitado automaticamente
+  - [ ] Mantener experiencia usable para invitado sin bloquear la app
+- [ ] Aislar estado local por `uid`:
+  - [ ] Separar o limpiar caches de sesion al cambiar de cuenta
+  - [ ] Evitar que usuario B vea datos sincronizados por usuario A
+- [ ] Definir comportamiento de migracion en cambio de cuenta:
+  - [ ] Migracion local -> Firestore automatica al iniciar sesion real
+  - [ ] No duplicar datos si el proceso se ejecuta mas de una vez
+- [ ] Reforzar proteccion de lectura/escritura:
+  - [ ] Verificar que toda consulta/escritura use rutas del `uid` activo
+  - [ ] Registrar error controlado si hay desajuste de `uid`
+- [ ] Criterio de cierre de fase:
+  - [ ] Login con cuenta A, logout, login con cuenta B sin fuga de datos
+  - [ ] Vuelta a cuenta A mantiene sus datos propios
+  - [ ] Evidencia de pruebas guardada
 
 ## FASE 5: Preparar corte a produccion
 
@@ -211,6 +277,34 @@ Validar flujo completo de autenticacion, perfil y persistencia con ejecucion gui
   - [x] Flujos criticos en verde
   - [x] Evidencia guardada (logs/capturas/resumen)
 
+## FASE TESTING 4D-4E (Playwright)
+
+### Objetivo
+
+Validar por IA (Playwright) los nuevos flujos de pantalla inicial, sincronizacion automatica y aislamiento multiusuario.
+
+- [ ] Probar flujo inicial de sesion:
+  - [ ] Usuario real entra y no vuelve a ver pantalla de acceso al reabrir
+  - [ ] Usuario invitado entra y mantiene estado de invitado
+- [ ] Probar comportamiento offline:
+  - [ ] Crear/editar datos sin internet (guardado local)
+  - [ ] Reconectar internet y verificar sincronizacion automatica a Firestore
+- [ ] Probar prioridad de perfil visible:
+  - [ ] Perfil manual sobreescribe datos de proveedor
+  - [ ] Si no hay perfil manual, se usan datos del proveedor
+- [ ] Probar cabecera de usuario en drawer:
+  - [ ] Logueado: muestra nombre y avatar/fallback
+  - [ ] Invitado: mantiene cabecera neutra sin datos personales
+- [ ] Probar multiusuario en mismo dispositivo:
+  - [ ] Login A -> logout -> login B, sin ver datos de A
+  - [ ] Login B -> logout -> login A, conserva datos de A
+- [ ] Probar no-duplicacion de migracion automatica:
+  - [ ] Ejecutar flujo de migracion mas de una vez y confirmar idempotencia
+- [ ] Guardar evidencia Playwright:
+  - [ ] capturas
+  - [ ] logs
+  - [ ] resumen final por escenario
+
 ## Progreso del plan
 
 - [x] Fase 1: Consolidar base Firebase en pruebas
@@ -219,9 +313,12 @@ Validar flujo completo de autenticacion, perfil y persistencia con ejecucion gui
 - [x] Fase 4A: Auth robusta
 - [x] Fase 4B: Perfil editable y datos personales
 - [ ] Fase 4C: Reorganizacion UX de Configuracion
+- [ ] Fase 4D: Pantalla de acceso y cabecera de usuario
+- [ ] Fase 4E: Aislamiento multiusuario en mismo dispositivo
 - [ ] Fase 5: Preparar corte a produccion
 - [x] Fase Testing
+- [ ] Fase Testing 4D-4E (Playwright)
 
 Fecha de creacion: 14 de Marzo 2026
-Fecha de ultima actualizacion: 2 de Mayo 2026
+Fecha de ultima actualizacion: 3 de Mayo 2026
 Estado: EN PROCESO

@@ -3,7 +3,6 @@
     <div class="contenedor-configuracion">
       <div class="q-mb-md">
         <h5 class="q-my-none">Configuración</h5>
-        <p class="text-grey-7 q-mt-xs q-mb-none">Preferencias globales de la app</p>
       </div>
 
       <q-list bordered separator class="contenedor-acordeon">
