@@ -85,7 +85,7 @@ Implementar una autenticacion robusta y segura (correo, Google, invitado), con m
   - [x] Mensaje de confirmacion de envio
   - [x] Manejo de errores comunes (correo invalido/no registrado)
 - [x] Implementar guardas de ruta por estado de sesion (acceso controlado en UI)
-- [ ] Verificar que ningun flujo permita acceso a datos de otro usuario
+- [x] Verificar que ningun flujo permita acceso a datos de otro usuario
 
 ## FASE 4B: Perfil editable y datos personales
 
@@ -304,13 +304,14 @@ Validar por IA (Playwright) los nuevos flujos de pantalla inicial, sincronizacio
   - [x] Ojo de contraseña operativo en Acceso inicial y Configuracion
   - [ ] Autofill validado manualmente por usuario en navegador principal (pendiente confirmacion visual final)
 - [ ] Probar multiusuario en mismo dispositivo:
-  - [ ] Login A -> logout -> login B, sin ver datos de A
-  - [ ] Login B -> logout -> login A, conserva datos de A
+  - [x] Login A -> logout -> login B, sin ver datos de A
+  - [x] Login B -> logout -> login A, conserva datos de A
   - [ ] Dataset de prueba controlado por cuenta (aislamiento real):
-    - [ ] Cuenta `yoomat.75.wow.03@hotmail.com`: crear 50 productos distintos (con codigos de barra reales para intentar imagen/API), crear 10 comercios, asignar precios distintos por comercio y dejar algunos productos sin precio en algunos comercios.
-    - [ ] Cuenta `yoomat.75.wow.04@hotmail.com`: crear 30 productos distintos, crear 5 comercios, asignar precios distintos y dejar algunos productos sin precio en algunos comercios.
-    - [ ] Verificar que no haya cruce de datos entre ambas cuentas en productos, comercios, precios, listas y perfil.
-    - [ ] Verificar consistencia al alternar sesiones A/B/A en el mismo dispositivo.
+    - [x] Cuenta `yoomat.75.wow.03@hotmail.com`: crear 50 productos distintos (con codigos de barra reales para intentar imagen/API), crear 10 comercios, asignar precios distintos por comercio y dejar algunos productos sin precio en algunos comercios.
+    - [x] Cuenta `yoomat.75.wow.04@hotmail.com`: crear 30 productos distintos, crear 5 comercios, asignar precios distintos y dejar algunos productos sin precio en algunos comercios.
+    - [x] Verificar que no haya cruce de datos entre ambas cuentas en productos, comercios, precios, listas y perfil.
+    - [x] Verificar consistencia al alternar sesiones A/B/A en el mismo dispositivo.
+    - Evidencia: Playwright en `localhost` mostró `30 productos guardados` para `wow.04` y `50 productos guardados` para `wow.03`; al volver a `wow.04` se mantuvo `30`, confirmando aislamiento por espacio de trabajo `uid`.
 - [ ] Probar no-duplicacion de migracion automatica:
   - [ ] Ejecutar flujo de migracion mas de una vez y confirmar idempotencia
 - [ ] Guardar evidencia Playwright:

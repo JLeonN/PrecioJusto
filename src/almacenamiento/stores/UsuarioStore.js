@@ -267,6 +267,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
       if (!usuario) {
         return true
       }
+      await sincronizarEspacioTrabajoLocal(usuario)
       await sincronizarPerfilUsuario(usuario)
       aplicarEstadoUsuario(usuario)
       marcarAccesoInicialCompletado()
@@ -283,6 +284,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
 
     try {
       const usuario = await servicioAuthFirebase.iniciarSesionConCorreo(email, contrasena)
+      await sincronizarEspacioTrabajoLocal(usuario)
       await sincronizarPerfilUsuario(usuario)
       aplicarEstadoUsuario(usuario)
       marcarAccesoInicialCompletado()
@@ -299,6 +301,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
 
     try {
       const usuario = await servicioAuthFirebase.registrarConCorreo(email, contrasena)
+      await sincronizarEspacioTrabajoLocal(usuario)
       await sincronizarPerfilUsuario(usuario)
       aplicarEstadoUsuario(usuario)
       marcarAccesoInicialCompletado()
@@ -332,7 +335,8 @@ export const useUsuarioStore = defineStore('usuario', () => {
 
     try {
       await servicioAuthFirebase.cerrarSesionActual()
-      await servicioAuthFirebase.iniciarSesionAnonimaSiNoExiste()
+      const usuarioAnonimo = await servicioAuthFirebase.iniciarSesionAnonimaSiNoExiste()
+      await sincronizarEspacioTrabajoLocal(usuarioAnonimo)
       marcarAccesoInicialCompletado()
       return true
     } catch (error) {
