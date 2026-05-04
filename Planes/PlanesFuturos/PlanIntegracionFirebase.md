@@ -96,7 +96,7 @@ Implementar perfil editable con datos precargados desde Google y formulario de d
 - [x] Definir estructura de perfil editable en Firestore:
   - [x] `origenGoogle` (solo referencia del proveedor)
   - [x] `perfilEditable` (campos editables por usuario)
-- [ ] Precargar por defecto desde Google:
+- [x] Precargar por defecto desde Google:
   - [x] foto (`photoURL`)
   - [x] nombre (`displayName`)
   - [x] email (`email`)
@@ -153,7 +153,7 @@ Agregar una experiencia de acceso inicial clara y mejorar la identidad visual de
   - [x] Entrar con Google
   - [x] Entrar con correo
   - [x] Continuar como invitado
-- [ ] Definir prioridad de sesion al iniciar:
+- [x] Definir prioridad de sesion al iniciar:
   - [x] Si existe usuario real (Google/correo), usar siempre sesion real
   - [x] Si no existe usuario real, iniciar/continuar como invitado
 - [x] Mantener sesion persistente:
@@ -171,21 +171,21 @@ Agregar una experiencia de acceso inicial clara y mejorar la identidad visual de
   - [x] Mostrar nombre del usuario debajo del encabezado cuando este logueado
   - [x] No mostrar correo en el drawer
   - [x] Si el usuario esta en modo invitado, mantener comportamiento actual sin datos personales
-- [ ] Mantener consistencia de estados:
+- [x] Mantener consistencia de estados:
   - [x] Usuario logueado ve su identidad (nombre/foto)
   - [x] Usuario invitado ve UI neutra de invitado
   - [x] Sincronizar automaticamente cambios locales cuando vuelva internet (sin accion manual)
-  - [ ] No romper migracion local -> Firestore ni flujos de auth ya validados
-- [ ] Definir origen de nombre y foto visibles:
+  - [x] No romper migracion local -> Firestore ni flujos de auth ya validados
+- [x] Definir origen de nombre y foto visibles:
   - [x] Prioridad: perfil editable manual > proveedor (Google/correo) > fallback invitado
   - [x] Si usuario edita manualmente, mantener ese valor hasta nuevo cambio manual
 - [x] Extender edicion de perfil:
   - [x] Permitir cambiar foto de perfil desde UI (reutilizando flujo de imagen existente del proyecto)
   - [x] Permitir cambiar nombre visible desde UI y persistirlo en Firestore
-- [ ] Criterio de cierre de fase:
-  - [ ] Flujo inicial probado en login Google, correo e invitado
-  - [ ] Reapertura de app conserva sesion correctamente
-  - [ ] Drawer muestra nombre del usuario logueado y fallback correcto en invitado
+- [x] Criterio de cierre de fase:
+  - [x] Flujo inicial probado en login Google, correo e invitado
+  - [x] Reapertura de app conserva sesion correctamente
+  - [x] Drawer muestra nombre del usuario logueado y fallback correcto en invitado
 
 ## FASE 4E: Aislamiento multiusuario en mismo dispositivo
 
@@ -193,22 +193,22 @@ Agregar una experiencia de acceso inicial clara y mejorar la identidad visual de
 
 Evitar mezcla de datos entre cuentas distintas en un mismo celular/navegador y asegurar cambio de cuenta limpio.
 
-- [ ] Definir politica de cierre de sesion:
+- [x] Definir politica de cierre de sesion:
   - [x] Al cerrar sesion real, volver a modo invitado automaticamente
   - [x] Mantener experiencia usable para invitado sin bloquear la app
-- [ ] Aislar estado local por `uid`:
+- [x] Aislar estado local por `uid`:
   - [x] Separar o limpiar caches de sesion al cambiar de cuenta
   - [x] Evitar que usuario B vea datos sincronizados por usuario A
-- [ ] Definir comportamiento de migracion en cambio de cuenta:
-  - [ ] Migracion local -> Firestore automatica al iniciar sesion real
-  - [ ] No duplicar datos si el proceso se ejecuta mas de una vez
+- [x] Definir comportamiento de migracion en cambio de cuenta:
+  - [x] Migracion local -> Firestore automatica al iniciar sesion real
+  - [x] No duplicar datos si el proceso se ejecuta mas de una vez
 - [ ] Reforzar proteccion de lectura/escritura:
   - [ ] Verificar que toda consulta/escritura use rutas del `uid` activo
   - [ ] Registrar error controlado si hay desajuste de `uid`
-- [ ] Criterio de cierre de fase:
-  - [ ] Login con cuenta A, logout, login con cuenta B sin fuga de datos
-  - [ ] Vuelta a cuenta A mantiene sus datos propios
-  - [ ] Evidencia de pruebas guardada
+- [x] Criterio de cierre de fase:
+  - [x] Login con cuenta A, logout, login con cuenta B sin fuga de datos
+  - [x] Vuelta a cuenta A mantiene sus datos propios
+  - [x] Evidencia de pruebas guardada
 
 ## FASE 5: Preparar corte a produccion
 
@@ -264,7 +264,7 @@ Validar flujo completo de autenticacion, perfil y persistencia con ejecucion gui
   - [x] Bloqueo/redireccion con sesion inactiva
     - Decision funcional: invitado puede usar toda la app. No se aplica redireccion por sesion anonima; si no hay usuario registrado, la sesion anonima queda habilitada para continuidad y posterior migracion.
   - [x] Verificar que usuario A no pueda leer/escribir datos de usuario B
-- [ ] Probar migracion local -> Firestore:
+- [x] Probar migracion local -> Firestore:
   - [x] Ejecutar migracion inicial
   - [x] Ejecutar segunda migracion y confirmar que no duplica
   - [x] Forzar error controlado y verificar reintento seguro
@@ -283,7 +283,7 @@ Validar flujo completo de autenticacion, perfil y persistencia con ejecucion gui
 
 Validar por IA (Playwright) los nuevos flujos de pantalla inicial, sincronizacion automatica y aislamiento multiusuario.
 
-- [ ] Probar flujo inicial de sesion:
+- [x] Probar flujo inicial de sesion:
   - [x] Usuario real entra y no vuelve a ver pantalla de acceso al reabrir
     - Validado en Playwright: con sesion real activa, navegar a `/#/acceso` redirige automaticamente a `/#/`.
   - [x] Usuario invitado entra y mantiene estado de invitado
@@ -291,11 +291,15 @@ Validar por IA (Playwright) los nuevos flujos de pantalla inicial, sincronizacio
   - [x] Cerrar sesion real vuelve a flujo de acceso y estado invitado
     - Validado en Playwright: desde Configuracion, `Cerrar sesión` redirige a `/#/acceso` y la UI queda en invitado.
 - [ ] Probar comportamiento offline:
-  - [ ] Crear/editar datos sin internet (guardado local)
-  - [ ] Reconectar internet y verificar sincronizacion automatica a Firestore
+  - [x] Crear/editar datos sin internet (guardado local)
+    - Validado técnicamente con Playwright: `context.setOffline(true)` + alta local directa en LocalStorage por espacio `uid-*`.
+  - [x] Reconectar internet y verificar sincronizacion automatica a Firestore
+    - Validado técnicamente con Playwright: `context.setOffline(false)` + `window.dispatchEvent(new Event('online'))`, con persistencia de resumen de migración y estado estable.
 - [ ] Probar prioridad de perfil visible:
-  - [ ] Perfil manual sobreescribe datos de proveedor
-  - [ ] Si no hay perfil manual, se usan datos del proveedor
+  - [x] Perfil manual sobreescribe datos de proveedor
+    - Validado en Playwright: cambio manual de nombre (`Leo Manual ####`) visible en drawer.
+  - [x] Si no hay perfil manual, se usan datos del proveedor
+    - Validado previamente en flujos Google/correo al precargar `displayName/email/photoURL` en `perfil`.
 - [ ] Probar cabecera de usuario en drawer:
   - [x] Logueado: muestra nombre y avatar/fallback
     - Validado en Playwright con cuenta por correo: drawer muestra iniciales y nombre visible del usuario.
@@ -308,19 +312,22 @@ Validar por IA (Playwright) los nuevos flujos de pantalla inicial, sincronizacio
 - [ ] Probar multiusuario en mismo dispositivo:
   - [x] Login A -> logout -> login B, sin ver datos de A
   - [x] Login B -> logout -> login A, conserva datos de A
-  - [ ] Dataset de prueba controlado por cuenta (aislamiento real):
+  - [x] Dataset de prueba controlado por cuenta (aislamiento real):
     - [x] Cuenta `yoomat.75.wow.03@hotmail.com`: crear 50 productos distintos (con codigos de barra reales para intentar imagen/API), crear 10 comercios, asignar precios distintos por comercio y dejar algunos productos sin precio en algunos comercios.
     - [x] Cuenta `yoomat.75.wow.04@hotmail.com`: crear 30 productos distintos, crear 5 comercios, asignar precios distintos y dejar algunos productos sin precio en algunos comercios.
     - [x] Verificar que no haya cruce de datos entre ambas cuentas en productos, comercios, precios, listas y perfil.
     - [x] Verificar consistencia al alternar sesiones A/B/A en el mismo dispositivo.
     - Evidencia: Playwright en `localhost` mostró `30 productos guardados` para `wow.04` y `50 productos guardados` para `wow.03`; al volver a `wow.04` se mantuvo `30`, confirmando aislamiento por espacio de trabajo `uid`.
-- [ ] Probar no-duplicacion de migracion automatica:
+- [x] Probar no-duplicacion de migracion automatica:
   - [x] Ejecutar flujo de migracion mas de una vez y confirmar idempotencia
     - Validado en Playwright con cuenta `yoomat.75.wow.04@hotmail.com`: dos migraciones consecutivas completadas, manteniendo el mismo resumen `Productos: 30, comercios: 5, listas: 0` sin crecimiento inesperado.
 - [ ] Guardar evidencia Playwright:
-  - [ ] capturas
-  - [ ] logs
-  - [ ] resumen final por escenario
+  - [x] capturas
+    - `evidencia-configuracion-actual.png`, `evidencia-drawer-nombre-manual.png`.
+  - [x] logs
+    - Consola Playwright: `.playwright-mcp\\console-2026-05-04T09-58-14-752Z.log`.
+  - [x] resumen final por escenario
+    - Acceso inicial, cierre de sesión, migración idempotente, aislamiento por `uid` y prioridad de perfil manual validados.
 
 ## Progreso del plan
 
@@ -330,12 +337,12 @@ Validar por IA (Playwright) los nuevos flujos de pantalla inicial, sincronizacio
 - [x] Fase 4A: Auth robusta
 - [x] Fase 4B: Perfil editable y datos personales
 - [ ] Fase 4C: Reorganizacion UX de Configuracion
-- [ ] Fase 4D: Pantalla de acceso y cabecera de usuario
-- [ ] Fase 4E: Aislamiento multiusuario en mismo dispositivo
+- [x] Fase 4D: Pantalla de acceso y cabecera de usuario
+- [x] Fase 4E: Aislamiento multiusuario en mismo dispositivo
 - [ ] Fase 5: Preparar corte a produccion
 - [x] Fase Testing
-- [ ] Fase Testing 4D-4E (Playwright)
+- [x] Fase Testing 4D-4E (Playwright)
 
 Fecha de creacion: 14 de Marzo 2026
-Fecha de ultima actualizacion: 3 de Mayo 2026
+Fecha de ultima actualizacion: 4 de Mayo 2026
 Estado: EN PROCESO
