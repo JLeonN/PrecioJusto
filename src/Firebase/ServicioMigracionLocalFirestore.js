@@ -1,6 +1,9 @@
 ﻿import { doc, serverTimestamp, setDoc, writeBatch } from 'firebase/firestore'
 import { firestoreDb } from './ClienteFirebase.js'
-import { adaptadorActual } from '../almacenamiento/servicios/AlmacenamientoService.js'
+import {
+  adaptadorActual,
+  configurarEspacioTrabajoAlmacenamiento,
+} from '../almacenamiento/servicios/AlmacenamientoService.js'
 import productosService from '../almacenamiento/servicios/ProductosService.js'
 import comerciosService from '../almacenamiento/servicios/ComerciosService.js'
 import listaJustaService from '../almacenamiento/servicios/ListaJustaService.js'
@@ -12,7 +15,32 @@ const CLAVE_PREFERENCIAS = 'preferencias_usuario'
 const CLAVE_SESION_ESCANEO = 'sesion_escaneo'
 const CLAVE_RESPALDO_MIGRACION = 'respaldo_migracion_firestore'
 
-async function obtenerDatosLocalesActuales() {
+function obtenerEspacioActualAdaptador() {
+  return adaptadorActual?.espacioTrabajo || 'compartido'
+}
+
+function construirEspaciosCandidatos(usuarioId) {
+  const espacios = []
+
+  const agregar = (valor) => {
+    const normalizado = String(valor || '')
+      .trim()
+      .toLowerCase()
+
+    if (!normalizado || espacios.includes(normalizado)) return
+    espacios.push(normalizado)
+  }
+
+  agregar(obtenerEspacioActualAdaptador())
+  agregar(`uid-${usuarioId}`)
+  agregar('compartido')
+
+  return espacios
+}
+
+async function obtenerDatosLocalesEspacio(espacioTrabajo) {
+  configurarEspacioTrabajoAlmacenamiento(espacioTrabajo)
+
   const [productos, comercios, listas, preferencias, sesionEscaneo] = await Promise.all([
     productosService.obtenerTodos(),
     comerciosService.obtenerTodos(),
@@ -27,7 +55,44 @@ async function obtenerDatosLocalesActuales() {
     listas,
     preferencias,
     sesionEscaneo: sesionEscaneo || null,
+    espacioTrabajo,
   }
+}
+
+async function obtenerDatosLocalesActuales(usuarioId) {
+  const espacioOriginal = obtenerEspacioActualAdaptador()
+  const espacios = construirEspaciosCandidatos(usuarioId)
+  let datosSeleccionados = null
+
+  try {
+    for (const espacio of espacios) {
+      const datos = await obtenerDatosLocalesEspacio(espacio)
+      const tieneContenido =
+        datos.productos.length > 0 || datos.comercios.length > 0 || datos.listas.length > 0
+
+      if (tieneContenido) {
+        datosSeleccionados = datos
+        break
+      }
+
+      if (!datosSeleccionados) {
+        datosSeleccionados = datos
+      }
+    }
+  } finally {
+    configurarEspacioTrabajoAlmacenamiento(espacioOriginal)
+  }
+
+  return (
+    datosSeleccionados || {
+      productos: [],
+      comercios: [],
+      listas: [],
+      preferencias: null,
+      sesionEscaneo: null,
+      espacioTrabajo: espacioOriginal,
+    }
+  )
 }
 
 function crearResumenMigracion(datosLocales) {
@@ -37,11 +102,12 @@ function crearResumenMigracion(datosLocales) {
     totalListas: datosLocales.listas.length,
     tienePreferencias: Boolean(datosLocales.preferencias),
     tieneSesionEscaneo: Boolean(datosLocales.sesionEscaneo?.items?.length),
+    espacioTrabajoOrigen: datosLocales.espacioTrabajo || 'desconocido',
   }
 }
 
 async function migrarDatosLocalesAFirestore(usuarioId, opciones = {}) {
-  const datosLocales = await obtenerDatosLocalesActuales()
+  const datosLocales = await obtenerDatosLocalesActuales(usuarioId)
   const resumen = crearResumenMigracion(datosLocales)
   const intentoId = `migracion_${Date.now()}`
   const claveRespaldo = `${CLAVE_RESPALDO_MIGRACION}_${usuarioId}`
@@ -81,6 +147,7 @@ async function migrarDatosLocalesAFirestore(usuarioId, opciones = {}) {
         actualizadoEn: serverTimestamp(),
         migradoDesdeLocal: true,
         origenMigracion: 'localStorageAdapter',
+        espacioTrabajoOrigen: datosLocales.espacioTrabajo || 'desconocido',
       },
       { merge: true },
     )
@@ -156,6 +223,7 @@ async function migrarDatosLocalesAFirestore(usuarioId, opciones = {}) {
         intentoId,
         fechaMigracion: serverTimestamp(),
         nota: 'Migracion idempotente con merge. No elimina datos locales.',
+        espacioTrabajoOrigen: datosLocales.espacioTrabajo || 'desconocido',
       },
       { merge: true },
     )
