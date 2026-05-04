@@ -10,11 +10,22 @@
           v-model="seccionesAbiertas.cuentaPerfil"
           header-class="cabecera-seccion"
           expand-separator
-          icon="person"
-          label="Cuenta y perfil"
-          :caption="resumenCuentaPerfil"
+          hide-expand-icon
           ref="tarjetaCuentaCorreoRef"
         >
+          <template #header="{ expanded }">
+            <q-item-section avatar>
+              <q-icon name="person" />
+            </q-item-section>
+            <q-item-section>
+              <div class="titulo-cabecera-cuenta">Cuenta y perfil</div>
+              <div class="nombre-cabecera-cuenta">{{ nombreResumenCuentaPerfil }}</div>
+              <div v-if="!expanded" class="correo-cabecera-cuenta">{{ correoResumenCuentaPerfil }}</div>
+            </q-item-section>
+            <q-item-section side>
+              <q-icon :name="expanded ? 'expand_less' : 'expand_more'" />
+            </q-item-section>
+          </template>
           <div class="bloque-contenido">
             <div class="text-subtitle2 text-weight-medium">Cuenta</div>
             <p class="text-caption text-grey-7 q-mt-xs q-mb-sm">
@@ -52,9 +63,39 @@
               Datos visibles de tu cuenta. Podés editarlos cuando quieras.
             </p>
             <div class="preview-avatar-perfil q-mb-sm">
-              <q-avatar size="64px" class="avatar-perfil">
+              <q-avatar size="92px" class="avatar-perfil">
                 <img v-if="fotoPreviewPerfil" :src="fotoPreviewPerfil" alt="Foto de perfil" />
                 <span v-else class="iniciales-perfil">{{ inicialesPerfil }}</span>
+                <q-btn
+                  round
+                  dense
+                  unelevated
+                  color="primary"
+                  icon="photo_camera"
+                  class="boton-accion-avatar"
+                >
+                  <q-menu anchor="bottom right" self="top right">
+                    <q-list dense style="min-width: 180px">
+                      <q-item clickable v-close-popup @click="abrirSelectorFotoPerfil">
+                        <q-item-section avatar>
+                          <q-icon name="photo_library" />
+                        </q-item-section>
+                        <q-item-section>Cambiar foto</q-item-section>
+                      </q-item>
+                      <q-item
+                        v-if="perfilEditableFoto"
+                        clickable
+                        v-close-popup
+                        @click="quitarFotoPerfil"
+                      >
+                        <q-item-section avatar>
+                          <q-icon name="delete" color="negative" />
+                        </q-item-section>
+                        <q-item-section>Quitar foto</q-item-section>
+                      </q-item>
+                    </q-list>
+                  </q-menu>
+                </q-btn>
               </q-avatar>
             </div>
             <div class="column q-gutter-sm">
@@ -65,23 +106,6 @@
                 class="input-archivo-oculto"
                 @change="manejarSeleccionArchivoFoto"
               />
-              <div class="acciones-foto-perfil">
-                <q-btn
-                  outline
-                  color="primary"
-                  no-caps
-                  label="Cambiar foto"
-                  @click="abrirSelectorFotoPerfil"
-                />
-                <q-btn
-                  v-if="perfilEditableFoto"
-                  flat
-                  color="negative"
-                  no-caps
-                  label="Quitar foto"
-                  @click="quitarFotoPerfil"
-                />
-              </div>
               <InputFormularioReutilizable v-model="perfilEditableNombre" label="Nombre" />
               <InputFormularioReutilizable
                 v-model="perfilEditableFechaNacimiento"
@@ -373,7 +397,7 @@ const etiquetaTemaActivo = computed(() => (quasar.dark.isActive ? 'Oscuro' : 'Cl
 const etiquetaEstadoCuenta = computed(() => {
   if (!usuarioStore.autenticado) return 'Sin sesión'
   if (usuarioStore.esAnonimo) return 'Invitado'
-  return usuarioStore.perfil?.email ? `Google (${usuarioStore.perfil.email})` : 'Registrada'
+  return 'Registrada'
 })
 const textoResumenMigracion = computed(() => {
   const resumen = usuarioStore.ultimoResumenMigracion
@@ -385,9 +409,11 @@ const etiquetaEdadPerfil = computed(() => {
   const edad = calcularEdadDesdeFecha(perfilEditableFechaNacimiento.value)
   return Number.isInteger(edad) ? `${edad} años` : 'Sin definir'
 })
-const resumenCuentaPerfil = computed(() => {
-  const nombre = perfilEditableNombre.value?.trim() || 'Sin nombre'
-  return `${etiquetaEstadoCuenta.value} - ${nombre}`
+const nombreResumenCuentaPerfil = computed(() => perfilEditableNombre.value?.trim() || 'Sin nombre')
+const correoResumenCuentaPerfil = computed(() => {
+  if (!usuarioStore.autenticado) return 'Sin sesión'
+  if (usuarioStore.esAnonimo) return 'Modo invitado'
+  return usuarioStore.perfil?.email || 'Cuenta registrada'
 })
 const resumenTema = computed(() => `Tema activo: ${etiquetaTemaActivo.value}`)
 const resumenMoneda = computed(() => {
@@ -761,6 +787,23 @@ onMounted(async () => {
   min-height: 64px;
   padding: 6px 4px;
 }
+.titulo-cabecera-cuenta {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+.nombre-cabecera-cuenta {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-primario);
+  margin-top: 2px;
+  line-height: 1.2;
+}
+.correo-cabecera-cuenta {
+  font-size: 0.82rem;
+  color: var(--texto-secundario);
+  line-height: 1.2;
+}
 .bloque-contenido {
   padding: 18px 16px;
 }
@@ -780,17 +823,20 @@ onMounted(async () => {
   display: flex;
   justify-content: center;
 }
-.acciones-foto-perfil {
-  display: flex;
-  gap: 10px;
-}
 .avatar-perfil {
+  position: relative;
   background: color-mix(in srgb, var(--color-primario) 20%, var(--fondo-tarjeta));
   color: var(--texto-primario);
   border: 1px solid color-mix(in srgb, var(--color-primario) 40%, var(--borde-color));
 }
+.boton-accion-avatar {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  border: 2px solid var(--fondo-tarjeta);
+}
 .iniciales-perfil {
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 700;
 }
 .bloque-ayuda-moneda {
@@ -872,9 +918,6 @@ onMounted(async () => {
   }
   .acciones-correo {
     grid-template-columns: 1fr;
-  }
-  .acciones-foto-perfil {
-    flex-direction: column;
   }
   .selector-modo-tema {
     grid-template-columns: 1fr;
