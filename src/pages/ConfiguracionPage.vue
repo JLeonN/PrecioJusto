@@ -58,6 +58,30 @@
               </q-avatar>
             </div>
             <div class="column q-gutter-sm">
+              <input
+                ref="inputArchivoFotoRef"
+                type="file"
+                accept="image/*"
+                class="input-archivo-oculto"
+                @change="manejarSeleccionArchivoFoto"
+              />
+              <div class="acciones-foto-perfil">
+                <q-btn
+                  outline
+                  color="primary"
+                  no-caps
+                  label="Cambiar foto"
+                  @click="abrirSelectorFotoPerfil"
+                />
+                <q-btn
+                  v-if="perfilEditableFoto"
+                  flat
+                  color="negative"
+                  no-caps
+                  label="Quitar foto"
+                  @click="quitarFotoPerfil"
+                />
+              </div>
               <InputFormularioReutilizable v-model="perfilEditableNombre" label="Nombre" />
               <InputFormularioReutilizable
                 v-model="perfilEditableFechaNacimiento"
@@ -74,6 +98,15 @@
                 label="Guardar perfil"
                 :loading="usuarioStore.cargandoPerfil"
                 @click="manejarGuardarPerfilEditable"
+              />
+              <q-btn
+                v-if="usuarioStore.tieneSesionRealActiva"
+                outline
+                color="negative"
+                no-caps
+                label="Cerrar sesión"
+                :loading="cargandoAccionCuenta"
+                @click="manejarCerrarSesionReal"
               />
             </div>
           </div>
@@ -288,11 +321,19 @@
       @accion-principal="confirmarModoInvitado"
       @accion-secundaria="irARegistroDesdeModal"
     />
+
+    <EditorImagen
+      v-model="editorFotoAbierto"
+      :src="fotoTemporalEdicion"
+      @guardar="manejarGuardarFotoEditada"
+      @cancelar="manejarCancelarFotoEditada"
+    />
   </q-page>
 </template>
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { MONEDAS } from '../almacenamiento/constantes/Monedas.js'
 import { usePublicidad } from '../composables/usePublicidad.js'
@@ -300,8 +341,10 @@ import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore
 import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
 import ModalConfirmacionReutilizable from '../components/Compartidos/ModalConfirmacionReutilizable.vue'
 import InputFormularioReutilizable from '../components/Compartidos/InputFormularioReutilizable.vue'
+import EditorImagen from '../components/Compartidos/EditorImagen.vue'
 
 const quasar = useQuasar()
+const router = useRouter()
 const preferenciasStore = usePreferenciasStore()
 const usuarioStore = useUsuarioStore()
 const { mostrarInterstitial } = usePublicidad()
@@ -312,8 +355,12 @@ const contrasenaCuenta = ref('')
 const mostrarContrasenaCuenta = ref(false)
 const modalInvitadoAbierto = ref(false)
 const tarjetaCuentaCorreoRef = ref(null)
+const inputArchivoFotoRef = ref(null)
 const perfilEditableNombre = ref('')
+const perfilEditableFoto = ref('')
 const perfilEditableFechaNacimiento = ref('')
+const fotoTemporalEdicion = ref('')
+const editorFotoAbierto = ref(false)
 const esModoDesarrollo = import.meta.env.DEV
 const TIEMPO_ESPERA_INTERSTICIAL_MS = 60000
 const seccionesAbiertas = ref({
@@ -358,7 +405,7 @@ const resumenSincronizacion = computed(() => {
   if (textoResumenMigracion.value) return 'Última migración completada'
   return 'Sin migración reciente'
 })
-const fotoPreviewPerfil = computed(() => usuarioStore.perfil?.foto?.trim() || null)
+const fotoPreviewPerfil = computed(() => perfilEditableFoto.value?.trim() || null)
 const inicialesPerfil = computed(() => {
   const nombre = perfilEditableNombre.value?.trim()
   if (!nombre) return 'U'
@@ -383,8 +430,42 @@ function calcularEdadDesdeFecha(fechaNacimientoIso) {
 }
 
 function sincronizarFormularioPerfil(perfil) {
-  perfilEditableNombre.value = perfil?.nombre || ''
-  perfilEditableFechaNacimiento.value = perfil?.fechaNacimiento || ''
+  perfilEditableNombre.value = perfil?.perfilEditable?.nombre || perfil?.nombre || ''
+  perfilEditableFoto.value = perfil?.perfilEditable?.foto || perfil?.foto || ''
+  perfilEditableFechaNacimiento.value = perfil?.perfilEditable?.fechaNacimiento || perfil?.fechaNacimiento || ''
+}
+
+function abrirSelectorFotoPerfil() {
+  inputArchivoFotoRef.value?.click()
+}
+
+function quitarFotoPerfil() {
+  perfilEditableFoto.value = ''
+}
+
+function manejarCancelarFotoEditada() {
+  fotoTemporalEdicion.value = ''
+}
+
+function manejarGuardarFotoEditada(nuevaFotoBase64) {
+  perfilEditableFoto.value = nuevaFotoBase64 || ''
+  fotoTemporalEdicion.value = ''
+}
+
+async function manejarSeleccionArchivoFoto(evento) {
+  const archivo = evento?.target?.files?.[0]
+  if (!archivo) return
+
+  const lector = new FileReader()
+  lector.onload = () => {
+    fotoTemporalEdicion.value = String(lector.result || '')
+    editorFotoAbierto.value = true
+  }
+  lector.readAsDataURL(archivo)
+
+  if (inputArchivoFotoRef.value) {
+    inputArchivoFotoRef.value.value = ''
+  }
 }
 
 function validarPerfilEditable() {
@@ -458,6 +539,21 @@ async function manejarEntrarConGoogle() {
   }
 
   cargandoAccionCuenta.value = false
+}
+
+async function manejarCerrarSesionReal() {
+  cargandoAccionCuenta.value = true
+
+  try {
+    await usuarioStore.cerrarSesion()
+    quasar.notify({ type: 'info', message: 'Sesión cerrada. Podés entrar con otra cuenta.' })
+    await router.push('/acceso')
+  } catch (error) {
+    console.error('Error al cerrar sesión:', error)
+    quasar.notify({ type: 'negative', message: 'No se pudo cerrar sesión.' })
+  } finally {
+    cargandoAccionCuenta.value = false
+  }
 }
 
 async function manejarContinuarComoInvitado() {
@@ -646,7 +742,7 @@ async function manejarGuardarPerfilEditable() {
 
   const perfilOk = await usuarioStore.actualizarPerfilEditable({
     nombre: perfilEditableNombre.value.trim(),
-    foto: usuarioStore.perfil?.foto || '',
+    foto: perfilEditableFoto.value || '',
     fechaNacimiento: perfilEditableFechaNacimiento.value,
   })
 
@@ -715,6 +811,10 @@ onMounted(async () => {
   display: flex;
   justify-content: center;
 }
+.acciones-foto-perfil {
+  display: flex;
+  gap: 10px;
+}
 .avatar-perfil {
   background: color-mix(in srgb, var(--color-primario) 20%, var(--fondo-tarjeta));
   color: var(--texto-primario);
@@ -750,6 +850,9 @@ onMounted(async () => {
 }
 .boton-accion-correo {
   min-height: 42px;
+}
+.input-archivo-oculto {
+  display: none;
 }
 .selector-modo-tema {
   display: grid;
@@ -800,6 +903,9 @@ onMounted(async () => {
   }
   .acciones-correo {
     grid-template-columns: 1fr;
+  }
+  .acciones-foto-perfil {
+    flex-direction: column;
   }
   .selector-modo-tema {
     grid-template-columns: 1fr;

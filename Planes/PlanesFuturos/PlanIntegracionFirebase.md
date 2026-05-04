@@ -149,39 +149,39 @@ Reordenar la pantalla de Configuracion para que sea clara, agrupada y escalable,
 
 Agregar una experiencia de acceso inicial clara y mejorar la identidad visual del usuario en la app, manteniendo el flujo actual de invitado.
 
-- [ ] Implementar pantalla de acceso inicial al abrir la app por primera vez:
+- [x] Implementar pantalla de acceso inicial al abrir la app por primera vez:
   - [x] Entrar con Google
   - [x] Entrar con correo
   - [x] Continuar como invitado
 - [ ] Definir prioridad de sesion al iniciar:
   - [x] Si existe usuario real (Google/correo), usar siempre sesion real
   - [x] Si no existe usuario real, iniciar/continuar como invitado
-- [ ] Mantener sesion persistente:
+- [x] Mantener sesion persistente:
   - [x] Si el usuario ya esta autenticado, no mostrar pantalla de acceso nuevamente
   - [x] Solo volver a mostrar acceso si el usuario cierra sesion o se pierde la sesion
 - [ ] Definir comportamiento en perdida de sesion:
   - [ ] Error temporal de red: no cerrar sesion, mostrar aviso y reintentar
   - [ ] Token invalido/revocado: cerrar sesion real y volver a modo invitado
-- [ ] Mejorar visualizacion de foto de perfil:
+- [x] Mejorar visualizacion de foto de perfil:
   - [x] Mostrar avatar visible en Configuracion (no solo URL)
   - [x] Mantener `foto` como URL en Firestore, pero renderizar imagen en UI
   - [x] Definir fallback visual cuando la imagen no cargue (inicial del nombre)
-- [ ] Mejorar cabecera del drawer (menu lateral):
+- [x] Mejorar cabecera del drawer (menu lateral):
   - [x] Mantener titulo actual de la app
   - [x] Mostrar nombre del usuario debajo del encabezado cuando este logueado
   - [x] No mostrar correo en el drawer
   - [x] Si el usuario esta en modo invitado, mantener comportamiento actual sin datos personales
 - [ ] Mantener consistencia de estados:
   - [x] Usuario logueado ve su identidad (nombre/foto)
-  - [ ] Usuario invitado ve UI neutra de invitado
+  - [x] Usuario invitado ve UI neutra de invitado
   - [x] Sincronizar automaticamente cambios locales cuando vuelva internet (sin accion manual)
   - [ ] No romper migracion local -> Firestore ni flujos de auth ya validados
 - [ ] Definir origen de nombre y foto visibles:
   - [x] Prioridad: perfil editable manual > proveedor (Google/correo) > fallback invitado
   - [x] Si usuario edita manualmente, mantener ese valor hasta nuevo cambio manual
-- [ ] Extender edicion de perfil:
-  - [ ] Permitir cambiar foto de perfil desde UI (reutilizando flujo de imagen existente del proyecto)
-  - [ ] Permitir cambiar nombre visible desde UI y persistirlo en Firestore
+- [x] Extender edicion de perfil:
+  - [x] Permitir cambiar foto de perfil desde UI (reutilizando flujo de imagen existente del proyecto)
+  - [x] Permitir cambiar nombre visible desde UI y persistirlo en Firestore
 - [ ] Criterio de cierre de fase:
   - [ ] Flujo inicial probado en login Google, correo e invitado
   - [ ] Reapertura de app conserva sesion correctamente
@@ -288,6 +288,8 @@ Validar por IA (Playwright) los nuevos flujos de pantalla inicial, sincronizacio
     - Validado en Playwright: con sesion real activa, navegar a `/#/acceso` redirige automaticamente a `/#/`.
   - [x] Usuario invitado entra y mantiene estado de invitado
     - Validado en Playwright con recarga (`F5`) y permanencia en `/#/` sin redireccion a `/#/acceso` cuando ya existe estado invitado activo.
+  - [x] Cerrar sesion real vuelve a flujo de acceso y estado invitado
+    - Validado en Playwright: desde Configuracion, `Cerrar sesión` redirige a `/#/acceso` y la UI queda en invitado.
 - [ ] Probar comportamiento offline:
   - [ ] Crear/editar datos sin internet (guardado local)
   - [ ] Reconectar internet y verificar sincronizacion automatica a Firestore
@@ -313,7 +315,8 @@ Validar por IA (Playwright) los nuevos flujos de pantalla inicial, sincronizacio
     - [x] Verificar consistencia al alternar sesiones A/B/A en el mismo dispositivo.
     - Evidencia: Playwright en `localhost` mostró `30 productos guardados` para `wow.04` y `50 productos guardados` para `wow.03`; al volver a `wow.04` se mantuvo `30`, confirmando aislamiento por espacio de trabajo `uid`.
 - [ ] Probar no-duplicacion de migracion automatica:
-  - [ ] Ejecutar flujo de migracion mas de una vez y confirmar idempotencia
+  - [x] Ejecutar flujo de migracion mas de una vez y confirmar idempotencia
+    - Validado en Playwright con cuenta `yoomat.75.wow.04@hotmail.com`: dos migraciones consecutivas completadas, manteniendo el mismo resumen `Productos: 30, comercios: 5, listas: 0` sin crecimiento inesperado.
 - [ ] Guardar evidencia Playwright:
   - [ ] capturas
   - [ ] logs

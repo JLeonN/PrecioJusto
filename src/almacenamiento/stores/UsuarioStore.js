@@ -347,6 +347,8 @@ export const useUsuarioStore = defineStore('usuario', () => {
   }
 
   async function cerrarSesion() {
+    accesoInicialCompletado.value = false
+    localStorage.removeItem(CLAVE_ACCESO_INICIAL)
     await servicioAuthFirebase.cerrarSesionActual()
   }
 
