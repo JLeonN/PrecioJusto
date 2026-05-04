@@ -282,25 +282,19 @@
         >
           <div class="bloque-contenido">
             <p class="text-caption text-grey-7 q-mt-none q-mb-sm">
-              Copia tus datos locales actuales a Firestore sin borrar el almacenamiento local.
+              Tu información se sincroniza automáticamente cuando entrás con tu cuenta.
             </p>
+            <q-banner rounded class="banner-cuenta q-mb-sm">
+              Si notás que falta algo, podés usar el botón de abajo para reintentar la sincronización.
+            </q-banner>
             <div class="column q-gutter-sm">
               <q-btn
                 color="secondary"
                 unelevated
                 no-caps
-                label="Migrar datos locales ahora"
+                label="Reintentar sincronización"
                 :loading="usuarioStore.cargandoMigracion"
                 @click="manejarMigracionDatos"
-              />
-              <q-btn
-                v-if="esModoDesarrollo"
-                color="warning"
-                outline
-                no-caps
-                label="Forzar error controlado de migración (debug)"
-                :loading="usuarioStore.cargandoMigracion"
-                @click="manejarMigracionConErrorControlado"
               />
               <q-banner v-if="textoResumenMigracion" rounded class="banner-cuenta">
                 {{ textoResumenMigracion }}
@@ -361,7 +355,6 @@ const perfilEditableFoto = ref('')
 const perfilEditableFechaNacimiento = ref('')
 const fotoTemporalEdicion = ref('')
 const editorFotoAbierto = ref(false)
-const esModoDesarrollo = import.meta.env.DEV
 const TIEMPO_ESPERA_INTERSTICIAL_MS = 60000
 const seccionesAbiertas = ref({
   cuentaPerfil: false,
@@ -402,8 +395,8 @@ const resumenMoneda = computed(() => {
   return `${preferenciasStore.monedaDefaultEfectiva} (${modo})`
 })
 const resumenSincronizacion = computed(() => {
-  if (textoResumenMigracion.value) return 'Última migración completada'
-  return 'Sin migración reciente'
+  if (textoResumenMigracion.value) return 'Sincronización lista'
+  return 'Sincronización automática activa'
 })
 const fotoPreviewPerfil = computed(() => perfilEditableFoto.value?.trim() || null)
 const inicialesPerfil = computed(() => {
@@ -687,49 +680,25 @@ async function manejarMigracionDatos() {
 
   quasar
     .dialog({
-      title: 'Confirmar migración',
-      message: 'Se copiarán tus datos locales actuales hacia Firestore. ¿Continuar?',
+      title: 'Reintentar sincronización',
+      message: 'Vamos a volver a sincronizar tus datos de este dispositivo con tu cuenta. ¿Querés continuar?',
       persistent: true,
-      ok: { label: 'Migrar', color: 'secondary' },
+      ok: { label: 'Reintentar', color: 'secondary' },
       cancel: { label: 'Cancelar', flat: true },
     })
     .onOk(async () => {
       const resumen = await usuarioStore.migrarDatosLocales()
 
       if (resumen) {
-        quasar.notify({ type: 'positive', message: 'Migración completada en Firebase.' })
+        quasar.notify({ type: 'positive', message: 'Sincronización completada correctamente.' })
         return
       }
 
       quasar.notify({
         type: 'negative',
-        message: usuarioStore.errorMigracion || 'No se pudo completar la migración.',
+        message: usuarioStore.errorMigracion || 'No se pudo completar la sincronización.',
       })
     })
-}
-
-async function manejarMigracionConErrorControlado() {
-  if (!usuarioStore.tieneSesionActiva) {
-    quasar.notify({
-      type: 'warning',
-      message: 'Necesitás una sesión activa antes de migrar datos.',
-    })
-    return
-  }
-
-  const resumen = await usuarioStore.migrarDatosLocales({ forzarErrorControlado: true })
-  if (resumen) {
-    quasar.notify({
-      type: 'warning',
-      message: 'La prueba de error controlado no falló como se esperaba.',
-    })
-    return
-  }
-
-  quasar.notify({
-    type: 'info',
-    message: 'Error controlado de migración ejecutado correctamente.',
-  })
 }
 
 async function manejarGuardarPerfilEditable() {
