@@ -372,6 +372,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
         opciones,
       )
       ultimoResumenMigracion.value = resumen
+      await recargarContextoDatos()
       return resumen
     } catch (error) {
       console.error('Error al migrar datos locales:', error)

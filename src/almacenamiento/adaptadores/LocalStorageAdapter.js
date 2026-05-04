@@ -124,6 +124,9 @@ class LocalStorageAdapter {
         // Filtrar solo claves del espacio activo
         if (!claveCompleta.startsWith(prefijoActivo)) continue
 
+        // En espacio compartido, excluir claves de espacios por uid para no mezclar cuentas
+        if (this.espacioTrabajo === 'compartido' && this._esClaveEspacioUid(claveCompleta)) continue
+
         // Extraer la clave sin prefijo
         const clave = claveCompleta.replace(prefijoActivo, '')
 
@@ -231,6 +234,10 @@ class LocalStorageAdapter {
    */
   _construirClave(clave) {
     return `${this._construirPrefijoActivo()}${clave}`
+  }
+
+  _esClaveEspacioUid(claveCompleta) {
+    return /^precio_justo_uid-[^_]+_/i.test(claveCompleta)
   }
 
   _construirPrefijoActivo() {
