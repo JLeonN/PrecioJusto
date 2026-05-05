@@ -117,7 +117,7 @@
                 type="date"
               />
               <q-banner rounded class="banner-cuenta">
-                Edad calculada: <strong>{{ etiquetaEdadPerfil }}</strong>
+                Edad: <strong>{{ etiquetaEdadPerfil }}</strong>
               </q-banner>
               <q-btn
                 color="primary"
