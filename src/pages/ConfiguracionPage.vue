@@ -26,7 +26,7 @@
               <q-icon :name="expanded ? 'expand_less' : 'expand_more'" />
             </q-item-section>
           </template>
-          <div class="bloque-contenido">
+          <div ref="bloquePerfilRef" class="bloque-contenido">
             <div class="text-subtitle2 text-weight-medium">Cuenta</div>
             <p class="text-caption text-grey-7 q-mt-xs q-mb-sm">
               Podés usar la app con Google o como invitado.
@@ -110,7 +110,11 @@
                 class="input-archivo-oculto"
                 @change="manejarSeleccionArchivoFoto"
               />
-              <InputFormularioReutilizable v-model="perfilEditableNombre" label="Nombre" />
+              <InputFormularioReutilizable
+                ref="inputNombrePerfilRef"
+                v-model="perfilEditableNombre"
+                label="Nombre"
+              />
               <InputFormularioReutilizable
                 v-model="perfilEditableFechaNacimiento"
                 label="Fecha de nacimiento"
@@ -354,8 +358,8 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { MONEDAS } from '../almacenamiento/constantes/Monedas.js'
 import { usePublicidad } from '../composables/usePublicidad.js'
@@ -366,6 +370,7 @@ import InputFormularioReutilizable from '../components/Compartidos/InputFormular
 import EditorImagen from '../components/Compartidos/EditorImagen.vue'
 
 const quasar = useQuasar()
+const route = useRoute()
 const router = useRouter()
 const preferenciasStore = usePreferenciasStore()
 const usuarioStore = useUsuarioStore()
@@ -377,6 +382,8 @@ const contrasenaCuenta = ref('')
 const mostrarContrasenaCuenta = ref(false)
 const modalInvitadoAbierto = ref(false)
 const tarjetaCuentaCorreoRef = ref(null)
+const bloquePerfilRef = ref(null)
+const inputNombrePerfilRef = ref(null)
 const inputArchivoFotoRef = ref(null)
 const perfilEditableNombre = ref('')
 const perfilEditableFoto = ref('')
@@ -615,6 +622,47 @@ function irARegistroDesdeModal() {
   }
 }
 
+function enfocarCampoNombrePerfil() {
+  const componenteInput = inputNombrePerfilRef.value
+  const elementoInput =
+    componenteInput?.$el?.querySelector?.('input') ||
+    componenteInput?.querySelector?.('input') ||
+    null
+  if (!elementoInput) return
+
+  setTimeout(() => {
+    elementoInput.focus()
+    elementoInput.select?.()
+  }, 220)
+}
+
+function desplazarSuaveHastaPerfil() {
+  const elementoPerfil = bloquePerfilRef.value
+  if (!elementoPerfil?.getBoundingClientRect) return
+
+  const encabezado = document.querySelector('.q-header')
+  const altoEncabezado = encabezado?.getBoundingClientRect?.().height || 0
+  const margenSuperior = 10
+  const posicionActual = window.scrollY || window.pageYOffset || 0
+  const posicionObjetivo =
+    posicionActual + elementoPerfil.getBoundingClientRect().top - altoEncabezado - margenSuperior
+
+  window.scrollTo({
+    top: Math.max(0, posicionObjetivo),
+    behavior: 'smooth',
+  })
+}
+
+async function prepararVistaPerfilDesdeNavegacion(foco = '') {
+  seccionesAbiertas.value.cuentaPerfil = true
+  await nextTick()
+  desplazarSuaveHastaPerfil()
+
+  if (foco === 'nombre') {
+    enfocarCampoNombrePerfil()
+  }
+}
+
 function validarCorreoCuenta() {
   if (!correoCuenta.value.trim()) {
     quasar.notify({ type: 'warning', message: 'Ingresá un correo.' })
@@ -772,7 +820,19 @@ onMounted(async () => {
   if (preferenciasStore.modoMoneda === 'automatica' && !preferenciasStore.paisDetectado) {
     await preferenciasStore.detectarMonedaAutomatica()
   }
+
+  if (route.query.seccion === 'perfil') {
+    await prepararVistaPerfilDesdeNavegacion(String(route.query.foco || ''))
+  }
 })
+
+watch(
+  () => [route.query.seccion, route.query.foco],
+  async ([seccion, foco]) => {
+    if (seccion !== 'perfil') return
+    await prepararVistaPerfilDesdeNavegacion(String(foco || ''))
+  },
+)
 </script>
 
 <style scoped>

@@ -91,7 +91,14 @@
                         <!-- Header del drawer -->
             <q-item class="q-mb-md">
               <q-item-section avatar>
-                <div v-if="mostrarIdentidadUsuario" class="avatar-usuario-drawer-box">
+                <div
+                  v-if="mostrarIdentidadUsuario"
+                  class="avatar-usuario-drawer-box clickable"
+                  role="button"
+                  tabindex="0"
+                  @click="irAPerfilDesdeDrawer('foto')"
+                  @keyup.enter="irAPerfilDesdeDrawer('foto')"
+                >
                   <q-avatar size="56px" class="avatar-usuario-drawer">
                     <img v-if="fotoUsuarioDrawer" :src="fotoUsuarioDrawer" alt="Foto de perfil" />
                     <span v-else class="iniciales-usuario-drawer">{{ inicialesUsuarioDrawer }}</span>
@@ -108,9 +115,16 @@
               <q-item-section>
                 <q-item-label class="text-h6 text-weight-bold"> Precio Justo </q-item-label>
                 <q-item-label caption> Compará y ahorrá </q-item-label>
-                <q-item-label v-if="mostrarIdentidadUsuario" class="q-mt-xs text-caption text-weight-medium">
+                <q-btn
+                  v-if="mostrarIdentidadUsuario"
+                  flat
+                  dense
+                  no-caps
+                  class="q-mt-xs boton-nombre-drawer"
+                  @click="irAPerfilDesdeDrawer('nombre')"
+                >
                   {{ nombreUsuarioDrawer }}
-                </q-item-label>
+                </q-btn>
               </q-item-section>
             </q-item>
 
@@ -397,6 +411,14 @@ const irAMesaTrabajo = () => {
   if (esMesaActivo.value) return
   router.push('/mesa-trabajo')
 }
+const irAPerfilDesdeDrawer = (destino = 'foto') => {
+  drawerAbierto.value = false
+  const query =
+    destino === 'nombre'
+      ? { seccion: 'perfil', foco: 'nombre', accion: String(Date.now()) }
+      : { seccion: 'perfil', accion: String(Date.now()) }
+  router.push({ path: '/configuracion', query })
+}
 
 const manejarClickActualizarApp = async () => {
   await refrescarEstadoActualizacion({ mostrarModalSiHay: true })
@@ -570,6 +592,13 @@ useBotonAtras({ drawerAbierto, router, route })
   height: 56px;
   border-radius: 12px;
 }
+.avatar-usuario-drawer-box.clickable {
+  cursor: pointer;
+}
+.avatar-usuario-drawer-box.clickable:focus-visible {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+}
 .avatar-usuario-drawer {
   background: color-mix(in srgb, var(--color-primario) 22%, var(--fondo-tarjeta));
   color: var(--texto-primario);
@@ -584,6 +613,21 @@ useBotonAtras({ drawerAbierto, router, route })
   height: 100%;
   object-fit: cover;
   display: block;
+}
+.boton-nombre-drawer {
+  padding: 0;
+  min-height: 22px;
+  width: 100%;
+  justify-content: flex-start;
+  align-self: flex-start;
+  text-align: left;
+  color: var(--color-primario);
+  font-weight: 600;
+}
+.boton-nombre-drawer :deep(.q-btn__content) {
+  justify-content: flex-start;
+  text-align: left;
+  width: 100%;
 }
 @media (max-width: 420px) {
   .title-text {
