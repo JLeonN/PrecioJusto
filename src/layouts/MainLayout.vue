@@ -24,6 +24,17 @@
           >
             <span class="title-text">Precio Justo</span>
           </q-btn>
+          <q-btn
+            v-if="mostrarBotonAccesoHeader"
+            flat
+            dense
+            round
+            class="boton-acceso-header"
+            aria-label="Abrir acceso"
+            @click="irAAcceso"
+          >
+            <q-icon name="login" />
+          </q-btn>
         </div>
         <div v-if="MODO_PRUEBA" class="indicador-modo-prueba">MODO PRUEBA</div>
 
@@ -326,6 +337,9 @@ const textoActualizacionDrawer = computed(() => {
 const mostrarIdentidadUsuario = computed(
   () => usuarioStore.tieneSesionActiva && !usuarioStore.esAnonimo,
 )
+const mostrarBotonAccesoHeader = computed(
+  () => !MODO_PRUEBA && !usuarioStore.cargandoSesion && !usuarioStore.tieneSesionRealActiva,
+)
 function esNombreGenericoAnonimo(nombre) {
   return String(nombre || '').trim().toLowerCase() === 'usuario anónimo'
 }
@@ -405,6 +419,10 @@ const irAListaJusta = () => {
 const irAComercios = () => {
   if (esComerciosActivo.value) return
   router.push('/comercios')
+}
+const irAAcceso = () => {
+  if (route.path === '/acceso') return
+  router.push('/acceso')
 }
 
 const irAMesaTrabajo = () => {
@@ -508,6 +526,9 @@ useBotonAtras({ drawerAbierto, router, route })
   min-width: 0;
   max-width: 100%;
   padding: 0 6px;
+}
+.boton-acceso-header {
+  color: var(--color-primario);
 }
 .title-text {
   display: block;
