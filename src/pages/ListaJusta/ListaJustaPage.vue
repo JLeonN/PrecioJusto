@@ -103,6 +103,7 @@
     </div>
 
     <BotonAccionSticky
+      v-if="listaJustaStore.tieneListas"
       etiqueta="Crear lista"
       icono="add"
       class="boton-crear-lista-sticky"
