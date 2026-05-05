@@ -34,12 +34,16 @@
             <q-banner rounded class="banner-cuenta q-mb-sm">
               Estado:
               <strong>{{ etiquetaEstadoCuenta }}</strong>
+              <div v-if="correoEstadoCuenta" class="estado-cuenta-correo">
+                {{ correoEstadoCuenta }}
+              </div>
             </q-banner>
             <div class="column q-gutter-sm">
               <q-btn
                 color="primary"
                 unelevated
                 no-caps
+                icon="img:https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
                 label="Entrar con Google"
                 :loading="cargandoAccionCuenta"
                 @click="manejarEntrarConGoogle"
@@ -398,6 +402,10 @@ const etiquetaEstadoCuenta = computed(() => {
   if (!usuarioStore.autenticado) return 'Sin sesión'
   if (usuarioStore.esAnonimo) return 'Invitado'
   return 'Registrada'
+})
+const correoEstadoCuenta = computed(() => {
+  if (!usuarioStore.autenticado || usuarioStore.esAnonimo) return ''
+  return usuarioStore.perfil?.email?.trim() || ''
 })
 const textoResumenMigracion = computed(() => {
   const resumen = usuarioStore.ultimoResumenMigracion
@@ -904,6 +912,13 @@ onMounted(async () => {
   background: var(--fondo-banner-suave);
   color: var(--texto-primario);
   border: 1px solid var(--borde-color);
+}
+.estado-cuenta-correo {
+  margin-top: 4px;
+  font-size: 0.84rem;
+  line-height: 1.2;
+  color: var(--texto-secundario);
+  word-break: break-all;
 }
 @media (max-width: 640px) {
   .contenedor-configuracion {
