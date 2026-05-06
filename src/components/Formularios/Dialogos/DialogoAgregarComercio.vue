@@ -330,6 +330,12 @@ function cerrarDialogo() {
 .contenido-scroll {
   max-height: 60vh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.contenido-scroll::-webkit-scrollbar {
+  display: none;
 }
 /* En landscape, reducir altura */
 .dialogo-landscape .contenido-scroll {

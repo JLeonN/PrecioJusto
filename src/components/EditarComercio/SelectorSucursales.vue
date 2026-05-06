@@ -89,6 +89,11 @@ const estaSeleccionada = (direccion) => props.direccionSeleccionada?.id === dire
   overflow-x: auto;
   padding-bottom: 6px;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.selector-sucursales__lista::-webkit-scrollbar {
+  display: none;
 }
 .mini-tarjeta-sucursal {
   flex-shrink: 0;

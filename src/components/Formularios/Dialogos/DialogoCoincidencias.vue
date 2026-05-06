@@ -152,6 +152,12 @@ function cerrarDialogo() {
 .contenido-scroll {
   max-height: 400px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.contenido-scroll::-webkit-scrollbar {
+  display: none;
 }
 /* Items clickables con hover */
 .q-item {

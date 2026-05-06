@@ -589,6 +589,12 @@ function alCrearComercio(comercioCreado) {
 .mesa-lista-scroll {
   flex: 1;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.mesa-lista-scroll::-webkit-scrollbar {
+  display: none;
 }
 .mesa-trabajo-barra {
   border-bottom: 1px solid var(--borde-color);

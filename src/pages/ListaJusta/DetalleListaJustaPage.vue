@@ -2043,6 +2043,12 @@ onMounted(async () => {
   max-height: 320px;
   overflow: auto;
   border-radius: 10px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.lista-productos-origen::-webkit-scrollbar {
+  display: none;
 }
 .item-producto-seleccionable {
   align-items: center;
