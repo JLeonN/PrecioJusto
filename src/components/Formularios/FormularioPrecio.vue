@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="formulario-precio">
     <!-- COMERCIO (Selector con autocompletado) -->
     <q-select
@@ -112,7 +112,7 @@
     <!-- PRECIO Y MONEDA -->
     <div class="row q-col-gutter-md">
       <div class="col-8">
-        <q-input
+        <InputFormularioReutilizable
           ref="qInputPrecioRef"
           :model-value="valorPrecioTexto"
           :label="etiquetaPrecio"
@@ -163,6 +163,7 @@
 </template>
 
 <script setup>
+import InputFormularioReutilizable from '../Compartidos/InputFormularioReutilizable.vue'
 import { ref, watch, onMounted, computed } from 'vue'
 import { useComerciStore } from '../../almacenamiento/stores/comerciosStore.js'
 import { usePreferenciasStore } from '../../almacenamiento/stores/preferenciasStore.js'
@@ -399,7 +400,7 @@ function guardarComercioEscrito() {
   comercioTieneFoco.value = false
   if (textoTemporalComercio.value && !comercioSeleccionado.value) {
     comercioEscrito.value = textoTemporalComercio.value
-    console.log('💾 Comercio guardado:', comercioEscrito.value)
+    console.log('Comercio guardado:', comercioEscrito.value)
   }
 }
 
@@ -424,7 +425,7 @@ function guardarDireccionEscrita() {
   direccionTieneFoco.value = false
   if (textoTemporalDireccion.value && !direccionSeleccionada.value) {
     direccionEscrita.value = textoTemporalDireccion.value
-    console.log('💾 Dirección guardada:', direccionEscrita.value)
+    console.log('Dirección guardada:', direccionEscrita.value)
   }
 }
 
@@ -497,8 +498,8 @@ function alSeleccionarDireccion(direccion) {
  * Abrir diálogo de nuevo comercio con datos pre-llenados
  */
 function abrirDialogoNuevoComercio() {
-  console.log('🔍 Nombre:', comercioEscrito.value)
-  console.log('🔍 Dirección:', direccionEscrita.value)
+  console.log('Nombre:', comercioEscrito.value)
+  console.log('Dirección:', direccionEscrita.value)
   dialogoNuevoComercioAbierto.value = true
 }
 
@@ -627,7 +628,7 @@ function alCambiarPrecio(val) {
   emitirCambios()
 }
 
-// Al salir del campo: formatear a 2 decimales si corresponde (ej: "3.3" → "3.30")
+// Al salir del campo: formatear a 2 decimales si corresponde (ej: "3.3" -> "3.30")
 function alSalirPrecio() {
   valorPrecioTexto.value = formatearPrecioAlSalir(valorPrecioTexto.value)
 }
@@ -645,14 +646,14 @@ function validarPrecio() {
   const val = valorPrecioTexto.value
   errorPrecioMsg.value = ''
 
-  // Precio vacío/nulo → error manual (las rules no lo capturan en modo local)
+  // Precio vacío/nulo -> error manual (las rules no lo capturan en modo local)
   if (!val || val.trim() === '') {
     errorPrecioMsg.value = 'Ingresá el precio del producto'
     enfocarYNavegar()
     return false
   }
 
-  // Precio 0 o negativo → dejar que las rules de Quasar muestren el error
+  // Precio 0 o negativo -> dejar que las rules de Quasar muestren el error
   const resultado = qInputPrecioRef.value?.validate()
   if (!resultado) {
     enfocarYNavegar()
@@ -698,3 +699,8 @@ function precioValido(val) {
   gap: 16px;
 }
 </style>
+
+
+
+
+

@@ -78,7 +78,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useUsuarioStore } from 'src/almacenamiento/stores/UsuarioStore.js'
-import InputFormularioReutilizable from 'src/components/Compartidos/InputFormularioReutilizable.vue'
+import InputFormularioReutilizable from '../components/Compartidos/InputFormularioReutilizable.vue'
 
 const quasar = useQuasar()
 const router = useRouter()
@@ -172,4 +172,5 @@ async function manejarInvitado() {
   }
 }
 </style>
+
 

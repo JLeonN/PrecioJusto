@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <q-dialog v-model="dialogoAbierto" persistent>
     <q-card class="dialogo-motivo-eliminacion" :style="estiloTarjeta">
       <!-- HEADER -->
@@ -33,7 +33,7 @@
         />
 
         <!-- CAMPO "OTRO MOTIVO" -->
-        <q-input
+        <InputFormularioReutilizable
           v-if="motivoSeleccionado === 'otro'"
           v-model="otroMotivo"
           outlined
@@ -69,7 +69,7 @@
           </div>
         </q-banner>
 
-        <!-- INFORMACIÓN SEGÚN MOTIVO -->
+        <!-- INFORMACI�"N SEG�sN MOTIVO -->
         <q-banner v-if="motivoSeleccionado === 'cerro'" dense class="bg-grey-2 q-mt-md" rounded>
           <template #avatar>
             <q-icon name="info" color="primary" />
@@ -116,6 +116,7 @@
 </template>
 
 <script setup>
+import InputFormularioReutilizable from '../../Compartidos/InputFormularioReutilizable.vue'
 import { ref, computed } from 'vue'
 import { useTecladoVirtual } from '../../../composables/useTecladoVirtual.js'
 
@@ -231,3 +232,6 @@ function cerrarDialogo() {
   max-width: 500px;
 }
 </style>
+
+
+

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <TarjetaBase
     tipo="producto"
     :nombre="item.nombre || 'Sin nombre'"
@@ -172,7 +172,7 @@
     <template #expandido-contenido>
       <div class="edit-campos">
         <!-- Nombre -->
-        <q-input
+        <InputFormularioReutilizable
           ref="refInputNombre"
           :model-value="datosEditando.nombre"
           label="Nombre *"
@@ -180,7 +180,7 @@
           dense
           @update:model-value="(v) => actualizar('nombre', v)"
         />
-        <q-input
+        <InputFormularioReutilizable
           :model-value="datosEditando.marca"
           label="Marca"
           outlined
@@ -192,7 +192,7 @@
         <!-- Precio + Moneda -->
         <div class="row q-col-gutter-sm">
           <div class="col-8">
-            <q-input
+            <InputFormularioReutilizable
               ref="refInputPrecio"
               :model-value="precioTexto"
               label="Precio *"
@@ -244,7 +244,7 @@
         <!-- Cantidad + Unidad -->
         <div class="row q-col-gutter-sm">
           <div class="col-6">
-            <q-input
+            <InputFormularioReutilizable
               :model-value="datosEditando.cantidad"
               label="Cantidad"
               outlined
@@ -316,6 +316,7 @@
 </template>
 
 <script setup>
+import InputFormularioReutilizable from '../Compartidos/InputFormularioReutilizable.vue'
 import { ref, computed, watch, nextTick } from 'vue'
 import { useQuasar, copyToClipboard } from 'quasar'
 import TarjetaBase from '../Tarjetas/TarjetaBase.vue'
@@ -670,3 +671,6 @@ function emitirEnviar() {
   display: none;
 }
 </style>
+
+
+

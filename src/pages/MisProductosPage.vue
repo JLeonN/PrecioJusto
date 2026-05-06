@@ -1,6 +1,6 @@
-<template>
+﻿<template>
   <q-page class="q-pa-md">
-    <!-- BARRA DE SELECCIÓN (sticky debajo del header) -->
+    <!-- BARRA DE SELECCI�"N (sticky debajo del header) -->
     <BarraSeleccion
       :visible="seleccion.modoSeleccion.value"
       :cantidad-seleccionados="seleccion.cantidadSeleccionados.value"
@@ -11,7 +11,7 @@
 
     <!-- Contenedor con ancho máximo -->
     <div class="contenedor-pagina">
-      <!-- HEADER DE LA PÁGINA -->
+      <!-- HEADER DE LA P�GINA -->
       <div class="header-pagina">
         <h5 class="titulo-pagina">Mis Productos</h5>
         <p class="contador-items">{{ productosStore.productos.length }} productos guardados</p>
@@ -69,7 +69,7 @@
       </template>
     </div>
 
-    <!-- BOTÓN FLOTANTE AGREGAR (oculto en modo selección) -->
+    <!-- BOT�"N FLOTANTE AGREGAR (oculto en modo selección) -->
     <FabAcciones v-if="!seleccion.modoSeleccion.value" :acciones="accionesFab" color="primary" />
 
     <!-- BARRA DE ACCIONES (fixed bottom en modo selección) -->
@@ -81,14 +81,14 @@
       @cancelar="seleccion.desactivarModoSeleccion()"
     />
 
-    <!-- DIÁLOGO AGREGAR PRODUCTO -->
+    <!-- DI�LOGO AGREGAR PRODUCTO -->
     <DialogoAgregarProducto
       v-model="dialogoAgregarAbierto"
       modo="local"
       @producto-guardado="onProductoGuardado"
     />
 
-    <!-- ESCANEADOR DE CÓDIGO DE BARRAS -->
+    <!-- ESCANEADOR DE C�"DIGO DE BARRAS -->
     <EscaneadorCodigo
       :activo="scannerActivo"
       :continuo="modoEscaneo === 'rafaga'"
@@ -123,7 +123,7 @@
         </q-card-section>
 
         <q-card-section class="q-pt-none">
-          <q-input
+          <InputFormularioReutilizable
             ref="inputCodigoManualRef"
             v-model="codigoManual"
             label="Código de barras"
@@ -169,7 +169,7 @@
       </div>
     </Teleport>
 
-    <!-- TARJETITA SOBRE LA CÁMARA (duplicado + éxito Ráfaga) -->
+    <!-- TARJETITA SOBRE LA C�MARA (duplicado + éxito Ráfaga) -->
     <Teleport to="body">
       <Transition name="aviso-deslizar">
         <div v-if="avisoEscaneo.visible" class="aviso-escaneo">
@@ -202,7 +202,7 @@
       </Transition>
     </Teleport>
 
-    <!-- DIÁLOGO CONFIRMACIÓN ELIMINACIÓN -->
+    <!-- DI�LOGO CONFIRMACI�"N ELIMINACI�"N -->
     <q-dialog v-model="dialogoConfirmacionAbierto" persistent>
       <q-card>
         <q-card-section class="row items-center">
@@ -233,6 +233,7 @@
 </template>
 
 <script setup>
+import InputFormularioReutilizable from '../components/Compartidos/InputFormularioReutilizable.vue'
 import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
 import { IconPlus, IconScan, IconBolt, IconShoppingBag } from '@tabler/icons-vue'
 import ListaProductos from '../components/MisProductos/ListaProductos.vue'
@@ -831,3 +832,7 @@ onMounted(async () => {
   transform: translateX(-50%) translateY(-16px);
 }
 </style>
+
+
+
+

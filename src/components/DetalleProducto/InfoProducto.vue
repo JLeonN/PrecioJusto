@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <q-card :class="['info-producto', { 'info-producto-ventaja-mayorista': hayVentajaMayoristaGlobal }]">
     <q-card-section class="info-contenido q-pb-lg">
 
@@ -62,7 +62,7 @@
         />
       </div>
 
-      <!-- INFORMACIÓN PRINCIPAL -->
+      <!-- INFORMACI�"N PRINCIPAL -->
       <div class="info-detalles">
 
         <!-- Nombre del producto (editable inline) -->
@@ -75,7 +75,7 @@
             </q-btn>
           </template>
           <template v-else>
-            <q-input
+            <InputFormularioReutilizable
               v-model="nombreTemporal"
               dense
               outlined
@@ -144,7 +144,7 @@
             <div class="cantidad-edicion-inputs">
               <div class="cantidad-etiqueta">Cantidad</div>
               <div class="row q-gutter-xs no-wrap">
-                <q-input
+                <InputFormularioReutilizable
                   v-model.number="cantidadTemporal"
                   type="number"
                   dense
@@ -305,6 +305,7 @@
 </template>
 
 <script setup>
+import InputFormularioReutilizable from '../Compartidos/InputFormularioReutilizable.vue'
 import { ref, computed } from 'vue'
 import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
 import {
@@ -346,11 +347,11 @@ const props = defineProps({
 
 defineEmits(['agregar-precio'])
 
-// ── Visor de imagen ──────────────────────────────────────
+// �"?�"? Visor de imagen �"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?
 const verFoto = ref(false)
 const verMayoristasAlternativos = ref(false)
 
-// ── Nombre editable ──────────────────────────────────────
+// �"?�"? Nombre editable �"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?
 
 const editandoNombre = ref(false)
 const nombreTemporal = ref('')
@@ -380,7 +381,7 @@ function cancelarEdicionNombre() {
   nombreTemporal.value = ''
 }
 
-// ── Restaurar desde API ──────────────────────────────────
+// �"?�"? Restaurar desde API �"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?
 
 const restaurandoApi = ref(false)
 
@@ -394,7 +395,7 @@ async function restaurarDesdeApi() {
       return
     }
     const resultado = resultadoApi.producto
-    // Si la API devuelve imagen → fuente = 'api'; si no → conservar la fuente existente
+    // Si la API devuelve imagen �?' fuente = 'api'; si no �?' conservar la fuente existente
     const nuevaFotoFuente = resultado.imagen ? 'api' : (props.producto.fotoFuente ?? null)
     await productosStore.actualizarProducto(props.producto.id, {
       nombre: resultado.nombre || props.producto.nombre,
@@ -412,7 +413,7 @@ async function restaurarDesdeApi() {
   }
 }
 
-// ── Foto editable ────────────────────────────────────────
+// �"?�"? Foto editable �"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?
 
 const { inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo } = useCamaraFoto()
 
@@ -428,7 +429,7 @@ async function alSeleccionarArchivo(event) {
 
 async function actualizarFoto(base64) {
   try {
-    // Foto tomada o elegida por el usuario → fotoFuente = 'usuario'
+    // Foto tomada o elegida por el usuario �?' fotoFuente = 'usuario'
     await productosStore.actualizarProducto(props.producto.id, { imagen: base64, fotoFuente: 'usuario' })
     $q.notify({ type: 'positive', message: 'Foto actualizada', position: 'top', timeout: 1500 })
   } catch {
@@ -449,7 +450,7 @@ async function quitarFoto() {
   }
 }
 
-// ── Marca editable ───────────────────────────────────────
+// �"?�"? Marca editable �"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?
 
 async function actualizarMarca(nuevaMarca) {
   try {
@@ -460,7 +461,7 @@ async function actualizarMarca(nuevaMarca) {
   }
 }
 
-// ── Categoría editable (ya existía) ─────────────────────
+// �"?�"? Categoría editable (ya existía) �"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?
 
 async function actualizarCategoria(nuevaCategoria) {
   try {
@@ -471,7 +472,7 @@ async function actualizarCategoria(nuevaCategoria) {
   }
 }
 
-// ── Tendencia ────────────────────────────────────────────
+// �"?�"? Tendencia �"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?
 
 const tendenciaProducto = computed(() => {
   if (!props.producto.precios || props.producto.precios.length === 0)
@@ -663,7 +664,7 @@ function esEscalonConVentajaGlobal(escalon) {
   return precioEscalon < precioBaseGlobal
 }
 
-// ── Cantidad / Unidad editable ───────────────────────────
+// �"?�"? Cantidad / Unidad editable �"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?
 
 const OPCIONES_UNIDADES = [
   { label: 'Unidad', value: 'unidad' },
@@ -724,7 +725,7 @@ function cancelarEdicionCantidad() {
   editandoCantidad.value = false
 }
 
-// ── Copiar código de barras ──────────────────────────────
+// �"?�"? Copiar código de barras �"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?
 
 const copiarCodigoBarras = async (codigo) => {
   try {
@@ -1047,3 +1048,6 @@ const copiarCodigoBarras = async (codigo) => {
   padding-top: 16px;
 }
 </style>
+
+
+

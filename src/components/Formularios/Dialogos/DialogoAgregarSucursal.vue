@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <q-dialog :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)">
     <q-card class="dialogo-agregar-sucursal" :style="estiloTarjeta">
       <!-- HEADER -->
@@ -13,7 +13,7 @@
       <!-- FORMULARIO -->
       <q-card-section class="q-gutter-md">
         <!-- Dirección (obligatorio) -->
-        <q-input
+        <InputFormularioReutilizable
           v-model="datos.calle"
           label="Calle y número *"
           outlined
@@ -23,7 +23,7 @@
         />
 
         <!-- Barrio (opcional) -->
-        <q-input
+        <InputFormularioReutilizable
           v-model="datos.barrio"
           label="Barrio (opcional)"
           outlined
@@ -32,7 +32,7 @@
         />
 
         <!-- Ciudad (opcional) -->
-        <q-input
+        <InputFormularioReutilizable
           v-model="datos.ciudad"
           label="Ciudad (opcional)"
           outlined
@@ -63,6 +63,7 @@
 </template>
 
 <script setup>
+import InputFormularioReutilizable from '../../Compartidos/InputFormularioReutilizable.vue'
 import { ref, reactive } from 'vue'
 import ComerciosService from '../../../almacenamiento/servicios/ComerciosService.js'
 import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.js'
@@ -107,7 +108,7 @@ function cerrar() {
   emit('update:modelValue', false)
 }
 
-// Crea un nuevo comercio con el mismo nombre → se agrupa automáticamente
+// Crea un nuevo comercio con el mismo nombre �?' se agrupa automáticamente
 async function guardar() {
   if (!datos.calle) return
 
@@ -141,3 +142,6 @@ async function guardar() {
   width: 90vw;
 }
 </style>
+
+
+

@@ -11,12 +11,13 @@
     :label="label"
     :type="type"
     :autocomplete="autocomplete"
-    :placeholder="placeholder"
+    :placeholder="placeholderEfectivo"
     :disable="disable"
     :readonly="readonly"
     :filled="filled"
     :outlined="outlined"
     :dense="dense"
+    v-bind="atributosEntrada"
     @focus="alEnfocarInput"
     @blur="alQuitarFocoInput"
     @update:model-value="$emit('update:modelValue', $event)"
@@ -31,7 +32,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, useAttrs } from 'vue'
 
 const props = defineProps({
   modelValue: {
@@ -85,6 +86,7 @@ const props = defineProps({
 })
 
 defineEmits(['update:modelValue'])
+const atributosEntrada = useAttrs()
 
 const inputReutilizableRef = ref(null)
 const desplazamientoVertical = ref(0)
@@ -96,6 +98,17 @@ const estiloDesplazamiento = computed(() => ({
   transform: `translateY(-${desplazamientoVertical.value}px)`,
   '--color-foco-input': props.colorFoco,
 }))
+
+const placeholderEfectivo = computed(() => {
+  if (!props.placeholder) return ''
+  if (!props.label) return props.placeholder
+
+  const valor = props.modelValue
+  const tieneValor = valor !== null && valor !== undefined && String(valor).length > 0
+
+  // Evita superposición label/placeholder cuando está en reposo.
+  return inputEnfocado.value || tieneValor ? props.placeholder : ''
+})
 
 function obtenerElementoCampo() {
   return inputReutilizableRef.value?.$el?.querySelector('.q-field') || null
@@ -277,12 +290,27 @@ onBeforeUnmount(() => {
   opacity: 1;
 }
 .input-formulario-reutilizable :deep(.q-field__native) {
-  padding-left: 12px;
-  padding-right: 12px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 14px;
+  padding-right: 14px;
+  line-height: 1.25;
 }
 .input-formulario-reutilizable :deep(.q-field__label) {
   opacity: 0.8;
-  left: 12px;
+  left: 14px;
+}
+.input-formulario-reutilizable :deep(.q-field--labeled .q-field__label) {
+  top: 8px;
+  font-size: 12px;
+}
+.input-formulario-reutilizable :deep(.q-field--labeled .q-field__native) {
+  padding-top: 22px;
+  padding-bottom: 6px;
+}
+.input-formulario-reutilizable :deep(.q-field--labeled.q-field--float .q-field__native) {
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 .input-formulario-reutilizable :deep(.q-field__append) {
   padding-left: 6px;

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="bloque-escalas">
     <div class="encabezado-bloque-escalas">
       <div
@@ -54,7 +54,7 @@
           class="fila-escala row q-col-gutter-sm q-mb-sm"
         >
           <div class="col-4">
-            <q-input
+            <InputFormularioReutilizable
               class="inputCantidadEscala"
               :model-value="escala.cantidadMinima"
               label="Desde"
@@ -84,10 +84,10 @@
                   />
                 </div>
               </template>
-            </q-input>
+            </InputFormularioReutilizable>
           </div>
           <div class="col-5">
-            <q-input
+            <InputFormularioReutilizable
               class="inputPrecioEscala"
               :model-value="escala.precioUnitario"
               label="Precio"
@@ -118,7 +118,7 @@
                   />
                 </div>
               </template>
-            </q-input>
+            </InputFormularioReutilizable>
           </div>
           <div class="col-3 columna-acciones">
             <q-btn
@@ -155,6 +155,7 @@
 </template>
 
 <script setup>
+import InputFormularioReutilizable from '../Compartidos/InputFormularioReutilizable.vue'
 import { computed, ref, watch } from 'vue'
 
 const props = defineProps({
@@ -513,3 +514,6 @@ defineExpose({ validarEscalas })
   transform: translateY(-2px);
 }
 </style>
+
+
+

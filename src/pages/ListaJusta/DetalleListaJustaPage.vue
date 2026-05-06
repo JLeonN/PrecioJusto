@@ -135,7 +135,7 @@
                   <div class="fila-nombre">
                     <div class="contenido-nombre-item">
                       <template v-if="itemEditandoId === item.id && esItemManual(item)">
-                        <q-input
+                        <InputFormularioReutilizable
                           v-model="edicionInline.nombre"
                           dense
                           outlined
@@ -173,7 +173,7 @@
                     <template v-if="itemEditandoId === item.id">
                       <div class="editor-inline-item">
                         <div class="fila-edicion-precio">
-                          <q-input
+                          <InputFormularioReutilizable
                             v-model="edicionInline.precioTexto"
                             dense
                             outlined
@@ -389,7 +389,7 @@
 
           <div v-if="modoAlta === 'misProductos'" class="q-mt-sm">
             <div class="encabezado-seleccion-productos">
-              <q-input
+              <InputFormularioReutilizable
                 v-model="textoBusquedaProducto"
                 outlined
                 dense
@@ -508,6 +508,7 @@
 </template>
 
 <script setup>
+import InputFormularioReutilizable from '../../components/Compartidos/InputFormularioReutilizable.vue'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
@@ -2187,3 +2188,4 @@ onMounted(async () => {
   }
 }
 </style>
+

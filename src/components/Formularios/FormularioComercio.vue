@@ -1,7 +1,7 @@
-<template>
+﻿<template>
   <div class="formulario-comercio">
     <!-- NOMBRE DEL COMERCIO -->
-    <q-input
+    <InputFormularioReutilizable
       v-model="datosInternos.nombre"
       label="Nombre del comercio *"
       outlined
@@ -13,7 +13,7 @@
       <template #prepend>
         <q-icon name="store" />
       </template>
-    </q-input>
+    </InputFormularioReutilizable>
 
     <!-- TIPO DE COMERCIO -->
     <q-select
@@ -39,8 +39,8 @@
       <span>Dirección</span>
     </div>
 
-    <!-- CALLE Y NÚMERO -->
-    <q-input
+    <!-- CALLE Y N�sMERO -->
+    <InputFormularioReutilizable
       v-model="datosInternos.calle"
       label="Calle y número *"
       outlined
@@ -52,10 +52,10 @@
       <template #prepend>
         <q-icon name="signpost" />
       </template>
-    </q-input>
+    </InputFormularioReutilizable>
 
     <!-- BARRIO -->
-    <q-input
+    <InputFormularioReutilizable
       v-model="datosInternos.barrio"
       label="Barrio (opcional)"
       outlined
@@ -66,10 +66,10 @@
       <template #prepend>
         <q-icon name="apartment" />
       </template>
-    </q-input>
+    </InputFormularioReutilizable>
 
     <!-- CIUDAD -->
-    <q-input
+    <InputFormularioReutilizable
       v-model="datosInternos.ciudad"
       label="Ciudad (opcional)"
       outlined
@@ -80,7 +80,7 @@
       <template #prepend>
         <q-icon name="location_city" />
       </template>
-    </q-input>
+    </InputFormularioReutilizable>
 
     <!-- FOTO DEL LOCAL -->
     <div class="seccion-foto">
@@ -111,7 +111,7 @@
     </div>
     <input ref="inputArchivoRef" type="file" accept="image/*" class="input-archivo-oculto" @change="alSeleccionarArchivo" />
 
-    <!-- FEEDBACK DE VALIDACIÓN -->
+    <!-- FEEDBACK DE VALIDACI�"N -->
     <div v-if="mostrarFeedbackValidacion" class="feedback-validacion q-mt-md">
       <q-banner dense class="bg-info text-white" rounded>
         <template #avatar>
@@ -124,6 +124,7 @@
 </template>
 
 <script setup>
+import InputFormularioReutilizable from '../Compartidos/InputFormularioReutilizable.vue'
 import { ref, watch } from 'vue'
 import { IconCamera, IconPhoto, IconTrash } from '@tabler/icons-vue'
 import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
@@ -276,3 +277,6 @@ function requerido(val) {
   }
 }
 </style>
+
+
+

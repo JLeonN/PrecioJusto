@@ -117,7 +117,7 @@
         </q-card-section>
 
         <q-card-section class="q-pt-none">
-          <q-input
+          <InputFormularioReutilizable
             v-model="nombreLista"
             outlined
             dense
@@ -145,6 +145,7 @@
 </template>
 
 <script setup>
+import InputFormularioReutilizable from '../../components/Compartidos/InputFormularioReutilizable.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
@@ -347,3 +348,4 @@ onMounted(async () => {
   margin-top: 8px;
 }
 </style>
+

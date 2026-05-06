@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <q-dialog v-model="dialogoAbierto" persistent>
     <q-card style="min-width: 350px; max-width: 500px" :style="estiloTarjeta">
       <!-- Header -->
@@ -16,7 +16,7 @@
         </p>
 
         <!-- Nombre del comercio -->
-        <q-input
+        <InputFormularioReutilizable
           v-model="nombreInterno"
           label="Nombre del comercio *"
           outlined
@@ -29,7 +29,7 @@
         />
 
         <!-- Dirección (obligatoria) -->
-        <q-input
+        <InputFormularioReutilizable
           v-model="direccionInterna"
           label="Dirección *"
           outlined
@@ -137,6 +137,7 @@
 </template>
 
 <script setup>
+import InputFormularioReutilizable from '../../Compartidos/InputFormularioReutilizable.vue'
 import { ref, computed, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import { IconCamera, IconPhoto, IconTrash } from '@tabler/icons-vue'
@@ -330,3 +331,6 @@ function requerido(val) {
   display: none;
 }
 </style>
+
+
+

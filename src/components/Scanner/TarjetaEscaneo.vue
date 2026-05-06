@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <q-dialog v-model="abierto" position="bottom" @show="alAbrir" @hide="alCerrar">
     <q-card class="tarjeta-escaneo-card" :style="estiloTarjeta">
       <!-- FOTO + NOMBRE (con gradiente) -->
@@ -97,8 +97,8 @@
 
         <!-- Modo edición inline -->
         <template v-else>
-          <q-input v-model="datosForm.nombre" label="Nombre *" outlined dense class="q-mb-sm" />
-          <q-input
+          <InputFormularioReutilizable v-model="datosForm.nombre" label="Nombre *" outlined dense class="q-mb-sm" />
+          <InputFormularioReutilizable
             v-model="datosForm.marca"
             label="Marca"
             outlined
@@ -108,7 +108,7 @@
           />
           <div class="row q-col-gutter-sm q-mb-sm">
             <div class="col-6">
-              <q-input
+              <InputFormularioReutilizable
                 v-model.number="datosForm.cantidad"
                 label="Cantidad"
                 outlined
@@ -154,7 +154,7 @@
       <q-card-section class="tarjeta-escaneo-precio">
         <div class="row q-col-gutter-sm items-center">
           <div class="col-8">
-            <q-input
+            <InputFormularioReutilizable
               ref="inputPrecioRef"
               :model-value="precioTexto"
               label="Precio *"
@@ -173,7 +173,7 @@
               <template v-if="mostrarErrorPrecio" #append>
                 <span class="text-negative text-caption">Obligatorio</span>
               </template>
-            </q-input>
+            </InputFormularioReutilizable>
           </div>
           <div class="col-4">
             <q-select
@@ -203,7 +203,7 @@
         />
       </q-card-section>
 
-      <!-- BOTONES DE ACCIÓN -->
+      <!-- BOTONES DE ACCI�"N -->
       <q-card-section class="tarjeta-escaneo-footer">
         <div class="row items-center no-wrap q-gutter-xs">
           <q-btn flat no-caps color="grey-7" @click="emitDescartar"> Descartar </q-btn>
@@ -229,6 +229,7 @@
 </template>
 
 <script setup>
+import InputFormularioReutilizable from '../Compartidos/InputFormularioReutilizable.vue'
 import { ref, computed, watch, nextTick } from 'vue'
 import { useQuasar, copyToClipboard } from 'quasar'
 import { useTecladoVirtual } from '../../composables/useTecladoVirtual.js'
@@ -582,3 +583,6 @@ function emitDescartar() {
   display: none;
 }
 </style>
+
+
+

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <q-dialog v-model="dialogoAbierto" persistent>
     <q-card style="min-width: 350px; max-width: 500px" :style="estiloTarjeta">
       <!-- Header con nombre del producto -->
@@ -26,7 +26,7 @@
         <!-- Input precio nuevo (pre-seleccionado) -->
         <div class="row q-col-gutter-sm q-mb-md">
           <div class="col-8">
-            <q-input
+            <InputFormularioReutilizable
               ref="inputPrecioRef"
               :model-value="precioTexto"
               label="Nuevo precio"
@@ -172,6 +172,7 @@
 </template>
 
 <script setup>
+import InputFormularioReutilizable from '../../Compartidos/InputFormularioReutilizable.vue'
 import { ref, computed, watch, nextTick } from 'vue'
 import { useQuasar } from 'quasar'
 import { useProductosStore } from '../../../almacenamiento/stores/productosStore.js'
@@ -457,7 +458,7 @@ async function guardarPrecio() {
 
     const nombreComercio = comercio?.nombre || textoComercioEscrito.value.trim() || 'Sin comercio'
     const calleDireccion = direccion?.calle || ''
-    const nombreCompleto = calleDireccion ? `${nombreComercio} — ${calleDireccion}` : nombreComercio
+    const nombreCompleto = calleDireccion ? `${nombreComercio} �?" ${calleDireccion}` : nombreComercio
 
     // Resolver el branch correcto para cadenas
     const idDireccion = direccionSeleccionada.value?.value || null
@@ -539,3 +540,6 @@ function cerrar() {
   border-radius: 8px;
 }
 </style>
+
+
+

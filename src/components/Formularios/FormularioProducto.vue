@@ -1,7 +1,7 @@
-<template>
+﻿<template>
   <div class="formulario-producto">
     <!-- NOMBRE DEL PRODUCTO -->
-    <q-input
+    <InputFormularioReutilizable
       ref="qInputNombreRef"
       v-model="datosInternos.nombre"
       label="Nombre del producto"
@@ -30,10 +30,10 @@
           <q-tooltip>Buscar en base de datos</q-tooltip>
         </q-btn>
       </template>
-    </q-input>
+    </InputFormularioReutilizable>
 
     <!-- MARCA -->
-    <q-input
+    <InputFormularioReutilizable
       v-if="mostrarMarca"
       v-model="datosInternos.marca"
       label="Marca"
@@ -45,8 +45,8 @@
       @update:model-value="emitirCambios"
     />
 
-    <!-- CÓDIGO DE BARRAS -->
-    <q-input
+    <!-- C�"DIGO DE BARRAS -->
+    <InputFormularioReutilizable
       v-model="datosInternos.codigoBarras"
       label="Código de barras"
       outlined
@@ -76,12 +76,12 @@
           <q-tooltip>Buscar por código</q-tooltip>
         </q-btn>
       </template>
-    </q-input>
+    </InputFormularioReutilizable>
 
     <!-- CANTIDAD Y UNIDAD -->
     <div class="row q-col-gutter-md">
       <div class="col-6">
-        <q-input
+        <InputFormularioReutilizable
           v-model.number="datosInternos.cantidad"
           label="Cantidad"
           outlined
@@ -145,6 +145,7 @@
 </template>
 
 <script setup>
+import InputFormularioReutilizable from '../Compartidos/InputFormularioReutilizable.vue'
 import { ref, watch, computed } from 'vue'
 import { IconSearch, IconCamera, IconPhoto, IconTrash } from '@tabler/icons-vue'
 import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
@@ -239,7 +240,7 @@ watch(
   { deep: true },
 )
 
-// ── Foto del producto ─────────────────────────────────────
+// �"?�"? Foto del producto �"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?
 async function seleccionarCamara() {
   const resultado = await abrirCamara()
   if (resultado) {
@@ -358,6 +359,17 @@ defineExpose({ validarFormulario })
   flex-direction: column;
   gap: 16px;
 }
+.formulario-producto :deep(.input-formulario-reutilizable.q-field--labeled .q-field__native) {
+  padding-top: 24px;
+  padding-bottom: 6px;
+}
+.formulario-producto :deep(.input-formulario-reutilizable.q-field--labeled .q-field__label) {
+  top: 7px;
+}
+.formulario-producto :deep(.input-formulario-reutilizable.q-field--labeled.q-field--float .q-field__native) {
+  padding-top: 10px;
+  padding-bottom: 8px;
+}
 .foto-fila {
   display: flex;
   align-items: center;
@@ -386,3 +398,6 @@ defineExpose({ validarFormulario })
   display: none;
 }
 </style>
+
+
+

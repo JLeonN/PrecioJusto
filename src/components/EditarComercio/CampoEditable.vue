@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div
     class="campo-editable"
     :style="{
@@ -22,7 +22,7 @@
       </q-btn>
     </div>
 
-    <!-- MODO EDICIÓN -->
+    <!-- MODO EDICI�"N -->
     <div v-else class="campo-editable__edicion">
       <div class="campo-editable__icono">
         <component :is="icono" :size="20" class="campo-editable__icono-svg" />
@@ -30,7 +30,7 @@
       <div class="campo-editable__input-contenedor">
         <div class="campo-editable__etiqueta">{{ etiqueta }}</div>
         <!-- Input de texto -->
-        <q-input
+        <InputFormularioReutilizable
           v-if="tipo === 'text'"
           v-model="valorTemporal"
           dense
@@ -64,6 +64,7 @@
 </template>
 
 <script setup>
+import InputFormularioReutilizable from '../Compartidos/InputFormularioReutilizable.vue'
 import { ref, computed } from 'vue'
 import { IconPencil, IconCheck, IconX } from '@tabler/icons-vue'
 
@@ -199,3 +200,6 @@ function cancelar() {
   padding-top: 16px;
 }
 </style>
+
+
+
