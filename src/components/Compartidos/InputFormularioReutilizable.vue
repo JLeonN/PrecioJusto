@@ -70,6 +70,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  colorFoco: {
+    type: String,
+    default: 'var(--color-primario)',
+  },
   desactivarAutoAjusteTeclado: {
     type: Boolean,
     default: false,
@@ -84,6 +88,7 @@ const inputEnfocado = ref(false)
 
 const estiloDesplazamiento = computed(() => ({
   transform: `translateY(-${desplazamientoVertical.value}px)`,
+  '--color-foco-input': props.colorFoco,
 }))
 
 function obtenerElementoCampo() {
@@ -165,8 +170,26 @@ onBeforeUnmount(() => {
   border: 1px solid color-mix(in srgb, var(--color-primario) 28%, var(--borde-color));
   min-height: 44px;
   overflow: hidden;
+  position: relative;
+  background-clip: padding-box;
   padding-left: 0;
   padding-right: 0;
+}
+.input-formulario-reutilizable :deep(.q-field__control::before),
+.input-formulario-reutilizable :deep(.q-field__control::after) {
+  border: 0 !important;
+}
+.input-formulario-reutilizable :deep(.q-field__control::after) {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--color-foco-input, var(--color-primario));
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 220ms cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 .input-formulario-reutilizable :deep(.q-field:hover .q-field__control),
 .input-formulario-reutilizable :deep(.q-field.q-field--highlighted .q-field__control),
@@ -198,6 +221,10 @@ onBeforeUnmount(() => {
 .input-formulario-reutilizable :deep(.q-field__label) {
   color: var(--texto-primario);
 }
+.input-formulario-reutilizable :deep(.q-field__native::placeholder) {
+  color: color-mix(in srgb, var(--texto-secundario) 86%, transparent);
+  opacity: 1;
+}
 .input-formulario-reutilizable :deep(.q-field__native) {
   padding-left: 12px;
   padding-right: 12px;
@@ -211,8 +238,11 @@ onBeforeUnmount(() => {
   padding-right: 6px;
 }
 .input-formulario-reutilizable :deep(.q-field--focused .q-field__control) {
-  border-color: var(--color-primario);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primario) 40%, transparent);
+  border-color: var(--color-foco-input, var(--color-primario));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-foco-input, var(--color-primario)) 40%, transparent);
+}
+.input-formulario-reutilizable :deep(.q-field--focused .q-field__control::after) {
+  transform: scaleX(1);
 }
 .input-formulario-reutilizable :deep(.q-btn.q-btn--round) {
   background: color-mix(in srgb, var(--color-primario) 14%, transparent);
