@@ -16,6 +16,50 @@ npm install
 quasar dev
 ```
 
+## Modo prueba (sin anuncios reales)
+
+Si querés probar la app sin riesgo de tocar anuncios reales:
+
+1. Abrí este archivo:
+
+`src/almacenamiento/constantes/ConfigPublicidad.js`
+
+2. Cambiá esta línea:
+
+```js
+export const MODO_PRUEBA = false
+```
+
+por:
+
+```js
+export const MODO_PRUEBA = true
+```
+
+3. Ejecutá la app:
+
+```bash
+npm install
+quasar dev
+```
+
+4. Para Android (build + sync + abrir Android Studio):
+
+```bash
+npm run cel
+```
+
+5. Verificación rápida:
+
+- En la app debería verse el indicador `MODO PRUEBA`.
+- No deberían mostrarse anuncios reales.
+
+Antes de producción, volver a:
+
+```js
+export const MODO_PRUEBA = false
+```
+
 ### Lint the files
 
 ```bash

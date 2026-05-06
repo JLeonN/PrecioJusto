@@ -548,10 +548,18 @@ useBotonAtras({ drawerAbierto, router, route })
 }
 .indicador-modo-prueba {
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 12px;
+  left: 58px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  font-size: 11px;
+  font-weight: 700;
   letter-spacing: 0.04em;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+  padding: 3px 8px;
   pointer-events: none;
 }
 .quick-access-btn {
