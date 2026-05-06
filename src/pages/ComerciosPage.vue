@@ -28,7 +28,11 @@
       <!-- BARRA DE BÚSQUEDA CENTRADA -->
       <ContenedorStickySuperior :top-extra="seleccion.modoSeleccion.value ? 56 : 0">
         <div class="buscador-centrado">
-          <InputBusqueda v-model="textoBusqueda" placeholder="Buscar comercio..." color="orange" />
+          <InputBusqueda
+            v-model="textoBusqueda"
+            placeholder="Buscar por nombre, categoría, dirección, barrio o ciudad..."
+            color="orange"
+          />
         </div>
       </ContenedorStickySuperior>
 
@@ -79,11 +83,7 @@
     </div>
 
     <!-- BOTÓN FLOTANTE AGREGAR (oculto en modo selección) -->
-    <FabAcciones
-      v-if="!seleccion.modoSeleccion.value"
-      :acciones="accionFab"
-      color="primary"
-    />
+    <FabAcciones v-if="!seleccion.modoSeleccion.value" :acciones="accionFab" color="primary" />
 
     <!-- BARRA DE ACCIONES (fixed bottom en modo selección) -->
     <BarraAccionesSeleccion
@@ -185,15 +185,38 @@ const comerciosFiltrados = computed(() => {
     return comercios
   }
 
-  const textoNormalizado = textoBusqueda.value.toLowerCase()
+  const textoNormalizado = ComerciosService.normalizar(textoBusqueda.value)
+  const terminosBusqueda = textoNormalizado.split(' ').filter(Boolean)
+  const busquedaIncluyeSucursal = terminosBusqueda.some(
+    (termino) => termino === 'sucursal' || termino === 'sucursales',
+  )
+  const terminosSinSucursal = terminosBusqueda.filter(
+    (termino) => termino !== 'sucursal' && termino !== 'sucursales',
+  )
+
   return comercios.filter((comercio) => {
-    return (
-      comercio.nombre.toLowerCase().includes(textoNormalizado) ||
-      comercio.tipo.toLowerCase().includes(textoNormalizado) ||
-      comercio.direcciones.some((dir) =>
-        dir.nombreCompleto?.toLowerCase().includes(textoNormalizado),
-      )
+    if (busquedaIncluyeSucursal && !comercio.esCadena) return false
+
+    const textoComercio = ComerciosService.normalizar(
+      [
+        comercio.nombre,
+        comercio.tipo,
+        ...comercio.direcciones.flatMap((direccion) => [
+          direccion.nombreCompleto,
+          direccion.calle,
+          direccion.barrio,
+          direccion.ciudad,
+        ]),
+      ]
+        .filter(Boolean)
+        .join(' '),
     )
+
+    if (terminosSinSucursal.length === 0) {
+      return busquedaIncluyeSucursal ? comercio.esCadena : true
+    }
+
+    return terminosSinSucursal.every((termino) => textoComercio.includes(termino))
   })
 })
 
@@ -211,7 +234,9 @@ function abrirDialogoAgregar() {
   dialogoAgregarAbierto.value = true
 }
 
-const accionFab = [{ icono: IconPlus, label: 'Agregar comercio', color: 'primary', accion: abrirDialogoAgregar }]
+const accionFab = [
+  { icono: IconPlus, label: 'Agregar comercio', color: 'primary', accion: abrirDialogoAgregar },
+]
 
 /**
  * Activa modo selección con un comercio inicial
@@ -480,5 +505,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
