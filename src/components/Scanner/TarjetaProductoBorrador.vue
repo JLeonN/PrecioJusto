@@ -633,8 +633,9 @@ function emitirEnviar() {
   top: 7px;
 }
 .edit-campos :deep(.input-formulario-reutilizable.q-field--labeled.q-field--float .q-field__native) {
-  padding-top: 10px;
-  padding-bottom: 8px;
+  padding-top: 20px;
+  padding-bottom: 0;
+  line-height: 1.3;
 }
 .boton-recuperar-datos {
   align-self: flex-end;

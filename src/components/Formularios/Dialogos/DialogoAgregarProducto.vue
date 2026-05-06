@@ -630,6 +630,12 @@ async function alDetectarCodigo(codigo) {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.contenido-scroll::-webkit-scrollbar {
+  display: none;
 }
 .dialogo-landscape .contenido-scroll {
   max-height: 50vh;

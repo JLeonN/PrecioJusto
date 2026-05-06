@@ -114,6 +114,7 @@
       <div class="col-8">
         <InputFormularioReutilizable
           ref="qInputPrecioRef"
+          class="input-precio-formulario"
           :model-value="valorPrecioTexto"
           :label="etiquetaPrecio"
           outlined
@@ -697,6 +698,15 @@ function precioValido(val) {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+.input-precio-formulario :deep(.q-field--labeled.q-field--float .q-field__native),
+.input-precio-formulario :deep(.q-field--labeled.q-field--dense.q-field--float .q-field__native),
+.input-precio-formulario :deep(.q-field--stacked .q-field__native),
+.input-precio-formulario :deep(.q-field--stacked.q-field--dense .q-field__native),
+.input-precio-formulario :deep(input.q-field__native) {
+  padding-top: 20px !important;
+  padding-bottom: 0 !important;
+  line-height: 1.3 !important;
 }
 </style>
 

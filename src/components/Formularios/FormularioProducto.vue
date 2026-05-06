@@ -367,8 +367,9 @@ defineExpose({ validarFormulario })
   top: 7px;
 }
 .formulario-producto :deep(.input-formulario-reutilizable.q-field--labeled.q-field--float .q-field__native) {
-  padding-top: 10px;
-  padding-bottom: 8px;
+  padding-top: 20px;
+  padding-bottom: 0;
+  line-height: 1.3;
 }
 .foto-fila {
   display: flex;

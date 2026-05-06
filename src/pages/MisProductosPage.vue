@@ -683,8 +683,16 @@ onMounted(async () => {
   padding-bottom: 6px !important;
 }
 .input-codigo-manual :deep(.q-field--labeled.q-field--float .q-field__native) {
-  padding-top: 18px !important;
-  padding-bottom: 6px !important;
+  padding-top: 20px !important;
+  padding-bottom: 0 !important;
+  line-height: 1.3 !important;
+}
+.input-codigo-manual :deep(.q-field--stacked .q-field__native),
+.input-codigo-manual :deep(.q-field--stacked.q-field--dense .q-field__native),
+.input-codigo-manual :deep(input.q-field__native) {
+  padding-top: 20px !important;
+  padding-bottom: 0 !important;
+  line-height: 1.3 !important;
 }
 .escaneo-api-overlay {
   position: fixed;

@@ -394,7 +394,7 @@
                 outlined
                 dense
                 label="Buscar producto"
-                class="buscador-productos-dialogo"
+                class="buscador-productos-dialogo input-buscador-productos-dialogo"
               />
             </div>
             <q-list bordered separator class="lista-productos-origen q-mt-sm">
@@ -1829,6 +1829,15 @@ onMounted(async () => {
   align-items: start;
   gap: 10px;
 }
+.pagina-detalle-lista :deep(.input-formulario-reutilizable .q-field--labeled.q-field--float .q-field__native),
+.pagina-detalle-lista :deep(.input-formulario-reutilizable .q-field--labeled.q-field--dense.q-field--float .q-field__native),
+.pagina-detalle-lista :deep(.input-formulario-reutilizable .q-field--stacked .q-field__native),
+.pagina-detalle-lista :deep(.input-formulario-reutilizable .q-field--stacked.q-field--dense .q-field__native),
+.pagina-detalle-lista :deep(.input-formulario-reutilizable input.q-field__native) {
+  padding-top: 20px !important;
+  padding-bottom: 0 !important;
+  line-height: 1.3 !important;
+}
 .editor-inline-item {
   display: grid;
   gap: 8px;
@@ -2005,6 +2014,15 @@ onMounted(async () => {
 .buscador-productos-dialogo {
   min-width: 0;
   width: 100%;
+}
+.input-buscador-productos-dialogo :deep(.q-field--labeled .q-field__native),
+.input-buscador-productos-dialogo :deep(.q-field--labeled.q-field--dense .q-field__native),
+.input-buscador-productos-dialogo :deep(.q-field--labeled.q-field--float .q-field__native),
+.input-buscador-productos-dialogo :deep(.q-field--labeled.q-field--dense.q-field--float .q-field__native),
+.input-buscador-productos-dialogo :deep(input.q-field__native) {
+  padding-top: 20px !important;
+  padding-bottom: 0 !important;
+  line-height: 1.3 !important;
 }
 .contador-productos-seleccionados {
   display: flex;

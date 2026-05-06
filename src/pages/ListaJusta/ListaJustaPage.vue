@@ -119,6 +119,7 @@
         <q-card-section class="q-pt-none">
           <InputFormularioReutilizable
             v-model="nombreLista"
+            class="input-crear-lista"
             outlined
             dense
             autofocus
@@ -343,6 +344,24 @@ onMounted(async () => {
 .dialogo-lista {
   width: min(92vw, 420px);
   border-radius: 14px;
+}
+.input-crear-lista :deep(.q-field--labeled .q-field__native),
+.input-crear-lista :deep(.q-field--labeled.q-field--dense .q-field__native),
+.input-crear-lista :deep(.q-field--labeled.q-field--float .q-field__native),
+.input-crear-lista :deep(.q-field--labeled.q-field--dense.q-field--float .q-field__native),
+.input-crear-lista :deep(input.q-field__native) {
+  padding-top: 20px !important;
+  padding-bottom: 0 !important;
+  line-height: 1.3 !important;
+}
+.pagina-lista-justa :deep(.input-formulario-reutilizable .q-field--labeled.q-field--float .q-field__native),
+.pagina-lista-justa :deep(.input-formulario-reutilizable .q-field--labeled.q-field--dense.q-field--float .q-field__native),
+.pagina-lista-justa :deep(.input-formulario-reutilizable .q-field--stacked .q-field__native),
+.pagina-lista-justa :deep(.input-formulario-reutilizable .q-field--stacked.q-field--dense .q-field__native),
+.pagina-lista-justa :deep(.input-formulario-reutilizable input.q-field__native) {
+  padding-top: 20px !important;
+  padding-bottom: 0 !important;
+  line-height: 1.3 !important;
 }
 .boton-crear-lista-sticky {
   margin-top: 8px;
