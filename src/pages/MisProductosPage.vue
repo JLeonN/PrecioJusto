@@ -126,7 +126,9 @@
           <InputFormularioReutilizable
             ref="inputCodigoManualRef"
             v-model="codigoManual"
+            class="input-codigo-manual"
             label="Código de barras"
+            stack-label
             outlined
             dense
             autofocus
@@ -672,6 +674,17 @@ onMounted(async () => {
 .dialogo-codigo-manual {
   width: min(92vw, 420px);
   border-radius: 18px;
+}
+.input-codigo-manual :deep(.q-field--labeled .q-field__label) {
+  top: 7px;
+}
+.input-codigo-manual :deep(.q-field--labeled .q-field__native) {
+  padding-top: 24px !important;
+  padding-bottom: 6px !important;
+}
+.input-codigo-manual :deep(.q-field--labeled.q-field--float .q-field__native) {
+  padding-top: 18px !important;
+  padding-bottom: 6px !important;
 }
 .escaneo-api-overlay {
   position: fixed;

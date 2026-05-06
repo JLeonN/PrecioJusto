@@ -51,6 +51,7 @@ export const useProductosStore = defineStore('productos', () => {
    * 🔥 FIRESTORE: Útil para mostrar badge "X pendientes"
    */
   const sincronizando = ref(false)
+  let promesaCargaProductos = null
 
   // ========================================
   // 🧮 COMPUTED (GETTERS)
@@ -122,6 +123,11 @@ export const useProductosStore = defineStore('productos', () => {
    *   })
    */
   async function cargarProductos() {
+    if (promesaCargaProductos) {
+      return promesaCargaProductos
+    }
+
+    promesaCargaProductos = (async () => {
     cargando.value = true
     error.value = null
 
@@ -137,7 +143,11 @@ export const useProductosStore = defineStore('productos', () => {
       error.value = 'No se pudieron cargar los productos'
     } finally {
       cargando.value = false
+      promesaCargaProductos = null
     }
+    })()
+
+    return promesaCargaProductos
   }
 
   /**

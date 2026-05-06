@@ -301,16 +301,24 @@ onBeforeUnmount(() => {
   left: 14px;
 }
 .input-formulario-reutilizable :deep(.q-field--labeled .q-field__label) {
-  top: 8px;
+  top: 7px;
   font-size: 12px;
 }
 .input-formulario-reutilizable :deep(.q-field--labeled .q-field__native) {
-  padding-top: 22px;
-  padding-bottom: 6px;
+  padding-top: 24px !important;
+  padding-bottom: 6px !important;
 }
 .input-formulario-reutilizable :deep(.q-field--labeled.q-field--float .q-field__native) {
-  padding-top: 8px;
-  padding-bottom: 8px;
+  padding-top: 16px !important;
+  padding-bottom: 4px !important;
+}
+.input-formulario-reutilizable :deep(.q-field--labeled.q-field--dense .q-field__native) {
+  padding-top: 24px !important;
+  padding-bottom: 6px !important;
+}
+.input-formulario-reutilizable :deep(.q-field--labeled.q-field--dense.q-field--float .q-field__native) {
+  padding-top: 16px !important;
+  padding-bottom: 4px !important;
 }
 .input-formulario-reutilizable :deep(.q-field__append) {
   padding-left: 6px;

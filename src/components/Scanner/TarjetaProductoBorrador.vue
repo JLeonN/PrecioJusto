@@ -625,6 +625,17 @@ function emitirEnviar() {
   flex-direction: column;
   gap: 10px;
 }
+.edit-campos :deep(.input-formulario-reutilizable.q-field--labeled .q-field__native) {
+  padding-top: 24px;
+  padding-bottom: 6px;
+}
+.edit-campos :deep(.input-formulario-reutilizable.q-field--labeled .q-field__label) {
+  top: 7px;
+}
+.edit-campos :deep(.input-formulario-reutilizable.q-field--labeled.q-field--float .q-field__native) {
+  padding-top: 10px;
+  padding-bottom: 8px;
+}
 .boton-recuperar-datos {
   align-self: flex-end;
 }

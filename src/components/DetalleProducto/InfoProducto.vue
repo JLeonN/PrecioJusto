@@ -1,5 +1,6 @@
 ﻿<template>
-  <q-card :class="['info-producto', { 'info-producto-ventaja-mayorista': hayVentajaMayoristaGlobal }]">
+  <div v-bind="$attrs">
+    <q-card :class="['info-producto', { 'info-producto-ventaja-mayorista': hayVentajaMayoristaGlobal }]">
     <q-card-section class="info-contenido q-pb-lg">
 
       <!-- IMAGEN DEL PRODUCTO (editable) -->
@@ -291,17 +292,18 @@
         </q-btn>
 
       </div>
-    </q-card-section>
-  </q-card>
+      </q-card-section>
+    </q-card>
 
-  <!-- Visor de imagen en grande -->
-  <DialogoVerImagen
-    v-model="verFoto"
-    :src="producto.imagen || ''"
-    :titulo="producto.nombre"
-    :editable="!!producto.imagen"
-    @guardar="alGuardarFotoEditada"
-  />
+    <!-- Visor de imagen en grande -->
+    <DialogoVerImagen
+      v-model="verFoto"
+      :src="producto.imagen || ''"
+      :titulo="producto.nombre"
+      :editable="!!producto.imagen"
+      @guardar="alGuardarFotoEditada"
+    />
+  </div>
 </template>
 
 <script setup>
@@ -1048,6 +1050,8 @@ const copiarCodigoBarras = async (codigo) => {
   padding-top: 16px;
 }
 </style>
+
+
 
 
 

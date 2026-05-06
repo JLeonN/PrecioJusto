@@ -12,6 +12,9 @@ const estadoActualizacion = ref({
   urlPlayStore: urlPlayStoreDefecto,
   debeMostrarModal: false,
 })
+let promesaActualizacionEnCurso = null
+let ultimoChequeoMs = 0
+const INTERVALO_MINIMO_CHEQUEO_MS = 30000
 
 function obtenerUrlPlayStoreNativa(urlPlayStore) {
   if (typeof urlPlayStore !== 'string' || !urlPlayStore.includes('play.google.com/store/apps/details')) {
@@ -25,20 +28,38 @@ function obtenerUrlPlayStoreNativa(urlPlayStore) {
 }
 
 async function refrescarEstadoActualizacion({ mostrarModalSiHay = false } = {}) {
+  const ahora = Date.now()
+  if (
+    !mostrarModalSiHay &&
+    ahora - ultimoChequeoMs < INTERVALO_MINIMO_CHEQUEO_MS &&
+    estadoActualizacion.value.versionInstalada
+  ) {
+    return estadoActualizacion.value
+  }
+  if (promesaActualizacionEnCurso) {
+    return promesaActualizacionEnCurso
+  }
+
+  promesaActualizacionEnCurso = (async () => {
   cargandoActualizacion.value = true
 
   try {
     const nuevoEstado = await verificarActualizacionApp()
     estadoActualizacion.value = nuevoEstado
+    ultimoChequeoMs = Date.now()
 
     if (mostrarModalSiHay && nuevoEstado.debeMostrarModal) {
       modalActualizacionAbierto.value = true
     }
   } finally {
     cargandoActualizacion.value = false
+    promesaActualizacionEnCurso = null
   }
 
   return estadoActualizacion.value
+  })()
+
+  return promesaActualizacionEnCurso
 }
 
 function cerrarModalActualizacion() {

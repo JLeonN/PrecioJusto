@@ -28,6 +28,7 @@
           <div class="col-8">
             <InputFormularioReutilizable
               ref="inputPrecioRef"
+              class="input-nuevo-precio-modal"
               :model-value="precioTexto"
               label="Nuevo precio"
               outlined
@@ -538,6 +539,17 @@ function cerrar() {
 <style scoped>
 .q-card {
   border-radius: 8px;
+}
+.input-nuevo-precio-modal :deep(.q-field--labeled.q-field--float .q-field__native),
+.input-nuevo-precio-modal :deep(.q-field--labeled.q-field--dense.q-field--float .q-field__native) {
+  padding-top: 20px !important;
+  padding-bottom: 0 !important;
+  line-height: 1.3 !important;
+}
+.input-nuevo-precio-modal :deep(input.q-field__native) {
+  padding-top: 20px !important;
+  padding-bottom: 0 !important;
+  line-height: 1.3 !important;
 }
 </style>
 

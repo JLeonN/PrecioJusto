@@ -53,14 +53,7 @@ async function obtenerVersionRemota() {
 
   const separadorQuery = urlVersionRemota.includes('?') ? '&' : '?'
   const urlVersionConCacheBust = `${urlVersionRemota}${separadorQuery}t=${Date.now()}`
-  const respuesta = await fetch(urlVersionConCacheBust, {
-    cache: 'no-store',
-    headers: {
-      'cache-control': 'no-cache, no-store, must-revalidate',
-      pragma: 'no-cache',
-      expires: '0',
-    },
-  })
+  const respuesta = await fetch(urlVersionConCacheBust, { cache: 'no-store' })
   if (!respuesta.ok) return null
 
   const datos = await respuesta.json()
