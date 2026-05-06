@@ -1,6 +1,8 @@
 <template>
   <q-input
+    ref="inputReutilizableRef"
     class="input-formulario-reutilizable"
+    :style="estiloDesplazamiento"
     :model-value="modelValue"
     :label="label"
     :type="type"
@@ -11,6 +13,8 @@
     :filled="filled"
     :outlined="outlined"
     :dense="dense"
+    @focus="alEnfocarInput"
+    @blur="alQuitarFocoInput"
     @update:model-value="$emit('update:modelValue', $event)"
   >
     <template v-if="$slots.prepend" #prepend>
@@ -23,7 +27,9 @@
 </template>
 
 <script setup>
-defineProps({
+import { computed, nextTick, onBeforeUnmount, ref } from 'vue'
+
+const props = defineProps({
   modelValue: {
     type: [String, Number],
     default: '',
@@ -64,12 +70,95 @@ defineProps({
     type: Boolean,
     default: true,
   },
+  desactivarAutoAjusteTeclado: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 defineEmits(['update:modelValue'])
+
+const inputReutilizableRef = ref(null)
+const desplazamientoVertical = ref(0)
+const inputEnfocado = ref(false)
+
+const estiloDesplazamiento = computed(() => ({
+  transform: `translateY(-${desplazamientoVertical.value}px)`,
+}))
+
+function obtenerElementoCampo() {
+  return inputReutilizableRef.value?.$el?.querySelector('.q-field') || null
+}
+
+function limpiarAjusteVertical() {
+  desplazamientoVertical.value = 0
+}
+
+function calcularDesplazamientoNecesario() {
+  if (props.desactivarAutoAjusteTeclado) return 0
+  const viewportVisual = window.visualViewport
+  if (!viewportVisual) return 0
+  const elementoCampo = obtenerElementoCampo()
+  if (!elementoCampo) return 0
+
+  const rectanguloCampo = elementoCampo.getBoundingClientRect()
+  const limiteSuperiorTeclado = viewportVisual.offsetTop + viewportVisual.height
+  const margenSeguroInferior = 20
+  const excesoInferior = rectanguloCampo.bottom + margenSeguroInferior - limiteSuperiorTeclado
+
+  if (excesoInferior <= 0) return 0
+
+  const margenSeguroSuperior = 12
+  const maximoPermitido = Math.max(rectanguloCampo.top - margenSeguroSuperior, 0)
+  return Math.min(excesoInferior, maximoPermitido)
+}
+
+function ajustarInputPorTeclado() {
+  if (!inputEnfocado.value || props.desactivarAutoAjusteTeclado) return
+  desplazamientoVertical.value = calcularDesplazamientoNecesario()
+}
+
+function agregarEventosViewport() {
+  const viewportVisual = window.visualViewport
+  if (!viewportVisual) return
+  viewportVisual.addEventListener('resize', ajustarInputPorTeclado)
+  viewportVisual.addEventListener('scroll', ajustarInputPorTeclado)
+}
+
+function quitarEventosViewport() {
+  const viewportVisual = window.visualViewport
+  if (!viewportVisual) return
+  viewportVisual.removeEventListener('resize', ajustarInputPorTeclado)
+  viewportVisual.removeEventListener('scroll', ajustarInputPorTeclado)
+}
+
+function alEnfocarInput() {
+  if (props.desactivarAutoAjusteTeclado) return
+  inputEnfocado.value = true
+  agregarEventosViewport()
+  nextTick(() => {
+    setTimeout(() => {
+      ajustarInputPorTeclado()
+    }, 80)
+  })
+}
+
+function alQuitarFocoInput() {
+  inputEnfocado.value = false
+  quitarEventosViewport()
+  limpiarAjusteVertical()
+}
+
+onBeforeUnmount(() => {
+  quitarEventosViewport()
+})
 </script>
 
 <style scoped>
+.input-formulario-reutilizable {
+  transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: transform;
+}
 .input-formulario-reutilizable :deep(.q-field__control) {
   background: var(--fondo-tarjeta) !important;
   border-radius: 8px;
