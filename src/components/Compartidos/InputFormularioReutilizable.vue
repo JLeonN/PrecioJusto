@@ -2,6 +2,10 @@
   <q-input
     ref="inputReutilizableRef"
     class="input-formulario-reutilizable"
+    :class="{
+      'input-enfocado': inputEnfocado,
+      'input-saliendo': animacionSalidaActiva,
+    }"
     :style="estiloDesplazamiento"
     :model-value="modelValue"
     :label="label"
@@ -85,6 +89,8 @@ defineEmits(['update:modelValue'])
 const inputReutilizableRef = ref(null)
 const desplazamientoVertical = ref(0)
 const inputEnfocado = ref(false)
+const animacionSalidaActiva = ref(false)
+let temporizadorSalida = null
 
 const estiloDesplazamiento = computed(() => ({
   transform: `translateY(-${desplazamientoVertical.value}px)`,
@@ -139,6 +145,11 @@ function quitarEventosViewport() {
 
 function alEnfocarInput() {
   if (props.desactivarAutoAjusteTeclado) return
+  if (temporizadorSalida) {
+    clearTimeout(temporizadorSalida)
+    temporizadorSalida = null
+  }
+  animacionSalidaActiva.value = false
   inputEnfocado.value = true
   agregarEventosViewport()
   nextTick(() => {
@@ -150,11 +161,23 @@ function alEnfocarInput() {
 
 function alQuitarFocoInput() {
   inputEnfocado.value = false
+  animacionSalidaActiva.value = true
+  if (temporizadorSalida) {
+    clearTimeout(temporizadorSalida)
+  }
+  temporizadorSalida = setTimeout(() => {
+    animacionSalidaActiva.value = false
+    temporizadorSalida = null
+  }, 1200)
   quitarEventosViewport()
   limpiarAjusteVertical()
 }
 
 onBeforeUnmount(() => {
+  if (temporizadorSalida) {
+    clearTimeout(temporizadorSalida)
+    temporizadorSalida = null
+  }
   quitarEventosViewport()
 })
 </script>
@@ -178,6 +201,34 @@ onBeforeUnmount(() => {
 .input-formulario-reutilizable :deep(.q-field__control::before),
 .input-formulario-reutilizable :deep(.q-field__control::after) {
   border: 0 !important;
+}
+.input-formulario-reutilizable :deep(.q-field__control::before) {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 9px;
+  padding: 1px;
+  opacity: 0;
+  background: conic-gradient(
+    from 180deg at 50% 50%,
+    color-mix(in srgb, var(--color-foco-input, var(--color-primario)) 0%, transparent) 0deg,
+    color-mix(in srgb, var(--color-foco-input, var(--color-primario)) 0%, transparent) 110deg,
+    color-mix(in srgb, var(--color-foco-input, var(--color-primario)) 94%, white 6%) 166deg,
+    color-mix(in srgb, var(--color-foco-input, var(--color-primario)) 100%, white 0%) 180deg,
+    color-mix(in srgb, var(--color-foco-input, var(--color-primario)) 94%, white 6%) 194deg,
+    color-mix(in srgb, var(--color-foco-input, var(--color-primario)) 0%, transparent) 250deg,
+    color-mix(in srgb, var(--color-foco-input, var(--color-primario)) 0%, transparent) 360deg
+  );
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--color-foco-input, var(--color-primario)) 44%, transparent));
+  pointer-events: none;
 }
 .input-formulario-reutilizable :deep(.q-field__control::after) {
   content: '';
@@ -237,12 +288,32 @@ onBeforeUnmount(() => {
   padding-left: 6px;
   padding-right: 6px;
 }
-.input-formulario-reutilizable :deep(.q-field--focused .q-field__control) {
+.input-formulario-reutilizable.input-enfocado :deep(.q-field__control),
+.input-formulario-reutilizable.input-saliendo :deep(.q-field__control),
+.input-formulario-reutilizable.q-field--focused :deep(.q-field__control) {
   border-color: var(--color-foco-input, var(--color-primario));
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-foco-input, var(--color-primario)) 40%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--color-foco-input, var(--color-primario)) 55%, transparent),
+    0 0 14px color-mix(in srgb, var(--color-foco-input, var(--color-primario)) 26%, transparent);
 }
-.input-formulario-reutilizable :deep(.q-field--focused .q-field__control::after) {
+.input-formulario-reutilizable.input-enfocado :deep(.q-field__control::before),
+.input-formulario-reutilizable.input-saliendo :deep(.q-field__control::before),
+.input-formulario-reutilizable.q-field--focused :deep(.q-field__control::before) {
+  opacity: 1;
+  animation: recorridoLuzBorde 2500ms cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
+}
+.input-formulario-reutilizable.input-saliendo :deep(.q-field__control::before) {
+  animation: recorridoLuzBordeReversa 1150ms cubic-bezier(0.22, 0.61, 0.36, 1) 1 forwards;
+}
+.input-formulario-reutilizable.input-enfocado :deep(.q-field__control::after),
+.input-formulario-reutilizable.input-saliendo :deep(.q-field__control::after),
+.input-formulario-reutilizable.q-field--focused :deep(.q-field__control::after) {
   transform: scaleX(1);
+  transition-duration: 180ms;
+}
+.input-formulario-reutilizable.input-saliendo :deep(.q-field__control::after) {
+  transform: scaleX(0);
+  transition-duration: 300ms;
 }
 .input-formulario-reutilizable :deep(.q-btn.q-btn--round) {
   background: color-mix(in srgb, var(--color-primario) 14%, transparent);
@@ -264,5 +335,41 @@ onBeforeUnmount(() => {
   -webkit-text-fill-color: var(--texto-primario);
   -webkit-box-shadow: 0 0 0 1000px var(--fondo-tarjeta) inset;
   transition: background-color 9999s ease-out 0s;
+}
+@keyframes recorridoLuzBorde {
+  0% {
+    transform: rotate(0deg);
+    opacity: 0.38;
+  }
+  18% {
+    transform: rotate(35deg);
+    opacity: 0.95;
+  }
+  55% {
+    transform: rotate(210deg);
+    opacity: 0.95;
+  }
+  100% {
+    transform: rotate(360deg);
+    opacity: 0.38;
+  }
+}
+@keyframes recorridoLuzBordeReversa {
+  0% {
+    transform: rotate(360deg);
+    opacity: 0.92;
+  }
+  100% {
+    transform: rotate(0deg);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .input-formulario-reutilizable.input-enfocado :deep(.q-field__control::before),
+  .input-formulario-reutilizable.input-saliendo :deep(.q-field__control::before),
+  .input-formulario-reutilizable.q-field--focused :deep(.q-field__control::before) {
+    animation: none;
+    opacity: 0.75;
+  }
 }
 </style>
