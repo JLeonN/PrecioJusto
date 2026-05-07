@@ -20,8 +20,10 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import productosService from '../servicios/ProductosService.js'
+import { useUsuarioStore } from './UsuarioStore.js'
 
 export const useProductosStore = defineStore('productos', () => {
+  const usuarioStore = useUsuarioStore()
   // ========================================
   // 📊 ESTADO
   // ========================================
@@ -181,6 +183,7 @@ export const useProductosStore = defineStore('productos', () => {
       if (productoGuardado) {
         // Agregar al estado local
         productos.value.push(productoGuardado)
+        usuarioStore.solicitarSincronizacionAutomatica('producto_creado')
         console.log('✅ Producto agregado al store')
         return productoGuardado
       }
@@ -218,6 +221,7 @@ export const useProductosStore = defineStore('productos', () => {
           productos.value[index] = productoActualizado
         }
 
+        usuarioStore.solicitarSincronizacionAutomatica('precio_agregado')
         console.log('✅ Precio agregado al producto')
         return true
       }
@@ -273,6 +277,7 @@ export const useProductosStore = defineStore('productos', () => {
           productos.value[index] = guardado
         }
 
+        usuarioStore.solicitarSincronizacionAutomatica('producto_actualizado')
         console.log('✅ Producto actualizado en el store')
         return true
       }
@@ -311,6 +316,7 @@ export const useProductosStore = defineStore('productos', () => {
       if (eliminado) {
         // Eliminar del estado local
         productos.value = productos.value.filter((p) => p.id !== productoId)
+        usuarioStore.solicitarSincronizacionAutomatica('producto_eliminado')
         console.log('✅ Producto eliminado del store')
         return true
       }

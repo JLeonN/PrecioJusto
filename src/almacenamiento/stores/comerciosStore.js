@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import ComerciosService from '../servicios/ComerciosService'
 import { useProductosStore } from './productosStore.js'
+import { useUsuarioStore } from './UsuarioStore.js'
 
 /**
  * COMERCIOS STORE
@@ -207,6 +208,7 @@ export const useComerciStore = defineStore('comercios', {
         // No es duplicado, agregar
         const nuevoComercio = await ComerciosService.agregarComercio(datosComercio)
         this.comercios.push(nuevoComercio)
+        useUsuarioStore().solicitarSincronizacionAutomatica('comercio_creado')
 
         return {
           exito: true,
@@ -244,6 +246,7 @@ export const useComerciStore = defineStore('comercios', {
           if (datosActualizados.nombre) {
             await this._sincronizarNombreEnPrecios(id, datosActualizados.nombre)
           }
+          useUsuarioStore().solicitarSincronizacionAutomatica('comercio_editado')
         }
 
         return comercioActualizado
@@ -297,6 +300,7 @@ export const useComerciStore = defineStore('comercios', {
 
         if (eliminado) {
           this.comercios = this.comercios.filter((c) => c.id !== id)
+          useUsuarioStore().solicitarSincronizacionAutomatica('comercio_eliminado')
         }
 
         return eliminado
@@ -335,6 +339,9 @@ export const useComerciStore = defineStore('comercios', {
 
         // Actualizar estado local
         this.comercios = this.comercios.filter((c) => !resultados.exitosos.includes(c.id))
+        if (resultados.exitosos.length > 0) {
+          useUsuarioStore().solicitarSincronizacionAutomatica('comercios_eliminados')
+        }
 
         return resultados
       } catch (error) {
@@ -367,6 +374,7 @@ export const useComerciStore = defineStore('comercios', {
           if (indice !== -1) {
             this.comercios[indice] = comercioActualizado
           }
+          useUsuarioStore().solicitarSincronizacionAutomatica('direccion_agregada')
         }
 
         return comercioActualizado
@@ -399,6 +407,7 @@ export const useComerciStore = defineStore('comercios', {
           if (indice !== -1) {
             this.comercios[indice] = comercioActualizado
           }
+          useUsuarioStore().solicitarSincronizacionAutomatica('direccion_editada')
         }
 
         return comercioActualizado
@@ -428,6 +437,7 @@ export const useComerciStore = defineStore('comercios', {
           if (comercio) {
             comercio.direcciones = comercio.direcciones.filter((d) => d.id !== direccionId)
           }
+          useUsuarioStore().solicitarSincronizacionAutomatica('direccion_eliminada')
         }
 
         return eliminado
@@ -477,6 +487,7 @@ export const useComerciStore = defineStore('comercios', {
             const direccion = comercio.direcciones.find((d) => d.id === direccionId)
             if (direccion) direccion.foto = base64 || null
           }
+          useUsuarioStore().solicitarSincronizacionAutomatica('foto_direccion_actualizada')
         }
         return guardado
       } catch (error) {

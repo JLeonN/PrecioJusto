@@ -22,6 +22,8 @@ export const useUsuarioStore = defineStore('usuario', () => {
   const cargandoPerfil = ref(false)
   const errorPerfil = ref(null)
   const accesoInicialCompletado = ref(false)
+  const ultimaSincronizacionAutomatica = ref(null)
+  const ultimoErrorSincronizacionAutomatica = ref(null)
 
   let detenerEscuchaSesion = null
   let promesaInicializacion = null
@@ -29,7 +31,12 @@ export const useUsuarioStore = defineStore('usuario', () => {
   let uidMigracionAutomaticaEnSesion = null
   let listenerConexionRegistrado = false
   let manejarVueltaConexion = null
+  let temporizadorSincronizacionAutomatica = null
+  let sincronizacionAutomaticaEnCurso = false
+  let sincronizacionAutomaticaReprogramada = false
+  let ultimoMotivoSincronizacion = null
   const CLAVE_ACCESO_INICIAL = 'acceso_inicial_completado'
+  const RETRASO_SINCRONIZACION_MS = 1200
 
   const tieneSesionActiva = computed(() => autenticado.value && !!usuarioId.value)
   const tieneSesionRealActiva = computed(
@@ -108,7 +115,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
 
     manejarVueltaConexion = async () => {
       if (!tieneSesionRealActiva.value) return
-      await migrarDatosLocales()
+      await solicitarSincronizacionAutomatica('reconexion')
     }
 
     window.addEventListener('online', manejarVueltaConexion)
@@ -383,6 +390,65 @@ export const useUsuarioStore = defineStore('usuario', () => {
     }
   }
 
+  function puedeSincronizarAutomaticamente() {
+    if (!tieneSesionRealActiva.value) return false
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return false
+    return true
+  }
+
+  async function ejecutarSincronizacionAutomatica(motivo = 'operacion') {
+    if (!puedeSincronizarAutomaticamente()) return false
+
+    if (sincronizacionAutomaticaEnCurso) {
+      sincronizacionAutomaticaReprogramada = true
+      return false
+    }
+
+    sincronizacionAutomaticaEnCurso = true
+    ultimoMotivoSincronizacion = motivo
+    ultimoErrorSincronizacionAutomatica.value = null
+
+    try {
+      const resumen = await migrarDatosLocales()
+      if (!resumen) {
+        ultimoErrorSincronizacionAutomatica.value = 'No se pudo completar la sincronización automática.'
+        return false
+      }
+
+      ultimaSincronizacionAutomatica.value = {
+        fecha: new Date().toISOString(),
+        motivo,
+      }
+      return true
+    } catch (error) {
+      console.error('Error en sincronización automática:', error)
+      ultimoErrorSincronizacionAutomatica.value = 'Ocurrió un error en la sincronización automática.'
+      return false
+    } finally {
+      sincronizacionAutomaticaEnCurso = false
+
+      if (sincronizacionAutomaticaReprogramada) {
+        sincronizacionAutomaticaReprogramada = false
+        solicitarSincronizacionAutomatica(ultimoMotivoSincronizacion || 'reintento')
+      }
+    }
+  }
+
+  function solicitarSincronizacionAutomatica(motivo = 'operacion') {
+    if (!tieneSesionRealActiva.value) return false
+
+    if (temporizadorSincronizacionAutomatica) {
+      clearTimeout(temporizadorSincronizacionAutomatica)
+    }
+
+    temporizadorSincronizacionAutomatica = setTimeout(() => {
+      temporizadorSincronizacionAutomatica = null
+      void ejecutarSincronizacionAutomatica(motivo)
+    }, RETRASO_SINCRONIZACION_MS)
+
+    return true
+  }
+
   async function actualizarPerfilEditable(datosPerfilEditable) {
     if (!usuarioId.value) {
       errorPerfil.value = 'No hay sesión activa para actualizar el perfil'
@@ -402,6 +468,8 @@ export const useUsuarioStore = defineStore('usuario', () => {
         ...(perfil.value || {}),
         ...datosGuardados,
       }
+
+      solicitarSincronizacionAutomatica('perfil_actualizado')
 
       return true
     } catch (error) {
@@ -430,8 +498,17 @@ export const useUsuarioStore = defineStore('usuario', () => {
     ultimoResumenMigracion.value = null
     cargandoPerfil.value = false
     errorPerfil.value = null
+    ultimaSincronizacionAutomatica.value = null
+    ultimoErrorSincronizacionAutomatica.value = null
     accesoInicialCompletado.value = false
     uidMigracionAutomaticaEnSesion = null
+    if (temporizadorSincronizacionAutomatica) {
+      clearTimeout(temporizadorSincronizacionAutomatica)
+      temporizadorSincronizacionAutomatica = null
+    }
+    sincronizacionAutomaticaEnCurso = false
+    sincronizacionAutomaticaReprogramada = false
+    ultimoMotivoSincronizacion = null
     if (typeof window !== 'undefined' && listenerConexionRegistrado && manejarVueltaConexion) {
       window.removeEventListener('online', manejarVueltaConexion)
     }
@@ -451,6 +528,8 @@ export const useUsuarioStore = defineStore('usuario', () => {
     ultimoResumenMigracion,
     cargandoPerfil,
     errorPerfil,
+    ultimaSincronizacionAutomatica,
+    ultimoErrorSincronizacionAutomatica,
     accesoInicialCompletado,
     tieneSesionActiva,
     tieneSesionRealActiva,
@@ -461,6 +540,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
     recuperarContrasena,
     continuarComoInvitado,
     migrarDatosLocales,
+    solicitarSincronizacionAutomatica,
     actualizarPerfilEditable,
     marcarAccesoInicialCompletado,
     cerrarSesion,

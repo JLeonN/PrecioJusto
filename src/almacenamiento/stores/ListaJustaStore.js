@@ -5,11 +5,13 @@ import ListaJustaService from '../servicios/ListaJustaService.js'
 import productosService from '../servicios/ProductosService.js'
 import { useProductosStore } from './productosStore.js'
 import { useSesionEscaneoStore } from './sesionEscaneoStore.js'
+import { useUsuarioStore } from './UsuarioStore.js'
 
 export const useListaJustaStore = defineStore('listaJusta', () => {
   const quasar = useQuasar()
   const productosStore = useProductosStore()
   const sesionEscaneoStore = useSesionEscaneoStore()
+  const usuarioStore = useUsuarioStore()
 
   const listas = ref([])
   const cargando = ref(false)
@@ -792,6 +794,8 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     if (!guardado) {
       throw new Error('No se pudo persistir Lista Justa.')
     }
+
+    usuarioStore.solicitarSincronizacionAutomatica('lista_justa_actualizada')
   }
 
   return {

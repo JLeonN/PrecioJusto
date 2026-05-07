@@ -210,6 +210,66 @@ Evitar mezcla de datos entre cuentas distintas en un mismo celular/navegador y a
   - [x] Vuelta a cuenta A mantiene sus datos propios
   - [x] Evidencia de pruebas guardada
 
+## FASE 4F: Sincronizacion automatica post-operacion (corto plazo)
+
+### Objetivo
+
+Asegurar que, luego del login real, cada cambio importante viaje tambien a Firebase sin depender solo de la migracion inicial.
+
+- [x] Definir eventos que deben disparar sincronizacion automatica:
+  - [x] crear/editar/eliminar producto
+  - [x] agregar/editar/eliminar precio
+  - [x] crear/editar/eliminar comercio
+  - [x] crear/editar/eliminar lista (incluye cambios en Lista Justa y mesa de trabajo que persisten datos)
+  - [x] cambios clave de perfil
+- [x] Implementar cola de sincronizacion por eventos (throttle/debounce) para evitar exceso de escrituras
+- [ ] Mantener comportamiento offline-first:
+  - [x] guardar local inmediato
+  - [ ] marcar cambios pendientes para subida
+  - [x] subir automatico al volver internet
+- [ ] Evitar duplicados y sobrescrituras indebidas:
+  - [ ] aplicar reglas idempotentes por entidad
+  - [ ] mantener merge seguro en historiales de precios
+- [ ] Registrar estado de sincronizacion para soporte:
+  - [x] ultima sincronizacion exitosa
+  - [x] ultimo error de sincronizacion
+  - [ ] cantidad de pendientes
+- [x] Mantener boton manual de reintento como plan B (sin exponer lenguaje tecnico al usuario)
+- [ ] Criterio de cierre de fase:
+  - [ ] crear datos nuevos y confirmar que aparecen en Firebase sin accion manual
+  - [ ] simular offline -> reconexion y confirmar subida automatica
+  - [ ] no hay duplicados en reintentos
+
+## FASE 4G: Fuente de verdad en Firebase (mediano plazo)
+
+### Objetivo
+
+Migrar gradualmente a un modelo cloud-first donde Firestore sea la fuente principal de verdad, usando capacidades offline nativas para continuidad sin internet.
+
+- [ ] Definir arquitectura destino:
+  - [ ] Firestore como origen principal
+  - [ ] local como cache/soporte offline
+  - [ ] sincronizacion interna de Firestore en segundo plano
+- [ ] Diseñar migracion incremental por modulos:
+  - [ ] perfil
+  - [ ] productos
+  - [ ] comercios
+  - [ ] listas
+- [ ] Definir estrategia de conflictos:
+  - [ ] criterio por `updatedAt` y/o merge por campos
+  - [ ] reglas para historial de precios repetidos en ventanas cortas
+- [ ] Definir politica de limpieza local:
+  - [ ] que queda en cache
+  - [ ] que se invalida al cambiar de cuenta
+  - [ ] como evitar residuos de datos viejos
+- [ ] Definir observabilidad minima:
+  - [ ] logs de sync en entorno prueba
+  - [ ] señales de salud para detectar cuentas desfasadas
+- [ ] Criterio de cierre de fase:
+  - [ ] app funcional sin boton de migracion manual para flujo normal
+  - [ ] cambios en un dispositivo se reflejan en otro con la misma cuenta
+  - [ ] comportamiento offline estable sin perdida de datos
+
 ## FASE 5: Preparar corte a produccion
 
 ### Objetivo
@@ -339,10 +399,12 @@ Validar por IA (Playwright) los nuevos flujos de pantalla inicial, sincronizacio
 - [ ] Fase 4C: Reorganizacion UX de Configuracion
 - [x] Fase 4D: Pantalla de acceso y cabecera de usuario
 - [x] Fase 4E: Aislamiento multiusuario en mismo dispositivo
+- [ ] Fase 4F: Sincronizacion automatica post-operacion
+- [ ] Fase 4G: Fuente de verdad en Firebase
 - [ ] Fase 5: Preparar corte a produccion
 - [x] Fase Testing
 - [x] Fase Testing 4D-4E (Playwright)
 
 Fecha de creacion: 14 de Marzo 2026
-Fecha de ultima actualizacion: 4 de Mayo 2026
+Fecha de ultima actualizacion: 6 de Mayo 2026
 Estado: EN PROCESO
