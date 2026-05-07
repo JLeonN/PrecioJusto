@@ -328,10 +328,14 @@
               Se subirán automáticamente.
             </q-banner>
             <q-banner rounded class="banner-cuenta q-mb-sm">
-              Si notás que falta algo, podés usar el botón de abajo para reintentar la sincronización.
+              No necesitás hacer nada: la app sincroniza sola en segundo plano.
+            </q-banner>
+            <q-banner v-if="textoSincronizacionRemota" rounded class="banner-cuenta q-mb-sm">
+              {{ textoSincronizacionRemota }}
             </q-banner>
             <div class="column q-gutter-sm">
               <q-btn
+                v-if="mostrarBotonReintentarSync"
                 color="secondary"
                 unelevated
                 no-caps
@@ -373,6 +377,7 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { MONEDAS } from '../almacenamiento/constantes/Monedas.js'
+import { MODO_PRUEBA } from '../almacenamiento/constantes/ConfigPublicidad.js'
 import { usePublicidad } from '../composables/usePublicidad.js'
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
 import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
@@ -431,6 +436,28 @@ const textoResumenMigracion = computed(() => {
 
   return `Migración completada. Productos: ${resumen.totalProductos}, comercios: ${resumen.totalComercios}, listas: ${resumen.totalListas}.`
 })
+const mostrarBotonReintentarSync = computed(
+  () =>
+    MODO_PRUEBA ||
+    usuarioStore.hayPendientesSincronizacion ||
+    Boolean(usuarioStore.ultimoErrorSincronizacionAutomatica),
+)
+const textoSincronizacionRemota = computed(() => {
+  const ultimaSyncRemota = usuarioStore.ultimaSincronizacionRemota
+  if (ultimaSyncRemota?.fecha) {
+    return `Última actualización en segundo plano: ${formatearFechaLegible(ultimaSyncRemota.fecha)}`
+  }
+  if (usuarioStore.ultimoErrorSincronizacionRemota) {
+    return usuarioStore.ultimoErrorSincronizacionRemota
+  }
+  return ''
+})
+function formatearFechaLegible(fechaIso) {
+  if (!fechaIso) return ''
+  const fecha = new Date(fechaIso)
+  if (Number.isNaN(fecha.getTime())) return ''
+  return fecha.toLocaleString('es-UY')
+}
 const etiquetaEdadPerfil = computed(() => {
   const edad = calcularEdadDesdeFecha(perfilEditableFechaNacimiento.value)
   return Number.isInteger(edad) ? `${edad} años` : 'Sin definir'

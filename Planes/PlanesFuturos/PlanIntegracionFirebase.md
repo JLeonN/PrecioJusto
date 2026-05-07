@@ -202,7 +202,7 @@ Evitar mezcla de datos entre cuentas distintas en un mismo celular/navegador y a
 - [x] Definir comportamiento de migracion en cambio de cuenta:
   - [x] Migracion local -> Firestore automatica al iniciar sesion real
   - [x] No duplicar datos si el proceso se ejecuta mas de una vez
-- [ ] Reforzar proteccion de lectura/escritura:
+- [x] Reforzar proteccion de lectura/escritura:
   - [x] Verificar que toda consulta/escritura use rutas del `uid` activo
   - [x] Registrar error controlado si hay desajuste de `uid`
 - [x] Criterio de cierre de fase:
@@ -223,19 +223,19 @@ Asegurar que, luego del login real, cada cambio importante viaje tambien a Fireb
   - [x] crear/editar/eliminar lista (incluye cambios en Lista Justa y mesa de trabajo que persisten datos)
   - [x] cambios clave de perfil
 - [x] Implementar cola de sincronizacion por eventos (throttle/debounce) para evitar exceso de escrituras
-- [ ] Mantener comportamiento offline-first:
+- [x] Mantener comportamiento offline-first:
   - [x] guardar local inmediato
   - [x] marcar cambios pendientes para subida
   - [x] subir automatico al volver internet
-- [ ] Evitar duplicados y sobrescrituras indebidas:
+- [x] Evitar duplicados y sobrescrituras indebidas:
   - [x] aplicar reglas idempotentes por entidad
   - [x] mantener merge seguro en historiales de precios
-- [ ] Registrar estado de sincronizacion para soporte:
+- [x] Registrar estado de sincronizacion para soporte:
   - [x] ultima sincronizacion exitosa
   - [x] ultimo error de sincronizacion
   - [x] cantidad de pendientes
 - [x] Mantener boton manual de reintento como plan B (sin exponer lenguaje tecnico al usuario)
-- [ ] Criterio de cierre de fase:
+- [x] Criterio de cierre de fase:
   - [x] crear datos nuevos y confirmar que aparecen en Firebase sin accion manual
   - [x] simular offline -> reconexion y confirmar subida automatica
   - [x] no hay duplicados en reintentos
@@ -246,29 +246,29 @@ Asegurar que, luego del login real, cada cambio importante viaje tambien a Fireb
 
 Migrar gradualmente a un modelo cloud-first donde Firestore sea la fuente principal de verdad, usando capacidades offline nativas para continuidad sin internet.
 
-- [ ] Definir arquitectura destino:
-  - [ ] Firestore como origen principal
-  - [ ] local como cache/soporte offline
-  - [ ] sincronizacion interna de Firestore en segundo plano
-- [ ] Diseñar migracion incremental por modulos:
-  - [ ] perfil
-  - [ ] productos
-  - [ ] comercios
-  - [ ] listas
-- [ ] Definir estrategia de conflictos:
-  - [ ] criterio por `updatedAt` y/o merge por campos
-  - [ ] reglas para historial de precios repetidos en ventanas cortas
-- [ ] Definir politica de limpieza local:
-  - [ ] que queda en cache
-  - [ ] que se invalida al cambiar de cuenta
-  - [ ] como evitar residuos de datos viejos
-- [ ] Definir observabilidad minima:
-  - [ ] logs de sync en entorno prueba
-  - [ ] señales de salud para detectar cuentas desfasadas
-- [ ] Criterio de cierre de fase:
-  - [ ] app funcional sin boton de migracion manual para flujo normal
-  - [ ] cambios en un dispositivo se reflejan en otro con la misma cuenta
-  - [ ] comportamiento offline estable sin perdida de datos
+- [x] Definir arquitectura destino:
+  - [x] Firestore como origen principal
+  - [x] local como cache/soporte offline
+  - [x] sincronizacion interna de Firestore en segundo plano
+- [x] Diseñar migracion incremental por modulos:
+  - [x] perfil
+  - [x] productos
+  - [x] comercios
+  - [x] listas
+- [x] Definir estrategia de conflictos:
+  - [x] criterio por `updatedAt` y/o merge por campos
+  - [x] reglas para historial de precios repetidos en ventanas cortas
+- [x] Definir politica de limpieza local:
+  - [x] que queda en cache
+  - [x] que se invalida al cambiar de cuenta
+  - [x] como evitar residuos de datos viejos
+- [x] Definir observabilidad minima:
+  - [x] logs de sync en entorno prueba
+  - [x] señales de salud para detectar cuentas desfasadas
+- [x] Criterio de cierre de fase:
+  - [x] app funcional sin boton de migracion manual para flujo normal
+  - [x] cambios en un dispositivo se reflejan en otro con la misma cuenta
+  - [x] comportamiento offline estable sin perdida de datos
 
 ## FASE 5: Preparar corte a produccion
 
@@ -398,6 +398,10 @@ Validar por IA (Playwright) los nuevos flujos de pantalla inicial, sincronizacio
     - Consola Playwright: `.playwright-mcp\\console-2026-05-04T09-58-14-752Z.log`.
   - [x] resumen final por escenario
     - Acceso inicial, cierre de sesión, migración idempotente, aislamiento por `uid` y prioridad de perfil manual validados.
+- [x] Validar fuente de verdad Firebase (FASE 4G):
+  - [x] Botón manual de reintento oculto en flujo normal (visible solo en modo prueba/pendientes/error).
+  - [x] Sincronización remota en segundo plano visible en Configuración (`Última actualización en segundo plano`).
+  - [x] Simulación de dispositivo limpio: borrado de claves locales de productos/comercios/listas y recuperación automática desde Firebase al recargar (`70 productos guardados` restaurados).
 
 ## Progreso del plan
 
@@ -409,12 +413,12 @@ Validar por IA (Playwright) los nuevos flujos de pantalla inicial, sincronizacio
 - [ ] Fase 4C: Reorganizacion UX de Configuracion
 - [x] Fase 4D: Pantalla de acceso y cabecera de usuario
 - [x] Fase 4E: Aislamiento multiusuario en mismo dispositivo
-- [ ] Fase 4F: Sincronizacion automatica post-operacion
-- [ ] Fase 4G: Fuente de verdad en Firebase
+- [x] Fase 4F: Sincronizacion automatica post-operacion
+- [x] Fase 4G: Fuente de verdad en Firebase
 - [ ] Fase 5: Preparar corte a produccion
 - [x] Fase Testing
 - [x] Fase Testing 4D-4E (Playwright)
 
 Fecha de creacion: 14 de Marzo 2026
-Fecha de ultima actualizacion: 6 de Mayo 2026
+Fecha de ultima actualizacion: 7 de Mayo 2026
 Estado: EN PROCESO

@@ -24,6 +24,8 @@ export const useUsuarioStore = defineStore('usuario', () => {
   const accesoInicialCompletado = ref(false)
   const ultimaSincronizacionAutomatica = ref(null)
   const ultimoErrorSincronizacionAutomatica = ref(null)
+  const ultimaSincronizacionRemota = ref(null)
+  const ultimoErrorSincronizacionRemota = ref(null)
   const pendientesSincronizacion = ref([])
 
   let detenerEscuchaSesion = null
@@ -33,12 +35,16 @@ export const useUsuarioStore = defineStore('usuario', () => {
   let listenerConexionRegistrado = false
   let manejarVueltaConexion = null
   let temporizadorSincronizacionAutomatica = null
+  let temporizadorSincronizacionRemota = null
   let sincronizacionAutomaticaEnCurso = false
+  let sincronizacionRemotaEnCurso = false
   let sincronizacionAutomaticaReprogramada = false
   let ultimoMotivoSincronizacion = null
   const motivosPendientes = new Set()
   const CLAVE_ACCESO_INICIAL = 'acceso_inicial_completado'
   const RETRASO_SINCRONIZACION_MS = 1200
+  const RETRASO_SINCRONIZACION_REMOTA_MS = 2500
+  const INTERVALO_SINCRONIZACION_REMOTA_MS = 90000
 
   const tieneSesionActiva = computed(() => autenticado.value && !!usuarioId.value)
   const tieneSesionRealActiva = computed(
@@ -142,10 +148,25 @@ export const useUsuarioStore = defineStore('usuario', () => {
     manejarVueltaConexion = async () => {
       if (!tieneSesionRealActiva.value) return
       await solicitarSincronizacionAutomatica('reconexion')
+      await solicitarSincronizacionRemota('reconexion')
     }
 
     window.addEventListener('online', manejarVueltaConexion)
     listenerConexionRegistrado = true
+  }
+
+  function registrarEscuchaVisibilidad() {
+    if (typeof window === 'undefined') return
+    if (window.__precioJustoEscuchaVisibilidadRegistrada) return
+
+    const alVolverVisible = () => {
+      if (document.visibilityState !== 'visible') return
+      void solicitarSincronizacionRemota('vuelta_visible')
+    }
+
+    window.addEventListener('visibilitychange', alVolverVisible)
+    window.__precioJustoEscuchaVisibilidadRegistrada = true
+    window.__precioJustoAlVolverVisible = alVolverVisible
   }
 
   function resolverMensajeErrorAuth(error, accion) {
@@ -223,6 +244,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
     cargandoSesion.value = true
     errorSesion.value = null
     registrarEscuchaConexion()
+    registrarEscuchaVisibilidad()
 
     try {
       const usuarioRedirect = await servicioAuthFirebase.procesarResultadoRedirectGoogle()
@@ -245,12 +267,15 @@ export const useUsuarioStore = defineStore('usuario', () => {
             aplicarEstadoUsuario(usuario)
 
             if (!usuario) {
+              detenerIntervaloSincronizacionRemota()
               await asegurarSesionAnonima()
               return
             }
 
             await sincronizarPerfilConReintento(usuario)
             await ejecutarMigracionAutomaticaSiCorresponde(usuario)
+            await solicitarSincronizacionRemota('arranque_sesion')
+            iniciarIntervaloSincronizacionRemota()
 
             if (!primerEventoRecibido) {
               primerEventoRecibido = true
@@ -289,6 +314,12 @@ export const useUsuarioStore = defineStore('usuario', () => {
         })
         .finally(() => {
           aplicarEstadoUsuario(usuarioActual)
+          if (usuarioActual && !usuarioActual.isAnonymous) {
+            iniciarIntervaloSincronizacionRemota()
+            void solicitarSincronizacionRemota('arranque_sesion')
+          } else {
+            detenerIntervaloSincronizacionRemota()
+          }
           cargandoSesion.value = false
           resolve(usuarioActual)
         })
@@ -431,6 +462,13 @@ export const useUsuarioStore = defineStore('usuario', () => {
     return true
   }
 
+  function puedeSincronizarRemoto() {
+    if (!tieneSesionRealActiva.value) return false
+    if (hayPendientesSincronizacion.value) return false
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return false
+    return true
+  }
+
   async function ejecutarSincronizacionAutomatica(motivo = 'operacion') {
     if (!puedeSincronizarAutomaticamente()) return false
 
@@ -496,6 +534,59 @@ export const useUsuarioStore = defineStore('usuario', () => {
       temporizadorSincronizacionAutomatica = null
       void ejecutarSincronizacionAutomatica(motivo)
     }, RETRASO_SINCRONIZACION_MS)
+
+    return true
+  }
+
+  async function ejecutarSincronizacionRemota(motivo = 'remoto') {
+    if (!puedeSincronizarRemoto()) return false
+    if (sincronizacionRemotaEnCurso) return false
+    if (!usuarioId.value) return false
+
+    sincronizacionRemotaEnCurso = true
+    ultimoErrorSincronizacionRemota.value = null
+
+    try {
+      const resumenRemoto = await servicioMigracionLocalFirestore.sincronizarDesdeFirestoreALocal(
+        usuarioId.value,
+      )
+      await recargarContextoDatos()
+      ultimaSincronizacionRemota.value = {
+        fecha: new Date().toISOString(),
+        motivo,
+        resumen: resumenRemoto,
+      }
+      return true
+    } catch (error) {
+      console.error('Error en sincronización remota:', error)
+      ultimoErrorSincronizacionRemota.value = 'No se pudo actualizar desde la nube en segundo plano.'
+      return false
+    } finally {
+      sincronizacionRemotaEnCurso = false
+    }
+  }
+
+  function iniciarIntervaloSincronizacionRemota() {
+    if (temporizadorSincronizacionRemota || typeof window === 'undefined') return
+
+    temporizadorSincronizacionRemota = window.setInterval(() => {
+      void solicitarSincronizacionRemota('intervalo')
+    }, INTERVALO_SINCRONIZACION_REMOTA_MS)
+  }
+
+  function detenerIntervaloSincronizacionRemota() {
+    if (!temporizadorSincronizacionRemota) return
+    clearInterval(temporizadorSincronizacionRemota)
+    temporizadorSincronizacionRemota = null
+  }
+
+  function solicitarSincronizacionRemota(motivo = 'remoto') {
+    if (!tieneSesionRealActiva.value) return false
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return false
+
+    setTimeout(() => {
+      void ejecutarSincronizacionRemota(motivo)
+    }, RETRASO_SINCRONIZACION_REMOTA_MS)
 
     return true
   }
@@ -574,6 +665,8 @@ export const useUsuarioStore = defineStore('usuario', () => {
     errorPerfil.value = null
     ultimaSincronizacionAutomatica.value = null
     ultimoErrorSincronizacionAutomatica.value = null
+    ultimaSincronizacionRemota.value = null
+    ultimoErrorSincronizacionRemota.value = null
     pendientesSincronizacion.value = []
     accesoInicialCompletado.value = false
     uidMigracionAutomaticaEnSesion = null
@@ -581,6 +674,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
       clearTimeout(temporizadorSincronizacionAutomatica)
       temporizadorSincronizacionAutomatica = null
     }
+    detenerIntervaloSincronizacionRemota()
     sincronizacionAutomaticaEnCurso = false
     sincronizacionAutomaticaReprogramada = false
     ultimoMotivoSincronizacion = null
@@ -590,6 +684,15 @@ export const useUsuarioStore = defineStore('usuario', () => {
     }
     manejarVueltaConexion = null
     listenerConexionRegistrado = false
+    if (
+      typeof window !== 'undefined' &&
+      window.__precioJustoEscuchaVisibilidadRegistrada &&
+      window.__precioJustoAlVolverVisible
+    ) {
+      window.removeEventListener('visibilitychange', window.__precioJustoAlVolverVisible)
+      window.__precioJustoEscuchaVisibilidadRegistrada = false
+      window.__precioJustoAlVolverVisible = null
+    }
   }
 
   return {
@@ -606,6 +709,8 @@ export const useUsuarioStore = defineStore('usuario', () => {
     errorPerfil,
     ultimaSincronizacionAutomatica,
     ultimoErrorSincronizacionAutomatica,
+    ultimaSincronizacionRemota,
+    ultimoErrorSincronizacionRemota,
     pendientesSincronizacion,
     cantidadPendientesSincronizacion,
     hayPendientesSincronizacion,
@@ -620,6 +725,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
     continuarComoInvitado,
     migrarDatosLocales,
     solicitarSincronizacionAutomatica,
+    solicitarSincronizacionRemota,
     actualizarPerfilEditable,
     marcarAccesoInicialCompletado,
     cerrarSesion,

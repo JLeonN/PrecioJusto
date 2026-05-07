@@ -375,6 +375,18 @@ async function obtenerSesionEscaneoRemota(usuarioId) {
   return snapshot.exists() ? snapshot.data() : null
 }
 
+async function obtenerPreferenciasRemotas(usuarioId) {
+  const referenciaPreferencias = doc(
+    firestoreDb,
+    'users',
+    usuarioId,
+    'configuracion',
+    'preferencias',
+  )
+  const snapshot = await getDoc(referenciaPreferencias)
+  return snapshot.exists() ? snapshot.data() : null
+}
+
 async function sincronizarDatosFusionadosEnLocal(datosFusionados) {
   const productosLocales = await adaptadorActual.listarTodo('producto_')
   await Promise.all(productosLocales.map((registro) => adaptadorActual.eliminar(registro.clave)))
@@ -601,9 +613,44 @@ async function migrarDatosLocalesAFirestore(usuarioId, opciones = {}) {
   }
 }
 
+async function sincronizarDesdeFirestoreALocal(usuarioId) {
+  const datosLocales = await obtenerDatosLocalesActuales(usuarioId)
+  const [productosRemotos, comerciosRemotos, listasRemotas, preferenciasRemotas, sesionEscaneoRemota] = await Promise.all([
+    obtenerDocumentosColeccionUsuario(usuarioId, 'productos'),
+    obtenerDocumentosColeccionUsuario(usuarioId, 'comercios'),
+    obtenerDocumentosColeccionUsuario(usuarioId, 'listasJustas'),
+    obtenerPreferenciasRemotas(usuarioId),
+    obtenerSesionEscaneoRemota(usuarioId),
+  ])
+
+  const fechaPreferenciasLocales = convertirFechaAms(datosLocales.preferencias?.fechaActualizacion)
+  const fechaPreferenciasRemotas = convertirFechaAms(preferenciasRemotas?.fechaActualizacion)
+  const preferenciasFusionadas = fechaPreferenciasRemotas >= fechaPreferenciasLocales
+    ? (preferenciasRemotas || datosLocales.preferencias || null)
+    : (datosLocales.preferencias || preferenciasRemotas || null)
+
+  const datosFusionados = {
+    ...datosLocales,
+    productos: fusionarProductosConRemoto(productosRemotos, datosLocales.productos),
+    comercios: fusionarComerciosConRemoto(comerciosRemotos, datosLocales.comercios),
+    listas: fusionarListasConRemoto(listasRemotas, datosLocales.listas),
+    preferencias: preferenciasFusionadas,
+    sesionEscaneo: fusionarSesionEscaneoConRemoto(sesionEscaneoRemota, datosLocales.sesionEscaneo),
+  }
+
+  await sincronizarDatosFusionadosEnLocal(datosFusionados)
+
+  return {
+    ...crearResumenMigracion(datosFusionados),
+    fuente: 'firestore',
+    fechaSincronizacion: new Date().toISOString(),
+  }
+}
+
 export default {
   obtenerDatosLocalesActuales,
   crearResumenMigracion,
   migrarDatosLocalesAFirestore,
+  sincronizarDesdeFirestoreALocal,
 }
 
