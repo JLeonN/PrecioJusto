@@ -316,6 +316,17 @@
             <p class="text-caption text-grey-7 q-mt-none q-mb-sm">
               Tu información se sincroniza automáticamente cuando entrás con tu cuenta.
             </p>
+            <q-banner
+              v-if="usuarioStore.hayPendientesSincronizacion"
+              rounded
+              class="banner-cuenta q-mb-sm"
+            >
+              Tenés
+              <strong>{{ usuarioStore.cantidadPendientesSincronizacion }}</strong>
+              cambio{{ usuarioStore.cantidadPendientesSincronizacion === 1 ? '' : 's' }}
+              pendiente{{ usuarioStore.cantidadPendientesSincronizacion === 1 ? '' : 's' }}.
+              Se subirán automáticamente.
+            </q-banner>
             <q-banner rounded class="banner-cuenta q-mb-sm">
               Si notás que falta algo, podés usar el botón de abajo para reintentar la sincronización.
             </q-banner>
@@ -436,6 +447,10 @@ const resumenMoneda = computed(() => {
   return `${preferenciasStore.monedaDefaultEfectiva} (${modo})`
 })
 const resumenSincronizacion = computed(() => {
+  if (usuarioStore.cantidadPendientesSincronizacion > 0) {
+    const totalPendientes = usuarioStore.cantidadPendientesSincronizacion
+    return `${totalPendientes} cambio${totalPendientes === 1 ? '' : 's'} pendiente${totalPendientes === 1 ? '' : 's'}`
+  }
   if (textoResumenMigracion.value) return 'Sincronización lista'
   return 'Sincronización automática activa'
 })
@@ -798,7 +813,11 @@ async function manejarGuardarPerfilEditable() {
   })
 
   if (perfilOk) {
-    quasar.notify({ type: 'positive', message: 'Perfil actualizado correctamente.' })
+    if (usuarioStore.errorPerfil) {
+      quasar.notify({ type: 'warning', message: usuarioStore.errorPerfil })
+    } else {
+      quasar.notify({ type: 'positive', message: 'Perfil actualizado correctamente.' })
+    }
     return
   }
 

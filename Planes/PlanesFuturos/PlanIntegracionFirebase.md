@@ -203,8 +203,8 @@ Evitar mezcla de datos entre cuentas distintas en un mismo celular/navegador y a
   - [x] Migracion local -> Firestore automatica al iniciar sesion real
   - [x] No duplicar datos si el proceso se ejecuta mas de una vez
 - [ ] Reforzar proteccion de lectura/escritura:
-  - [ ] Verificar que toda consulta/escritura use rutas del `uid` activo
-  - [ ] Registrar error controlado si hay desajuste de `uid`
+  - [x] Verificar que toda consulta/escritura use rutas del `uid` activo
+  - [x] Registrar error controlado si hay desajuste de `uid`
 - [x] Criterio de cierre de fase:
   - [x] Login con cuenta A, logout, login con cuenta B sin fuga de datos
   - [x] Vuelta a cuenta A mantiene sus datos propios
@@ -225,20 +225,20 @@ Asegurar que, luego del login real, cada cambio importante viaje tambien a Fireb
 - [x] Implementar cola de sincronizacion por eventos (throttle/debounce) para evitar exceso de escrituras
 - [ ] Mantener comportamiento offline-first:
   - [x] guardar local inmediato
-  - [ ] marcar cambios pendientes para subida
+  - [x] marcar cambios pendientes para subida
   - [x] subir automatico al volver internet
 - [ ] Evitar duplicados y sobrescrituras indebidas:
-  - [ ] aplicar reglas idempotentes por entidad
-  - [ ] mantener merge seguro en historiales de precios
+  - [x] aplicar reglas idempotentes por entidad
+  - [x] mantener merge seguro en historiales de precios
 - [ ] Registrar estado de sincronizacion para soporte:
   - [x] ultima sincronizacion exitosa
   - [x] ultimo error de sincronizacion
-  - [ ] cantidad de pendientes
+  - [x] cantidad de pendientes
 - [x] Mantener boton manual de reintento como plan B (sin exponer lenguaje tecnico al usuario)
 - [ ] Criterio de cierre de fase:
-  - [ ] crear datos nuevos y confirmar que aparecen en Firebase sin accion manual
-  - [ ] simular offline -> reconexion y confirmar subida automatica
-  - [ ] no hay duplicados en reintentos
+  - [x] crear datos nuevos y confirmar que aparecen en Firebase sin accion manual
+  - [x] simular offline -> reconexion y confirmar subida automatica
+  - [x] no hay duplicados en reintentos
 
 ## FASE 4G: Fuente de verdad en Firebase (mediano plazo)
 
@@ -382,6 +382,15 @@ Validar por IA (Playwright) los nuevos flujos de pantalla inicial, sincronizacio
 - [x] Probar no-duplicacion de migracion automatica:
   - [x] Ejecutar flujo de migracion mas de una vez y confirmar idempotencia
     - Validado en Playwright con cuenta `yoomat.75.wow.04@hotmail.com`: dos migraciones consecutivas completadas, manteniendo el mismo resumen `Productos: 30, comercios: 5, listas: 0` sin crecimiento inesperado.
+- [x] Validar contador de pendientes de sincronización (FASE 4F):
+  - [x] Al guardar cambios de perfil aparece `1 cambio pendiente` en `Datos y sincronización`.
+  - [x] Luego de la sincronización automática el contador se limpia sin acción manual.
+- [x] Validar offline -> reconexión (FASE 4F):
+  - [x] En offline, editar perfil mantiene cambio local y muestra pendientes.
+  - [x] Al reconectar (`online`), la sincronización automática limpia pendientes (validado con espera extendida en Playwright).
+- [x] Validar no duplicación en reintentos manuales (FASE 4F):
+  - [x] Ejecutar `Reintentar sincronización` dos veces seguidas mantiene estable el conteo de productos.
+  - [x] Evidencia Playwright: `conteoAntes=70`, `conteoDespues=70`.
 - [x] Guardar evidencia Playwright:
   - [x] capturas
     - `evidencia-configuracion-actual.png`, `evidencia-drawer-nombre-manual.png`.

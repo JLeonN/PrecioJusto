@@ -24,6 +24,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
   const accesoInicialCompletado = ref(false)
   const ultimaSincronizacionAutomatica = ref(null)
   const ultimoErrorSincronizacionAutomatica = ref(null)
+  const pendientesSincronizacion = ref([])
 
   let detenerEscuchaSesion = null
   let promesaInicializacion = null
@@ -35,6 +36,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
   let sincronizacionAutomaticaEnCurso = false
   let sincronizacionAutomaticaReprogramada = false
   let ultimoMotivoSincronizacion = null
+  const motivosPendientes = new Set()
   const CLAVE_ACCESO_INICIAL = 'acceso_inicial_completado'
   const RETRASO_SINCRONIZACION_MS = 1200
 
@@ -42,9 +44,33 @@ export const useUsuarioStore = defineStore('usuario', () => {
   const tieneSesionRealActiva = computed(
     () => autenticado.value && !!usuarioId.value && !esAnonimo.value,
   )
+  const cantidadPendientesSincronizacion = computed(() => pendientesSincronizacion.value.length)
+  const hayPendientesSincronizacion = computed(() => cantidadPendientesSincronizacion.value > 0)
 
   function esErrorPermisosFirestore(error) {
     return error?.code === 'permission-denied' || error?.message?.includes('Missing or insufficient permissions')
+  }
+
+  function esErrorConectividad(error) {
+    const codigo = String(error?.code || '').toLowerCase()
+    const mensaje = String(error?.message || '').toLowerCase()
+    return (
+      codigo.includes('unavailable') ||
+      codigo.includes('network') ||
+      mensaje.includes('network') ||
+      mensaje.includes('offline') ||
+      mensaje.includes('failed to fetch')
+    )
+  }
+  function registrarDesajusteUidEnPerfil(usuarioUid, perfilUid) {
+    const uidSesion = String(usuarioUid || '').trim()
+    const uidPerfil = String(perfilUid || '').trim()
+    if (!uidSesion || !uidPerfil || uidSesion === uidPerfil) return false
+
+    const mensaje = 'Se detectó un desajuste de sesión. Se actualizará el perfil con el usuario activo.'
+    console.error('[SeguridadSesion] desajuste uid', { uidSesion, uidPerfil })
+    errorSesion.value = mensaje
+    return true
   }
 
   function aplicarEstadoUsuario(usuario) {
@@ -155,6 +181,13 @@ export const useUsuarioStore = defineStore('usuario', () => {
     perfil.value = {
       ...perfilActual,
       ...perfilSesion,
+    }
+    const existeDesajuste = registrarDesajusteUidEnPerfil(usuario.uid, perfil.value?.usuarioId)
+    if (existeDesajuste) {
+      perfil.value = {
+        ...perfil.value,
+        usuarioId: usuario.uid,
+      }
     }
   }
 
@@ -379,6 +412,8 @@ export const useUsuarioStore = defineStore('usuario', () => {
         opciones,
       )
       ultimoResumenMigracion.value = resumen
+      pendientesSincronizacion.value = []
+      motivosPendientes.clear()
       await recargarContextoDatos()
       return resumen
     } catch (error) {
@@ -419,6 +454,8 @@ export const useUsuarioStore = defineStore('usuario', () => {
         fecha: new Date().toISOString(),
         motivo,
       }
+      pendientesSincronizacion.value = []
+      motivosPendientes.clear()
       return true
     } catch (error) {
       console.error('Error en sincronización automática:', error)
@@ -434,8 +471,22 @@ export const useUsuarioStore = defineStore('usuario', () => {
     }
   }
 
+  function registrarPendienteSincronizacion(motivo = 'operacion') {
+    const motivoNormalizado = String(motivo || 'operacion').trim().toLowerCase()
+    if (!motivoNormalizado) return
+
+    motivosPendientes.add(motivoNormalizado)
+    pendientesSincronizacion.value = Array.from(motivosPendientes.values())
+  }
+
   function solicitarSincronizacionAutomatica(motivo = 'operacion') {
     if (!tieneSesionRealActiva.value) return false
+    registrarPendienteSincronizacion(motivo)
+
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      ultimoErrorSincronizacionAutomatica.value = 'Sin conexión. Se reintentará automáticamente al volver internet.'
+      return true
+    }
 
     if (temporizadorSincronizacionAutomatica) {
       clearTimeout(temporizadorSincronizacionAutomatica)
@@ -458,6 +509,28 @@ export const useUsuarioStore = defineStore('usuario', () => {
     cargandoPerfil.value = true
     errorPerfil.value = null
 
+    const datosLocalesNormalizados = {
+      nombre: (datosPerfilEditable.nombre || '').trim(),
+      foto: (datosPerfilEditable.foto || '').trim() || null,
+      fechaNacimiento: datosPerfilEditable.fechaNacimiento || null,
+      edad:
+        servicioFirestoreUsuarios.calcularEdadDesdeFecha(datosPerfilEditable.fechaNacimiento || null) || null,
+      perfilEditable: {
+        nombre: (datosPerfilEditable.nombre || '').trim(),
+        foto: (datosPerfilEditable.foto || '').trim() || null,
+        fechaNacimiento: datosPerfilEditable.fechaNacimiento || null,
+        edad:
+          servicioFirestoreUsuarios.calcularEdadDesdeFecha(datosPerfilEditable.fechaNacimiento || null) || null,
+      },
+      fechaActualizacion: new Date().toISOString(),
+    }
+
+    perfil.value = {
+      ...(perfil.value || {}),
+      ...datosLocalesNormalizados,
+    }
+    solicitarSincronizacionAutomatica('perfil_actualizado')
+
     try {
       const datosGuardados = await servicioFirestoreUsuarios.guardarPerfilEditable(
         usuarioId.value,
@@ -468,12 +541,13 @@ export const useUsuarioStore = defineStore('usuario', () => {
         ...(perfil.value || {}),
         ...datosGuardados,
       }
-
-      solicitarSincronizacionAutomatica('perfil_actualizado')
-
       return true
     } catch (error) {
       console.error('Error al actualizar perfil editable:', error)
+      if (esErrorConectividad(error)) {
+        errorPerfil.value = 'Sin conexión: el perfil se guardó localmente y se sincronizará cuando vuelva internet.'
+        return true
+      }
       errorPerfil.value = 'No se pudo guardar el perfil'
       return false
     } finally {
@@ -500,6 +574,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
     errorPerfil.value = null
     ultimaSincronizacionAutomatica.value = null
     ultimoErrorSincronizacionAutomatica.value = null
+    pendientesSincronizacion.value = []
     accesoInicialCompletado.value = false
     uidMigracionAutomaticaEnSesion = null
     if (temporizadorSincronizacionAutomatica) {
@@ -509,6 +584,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
     sincronizacionAutomaticaEnCurso = false
     sincronizacionAutomaticaReprogramada = false
     ultimoMotivoSincronizacion = null
+    motivosPendientes.clear()
     if (typeof window !== 'undefined' && listenerConexionRegistrado && manejarVueltaConexion) {
       window.removeEventListener('online', manejarVueltaConexion)
     }
@@ -530,6 +606,9 @@ export const useUsuarioStore = defineStore('usuario', () => {
     errorPerfil,
     ultimaSincronizacionAutomatica,
     ultimoErrorSincronizacionAutomatica,
+    pendientesSincronizacion,
+    cantidadPendientesSincronizacion,
+    hayPendientesSincronizacion,
     accesoInicialCompletado,
     tieneSesionActiva,
     tieneSesionRealActiva,
