@@ -160,12 +160,7 @@ const props = defineProps({
     type: Object,
     required: true,
     validator: (valor) => {
-      return (
-        valor.id &&
-        valor.nombre &&
-        typeof valor.precioMejor === 'number' &&
-        Array.isArray(valor.precios)
-      )
+      return Boolean(valor?.id && valor?.nombre && Array.isArray(valor?.precios))
     },
   },
   modoSeleccion: {

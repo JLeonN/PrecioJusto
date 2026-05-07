@@ -350,20 +350,21 @@ Validar por IA (Playwright) los nuevos flujos de pantalla inicial, sincronizacio
     - Validado en Playwright con recarga (`F5`) y permanencia en `/#/` sin redireccion a `/#/acceso` cuando ya existe estado invitado activo.
   - [x] Cerrar sesion real vuelve a flujo de acceso y estado invitado
     - Validado en Playwright: desde Configuracion, `Cerrar sesión` redirige a `/#/acceso` y la UI queda en invitado.
-- [ ] Probar comportamiento offline:
+- [x] Probar comportamiento offline:
   - [x] Crear/editar datos sin internet (guardado local)
     - Validado técnicamente con Playwright: `context.setOffline(true)` + alta local directa en LocalStorage por espacio `uid-*`.
   - [x] Reconectar internet y verificar sincronizacion automatica a Firestore
     - Validado técnicamente con Playwright: `context.setOffline(false)` + `window.dispatchEvent(new Event('online'))`, con persistencia de resumen de migración y estado estable.
-- [ ] Probar prioridad de perfil visible:
+- [x] Probar prioridad de perfil visible:
   - [x] Perfil manual sobreescribe datos de proveedor
     - Validado en Playwright: cambio manual de nombre (`Leo Manual ####`) visible en drawer.
   - [x] Si no hay perfil manual, se usan datos del proveedor
     - Validado previamente en flujos Google/correo al precargar `displayName/email/photoURL` en `perfil`.
-- [ ] Probar cabecera de usuario en drawer:
-  - [x] Logueado: muestra nombre y avatar/fallback
+- [x] Probar cabecera de usuario en drawer:
+- [x] Logueado: muestra nombre y avatar/fallback
     - Validado en Playwright con cuenta por correo: drawer muestra iniciales y nombre visible del usuario.
   - [x] Invitado: mantiene cabecera neutra sin datos personales
+    - Validado en Playwright: al cerrar sesión (`/#/acceso`) se muestra `Usuario anónimo` en Configuración y botón de acceso en cabecera.
 - [x] Validar UI de inputs reutilizables en Acceso inicial y Configuracion:
   - [x] Tema claro/oscuro en Configuracion sin regresion visual
   - [x] Foco y hover en inputs reutilizables
@@ -381,7 +382,7 @@ Validar por IA (Playwright) los nuevos flujos de pantalla inicial, sincronizacio
 - [x] Probar no-duplicacion de migracion automatica:
   - [x] Ejecutar flujo de migracion mas de una vez y confirmar idempotencia
     - Validado en Playwright con cuenta `yoomat.75.wow.04@hotmail.com`: dos migraciones consecutivas completadas, manteniendo el mismo resumen `Productos: 30, comercios: 5, listas: 0` sin crecimiento inesperado.
-- [ ] Guardar evidencia Playwright:
+- [x] Guardar evidencia Playwright:
   - [x] capturas
     - `evidencia-configuracion-actual.png`, `evidencia-drawer-nombre-manual.png`.
   - [x] logs
