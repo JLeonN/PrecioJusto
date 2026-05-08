@@ -284,18 +284,18 @@ Mejorar la velocidad percibida y real de la app con Firebase activa, priorizando
   - [ ] evitar cargar todo `productos/comercios/listas` al iniciar
   - [ ] priorizar dataset minimo necesario por pantalla
   - [ ] paginar o diferir modulos con volumen alto
-- [ ] Optimizar persistencia local:
-  - [ ] evitar payloads grandes en `Preferences` (solo metadata cuando aplique)
-  - [ ] reducir cantidad de lecturas/escrituras por rafaga
-  - [ ] consolidar escrituras por lotes en eventos consecutivos
+- [x] Optimizar persistencia local:
+  - [x] evitar payloads grandes en `Preferences` (solo metadata cuando aplique)
+  - [x] reducir cantidad de lecturas/escrituras por rafaga
+  - [x] consolidar escrituras por lotes en eventos consecutivos
 - [ ] Optimizar sincronizacion automatica:
   - [ ] aumentar debounce/throttle en mobile para reducir picos
   - [ ] no sincronizar si no hay cambios efectivos
-  - [ ] evitar recargas globales de stores cuando alcanza con actualizacion incremental
-- [ ] Afinar sincronizacion remota:
-  - [ ] traer solo datos necesarios/recientes cuando sea posible
-  - [ ] reducir merges completos si no hubo cambios remotos relevantes
-  - [ ] mantener consistencia de borrados y conflictos sin reintroducir datos eliminados
+  - [x] evitar recargas globales de stores cuando alcanza con actualizacion incremental
+- [x] Afinar sincronizacion remota:
+  - [x] traer solo datos necesarios/recientes cuando sea posible
+  - [x] reducir merges completos si no hubo cambios remotos relevantes
+  - [x] mantener consistencia de borrados y conflictos sin reintroducir datos eliminados
 - [ ] Instrumentar metricas de rendimiento:
   - [ ] medir tiempo de apertura (cold start) en celular real
   - [ ] medir tiempo hasta datos visibles (listas/comercios/productos)
@@ -321,7 +321,7 @@ Validar mejora de performance con medicion comparativa y evidencia tecnica repro
   - [ ] navegacion inicial entre Inicio, Comercios y Mesa de trabajo
   - [ ] creacion/edicion/eliminacion de datos con sync activa
 - [ ] Validar que no haya regresion funcional durante optimizacion:
-  - [ ] productos/comercios/listas/mesa siguen consistentes entre celular y navegador
+  - [x] productos/comercios/listas/mesa siguen consistentes entre celular y navegador
   - [ ] borrados no reaparecen tras sincronizacion
 - [ ] Guardar evidencia:
   - [ ] logs Android (`adb logcat`) antes/despues
@@ -484,5 +484,5 @@ Validar por IA (Playwright) los nuevos flujos de pantalla inicial, sincronizacio
 - [x] Fase Testing 4D-4E (Playwright)
 
 Fecha de creacion: 14 de Marzo 2026
-Fecha de ultima actualizacion: 7 de Mayo 2026
+Fecha de ultima actualizacion: 8 de Mayo 2026
 Estado: EN PROCESO

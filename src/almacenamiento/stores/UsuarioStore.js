@@ -134,7 +134,10 @@ export const useUsuarioStore = defineStore('usuario', () => {
     if (uidMigracionAutomaticaEnSesion === usuario.uid) return
 
     uidMigracionAutomaticaEnSesion = usuario.uid
-    const resumen = await migrarDatosLocales()
+    const resumen = await migrarDatosLocales({
+      incluirEspacioCompartido: true,
+      recargarContexto: true,
+    })
 
     if (!resumen) {
       uidMigracionAutomaticaEnSesion = null
@@ -450,7 +453,9 @@ export const useUsuarioStore = defineStore('usuario', () => {
       ultimoResumenMigracion.value = resumen
       pendientesSincronizacion.value = []
       motivosPendientes.clear()
-      await recargarContextoDatos()
+      if (opciones.recargarContexto === true) {
+        await recargarContextoDatos()
+      }
       return resumen
     } catch (error) {
       console.error('Error al migrar datos locales:', error)

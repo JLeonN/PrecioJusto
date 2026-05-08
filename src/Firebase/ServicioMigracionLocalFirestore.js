@@ -21,8 +21,9 @@ function obtenerEspacioActualAdaptador() {
   return adaptadorActual?.espacioTrabajo || 'compartido'
 }
 
-function construirEspaciosCandidatos(usuarioId) {
+function construirEspaciosCandidatos(usuarioId, opciones = {}) {
   const espacios = []
+  const incluirEspacioCompartido = opciones.incluirEspacioCompartido === true
 
   const agregar = (valor) => {
     const normalizado = String(valor || '')
@@ -35,7 +36,9 @@ function construirEspaciosCandidatos(usuarioId) {
 
   agregar(obtenerEspacioActualAdaptador())
   agregar(`uid-${usuarioId}`)
-  agregar('compartido')
+  if (incluirEspacioCompartido) {
+    agregar('compartido')
+  }
 
   return espacios
 }
@@ -61,9 +64,9 @@ async function obtenerDatosLocalesEspacio(espacioTrabajo) {
   }
 }
 
-async function obtenerDatosLocalesActuales(usuarioId) {
+async function obtenerDatosLocalesActuales(usuarioId, opciones = {}) {
   const espacioOriginal = obtenerEspacioActualAdaptador()
-  const espacios = construirEspaciosCandidatos(usuarioId)
+  const espacios = construirEspaciosCandidatos(usuarioId, opciones)
   const datosAcumulados = {
     productos: [],
     comercios: [],
@@ -411,7 +414,9 @@ async function sincronizarDatosFusionadosEnLocal(datosFusionados) {
 }
 
 async function migrarDatosLocalesAFirestore(usuarioId, opciones = {}) {
-  const datosLocales = await obtenerDatosLocalesActuales(usuarioId)
+  const datosLocales = await obtenerDatosLocalesActuales(usuarioId, {
+    incluirEspacioCompartido: opciones.incluirEspacioCompartido === true,
+  })
   const [productosRemotos, comerciosRemotos, listasRemotas] = await Promise.all([
     obtenerDocumentosColeccionUsuario(usuarioId, 'productos'),
     obtenerDocumentosColeccionUsuario(usuarioId, 'comercios'),
@@ -616,7 +621,9 @@ async function migrarDatosLocalesAFirestore(usuarioId, opciones = {}) {
 }
 
 async function sincronizarDesdeFirestoreALocal(usuarioId) {
-  const datosLocales = await obtenerDatosLocalesActuales(usuarioId)
+  const datosLocales = await obtenerDatosLocalesActuales(usuarioId, {
+    incluirEspacioCompartido: false,
+  })
   const [productosRemotos, comerciosRemotos, listasRemotas, preferenciasRemotas, sesionEscaneoRemota] = await Promise.all([
     obtenerDocumentosColeccionUsuario(usuarioId, 'productos'),
     obtenerDocumentosColeccionUsuario(usuarioId, 'comercios'),

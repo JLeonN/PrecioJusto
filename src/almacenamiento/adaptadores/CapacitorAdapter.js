@@ -26,6 +26,7 @@ class CapacitorAdapter {
   constructor() {
     this.prefijoBase = 'precio_justo_' // Prefijo para organizar las claves
     this.espacioTrabajo = 'compartido'
+    this.tamanoLoteLectura = 25
 
     console.log('📱 CapacitorAdapter inicializado')
 
@@ -148,26 +149,33 @@ class CapacitorAdapter {
       const prefijoActivo = this._construirPrefijoActivo()
       // Filtrar claves que pertenecen al espacio activo
       const clavesApp = keys.filter((claveCompleta) => claveCompleta.startsWith(prefijoActivo))
-
-      // Procesar cada clave
-      for (const claveCompleta of clavesApp) {
-        // Extraer la clave sin prefijo
+      const clavesFiltradas = clavesApp.filter((claveCompleta) => {
         const clave = claveCompleta.replace(prefijoActivo, '')
+        if (prefijoBusqueda && !clave.startsWith(prefijoBusqueda)) return false
+        return true
+      })
 
-        // Aplicar filtro adicional si existe
-        if (prefijoBusqueda && !clave.startsWith(prefijoBusqueda)) continue
+      for (let indice = 0; indice < clavesFiltradas.length; indice += this.tamanoLoteLectura) {
+        const lote = clavesFiltradas.slice(indice, indice + this.tamanoLoteLectura)
+        const resultadosLote = await Promise.all(
+          lote.map(async (claveCompleta) => {
+            const clave = claveCompleta.replace(prefijoActivo, '')
+            const resultado = await Preferences.get({ key: claveCompleta })
+            if (!resultado.value) return null
 
-        // Obtener el valor
-        const resultado = await Preferences.get({ key: claveCompleta })
+            try {
+              const valor = JSON.parse(resultado.value)
+              return { clave, valor }
+            } catch (error) {
+              console.warn(`Dato corrupto en ${clave}, ignorando...`, error)
+              return null
+            }
+          }),
+        )
 
-        if (resultado.value) {
-          try {
-            const valor = JSON.parse(resultado.value)
-            resultados.push({ clave, valor })
-          } catch (error) {
-            console.warn(`⚠️ Dato corrupto en ${clave}, ignorando...`, error)
-          }
-        }
+        resultadosLote.forEach((registro) => {
+          if (registro) resultados.push(registro)
+        })
       }
 
       console.log(
