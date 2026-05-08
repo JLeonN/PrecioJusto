@@ -44,6 +44,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
   const CLAVE_ACCESO_INICIAL = 'acceso_inicial_completado'
   const RETRASO_SINCRONIZACION_MS = 1200
   const RETRASO_SINCRONIZACION_REMOTA_MS = 2500
+  const RETRASO_SINCRONIZACION_REMOTA_ARRANQUE_MS = 8000
   const INTERVALO_SINCRONIZACION_REMOTA_MS = 90000
 
   const tieneSesionActiva = computed(() => autenticado.value && !!usuarioId.value)
@@ -273,8 +274,10 @@ export const useUsuarioStore = defineStore('usuario', () => {
             }
 
             await sincronizarPerfilConReintento(usuario)
-            await ejecutarMigracionAutomaticaSiCorresponde(usuario)
-            await solicitarSincronizacionRemota('arranque_sesion')
+            void ejecutarMigracionAutomaticaSiCorresponde(usuario)
+            void solicitarSincronizacionRemota('arranque_sesion', {
+              retrasoMs: RETRASO_SINCRONIZACION_REMOTA_ARRANQUE_MS,
+            })
             iniciarIntervaloSincronizacionRemota()
 
             if (!primerEventoRecibido) {
@@ -316,7 +319,9 @@ export const useUsuarioStore = defineStore('usuario', () => {
           aplicarEstadoUsuario(usuarioActual)
           if (usuarioActual && !usuarioActual.isAnonymous) {
             iniciarIntervaloSincronizacionRemota()
-            void solicitarSincronizacionRemota('arranque_sesion')
+            void solicitarSincronizacionRemota('arranque_sesion', {
+              retrasoMs: RETRASO_SINCRONIZACION_REMOTA_ARRANQUE_MS,
+            })
           } else {
             detenerIntervaloSincronizacionRemota()
           }
@@ -580,13 +585,17 @@ export const useUsuarioStore = defineStore('usuario', () => {
     temporizadorSincronizacionRemota = null
   }
 
-  function solicitarSincronizacionRemota(motivo = 'remoto') {
+  function solicitarSincronizacionRemota(motivo = 'remoto', opciones = {}) {
     if (!tieneSesionRealActiva.value) return false
     if (typeof navigator !== 'undefined' && navigator.onLine === false) return false
+    const retrasoMs = Number(opciones?.retrasoMs)
+    const retrasoNormalizado = Number.isFinite(retrasoMs) && retrasoMs >= 0
+      ? retrasoMs
+      : RETRASO_SINCRONIZACION_REMOTA_MS
 
     setTimeout(() => {
       void ejecutarSincronizacionRemota(motivo)
-    }, RETRASO_SINCRONIZACION_REMOTA_MS)
+    }, retrasoNormalizado)
 
     return true
   }

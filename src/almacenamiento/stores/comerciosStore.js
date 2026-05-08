@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import ComerciosService from '../servicios/ComerciosService'
 import { useProductosStore } from './productosStore.js'
 import { useUsuarioStore } from './UsuarioStore.js'
+import servicioMigracionLocalFirestore from '../../Firebase/ServicioMigracionLocalFirestore.js'
 
 /**
  * COMERCIOS STORE
@@ -300,6 +301,14 @@ export const useComerciStore = defineStore('comercios', {
 
         if (eliminado) {
           this.comercios = this.comercios.filter((c) => c.id !== id)
+          const usuarioStore = useUsuarioStore()
+          if (usuarioStore.tieneSesionRealActiva && usuarioStore.usuarioId) {
+            try {
+              await servicioMigracionLocalFirestore.eliminarComercioRemoto(usuarioStore.usuarioId, id)
+            } catch (errorRemoto) {
+              console.warn('No se pudo eliminar el comercio en Firebase:', errorRemoto)
+            }
+          }
           useUsuarioStore().solicitarSincronizacionAutomatica('comercio_eliminado')
         }
 
@@ -340,6 +349,16 @@ export const useComerciStore = defineStore('comercios', {
         // Actualizar estado local
         this.comercios = this.comercios.filter((c) => !resultados.exitosos.includes(c.id))
         if (resultados.exitosos.length > 0) {
+          const usuarioStore = useUsuarioStore()
+          if (usuarioStore.tieneSesionRealActiva && usuarioStore.usuarioId) {
+            for (const idExitoso of resultados.exitosos) {
+              try {
+                await servicioMigracionLocalFirestore.eliminarComercioRemoto(usuarioStore.usuarioId, idExitoso)
+              } catch (errorRemoto) {
+                console.warn('No se pudo eliminar un comercio en Firebase:', errorRemoto)
+              }
+            }
+          }
           useUsuarioStore().solicitarSincronizacionAutomatica('comercios_eliminados')
         }
 

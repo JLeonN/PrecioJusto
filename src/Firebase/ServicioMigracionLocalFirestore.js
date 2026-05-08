@@ -1,4 +1,4 @@
-﻿import { collection, doc, getDoc, getDocs, serverTimestamp, setDoc, writeBatch } from 'firebase/firestore'
+﻿import { collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, setDoc, writeBatch } from 'firebase/firestore'
 import { firestoreDb } from './ClienteFirebase.js'
 import {
   adaptadorActual,
@@ -15,6 +15,7 @@ const CLAVE_PREFERENCIAS = 'preferencias_usuario'
 const CLAVE_SESION_ESCANEO = 'sesion_escaneo'
 const CLAVE_RESPALDO_MIGRACION = 'respaldo_migracion_firestore'
 const VENTANA_DUPLICADO_HISTORIAL_DIAS = 30
+const VERSION_RESPALDO_LIGERO = 2
 
 function obtenerEspacioActualAdaptador() {
   return adaptadorActual?.espacioTrabajo || 'compartido'
@@ -430,12 +431,13 @@ async function migrarDatosLocalesAFirestore(usuarioId, opciones = {}) {
   const intentoId = `migracion_${Date.now()}`
   const claveRespaldo = `${CLAVE_RESPALDO_MIGRACION}_${usuarioId}`
   const respaldoTemporal = {
-    version: 1,
+    version: VERSION_RESPALDO_LIGERO,
     intentoId,
     usuarioId,
     fechaRespaldo: new Date().toISOString(),
     resumen,
-    datosLocales: datosFusionados,
+    espacioTrabajoOrigen: datosFusionados.espacioTrabajo || 'desconocido',
+    nota: 'Respaldo liviano sin payload completo para reducir I/O local.',
   }
 
   const respaldoGuardado = await adaptadorActual.guardar(claveRespaldo, respaldoTemporal)
@@ -647,10 +649,29 @@ async function sincronizarDesdeFirestoreALocal(usuarioId) {
   }
 }
 
+
+async function eliminarListaRemota(usuarioId, listaId) {
+  const uid = String(usuarioId || '').trim()
+  const id = String(listaId || '').trim()
+  if (!uid || !id) return false
+
+  await deleteDoc(doc(firestoreDb, 'users', uid, 'listasJustas', id))
+  return true
+}
+
+async function eliminarComercioRemoto(usuarioId, comercioId) {
+  const uid = String(usuarioId || '').trim()
+  const id = String(comercioId || '').trim()
+  if (!uid || !id) return false
+
+  await deleteDoc(doc(firestoreDb, 'users', uid, 'comercios', id))
+  return true
+}
 export default {
   obtenerDatosLocalesActuales,
   crearResumenMigracion,
   migrarDatosLocalesAFirestore,
   sincronizarDesdeFirestoreALocal,
+  eliminarListaRemota,
+  eliminarComercioRemoto,
 }
-

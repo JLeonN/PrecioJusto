@@ -6,6 +6,7 @@ import productosService from '../servicios/ProductosService.js'
 import { useProductosStore } from './productosStore.js'
 import { useSesionEscaneoStore } from './sesionEscaneoStore.js'
 import { useUsuarioStore } from './UsuarioStore.js'
+import servicioMigracionLocalFirestore from '../../Firebase/ServicioMigracionLocalFirestore.js'
 
 export const useListaJustaStore = defineStore('listaJusta', () => {
   const quasar = useQuasar()
@@ -141,6 +142,15 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
   async function eliminarLista(listaId) {
     listas.value = listas.value.filter((lista) => lista.id !== listaId)
     await persistir()
+
+    if (usuarioStore.tieneSesionRealActiva && usuarioStore.usuarioId) {
+      try {
+        await servicioMigracionLocalFirestore.eliminarListaRemota(usuarioStore.usuarioId, listaId)
+      } catch (error) {
+        console.warn('No se pudo eliminar la lista en Firebase:', error)
+      }
+    }
+
     return true
   }
 

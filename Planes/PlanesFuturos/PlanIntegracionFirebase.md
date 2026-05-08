@@ -270,7 +270,69 @@ Migrar gradualmente a un modelo cloud-first donde Firestore sea la fuente princi
   - [x] cambios en un dispositivo se reflejan en otro con la misma cuenta
   - [x] comportamiento offline estable sin perdida de datos
 
-## FASE 5: Preparar corte a produccion
+## FASE 5: Optimizacion de rendimiento (mobile + web)
+
+### Objetivo
+
+Mejorar la velocidad percibida y real de la app con Firebase activa, priorizando apertura fluida, menor carga inicial y sincronizacion incremental sin bloquear UI.
+
+- [ ] Reducir trabajo en arranque de sesion:
+  - [ ] cargar primero UI critica (pantalla inicial + datos visibles)
+  - [ ] diferir sincronizaciones pesadas post-render
+  - [ ] evitar tareas de migracion/barrido completo en el primer frame
+- [ ] Implementar carga progresiva de datos:
+  - [ ] evitar cargar todo `productos/comercios/listas` al iniciar
+  - [ ] priorizar dataset minimo necesario por pantalla
+  - [ ] paginar o diferir modulos con volumen alto
+- [ ] Optimizar persistencia local:
+  - [ ] evitar payloads grandes en `Preferences` (solo metadata cuando aplique)
+  - [ ] reducir cantidad de lecturas/escrituras por rafaga
+  - [ ] consolidar escrituras por lotes en eventos consecutivos
+- [ ] Optimizar sincronizacion automatica:
+  - [ ] aumentar debounce/throttle en mobile para reducir picos
+  - [ ] no sincronizar si no hay cambios efectivos
+  - [ ] evitar recargas globales de stores cuando alcanza con actualizacion incremental
+- [ ] Afinar sincronizacion remota:
+  - [ ] traer solo datos necesarios/recientes cuando sea posible
+  - [ ] reducir merges completos si no hubo cambios remotos relevantes
+  - [ ] mantener consistencia de borrados y conflictos sin reintroducir datos eliminados
+- [ ] Instrumentar metricas de rendimiento:
+  - [ ] medir tiempo de apertura (cold start) en celular real
+  - [ ] medir tiempo hasta datos visibles (listas/comercios/productos)
+  - [ ] registrar cantidad de operaciones de storage y sync por arranque
+- [ ] Criterio de cierre de fase:
+  - [ ] apertura percibida claramente mas rapida en celular real con cuenta de datos grandes
+  - [ ] no hay regresion funcional en productos/comercios/listas/mesa de trabajo
+  - [ ] sincronizacion mantiene consistencia multi-dispositivo
+  - [ ] evidencia guardada con logs antes/despues y comparativa de tiempos
+
+## FASE TESTING RENDIMIENTO (Playwright + celular real)
+
+### Objetivo
+
+Validar mejora de performance con medicion comparativa y evidencia tecnica reproducible.
+
+- [ ] Definir baseline antes de optimizar:
+  - [ ] tiempo de cold start en celular real (cuenta `wow.03`)
+  - [ ] tiempo hasta primer dato visible en Lista Justa
+  - [ ] cantidad de operaciones de storage al arranque
+- [ ] Ejecutar pruebas de rendimiento tras cada bloque de optimizacion:
+  - [ ] arranque de app con sesion real (3 corridas minimas)
+  - [ ] navegacion inicial entre Inicio, Comercios y Mesa de trabajo
+  - [ ] creacion/edicion/eliminacion de datos con sync activa
+- [ ] Validar que no haya regresion funcional durante optimizacion:
+  - [ ] productos/comercios/listas/mesa siguen consistentes entre celular y navegador
+  - [ ] borrados no reaparecen tras sincronizacion
+- [ ] Guardar evidencia:
+  - [ ] logs Android (`adb logcat`) antes/despues
+  - [ ] capturas o video corto del flujo en celular
+  - [ ] resumen comparativo de tiempos y observaciones
+- [ ] Criterio de salida testing rendimiento:
+  - [ ] mejora observable y medible respecto al baseline
+  - [ ] sin errores bloqueantes nuevos
+  - [ ] resultados documentados en este plan
+
+## FASE 6: Preparar corte a produccion
 
 ### Objetivo
 
@@ -415,7 +477,9 @@ Validar por IA (Playwright) los nuevos flujos de pantalla inicial, sincronizacio
 - [x] Fase 4E: Aislamiento multiusuario en mismo dispositivo
 - [x] Fase 4F: Sincronizacion automatica post-operacion
 - [x] Fase 4G: Fuente de verdad en Firebase
-- [ ] Fase 5: Preparar corte a produccion
+- [ ] Fase 5: Optimizacion de rendimiento (mobile + web)
+- [ ] Fase Testing Rendimiento (Playwright + celular real)
+- [ ] Fase 6: Preparar corte a produccion
 - [x] Fase Testing
 - [x] Fase Testing 4D-4E (Playwright)
 
