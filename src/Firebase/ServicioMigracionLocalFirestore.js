@@ -14,8 +14,10 @@ const CLAVE_COMERCIOS = 'comercios'
 const CLAVE_PREFERENCIAS = 'preferencias_usuario'
 const CLAVE_SESION_ESCANEO = 'sesion_escaneo'
 const CLAVE_RESPALDO_MIGRACION = 'respaldo_migracion_firestore'
+const CLAVE_ELIMINACIONES_PENDIENTES = 'eliminaciones_pendientes_firestore'
 const VENTANA_DUPLICADO_HISTORIAL_DIAS = 30
 const VERSION_RESPALDO_LIGERO = 2
+const TIEMPO_MAXIMO_OPERACION_REMOTA_MS = 12000
 
 function obtenerEspacioActualAdaptador() {
   return adaptadorActual?.espacioTrabajo || 'compartido'
@@ -133,6 +135,18 @@ function normalizarCodigoBarras(codigoBarras) {
 function convertirFechaAms(fecha) {
   const fechaMs = Date.parse(String(fecha || ''))
   return Number.isFinite(fechaMs) ? fechaMs : 0
+}
+
+async function ejecutarConTimeout(promesa, tiempoMaximoMs = TIEMPO_MAXIMO_OPERACION_REMOTA_MS, mensaje = 'Tiempo de espera agotado') {
+  let timeoutId = null
+  try {
+    const timeout = new Promise((_, reject) => {
+      timeoutId = setTimeout(() => reject(new Error(mensaje)), tiempoMaximoMs)
+    })
+    return await Promise.race([promesa, timeout])
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId)
+  }
 }
 
 function obtenerClavePrecio(precio) {
@@ -367,6 +381,87 @@ function fusionarSesionEscaneoConRemoto(sesionRemota, sesionLocal) {
   }
 }
 
+async function obtenerEliminacionesPendientes() {
+  const datos = await adaptadorActual.obtener(CLAVE_ELIMINACIONES_PENDIENTES)
+  const listasJustas = Array.isArray(datos?.listasJustas)
+    ? datos.listasJustas.map((id) => String(id || '').trim()).filter(Boolean)
+    : []
+
+  return {
+    listasJustas: Array.from(new Set(listasJustas)),
+  }
+}
+
+async function guardarEliminacionesPendientes(eliminaciones) {
+  return adaptadorActual.guardar(CLAVE_ELIMINACIONES_PENDIENTES, {
+    listasJustas: Array.isArray(eliminaciones?.listasJustas) ? eliminaciones.listasJustas : [],
+  })
+}
+
+async function registrarEliminacionListaPendiente(listaId) {
+  const id = String(listaId || '').trim()
+  if (!id) return
+
+  const eliminaciones = await obtenerEliminacionesPendientes()
+  if (eliminaciones.listasJustas.includes(id)) return
+
+  eliminaciones.listasJustas.push(id)
+  await guardarEliminacionesPendientes(eliminaciones)
+}
+
+async function confirmarEliminacionListaPendiente(listaId) {
+  const id = String(listaId || '').trim()
+  if (!id) return
+
+  const eliminaciones = await obtenerEliminacionesPendientes()
+  const listasActualizadas = eliminaciones.listasJustas.filter((listaPendienteId) => listaPendienteId !== id)
+  if (listasActualizadas.length === eliminaciones.listasJustas.length) return
+
+  await guardarEliminacionesPendientes({
+    ...eliminaciones,
+    listasJustas: listasActualizadas,
+  })
+}
+
+function filtrarListasRemotasPorPendientes(listasRemotas = [], eliminacionesPendientes = { listasJustas: [] }) {
+  const pendientes = new Set(
+    (eliminacionesPendientes.listasJustas || []).map((id) => String(id || '').trim()).filter(Boolean),
+  )
+  if (pendientes.size === 0) return listasRemotas
+
+  return listasRemotas.filter((lista) => !pendientes.has(String(lista?.id || '').trim()))
+}
+
+async function procesarEliminacionesPendientesListas(usuarioId) {
+  const uid = String(usuarioId || '').trim()
+  if (!uid) return
+
+  const eliminaciones = await obtenerEliminacionesPendientes()
+  if (!eliminaciones.listasJustas.length) return
+
+  const pendientes = [...eliminaciones.listasJustas]
+  const pendientesFallidos = []
+
+  await Promise.all(
+    pendientes.map(async (listaId) => {
+      try {
+        await ejecutarConTimeout(
+          deleteDoc(doc(firestoreDb, 'users', uid, 'listasJustas', listaId)),
+          TIEMPO_MAXIMO_OPERACION_REMOTA_MS,
+          `Timeout eliminando lista remota pendiente: ${listaId}`,
+        )
+      } catch {
+        pendientesFallidos.push(listaId)
+      }
+    }),
+  )
+
+  await guardarEliminacionesPendientes({
+    ...eliminaciones,
+    listasJustas: Array.from(new Set(pendientesFallidos)),
+  })
+}
+
 async function obtenerSesionEscaneoRemota(usuarioId) {
   const referenciaSesionEscaneo = doc(
     firestoreDb,
@@ -414,6 +509,7 @@ async function sincronizarDatosFusionadosEnLocal(datosFusionados) {
 }
 
 async function migrarDatosLocalesAFirestore(usuarioId, opciones = {}) {
+  await procesarEliminacionesPendientesListas(usuarioId)
   const datosLocales = await obtenerDatosLocalesActuales(usuarioId, {
     incluirEspacioCompartido: opciones.incluirEspacioCompartido === true,
   })
@@ -424,11 +520,13 @@ async function migrarDatosLocalesAFirestore(usuarioId, opciones = {}) {
   ])
   const sesionEscaneoRemota = await obtenerSesionEscaneoRemota(usuarioId)
 
+  const eliminacionesPendientes = await obtenerEliminacionesPendientes()
+  const listasRemotasFiltradas = filtrarListasRemotasPorPendientes(listasRemotas, eliminacionesPendientes)
   const datosFusionados = {
     ...datosLocales,
     productos: fusionarProductosConRemoto(productosRemotos, datosLocales.productos),
     comercios: fusionarComerciosConRemoto(comerciosRemotos, datosLocales.comercios),
-    listas: fusionarListasConRemoto(listasRemotas, datosLocales.listas),
+    listas: fusionarListasConRemoto(listasRemotasFiltradas, datosLocales.listas),
     sesionEscaneo: fusionarSesionEscaneoConRemoto(sesionEscaneoRemota, datosLocales.sesionEscaneo),
   }
 
@@ -621,6 +719,7 @@ async function migrarDatosLocalesAFirestore(usuarioId, opciones = {}) {
 }
 
 async function sincronizarDesdeFirestoreALocal(usuarioId) {
+  await procesarEliminacionesPendientesListas(usuarioId)
   const datosLocales = await obtenerDatosLocalesActuales(usuarioId, {
     incluirEspacioCompartido: false,
   })
@@ -638,11 +737,13 @@ async function sincronizarDesdeFirestoreALocal(usuarioId) {
     ? (preferenciasRemotas || datosLocales.preferencias || null)
     : (datosLocales.preferencias || preferenciasRemotas || null)
 
+  const eliminacionesPendientes = await obtenerEliminacionesPendientes()
+  const listasRemotasFiltradas = filtrarListasRemotasPorPendientes(listasRemotas, eliminacionesPendientes)
   const datosFusionados = {
     ...datosLocales,
     productos: fusionarProductosConRemoto(productosRemotos, datosLocales.productos),
     comercios: fusionarComerciosConRemoto(comerciosRemotos, datosLocales.comercios),
-    listas: fusionarListasConRemoto(listasRemotas, datosLocales.listas),
+    listas: fusionarListasConRemoto(listasRemotasFiltradas, datosLocales.listas),
     preferencias: preferenciasFusionadas,
     sesionEscaneo: fusionarSesionEscaneoConRemoto(sesionEscaneoRemota, datosLocales.sesionEscaneo),
   }
@@ -662,7 +763,13 @@ async function eliminarListaRemota(usuarioId, listaId) {
   const id = String(listaId || '').trim()
   if (!uid || !id) return false
 
-  await deleteDoc(doc(firestoreDb, 'users', uid, 'listasJustas', id))
+  await registrarEliminacionListaPendiente(id)
+  await ejecutarConTimeout(
+    deleteDoc(doc(firestoreDb, 'users', uid, 'listasJustas', id)),
+    TIEMPO_MAXIMO_OPERACION_REMOTA_MS,
+    `Timeout eliminando lista remota: ${id}`,
+  )
+  await confirmarEliminacionListaPendiente(id)
   return true
 }
 
@@ -671,7 +778,11 @@ async function eliminarComercioRemoto(usuarioId, comercioId) {
   const id = String(comercioId || '').trim()
   if (!uid || !id) return false
 
-  await deleteDoc(doc(firestoreDb, 'users', uid, 'comercios', id))
+  await ejecutarConTimeout(
+    deleteDoc(doc(firestoreDb, 'users', uid, 'comercios', id)),
+    TIEMPO_MAXIMO_OPERACION_REMOTA_MS,
+    `Timeout eliminando comercio remoto: ${id}`,
+  )
   return true
 }
 export default {
