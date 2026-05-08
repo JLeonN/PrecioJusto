@@ -8,7 +8,7 @@
         </p>
       </q-card-section>
 
-      <q-card-section class="q-gutter-sm">
+      <q-card-section class="bloque-acceso">
         <q-btn
           color="primary"
           unelevated
@@ -20,13 +20,17 @@
         />
         <InputFormularioReutilizable
           v-model="correoCuenta"
+          class="input-acceso"
           label="Correo"
+          stack-label
           type="email"
           autocomplete="email"
         />
         <InputFormularioReutilizable
           v-model="contrasenaCuenta"
+          class="input-acceso"
           label="Contraseña"
+          stack-label
           :type="mostrarContrasena ? 'text' : 'password'"
           autocomplete="current-password"
         >
@@ -165,6 +169,25 @@ async function manejarInvitado() {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+}
+.bloque-acceso {
+  display: grid;
+  gap: 10px;
+}
+.bloque-acceso > * {
+  width: 100%;
+  margin: 0;
+}
+.input-acceso :deep(.q-field--labeled .q-field__native),
+.input-acceso :deep(.q-field--labeled.q-field--dense .q-field__native),
+.input-acceso :deep(.q-field--labeled.q-field--float .q-field__native),
+.input-acceso :deep(.q-field--labeled.q-field--dense.q-field--float .q-field__native),
+.input-acceso :deep(.q-field--stacked .q-field__native),
+.input-acceso :deep(.q-field--stacked.q-field--dense .q-field__native),
+.input-acceso :deep(input.q-field__native) {
+  padding-top: 20px !important;
+  padding-bottom: 0 !important;
+  line-height: 1.3 !important;
 }
 @media (max-width: 520px) {
   .acciones-correo {
