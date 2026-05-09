@@ -43,6 +43,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
   const motivosPendientes = new Set()
   const CLAVE_ACCESO_INICIAL = 'acceso_inicial_completado'
   const RETRASO_SINCRONIZACION_MS = 1200
+  const RETRASO_SINCRONIZACION_REMOTA_POST_LOCAL_MS = 1200
   const RETRASO_SINCRONIZACION_REMOTA_MS = 2500
   const RETRASO_SINCRONIZACION_REMOTA_ARRANQUE_MS = 8000
   const INTERVALO_SINCRONIZACION_REMOTA_MS = 90000
@@ -504,6 +505,9 @@ export const useUsuarioStore = defineStore('usuario', () => {
       }
       pendientesSincronizacion.value = []
       motivosPendientes.clear()
+      solicitarSincronizacionRemota('post_sincronizacion_local', {
+        retrasoMs: RETRASO_SINCRONIZACION_REMOTA_POST_LOCAL_MS,
+      })
       return true
     } catch (error) {
       console.error('Error en sincronización automática:', error)

@@ -21,6 +21,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import productosService from '../servicios/ProductosService.js'
 import { useUsuarioStore } from './UsuarioStore.js'
+import servicioMigracionLocalFirestore from '../../Firebase/ServicioMigracionLocalFirestore.js'
 
 export const useProductosStore = defineStore('productos', () => {
   const usuarioStore = useUsuarioStore()
@@ -316,6 +317,14 @@ export const useProductosStore = defineStore('productos', () => {
       if (eliminado) {
         // Eliminar del estado local
         productos.value = productos.value.filter((p) => p.id !== productoId)
+        if (usuarioStore.tieneSesionRealActiva && usuarioStore.usuarioId) {
+          await servicioMigracionLocalFirestore.registrarEliminacionProductoLocal(productoId)
+          servicioMigracionLocalFirestore
+            .eliminarProductoRemoto(usuarioStore.usuarioId, productoId)
+            .catch((errorRemoto) => {
+              console.warn('No se pudo eliminar el producto en Firebase:', errorRemoto)
+            })
+        }
         usuarioStore.solicitarSincronizacionAutomatica('producto_eliminado')
         console.log('✅ Producto eliminado del store')
         return true
