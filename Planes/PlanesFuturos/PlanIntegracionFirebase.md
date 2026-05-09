@@ -8,6 +8,7 @@ Migrar Precio Justo desde almacenamiento local a Firebase de forma incremental, 
 
 - Consolidar autenticacion y perfil de usuario en Firestore con reglas seguras por `uid`
 - Preparar la migracion progresiva desde `LocalStorageAdapter` hacia Firestore sin perder datos
+- Consolidar Firestore como fuente de verdad para usuarios logueados, dejando el almacenamiento local como cache rapida/offline
 
 ## Reglas del plan
 
@@ -16,6 +17,11 @@ Migrar Precio Justo desde almacenamiento local a Firebase de forma incremental, 
 - No borrar `users` completos en Firestore, solo documentos de prueba no vigentes
 - Toda regla de acceso debe validar `request.auth.uid == userId`
 - Revisar `src/almacenamiento/adaptadores/LocalStorageAdapter.js` antes de migrar datos porque contiene informacion sensible de la estructura local actual y condiciona la estrategia de migracion
+- En usuario logueado, Firestore manda como fuente de verdad; local solo acelera la UI y permite soporte offline
+- En usuario invitado, no se escribe en Firestore real; los datos quedan solo en almacenamiento local
+- Toda creacion, edicion o borrado de datos de usuario real debe sincronizarse automaticamente sin boton manual obligatorio
+- Todo borrado debe registrarse de forma que no pueda reaparecer por una sincronizacion vieja
+- En web, la cache local debe soportar volumen alto mediante IndexedDB; `localStorage` queda como legado/migracion, no como cache principal
 - Considerar que Leo esta aprendiendo Firebase y requiere guia paso a paso en Firebase.com para cada accion de consola
 
 ## FASE 1: Consolidar base Firebase en pruebas
@@ -270,6 +276,113 @@ Migrar gradualmente a un modelo cloud-first donde Firestore sea la fuente princi
   - [x] cambios en un dispositivo se reflejan en otro con la misma cuenta
   - [x] comportamiento offline estable sin perdida de datos
 
+## FASE 4H: Auditoria y correccion Firebase como fuente de verdad por modulo
+
+### Objetivo
+
+Revisar toda la app modulo por modulo para asegurar que, con usuario real, Firestore sea la fuente de verdad y el almacenamiento local sea solo cache rapida/offline. Esta fase no reemplaza fases anteriores: las verifica, corrige contradicciones y deja evidencia funcional.
+
+- [ ] Definir contrato global de sincronizacion:
+  - [ ] Usuario real: crear local inmediato, subir automatico a Firestore y confirmar consistencia posterior
+  - [ ] Usuario real: editar local inmediato, actualizar Firestore y evitar sobrescrituras viejas
+  - [ ] Usuario real: borrar local inmediato, borrar/registrar eliminacion en Firestore y evitar que reaparezca
+  - [ ] Usuario real: al abrir app o cambiar dispositivo, bajar datos de Firestore sin requerir boton manual
+  - [ ] Usuario invitado: operar solo local, sin escribir datos privados en Firestore real
+  - [ ] Cambio de cuenta: limpiar/aislar cache visible para que no haya mezcla entre usuarios
+- [ ] Auditar `Mis Productos`:
+  - [ ] Crear producto manual y confirmar documento en `users/{uid}/productos/{productoId}`
+  - [ ] Crear producto desde API/codigo de barras y confirmar imagen/datos persistidos
+  - [ ] Editar nombre, marca, categoria, cantidad, unidad e imagen y confirmar actualizacion en Firestore
+  - [ ] Agregar precio y confirmar merge correcto del historial sin duplicados
+  - [ ] Borrar producto y confirmar que desaparece local, desaparece/remueve en Firestore y no reaparece tras recargar
+  - [ ] Abrir misma cuenta en otro navegador/dispositivo y confirmar que los cambios aparecen automaticamente
+- [ ] Auditar `Comercios`:
+  - [ ] Crear comercio y confirmar documento en `users/{uid}/comercios/{comercioId}`
+  - [ ] Editar comercio y direcciones y confirmar actualizacion en Firestore
+  - [ ] Agregar y borrar direcciones sin romper precios vinculados
+  - [ ] Editar o quitar foto de local y confirmar persistencia
+  - [ ] Borrar comercio y confirmar que no reaparece tras sincronizacion remota
+  - [ ] Confirmar que `uso reciente` no pisa datos remotos mas importantes
+- [ ] Auditar `Lista Justa`:
+  - [ ] Crear lista y confirmar documento en `users/{uid}/listasJustas/{listaId}`
+  - [ ] Editar nombre/configuracion de lista y confirmar actualizacion remota
+  - [ ] Agregar, editar, comprar/descomprar y borrar items con sincronizacion automatica
+  - [ ] Borrar lista y confirmar que no reaparece tras recargar ni tras abrir otro dispositivo
+  - [ ] Verificar listas con productos locales/remotos y precios manuales
+- [ ] Auditar `Mesa de Trabajo` y escaneo:
+  - [ ] Verificar que la sesion de escaneo que deba persistir se sincronice en `configuracion/sesionEscaneo`
+  - [ ] Escaneo rapido: guardar producto/precio y confirmar subida automatica a Firestore
+  - [ ] Rafaga: guardar varios items y confirmar que no genere duplicados ni bloqueos de UI
+  - [ ] Descartar items y confirmar que no reaparezcan al recargar
+  - [ ] Mover items a productos/listas y confirmar consistencia en los modulos destino
+- [ ] Auditar `Configuracion` y perfil:
+  - [ ] Editar nombre visible, foto, fecha de nacimiento y confirmar persistencia en `perfil/principal`
+  - [ ] Cambiar tema y confirmar si debe ser preferencia local o sincronizada por cuenta
+  - [ ] Cambiar moneda, modo de moneda, unidad y region y confirmar persistencia en Firestore
+  - [ ] Confirmar que otra instancia de la misma cuenta refleje las preferencias esperadas
+  - [ ] Confirmar que cerrar sesion y volver a entrar restaure configuracion de la cuenta
+- [ ] Auditar fotos y payload multimedia:
+  - [ ] Identificar donde se guardan fotos como URL y donde como base64
+  - [ ] Verificar si producto, comercio y perfil guardan la foto actual en Firestore o solo local
+  - [ ] Medir impacto de fotos base64 en Firestore/cache local
+  - [ ] Decidir si se mantiene base64 temporalmente o se crea fase separada para Firebase Storage
+  - [ ] No migrar a Storage en esta fase salvo que sea imprescindible para estabilidad
+- [ ] Auditar cache local web/mobile:
+  - [ ] Confirmar que web usa IndexedDB como cache principal y no se queda sin cuota con datos reales
+  - [ ] Confirmar que Android mantiene `CapacitorAdapter` sin regresion
+  - [ ] Verificar migracion segura desde `localStorage` legado a IndexedDB
+  - [ ] Confirmar que si la cache falla no se borren datos correctos de Firestore
+- [ ] Auditar reglas y rutas Firestore:
+  - [ ] Confirmar que todos los paths privados viven bajo `users/{uid}`
+  - [ ] Confirmar que ninguna escritura usa `uid` de otra cuenta
+  - [ ] Confirmar reglas de seguridad para productos, comercios, listas, configuracion y perfil
+  - [ ] Validar errores controlados ante permisos insuficientes
+- [ ] Corregir contradicciones encontradas:
+  - [ ] Si una fase vieja dice `LocalStorageAdapter` como base principal, actualizarla a cache legado/migracion
+  - [ ] Si una tarea marcada completa no cumple la regla cloud-first, agregar subtarea correctiva sin borrar historial
+  - [ ] Documentar decisiones de conflicto: remoto vs local, updatedAt, tombstones y merge de precios
+
+## FASE 4I: Validacion funcional Firebase fuente de verdad
+
+### Objetivo
+
+Validar con pruebas ejecutables y verificables por Leo que Firebase se comporta con sentido comun en todos los modulos principales.
+
+- [ ] Probar `Mis Productos` con dos instancias:
+  - [ ] Instancia A crea producto con precio y foto
+  - [ ] Instancia B ve el producto sin accion manual
+  - [ ] Instancia A edita producto/precio/foto
+  - [ ] Instancia B ve la edicion sin duplicados
+  - [ ] Instancia A borra el producto
+  - [ ] Instancia B deja de verlo y no reaparece tras recargar
+- [ ] Probar `Comercios` con dos instancias:
+  - [ ] Crear comercio con direccion y foto
+  - [ ] Editar comercio/direccion/foto
+  - [ ] Borrar comercio y confirmar que no reaparece
+- [ ] Probar `Lista Justa` con dos instancias:
+  - [ ] Crear lista
+  - [ ] Agregar/editar/borrar items
+  - [ ] Borrar lista
+  - [ ] Confirmar consistencia tras recargar ambas instancias
+- [ ] Probar `Mesa de Trabajo`:
+  - [ ] Escaneo rapido guarda producto/precio y sincroniza
+  - [ ] Rafaga no duplica productos ni bloquea UI
+  - [ ] Descartar items no reaparece tras recarga
+- [ ] Probar `Configuracion`:
+  - [ ] Editar perfil, foto y fecha de nacimiento
+  - [ ] Cambiar moneda/unidad/region
+  - [ ] Cerrar sesion y volver a entrar
+  - [ ] Abrir la misma cuenta en otro dispositivo y confirmar datos esperados
+- [ ] Probar aislamiento:
+  - [ ] Cuenta A no ve productos/comercios/listas/configuracion de cuenta B
+  - [ ] Invitado no sube datos privados a Firebase real
+  - [ ] Cambio A -> B -> A conserva datos correctos
+- [ ] Probar resiliencia:
+  - [ ] Crear/editar/borrar offline y reconectar
+  - [ ] Verificar que pendientes se suben solos
+  - [ ] Verificar que borrados no reaparecen
+  - [ ] Verificar que no hay errores de consola bloqueantes
+
 ## FASE 5: Optimizacion de rendimiento (mobile + web)
 
 ### Objetivo
@@ -477,6 +590,8 @@ Validar por IA (Playwright) los nuevos flujos de pantalla inicial, sincronizacio
 - [x] Fase 4E: Aislamiento multiusuario en mismo dispositivo
 - [x] Fase 4F: Sincronizacion automatica post-operacion
 - [x] Fase 4G: Fuente de verdad en Firebase
+- [ ] Fase 4H: Auditoria y correccion Firebase como fuente de verdad por modulo
+- [ ] Fase 4I: Validacion funcional Firebase fuente de verdad
 - [ ] Fase 5: Optimizacion de rendimiento (mobile + web)
 - [ ] Fase Testing Rendimiento (Playwright + celular real)
 - [ ] Fase 6: Preparar corte a produccion
@@ -484,5 +599,5 @@ Validar por IA (Playwright) los nuevos flujos de pantalla inicial, sincronizacio
 - [x] Fase Testing 4D-4E (Playwright)
 
 Fecha de creacion: 14 de Marzo 2026
-Fecha de ultima actualizacion: 8 de Mayo 2026
+Fecha de ultima actualizacion: 9 de Mayo 2026
 Estado: EN PROCESO
