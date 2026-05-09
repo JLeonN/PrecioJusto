@@ -1,0 +1,26 @@
+Franco:
+Che, que bajo en eso de que se haya roto todo, aparte son tipo errores vagos, puta madre, errores raros, viste, difíciles de encontrar y difíciles de entender. Al final vos lo que hiciste que fue que cada cambio vaya directo a Firebase con la opción esa de que te los mantenga offline o estás usando la opción esa que era un poco más sencilla de disparar la sincronización cada vez que modificas algo.
+
+Yo:
+La cosa está así, yo no sé si estos errores tenía de antes o empezaron ahora pero cuando guardo por ejemplo la lista justa creo una lista nueva la lista TAS queda guardada todo bárbaro pero la quiero borrar y a los segundos reaparece de vuelta Eso creo que lo solucioné. El tema que yo la borro, se borró, pero después me vuelvo a loguear y aparece. Creo que la estoy cagando con algo ahí. No sé bien cuál puede ser el tema. Incluso me logueo en el celular y me logueo en el navegador para que hayan dos lugares diferentes, ¿no? y me vuelve a aparecer y si he tenido otros problemas también creo que no le puse para que los comercios puedan borrar porque aparece al toque, borro y borro y aparece al toque
+
+Franco:
+Porque lo que me estás diciendo tiene pinta que es lo segundo, ¿no? O sea, que disparás una sincronización cada vez que modificas algo, ¿no? Por ejemplo, borrás la lista. La lista se borra. luego se dispara la sincronización y ahí te vuelve a aparecer la lista. Por eso es como que te demora un segundo en aparecer, ¿no? Porque vos me decías que borrás algo y un segundo después vuelve a aparecer. Quizás ese segundo es lo que demora la sincronización y que te la está trayendo de vuelta. Pero la verdad que no sé. Deberías plantearle estas ideas a la IA, a ver qué te dice. Le decís algo tipo... Yo lo borro y un segundo después me vuelve a aparecer. ¿Será que se borra el local pero después la sincronización la descarga otra vez desde Firebase?
+
+Yo:
+Sí, es probable que eso esté pasando, quizás lo mejor que pueda hacer es plantearlo de la forma que vos decís. Y sí, es lo segundo, lo que yo hice fue lo segundo que vos mencionás, estoy seguro. Sí, se me rompió ahí, no sé qué hacer, y encima hay partes que no guardan lo borrado, cosas así. No, perdón, no es que no guardan lo borrado, es que... borras y vuelve a aparecer de vuelta lo mismo bueno lo que hablamos recién hay lugares de la app donde eso pasa y otros lugares donde pasa y no pasa pasa cuando te volvés a loggear esa es la cosa pues yo lo borro se mantiene lo borrado pero luego cuando me loggeo en otra cuenta en otra cuenta no cuando me loggeo en otro dispositivo me lo carga de vuelta
+
+Franco:
+Yo creo que debe haber algún problema con la sincronización. Vos cuando lo borrás, seguramente se borra de tu local y dispara la sincronización y eso lo vuelve a descargar de Firebase. O sea, básicamente lo que sucede es, paso 1, te logueás. Envía toda la información a Firebase. Paso 2. borrás algo, se borra en el almacenamiento local y eso dispara la sincronización. Paso tres: la sincronización vuelve a descargar de Firebase esos datos que estaban en la nube y vuelve a aparecer lo que se borró. Supongo yo que está pasando eso. Si solo sucede En algunos puntos debe ser porque no todas las modificaciones de datos disparan sincronización. Entonces, cuando te logueas de vuelta, es cuando se dispara la sincronización de esas cosas y vuelven a aparecer los datos borrados. Pero bueno, todo esto lo supongo. Luego, cuando pueda, voy a ver el código y lo verifico. A ver, quizás es algo de eso.
+
+Yo:
+Ah, viene bien, Franco. Sí, yo tenía pensado reempezar de nuevo, ¿no? Empezar un chat de cero, mostrarle el plan y hablarle de lo que estamos hablando ahora y que compruebe las cosas. A ver qué onda ahí. A ver qué información me da o qué puede pasar. Si no, lo otro que estoy pensando es empezar de cero de vuelta con Fireworks. borrar todo y empezar a hacer otra vez lo que no quiero hacer pero para que termine haciendo eso
+
+Franco:
+¿A qué me referís con borrar todo y empezar de cero? ¿A borrar todos los datos que tenés en el teléfono de precios y cosas guardados?
+
+Franco:
+Yo te diría que le dediques un par de intentos más. Así empezar un chat nuevo y le explicas todo y que lo revise. Esa podría ser una opción. Si no, la otra opción más limpia sería ir un par de commits atrás, ¿viste? Como deshacer los commits estos últimos de Firebase y ahí empezar un chat nuevo, ¿viste? para arrancar como de cero toda la funcionalidad de Firebase. Porque capaz que si ahora empezás un chat nuevo, aunque le expliques todo, capaz que la IA sigue usando parte de las cosas que ya están hechas. Pero bueno, a ver, capaz que el bug no es tan grave, porque estamos hablando como si el problema vaya a ser imposible de solucionar, pero capaz que se soluciona fácilmente.
+
+Yo:
+Claro, cuando yo te digo borrar todo y empezar de cero es borrar la app y empezar de cero de vuelta, otra app nueva. No, no, no, mentira, eso no, ni a palo. No, no, te digo de borrar todo, borrar todo lo relacionado a Fireworks. Todo, todo, todo, exactamente, todo. Todo lo de Fireworks, borrar todo y comenzar de cero. Pero esa va a ser la última alternativa. Primero voy a iniciar un chat nuevo y voy a hablar de todo lo sucedido, que revise todo y ver ahí qué onda ahí y que haga las pruebas.
