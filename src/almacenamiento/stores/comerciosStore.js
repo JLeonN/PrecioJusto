@@ -303,6 +303,7 @@ export const useComerciStore = defineStore('comercios', {
           this.comercios = this.comercios.filter((c) => c.id !== id)
           const usuarioStore = useUsuarioStore()
           if (usuarioStore.tieneSesionRealActiva && usuarioStore.usuarioId) {
+            await servicioMigracionLocalFirestore.registrarEliminacionComercioLocal(id)
             servicioMigracionLocalFirestore
               .eliminarComercioRemoto(usuarioStore.usuarioId, id)
               .catch((errorRemoto) => {
@@ -351,6 +352,11 @@ export const useComerciStore = defineStore('comercios', {
         if (resultados.exitosos.length > 0) {
           const usuarioStore = useUsuarioStore()
           if (usuarioStore.tieneSesionRealActiva && usuarioStore.usuarioId) {
+            await Promise.all(
+              resultados.exitosos.map((idExitoso) =>
+                servicioMigracionLocalFirestore.registrarEliminacionComercioLocal(idExitoso),
+              ),
+            )
             for (const idExitoso of resultados.exitosos) {
               servicioMigracionLocalFirestore
                 .eliminarComercioRemoto(usuarioStore.usuarioId, idExitoso)
