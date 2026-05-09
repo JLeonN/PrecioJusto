@@ -65,7 +65,10 @@ class PreferenciasService {
     try {
       const actuales = await this.obtenerPreferencias()
       const fusionadas = normalizarPreferencias({ ...actuales, ...cambios })
-      await this.adaptador.guardar(this.clavePreferencias, fusionadas)
+      const guardado = await this.adaptador.guardar(this.clavePreferencias, fusionadas)
+      if (!guardado) {
+        throw new Error('No se pudieron guardar las preferencias')
+      }
       return fusionadas
     } catch (error) {
       console.error('Error al guardar preferencias:', error)

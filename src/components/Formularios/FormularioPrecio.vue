@@ -607,7 +607,7 @@ function emitirCambios() {
 
 // Desplaza el input de precio a la vista, lo enfoca y aplica animación
 function enfocarYNavegar() {
-  const el = qInputPrecioRef.value?.$el
+  const el = qInputPrecioRef.value?.obtenerElemento?.() || qInputPrecioRef.value?.$el
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
   qInputPrecioRef.value?.focus()
 
@@ -655,7 +655,9 @@ function validarPrecio() {
   }
 
   // Precio 0 o negativo -> dejar que las rules de Quasar muestren el error
-  const resultado = qInputPrecioRef.value?.validate()
+  const resultado = typeof qInputPrecioRef.value?.validate === 'function'
+    ? qInputPrecioRef.value.validate()
+    : precioValido(val) === true
   if (!resultado) {
     enfocarYNavegar()
     return false

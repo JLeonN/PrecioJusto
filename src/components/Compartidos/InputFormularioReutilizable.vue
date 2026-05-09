@@ -186,6 +186,34 @@ function alQuitarFocoInput() {
   limpiarAjusteVertical()
 }
 
+function focus() {
+  inputReutilizableRef.value?.focus?.()
+}
+
+function blur() {
+  inputReutilizableRef.value?.blur?.()
+}
+
+function validate() {
+  return inputReutilizableRef.value?.validate?.() ?? true
+}
+
+function resetValidation() {
+  inputReutilizableRef.value?.resetValidation?.()
+}
+
+function obtenerElemento() {
+  return inputReutilizableRef.value?.$el || null
+}
+
+defineExpose({
+  blur,
+  focus,
+  obtenerElemento,
+  resetValidation,
+  validate,
+})
+
 onBeforeUnmount(() => {
   if (temporizadorSalida) {
     clearTimeout(temporizadorSalida)

@@ -10,6 +10,7 @@
 import { Capacitor } from '@capacitor/core'
 import LocalStorageAdapter from '../adaptadores/LocalStorageAdapter.js'
 import CapacitorAdapter from '../adaptadores/CapacitorAdapter.js'
+import IndexedDbAdapter from '../adaptadores/IndexedDbAdapter.js'
 // import FirestoreAdapter from '../adaptadores/FirestoreAdapter.js' // 🔥 Descomentar cuando crees FirestoreAdapter
 
 /**
@@ -17,6 +18,7 @@ import CapacitorAdapter from '../adaptadores/CapacitorAdapter.js'
  *
  * Opciones disponibles:
  * - 'local'      → localStorage (web, testing rápido)
+ * - 'indexeddb'  → IndexedDB (web con más espacio local)
  * - 'capacitor'  → Capacitor Storage (móvil, SQLite nativo)
  * - 'firestore'  → Firestore (nube colaborativa) 🔥 FUTURO
  *
@@ -28,21 +30,22 @@ import CapacitorAdapter from '../adaptadores/CapacitorAdapter.js'
  * 4. Crear índices en Firestore para queries rápidas
  * 5. Configurar reglas de seguridad en Firebase Console
  */
-// En web usa localStorage, en móvil nativo usa Capacitor Storage
-const ADAPTADOR_ACTIVO = Capacitor.isNativePlatform() ? 'capacitor' : 'local'
+// En web usa IndexedDB para soportar Firebase con más datos; en móvil nativo usa Capacitor Storage.
+const ADAPTADOR_ACTIVO = Capacitor.isNativePlatform() ? 'capacitor' : 'indexeddb'
 
-// Mapa de adaptadores disponibles
-const adaptadores = {
-  local: new LocalStorageAdapter(),
-  capacitor: new CapacitorAdapter(),
+// Mapa de fábricas para no inicializar adaptadores que no se usan en la plataforma actual.
+const fabricasAdaptadores = {
+  local: () => new LocalStorageAdapter(),
+  indexeddb: () => new IndexedDbAdapter(),
+  capacitor: () => new CapacitorAdapter(),
   // firestore: new FirestoreAdapter(), // 🔥 Descomentar cuando esté listo
 }
 
 // Validar que el adaptador exista
-if (!adaptadores[ADAPTADOR_ACTIVO]) {
+if (!fabricasAdaptadores[ADAPTADOR_ACTIVO]) {
   throw new Error(
     `❌ Adaptador "${ADAPTADOR_ACTIVO}" no existe. ` +
-      `Opciones válidas: ${Object.keys(adaptadores).join(', ')}`,
+      `Opciones válidas: ${Object.keys(fabricasAdaptadores).join(', ')}`,
   )
 }
 
@@ -50,7 +53,7 @@ if (!adaptadores[ADAPTADOR_ACTIVO]) {
  * 📦 ADAPTADOR ACTUAL
  * Este es el adaptador que usarán todos los servicios de la app
  */
-export const adaptadorActual = adaptadores[ADAPTADOR_ACTIVO]
+export const adaptadorActual = fabricasAdaptadores[ADAPTADOR_ACTIVO]()
 
 export const configurarEspacioTrabajoAlmacenamiento = (espacioTrabajo = 'compartido') => {
   if (typeof adaptadorActual.configurarEspacioTrabajo === 'function') {

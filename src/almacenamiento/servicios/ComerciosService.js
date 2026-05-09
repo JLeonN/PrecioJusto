@@ -7,6 +7,14 @@ import { adaptadorActual } from './AlmacenamientoService.js'
 
 const CLAVE_COMERCIOS = 'comercios'
 
+async function guardarComercios(comercios) {
+  const guardado = await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  if (!guardado) {
+    throw new Error('No se pudo guardar la lista de comercios')
+  }
+  return true
+}
+
 // ═══════════════════════════════════════════════════════════
 // ABREVIATURAS COMUNES
 // ═══════════════════════════════════════════════════════════
@@ -283,7 +291,7 @@ async function agregarComercio(datosComercio) {
   }
 
   comercios.push(nuevoComercio)
-  await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  await guardarComercios(comercios)
 
   return nuevoComercio
 }
@@ -306,7 +314,7 @@ async function editarComercio(id, datosActualizados) {
     id, // Mantener ID original
   }
 
-  await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  await guardarComercios(comercios)
   return comercios[indice]
 }
 
@@ -323,7 +331,7 @@ async function eliminarComercio(id) {
     return false // No se encontró
   }
 
-  await adaptadorActual.guardar(CLAVE_COMERCIOS, comerciosFiltrados)
+  await guardarComercios(comerciosFiltrados)
   return true
 }
 
@@ -351,7 +359,7 @@ async function agregarDireccion(comercioId, datosDireccion) {
 
   comercio.direcciones.push(nuevaDireccion)
 
-  await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  await guardarComercios(comercios)
   return comercio
 }
 
@@ -379,7 +387,7 @@ async function editarDireccion(comercioId, direccionId, datosDireccion) {
     ? `${comercio.nombre} - ${direccion.calle}`
     : comercio.nombre
 
-  await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  await guardarComercios(comercios)
   return comercio
 }
 
@@ -402,7 +410,7 @@ async function eliminarDireccion(comercioId, direccionId) {
     return false // No se encontró la dirección
   }
 
-  await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  await guardarComercios(comercios)
   return true
 }
 
@@ -420,7 +428,7 @@ async function actualizarFotoDireccion(comercioId, direccionId, base64) {
   const direccion = comercio.direcciones.find((d) => d.id === direccionId)
   if (!direccion) return false
   direccion.foto = base64 || null
-  await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  await guardarComercios(comercios)
   return true
 }
 
@@ -447,7 +455,7 @@ async function registrarUsoComercio(comercioId, direccionId = null) {
     }
   }
 
-  await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  await guardarComercios(comercios)
 }
 
 /**

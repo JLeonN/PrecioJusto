@@ -585,25 +585,71 @@ async function obtenerPreferenciasRemotas(usuarioId) {
   return snapshot.exists() ? snapshot.data() : null
 }
 
-async function sincronizarDatosFusionadosEnLocal(datosFusionados) {
-  const productosLocales = await adaptadorActual.listarTodo('producto_')
-  await Promise.all(productosLocales.map((registro) => adaptadorActual.eliminar(registro.clave)))
+function crearErrorGuardadoLocal(clave) {
+  return new Error(`No se pudo guardar ${clave} en el almacenamiento local`)
+}
 
-  await Promise.all(
-    (datosFusionados.productos || []).map((producto) =>
-      adaptadorActual.guardar(`producto_${producto.id}`, producto),
-    ),
+async function guardarDatoLocalObligatorio(clave, valor) {
+  const guardado = await adaptadorActual.guardar(clave, valor)
+  if (!guardado) throw crearErrorGuardadoLocal(clave)
+  return true
+}
+
+async function restaurarProductosLocales(productosPrevios, clavesGuardadas) {
+  const productosPreviosPorClave = new Map(
+    productosPrevios.map((registro) => [registro.clave, registro.valor]),
   )
 
-  await adaptadorActual.guardar(CLAVE_COMERCIOS, datosFusionados.comercios || [])
-  await adaptadorActual.guardar(CLAVE_LISTA_JUSTA, { listas: datosFusionados.listas || [] })
+  const clavesNuevas = clavesGuardadas.filter((clave) => !productosPreviosPorClave.has(clave))
+  await Promise.all(clavesNuevas.map((clave) => adaptadorActual.eliminar(clave)))
+
+  await Promise.all(
+    clavesGuardadas
+      .filter((clave) => productosPreviosPorClave.has(clave))
+      .map((clave) => adaptadorActual.guardar(clave, productosPreviosPorClave.get(clave))),
+  )
+}
+
+async function guardarProductosFusionadosEnLocal(productos = []) {
+  const productosValidos = productos
+    .map((producto) => ({
+      ...producto,
+      id: String(producto?.id || '').trim(),
+    }))
+    .filter((producto) => producto.id)
+  const productosLocalesPrevios = await adaptadorActual.listarTodo('producto_')
+  const clavesGuardadas = []
+
+  try {
+    for (const producto of productosValidos) {
+      const clave = `producto_${producto.id}`
+      await guardarDatoLocalObligatorio(clave, producto)
+      clavesGuardadas.push(clave)
+    }
+  } catch (error) {
+    await restaurarProductosLocales(productosLocalesPrevios, clavesGuardadas)
+    throw error
+  }
+
+  const clavesActuales = new Set(productosValidos.map((producto) => `producto_${producto.id}`))
+  await Promise.all(
+    productosLocalesPrevios
+      .filter((registro) => !clavesActuales.has(registro.clave))
+      .map((registro) => adaptadorActual.eliminar(registro.clave)),
+  )
+}
+
+async function sincronizarDatosFusionadosEnLocal(datosFusionados) {
+  await guardarProductosFusionadosEnLocal(datosFusionados.productos || [])
+  await guardarDatoLocalObligatorio(CLAVE_COMERCIOS, datosFusionados.comercios || [])
+  await guardarDatoLocalObligatorio(CLAVE_LISTA_JUSTA, { listas: datosFusionados.listas || [] })
 
   if (datosFusionados.preferencias) {
-    await adaptadorActual.guardar(CLAVE_PREFERENCIAS, datosFusionados.preferencias)
+    await guardarDatoLocalObligatorio(CLAVE_PREFERENCIAS, datosFusionados.preferencias)
   }
 
   if (datosFusionados.sesionEscaneo) {
-    await adaptadorActual.guardar(CLAVE_SESION_ESCANEO, datosFusionados.sesionEscaneo)
+    await guardarDatoLocalObligatorio(CLAVE_SESION_ESCANEO, datosFusionados.sesionEscaneo)
   }
 }
 
@@ -673,7 +719,7 @@ async function migrarDatosLocalesAFirestore(usuarioId, opciones = {}) {
 
   const respaldoGuardado = await adaptadorActual.guardar(claveRespaldo, respaldoTemporal)
   if (!respaldoGuardado) {
-    throw new Error('No se pudo crear respaldo temporal antes de migrar')
+    console.warn('No se pudo crear respaldo temporal local. La migración continuará sin borrar datos locales.')
   }
 
   if (opciones.forzarErrorControlado === true) {
@@ -807,7 +853,7 @@ async function migrarDatosLocalesAFirestore(usuarioId, opciones = {}) {
       {
         localStorageMigrado: true,
         intentoId,
-        claveRespaldoTemporal: claveRespaldo,
+        claveRespaldoTemporal: respaldoGuardado ? claveRespaldo : null,
         fechaUltimaMigracion: serverTimestamp(),
       },
       { merge: true },
@@ -818,7 +864,7 @@ async function migrarDatosLocalesAFirestore(usuarioId, opciones = {}) {
     return {
       ...resumen,
       intentoId,
-      claveRespaldo,
+      claveRespaldo: respaldoGuardado ? claveRespaldo : null,
     }
   } catch (error) {
     await setDoc(
