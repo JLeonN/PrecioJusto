@@ -63,7 +63,6 @@ import DialogoCoincidencias from './DialogoCoincidencias.vue'
 import DialogoMismaUbicacion from './DialogoMismaUbicacion.vue'
 import DialogoDuplicadoExacto from './DialogoDuplicadoExacto.vue'
 import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.js'
-import ComerciosService from '../../../almacenamiento/servicios/ComerciosService.js'
 
 const props = defineProps({
   modelValue: {
@@ -140,10 +139,7 @@ async function validarDuplicados() {
   if (!formularioValido.value) return
 
   try {
-    const resultado = await ComerciosService.validarDuplicados(
-      datosComercio.value,
-      comerciosStore.comerciosAgrupados,
-    )
+    const resultado = await comerciosStore.validarDuplicados(datosComercio.value)
 
     if (resultado.esDuplicado) {
       // Hay duplicados - mostrar diálogo correspondiente
@@ -226,11 +222,13 @@ async function continuarConNuevo() {
   try {
     console.log('💾 Guardando comercio nuevo...')
 
-    // Agregar comercio usando el servicio (esto SÍ persiste en storage)
-    const nuevoComercio = await ComerciosService.agregarComercio(datosComercio.value)
-
-    // Agregar al store local para actualizar UI
-    comerciosStore.comercios.push(nuevoComercio)
+    const resultado = await comerciosStore.agregarComercio(datosComercio.value, {
+      omitirValidacionDuplicados: true,
+    })
+    if (!resultado?.exito) {
+      throw new Error('No se pudo agregar el comercio.')
+    }
+    const nuevoComercio = resultado.comercio
 
     $q.notify({
       type: 'positive',

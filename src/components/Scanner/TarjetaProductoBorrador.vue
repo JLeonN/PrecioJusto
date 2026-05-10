@@ -496,13 +496,13 @@ function irACampo(campo) {
   expandidoLocal.value = true
   nextTick(() => {
     if (campo === 'nombre') {
-      refInputNombre.value?.focus()
+      refInputNombre.value?.focus?.()
       if (datosEditando.value.nombre?.trim()) refInputNombre.value?.select()
     } else if (campo === 'precio') {
-      refInputPrecio.value?.focus()
+      refInputPrecio.value?.focus?.()
       if (datosEditando.value.precio > 0) refInputPrecio.value?.select()
     } else if (campo === 'comercio') {
-      refSelectorComercio.value?.focus()
+      refSelectorComercio.value?.focus?.()
     }
   })
 }
@@ -683,6 +683,5 @@ function emitirEnviar() {
   display: none;
 }
 </style>
-
 
 

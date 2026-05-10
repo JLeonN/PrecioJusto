@@ -1,5 +1,6 @@
 ﻿import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { firestoreDb } from './ClienteFirebase.js'
+import servicioFirestoreDisponibilidad from './ServicioFirestoreDisponibilidad.js'
 
 function crearReferenciaPerfil(usuarioId) {
   return doc(firestoreDb, 'users', usuarioId, 'perfil', 'principal')
@@ -60,7 +61,11 @@ function calcularEdadDesdeFecha(fechaNacimientoIso) {
 
 async function obtenerPerfilUsuario(usuarioId) {
   const referenciaPerfil = crearReferenciaPerfil(usuarioId)
-  const snapshotPerfil = await getDoc(referenciaPerfil)
+  const snapshotPerfil = await servicioFirestoreDisponibilidad.ejecutarOperacionFirestore(
+    () => getDoc(referenciaPerfil),
+    'Timeout leyendo perfil de usuario',
+    3500,
+  )
 
   if (!snapshotPerfil.exists()) {
     return null
@@ -73,20 +78,25 @@ async function guardarPerfilInicial(usuario) {
   const referenciaPerfil = crearReferenciaPerfil(usuario.uid)
   const datosPerfil = resolverDatosPerfilDesdeUsuario(usuario)
 
-  await setDoc(
-    referenciaPerfil,
-    {
-      ...datosPerfil,
-      perfilEditable: {
-        nombre: datosPerfil.nombre,
-        foto: datosPerfil.foto,
-        fechaNacimiento: null,
-        edad: null,
-      },
-      fechaCreacion: serverTimestamp(),
-      fechaActualizacion: serverTimestamp(),
-    },
-    { merge: true },
+  await servicioFirestoreDisponibilidad.ejecutarOperacionFirestore(
+    () =>
+      setDoc(
+        referenciaPerfil,
+        {
+          ...datosPerfil,
+          perfilEditable: {
+            nombre: datosPerfil.nombre,
+            foto: datosPerfil.foto,
+            fechaNacimiento: null,
+            edad: null,
+          },
+          fechaCreacion: serverTimestamp(),
+          fechaActualizacion: serverTimestamp(),
+        },
+        { merge: true },
+      ),
+    'Timeout guardando perfil inicial',
+    3500,
   )
 
   return datosPerfil
@@ -96,13 +106,18 @@ async function actualizarPerfilSesion(usuario) {
   const referenciaPerfil = crearReferenciaPerfil(usuario.uid)
   const datosPerfil = resolverDatosPerfilDesdeUsuario(usuario)
 
-  await setDoc(
-    referenciaPerfil,
-    {
-      ...datosPerfil,
-      fechaActualizacion: serverTimestamp(),
-    },
-    { merge: true },
+  await servicioFirestoreDisponibilidad.ejecutarOperacionFirestore(
+    () =>
+      setDoc(
+        referenciaPerfil,
+        {
+          ...datosPerfil,
+          fechaActualizacion: serverTimestamp(),
+        },
+        { merge: true },
+      ),
+    'Timeout actualizando perfil de sesión',
+    3500,
   )
 
   return datosPerfil
@@ -127,7 +142,10 @@ async function guardarPerfilEditable(usuarioId, datosPerfilEditable) {
     fechaActualizacion: serverTimestamp(),
   }
 
-  await setDoc(referenciaPerfil, datosNormalizados, { merge: true })
+  await servicioFirestoreDisponibilidad.ejecutarOperacionFirestore(
+    () => setDoc(referenciaPerfil, datosNormalizados, { merge: true }),
+    'Timeout guardando perfil editable',
+  )
   return { ...datosNormalizados }
 }
 

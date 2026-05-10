@@ -45,7 +45,7 @@
       @update:model-value="emitirCambios"
     />
 
-    <!-- C�"DIGO DE BARRAS -->
+    <!-- CÓDIGO DE BARRAS -->
     <InputFormularioReutilizable
       v-model="datosInternos.codigoBarras"
       label="Código de barras"
@@ -240,7 +240,7 @@ watch(
   { deep: true },
 )
 
-// �"?�"? Foto del producto �"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?
+// Foto del producto
 async function seleccionarCamara() {
   const resultado = await abrirCamara()
   if (resultado) {
@@ -309,7 +309,7 @@ function cantidadValida(val) {
 function animarErrorNombre() {
   const el = qInputNombreRef.value?.$el
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-  qInputNombreRef.value?.focus()
+  qInputNombreRef.value?.focus?.()
 
   animarShakeNombre.value = false
   setTimeout(() => {
@@ -330,7 +330,7 @@ function validarFormulario() {
     return false
   }
 
-  const resultado = qInputNombreRef.value?.validate()
+  const resultado = qInputNombreRef.value?.validate?.()
   if (!resultado) {
     animarErrorNombre()
     return false
@@ -399,6 +399,5 @@ defineExpose({ validarFormulario })
   display: none;
 }
 </style>
-
 
 

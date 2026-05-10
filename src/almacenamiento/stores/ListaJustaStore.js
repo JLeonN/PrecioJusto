@@ -50,7 +50,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
 
     const nuevaLista = ListaJustaService.crearListaVacia(nombreLimpio, listas.value.length)
     listas.value.unshift(nuevaLista)
-    await persistir()
+    await persistir({ listaId: nuevaLista.id })
 
     return nuevaLista
   }
@@ -80,7 +80,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     lista.comercioActual = null
     lista.configuracionInteligente = ListaJustaService._normalizarConfiguracionInteligente(null, null)
     lista.fechaActualizacion = new Date().toISOString()
-    await persistir()
+    await persistir({ listaId })
     return true
   }
 
@@ -100,7 +100,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
       )
     }
     lista.fechaActualizacion = new Date().toISOString()
-    await persistir()
+    await persistir({ listaId })
     return true
   }
 
@@ -116,7 +116,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
       lista.comercioActual,
     )
     lista.fechaActualizacion = new Date().toISOString()
-    await persistir()
+    await persistir({ listaId })
     return true
   }
 
@@ -135,7 +135,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
       lista.comercioActual,
     )
     lista.fechaActualizacion = new Date().toISOString()
-    await persistir()
+    await persistir({ listaId })
     return true
   }
 
@@ -146,7 +146,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
       await servicioMigracionLocalFirestore.registrarEliminacionListaLocal(listaId)
     }
 
-    await persistir()
+    await persistir({ listaId, eliminaciones: true })
 
     if (usuarioStore.tieneSesionRealActiva && usuarioStore.usuarioId) {
       try {
@@ -166,7 +166,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     const ahora = new Date().toISOString()
     lista.fechaUltimoUso = ahora
     lista.fechaActualizacion = ahora
-    await persistir()
+    await persistir({ listaId })
     return true
   }
 
@@ -210,7 +210,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     lista.fechaActualizacion = new Date().toISOString()
 
     await intentarEnviarAMisProductosSiCorresponde(lista, itemNormalizado)
-    await persistir()
+    await persistir({ listaId })
 
     return { exito: true, item: itemNormalizado }
   }
@@ -297,7 +297,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     lista.fechaActualizacion = new Date().toISOString()
 
     await intentarEnviarAMisProductosSiCorresponde(lista, itemActualizado)
-    await persistir()
+    await persistir({ listaId })
 
     return true
   }
@@ -340,7 +340,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
 
     lista.items = lista.items.filter((item) => item.id !== itemId)
     lista.fechaActualizacion = new Date().toISOString()
-    await persistir()
+    await persistir({ listaId })
     return true
   }
 
@@ -383,7 +383,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     item.mesaTrabajoItemId = itemMesa?.id || null
     item.actualizadoEn = new Date().toISOString()
     lista.fechaActualizacion = new Date().toISOString()
-    await persistir()
+    await persistir({ listaId })
 
     return true
   }
@@ -535,7 +535,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     }).onOk(async (valor) => {
       lista.preferenciaPrecioFaltante = valor
       lista.fechaActualizacion = new Date().toISOString()
-      await persistir()
+      await persistir({ listaId: lista.id })
     })
   }
 
@@ -630,7 +630,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     }
     item.actualizadoEn = new Date().toISOString()
     lista.fechaActualizacion = new Date().toISOString()
-    await persistir()
+    await persistir({ listaId })
     return true
   }
 
@@ -803,14 +803,14 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     return Number.isFinite(marca) ? marca : 0
   }
 
-  async function persistir() {
+  async function persistir(cambio = {}) {
     const guardado = await ListaJustaService.guardarListas(listas.value)
 
     if (!guardado) {
       throw new Error('No se pudo persistir Lista Justa.')
     }
 
-    usuarioStore.solicitarSincronizacionAutomatica('lista_justa_actualizada')
+    usuarioStore.solicitarSincronizacionAutomatica('lista_justa_actualizada', cambio)
   }
 
   return {

@@ -184,7 +184,9 @@ export const useProductosStore = defineStore('productos', () => {
       if (productoGuardado) {
         // Agregar al estado local
         productos.value.push(productoGuardado)
-        usuarioStore.solicitarSincronizacionAutomatica('producto_creado')
+        usuarioStore.solicitarSincronizacionAutomatica('producto_creado', {
+          productoId: productoGuardado.id,
+        })
         console.log('✅ Producto agregado al store')
         return productoGuardado
       }
@@ -222,7 +224,7 @@ export const useProductosStore = defineStore('productos', () => {
           productos.value[index] = productoActualizado
         }
 
-        usuarioStore.solicitarSincronizacionAutomatica('precio_agregado')
+        usuarioStore.solicitarSincronizacionAutomatica('precio_agregado', { productoId })
         console.log('✅ Precio agregado al producto')
         return true
       }
@@ -278,7 +280,7 @@ export const useProductosStore = defineStore('productos', () => {
           productos.value[index] = guardado
         }
 
-        usuarioStore.solicitarSincronizacionAutomatica('producto_actualizado')
+        usuarioStore.solicitarSincronizacionAutomatica('producto_actualizado', { productoId })
         console.log('✅ Producto actualizado en el store')
         return true
       }
@@ -325,7 +327,10 @@ export const useProductosStore = defineStore('productos', () => {
               console.warn('No se pudo eliminar el producto en Firebase:', errorRemoto)
             })
         }
-        usuarioStore.solicitarSincronizacionAutomatica('producto_eliminado')
+        usuarioStore.solicitarSincronizacionAutomatica('producto_eliminado', {
+          productoId,
+          eliminaciones: true,
+        })
         console.log('✅ Producto eliminado del store')
         return true
       }
@@ -355,6 +360,7 @@ export const useProductosStore = defineStore('productos', () => {
       if (guardado) {
         const index = productos.value.findIndex((p) => p.id === productoId)
         if (index !== -1) productos.value[index] = guardado
+        usuarioStore.solicitarSincronizacionAutomatica('producto_interaccion', { productoId })
       }
     } catch (err) {
       console.error('❌ Error al registrar interacción:', err)

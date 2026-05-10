@@ -65,7 +65,6 @@
 <script setup>
 import InputFormularioReutilizable from '../../Compartidos/InputFormularioReutilizable.vue'
 import { ref, reactive } from 'vue'
-import ComerciosService from '../../../almacenamiento/servicios/ComerciosService.js'
 import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.js'
 import { useTecladoVirtual } from '../../../composables/useTecladoVirtual.js'
 
@@ -108,7 +107,7 @@ function cerrar() {
   emit('update:modelValue', false)
 }
 
-// Crea un nuevo comercio con el mismo nombre �?' se agrupa automáticamente
+// Crea un nuevo comercio con el mismo nombre; se agrupa automáticamente.
 async function guardar() {
   if (!datos.calle) return
 
@@ -122,8 +121,9 @@ async function guardar() {
       ciudad: datos.ciudad?.trim() || '',
     }
 
-    await ComerciosService.agregarComercio(nuevoComercio)
-    await comerciosStore.cargarComercios()
+    await comerciosStore.agregarComercio(nuevoComercio, {
+      omitirValidacionDuplicados: true,
+    })
 
     emit('sucursal-guardada')
     cerrar()

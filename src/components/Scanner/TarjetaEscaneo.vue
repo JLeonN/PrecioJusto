@@ -203,7 +203,7 @@
         />
       </q-card-section>
 
-      <!-- BOTONES DE ACCI�"N -->
+      <!-- BOTONES DE ACCI?N -->
       <q-card-section class="tarjeta-escaneo-footer">
         <div class="row items-center no-wrap q-gutter-xs">
           <q-btn flat no-caps color="grey-7" @click="emitDescartar"> Descartar </q-btn>
@@ -362,7 +362,7 @@ watch(
 )
 
 function alAbrir() {
-  nextTick(() => inputPrecioRef.value?.focus())
+  nextTick(() => inputPrecioRef.value?.focus?.())
 }
 
 function alCerrar() {
@@ -583,6 +583,5 @@ function emitDescartar() {
   display: none;
 }
 </style>
-
 
 

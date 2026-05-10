@@ -108,7 +108,7 @@ const emit = defineEmits(['update:modelValue'])
 const comerciosStore = useComerciStore()
 
 const refSelectComercio = ref(null)
-defineExpose({ focus: () => refSelectComercio.value?.focus() })
+defineExpose({ focus: () => refSelectComercio.value?.focus?.() })
 
 // Estado del selector de comercio
 const comercioSeleccionado = ref(null)

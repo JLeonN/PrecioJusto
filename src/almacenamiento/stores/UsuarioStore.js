@@ -3,7 +3,10 @@ import { computed, ref } from 'vue'
 import servicioAuthFirebase from '../../Firebase/ServicioAuthFirebase.js'
 import servicioFirestoreUsuarios from '../../Firebase/ServicioFirestoreUsuarios.js'
 import servicioMigracionLocalFirestore from '../../Firebase/ServicioMigracionLocalFirestore.js'
-import { configurarEspacioTrabajoAlmacenamiento } from '../servicios/AlmacenamientoService.js'
+import {
+  adaptadorActual,
+  configurarEspacioTrabajoAlmacenamiento,
+} from '../servicios/AlmacenamientoService.js'
 import { useProductosStore } from './productosStore.js'
 import { useComerciStore } from './comerciosStore.js'
 import { useListaJustaStore } from './ListaJustaStore.js'
@@ -41,7 +44,17 @@ export const useUsuarioStore = defineStore('usuario', () => {
   let sincronizacionAutomaticaReprogramada = false
   let ultimoMotivoSincronizacion = null
   const motivosPendientes = new Set()
+  const cambiosPendientesSincronizacion = {
+    productos: new Set(),
+    comercios: new Set(),
+    listasJustas: new Set(),
+    preferencias: false,
+    sesionEscaneo: false,
+    perfil: false,
+    eliminaciones: false,
+  }
   const CLAVE_ACCESO_INICIAL = 'acceso_inicial_completado'
+  const CLAVE_PERFIL_EDITABLE_PENDIENTE = 'perfil_editable_pendiente'
   const RETRASO_SINCRONIZACION_MS = 1200
   const RETRASO_SINCRONIZACION_REMOTA_POST_LOCAL_MS = 1200
   const RETRASO_SINCRONIZACION_REMOTA_MS = 2500
@@ -63,12 +76,37 @@ export const useUsuarioStore = defineStore('usuario', () => {
     const codigo = String(error?.code || '').toLowerCase()
     const mensaje = String(error?.message || '').toLowerCase()
     return (
+      codigo.includes('resource-exhausted') ||
+      codigo.includes('firestore/pausado') ||
+      codigo.includes('deadline-exceeded') ||
       codigo.includes('unavailable') ||
       codigo.includes('network') ||
+      mensaje.includes('quota exceeded') ||
+      mensaje.includes('firestore pausado') ||
+      mensaje.includes('timeout') ||
       mensaje.includes('network') ||
       mensaje.includes('offline') ||
       mensaje.includes('failed to fetch')
     )
+  }
+
+  function aplicarPerfilLocalTemporal(usuario) {
+    if (!usuario) return
+
+    const datosProveedor = servicioFirestoreUsuarios.resolverDatosPerfilDesdeUsuario(usuario)
+    perfil.value = {
+      ...datosProveedor,
+      ...(perfil.value || {}),
+      usuarioId: usuario.uid,
+      tipoCuenta: usuario.isAnonymous ? 'anonima' : 'registrada',
+      perfilEditable: perfil.value?.perfilEditable || {
+        nombre: datosProveedor.nombre,
+        foto: datosProveedor.foto,
+        fechaNacimiento: null,
+        edad: null,
+      },
+      sincronizacionPerfilPendiente: true,
+    }
   }
   function registrarDesajusteUidEnPerfil(usuarioUid, perfilUid) {
     const uidSesion = String(usuarioUid || '').trim()
@@ -105,6 +143,8 @@ export const useUsuarioStore = defineStore('usuario', () => {
     const comerciosStore = useComerciStore()
     const listaJustaStore = useListaJustaStore()
     const sesionEscaneoStore = useSesionEscaneoStore()
+    const { usePreferenciasStore } = await import('./preferenciasStore.js')
+    const preferenciasStore = usePreferenciasStore()
 
     productosStore.limpiarEstado()
     comerciosStore.comercios = []
@@ -115,6 +155,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
       comerciosStore.cargarComercios(),
       listaJustaStore.cargarListas(),
       sesionEscaneoStore.cargarSesion(),
+      preferenciasStore.inicializar(),
     ])
   }
 
@@ -142,7 +183,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
 
     if (!resumen) {
       uidMigracionAutomaticaEnSesion = null
-      console.warn('Migración automática pendiente por error o sin conexión.')
+      console.info('Migración automática pendiente por Firebase temporalmente no disponible.')
     }
   }
 
@@ -195,6 +236,50 @@ export const useUsuarioStore = defineStore('usuario', () => {
     return 'No se pudo completar la operación de autenticación.'
   }
 
+  async function guardarPerfilEditablePendiente(datosPerfilEditable) {
+    const guardado = await adaptadorActual.guardar(CLAVE_PERFIL_EDITABLE_PENDIENTE, {
+      ...datosPerfilEditable,
+      fechaPendiente: new Date().toISOString(),
+    })
+    if (!guardado) {
+      console.warn('No se pudo guardar el perfil pendiente para reintento.')
+    }
+    return guardado
+  }
+
+  async function obtenerPerfilEditablePendiente() {
+    return adaptadorActual.obtener(CLAVE_PERFIL_EDITABLE_PENDIENTE)
+  }
+
+  async function limpiarPerfilEditablePendiente() {
+    await adaptadorActual.eliminar(CLAVE_PERFIL_EDITABLE_PENDIENTE)
+  }
+
+  async function sincronizarPerfilEditablePendiente() {
+    if (!tieneSesionRealActiva.value || !usuarioId.value) return false
+
+    const perfilPendiente = await obtenerPerfilEditablePendiente()
+    if (!perfilPendiente) return false
+
+    try {
+      const datosGuardados = await servicioFirestoreUsuarios.guardarPerfilEditable(
+        usuarioId.value,
+        perfilPendiente,
+      )
+      perfil.value = {
+        ...(perfil.value || {}),
+        ...datosGuardados,
+      }
+      await limpiarPerfilEditablePendiente()
+      return true
+    } catch (error) {
+      if (!esErrorConectividad(error)) {
+        console.warn('No se pudo sincronizar el perfil pendiente:', error)
+      }
+      return false
+    }
+  }
+
   async function sincronizarPerfilUsuario(usuario) {
     const perfilActual = await servicioFirestoreUsuarios.obtenerPerfilUsuario(usuario.uid)
 
@@ -218,17 +303,35 @@ export const useUsuarioStore = defineStore('usuario', () => {
   }
 
   async function sincronizarPerfilConReintento(usuario) {
+    if (usuario?.isAnonymous) {
+      aplicarPerfilLocalTemporal(usuario)
+      return
+    }
+
     try {
       await sincronizarPerfilUsuario(usuario)
       return
     } catch (error) {
+      if (esErrorConectividad(error)) {
+        aplicarPerfilLocalTemporal(usuario)
+        return
+      }
+
       if (!esErrorPermisosFirestore(error)) {
         throw error
       }
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 350))
-    await sincronizarPerfilUsuario(usuario)
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 350))
+      await sincronizarPerfilUsuario(usuario)
+    } catch (error) {
+      if (esErrorConectividad(error)) {
+        aplicarPerfilLocalTemporal(usuario)
+        return
+      }
+      throw error
+    }
   }
 
   async function asegurarSesionAnonima() {
@@ -278,6 +381,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
             }
 
             await sincronizarPerfilConReintento(usuario)
+            void sincronizarPerfilEditablePendiente()
             void ejecutarMigracionAutomaticaSiCorresponde(usuario)
             void solicitarSincronizacionRemota('arranque_sesion', {
               retrasoMs: RETRASO_SINCRONIZACION_REMOTA_ARRANQUE_MS,
@@ -348,7 +452,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
         return true
       }
       await sincronizarEspacioTrabajoLocal(usuario)
-      await sincronizarPerfilUsuario(usuario)
+      await sincronizarPerfilConReintento(usuario)
       aplicarEstadoUsuario(usuario)
       marcarAccesoInicialCompletado()
       return true
@@ -365,7 +469,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
     try {
       const usuario = await servicioAuthFirebase.iniciarSesionConCorreo(email, contrasena)
       await sincronizarEspacioTrabajoLocal(usuario)
-      await sincronizarPerfilUsuario(usuario)
+      await sincronizarPerfilConReintento(usuario)
       aplicarEstadoUsuario(usuario)
       marcarAccesoInicialCompletado()
       return true
@@ -382,7 +486,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
     try {
       const usuario = await servicioAuthFirebase.registrarConCorreo(email, contrasena)
       await sincronizarEspacioTrabajoLocal(usuario)
-      await sincronizarPerfilUsuario(usuario)
+      await sincronizarPerfilConReintento(usuario)
       aplicarEstadoUsuario(usuario)
       marcarAccesoInicialCompletado()
       return true
@@ -459,6 +563,12 @@ export const useUsuarioStore = defineStore('usuario', () => {
       }
       return resumen
     } catch (error) {
+      if (esErrorConectividad(error)) {
+        console.info('Migración local pendiente por Firebase temporalmente no disponible:', error?.code || error?.message)
+        errorMigracion.value = 'Firebase no está disponible ahora. Los datos locales quedan pendientes de sincronización.'
+        return null
+      }
+
       console.error('Error al migrar datos locales:', error)
       errorMigracion.value = 'No se pudo migrar los datos locales a Firebase'
       return null
@@ -480,6 +590,103 @@ export const useUsuarioStore = defineStore('usuario', () => {
     return true
   }
 
+  function agregarIdsPendientes(campo, ids) {
+    const destino = cambiosPendientesSincronizacion[campo]
+    if (!(destino instanceof Set)) return
+
+    ids
+      .map((id) => String(id || '').trim())
+      .filter(Boolean)
+      .forEach((id) => destino.add(id))
+  }
+
+  function registrarCambioPendientePorMotivo(motivo, cambio = {}) {
+    const motivoNormalizado = String(motivo || '').trim().toLowerCase()
+    const idsProductos = [
+      cambio.productoId,
+      ...(Array.isArray(cambio.productos) ? cambio.productos : []),
+    ]
+    const idsComercios = [
+      cambio.comercioId,
+      ...(Array.isArray(cambio.comercios) ? cambio.comercios : []),
+    ]
+    const idsListas = [
+      cambio.listaId,
+      ...(Array.isArray(cambio.listasJustas) ? cambio.listasJustas : []),
+    ]
+
+    agregarIdsPendientes('productos', idsProductos)
+    agregarIdsPendientes('comercios', idsComercios)
+    agregarIdsPendientes('listasJustas', idsListas)
+
+    if (cambio.preferencias || motivoNormalizado.includes('preferencias')) {
+      cambiosPendientesSincronizacion.preferencias = true
+    }
+    if (
+      cambio.sesionEscaneo ||
+      motivoNormalizado.includes('sesion_escaneo') ||
+      motivoNormalizado.includes('mesa')
+    ) {
+      cambiosPendientesSincronizacion.sesionEscaneo = true
+    }
+    if (cambio.perfil || motivoNormalizado.includes('perfil')) {
+      cambiosPendientesSincronizacion.perfil = true
+    }
+    if (cambio.eliminaciones || motivoNormalizado.includes('eliminado')) {
+      cambiosPendientesSincronizacion.eliminaciones = true
+    }
+
+    if (idsProductos.filter(Boolean).length === 0) {
+      if (
+        motivoNormalizado.includes('producto') ||
+        motivoNormalizado.includes('precio') ||
+        motivoNormalizado.includes('confirmacion')
+      ) {
+        cambiosPendientesSincronizacion.productos = true
+      }
+    }
+    if (idsComercios.filter(Boolean).length === 0) {
+      if (
+        motivoNormalizado.includes('comercio') ||
+        motivoNormalizado.includes('direccion') ||
+        motivoNormalizado.includes('foto_direccion')
+      ) {
+        cambiosPendientesSincronizacion.comercios = true
+      }
+    }
+    if (idsListas.filter(Boolean).length === 0 && motivoNormalizado.includes('lista')) {
+      cambiosPendientesSincronizacion.listasJustas = true
+    }
+  }
+
+  function clonarCambiosPendientesSincronizacion() {
+    const clonarCampo = (valor) => {
+      if (valor === true) return true
+      if (valor instanceof Set) return Array.from(valor.values())
+      return false
+    }
+
+    return {
+      productos: clonarCampo(cambiosPendientesSincronizacion.productos),
+      comercios: clonarCampo(cambiosPendientesSincronizacion.comercios),
+      listasJustas: clonarCampo(cambiosPendientesSincronizacion.listasJustas),
+      preferencias: cambiosPendientesSincronizacion.preferencias,
+      sesionEscaneo: cambiosPendientesSincronizacion.sesionEscaneo,
+      perfil: cambiosPendientesSincronizacion.perfil,
+      eliminaciones: cambiosPendientesSincronizacion.eliminaciones,
+    }
+  }
+
+  function limpiarCambiosPendientesSincronizacion() {
+    cambiosPendientesSincronizacion.productos = new Set()
+    cambiosPendientesSincronizacion.comercios = new Set()
+    cambiosPendientesSincronizacion.listasJustas = new Set()
+    cambiosPendientesSincronizacion.preferencias = false
+    cambiosPendientesSincronizacion.sesionEscaneo = false
+    cambiosPendientesSincronizacion.perfil = false
+    cambiosPendientesSincronizacion.eliminaciones = false
+  }
+
   async function ejecutarSincronizacionAutomatica(motivo = 'operacion') {
     if (!puedeSincronizarAutomaticamente()) return false
 
@@ -493,7 +700,12 @@ export const useUsuarioStore = defineStore('usuario', () => {
     ultimoErrorSincronizacionAutomatica.value = null
 
     try {
-      const resumen = await migrarDatosLocales()
+      await sincronizarPerfilEditablePendiente()
+      const cambiosPendientes = clonarCambiosPendientesSincronizacion()
+      const resumen = await servicioMigracionLocalFirestore.sincronizarCambiosLocalesAFirestore(
+        usuarioId.value,
+        cambiosPendientes,
+      )
       if (!resumen) {
         ultimoErrorSincronizacionAutomatica.value = 'No se pudo completar la sincronización automática.'
         return false
@@ -505,11 +717,18 @@ export const useUsuarioStore = defineStore('usuario', () => {
       }
       pendientesSincronizacion.value = []
       motivosPendientes.clear()
+      limpiarCambiosPendientesSincronizacion()
       solicitarSincronizacionRemota('post_sincronizacion_local', {
         retrasoMs: RETRASO_SINCRONIZACION_REMOTA_POST_LOCAL_MS,
       })
       return true
     } catch (error) {
+      if (esErrorConectividad(error)) {
+        console.info('Sincronización automática pendiente por Firebase temporalmente no disponible:', error?.code || error?.message)
+        ultimoErrorSincronizacionAutomatica.value = 'Firebase no está disponible ahora. Los cambios quedaron guardados localmente.'
+        return false
+      }
+
       console.error('Error en sincronización automática:', error)
       ultimoErrorSincronizacionAutomatica.value = 'Ocurrió un error en la sincronización automática.'
       return false
@@ -523,17 +742,18 @@ export const useUsuarioStore = defineStore('usuario', () => {
     }
   }
 
-  function registrarPendienteSincronizacion(motivo = 'operacion') {
+  function registrarPendienteSincronizacion(motivo = 'operacion', cambio = {}) {
     const motivoNormalizado = String(motivo || 'operacion').trim().toLowerCase()
     if (!motivoNormalizado) return
 
     motivosPendientes.add(motivoNormalizado)
+    registrarCambioPendientePorMotivo(motivoNormalizado, cambio)
     pendientesSincronizacion.value = Array.from(motivosPendientes.values())
   }
 
-  function solicitarSincronizacionAutomatica(motivo = 'operacion') {
+  function solicitarSincronizacionAutomatica(motivo = 'operacion', cambio = {}) {
     if (!tieneSesionRealActiva.value) return false
-    registrarPendienteSincronizacion(motivo)
+    registrarPendienteSincronizacion(motivo, cambio)
 
     if (typeof navigator !== 'undefined' && navigator.onLine === false) {
       ultimoErrorSincronizacionAutomatica.value = 'Sin conexión. Se reintentará automáticamente al volver internet.'
@@ -561,10 +781,12 @@ export const useUsuarioStore = defineStore('usuario', () => {
     ultimoErrorSincronizacionRemota.value = null
 
     try {
-      const resumenRemoto = await servicioMigracionLocalFirestore.sincronizarDesdeFirestoreALocal(
+      const resumenRemoto = await servicioMigracionLocalFirestore.sincronizarDesdeFirestoreALocalSiCambio(
         usuarioId.value,
       )
-      await recargarContextoDatos()
+      if (!resumenRemoto?.sinCambios) {
+        await recargarContextoDatos()
+      }
       ultimaSincronizacionRemota.value = {
         fecha: new Date().toISOString(),
         motivo,
@@ -572,6 +794,12 @@ export const useUsuarioStore = defineStore('usuario', () => {
       }
       return true
     } catch (error) {
+      if (esErrorConectividad(error)) {
+        console.info('Actualización remota pausada por Firebase temporalmente no disponible:', error?.code || error?.message)
+        ultimoErrorSincronizacionRemota.value = 'Firebase no está disponible ahora. Se usan los datos locales.'
+        return false
+      }
+
       console.error('Error en sincronización remota:', error)
       ultimoErrorSincronizacionRemota.value = 'No se pudo actualizar desde la nube en segundo plano.'
       return false
@@ -638,7 +866,8 @@ export const useUsuarioStore = defineStore('usuario', () => {
       ...(perfil.value || {}),
       ...datosLocalesNormalizados,
     }
-    solicitarSincronizacionAutomatica('perfil_actualizado')
+    await guardarPerfilEditablePendiente(datosLocalesNormalizados.perfilEditable)
+    solicitarSincronizacionAutomatica('perfil_actualizado', { perfil: true })
 
     try {
       const datosGuardados = await servicioFirestoreUsuarios.guardarPerfilEditable(
@@ -650,13 +879,15 @@ export const useUsuarioStore = defineStore('usuario', () => {
         ...(perfil.value || {}),
         ...datosGuardados,
       }
+      await limpiarPerfilEditablePendiente()
       return true
     } catch (error) {
-      console.error('Error al actualizar perfil editable:', error)
       if (esErrorConectividad(error)) {
+        console.info('Perfil editable pendiente por Firebase temporalmente no disponible:', error?.code || error?.message)
         errorPerfil.value = 'Sin conexión: el perfil se guardó localmente y se sincronizará cuando vuelva internet.'
         return true
       }
+      console.error('Error al actualizar perfil editable:', error)
       errorPerfil.value = 'No se pudo guardar el perfil'
       return false
     } finally {
@@ -697,6 +928,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
     sincronizacionAutomaticaReprogramada = false
     ultimoMotivoSincronizacion = null
     motivosPendientes.clear()
+    limpiarCambiosPendientesSincronizacion()
     if (typeof window !== 'undefined' && listenerConexionRegistrado && manejarVueltaConexion) {
       window.removeEventListener('online', manejarVueltaConexion)
     }

@@ -20,6 +20,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import confirmacionesService from '../servicios/ConfirmacionesService.js'
 import { useProductosStore } from './productosStore.js'
+import { useUsuarioStore } from './UsuarioStore.js'
 
 export const useConfirmacionesStore = defineStore('confirmaciones', () => {
   // ========================================
@@ -173,6 +174,9 @@ export const useConfirmacionesStore = defineStore('confirmaciones', () => {
             productosStore.productos[index] = resultado.producto
           }
         }
+        useUsuarioStore().solicitarSincronizacionAutomatica('confirmacion_precio_actualizada', {
+          productoId,
+        })
 
         console.log('✅ Precio confirmado exitosamente')
       }
@@ -274,6 +278,9 @@ export const useConfirmacionesStore = defineStore('confirmaciones', () => {
             productosStore.productos[index] = resultado.producto
           }
         }
+        useUsuarioStore().solicitarSincronizacionAutomatica('confirmacion_precio_actualizada', {
+          productoId,
+        })
 
         console.log('✅ Confirmación eliminada')
       }

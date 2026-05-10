@@ -13,6 +13,7 @@ const PREFERENCIAS_BASE = {
   paisDetectado: null,
   monedaDetectada: null,
   unidad: 'unidad',
+  fechaActualizacion: null,
 }
 
 function normalizarPreferencias(preferenciasCrudas) {
@@ -42,6 +43,7 @@ function normalizarPreferencias(preferenciasCrudas) {
     paisDetectado: preferenciasCrudas.paisDetectado || null,
     monedaDetectada: preferenciasCrudas.monedaDetectada || null,
     unidad: preferenciasCrudas.unidad || PREFERENCIAS_BASE.unidad,
+    fechaActualizacion: preferenciasCrudas.fechaActualizacion || null,
   }
 }
 
@@ -64,7 +66,11 @@ class PreferenciasService {
   async guardarPreferenciasParciales(cambios) {
     try {
       const actuales = await this.obtenerPreferencias()
-      const fusionadas = normalizarPreferencias({ ...actuales, ...cambios })
+      const fusionadas = normalizarPreferencias({
+        ...actuales,
+        ...cambios,
+        fechaActualizacion: new Date().toISOString(),
+      })
       const guardado = await this.adaptador.guardar(this.clavePreferencias, fusionadas)
       if (!guardado) {
         throw new Error('No se pudieron guardar las preferencias')

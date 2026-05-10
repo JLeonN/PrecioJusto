@@ -609,7 +609,7 @@ function emitirCambios() {
 function enfocarYNavegar() {
   const el = qInputPrecioRef.value?.obtenerElemento?.() || qInputPrecioRef.value?.$el
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-  qInputPrecioRef.value?.focus()
+  qInputPrecioRef.value?.focus?.()
 
   animarShake.value = false
   setTimeout(() => {
@@ -711,7 +711,6 @@ function precioValido(val) {
   line-height: 1.3 !important;
 }
 </style>
-
 
 
 

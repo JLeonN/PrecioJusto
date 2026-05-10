@@ -22,7 +22,7 @@
       </q-btn>
     </div>
 
-    <!-- MODO EDICI�"N -->
+    <!-- MODO EDICIÓN -->
     <div v-else class="campo-editable__edicion">
       <div class="campo-editable__icono">
         <component :is="icono" :size="20" class="campo-editable__icono-svg" />

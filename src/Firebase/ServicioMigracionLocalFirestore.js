@@ -1,5 +1,6 @@
 ﻿import { collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, setDoc, writeBatch } from 'firebase/firestore'
 import { firestoreDb } from './ClienteFirebase.js'
+import servicioFirestoreDisponibilidad from './ServicioFirestoreDisponibilidad.js'
 import {
   adaptadorActual,
   configurarEspacioTrabajoAlmacenamiento,
@@ -16,6 +17,7 @@ const CLAVE_SESION_ESCANEO = 'sesion_escaneo'
 const CLAVE_RESPALDO_MIGRACION = 'respaldo_migracion_firestore'
 const CLAVE_ELIMINACIONES_PENDIENTES = 'eliminaciones_pendientes_firestore'
 const CLAVE_LIMPIEZA_ELIMINACIONES_PENDIENTE = 'limpieza_eliminaciones_pendiente_firestore'
+const CLAVE_ESTADO_SINCRONIZACION_FIRESTORE = 'estado_sincronizacion_firestore'
 const CAMPOS_ELIMINACIONES = ['productos', 'comercios', 'listasJustas']
 const VENTANA_DUPLICADO_HISTORIAL_DIAS = 30
 const VERSION_RESPALDO_LIGERO = 2
@@ -135,6 +137,12 @@ function normalizarCodigoBarras(codigoBarras) {
 }
 
 function convertirFechaAms(fecha) {
+  if (!fecha) return 0
+  if (typeof fecha?.toMillis === 'function') return fecha.toMillis()
+  if (fecha instanceof Date) return fecha.getTime()
+  if (Number.isFinite(Number(fecha?.seconds))) {
+    return Number(fecha.seconds) * 1000 + Math.round(Number(fecha.nanoseconds || 0) / 1000000)
+  }
   const fechaMs = Date.parse(String(fecha || ''))
   return Number.isFinite(fechaMs) ? fechaMs : 0
 }
@@ -146,9 +154,57 @@ async function ejecutarConTimeout(promesa, tiempoMaximoMs = TIEMPO_MAXIMO_OPERAC
       timeoutId = setTimeout(() => reject(new Error(mensaje)), tiempoMaximoMs)
     })
     return await Promise.race([promesa, timeout])
+  } catch (error) {
+    servicioFirestoreDisponibilidad.registrarFalloFirestore(error)
+    throw error
   } finally {
     if (timeoutId) clearTimeout(timeoutId)
   }
+}
+
+function crearErrorFirestorePausado() {
+  const error = new Error('Firestore pausado temporalmente. Se mantiene la operación local pendiente.')
+  error.code = 'firestore/pausado'
+  return error
+}
+
+function verificarFirestoreDisponible() {
+  if (servicioFirestoreDisponibilidad.estaFirestoreEnPausa()) {
+    throw crearErrorFirestorePausado()
+  }
+}
+
+function crearIdSincronizacion() {
+  return `sync_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+}
+
+function crearReferenciaEstadoSincronizacion(usuarioId) {
+  return doc(firestoreDb, 'users', usuarioId, 'configuracion', 'estadoSincronizacion')
+}
+
+async function obtenerEstadoSincronizacionLocal() {
+  return adaptadorActual.obtener(CLAVE_ESTADO_SINCRONIZACION_FIRESTORE)
+}
+
+async function guardarEstadoSincronizacionLocal(estado) {
+  if (!estado?.sincronizacionId) return false
+  return adaptadorActual.guardar(CLAVE_ESTADO_SINCRONIZACION_FIRESTORE, {
+    ...estado,
+    fechaGuardadoLocal: new Date().toISOString(),
+  })
+}
+
+async function obtenerEstadoSincronizacionRemoto(usuarioId) {
+  const uid = String(usuarioId || '').trim()
+  if (!uid) return null
+  verificarFirestoreDisponible()
+
+  const snapshot = await ejecutarConTimeout(
+    getDoc(crearReferenciaEstadoSincronizacion(uid)),
+    TIEMPO_MAXIMO_OPERACION_REMOTA_MS,
+    'Timeout leyendo estado de sincronización remoto',
+  )
+  return snapshot.exists() ? snapshot.data() : null
 }
 
 function obtenerClavePrecio(precio) {
@@ -239,8 +295,13 @@ function fusionarComerciosExistentes(comercioBase, comercioNuevo) {
 }
 
 async function obtenerDocumentosColeccionUsuario(usuarioId, nombreColeccion) {
+  verificarFirestoreDisponible()
   const referenciaColeccion = collection(firestoreDb, 'users', usuarioId, nombreColeccion)
-  const snapshot = await getDocs(referenciaColeccion)
+  const snapshot = await ejecutarConTimeout(
+    getDocs(referenciaColeccion),
+    TIEMPO_MAXIMO_OPERACION_REMOTA_MS,
+    `Timeout leyendo ${nombreColeccion}`,
+  )
 
   return snapshot.docs.map((documento) => ({
     id: documento.id,
@@ -343,44 +404,23 @@ function fusionarListasConRemoto(listasRemotas = [], listasLocales = []) {
 }
 
 function fusionarSesionEscaneoConRemoto(sesionRemota, sesionLocal) {
-  const itemsRemotos = Array.isArray(sesionRemota?.items) ? sesionRemota.items : []
-  const itemsLocales = Array.isArray(sesionLocal?.items) ? sesionLocal.items : []
-  const mapaItems = new Map()
+  const normalizarSesion = (sesion) => ({
+    ...(sesion || {}),
+    items: Array.isArray(sesion?.items) ? sesion.items : [],
+    fechaActualizacion: sesion?.fechaActualizacion || null,
+  })
 
-  const obtenerClaveItem = (item) => {
-    const id = String(item?.id || '').trim()
-    if (id) return `id:${id}`
+  const remota = normalizarSesion(sesionRemota)
+  const local = normalizarSesion(sesionLocal)
+  const fechaRemota = convertirFechaAms(remota.fechaActualizacion || remota.actualizadoEn)
+  const fechaLocal = convertirFechaAms(local.fechaActualizacion || local.actualizadoEn)
 
-    const codigo = String(item?.codigoBarras || '').trim()
-    const nombre = String(item?.nombre || '').trim().toLowerCase()
-    const precio = Number(item?.precio || 0)
-    return `alt:${codigo}|${nombre}|${precio}`
+  if (!sesionRemota && !sesionLocal) {
+    return { items: [], fechaActualizacion: new Date().toISOString() }
   }
 
-  const insertarItems = (items) => {
-    for (const item of items) {
-      const clave = obtenerClaveItem(item)
-      if (!mapaItems.has(clave)) {
-        mapaItems.set(clave, { ...item })
-        continue
-      }
-
-      const existente = mapaItems.get(clave)
-      const fechaExistente = convertirFechaAms(existente?.actualizadoEn || existente?.creadoEn)
-      const fechaActual = convertirFechaAms(item?.actualizadoEn || item?.creadoEn)
-      mapaItems.set(
-        clave,
-        fechaActual >= fechaExistente ? { ...existente, ...item } : { ...item, ...existente },
-      )
-    }
-  }
-
-  insertarItems(itemsRemotos)
-  insertarItems(itemsLocales)
-
-  return {
-    items: Array.from(mapaItems.values()),
-  }
+  if (fechaLocal >= fechaRemota) return local
+  return remota
 }
 
 function normalizarListaIds(ids = []) {
@@ -470,22 +510,32 @@ function crearReferenciaEliminacionesRemotas(usuarioId) {
 async function obtenerEliminacionesRemotas(usuarioId) {
   const uid = String(usuarioId || '').trim()
   if (!uid) return normalizarEliminaciones()
+  verificarFirestoreDisponible()
 
-  const snapshot = await getDoc(crearReferenciaEliminacionesRemotas(uid))
+  const snapshot = await ejecutarConTimeout(
+    getDoc(crearReferenciaEliminacionesRemotas(uid)),
+    TIEMPO_MAXIMO_OPERACION_REMOTA_MS,
+    'Timeout leyendo eliminaciones remotas',
+  )
   return snapshot.exists() ? normalizarEliminaciones(snapshot.data()) : normalizarEliminaciones()
 }
 
 async function guardarEliminacionesRemotas(usuarioId, eliminaciones) {
   const uid = String(usuarioId || '').trim()
   if (!uid) return false
+  verificarFirestoreDisponible()
 
-  await setDoc(
-    crearReferenciaEliminacionesRemotas(uid),
-    {
-      ...normalizarEliminaciones(eliminaciones),
-      actualizadoEn: serverTimestamp(),
-    },
-    { merge: true },
+  await ejecutarConTimeout(
+    setDoc(
+      crearReferenciaEliminacionesRemotas(uid),
+      {
+        ...normalizarEliminaciones(eliminaciones),
+        actualizadoEn: serverTimestamp(),
+      },
+      { merge: true },
+    ),
+    TIEMPO_MAXIMO_OPERACION_REMOTA_MS,
+    'Timeout guardando eliminaciones remotas',
   )
   return true
 }
@@ -562,6 +612,7 @@ async function procesarEliminacionesPendientes(usuarioId) {
 }
 
 async function obtenerSesionEscaneoRemota(usuarioId) {
+  verificarFirestoreDisponible()
   const referenciaSesionEscaneo = doc(
     firestoreDb,
     'users',
@@ -569,11 +620,16 @@ async function obtenerSesionEscaneoRemota(usuarioId) {
     'configuracion',
     'sesionEscaneo',
   )
-  const snapshot = await getDoc(referenciaSesionEscaneo)
+  const snapshot = await ejecutarConTimeout(
+    getDoc(referenciaSesionEscaneo),
+    TIEMPO_MAXIMO_OPERACION_REMOTA_MS,
+    'Timeout leyendo sesión de escaneo remota',
+  )
   return snapshot.exists() ? snapshot.data() : null
 }
 
 async function obtenerPreferenciasRemotas(usuarioId) {
+  verificarFirestoreDisponible()
   const referenciaPreferencias = doc(
     firestoreDb,
     'users',
@@ -581,7 +637,11 @@ async function obtenerPreferenciasRemotas(usuarioId) {
     'configuracion',
     'preferencias',
   )
-  const snapshot = await getDoc(referenciaPreferencias)
+  const snapshot = await ejecutarConTimeout(
+    getDoc(referenciaPreferencias),
+    TIEMPO_MAXIMO_OPERACION_REMOTA_MS,
+    'Timeout leyendo preferencias remotas',
+  )
   return snapshot.exists() ? snapshot.data() : null
 }
 
@@ -653,7 +713,194 @@ async function sincronizarDatosFusionadosEnLocal(datosFusionados) {
   }
 }
 
+function normalizarIdsCambios(valor) {
+  if (valor === true || valor === '*') {
+    return { completo: true, ids: new Set() }
+  }
+
+  const ids = Array.isArray(valor)
+    ? valor
+    : Array.isArray(valor?.ids)
+      ? valor.ids
+      : []
+
+  return {
+    completo: false,
+    ids: new Set(
+      ids
+        .map((id) => String(id || '').trim())
+        .filter(Boolean),
+    ),
+  }
+}
+
+function debeSincronizarEntidad(entidad, cambio) {
+  if (cambio.completo) return true
+  const id = String(entidad?.id || '').trim()
+  return Boolean(id && cambio.ids.has(id))
+}
+
+async function sincronizarCambiosLocalesAFirestore(usuarioId, cambios = {}) {
+  const uid = String(usuarioId || '').trim()
+  if (!uid) return null
+  verificarFirestoreDisponible()
+
+  const sincronizarEliminaciones = cambios.eliminaciones === true
+  const eliminaciones = sincronizarEliminaciones
+    ? await sincronizarEliminacionesConFirestore(uid)
+    : await obtenerEliminacionesLocales()
+
+  if (sincronizarEliminaciones) {
+    await procesarEliminacionesPendientes(uid)
+  }
+
+  const datosLocales = await obtenerDatosLocalesActuales(uid, {
+    incluirEspacioCompartido: false,
+  })
+  const resumen = crearResumenMigracion(datosLocales)
+  const cambiosProductos = normalizarIdsCambios(cambios.productos)
+  const cambiosComercios = normalizarIdsCambios(cambios.comercios)
+  const cambiosListas = normalizarIdsCambios(cambios.listasJustas)
+  const lote = writeBatch(firestoreDb)
+  const sincronizacionId = crearIdSincronizacion()
+  const escrituras = {
+    productos: 0,
+    comercios: 0,
+    listasJustas: 0,
+    preferencias: 0,
+    sesionEscaneo: 0,
+    eliminaciones: sincronizarEliminaciones && hayEliminaciones(eliminaciones) ? 1 : 0,
+  }
+
+  if (cambios.preferencias && datosLocales.preferencias) {
+    lote.set(
+      doc(firestoreDb, 'users', uid, 'configuracion', 'preferencias'),
+      {
+        ...datosLocales.preferencias,
+        actualizadoEn: serverTimestamp(),
+        origenSincronizacion: 'automatica_parcial',
+        espacioTrabajoOrigen: datosLocales.espacioTrabajo || 'desconocido',
+      },
+      { merge: true },
+    )
+    escrituras.preferencias = 1
+  }
+
+  if (cambios.sesionEscaneo) {
+    lote.set(
+      doc(firestoreDb, 'users', uid, 'configuracion', 'sesionEscaneo'),
+      {
+        ...(datosLocales.sesionEscaneo || { items: [] }),
+        actualizadoEn: serverTimestamp(),
+        origenSincronizacion: 'automatica_parcial',
+      },
+      { merge: true },
+    )
+    escrituras.sesionEscaneo = 1
+  }
+
+  datosLocales.comercios
+    .filter((comercio) => debeSincronizarEntidad(comercio, cambiosComercios))
+    .forEach((comercio) => {
+      const idComercio = String(comercio.id || '').trim()
+      if (!idComercio || idComercio === 'undefined' || idComercio === 'null') return
+      lote.set(
+        doc(firestoreDb, 'users', uid, 'comercios', idComercio),
+        {
+          ...comercio,
+          legacyId: idComercio,
+          actualizadoEn: serverTimestamp(),
+          origenSincronizacion: 'automatica_parcial',
+        },
+        { merge: true },
+      )
+      escrituras.comercios += 1
+    })
+
+  datosLocales.productos
+    .filter((producto) => debeSincronizarEntidad(producto, cambiosProductos))
+    .forEach((producto) => {
+      const idProducto = String(producto.id || '').trim()
+      if (!idProducto || idProducto === 'undefined' || idProducto === 'null') return
+      lote.set(
+        doc(firestoreDb, 'users', uid, 'productos', idProducto),
+        {
+          ...producto,
+          legacyId: idProducto,
+          actualizadoEn: serverTimestamp(),
+          origenSincronizacion: 'automatica_parcial',
+        },
+        { merge: true },
+      )
+      escrituras.productos += 1
+    })
+
+  datosLocales.listas
+    .filter((lista) => debeSincronizarEntidad(lista, cambiosListas))
+    .forEach((lista) => {
+      const idLista = String(lista.id || '').trim()
+      if (!idLista || idLista === 'undefined' || idLista === 'null') return
+      lote.set(
+        doc(firestoreDb, 'users', uid, 'listasJustas', idLista),
+        {
+          ...lista,
+          legacyId: idLista,
+          actualizadoEn: serverTimestamp(),
+          origenSincronizacion: 'automatica_parcial',
+        },
+        { merge: true },
+      )
+      escrituras.listasJustas += 1
+    })
+
+  const totalEscrituras =
+    escrituras.productos +
+    escrituras.comercios +
+    escrituras.listasJustas +
+    escrituras.preferencias +
+    escrituras.sesionEscaneo
+
+  if (totalEscrituras > 0) {
+    lote.set(
+      crearReferenciaEstadoSincronizacion(uid),
+      {
+        sincronizacionId,
+        modo: 'automatica_parcial',
+        resumen: {
+          productos: escrituras.productos,
+          comercios: escrituras.comercios,
+          listasJustas: escrituras.listasJustas,
+          preferencias: escrituras.preferencias,
+          sesionEscaneo: escrituras.sesionEscaneo,
+        },
+        actualizadoEn: serverTimestamp(),
+      },
+      { merge: true },
+    )
+
+    await ejecutarConTimeout(
+      lote.commit(),
+      TIEMPO_MAXIMO_OPERACION_REMOTA_MS,
+      'Timeout sincronizando cambios parciales',
+    )
+    await guardarEstadoSincronizacionLocal({
+      sincronizacionId,
+      modo: 'automatica_parcial',
+    })
+  }
+
+  return {
+    ...resumen,
+    modo: 'automatica_parcial',
+    escrituras,
+    totalEscrituras: totalEscrituras > 0 ? totalEscrituras + 1 : 0,
+    sincronizacionId: totalEscrituras > 0 ? sincronizacionId : null,
+    fechaSincronizacion: new Date().toISOString(),
+  }
+}
+
 async function migrarDatosLocalesAFirestore(usuarioId, opciones = {}) {
+  verificarFirestoreDisponible()
   const eliminaciones = await sincronizarEliminacionesConFirestore(usuarioId)
   await procesarEliminacionesPendientes(usuarioId)
   const datosLocales = await obtenerDatosLocalesActuales(usuarioId, {
@@ -846,7 +1093,22 @@ async function migrarDatosLocalesAFirestore(usuarioId, opciones = {}) {
       { merge: true },
     )
 
+    lote.set(
+      crearReferenciaEstadoSincronizacion(usuarioId),
+      {
+        sincronizacionId: intentoId,
+        modo: 'migracion_completa',
+        resumen,
+        actualizadoEn: serverTimestamp(),
+      },
+      { merge: true },
+    )
+
     await lote.commit()
+    await guardarEstadoSincronizacionLocal({
+      sincronizacionId: intentoId,
+      modo: 'migracion_completa',
+    })
 
     await setDoc(
       doc(firestoreDb, 'users', usuarioId, 'configuracion', 'estadoMigracion'),
@@ -893,6 +1155,7 @@ async function migrarDatosLocalesAFirestore(usuarioId, opciones = {}) {
 }
 
 async function sincronizarDesdeFirestoreALocal(usuarioId) {
+  verificarFirestoreDisponible()
   const eliminaciones = await sincronizarEliminacionesConFirestore(usuarioId)
   await procesarEliminacionesPendientes(usuarioId)
   const datosLocales = await obtenerDatosLocalesActuales(usuarioId, {
@@ -960,11 +1223,74 @@ async function sincronizarDesdeFirestoreALocal(usuarioId) {
   }
 }
 
+async function sincronizarDesdeFirestoreALocalSiCambio(usuarioId, opciones = {}) {
+  const uid = String(usuarioId || '').trim()
+  if (!uid) return null
+  verificarFirestoreDisponible()
+
+  const estadoRemoto = await obtenerEstadoSincronizacionRemoto(uid)
+  const estadoLocal = await obtenerEstadoSincronizacionLocal()
+  const sincronizacionRemotaId = String(estadoRemoto?.sincronizacionId || '').trim()
+  const sincronizacionLocalId = String(estadoLocal?.sincronizacionId || '').trim()
+
+  if (
+    opciones.forzar !== true &&
+    sincronizacionRemotaId &&
+    sincronizacionLocalId &&
+    sincronizacionRemotaId === sincronizacionLocalId
+  ) {
+    return {
+      sinCambios: true,
+      fuente: 'estadoSincronizacion',
+      sincronizacionId: sincronizacionRemotaId,
+      fechaSincronizacion: new Date().toISOString(),
+    }
+  }
+
+  const resumen = await sincronizarDesdeFirestoreALocal(uid)
+  let sincronizacionAplicadaId = sincronizacionRemotaId || null
+
+  if (sincronizacionRemotaId) {
+    await guardarEstadoSincronizacionLocal({
+      sincronizacionId: sincronizacionRemotaId,
+      modo: estadoRemoto?.modo || 'remoto',
+    })
+  } else {
+    const sincronizacionIdBase = crearIdSincronizacion()
+    sincronizacionAplicadaId = sincronizacionIdBase
+    await ejecutarConTimeout(
+      setDoc(
+        crearReferenciaEstadoSincronizacion(uid),
+        {
+          sincronizacionId: sincronizacionIdBase,
+          modo: 'baseline_remoto',
+          resumen,
+          actualizadoEn: serverTimestamp(),
+        },
+        { merge: true },
+      ),
+      TIEMPO_MAXIMO_OPERACION_REMOTA_MS,
+      'Timeout guardando estado base de sincronización',
+    )
+    await guardarEstadoSincronizacionLocal({
+      sincronizacionId: sincronizacionIdBase,
+      modo: 'baseline_remoto',
+    })
+  }
+
+  return {
+    ...resumen,
+    sinCambios: false,
+    sincronizacionId: sincronizacionAplicadaId,
+  }
+}
+
 
 async function eliminarListaRemota(usuarioId, listaId) {
   const uid = String(usuarioId || '').trim()
   const id = String(listaId || '').trim()
   if (!uid || !id) return false
+  verificarFirestoreDisponible()
 
   await registrarEliminacionListaLocal(id)
   await guardarEliminacionesRemotas(uid, await obtenerEliminacionesLocales())
@@ -981,6 +1307,7 @@ async function eliminarComercioRemoto(usuarioId, comercioId) {
   const uid = String(usuarioId || '').trim()
   const id = String(comercioId || '').trim()
   if (!uid || !id) return false
+  verificarFirestoreDisponible()
 
   await registrarEliminacionComercioLocal(id)
   await guardarEliminacionesRemotas(uid, await obtenerEliminacionesLocales())
@@ -997,6 +1324,7 @@ async function eliminarProductoRemoto(usuarioId, productoId) {
   const uid = String(usuarioId || '').trim()
   const id = String(productoId || '').trim()
   if (!uid || !id) return false
+  verificarFirestoreDisponible()
 
   await registrarEliminacionProductoLocal(id)
   await guardarEliminacionesRemotas(uid, await obtenerEliminacionesLocales())
@@ -1025,7 +1353,9 @@ export default {
   obtenerDatosLocalesActuales,
   crearResumenMigracion,
   migrarDatosLocalesAFirestore,
+  sincronizarCambiosLocalesAFirestore,
   sincronizarDesdeFirestoreALocal,
+  sincronizarDesdeFirestoreALocalSiCambio,
   registrarEliminacionListaLocal,
   registrarEliminacionComercioLocal,
   registrarEliminacionProductoLocal,

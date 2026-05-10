@@ -187,29 +187,33 @@ export const useComerciStore = defineStore('comercios', {
      * @param {Object} datosComercio - Datos del comercio
      * @returns {Promise<Object>} Comercio agregado
      */
-    async agregarComercio(datosComercio) {
+    async agregarComercio(datosComercio, opciones = {}) {
       this.cargando = true
       this.error = null
 
       try {
         // Validar duplicados antes de agregar (usa comercios agrupados)
-        const validacion = await ComerciosService.validarDuplicados(
-          datosComercio,
-          this.comerciosAgrupados,
-        )
+        if (opciones.omitirValidacionDuplicados !== true) {
+          const validacion = await ComerciosService.validarDuplicados(
+            datosComercio,
+            this.comerciosAgrupados,
+          )
 
-        if (validacion.esDuplicado) {
-          // Retornar validación para que el componente maneje el diálogo
-          return {
-            exito: false,
-            validacion,
+          if (validacion.esDuplicado) {
+            // Retornar validación para que el componente maneje el diálogo
+            return {
+              exito: false,
+              validacion,
+            }
           }
         }
 
         // No es duplicado, agregar
         const nuevoComercio = await ComerciosService.agregarComercio(datosComercio)
         this.comercios.push(nuevoComercio)
-        useUsuarioStore().solicitarSincronizacionAutomatica('comercio_creado')
+        useUsuarioStore().solicitarSincronizacionAutomatica('comercio_creado', {
+          comercioId: nuevoComercio.id,
+        })
 
         return {
           exito: true,
@@ -247,7 +251,7 @@ export const useComerciStore = defineStore('comercios', {
           if (datosActualizados.nombre) {
             await this._sincronizarNombreEnPrecios(id, datosActualizados.nombre)
           }
-          useUsuarioStore().solicitarSincronizacionAutomatica('comercio_editado')
+          useUsuarioStore().solicitarSincronizacionAutomatica('comercio_editado', { comercioId: id })
         }
 
         return comercioActualizado
@@ -310,7 +314,10 @@ export const useComerciStore = defineStore('comercios', {
                 console.warn('No se pudo eliminar el comercio en Firebase:', errorRemoto)
               })
           }
-          useUsuarioStore().solicitarSincronizacionAutomatica('comercio_eliminado')
+          useUsuarioStore().solicitarSincronizacionAutomatica('comercio_eliminado', {
+            comercioId: id,
+            eliminaciones: true,
+          })
         }
 
         return eliminado
@@ -365,7 +372,10 @@ export const useComerciStore = defineStore('comercios', {
                 })
             }
           }
-          useUsuarioStore().solicitarSincronizacionAutomatica('comercios_eliminados')
+          useUsuarioStore().solicitarSincronizacionAutomatica('comercios_eliminados', {
+            comercios: resultados.exitosos,
+            eliminaciones: true,
+          })
         }
 
         return resultados
@@ -399,7 +409,7 @@ export const useComerciStore = defineStore('comercios', {
           if (indice !== -1) {
             this.comercios[indice] = comercioActualizado
           }
-          useUsuarioStore().solicitarSincronizacionAutomatica('direccion_agregada')
+          useUsuarioStore().solicitarSincronizacionAutomatica('direccion_agregada', { comercioId })
         }
 
         return comercioActualizado
@@ -432,7 +442,7 @@ export const useComerciStore = defineStore('comercios', {
           if (indice !== -1) {
             this.comercios[indice] = comercioActualizado
           }
-          useUsuarioStore().solicitarSincronizacionAutomatica('direccion_editada')
+          useUsuarioStore().solicitarSincronizacionAutomatica('direccion_editada', { comercioId })
         }
 
         return comercioActualizado
@@ -462,7 +472,7 @@ export const useComerciStore = defineStore('comercios', {
           if (comercio) {
             comercio.direcciones = comercio.direcciones.filter((d) => d.id !== direccionId)
           }
-          useUsuarioStore().solicitarSincronizacionAutomatica('direccion_eliminada')
+          useUsuarioStore().solicitarSincronizacionAutomatica('direccion_eliminada', { comercioId })
         }
 
         return eliminado
@@ -497,6 +507,9 @@ export const useComerciStore = defineStore('comercios', {
             }
           }
         }
+        useUsuarioStore().solicitarSincronizacionAutomatica('comercio_uso_actualizado', {
+          comercioId,
+        })
       } catch (error) {
         console.error('Error al registrar uso:', error)
       }
@@ -512,7 +525,9 @@ export const useComerciStore = defineStore('comercios', {
             const direccion = comercio.direcciones.find((d) => d.id === direccionId)
             if (direccion) direccion.foto = base64 || null
           }
-          useUsuarioStore().solicitarSincronizacionAutomatica('foto_direccion_actualizada')
+          useUsuarioStore().solicitarSincronizacionAutomatica('foto_direccion_actualizada', {
+            comercioId,
+          })
         }
         return guardado
       } catch (error) {

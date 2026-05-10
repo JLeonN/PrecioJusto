@@ -39,7 +39,7 @@
       <span>Dirección</span>
     </div>
 
-    <!-- CALLE Y N�sMERO -->
+    <!-- CALLE Y NÚMERO -->
     <InputFormularioReutilizable
       v-model="datosInternos.calle"
       label="Calle y número *"
@@ -111,7 +111,7 @@
     </div>
     <input ref="inputArchivoRef" type="file" accept="image/*" class="input-archivo-oculto" @change="alSeleccionarArchivo" />
 
-    <!-- FEEDBACK DE VALIDACI�"N -->
+    <!-- FEEDBACK DE VALIDACI?N -->
     <div v-if="mostrarFeedbackValidacion" class="feedback-validacion q-mt-md">
       <q-banner dense class="bg-info text-white" rounded>
         <template #avatar>

@@ -1,6 +1,6 @@
 ﻿<template>
   <q-page class="q-pa-md">
-    <!-- BARRA DE SELECCI�"N (sticky debajo del header) -->
+    <!-- BARRA DE SELECCI?N (sticky debajo del header) -->
     <BarraSeleccion
       :visible="seleccion.modoSeleccion.value"
       :cantidad-seleccionados="seleccion.cantidadSeleccionados.value"
@@ -11,7 +11,7 @@
 
     <!-- Contenedor con ancho máximo -->
     <div class="contenedor-pagina">
-      <!-- HEADER DE LA P�GINA -->
+      <!-- HEADER DE LA PÁGINA -->
       <div class="header-pagina">
         <h5 class="titulo-pagina">Mis Productos</h5>
         <p class="contador-items">{{ productosStore.productos.length }} productos guardados</p>
@@ -69,7 +69,7 @@
       </template>
     </div>
 
-    <!-- BOT�"N FLOTANTE AGREGAR (oculto en modo selección) -->
+    <!-- BOTÓN FLOTANTE AGREGAR (oculto en modo selección) -->
     <FabAcciones v-if="!seleccion.modoSeleccion.value" :acciones="accionesFab" color="primary" />
 
     <!-- BARRA DE ACCIONES (fixed bottom en modo selección) -->
@@ -81,14 +81,14 @@
       @cancelar="seleccion.desactivarModoSeleccion()"
     />
 
-    <!-- DI�LOGO AGREGAR PRODUCTO -->
+    <!-- DIÁLOGO AGREGAR PRODUCTO -->
     <DialogoAgregarProducto
       v-model="dialogoAgregarAbierto"
       modo="local"
       @producto-guardado="onProductoGuardado"
     />
 
-    <!-- ESCANEADOR DE C�"DIGO DE BARRAS -->
+    <!-- ESCANEADOR DE CÓDIGO DE BARRAS -->
     <EscaneadorCodigo
       :activo="scannerActivo"
       :continuo="modoEscaneo === 'rafaga'"
@@ -171,7 +171,7 @@
       </div>
     </Teleport>
 
-    <!-- TARJETITA SOBRE LA C�MARA (duplicado + éxito Ráfaga) -->
+    <!-- TARJETITA SOBRE LA CÁMARA (duplicado + éxito Ráfaga) -->
     <Teleport to="body">
       <Transition name="aviso-deslizar">
         <div v-if="avisoEscaneo.visible" class="aviso-escaneo">
@@ -204,7 +204,7 @@
       </Transition>
     </Teleport>
 
-    <!-- DI�LOGO CONFIRMACI�"N ELIMINACI�"N -->
+    <!-- DIÁLOGO CONFIRMACIÓN ELIMINACIÓN -->
     <q-dialog v-model="dialogoConfirmacionAbierto" persistent>
       <q-card>
         <q-card-section class="row items-center">

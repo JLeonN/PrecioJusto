@@ -282,13 +282,19 @@ Migrar gradualmente a un modelo cloud-first donde Firestore sea la fuente princi
 
 Revisar toda la app modulo por modulo para asegurar que, con usuario real, Firestore sea la fuente de verdad y el almacenamiento local sea solo cache rapida/offline. Esta fase no reemplaza fases anteriores: las verifica, corrige contradicciones y deja evidencia funcional.
 
-- [ ] Definir contrato global de sincronizacion:
-  - [ ] Usuario real: crear local inmediato, subir automatico a Firestore y confirmar consistencia posterior
-  - [ ] Usuario real: editar local inmediato, actualizar Firestore y evitar sobrescrituras viejas
-  - [ ] Usuario real: borrar local inmediato, borrar/registrar eliminacion en Firestore y evitar que reaparezca
-  - [ ] Usuario real: al abrir app o cambiar dispositivo, bajar datos de Firestore sin requerir boton manual
-  - [ ] Usuario invitado: operar solo local, sin escribir datos privados en Firestore real
-  - [ ] Cambio de cuenta: limpiar/aislar cache visible para que no haya mezcla entre usuarios
+Estado 9 de Mayo 2026: se aplico auditoria correctiva de sincronizacion en stores y servicios principales. La prueba automatizada disponible quedo en usuario invitado, por lo que las validaciones reales contra Firestore multi-dispositivo quedan pendientes con una cuenta real de Leo o una cuenta de prueba autorizada.
+
+Estado 10 de Mayo 2026: Playwright inicio sesion real con `yoomat.75.wow.03@hotmail.com` y cargo `80 productos`, `18 comercios` y `1 lista`. Durante la prueba real Firebase devolvio `resource-exhausted / Quota exceeded`, por lo que se detecto que la sincronizacion automatica y el polling remoto eran demasiado costosos para Spark. Se corrigio la arquitectura para sincronizar cambios parciales por entidad y consultar primero `configuracion/estadoSincronizacion` antes de bajar colecciones completas. Las pruebas remotas completas quedan bloqueadas hasta que Firestore vuelva a aceptar operaciones.
+
+Estado 10 de Mayo 2026, iteracion estabilidad: se reprodujo app bloqueada en `localhost:9001` por `cargandoSesion=true` cuando Firestore entraba en backoff por cuota. Se agrego una capa de disponibilidad de Firestore con pausa local, timeout y fallback de perfil local para que la app abra igual en modo cache/offline. En Playwright se valido que, con Firebase pausado, la app carga con sesion real, datos locales visibles y consola sin errores ni warnings.
+
+- [x] Definir contrato global de sincronizacion:
+  - [x] Regla usuario real al crear: local inmediato, subida automatica a Firestore y validacion posterior en FASE 4I
+  - [x] Regla usuario real al editar: local inmediato, actualizacion en Firestore y proteccion contra sobrescrituras viejas
+  - [x] Regla usuario real al borrar: borrar local inmediato, borrar/registrar eliminacion en Firestore y validar que no reaparezca
+  - [x] Regla usuario real al abrir app o cambiar dispositivo: bajar datos de Firestore sin requerir boton manual
+  - [x] Regla usuario invitado: operar solo local, sin escribir datos privados en Firestore real
+  - [x] Regla cambio de cuenta: limpiar/aislar cache visible para que no haya mezcla entre usuarios
 - [ ] Auditar `Mis Productos`:
   - [ ] Crear producto manual y confirmar documento en `users/{uid}/productos/{productoId}`
   - [ ] Crear producto desde API/codigo de barras y confirmar imagen/datos persistidos
@@ -296,6 +302,7 @@ Revisar toda la app modulo por modulo para asegurar que, con usuario real, Fires
   - [ ] Agregar precio y confirmar merge correcto del historial sin duplicados
   - [ ] Borrar producto y confirmar que desaparece local, desaparece/remueve en Firestore y no reaparece tras recargar
   - [ ] Abrir misma cuenta en otro navegador/dispositivo y confirmar que los cambios aparecen automaticamente
+  - [x] Confirmar que interacciones y confirmaciones de precio disparan sincronizacion automatica post-operacion
 - [ ] Auditar `Comercios`:
   - [ ] Crear comercio y confirmar documento en `users/{uid}/comercios/{comercioId}`
   - [ ] Editar comercio y direcciones y confirmar actualizacion en Firestore
@@ -303,6 +310,8 @@ Revisar toda la app modulo por modulo para asegurar que, con usuario real, Fires
   - [ ] Editar o quitar foto de local y confirmar persistencia
   - [ ] Borrar comercio y confirmar que no reaparece tras sincronizacion remota
   - [ ] Confirmar que `uso reciente` no pisa datos remotos mas importantes
+  - [x] Corregir altas de comercios desde dialogos para pasar por `comerciosStore` y no saltarse la sincronizacion automatica
+  - [x] Confirmar que `uso reciente` dispara sincronizacion automatica sin depender de boton manual
 - [ ] Auditar `Lista Justa`:
   - [ ] Crear lista y confirmar documento en `users/{uid}/listasJustas/{listaId}`
   - [ ] Editar nombre/configuracion de lista y confirmar actualizacion remota
@@ -315,12 +324,19 @@ Revisar toda la app modulo por modulo para asegurar que, con usuario real, Fires
   - [ ] Rafaga: guardar varios items y confirmar que no genere duplicados ni bloqueos de UI
   - [ ] Descartar items y confirmar que no reaparezcan al recargar
   - [ ] Mover items a productos/listas y confirmar consistencia en los modulos destino
+  - [x] Guardar `sesion_escaneo` con `fechaActualizacion` para resolver conflictos por ultima escritura valida
+  - [x] Corregir `limpiarTodo()` para persistir sesion vacia en vez de borrar solo la clave local
+  - [x] Corregir merge remoto/local de sesion de escaneo para que descartes viejos no resuciten items
 - [ ] Auditar `Configuracion` y perfil:
   - [ ] Editar nombre visible, foto, fecha de nacimiento y confirmar persistencia en `perfil/principal`
   - [ ] Cambiar tema y confirmar si debe ser preferencia local o sincronizada por cuenta
   - [ ] Cambiar moneda, modo de moneda, unidad y region y confirmar persistencia en Firestore
   - [ ] Confirmar que otra instancia de la misma cuenta refleje las preferencias esperadas
   - [ ] Confirmar que cerrar sesion y volver a entrar restaure configuracion de la cuenta
+  - [x] Sincronizar automaticamente cambios de tema, moneda, unidad y region desde `preferenciasStore`
+  - [x] Agregar `fechaActualizacion` a preferencias para evitar sobrescrituras sin criterio temporal
+  - [x] Guardar perfil editable pendiente local antes de escribir Firestore para poder reintentar si falla la red
+  - [x] Recargar preferencias al cambiar contexto de cuenta para evitar mezcla visual entre usuarios
 - [ ] Auditar fotos y payload multimedia:
   - [ ] Identificar donde se guardan fotos como URL y donde como base64
   - [ ] Verificar si producto, comercio y perfil guardan la foto actual en Firestore o solo local
@@ -341,12 +357,44 @@ Revisar toda la app modulo por modulo para asegurar que, con usuario real, Fires
   - [ ] Si una fase vieja dice `LocalStorageAdapter` como base principal, actualizarla a cache legado/migracion
   - [ ] Si una tarea marcada completa no cumple la regla cloud-first, agregar subtarea correctiva sin borrar historial
   - [ ] Documentar decisiones de conflicto: remoto vs local, updatedAt, tombstones y merge de precios
+  - [x] Dejar documentado que Firestore manda para usuario real y local queda como cache/offline
+  - [x] Dejar documentado que `localStorage` web es legado/migracion y no cache principal para volumen alto
+  - [x] Corregir errores de foco/validacion en inputs que bloqueaban altas manuales durante las pruebas
+  - [x] Corregir sincronizacion automatica para que no reescriba todo el dataset en cada operacion
+  - [x] Agregar sync parcial por producto, comercio, lista, preferencias y sesion de escaneo
+  - [x] Agregar timeouts controlados en lecturas/escrituras remotas para evitar UI esperando indefinidamente
+  - [x] Agregar `configuracion/estadoSincronizacion` para reducir polling remoto completo
+  - [x] Agregar pausa local de Firestore cuando hay cuota excedida o timeout remoto
+  - [x] Evitar que perfil de usuario bloquee el arranque si Firestore no responde
+  - [x] Evitar llamadas Firestore innecesarias para usuario anonimo
 
 ## FASE 4I: Validacion funcional Firebase fuente de verdad
 
 ### Objetivo
 
 Validar con pruebas ejecutables y verificables por Leo que Firebase se comporta con sentido comun en todos los modulos principales.
+
+Estado 9 de Mayo 2026: validacion automatizada local en modo invitado completada. Falta repetir esta fase con sesion real para comprobar documentos Firestore y reflejo entre navegador/celular.
+
+Estado 10 de Mayo 2026: Playwright valido login real con `wow.03` y datos locales por `uid`. La bateria CRUD completa no pudo cerrarse porque Firestore respondio `Quota exceeded`. Se creo un comercio temporal local durante la prueba fallida, se verifico por script externo que no habia llegado a Firestore y se limpio del almacenamiento local. Una prueba chica de preferencias confirmo que, con cuota excedida, la app deja el cambio pendiente y muestra error controlado en vez de quedar colgada.
+
+Estado 10 de Mayo 2026, estabilidad `9001`: se ejecutaron 3 iteraciones Playwright. Iteracion 1: arranque anonimo con Firestore pausado, `cargandoSesion=false`, sin errores. Iteracion 2: crear/borrar producto local con Firestore pausado, sin errores. Iteracion 3: login real `wow.03` con Firestore pausado, datos por `uid` visibles y consola final sin errores ni warnings.
+
+Estado 10 de Mayo 2026, prueba minima post reset `wow.03`: se limpio navegador MCP en `localhost:9000` y `localhost:9001`, Leo limpio Firestore/celular y Playwright ejecuto el flujo minimo con sesion real. Resultado local y remoto confirmado: `1 producto` desde Open Food Facts con foto/codigo (`Coke Original Taste`), `1 comercio` (`CH Mercado Prueba`), `1 lista justa` con `1 item`, `1 item` en Mesa de trabajo y `modoTema: oscuro`. Verificacion directa con Firebase SDK: `productos=1`, `comercios=1`, `listasJustas=1`, `sesionEscaneo.items=1`, `preferencias.modoTema=oscuro`, `estadoSincronizacion` existe. Consola Playwright: `0 errors`, `0 warnings`.
+
+Estado 10 de Mayo 2026, reset por recontaminacion local: Leo inicio sesion por error en otro navegador con datos locales viejos y esos datos se resubieron a Firestore. Se limpio nuevamente el navegador MCP en `localhost:9000` y `localhost:9001`, se borro por SDK el espacio remoto `users/TOjno4zFqSa5JyVEmGpmMkj8j5k1` y se verifico remoto limpio: `productos=0`, `comercios=0`, `listasJustas=0`, `configuracion=0`, `perfil=0`, `migraciones=0`, `pruebasIntegracion=0`, documento usuario inexistente. Recomendacion: ningun navegador viejo debe volver a iniciar sesion sin borrar antes datos del sitio, IndexedDB y Firebase Auth persistence.
+
+Estado 10 de Mayo 2026, recreacion minima posterior al segundo reset `wow.03`: Playwright cargo nuevamente el set minimo pedido por Leo en `localhost:9000`: `1 producto` desde Open Food Facts (`Coke Original Taste`, codigo `5449000000996`, foto API), `1 comercio` (`CH Mercado Prueba`, `Av. Prueba 123`), `1 lista justa` (`Lista CH Prueba`) con `1 item`, `1 item` en Mesa de trabajo listo (`1 / 1 articulos listos`) y Configuracion en `modoTema=oscuro`. Verificacion remota via Firestore REST: `productos=1`, `comercios=1`, `listasJustas=1`, `configuracion=4`, `sesionEscaneo.items=1`, `preferencias.modoTema=oscuro`. Consola Playwright final: `0 errors`, `0 warnings`.
+
+- [x] Prueba minima post reset con cuenta real `wow.03`:
+  - [x] Crear 1 producto desde API con foto y codigo de barras
+  - [x] Crear 1 comercio con direccion
+  - [x] Crear 1 lista justa con 1 producto
+  - [x] Dejar 1 item en Mesa de trabajo
+  - [x] Cambiar Configuracion a modo oscuro
+  - [x] Confirmar datos locales en IndexedDB por espacio `uid`
+  - [x] Confirmar datos remotos en Firestore con Firebase SDK
+  - [x] Confirmar consola sin errores ni warnings
 
 - [ ] Probar `Mis Productos` con dos instancias:
   - [ ] Instancia A crea producto con precio y foto
@@ -368,20 +416,31 @@ Validar con pruebas ejecutables y verificables por Leo que Firebase se comporta 
   - [ ] Escaneo rapido guarda producto/precio y sincroniza
   - [ ] Rafaga no duplica productos ni bloquea UI
   - [ ] Descartar items no reaparece tras recarga
+  - [x] Invitado: agregar item, persistir `sesion_escaneo`, limpiar mesa y confirmar sesion vacia con `fechaActualizacion`
 - [ ] Probar `Configuracion`:
   - [ ] Editar perfil, foto y fecha de nacimiento
   - [ ] Cambiar moneda/unidad/region
   - [ ] Cerrar sesion y volver a entrar
   - [ ] Abrir la misma cuenta en otro dispositivo y confirmar datos esperados
+  - [x] Invitado: cambiar preferencia de unidad y confirmar persistencia local sin pendientes de Firestore
+  - [x] Cuenta real `wow.03`: cambiar unidad con Firestore en cuota excedida y confirmar pendiente/error controlado
 - [ ] Probar aislamiento:
   - [ ] Cuenta A no ve productos/comercios/listas/configuracion de cuenta B
   - [ ] Invitado no sube datos privados a Firebase real
   - [ ] Cambio A -> B -> A conserva datos correctos
+  - [x] Confirmar en Playwright que la sesion usada era anonima y no generaba pendientes de sincronizacion reales
 - [ ] Probar resiliencia:
   - [ ] Crear/editar/borrar offline y reconectar
   - [ ] Verificar que pendientes se suben solos
   - [ ] Verificar que borrados no reaparecen
   - [ ] Verificar que no hay errores de consola bloqueantes
+  - [x] Ejecutar `npm run lint` sin errores
+  - [x] Ejecutar `npm run build` sin errores bloqueantes
+  - [x] Corregir error bloqueante `validate/focus is not a function` detectado al agregar producto manual
+  - [x] Detectar y documentar bloqueo externo `resource-exhausted / Quota exceeded` de Firestore
+  - [x] Confirmar que la app corta por timeout controlado en vez de quedarse esperando indefinidamente
+  - [x] Confirmar que `localhost:9001` carga sin consola roja cuando Firestore esta pausado
+  - [x] Confirmar que login real no depende del perfil remoto para abrir la app
 
 ## FASE 5: Optimizacion de rendimiento (mobile + web)
 
@@ -405,6 +464,8 @@ Mejorar la velocidad percibida y real de la app con Firebase activa, priorizando
   - [ ] aumentar debounce/throttle en mobile para reducir picos
   - [ ] no sincronizar si no hay cambios efectivos
   - [x] evitar recargas globales de stores cuando alcanza con actualizacion incremental
+  - [x] sincronizar solo entidades afectadas en operaciones automaticas
+  - [x] reducir polling remoto completo usando `configuracion/estadoSincronizacion`
 - [x] Afinar sincronizacion remota:
   - [x] traer solo datos necesarios/recientes cuando sea posible
   - [x] reducir merges completos si no hubo cambios remotos relevantes
@@ -599,5 +660,5 @@ Validar por IA (Playwright) los nuevos flujos de pantalla inicial, sincronizacio
 - [x] Fase Testing 4D-4E (Playwright)
 
 Fecha de creacion: 14 de Marzo 2026
-Fecha de ultima actualizacion: 9 de Mayo 2026
+Fecha de ultima actualizacion: 10 de Mayo 2026
 Estado: EN PROCESO

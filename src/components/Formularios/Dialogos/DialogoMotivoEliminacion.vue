@@ -69,7 +69,7 @@
           </div>
         </q-banner>
 
-        <!-- INFORMACI�"N SEG�sN MOTIVO -->
+        <!-- INFORMACIÓN SEGÚN MOTIVO -->
         <q-banner v-if="motivoSeleccionado === 'cerro'" dense class="bg-grey-2 q-mt-md" rounded>
           <template #avatar>
             <q-icon name="info" color="primary" />

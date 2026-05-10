@@ -142,7 +142,6 @@ import { ref, computed, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import { IconCamera, IconPhoto, IconTrash } from '@tabler/icons-vue'
 import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.js'
-import ComerciosService from '../../../almacenamiento/servicios/ComerciosService.js'
 import { useCamaraFoto } from '../../../composables/useCamaraFoto.js'
 import { useTecladoVirtual } from '../../../composables/useTecladoVirtual.js'
 
@@ -212,10 +211,7 @@ async function guardar() {
 
   try {
     const datos = construirDatos()
-    const validacion = await ComerciosService.validarDuplicados(
-      datos,
-      comerciosStore.comerciosAgrupados,
-    )
+    const validacion = await comerciosStore.validarDuplicados(datos)
 
     if (validacion.esDuplicado) {
       if (validacion.nivel === 1) {
@@ -261,8 +257,13 @@ async function confirmarCrear() {
  * Crea el comercio directamente en el servicio y actualiza el store
  */
 async function crearComercio(datos) {
-  const nuevoComercio = await ComerciosService.agregarComercio(datos)
-  comerciosStore.comercios.push(nuevoComercio)
+  const resultado = await comerciosStore.agregarComercio(datos, {
+    omitirValidacionDuplicados: true,
+  })
+  if (!resultado?.exito) {
+    throw new Error('No se pudo crear el comercio.')
+  }
+  const nuevoComercio = resultado.comercio
 
   $q.notify({
     type: 'positive',
