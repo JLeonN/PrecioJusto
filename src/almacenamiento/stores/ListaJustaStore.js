@@ -64,7 +64,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
 
     lista.nombre = nombreLimpio
     lista.fechaActualizacion = new Date().toISOString()
-    await persistir()
+    await persistir({ listaId })
     return true
   }
 
@@ -670,7 +670,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     item.estadoDerivacion = item.mesaTrabajoItemId ? 'enMesa' : 'enMisProductos'
     item.actualizadoEn = new Date().toISOString()
     lista.fechaActualizacion = new Date().toISOString()
-    await persistir()
+    await persistir({ listaId })
     return true
   }
 

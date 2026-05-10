@@ -576,11 +576,14 @@ function filtrarEntidadesPorEliminaciones(entidades = [], eliminaciones = {}, ti
   return entidades.filter((entidad) => !idsEliminados.has(String(entidad?.id || '').trim()))
 }
 
-async function procesarEliminacionesPendientes(usuarioId) {
+async function procesarEliminacionesPendientes(usuarioId, eliminacionesConfirmadas = null) {
   const uid = String(usuarioId || '').trim()
   if (!uid) return
 
-  const eliminacionesActuales = await obtenerLimpiezaEliminacionesPendiente()
+  const eliminacionesActuales = fusionarEliminaciones(
+    await obtenerLimpiezaEliminacionesPendiente(),
+    eliminacionesConfirmadas || {},
+  )
   const eliminacionesFallidas = normalizarEliminaciones()
   const coleccionesPorCampo = {
     productos: 'productos',
@@ -751,7 +754,7 @@ async function sincronizarCambiosLocalesAFirestore(usuarioId, cambios = {}) {
     : await obtenerEliminacionesLocales()
 
   if (sincronizarEliminaciones) {
-    await procesarEliminacionesPendientes(uid)
+    await procesarEliminacionesPendientes(uid, eliminaciones)
   }
 
   const datosLocales = await obtenerDatosLocalesActuales(uid, {
@@ -902,7 +905,7 @@ async function sincronizarCambiosLocalesAFirestore(usuarioId, cambios = {}) {
 async function migrarDatosLocalesAFirestore(usuarioId, opciones = {}) {
   verificarFirestoreDisponible()
   const eliminaciones = await sincronizarEliminacionesConFirestore(usuarioId)
-  await procesarEliminacionesPendientes(usuarioId)
+  await procesarEliminacionesPendientes(usuarioId, eliminaciones)
   const datosLocales = await obtenerDatosLocalesActuales(usuarioId, {
     incluirEspacioCompartido: opciones.incluirEspacioCompartido === true,
   })
@@ -1157,7 +1160,7 @@ async function migrarDatosLocalesAFirestore(usuarioId, opciones = {}) {
 async function sincronizarDesdeFirestoreALocal(usuarioId) {
   verificarFirestoreDisponible()
   const eliminaciones = await sincronizarEliminacionesConFirestore(usuarioId)
-  await procesarEliminacionesPendientes(usuarioId)
+  await procesarEliminacionesPendientes(usuarioId, eliminaciones)
   const datosLocales = await obtenerDatosLocalesActuales(usuarioId, {
     incluirEspacioCompartido: false,
   })

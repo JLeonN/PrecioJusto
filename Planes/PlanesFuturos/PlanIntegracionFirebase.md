@@ -662,3 +662,77 @@ Validar por IA (Playwright) los nuevos flujos de pantalla inicial, sincronizacio
 Fecha de creacion: 14 de Marzo 2026
 Fecha de ultima actualizacion: 10 de Mayo 2026
 Estado: EN PROCESO
+
+## Verificacion practica Firebase por modulo
+
+Esta lista registra pruebas reales hechas entre navegador web, celular y Firestore para separar que funciona de lo que falta retocar.
+
+### Mis Productos
+
+- [x] Web -> Firebase: carga manual desde navegador funcionando.
+  - Producto probado: `Dulce De Leche`, marca `Conaprole`, codigo `7730105005091`, precio `199 UYU`, comercio `CH Mercado Prueba`.
+  - Confirmacion Firestore: el producto aparecio en `users/TOjno4zFqSa5JyVEmGpmMkj8j5k1/productos`.
+- [x] Web -> Celular: carga manual desde navegador reflejada en celular.
+  - Leo confirmo en celular que el producto agregado desde la web aparecio correctamente.
+  - Nota: prueba especifica hecha desde flujo de carga manual con codigo de barras/API; puede ser relevante si otros flujos se comportan distinto.
+- [x] Celular -> Firebase: carga manual desde celular funcionando.
+  - Producto probado: `Clight naranja dulce`, marca `Mondelez`, codigo `7622201703141`.
+  - Confirmacion Firestore: el conteo subio a `3 productos` y el producto aparecio con `fechaActualizacion=2026-05-10T19:04:15.966Z`.
+- [ ] Celular -> Web: pendiente confirmar que el producto creado desde celular aparezca en navegador sin accion manual.
+- [x] Web -> Firebase: agregar nuevo precio a producto creado desde celular funcionando.
+  - Producto probado: `Clight naranja dulce`.
+  - Accion: desde la web se agrego un nuevo precio `25 UYU` en `CH Mercado Prueba`.
+  - Confirmacion Firestore: el producto quedo con `2 precios`, original `20 USD` y nuevo `25 UYU`, con `fechaActualizacion=2026-05-10T19:09:43.082Z`.
+- [x] Celular -> Firebase: agregar nuevo precio a producto creado desde web funcionando.
+  - Producto probado: `Dulce De Leche`, codigo `7730105005091`.
+  - Accion: desde celular Leo agrego/cambio precio a `210`.
+  - Confirmacion Firestore: el producto quedo con `2 precios`, original `199 UYU` y nuevo `210 USD`, con `fechaActualizacion=2026-05-10T19:10:18.108Z`.
+
+### Lista Justa
+
+- [x] Web -> Firebase: crear lista vacia desde navegador funcionando.
+  - Lista probada: `Prueba Firebase 1`.
+  - Confirmacion Firestore: el conteo subio a `3 listasJustas` y la lista aparecio con `0 items`, `fechaActualizacion=2026-05-10T19:15:11.754Z`.
+- [ ] Pendiente validar Web -> Celular para lista vacia `Prueba Firebase 1`.
+- [x] Celular -> Firebase: crear lista vacia desde celular funcionando.
+  - Lista probada: `Prueba 2`.
+  - Confirmacion Firestore: la lista aparecio con `0 items`, `fechaActualizacion=2026-05-10T19:15:49.900Z`.
+- [ ] Celular -> Firebase: borrar lista desde celular pendiente/requiere correccion.
+  - Leo borro una lista vieja desde celular esperando quedar con `2 listasJustas`.
+  - Confirmacion Firestore: aun quedan `3 listasJustas`; la lista vieja `546` sigue remota con `1 item`.
+  - Lectura tecnica: el alta desde celular sincroniza, pero el borrado de lista desde celular no llego a Firestore o quedo pendiente sin aplicarse.
+- [x] Correccion de limpieza fisica remota para eliminaciones.
+  - Problema detectado: la app ocultaba listas eliminadas por `configuracion/eliminaciones`, pero podia quedar el documento fisico viejo en `listasJustas`.
+  - Correccion aplicada: la limpieza fisica ahora procesa tambien eliminaciones confirmadas/remotas, no solo eliminaciones pendientes locales.
+  - Verificacion Firestore: `listasJustas` quedo con `2 documentos fisicos` visibles (`Prueba Firebase 1` y `Prueba 2`) y `0 documentos fisicos marcados como eliminados`.
+  - Revision cruzada: `productos` y `comercios` tambien fueron comprobados; hay tombstones historicos, pero `0 documentos fisicos marcados como eliminados`.
+- [x] Web/Celular -> Firebase: listas con producto manual y producto desde Mis Productos funcionando.
+  - `Prueba Firebase 1`: quedo con `2 items`, `Jugo` manual y `Coke Original Taste` desde Mis Productos.
+  - `Prueba 2`: quedo con `2 items`, `Manual Web 1` manual y `Dulce De Leche` desde Mis Productos.
+  - Confirmacion Firestore: `listasJustas=2`, ambas listas con `cantidadItems=2`.
+  - Consola navegador: sin errores nuevos durante la carga de items.
+- [x] Celular/Web -> Firebase: renombrar listas funcionando con correccion aplicada.
+  - Deteccion: el cambio desde celular a `Prueba N 1` llego primero a Firestore, pero luego el navegador con datos locales viejos lo piso al editar otra lista.
+  - Correccion aplicada: `actualizarNombreLista()` ahora sincroniza solo la lista editada usando `listaId`, no todas las listas locales.
+  - Correccion preventiva: `restaurarPreciosOriginales()` tambien sincroniza solo la lista afectada.
+  - Estado final verificado en Firestore: `Prueba N 1` y `Prueba N 2`, ambas con `2 items`.
+  - Validacion tecnica: `npm run lint` sin errores y consola navegador sin errores nuevos.
+- [ ] Pendiente validar Celular -> Web.
+- [ ] Pendiente validar alta, edicion y borrado contra Firestore.
+
+### Comercios
+
+- [ ] Pendiente validar Web -> Celular.
+- [ ] Pendiente validar Celular -> Web.
+- [ ] Pendiente validar alta, edicion y borrado contra Firestore.
+
+### Mesa de trabajo
+
+- [ ] Pendiente validar Web -> Celular.
+- [ ] Pendiente validar Celular -> Web.
+- [ ] Pendiente validar que items listos, descartados y enviados no reaparezcan.
+
+### Configuracion
+
+- [ ] Pendiente validar tema, moneda, region y perfil entre Web -> Celular.
+- [ ] Pendiente validar tema, moneda, region y perfil entre Celular -> Web.
