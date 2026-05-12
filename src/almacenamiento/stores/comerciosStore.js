@@ -75,14 +75,15 @@ export const useComerciStore = defineStore('comercios', {
         const nombreNormalizado = ComerciosService.normalizar(comercio.nombre)
 
         if (!agrupados.has(nombreNormalizado)) {
+          const totalDirecciones = comercio.direcciones?.length || 0
           // Primer comercio con este nombre
           agrupados.set(nombreNormalizado, {
             id: comercio.id,
             nombre: comercio.nombre,
             tipo: comercio.tipo,
             foto: null,
-            esCadena: false,
-            totalSucursales: 1,
+            esCadena: totalDirecciones > 1,
+            totalSucursales: totalDirecciones,
             direcciones: [...comercio.direcciones],
             fechaUltimoUso: comercio.fechaUltimoUso,
             cantidadUsos: comercio.cantidadUsos,
@@ -92,7 +93,7 @@ export const useComerciStore = defineStore('comercios', {
           // Agregar sucursal a la cadena existente
           const grupo = agrupados.get(nombreNormalizado)
           grupo.esCadena = true
-          grupo.totalSucursales++
+          grupo.totalSucursales += comercio.direcciones?.length || 0
           grupo.direcciones.push(...comercio.direcciones)
           grupo.comerciosOriginales.push(comercio)
 

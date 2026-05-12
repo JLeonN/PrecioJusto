@@ -717,14 +717,70 @@ Esta lista registra pruebas reales hechas entre navegador web, celular y Firesto
   - Correccion preventiva: `restaurarPreciosOriginales()` tambien sincroniza solo la lista afectada.
   - Estado final verificado en Firestore: `Prueba N 1` y `Prueba N 2`, ambas con `2 items`.
   - Validacion tecnica: `npm run lint` sin errores y consola navegador sin errores nuevos.
+- [x] Celular -> Firebase: edicion de items dentro de lista funcionando.
+  - Lista probada: `N 1`.
+  - Accion: Leo edito el item manual `Jugo` desde celular y lo dejo como `Pan`, precio `89`, moneda `UYU`.
+  - Confirmacion Firestore: el item manual quedo con `nombre=Pan`, `precioManual=89`, `moneda=UYU`.
+- [x] Celular -> Firebase: editar precio de item desde Mis Productos dentro de lista funcionando.
+  - Lista probada: `N 1`.
+  - Accion: Leo edito `Coke Original Taste` desde celular y guardo precio `110 UYU`.
+  - Confirmacion Firestore: el item quedo con `precioManual=110`, `moneda=UYU`.
+- [x] Celular -> Firebase: agregar producto desde Mis Productos y editarlo dentro de lista funcionando.
+  - Lista probada: `N 1`.
+  - Accion: Leo agrego `Dulce De Leche`, codigo `7730105005091`, lo edito a `200 UYU` y confirmo con check.
+  - Confirmacion Firestore: la lista paso a `3 items` y `Dulce De Leche` quedo con `precioManual=200`, `moneda=UYU`.
+- [x] Celular -> Firebase: restaurar precio original de item desde Mis Productos funcionando.
+  - Lista probada: `N 1`.
+  - Accion: Leo uso restaurar sobre `Coke Original Taste`.
+  - Confirmacion Firestore: el item quedo con `precioManual=null`, usando el precio base del producto en Mis Productos.
+  - Confirmacion producto base: `Coke Original Taste` mantiene precio original `120 UYU` en `users/TOjno4zFqSa5JyVEmGpmMkj8j5k1/productos`.
+- [x] Celular -> Firebase: enviar item de Lista Justa a Mesa de trabajo funcionando.
+  - Lista probada: `N 1`.
+  - Accion: Leo envio `Dulce De Leche` a Mesa de trabajo desde celular.
+  - Confirmacion Lista Justa en Firestore: `Dulce De Leche` quedo con `estadoDerivacion=enMesa` y `mesaTrabajoItemId=escaneo_1778627436355_2onks`.
+  - Confirmacion Mesa de trabajo en Firestore: `configuracion/sesionEscaneo` contiene `Dulce De Leche`, precio `200`, moneda `UYU`, codigo `7730105005091`.
 - [ ] Pendiente validar Celular -> Web.
 - [ ] Pendiente validar alta, edicion y borrado contra Firestore.
 
 ### Comercios
 
+- [x] Celular -> Firebase: alta de comercio funcionando.
+  - Comercio probado: `Tata`.
+  - Confirmacion Firestore: se creo el comercio en `users/TOjno4zFqSa5JyVEmGpmMkj8j5k1/comercios`.
+  - Datos iniciales guardados: nombre `Tata`, tipo `Supermercado`, calle `Cam Maldonado 5885`, barrio `Bella Italia`, ciudad `Montevideo`.
+- [x] Celular -> Firebase: edicion de comercio funcionando.
+  - Comercio probado: `Ta-Ta`.
+  - Confirmacion Firestore: el comercio se actualizo con nombre `Ta-Ta`, tipo `Hipermercado`, calle `Cam Maldonado 5858`.
+  - Observacion tecnica: barrio y ciudad quedaron con punto y espacio final (`Bella Italia. `, `Montevideo. `); conviene normalizar con `trim()`.
+- [x] Celular -> Firebase/Web: agregar sucursal corregido.
+  - Accion probada: Leo agrego una nueva sucursal a `Ta-Ta`.
+  - Resultado inicial Firestore: la sucursal llego, pero se creo como segundo comercio `Ta-Ta` separado en vez de agregarse como nueva direccion del comercio existente.
+  - Documento nuevo detectado: `1778628177927z4qmeuh`, nombre `Ta-Ta`, tipo `Hipermercado`, direccion `Enotracalle`, barrio `Centro`, ciudad `Montevideo`.
+  - Documento original: `1778627877161gxzfyip`, nombre `Ta-Ta`, direccion `Cam Maldonado 5858`.
+  - Correccion aplicada: `DialogoAgregarSucursal` y el flujo de coincidencias ahora usan `agregarDireccion()` sobre el comercio existente en vez de crear otro comercio.
+  - Correccion de datos: se fusiono la sucursal duplicada dentro de `Ta-Ta`, se elimino el documento duplicado y se marco su id en eliminaciones remotas.
+  - Correccion de UI: el agrupador de comercios ahora cuenta sucursales por cantidad real de `direcciones[]`, no por cantidad de documentos agrupados.
+  - Correccion de sincronizacion: la fusion parcial ahora compara `fechaActualizacion`, `actualizadoEn`, `fechaUltimoUso` y `fechaCreacion` para evitar que cache local vieja pise documentos remotos nuevos.
+  - Estado final verificado en Firestore: `Ta-Ta`, tipo `Hipermercado`, con 2 sucursales (`Cam Maldonado 5858` y `Enotracalle`).
+  - Estado final verificado en navegador: Comercios muestra `Ta-Ta`, `Hipermercado` y `2 sucursales`.
+- [x] Web -> Firebase: modal de comercios similares agrega sucursal al comercio existente.
+  - Flujo probado con MCP: al crear comercio `Ta-Ta` con direccion temporal, aparecio el modal `Comercios similares encontrados`.
+  - Accion: se selecciono `Ta-Ta` dentro del modal como comercio similar.
+  - Confirmacion Firestore: no se creo un nuevo documento de comercio; `Ta-Ta` paso temporalmente a `3 direcciones`.
+  - Limpieza de prueba: la sucursal temporal `Sucursal Temporal MCP 123` fue eliminada desde la pantalla de edicion.
+  - Estado final verificado en Firestore y navegador: `Ta-Ta` vuelve a `2 sucursales`.
+- [x] Web -> Firebase: eliminar sucursal funciona y mantiene comercio principal.
+  - Flujo probado con MCP: eliminacion de la sucursal temporal desde `Editar comercio`.
+  - Confirmacion Firestore: el documento `Ta-Ta` permanece y su arreglo `direcciones[]` vuelve a contener solo `Cam Maldonado 5858` y `Enotracalle`.
+- [x] Revision tecnica: eliminar comercio contempla comercios agrupados heredados.
+  - Correccion aplicada: la eliminacion de una tarjeta agrupada expande la seleccion a todos los `comerciosOriginales`, evitando dejar ramas antiguas con el mismo nombre.
+- [x] Revision tecnica: fusionar sucursales revisado.
+  - Flujo revisado: mover precios a la sucursal destino, actualizar `comercioId`, `direccionId`, `comercio`, `direccion` y `nombreCompleto`, y eliminar la sucursal origen.
+  - Correccion aplicada: `nombreCompleto` usa formato consistente `Comercio - Direccion`.
+  - Nota: no se ejecuto una fusion real sobre `Ta-Ta` para no destruir las dos sucursales reales durante la prueba.
 - [ ] Pendiente validar Web -> Celular.
 - [ ] Pendiente validar Celular -> Web.
-- [ ] Pendiente validar alta, edicion y borrado contra Firestore.
+- [ ] Pendiente validar borrado contra Firestore.
 
 ### Mesa de trabajo
 

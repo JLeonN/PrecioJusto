@@ -77,6 +77,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  comercioId: {
+    type: String,
+    required: true,
+  },
   comercioTipo: {
     type: String,
     default: null,
@@ -107,23 +111,18 @@ function cerrar() {
   emit('update:modelValue', false)
 }
 
-// Crea un nuevo comercio con el mismo nombre; se agrupa automáticamente.
 async function guardar() {
   if (!datos.calle) return
 
   guardando.value = true
   try {
-    const nuevoComercio = {
-      nombre: props.comercioNombre,
-      tipo: props.comercioTipo || 'Supermercado',
+    const nuevaSucursal = {
       calle: datos.calle.trim(),
       barrio: datos.barrio?.trim() || '',
       ciudad: datos.ciudad?.trim() || '',
     }
 
-    await comerciosStore.agregarComercio(nuevoComercio, {
-      omitirValidacionDuplicados: true,
-    })
+    await comerciosStore.agregarDireccion(props.comercioId, nuevaSucursal)
 
     emit('sucursal-guardada')
     cerrar()

@@ -257,12 +257,42 @@ async function continuarConNuevo() {
  * Usuario elige agregar como nueva sucursal
  */
 async function agregarSucursal(comercio) {
-  console.log('📍 Agregando nueva sucursal de:', comercio.nombre)
+  console.log('Agregando nueva sucursal de:', comercio.nombre)
 
   dialogoCoincidenciasAbierto.value = false
 
-  // Crear el nuevo comercio (se agrupará automáticamente como sucursal)
-  await continuarConNuevo()
+  try {
+    const comercioActualizado = await comerciosStore.agregarDireccion(comercio.id, {
+      calle: datosComercio.value.calle,
+      barrio: datosComercio.value.barrio,
+      ciudad: datosComercio.value.ciudad,
+      foto: datosComercio.value.foto,
+    })
+    if (!comercioActualizado) {
+      throw new Error('No se pudo agregar la sucursal al comercio existente.')
+    }
+
+    $q.notify({
+      type: 'positive',
+      message: 'Sucursal agregada exitosamente',
+      caption: comercio.nombre,
+      position: 'top',
+      icon: 'check_circle',
+    })
+
+    emit('comercio-guardado', comercioActualizado)
+    limpiarFormulario()
+    cerrarDialogo()
+  } catch (error) {
+    console.error('Error al agregar sucursal:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Error al agregar la sucursal',
+      position: 'top',
+    })
+  } finally {
+    guardando.value = false
+  }
 }
 
 /**

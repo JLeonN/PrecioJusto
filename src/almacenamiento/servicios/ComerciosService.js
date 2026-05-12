@@ -7,6 +7,14 @@ import { adaptadorActual } from './AlmacenamientoService.js'
 
 const CLAVE_COMERCIOS = 'comercios'
 
+function limpiarTexto(valor) {
+  return String(valor || '').trim()
+}
+
+function limpiarTextoOpcional(valor) {
+  return valor === undefined ? undefined : limpiarTexto(valor)
+}
+
 async function guardarComercios(comercios) {
   const guardado = await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
   if (!guardado) {
@@ -266,6 +274,7 @@ async function validarDuplicados(nuevoComercio, comerciosParaValidar = null) {
  */
 async function agregarComercio(datosComercio) {
   const comercios = await obtenerTodos()
+  const ahora = new Date().toISOString()
 
   const nuevoComercio = {
     id: `${Date.now()}${Math.random().toString(36).substring(2, 9)}`,
@@ -280,13 +289,14 @@ async function agregarComercio(datosComercio) {
         nombreCompleto: datosComercio.calle?.trim()
           ? `${datosComercio.nombre.trim()} - ${datosComercio.calle.trim()}`
           : datosComercio.nombre.trim(),
-        fechaUltimoUso: new Date().toISOString(),
+        fechaUltimoUso: ahora,
         foto: datosComercio.foto || null,
       },
     ],
     foto: null,
-    fechaCreacion: new Date().toISOString(),
-    fechaUltimoUso: new Date().toISOString(),
+    fechaCreacion: ahora,
+    fechaActualizacion: ahora,
+    fechaUltimoUso: ahora,
     cantidadUsos: 0,
   }
 
@@ -308,10 +318,28 @@ async function editarComercio(id, datosActualizados) {
 
   if (indice === -1) return null
 
+  const datosLimpios = {
+    ...datosActualizados,
+  }
+  ;['nombre', 'tipo'].forEach((campo) => {
+    const valorLimpio = limpiarTextoOpcional(datosLimpios[campo])
+    if (valorLimpio !== undefined) datosLimpios[campo] = valorLimpio
+  })
+
   comercios[indice] = {
     ...comercios[indice],
-    ...datosActualizados,
+    ...datosLimpios,
     id, // Mantener ID original
+    fechaActualizacion: new Date().toISOString(),
+  }
+
+  if (datosLimpios.nombre) {
+    comercios[indice].direcciones = (comercios[indice].direcciones || []).map((direccion) => ({
+      ...direccion,
+      nombreCompleto: direccion.calle
+        ? `${datosLimpios.nombre} - ${direccion.calle}`
+        : datosLimpios.nombre,
+    }))
   }
 
   await guardarComercios(comercios)
@@ -347,17 +375,22 @@ async function agregarDireccion(comercioId, datosDireccion) {
 
   if (!comercio) return null
 
+  const ahora = new Date().toISOString()
+  const calle = limpiarTexto(datosDireccion.calle)
+  const barrio = limpiarTexto(datosDireccion.barrio)
+  const ciudad = limpiarTexto(datosDireccion.ciudad)
   const nuevaDireccion = {
     id: `${Date.now()}${Math.random().toString(36).substring(2, 9)}`,
-    calle: datosDireccion.calle.trim(),
-    barrio: datosDireccion.barrio?.trim() || '',
-    ciudad: datosDireccion.ciudad?.trim() || '',
-    nombreCompleto: `${comercio.nombre} - ${datosDireccion.calle.trim()}`,
-    fechaUltimoUso: new Date().toISOString(),
+    calle,
+    barrio,
+    ciudad,
+    nombreCompleto: `${comercio.nombre} - ${calle}`,
+    fechaUltimoUso: ahora,
     foto: datosDireccion.foto || null,
   }
 
   comercio.direcciones.push(nuevaDireccion)
+  comercio.fechaActualizacion = ahora
 
   await guardarComercios(comercios)
   return comercio
@@ -379,8 +412,15 @@ async function editarDireccion(comercioId, direccionId, datosDireccion) {
   const direccion = comercio.direcciones.find((d) => d.id === direccionId)
   if (!direccion) return null
 
+  const datosLimpios = { ...datosDireccion }
+  ;['calle', 'barrio', 'ciudad'].forEach((campo) => {
+    const valorLimpio = limpiarTextoOpcional(datosLimpios[campo])
+    if (valorLimpio !== undefined) datosLimpios[campo] = valorLimpio
+  })
+
   // Aplicar cambios
-  Object.assign(direccion, datosDireccion)
+  Object.assign(direccion, datosLimpios)
+  comercio.fechaActualizacion = new Date().toISOString()
 
   // Recalcular nombreCompleto (calle puede estar vacía)
   direccion.nombreCompleto = direccion.calle
@@ -410,6 +450,7 @@ async function eliminarDireccion(comercioId, direccionId) {
     return false // No se encontró la dirección
   }
 
+  comercio.fechaActualizacion = new Date().toISOString()
   await guardarComercios(comercios)
   return true
 }
@@ -428,6 +469,7 @@ async function actualizarFotoDireccion(comercioId, direccionId, base64) {
   const direccion = comercio.direcciones.find((d) => d.id === direccionId)
   if (!direccion) return false
   direccion.foto = base64 || null
+  comercio.fechaActualizacion = new Date().toISOString()
   await guardarComercios(comercios)
   return true
 }
@@ -444,14 +486,16 @@ async function registrarUsoComercio(comercioId, direccionId = null) {
 
   if (!comercio) return
 
-  comercio.fechaUltimoUso = new Date().toISOString()
+  const ahora = new Date().toISOString()
+  comercio.fechaUltimoUso = ahora
+  comercio.fechaActualizacion = ahora
   comercio.cantidadUsos = (comercio.cantidadUsos || 0) + 1
 
   // Si se especifica dirección, actualizar su fecha de uso
   if (direccionId) {
     const direccion = comercio.direcciones.find((d) => d.id === direccionId)
     if (direccion) {
-      direccion.fechaUltimoUso = new Date().toISOString()
+      direccion.fechaUltimoUso = ahora
     }
   }
 

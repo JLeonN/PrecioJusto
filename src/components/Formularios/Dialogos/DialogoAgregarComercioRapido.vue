@@ -244,6 +244,11 @@ async function guardar() {
 async function confirmarCrear() {
   guardando.value = true
   try {
+    if (validacionPendiente.value?.nivel === 2) {
+      await agregarSucursalAComercioSimilar()
+      return
+    }
+
     await crearComercio(construirDatos())
   } catch (error) {
     console.error('Error al confirmar comercio:', error)
@@ -251,6 +256,32 @@ async function confirmarCrear() {
   } finally {
     guardando.value = false
   }
+}
+
+async function agregarSucursalAComercioSimilar() {
+  const comercioSimilar = validacionPendiente.value?.comercios?.[0]?.comercio
+  if (!comercioSimilar?.id) {
+    throw new Error('No se encontró el comercio similar para agregar la sucursal.')
+  }
+
+  const comercioActualizado = await comerciosStore.agregarDireccion(comercioSimilar.id, {
+    calle: direccionInterna.value,
+    barrio: '',
+    ciudad: '',
+    foto: fotoTemporal.value,
+  })
+  if (!comercioActualizado) {
+    throw new Error('No se pudo agregar la sucursal al comercio existente.')
+  }
+
+  $q.notify({
+    type: 'positive',
+    message: `Sucursal agregada a "${comercioActualizado.nombre}"`,
+    position: 'top',
+  })
+
+  emit('comercio-creado', comercioActualizado)
+  cerrar()
 }
 
 /**

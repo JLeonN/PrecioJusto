@@ -147,6 +147,15 @@ function convertirFechaAms(fecha) {
   return Number.isFinite(fechaMs) ? fechaMs : 0
 }
 
+function obtenerMarcaActualizacion(entidad) {
+  return convertirFechaAms(
+    entidad?.fechaActualizacion ||
+      entidad?.actualizadoEn ||
+      entidad?.fechaUltimoUso ||
+      entidad?.fechaCreacion,
+  )
+}
+
 async function ejecutarConTimeout(promesa, tiempoMaximoMs = TIEMPO_MAXIMO_OPERACION_REMOTA_MS, mensaje = 'Tiempo de espera agotado') {
   let timeoutId = null
   try {
@@ -264,8 +273,8 @@ function fusionarHistorialPrecios(preciosBase = [], preciosNuevos = []) {
 }
 
 function fusionarProductoExistente(productoBase, productoNuevo) {
-  const fechaBaseMs = convertirFechaAms(productoBase?.fechaActualizacion)
-  const fechaNuevoMs = convertirFechaAms(productoNuevo?.fechaActualizacion)
+  const fechaBaseMs = obtenerMarcaActualizacion(productoBase)
+  const fechaNuevoMs = obtenerMarcaActualizacion(productoNuevo)
   const masReciente = fechaNuevoMs >= fechaBaseMs ? productoNuevo : productoBase
   const menosReciente = masReciente === productoNuevo ? productoBase : productoNuevo
   const preciosFusionados = fusionarHistorialPrecios(productoBase?.precios || [], productoNuevo?.precios || [])
@@ -289,8 +298,8 @@ function construirClaveComercio(comercio) {
 }
 
 function fusionarComerciosExistentes(comercioBase, comercioNuevo) {
-  const fechaBaseMs = convertirFechaAms(comercioBase?.fechaActualizacion)
-  const fechaNuevoMs = convertirFechaAms(comercioNuevo?.fechaActualizacion)
+  const fechaBaseMs = obtenerMarcaActualizacion(comercioBase)
+  const fechaNuevoMs = obtenerMarcaActualizacion(comercioNuevo)
   return fechaNuevoMs >= fechaBaseMs ? { ...comercioBase, ...comercioNuevo } : { ...comercioNuevo, ...comercioBase }
 }
 
@@ -376,6 +385,12 @@ function fusionarComerciosConRemoto(comerciosRemotos = [], comerciosLocales = []
   return Array.from(mapaComercios.values())
 }
 
+function fusionarListaExistente(listaBase, listaNueva) {
+  const fechaBaseMs = obtenerMarcaActualizacion(listaBase)
+  const fechaNuevaMs = obtenerMarcaActualizacion(listaNueva)
+  return fechaNuevaMs >= fechaBaseMs ? { ...listaBase, ...listaNueva } : { ...listaNueva, ...listaBase }
+}
+
 function fusionarListasConRemoto(listasRemotas = [], listasLocales = []) {
   const mapaListas = new Map()
 
@@ -394,10 +409,7 @@ function fusionarListasConRemoto(listasRemotas = [], listasLocales = []) {
       continue
     }
 
-    const existente = mapaListas.get(id)
-    const fechaExistente = convertirFechaAms(existente?.fechaActualizacion)
-    const fechaLocal = convertirFechaAms(listaLocal?.fechaActualizacion)
-    mapaListas.set(id, fechaLocal >= fechaExistente ? { ...existente, ...listaLocal } : { ...listaLocal, ...existente })
+    mapaListas.set(id, fusionarListaExistente(mapaListas.get(id), listaLocal))
   }
 
   return Array.from(mapaListas.values())
@@ -764,6 +776,24 @@ async function sincronizarCambiosLocalesAFirestore(usuarioId, cambios = {}) {
   const cambiosProductos = normalizarIdsCambios(cambios.productos)
   const cambiosComercios = normalizarIdsCambios(cambios.comercios)
   const cambiosListas = normalizarIdsCambios(cambios.listasJustas)
+  const necesitaRemotosProductos = cambiosProductos.completo || cambiosProductos.ids.size > 0
+  const necesitaRemotosComercios = cambiosComercios.completo || cambiosComercios.ids.size > 0
+  const necesitaRemotosListas = cambiosListas.completo || cambiosListas.ids.size > 0
+  const [productosRemotosActuales, comerciosRemotosActuales, listasRemotasActuales] =
+    await Promise.all([
+      necesitaRemotosProductos ? obtenerDocumentosColeccionUsuario(uid, 'productos') : [],
+      necesitaRemotosComercios ? obtenerDocumentosColeccionUsuario(uid, 'comercios') : [],
+      necesitaRemotosListas ? obtenerDocumentosColeccionUsuario(uid, 'listasJustas') : [],
+    ])
+  const mapaProductosRemotos = new Map(
+    productosRemotosActuales.map((producto) => [String(producto?.id || '').trim(), producto]),
+  )
+  const mapaComerciosRemotos = new Map(
+    comerciosRemotosActuales.map((comercio) => [String(comercio?.id || '').trim(), comercio]),
+  )
+  const mapaListasRemotas = new Map(
+    listasRemotasActuales.map((lista) => [String(lista?.id || '').trim(), lista]),
+  )
   const lote = writeBatch(firestoreDb)
   const sincronizacionId = crearIdSincronizacion()
   const escrituras = {
@@ -807,10 +837,14 @@ async function sincronizarCambiosLocalesAFirestore(usuarioId, cambios = {}) {
     .forEach((comercio) => {
       const idComercio = String(comercio.id || '').trim()
       if (!idComercio || idComercio === 'undefined' || idComercio === 'null') return
+      const comercioRemoto = mapaComerciosRemotos.get(idComercio)
+      const comercioSincronizado = comercioRemoto
+        ? fusionarComerciosExistentes(comercioRemoto, comercio)
+        : comercio
       lote.set(
         doc(firestoreDb, 'users', uid, 'comercios', idComercio),
         {
-          ...comercio,
+          ...comercioSincronizado,
           legacyId: idComercio,
           actualizadoEn: serverTimestamp(),
           origenSincronizacion: 'automatica_parcial',
@@ -825,10 +859,14 @@ async function sincronizarCambiosLocalesAFirestore(usuarioId, cambios = {}) {
     .forEach((producto) => {
       const idProducto = String(producto.id || '').trim()
       if (!idProducto || idProducto === 'undefined' || idProducto === 'null') return
+      const productoRemoto = mapaProductosRemotos.get(idProducto)
+      const productoSincronizado = productoRemoto
+        ? fusionarProductoExistente(productoRemoto, producto)
+        : producto
       lote.set(
         doc(firestoreDb, 'users', uid, 'productos', idProducto),
         {
-          ...producto,
+          ...productoSincronizado,
           legacyId: idProducto,
           actualizadoEn: serverTimestamp(),
           origenSincronizacion: 'automatica_parcial',
@@ -843,10 +881,14 @@ async function sincronizarCambiosLocalesAFirestore(usuarioId, cambios = {}) {
     .forEach((lista) => {
       const idLista = String(lista.id || '').trim()
       if (!idLista || idLista === 'undefined' || idLista === 'null') return
+      const listaRemota = mapaListasRemotas.get(idLista)
+      const listaSincronizada = listaRemota
+        ? fusionarListaExistente(listaRemota, lista)
+        : lista
       lote.set(
         doc(firestoreDb, 'users', uid, 'listasJustas', idLista),
         {
-          ...lista,
+          ...listaSincronizada,
           legacyId: idLista,
           actualizadoEn: serverTimestamp(),
           origenSincronizacion: 'automatica_parcial',

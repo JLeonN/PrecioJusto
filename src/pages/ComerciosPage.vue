@@ -117,6 +117,7 @@ import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
+import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
 import { useSeleccionMultiple } from '../composables/useSeleccionMultiple.js'
 import { IconPlus } from '@tabler/icons-vue'
 import InputBusqueda from '../components/Compartidos/InputBusqueda.vue'
@@ -132,6 +133,7 @@ import ComerciosService from '../almacenamiento/servicios/ComerciosService.js'
 const router = useRouter()
 const comerciosStore = useComerciStore()
 const productosStore = useProductosStore()
+const usuarioStore = useUsuarioStore()
 const $q = useQuasar()
 
 // Estado de búsqueda
@@ -245,11 +247,28 @@ function activarSeleccionConItem(comercioId) {
   seleccion.activarModoSeleccion(comercioId)
 }
 
+function obtenerIdsComerciosOriginalesDesdeSeleccion() {
+  const idsSeleccionados = new Set(seleccion.arraySeleccionados.value)
+  const idsOriginales = new Set()
+
+  comerciosStore.comerciosAgrupados.forEach((comercio) => {
+    const grupoSeleccionado = idsSeleccionados.has(comercio.id)
+    if (!grupoSeleccionado) return
+
+    ;(comercio.comerciosOriginales || [comercio]).forEach((comercioOriginal) => {
+      if (comercioOriginal?.id) idsOriginales.add(comercioOriginal.id)
+    })
+  })
+
+  idsSeleccionados.forEach((id) => idsOriginales.add(id))
+  return Array.from(idsOriginales)
+}
+
 /**
  * Cuenta cuántos productos tienen precios asociados a los comercios seleccionados
  */
 function contarProductosAfectados() {
-  const idsComerciosSeleccionados = seleccion.arraySeleccionados.value
+  const idsComerciosSeleccionados = obtenerIdsComerciosOriginalesDesdeSeleccion()
   let contadorProductos = 0
 
   // Recorrer todos los productos
@@ -306,7 +325,7 @@ async function eliminarSeleccionados(motivo) {
   eliminando.value = true
 
   try {
-    const idsAEliminar = seleccion.arraySeleccionados.value
+    const idsAEliminar = obtenerIdsComerciosOriginalesDesdeSeleccion()
 
     // Guardar comercios y productos afectados para deshacer
     const comerciosEliminados = idsAEliminar.map((id) =>
@@ -500,8 +519,9 @@ async function deshacerEliminacion() {
 }
 
 // Cargar datos al montar
-onMounted(() => {
-  cargarComercios()
+onMounted(async () => {
+  await usuarioStore.solicitarSincronizacionRemota('entrar_comercios')
+  await cargarComercios()
 })
 </script>
 
