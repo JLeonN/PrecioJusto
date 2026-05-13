@@ -792,3 +792,83 @@ Esta lista registra pruebas reales hechas entre navegador web, celular y Firesto
 
 - [ ] Pendiente validar tema, moneda, region y perfil entre Web -> Celular.
 - [ ] Pendiente validar tema, moneda, region y perfil entre Celular -> Web.
+
+## Pendientes de chequeo detectados desde Resumenes
+
+Esta lista sale de cruzar `Planes/Resumenes` con la verificacion practica Firebase. Sirve para no olvidar capacidades reales de la app que todavia no tienen evidencia completa Web/Celular/Firestore.
+
+### Mis Productos
+
+- [ ] Validar edicion completa de producto entre dispositivos: nombre, marca, codigo de barras, categoria, cantidad, unidad, gramos/litros e imagen.
+- [ ] Validar cambio, recuperacion y eliminacion de foto de producto, confirmando que Firestore/cache conservan el estado esperado.
+- [ ] Validar borrado de producto desde web y desde celular, confirmando que no reaparece al recargar ni al abrir otro dispositivo.
+- [ ] Validar historial de precios con varios comercios y sucursales, confirmando que `comercioId`, `direccionId`, `comercio` y `direccion` quedan consistentes.
+- [ ] Validar precio mayorista o escalas por cantidad dentro de productos y su efecto posterior en Lista Justa.
+- [ ] Validar confirmaciones de precios si el flujo sigue activo: confirmar precio, desconfirmar/reportar si existe, persistencia y aislamiento por usuario.
+- [ ] Validar filtros, ordenamientos y busqueda de Mis Productos luego de sincronizar datos remotos.
+- [ ] Validar detalle de producto completo: estadisticas, filtros de historial, tarjetas por comercio y consistencia luego de editar/borrar precios.
+- [ ] Validar producto creado desde API con imagen remota y producto creado manual sin API, ambos sincronizados Web/Celular.
+
+### Lista Justa
+
+- [ ] Validar Web -> Celular y Celular -> Web para lista vacia, lista con items y lista renombrada sin accion manual.
+- [ ] Validar borrado de lista desde web y desde celular, confirmando borrado fisico/remoto o tombstone correcto y que no reaparezca.
+- [ ] Validar borrar item individual, comprar/descomprar, cambiar cantidad y cambiar moneda, confirmando sincronizacion en Firestore.
+- [ ] Validar filtros de detalle (`pendientes`, `comprados`, `todos`) despues de sincronizar desde otro dispositivo.
+- [ ] Validar `comercioActual` de una lista: seleccionar, cambiar, quitar y comprobar persistencia remota.
+- [ ] Validar alta desde Mis Productos con seleccion multiple, cantidades independientes y prevencion de duplicados.
+- [ ] Validar alta manual con busqueda hibrida local/API, codigo de barras, precio opcional y escalas mayoristas.
+- [ ] Validar restaurar precio original y `usaPreciosLocales` en ambos sentidos Web/Celular.
+- [ ] Validar derivacion Lista Justa -> Mis Productos cuando el item manual esta completo.
+- [ ] Validar derivacion Lista Justa -> Mesa de trabajo y retorno/estado cuando el item sale de Mesa.
+- [ ] Validar Lista Justa Inteligente: comercio base, comercios de comparacion, heredar comercio actual, ranking, ahorro estimado y faltantes de precio.
+- [ ] Validar banners de precios faltantes y monedas mezcladas luego de sincronizar.
+
+### Comercios
+
+- [ ] Validar Web -> Celular y Celular -> Web para alta, edicion y sucursales sin accion manual.
+- [ ] Validar edicion completa de comercio: nombre, tipo/categoria, calle, barrio, ciudad y normalizacion de espacios/puntos.
+- [ ] Validar foto de comercio y foto de sucursal: agregar, cambiar, quitar y comprobar persistencia.
+- [ ] Validar borrado de una sucursal real con precios vinculados, confirmando que no deja referencias rotas.
+- [ ] Validar borrado completo de comercio con productos/precios vinculados, confirmando comportamiento esperado de precios afectados.
+- [ ] Validar fusion de sucursales usando comercios descartables, confirmando que los precios se mueven a la sucursal destino y que la origen desaparece.
+- [ ] Validar modal de duplicado exacto y modal de similares con casos de comercio nuevo, sucursal nueva y cancelacion.
+- [ ] Validar `uso reciente` y ordenamiento por uso, confirmando que no pisa ediciones remotas mas nuevas.
+- [ ] Validar tarjetas agrupadas de cadenas con documentos heredados y con comercios nuevos ya normalizados.
+
+### Mesa de trabajo y scanner
+
+- [ ] Validar Escaneo rapido desde celular: codigo detectado, API/local, edicion en tarjeta, precio, moneda, foto, `Siguiente` e `Ir a mesa`.
+- [ ] Validar Rafaga desde celular: varios codigos seguidos, debounce, duplicados, busquedas en background y ausencia de bloqueos.
+- [ ] Validar fallback web/manual del scanner si corresponde en navegador.
+- [ ] Validar edicion de item en Mesa: nombre, marca, precio, moneda, cantidad, unidad, comercio, direccion y foto.
+- [ ] Validar recuperar datos y recuperar foto en tarjeta de escaneo/Mesa cuando el item viene de API o producto existente.
+- [ ] Validar asignacion de comercio individual y asignacion en bloque con seleccion multiple.
+- [ ] Validar envio parcial a Mis Productos: item nuevo crea producto, item existente agrega precio, sin duplicados.
+- [ ] Validar limpiar todo, descartar item y eliminar item, confirmando que no reaparecen por sincronizacion remota.
+- [ ] Validar ordenamientos de Mesa luego de sincronizar: menos completo, mas completo, comercio, sin comercio y alfabetico.
+- [ ] Validar visibilidad del acceso a Mesa en header/drawer segun haya o no items pendientes.
+
+### Configuracion, cuenta y perfil
+
+- [ ] Validar perfil completo Web/Celular: nombre visible, foto, email, fecha de nacimiento y edad calculada.
+- [ ] Validar prioridad de perfil editable sobre datos del proveedor despues de cerrar sesion y volver a entrar.
+- [ ] Validar tema claro/oscuro/sistema entre dispositivos y decidir si debe sincronizar por cuenta o quedar local por dispositivo.
+- [ ] Validar moneda manual, moneda automatica, region y unidad predeterminada entre dispositivos.
+- [ ] Validar que cambiar moneda en un precio puntual no cambie la preferencia global.
+- [ ] Validar recuperacion de contrasena, login con correo, login Google y cierre de sesion sin mezcla de datos.
+- [ ] Validar usuario invitado: no escribe datos privados en Firestore real y conserva datos solo locales.
+- [ ] Validar cambio de cuenta A/B/A en el mismo navegador/celular luego de las ultimas correcciones.
+- [ ] Validar estado de sincronizacion visible: ultima sincronizacion, pendientes, errores y reintento manual como plan B.
+
+### Sincronizacion, offline y rendimiento
+
+- [ ] Validar offline -> reconexion por modulo: productos, comercios, listas, mesa y configuracion.
+- [ ] Validar dispositivo limpio: borrar cache local y confirmar recuperacion desde Firestore sin boton manual.
+- [ ] Validar que un navegador con cache vieja no pise datos nuevos de celular al iniciar sesion.
+- [ ] Validar que eliminaciones pendientes se procesen aunque la app se cierre antes de sincronizar.
+- [ ] Validar que no queden documentos fisicos basura en `productos`, `comercios`, `listasJustas` ni `configuracion`.
+- [ ] Validar consumo Firestore en Spark con dataset real chico, evitando `resource-exhausted`.
+- [ ] Validar IndexedDB como cache web principal y que `localStorage` no vuelva a llenarse.
+- [ ] Validar Android real con build actual: arranque, login, sincronizacion inicial, uso offline y reconexion.
+- [ ] Validar consola sin errores/warnings nuevos en navegador y logs Android sin errores bloqueantes.
