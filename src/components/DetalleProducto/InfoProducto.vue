@@ -403,6 +403,8 @@ async function restaurarDesdeApi() {
       nombre: resultado.nombre || props.producto.nombre,
       marca: resultado.marca || props.producto.marca,
       categoria: resultado.categoria || props.producto.categoria,
+      cantidad: resultado.cantidad || props.producto.cantidad,
+      unidad: resultado.unidad || props.producto.unidad,
       imagen: resultado.imagen || props.producto.imagen,
       fuenteDato: resultadoApi.fuenteDato,
       fotoFuente: nuevaFotoFuente,
@@ -1050,7 +1052,6 @@ const copiarCodigoBarras = async (codigo) => {
   padding-top: 16px;
 }
 </style>
-
 
 
 

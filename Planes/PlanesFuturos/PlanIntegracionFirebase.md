@@ -598,7 +598,7 @@ Validar por IA (Playwright) los nuevos flujos de pantalla inicial, sincronizacio
     - Validado previamente en flujos Google/correo al precargar `displayName/email/photoURL` en `perfil`.
 - [x] Probar cabecera de usuario en drawer:
 - [x] Logueado: muestra nombre y avatar/fallback
-    - Validado en Playwright con cuenta por correo: drawer muestra iniciales y nombre visible del usuario.
+  - Validado en Playwright con cuenta por correo: drawer muestra iniciales y nombre visible del usuario.
   - [x] Invitado: mantiene cabecera neutra sin datos personales
     - Validado en Playwright: al cerrar sesión (`/#/acceso`) se muestra `Usuario anónimo` en Configuración y botón de acceso en cabecera.
 - [x] Validar UI de inputs reutilizables en Acceso inicial y Configuracion:
@@ -687,6 +687,26 @@ Esta lista registra pruebas reales hechas entre navegador web, celular y Firesto
   - Producto probado: `Dulce De Leche`, codigo `7730105005091`.
   - Accion: desde celular Leo agrego/cambio precio a `210`.
   - Confirmacion Firestore: el producto quedo con `2 precios`, original `199 UYU` y nuevo `210 USD`, con `fechaActualizacion=2026-05-10T19:10:18.108Z`.
+- [x] Celular -> Firebase: edicion de datos principales de producto funcionando.
+  - Producto probado: `Clight naranja dulce`, codigo `7622201703141`.
+  - Accion: Leo edito desde celular nombre, marca, categoria, cantidad, unidad e imagen.
+  - Confirmacion Firestore: `nombre=Clight naranja dulce prueba`, `marca=Mondelez prueba`, `categoria=Polvo para preparar bebida analcoholica artificial dietetica prueba`, `cantidad=123`, `unidad=litro`.
+  - Confirmacion imagen: el producto mantiene imagen remota de Open Food Facts y `fotoFuente=api`.
+  - Observacion tecnica: no aparece campo `gramosOLitros` en el documento de producto remoto; revisar si ese campo solo existe en Lista Justa o si falta persistirlo en Mis Productos.
+- [x] Celular -> Firebase: restaurar datos desde API detectado y corregido parcialmente.
+  - Producto probado: `Clight naranja dulce`, codigo `7622201703141`.
+  - Accion: Leo uso el boton `Restaurar datos desde la API` desde celular.
+  - Confirmacion Firestore antes de la correccion: nombre, marca y categoria volvieron a los valores API, pero `cantidad=123` y `unidad=litro` quedaron con los valores editados manualmente.
+  - Causa detectada: `InfoProducto.restaurarDesdeApi()` no enviaba `cantidad` ni `unidad` al store.
+  - Segunda causa detectada: `OpenFoodFactsService` no parseaba `7.5 gr`; devolvia default `1 unidad`.
+  - Correccion aplicada: restaurar desde API ahora incluye `cantidad/unidad` y Open Food Facts reconoce `gr`.
+  - Validacion tecnica: busqueda directa de `7622201703141` devuelve `cantidad=7.5`, `unidad=gramo`.
+- [x] Celular/Web -> Firebase: precio mayorista guardado y reflejado correctamente.
+  - Producto probado: `Clight naranja dulce`, codigo `7622201703141`.
+  - Accion: Leo agrego precio mayorista en celular y luego confirmo visualmente en la web.
+  - Confirmacion Firestore: se guardo un nuevo precio en `Ta-Ta / Enotracalle` con `valor=25 UYU`, `activarPreciosMayoristas=true`.
+  - Escalas guardadas: `3 -> 24`, `6 -> 23`, `12 -> 20`.
+  - Estado del producto en Firestore durante la prueba: `cantidad=7.5`, `unidad=gramo`, `3 precios` totales.
 
 ### Lista Justa
 
@@ -784,6 +804,66 @@ Esta lista registra pruebas reales hechas entre navegador web, celular y Firesto
 
 ### Mesa de trabajo
 
+- [x] Celular -> Firebase/Web: alta de item en Mesa de trabajo funcionando.
+  - Producto probado: `9788466371803`.
+  - Confirmacion Firestore inicial: item presente en `configuracion/sesionEscaneo` con `nombre=Habla menos, actúa más`, `marca=Brian Tracy`, `origenApi=true`, `fuenteDato=Open Library`, `cantidad=1`, `unidad=unidad`, `precio=500 UYU`.
+  - Confirmacion remota inicial: el producto no estaba aun en `users/{uid}/productos`; quedo solo en Mesa de trabajo (comportamiento esperado).
+- [x] Celular -> Firebase/Web: edicion completa de item de Mesa funcionando.
+  - Accion: Leo edito nombre, marca, cantidad, unidad, precio, comercio/direccion y foto (con recorte) desde celular.
+  - Confirmacion Firestore: item actualizado con `nombre=Habla menos, actúa más pruba`, `marca=Brian Tracy prueba`, `cantidad=15`, `unidad=pack`, `precio=500000000 UYU`, `comercio=Ta-Ta`, `direccion=Enotracalle`.
+  - Confirmacion foto editada: `imagen` guardada como `base64` (recorte aplicado), largo aproximado `4759`.
+- [x] Celular -> Firebase/Web: precio mayorista en Mesa funcionando.
+  - Producto probado: `9788466371803`.
+  - Confirmacion Firestore: `activarPreciosMayoristas=true` y `escalasPorCantidad` con `2` escalas (`3 -> 85585`, `6 -> 6584`).
+  - Confirmacion visual: Leo verifico que en navegador se reflejo correctamente.
+- [x] Celular -> Firebase/Web: restaurar datos y restaurar foto en Mesa funcionando.
+  - Accion: Leo uso ambos botones de restaurar (datos y foto) sobre el item `9788466371803`.
+  - Confirmacion Firestore: nombre/marca/cantidad/unidad volvieron a valores API (`Habla menos, actúa más`, `Brian Tracy`, `1 unidad`), `imagen` volvio a URL API (dejo de ser base64), mayoristas desactivado (`activarPreciosMayoristas=false`, `0` escalas).
+  - Validacion de regla funcional: el precio manual no se restaura automaticamente; luego Leo lo cambio y quedo `precio=1000 UYU`.
+- [x] Celular -> Firebase: eliminar item de Mesa de trabajo funcionando.
+  - Accion: Leo elimino un producto desde Mesa de trabajo en celular.
+  - Confirmacion Firestore: `configuracion/sesionEscaneo.items` quedo con `2` items (antes `3`), con `fechaActualizacion=2026-05-13T10:13:39.601Z`.
+  - Items remanentes confirmados:
+    - `7730105005091` - `Dulce De Leche` - `200 UYU`.
+    - `9788466371803` - `Habla menos, actúa más` - `1000 UYU`.
+- [x] Web -> Celular: alta de item en Mesa de trabajo reflejada correctamente.
+  - Accion: Leo cargo desde navegador el producto `7730306000017`.
+  - Confirmacion funcional: Leo confirmo que el item aparecio en celular sin problemas.
+  - Confirmacion Firebase: item presente en `configuracion/sesionEscaneo` como `Pulpa de tomate` (`Deambrosi`), `75 UYU`, fuente `Open Food Facts`.
+- [x] Celular -> Web: sincronizacion de cambios de Mesa en ambas direcciones (punto 2) validada en pruebas previas.
+  - Estado: ya validado durante la secuencia anterior de ediciones/restauraciones en `9788466371803`, con reflejo en navegador.
+- [x] Celular -> Firebase: asignacion de comercio en bloque funcionando.
+  - Accion: Leo asigno `Ta-Ta` a todos los items de Mesa desde celular.
+  - Confirmacion Firestore: `3` items en `sesionEscaneo` con `comercio=Ta-Ta` y `direccion=Cam Maldonado 5858`.
+  - Items verificados: `7730105005091`, `9788466371803`, `7730306000017`.
+- [x] Reproduccion MCP del flujo de envio y borrado (controlado) funcionando.
+  - Flujo ejecutado en MCP para aislar error reportado:
+    - Enviar a Mis Productos el libro `9788466371803`.
+    - Eliminar `Dulce De Leche` desde la tarjeta.
+    - Eliminar `Pulpa de tomate` desde accion de tarjeta.
+  - Resultado final Firestore:
+    - `configuracion/sesionEscaneo.items=0` (Mesa vacia).
+    - `users/{uid}/productos` paso a `4` productos totales.
+    - Libro creado en Mis Productos: `Habla menos, actúa más`, `1000 UYU`, comercio `Ta-Ta`, direccion `Cam Maldonado 5858`.
+  - Conclusion tecnica: el flujo funcional no falla en backend/sincronizacion al reproducirlo con MCP; el desfasaje observado antes en celular no pudo reproducirse en esta corrida.
+- [x] Celular -> Firebase: enviar item completo desde Mesa a Mis Productos funcionando (caso azucar azul).
+  - Accion: Leo completo el item `azúcar azul` (solo faltaba comercio) y lo envio desde Mesa en celular.
+  - Confirmacion Firestore Mesa: `sesionEscaneo.items=2`, `azúcar azul` ya no figura en Mesa.
+  - Confirmacion Firestore Mis Productos: se creo `azúcar azul` (`codigo=7730975890346`) con `marca=bella unión`, `cantidad=1`, `unidad=kilo`.
+  - Precio guardado en producto: `45 UYU`, comercio `CH Mercado Prueba`, direccion `Av. Prueba 123`.
+- [x] Celular -> Firebase: eliminar item `Arroc` desde tarjeta funcionando.
+  - Accion: Leo elimino `Arroc` (codigo `7730114000117`) desde su tarjeta en Mesa.
+  - Confirmacion Firestore Mesa: `sesionEscaneo.items=1` y `Arroc` ya no aparece.
+  - Item remanente actual en Mesa: `Arroz` (`7730114400016`), `56 UYU`.
+- [x] Celular -> Firebase: eliminar item `Arroz` desde selector funcionando.
+  - Accion: Leo elimino `Arroz` (codigo `7730114400016`) usando el selector en Mesa.
+  - Confirmacion Firestore Mesa: `sesionEscaneo.items=0` y `Arroz` ya no aparece.
+  - Estado final actual de Mesa: vacia en Firebase.
+- [x] Correccion de desfasaje Web/Celular en Mesa (item fantasma local).
+  - Sintoma reportado: Firebase y celular mostraban Mesa vacia, pero en navegador seguia visible `Arroz`.
+  - Diagnostico: en la fusion `sesionEscaneo` local/remota, cuando timestamps eran iguales se priorizaba local (`>=`), manteniendo datos stale del navegador.
+  - Correccion aplicada: en `fusionarSesionEscaneoConRemoto` ahora local solo gana si `fechaLocal > fechaRemota`; en empate se prioriza remoto (Firestore).
+  - Resultado esperado tras recarga/sincronizacion: si Firestore esta vacio, la Mesa web tambien queda vacia.
 - [ ] Pendiente validar Web -> Celular.
 - [ ] Pendiente validar Celular -> Web.
 - [ ] Pendiente validar que items listos, descartados y enviados no reaparezcan.
@@ -799,7 +879,7 @@ Esta lista sale de cruzar `Planes/Resumenes` con la verificacion practica Fireba
 
 ### Mis Productos
 
-- [ ] Validar edicion completa de producto entre dispositivos: nombre, marca, codigo de barras, categoria, cantidad, unidad, gramos/litros e imagen.
+- [ ] Validar edicion completa de producto entre dispositivos: codigo de barras y campo gramos/litros. Nombre, marca, categoria, cantidad, unidad e imagen ya fueron validados parcialmente con `7622201703141`.
 - [ ] Validar cambio, recuperacion y eliminacion de foto de producto, confirmando que Firestore/cache conservan el estado esperado.
 - [ ] Validar borrado de producto desde web y desde celular, confirmando que no reaparece al recargar ni al abrir otro dispositivo.
 - [ ] Validar historial de precios con varios comercios y sucursales, confirmando que `comercioId`, `direccionId`, `comercio` y `direccion` quedan consistentes.

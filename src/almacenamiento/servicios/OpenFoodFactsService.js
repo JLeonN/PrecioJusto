@@ -1,5 +1,5 @@
-/**
- * 🌍 SERVICIO OPEN FOOD FACTS API
+﻿/**
+ * SERVICIO OPEN FOOD FACTS API
  *
  * API gratuita para buscar productos por código de barras o texto.
  * Documentación: https://world.openfoodfacts.org/data
@@ -14,14 +14,14 @@ class OpenFoodFactsService {
   }
 
   /**
-   * 🔍 BUSCAR POR CÓDIGO DE BARRAS
+   * BUSCAR POR CÓDIGO DE BARRAS
    * @param {string} codigoBarras - Código EAN/UPC
    * @returns {Promise<Object|null>} - Producto o null
    */
   async buscarPorCodigoBarras(codigoBarras) {
     try {
       const url = `${this.baseURL}/product/${codigoBarras}`
-      console.log(`🔍 Buscando código: ${codigoBarras}`)
+      console.log(`Buscando código: ${codigoBarras}`)
 
       const response = await axios.get(url)
 
@@ -29,17 +29,17 @@ class OpenFoodFactsService {
         return this._mapearProducto(response.data.product)
       }
 
-      console.log('⚠️ Producto no encontrado')
+      console.log('Producto no encontrado')
       return null
     } catch (error) {
       if (error.response?.status === 404) return null
-      console.error('❌ Error al buscar código:', error)
+      console.error('Error al buscar código:', error)
       return null
     }
   }
 
   /**
-   * 🔍 BUSCAR POR TEXTO (nombre, marca, etc)
+   * BUSCAR POR TEXTO (nombre, marca, etc)
    * @param {string} texto - Término de búsqueda
    * @param {number} limite - Máximo de resultados (default: 10)
    * @returns {Promise<Array>} - Array de productos
@@ -47,7 +47,7 @@ class OpenFoodFactsService {
   async buscarPorTexto(texto, limite = 10) {
     try {
       const url = `${this.apiURLLegacy}/search.pl`
-      console.log(`🔍 Buscando texto: "${texto}"`)
+      console.log(`Buscando texto: "${texto}"`)
 
       const response = await axios.get(url, {
         params: {
@@ -63,37 +63,37 @@ class OpenFoodFactsService {
         return response.data.products.map((p) => this._mapearProducto(p))
       }
 
-      console.log('⚠️ Sin resultados')
+      console.log('Sin resultados')
       return []
     } catch (error) {
-      console.error('❌ Error al buscar texto:', error)
+      console.error('Error al buscar texto:', error)
       return []
     }
   }
 
   /**
-   * 🗺️ MAPEAR DATOS API → FORMATO APP
+   * MAPEAR DATOS API -> FORMATO APP
    * @private
    */
   _mapearProducto(productoAPI) {
-    // Extraer cantidad y unidad
     const { cantidad, unidad } = this._extraerCantidadUnidad(productoAPI.quantity || '')
 
     return {
       nombre: productoAPI.product_name || '',
       marca: productoAPI.brands || '',
       codigoBarras: productoAPI.code || '',
-      cantidad: cantidad,
-      unidad: unidad,
+      cantidad,
+      unidad,
       categoria: this._extraerPrimeraCategoria(productoAPI.categories || ''),
       imagen: productoAPI.image_url || null,
     }
   }
 
   /**
-   * 📏 EXTRAER CANTIDAD Y UNIDAD
-   * Ejemplos: "1 L" → {cantidad: 1, unidad: 'litro'}
-   *           "500 ml" → {cantidad: 500, unidad: 'mililitro'}
+   * EXTRAER CANTIDAD Y UNIDAD
+   * Ejemplos: "1 L" -> {cantidad: 1, unidad: 'litro'}
+   *           "500 ml" -> {cantidad: 500, unidad: 'mililitro'}
+   *           "7.5 gr" -> {cantidad: 7.5, unidad: 'gramo'}
    * @private
    */
   _extraerCantidadUnidad(textoQuantity) {
@@ -101,12 +101,11 @@ class OpenFoodFactsService {
 
     const textoLower = textoQuantity.toLowerCase().trim()
 
-    // Patrones comunes
     const patrones = [
       { regex: /(\d+(?:\.\d+)?)\s*l(?:itros?)?/i, unidad: 'litro' },
       { regex: /(\d+(?:\.\d+)?)\s*ml/i, unidad: 'mililitro' },
       { regex: /(\d+(?:\.\d+)?)\s*kg/i, unidad: 'kilo' },
-      { regex: /(\d+(?:\.\d+)?)\s*g(?:ramos?)?/i, unidad: 'gramo' },
+      { regex: /(\d+(?:\.\d+)?)\s*(?:g|gr|gramos?)/i, unidad: 'gramo' },
       { regex: /(\d+(?:\.\d+)?)\s*u(?:nidades?)?/i, unidad: 'unidad' },
     ]
 
@@ -120,12 +119,11 @@ class OpenFoodFactsService {
       }
     }
 
-    // Si no matchea nada, devolver default
     return { cantidad: 1, unidad: 'unidad' }
   }
 
   /**
-   * 🏷️ EXTRAER PRIMERA CATEGORÍA
+   * EXTRAER PRIMERA CATEGORÍA
    * La API devuelve categorías separadas por coma
    * @private
    */
@@ -137,7 +135,7 @@ class OpenFoodFactsService {
   }
 }
 
-// 🧪 TESTING: Exponer en window para probar desde consola
+// TESTING: Exponer en window para probar desde consola
 if (typeof window !== 'undefined') {
   window.testAPI = new OpenFoodFactsService()
 }

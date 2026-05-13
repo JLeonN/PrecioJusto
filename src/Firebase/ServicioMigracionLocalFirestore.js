@@ -431,7 +431,8 @@ function fusionarSesionEscaneoConRemoto(sesionRemota, sesionLocal) {
     return { items: [], fechaActualizacion: new Date().toISOString() }
   }
 
-  if (fechaLocal >= fechaRemota) return local
+  // Firestore es fuente de verdad: si empatan timestamps, priorizamos remoto.
+  if (fechaLocal > fechaRemota) return local
   return remota
 }
 
