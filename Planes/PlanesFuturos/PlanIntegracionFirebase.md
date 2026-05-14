@@ -891,6 +891,13 @@ Esta lista sale de cruzar `Planes/Resumenes` con la verificacion practica Fireba
 
 ### Lista Justa
 
+- [x] Validado en `N 1`: restaurar precio de producto existente (`Dulce De Leche`) desde Mis Productos y persistencia en Firebase.
+- [x] Validado en `N 1`: edición de precio manual (`Coke`) y alta/edición de item manual (`Habla menos, actúa más`) con persistencia en Firebase.
+- [x] Validado en `N 1`: eliminación de item (`Coke`) y envío de item manual (`Pan`) a Mesa; ambos reflejados en Firebase.
+- [x] Validado en `N 1`: cambio de comercio actual a `Ta-Ta` sucursal `Enotracalle` reflejado en Firebase (`comercioActual` con `direccionId` y `direccionNombre`).
+- [x] Corrección aplicada: fusión de listas remota/local ahora resuelve conflictos por ítem (`actualizadoEn`) en vez de pisar lista completa por timestamp general, para evitar pérdida de cambios parciales entre web/cel.
+- [x] Corrección aplicada: marcar `comprado` ahora usa valor explícito del checkbox (true/false) en vez de toggle implícito por estado actual, evitando rebotes a `false` en eventos duplicados.
+- [ ] Pendiente observado: revalidar en Android/Web que `Pan` (manual, en Mesa) conserve `comprado=true` luego de marcarlo y sincronizar.
 - [ ] Validar Web -> Celular y Celular -> Web para lista vacia, lista con items y lista renombrada sin accion manual.
 - [ ] Validar borrado de lista desde web y desde celular, confirmando borrado fisico/remoto o tombstone correcto y que no reaparezca.
 - [ ] Validar borrar item individual, comprar/descomprar, cambiar cantidad y cambiar moneda, confirmando sincronizacion en Firestore.

@@ -388,7 +388,40 @@ function fusionarComerciosConRemoto(comerciosRemotos = [], comerciosLocales = []
 function fusionarListaExistente(listaBase, listaNueva) {
   const fechaBaseMs = obtenerMarcaActualizacion(listaBase)
   const fechaNuevaMs = obtenerMarcaActualizacion(listaNueva)
-  return fechaNuevaMs >= fechaBaseMs ? { ...listaBase, ...listaNueva } : { ...listaNueva, ...listaBase }
+  const baseReciente = fechaBaseMs >= fechaNuevaMs ? listaBase : listaNueva
+  const baseVieja = baseReciente === listaBase ? listaNueva : listaBase
+
+  const itemsBase = Array.isArray(listaBase?.items) ? listaBase.items : []
+  const itemsNueva = Array.isArray(listaNueva?.items) ? listaNueva.items : []
+  const mapaItems = new Map()
+
+  const fusionarItem = (itemA, itemB) => {
+    const marcaA = obtenerMarcaActualizacion(itemA)
+    const marcaB = obtenerMarcaActualizacion(itemB)
+    return marcaB >= marcaA ? { ...itemA, ...itemB } : { ...itemB, ...itemA }
+  }
+
+  for (const item of itemsBase) {
+    const id = String(item?.id || '').trim()
+    if (!id) continue
+    mapaItems.set(id, item)
+  }
+
+  for (const item of itemsNueva) {
+    const id = String(item?.id || '').trim()
+    if (!id) continue
+    if (!mapaItems.has(id)) {
+      mapaItems.set(id, item)
+      continue
+    }
+    mapaItems.set(id, fusionarItem(mapaItems.get(id), item))
+  }
+
+  return {
+    ...baseVieja,
+    ...baseReciente,
+    items: Array.from(mapaItems.values()),
+  }
 }
 
 function fusionarListasConRemoto(listasRemotas = [], listasLocales = []) {

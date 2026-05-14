@@ -315,14 +315,15 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     return actualizarItem(listaId, itemId, { cantidad: cantidadNueva })
   }
 
-  async function alternarComprado(listaId, itemId) {
+  async function alternarComprado(listaId, itemId, compradoObjetivo = null) {
     const lista = obtenerListaPorId(listaId)
     if (!lista) return false
 
     const item = lista.items.find((actual) => actual.id === itemId)
     if (!item) return false
 
-    const compradoSiguiente = !item.comprado
+    const compradoSiguiente =
+      typeof compradoObjetivo === 'boolean' ? compradoObjetivo : !item.comprado
     const actualizado = await actualizarItem(listaId, itemId, { comprado: compradoSiguiente })
 
     if (!actualizado) return false

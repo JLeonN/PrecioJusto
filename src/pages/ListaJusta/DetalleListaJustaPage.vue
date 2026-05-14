@@ -330,7 +330,7 @@
                     color="positive"
                     checked-icon="check_circle"
                     unchecked-icon="radio_button_unchecked"
-                    @update:model-value="alternarComprado(item.id)"
+                    @update:model-value="alternarComprado(item.id, $event)"
                   />
                 </div>
               </q-card-section>
@@ -1185,10 +1185,10 @@ function obtenerPrecioProductoSeleccion(producto, cantidad) {
   return resolverPrecioProducto(producto, cantidad)
 }
 
-async function alternarComprado(itemId) {
+async function alternarComprado(itemId, compradoObjetivo = null) {
   if (!listaActual.value) return
 
-  const ok = await listaJustaStore.alternarComprado(listaActual.value.id, itemId)
+  const ok = await listaJustaStore.alternarComprado(listaActual.value.id, itemId, compradoObjetivo)
   if (!ok) return
 
   const item = listaActual.value.items.find((actual) => actual.id === itemId)
@@ -1204,7 +1204,7 @@ async function alternarComprado(itemId) {
         label: 'Deshacer',
         color: 'white',
         handler: () => {
-          listaJustaStore.alternarComprado(listaActual.value.id, itemId)
+          listaJustaStore.alternarComprado(listaActual.value.id, itemId, false)
         },
       },
     ],
