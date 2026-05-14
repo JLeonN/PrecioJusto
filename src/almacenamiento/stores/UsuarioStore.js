@@ -55,6 +55,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
   }
   const CLAVE_ACCESO_INICIAL = 'acceso_inicial_completado'
   const CLAVE_PERFIL_EDITABLE_PENDIENTE = 'perfil_editable_pendiente'
+  const CLAVE_SINCRONIZACION_PENDIENTE = 'sincronizacion_pendiente_firestore'
   const RETRASO_SINCRONIZACION_MS = 1200
   const RETRASO_SINCRONIZACION_REMOTA_POST_LOCAL_MS = 1200
   const RETRASO_SINCRONIZACION_REMOTA_MS = 2500
@@ -215,6 +216,70 @@ export const useUsuarioStore = defineStore('usuario', () => {
     window.__precioJustoAlVolverVisible = alVolverVisible
   }
 
+  async function guardarSincronizacionPendienteLocal() {
+    try {
+      await adaptadorActual.guardar(CLAVE_SINCRONIZACION_PENDIENTE, {
+        motivos: Array.from(motivosPendientes.values()),
+        cambios: clonarCambiosPendientesSincronizacion(),
+        fechaActualizacion: new Date().toISOString(),
+      })
+    } catch (error) {
+      console.warn('No se pudo persistir la sincronización pendiente:', error?.message || error)
+    }
+  }
+
+  function aplicarCambiosPendientesPersistidos(cambiosPersistidos = {}) {
+    const restaurarSet = (campo, valor) => {
+      if (valor === true) {
+        cambiosPendientesSincronizacion[campo] = true
+        return
+      }
+      if (Array.isArray(valor) && valor.length > 0) {
+        cambiosPendientesSincronizacion[campo] = new Set(
+          valor
+            .map((id) => String(id || '').trim())
+            .filter(Boolean),
+        )
+      }
+    }
+
+    restaurarSet('productos', cambiosPersistidos.productos)
+    restaurarSet('comercios', cambiosPersistidos.comercios)
+    restaurarSet('listasJustas', cambiosPersistidos.listasJustas)
+    if (cambiosPersistidos.preferencias === true) cambiosPendientesSincronizacion.preferencias = true
+    if (cambiosPersistidos.sesionEscaneo === true) cambiosPendientesSincronizacion.sesionEscaneo = true
+    if (cambiosPersistidos.perfil === true) cambiosPendientesSincronizacion.perfil = true
+    if (cambiosPersistidos.eliminaciones === true) cambiosPendientesSincronizacion.eliminaciones = true
+  }
+
+  async function restaurarSincronizacionPendienteLocal() {
+    try {
+      const estadoPendiente = await adaptadorActual.obtener(CLAVE_SINCRONIZACION_PENDIENTE)
+      if (!estadoPendiente) return false
+
+      const motivos = Array.isArray(estadoPendiente.motivos) ? estadoPendiente.motivos : []
+      motivos
+        .map((motivo) => String(motivo || '').trim().toLowerCase())
+        .filter(Boolean)
+        .forEach((motivo) => motivosPendientes.add(motivo))
+
+      aplicarCambiosPendientesPersistidos(estadoPendiente.cambios || {})
+      pendientesSincronizacion.value = Array.from(motivosPendientes.values())
+      return pendientesSincronizacion.value.length > 0
+    } catch (error) {
+      console.warn('No se pudo restaurar la sincronización pendiente:', error?.message || error)
+      return false
+    }
+  }
+
+  async function limpiarSincronizacionPendienteLocal() {
+    try {
+      await adaptadorActual.eliminar(CLAVE_SINCRONIZACION_PENDIENTE)
+    } catch (error) {
+      console.warn('No se pudo limpiar la sincronización pendiente local:', error?.message || error)
+    }
+  }
+
   function resolverMensajeErrorAuth(error, accion) {
     const codigo = error?.code || ''
 
@@ -271,6 +336,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
         ...datosGuardados,
       }
       await limpiarPerfilEditablePendiente()
+      solicitarSincronizacionRemota('post_perfil_editable_guardado', { retrasoMs: 400 })
       return true
     } catch (error) {
       if (!esErrorConectividad(error)) {
@@ -382,7 +448,11 @@ export const useUsuarioStore = defineStore('usuario', () => {
 
             await sincronizarPerfilConReintento(usuario)
             void sincronizarPerfilEditablePendiente()
+            const habiaPendientes = await restaurarSincronizacionPendienteLocal()
             void ejecutarMigracionAutomaticaSiCorresponde(usuario)
+            if (habiaPendientes) {
+              void solicitarSincronizacionAutomatica('pendientes_restaurados')
+            }
             void solicitarSincronizacionRemota('arranque_sesion', {
               retrasoMs: RETRASO_SINCRONIZACION_REMOTA_ARRANQUE_MS,
             })
@@ -426,6 +496,11 @@ export const useUsuarioStore = defineStore('usuario', () => {
         .finally(() => {
           aplicarEstadoUsuario(usuarioActual)
           if (usuarioActual && !usuarioActual.isAnonymous) {
+            void restaurarSincronizacionPendienteLocal().then((habiaPendientes) => {
+              if (habiaPendientes) {
+                void solicitarSincronizacionAutomatica('pendientes_restaurados')
+              }
+            })
             iniciarIntervaloSincronizacionRemota()
             void solicitarSincronizacionRemota('arranque_sesion', {
               retrasoMs: RETRASO_SINCRONIZACION_REMOTA_ARRANQUE_MS,
@@ -718,6 +793,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
       pendientesSincronizacion.value = []
       motivosPendientes.clear()
       limpiarCambiosPendientesSincronizacion()
+      await limpiarSincronizacionPendienteLocal()
       solicitarSincronizacionRemota('post_sincronizacion_local', {
         retrasoMs: RETRASO_SINCRONIZACION_REMOTA_POST_LOCAL_MS,
       })
@@ -749,6 +825,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
     motivosPendientes.add(motivoNormalizado)
     registrarCambioPendientePorMotivo(motivoNormalizado, cambio)
     pendientesSincronizacion.value = Array.from(motivosPendientes.values())
+    void guardarSincronizacionPendienteLocal()
   }
 
   function solicitarSincronizacionAutomatica(motivo = 'operacion', cambio = {}) {
@@ -929,6 +1006,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
     ultimoMotivoSincronizacion = null
     motivosPendientes.clear()
     limpiarCambiosPendientesSincronizacion()
+    void limpiarSincronizacionPendienteLocal()
     if (typeof window !== 'undefined' && listenerConexionRegistrado && manejarVueltaConexion) {
       window.removeEventListener('online', manejarVueltaConexion)
     }

@@ -123,14 +123,10 @@
               <q-banner rounded class="banner-cuenta">
                 Edad: <strong>{{ etiquetaEdadPerfil }}</strong>
               </q-banner>
-              <q-btn
-                color="primary"
-                unelevated
-                no-caps
-                label="Guardar perfil"
-                :loading="usuarioStore.cargandoPerfil"
-                @click="manejarGuardarPerfilEditable"
-              />
+              <q-banner rounded class="banner-cuenta">
+                Guardado automático de perfil:
+                <strong>{{ perfilGuardandoAutomatico ? ' sincronizando...' : ' activo' }}</strong>
+              </q-banner>
               <q-btn
                 v-if="usuarioStore.tieneSesionRealActiva"
                 outline
@@ -373,7 +369,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { MONEDAS } from '../almacenamiento/constantes/Monedas.js'
@@ -406,7 +402,12 @@ const perfilEditableFoto = ref('')
 const perfilEditableFechaNacimiento = ref('')
 const fotoTemporalEdicion = ref('')
 const editorFotoAbierto = ref(false)
+const perfilGuardandoAutomatico = ref(false)
 const TIEMPO_ESPERA_INTERSTICIAL_MS = 60000
+const RETRASO_AUTOGUARDADO_PERFIL_MS = 900
+const perfilGuardadoClave = ref('')
+let temporizadorAutoguardadoPerfil = null
+let sincronizandoFormularioPerfil = false
 const seccionesAbiertas = ref({
   cuentaPerfil: false,
   tema: false,
@@ -506,9 +507,18 @@ function calcularEdadDesdeFecha(fechaNacimientoIso) {
 }
 
 function sincronizarFormularioPerfil(perfil) {
+  sincronizandoFormularioPerfil = true
   perfilEditableNombre.value = perfil?.perfilEditable?.nombre || perfil?.nombre || ''
   perfilEditableFoto.value = perfil?.perfilEditable?.foto || perfil?.foto || ''
   perfilEditableFechaNacimiento.value = perfil?.perfilEditable?.fechaNacimiento || perfil?.fechaNacimiento || ''
+  perfilGuardadoClave.value = construirClavePerfilEditable({
+    nombre: perfilEditableNombre.value,
+    foto: perfilEditableFoto.value,
+    fechaNacimiento: perfilEditableFechaNacimiento.value,
+  })
+  nextTick(() => {
+    sincronizandoFormularioPerfil = false
+  })
 }
 
 function abrirSelectorFotoPerfil() {
@@ -544,12 +554,15 @@ async function manejarSeleccionArchivoFoto(evento) {
   }
 }
 
-function validarPerfilEditable() {
+function validarPerfilEditable(opciones = {}) {
+  const notificar = opciones.notificar !== false
   const nombreNormalizado = perfilEditableNombre.value.trim()
   const fechaNacimiento = perfilEditableFechaNacimiento.value
 
   if (!nombreNormalizado) {
-    quasar.notify({ type: 'warning', message: 'El nombre es obligatorio.' })
+    if (notificar) {
+      quasar.notify({ type: 'warning', message: 'El nombre es obligatorio.' })
+    }
     return false
   }
 
@@ -560,12 +573,77 @@ function validarPerfilEditable() {
     ).padStart(2, '0')}`
 
     if (fechaNacimiento > hoyIso) {
-      quasar.notify({ type: 'warning', message: 'La fecha de nacimiento no puede ser futura.' })
+      if (notificar) {
+        quasar.notify({ type: 'warning', message: 'La fecha de nacimiento no puede ser futura.' })
+      }
       return false
     }
   }
 
   return true
+}
+
+function construirClavePerfilEditable(perfilEditable) {
+  return JSON.stringify({
+    nombre: String(perfilEditable?.nombre || '').trim(),
+    foto: String(perfilEditable?.foto || '').trim(),
+    fechaNacimiento: String(perfilEditable?.fechaNacimiento || '').trim(),
+  })
+}
+
+function limpiarTemporizadorAutoguardadoPerfil() {
+  if (!temporizadorAutoguardadoPerfil) return
+  clearTimeout(temporizadorAutoguardadoPerfil)
+  temporizadorAutoguardadoPerfil = null
+}
+
+async function guardarPerfilEditableAutomatico() {
+  if (!usuarioStore.tieneSesionActiva) return
+  if (!validarPerfilEditable({ notificar: false })) return
+
+  const datosPerfil = {
+    nombre: perfilEditableNombre.value.trim(),
+    foto: perfilEditableFoto.value || '',
+    fechaNacimiento: perfilEditableFechaNacimiento.value,
+  }
+  const claveActual = construirClavePerfilEditable(datosPerfil)
+  if (claveActual === perfilGuardadoClave.value) return
+
+  perfilGuardandoAutomatico.value = true
+  const perfilOk = await usuarioStore.actualizarPerfilEditable(datosPerfil)
+
+  if (perfilOk) {
+    perfilGuardadoClave.value = claveActual
+    if (usuarioStore.errorPerfil) {
+      quasar.notify({ type: 'warning', message: usuarioStore.errorPerfil })
+    }
+  } else {
+    quasar.notify({
+      type: 'negative',
+      message: usuarioStore.errorPerfil || 'No se pudo guardar el perfil.',
+    })
+  }
+
+  perfilGuardandoAutomatico.value = false
+}
+
+function programarAutoguardadoPerfil() {
+  if (sincronizandoFormularioPerfil) return
+  if (!usuarioStore.tieneSesionActiva) return
+  if (!validarPerfilEditable({ notificar: false })) return
+
+  const claveActual = construirClavePerfilEditable({
+    nombre: perfilEditableNombre.value,
+    foto: perfilEditableFoto.value,
+    fechaNacimiento: perfilEditableFechaNacimiento.value,
+  })
+  if (claveActual === perfilGuardadoClave.value) return
+
+  limpiarTemporizadorAutoguardadoPerfil()
+  temporizadorAutoguardadoPerfil = setTimeout(() => {
+    temporizadorAutoguardadoPerfil = null
+    void guardarPerfilEditableAutomatico()
+  }, RETRASO_AUTOGUARDADO_PERFIL_MS)
 }
 
 async function mostrarPublicidadConfiguracion() {
@@ -825,35 +903,6 @@ async function manejarMigracionDatos() {
     })
 }
 
-async function manejarGuardarPerfilEditable() {
-  if (!usuarioStore.tieneSesionActiva) {
-    quasar.notify({ type: 'warning', message: 'Necesitás una sesión activa para guardar perfil.' })
-    return
-  }
-
-  if (!validarPerfilEditable()) return
-
-  const perfilOk = await usuarioStore.actualizarPerfilEditable({
-    nombre: perfilEditableNombre.value.trim(),
-    foto: perfilEditableFoto.value || '',
-    fechaNacimiento: perfilEditableFechaNacimiento.value,
-  })
-
-  if (perfilOk) {
-    if (usuarioStore.errorPerfil) {
-      quasar.notify({ type: 'warning', message: usuarioStore.errorPerfil })
-    } else {
-      quasar.notify({ type: 'positive', message: 'Perfil actualizado correctamente.' })
-    }
-    return
-  }
-
-  quasar.notify({
-    type: 'negative',
-    message: usuarioStore.errorPerfil || 'No se pudo guardar el perfil.',
-  })
-}
-
 watch(
   () => usuarioStore.perfil,
   (perfil) => {
@@ -861,6 +910,14 @@ watch(
   },
   { immediate: true },
 )
+
+watch([perfilEditableNombre, perfilEditableFoto, perfilEditableFechaNacimiento], () => {
+  programarAutoguardadoPerfil()
+})
+
+onBeforeUnmount(() => {
+  limpiarTemporizadorAutoguardadoPerfil()
+})
 
 onMounted(async () => {
   if (preferenciasStore.modoMoneda === 'automatica' && !preferenciasStore.paisDetectado) {

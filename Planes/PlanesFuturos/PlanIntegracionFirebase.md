@@ -918,6 +918,12 @@ Esta lista sale de cruzar `Planes/Resumenes` con la verificacion practica Fireba
 
 ### Mesa de trabajo y scanner
 
+- [x] Validado Web -> Cel y Cel -> Web en Mesa para altas desde API con códigos distintos (sin duplicados no intencionales).
+- [x] Validado editar item de Mesa desde celular y reflejo en web/Firebase (nombre, precio, comercio, cantidad/unidad).
+- [x] Validado restaurar datos de item desde celular: restablece campos de producto y mantiene el precio definido por usuario.
+- [x] Validado persistencia de cambios offline tras cierre completo de app y reconexión (sync automática al reabrir).
+- [x] Validado recorte/actualización de foto en Mesa con persistencia posterior.
+- [x] Validado `Limpiar todo`: mesa vacía persistente en web (sin reaparición tras recarga).
 - [ ] Validar Escaneo rapido desde celular: codigo detectado, API/local, edicion en tarjeta, precio, moneda, foto, `Siguiente` e `Ir a mesa`.
 - [ ] Validar Rafaga desde celular: varios codigos seguidos, debounce, duplicados, busquedas en background y ausencia de bloqueos.
 - [ ] Validar fallback web/manual del scanner si corresponde en navegador.
@@ -931,6 +937,9 @@ Esta lista sale de cruzar `Planes/Resumenes` con la verificacion practica Fireba
 
 ### Configuracion, cuenta y perfil
 
+- [x] Validado Celular -> Web: cambio de tema (`claro/oscuro`) y moneda manual (`ARS/UYU`) sincronizan correctamente.
+- [x] Validado perfil editable (nombre, fecha y foto) con persistencia final en Firebase/Web.
+- [ ] Nota: no quedó perfecto en inmediatez visual Web; en algunas pruebas fue necesario refrescar (`F5`) para ver el cambio al instante, aunque el dato sí quedó guardado en Firebase.
 - [ ] Validar perfil completo Web/Celular: nombre visible, foto, email, fecha de nacimiento y edad calculada.
 - [ ] Validar prioridad de perfil editable sobre datos del proveedor despues de cerrar sesion y volver a entrar.
 - [ ] Validar tema claro/oscuro/sistema entre dispositivos y decidir si debe sincronizar por cuenta o quedar local por dispositivo.
@@ -943,6 +952,9 @@ Esta lista sale de cruzar `Planes/Resumenes` con la verificacion practica Fireba
 
 ### Sincronizacion, offline y rendimiento
 
+- [x] Fix aplicado: persistir cola de sincronización pendiente en almacenamiento local (`sincronizacion_pendiente_firestore`) para no perder cambios offline al cerrar/reabrir app.
+- [x] Fix aplicado: restaurar cola pendiente al iniciar sesión real y disparar sincronización automática de pendientes restaurados.
+- [x] Validado en Android real: cierre total de app offline con cambios pendientes y re-apertura con red activa sincroniza automáticamente sin tocar `Guardar` de nuevo. Evidencia reportada: cambios offline en Mesa (`Coca-Cola`, estado "prueba sin wifi", precio/comercio/cantidad) y ajustes de producto se reflejaron al reconectar.
 - [ ] Validar offline -> reconexion por modulo: productos, comercios, listas, mesa y configuracion.
 - [ ] Validar dispositivo limpio: borrar cache local y confirmar recuperacion desde Firestore sin boton manual.
 - [ ] Validar que un navegador con cache vieja no pise datos nuevos de celular al iniciar sesion.
