@@ -39,8 +39,12 @@ export const useUsuarioStore = defineStore('usuario', () => {
   let manejarVueltaConexion = null
   let temporizadorSincronizacionAutomatica = null
   let temporizadorSincronizacionRemota = null
+  let temporizadorSolicitudSincronizacionRemota = null
+  let motivoSolicitudSincronizacionRemota = 'remoto'
+  let opcionesSolicitudSincronizacionRemota = {}
   let sincronizacionAutomaticaEnCurso = false
   let sincronizacionRemotaEnCurso = false
+  let promesaSincronizacionRemotaEnCurso = null
   let sincronizacionAutomaticaReprogramada = false
   let ultimoMotivoSincronizacion = null
   const motivosPendientes = new Set()
@@ -660,7 +664,6 @@ export const useUsuarioStore = defineStore('usuario', () => {
 
   function puedeSincronizarRemoto() {
     if (!tieneSesionRealActiva.value) return false
-    if (hayPendientesSincronizacion.value) return false
     if (typeof navigator !== 'undefined' && navigator.onLine === false) return false
     return true
   }
@@ -849,40 +852,59 @@ export const useUsuarioStore = defineStore('usuario', () => {
     return true
   }
 
-  async function ejecutarSincronizacionRemota(motivo = 'remoto') {
+  async function ejecutarSincronizacionRemota(motivo = 'remoto', opciones = {}) {
     if (!puedeSincronizarRemoto()) return false
-    if (sincronizacionRemotaEnCurso) return false
+    if (sincronizacionRemotaEnCurso && promesaSincronizacionRemotaEnCurso) {
+      return promesaSincronizacionRemotaEnCurso
+    }
     if (!usuarioId.value) return false
 
     sincronizacionRemotaEnCurso = true
     ultimoErrorSincronizacionRemota.value = null
 
-    try {
-      const resumenRemoto = await servicioMigracionLocalFirestore.sincronizarDesdeFirestoreALocalSiCambio(
-        usuarioId.value,
-      )
-      if (!resumenRemoto?.sinCambios) {
-        await recargarContextoDatos()
-      }
-      ultimaSincronizacionRemota.value = {
-        fecha: new Date().toISOString(),
-        motivo,
-        resumen: resumenRemoto,
-      }
-      return true
-    } catch (error) {
-      if (esErrorConectividad(error)) {
-        console.info('Actualización remota pausada por Firebase temporalmente no disponible:', error?.code || error?.message)
-        ultimoErrorSincronizacionRemota.value = 'Firebase no está disponible ahora. Se usan los datos locales.'
-        return false
-      }
+    promesaSincronizacionRemotaEnCurso = (async () => {
+      try {
+        const resumenRemoto = await servicioMigracionLocalFirestore.sincronizarDesdeFirestoreALocalSiCambio(
+          usuarioId.value,
+          opciones,
+        )
+        if (!resumenRemoto?.sinCambios) {
+          await recargarContextoDatos()
+        }
+        ultimaSincronizacionRemota.value = {
+          fecha: new Date().toISOString(),
+          motivo,
+          resumen: resumenRemoto,
+        }
+        return true
+      } catch (error) {
+        if (esErrorConectividad(error)) {
+          console.info('Actualización remota pausada por Firebase temporalmente no disponible:', error?.code || error?.message)
+          ultimoErrorSincronizacionRemota.value = 'Firebase no está disponible ahora. Se usan los datos locales.'
+          return false
+        }
 
-      console.error('Error en sincronización remota:', error)
-      ultimoErrorSincronizacionRemota.value = 'No se pudo actualizar desde la nube en segundo plano.'
-      return false
-    } finally {
-      sincronizacionRemotaEnCurso = false
+        console.error('Error en sincronización remota:', error)
+        ultimoErrorSincronizacionRemota.value = 'No se pudo actualizar desde la nube en segundo plano.'
+        return false
+      } finally {
+        sincronizacionRemotaEnCurso = false
+        promesaSincronizacionRemotaEnCurso = null
+      }
+    })()
+
+    return promesaSincronizacionRemotaEnCurso
+  }
+
+  async function sincronizarRemotoAhora(motivo = 'remoto', opciones = {}) {
+    if (temporizadorSolicitudSincronizacionRemota) {
+      clearTimeout(temporizadorSolicitudSincronizacionRemota)
+      temporizadorSolicitudSincronizacionRemota = null
     }
+    return ejecutarSincronizacionRemota(motivo, {
+      ...opciones,
+      forzar: opciones?.forzar === true,
+    })
   }
 
   function iniciarIntervaloSincronizacionRemota() {
@@ -907,8 +929,19 @@ export const useUsuarioStore = defineStore('usuario', () => {
       ? retrasoMs
       : RETRASO_SINCRONIZACION_REMOTA_MS
 
-    setTimeout(() => {
-      void ejecutarSincronizacionRemota(motivo)
+    if (temporizadorSolicitudSincronizacionRemota) {
+      clearTimeout(temporizadorSolicitudSincronizacionRemota)
+    }
+
+    motivoSolicitudSincronizacionRemota = motivo
+    opcionesSolicitudSincronizacionRemota = { ...opciones }
+
+    temporizadorSolicitudSincronizacionRemota = setTimeout(() => {
+      temporizadorSolicitudSincronizacionRemota = null
+      void ejecutarSincronizacionRemota(
+        motivoSolicitudSincronizacionRemota,
+        opcionesSolicitudSincronizacionRemota,
+      )
     }, retrasoNormalizado)
 
     return true
@@ -1000,9 +1033,14 @@ export const useUsuarioStore = defineStore('usuario', () => {
       clearTimeout(temporizadorSincronizacionAutomatica)
       temporizadorSincronizacionAutomatica = null
     }
+    if (temporizadorSolicitudSincronizacionRemota) {
+      clearTimeout(temporizadorSolicitudSincronizacionRemota)
+      temporizadorSolicitudSincronizacionRemota = null
+    }
     detenerIntervaloSincronizacionRemota()
     sincronizacionAutomaticaEnCurso = false
     sincronizacionAutomaticaReprogramada = false
+    promesaSincronizacionRemotaEnCurso = null
     ultimoMotivoSincronizacion = null
     motivosPendientes.clear()
     limpiarCambiosPendientesSincronizacion()
@@ -1054,6 +1092,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
     migrarDatosLocales,
     solicitarSincronizacionAutomatica,
     solicitarSincronizacionRemota,
+    sincronizarRemotoAhora,
     actualizarPerfilEditable,
     marcarAccesoInicialCompletado,
     cerrarSesion,

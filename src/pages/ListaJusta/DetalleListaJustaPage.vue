@@ -509,7 +509,7 @@
 
 <script setup>
 import InputFormularioReutilizable from '../../components/Compartidos/InputFormularioReutilizable.vue'
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { IconShoppingBag, IconTrash } from '@tabler/icons-vue'
@@ -525,6 +525,7 @@ import { useListaJustaStore } from '../../almacenamiento/stores/ListaJustaStore.
 import { useProductosStore } from '../../almacenamiento/stores/productosStore.js'
 import { usePreferenciasStore } from '../../almacenamiento/stores/preferenciasStore.js'
 import { useSesionEscaneoStore } from '../../almacenamiento/stores/sesionEscaneoStore.js'
+import { useUsuarioStore } from '../../almacenamiento/stores/UsuarioStore.js'
 import busquedaProductosHibridaService from '../../almacenamiento/servicios/BusquedaProductosHibridaService.js'
 import {
   filtrarInputPrecio,
@@ -541,6 +542,8 @@ const listaJustaStore = useListaJustaStore()
 const productosStore = useProductosStore()
 const preferenciasStore = usePreferenciasStore()
 const sesionEscaneoStore = useSesionEscaneoStore()
+const usuarioStore = useUsuarioStore()
+let intervaloRefrescoRemotoId = null
 
 const filtroEstado = ref('pendientes')
 
@@ -1666,6 +1669,7 @@ watch(
 )
 
 onMounted(async () => {
+  await usuarioStore.sincronizarRemotoAhora('detalle_lista_justa_abierta', { forzar: true })
   await Promise.all([
     listaJustaStore.cargarListas(),
     productosStore.cargarProductos(),
@@ -1682,6 +1686,20 @@ onMounted(async () => {
   formularioPrecioManual.value = {
     ...formularioPrecioManual.value,
     moneda: preferenciasStore.monedaDefaultEfectiva,
+  }
+
+  if (typeof window !== 'undefined') {
+    intervaloRefrescoRemotoId = window.setInterval(async () => {
+      await usuarioStore.sincronizarRemotoAhora('detalle_lista_justa_intervalo', { forzar: true })
+      await listaJustaStore.cargarListas()
+    }, 12000)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (intervaloRefrescoRemotoId && typeof window !== 'undefined') {
+    window.clearInterval(intervaloRefrescoRemotoId)
+    intervaloRefrescoRemotoId = null
   }
 })
 </script>

@@ -385,7 +385,8 @@ function fusionarComerciosConRemoto(comerciosRemotos = [], comerciosLocales = []
   return Array.from(mapaComercios.values())
 }
 
-function fusionarListaExistente(listaBase, listaNueva) {
+function fusionarListaExistente(listaBase, listaNueva, opciones = {}) {
+  const priorizarRemoto = opciones.priorizarRemoto === true
   const fechaBaseMs = obtenerMarcaActualizacion(listaBase)
   const fechaNuevaMs = obtenerMarcaActualizacion(listaNueva)
   const baseReciente = fechaBaseMs >= fechaNuevaMs ? listaBase : listaNueva
@@ -396,9 +397,14 @@ function fusionarListaExistente(listaBase, listaNueva) {
   const mapaItems = new Map()
 
   const fusionarItem = (itemA, itemB) => {
+    if (priorizarRemoto) {
+      return { ...itemB, ...itemA }
+    }
     const marcaA = obtenerMarcaActualizacion(itemA)
     const marcaB = obtenerMarcaActualizacion(itemB)
-    return marcaB >= marcaA ? { ...itemA, ...itemB } : { ...itemB, ...itemA }
+    // En empate de marca temporal, priorizamos remoto/base para evitar
+    // que un caché local viejo vuelva a pisar Firebase.
+    return marcaB > marcaA ? { ...itemA, ...itemB } : { ...itemB, ...itemA }
   }
 
   for (const item of itemsBase) {
@@ -417,6 +423,14 @@ function fusionarListaExistente(listaBase, listaNueva) {
     mapaItems.set(id, fusionarItem(mapaItems.get(id), item))
   }
 
+  if (priorizarRemoto) {
+    return {
+      ...listaNueva,
+      ...listaBase,
+      items: Array.from(mapaItems.values()),
+    }
+  }
+
   return {
     ...baseVieja,
     ...baseReciente,
@@ -424,7 +438,7 @@ function fusionarListaExistente(listaBase, listaNueva) {
   }
 }
 
-function fusionarListasConRemoto(listasRemotas = [], listasLocales = []) {
+function fusionarListasConRemoto(listasRemotas = [], listasLocales = [], opciones = {}) {
   const mapaListas = new Map()
 
   for (const lista of listasRemotas) {
@@ -442,7 +456,7 @@ function fusionarListasConRemoto(listasRemotas = [], listasLocales = []) {
       continue
     }
 
-    mapaListas.set(id, fusionarListaExistente(mapaListas.get(id), listaLocal))
+    mapaListas.set(id, fusionarListaExistente(mapaListas.get(id), listaLocal, opciones))
   }
 
   return Array.from(mapaListas.values())
@@ -1288,7 +1302,9 @@ async function sincronizarDesdeFirestoreALocal(usuarioId) {
     ...datosLocales,
     productos: fusionarProductosConRemoto(productosRemotosFiltrados, productosLocalesFiltrados),
     comercios: fusionarComerciosConRemoto(comerciosRemotosFiltrados, comerciosLocalesFiltrados),
-    listas: fusionarListasConRemoto(listasRemotasFiltradas, listasLocalesFiltradas),
+    listas: fusionarListasConRemoto(listasRemotasFiltradas, listasLocalesFiltradas, {
+      priorizarRemoto: true,
+    }),
     preferencias: preferenciasFusionadas,
     sesionEscaneo: fusionarSesionEscaneoConRemoto(sesionEscaneoRemota, datosLocales.sesionEscaneo),
   }

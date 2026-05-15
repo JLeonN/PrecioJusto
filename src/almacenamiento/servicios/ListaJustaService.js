@@ -49,6 +49,10 @@ class ListaJustaService {
   }
 
   normalizarItem(nuevoItem = {}) {
+    const marcaTiempoActual = new Date().toISOString()
+    const creadoEnNormalizado = nuevoItem.creadoEn || marcaTiempoActual
+    const actualizadoEnNormalizado =
+      nuevoItem.actualizadoEn || nuevoItem.fechaActualizacion || creadoEnNormalizado
     const escalasPorCantidad = this._normalizarEscalasPorCantidad(nuevoItem.escalasPorCantidad)
 
     return {
@@ -74,8 +78,8 @@ class ListaJustaService {
       escalasPorCantidad,
       estadoDerivacion: nuevoItem.estadoDerivacion || 'ninguno',
       mesaTrabajoItemId: nuevoItem.mesaTrabajoItemId || null,
-      creadoEn: nuevoItem.creadoEn || new Date().toISOString(),
-      actualizadoEn: new Date().toISOString(),
+      creadoEn: creadoEnNormalizado,
+      actualizadoEn: actualizadoEnNormalizado,
       origenEscaneo: nuevoItem.origenEscaneo || null,
       advertencias: {
         sinNombre: !(nuevoItem.nombre || '').trim(),

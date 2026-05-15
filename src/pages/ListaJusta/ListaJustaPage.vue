@@ -147,17 +147,20 @@
 
 <script setup>
 import InputFormularioReutilizable from '../../components/Compartidos/InputFormularioReutilizable.vue'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { IconEdit, IconListDetails, IconTrash } from '@tabler/icons-vue'
 import { useListaJustaStore } from '../../almacenamiento/stores/ListaJustaStore.js'
+import { useUsuarioStore } from '../../almacenamiento/stores/UsuarioStore.js'
 import BotonConfirmacionEliminar from '../../components/Compartidos/BotonConfirmacionEliminar.vue'
 import BotonAccionSticky from '../../components/Compartidos/BotonAccionSticky.vue'
 
 const router = useRouter()
 const quasar = useQuasar()
 const listaJustaStore = useListaJustaStore()
+const usuarioStore = useUsuarioStore()
+let intervaloRefrescoRemotoId = null
 
 const dialogoListaAbierto = ref(false)
 const nombreLista = ref('')
@@ -259,7 +262,22 @@ async function onSwipeLargoLista(listaId, detalles) {
 }
 
 onMounted(async () => {
+  await usuarioStore.sincronizarRemotoAhora('entrar_lista_justa', { forzar: true })
   await listaJustaStore.cargarListas()
+
+  if (typeof window !== 'undefined') {
+    intervaloRefrescoRemotoId = window.setInterval(async () => {
+      await usuarioStore.sincronizarRemotoAhora('lista_justa_intervalo', { forzar: true })
+      await listaJustaStore.cargarListas()
+    }, 12000)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (intervaloRefrescoRemotoId && typeof window !== 'undefined') {
+    window.clearInterval(intervaloRefrescoRemotoId)
+    intervaloRefrescoRemotoId = null
+  }
 })
 </script>
 

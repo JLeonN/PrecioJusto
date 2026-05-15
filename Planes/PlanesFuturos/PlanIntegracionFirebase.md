@@ -891,13 +891,54 @@ Esta lista sale de cruzar `Planes/Resumenes` con la verificacion practica Fireba
 
 ### Lista Justa
 
+- [x] Informe de iteracion (resumen ejecutivo del chat actual).
+  - Problema principal reportado:
+    - Cambios de cantidad en `P 4` quedaban desfasados entre celular, Firebase y navegador.
+    - Caso observado: celular mandaba `Coke=3`, Firebase mostraba `3`, navegador seguia en `2`.
+  - Acierto confirmado:
+    - Flujo `Celular -> Firebase` funcionaba correctamente en cantidades.
+    - Se valido varias veces con lectura directa a Firestore (REST autenticado).
+  - Error detectado en web/local:
+    - La capa local de Lista Justa podia pisar datos remotos por conflicto de marcas temporales.
+    - En algunos ciclos, el navegador guardaba estados locales viejos como si fueran nuevos.
+  - Causa raiz 1 (critica):
+    - `ListaJustaService.normalizarItem()` reescribia `actualizadoEn` en cada carga, incluso sin cambios reales.
+    - Efecto: cualquier item local parecia "reciente" y competia injustamente con Firestore.
+  - Causa raiz 2 (sincronizacion):
+    - `sincronizarRemotoAhora()` podia devolver temprano si habia sync remota en curso.
+    - Efecto: se continuaba con operaciones locales (ej. uso de lista) antes de terminar de absorber remoto.
+  - Causa raiz 3 (fusion remota/local):
+    - En `Firestore -> local` para listas, faltaba priorizar remoto en conflictos de esta iteracion.
+  - Correcciones aplicadas:
+    - `src/almacenamiento/servicios/ListaJustaService.js`:
+      - `actualizadoEn` ahora conserva valor existente (`nuevoItem.actualizadoEn`) y no se pisa en lecturas.
+      - Si no existe, usa fallback estable (`fechaActualizacion` o `creadoEn`).
+    - `src/almacenamiento/stores/UsuarioStore.js`:
+      - Se agrego `promesaSincronizacionRemotaEnCurso`.
+      - Si una sync remota ya esta corriendo, nuevas llamadas esperan esa promesa en vez de abortar.
+    - `src/Firebase/ServicioMigracionLocalFirestore.js`:
+      - Se habilito opcion `priorizarRemoto` para fusion de listas.
+      - En `sincronizarDesdeFirestoreALocal`, Lista Justa prioriza remoto para limpiar desfasajes viejos.
+      - Se mantuvo criterio conservador en otros flujos para no romper migracion completa.
+    - `src/pages/ListaJusta/ListaJustaPage.vue` y `DetalleListaJustaPage.vue`:
+      - Refresco remoto periodico (12s) + recarga de listas para reflejo automatico en web.
+  - Validaciones realizadas (MCP + Firebase):
+    - Se forzo update remoto controlado en Firestore (`Coke=3`) simulando otro dispositivo.
+    - Resultado final: navegador reflejo `Coke=3` y IndexedDB local quedo en `3`.
+    - Estado final consistente: `Celular == Firebase == Web` para cantidad de Coke en `P 4`.
+  - Decision operativa acordada:
+    - Leo puede seguir probando en celular sin compilar APK en cada cambio web.
+    - Si `Celular -> Firebase` y `Firebase -> Web` reflejan bien, el flujo de escritura del celular esta OK.
+    - Compilar APK solo cuando se necesiten fixes que impactan lectura/sync del lado celular.
+
 - [x] Validado en `N 1`: restaurar precio de producto existente (`Dulce De Leche`) desde Mis Productos y persistencia en Firebase.
 - [x] Validado en `N 1`: edición de precio manual (`Coke`) y alta/edición de item manual (`Habla menos, actúa más`) con persistencia en Firebase.
 - [x] Validado en `N 1`: eliminación de item (`Coke`) y envío de item manual (`Pan`) a Mesa; ambos reflejados en Firebase.
 - [x] Validado en `N 1`: cambio de comercio actual a `Ta-Ta` sucursal `Enotracalle` reflejado en Firebase (`comercioActual` con `direccionId` y `direccionNombre`).
 - [x] Corrección aplicada: fusión de listas remota/local ahora resuelve conflictos por ítem (`actualizadoEn`) en vez de pisar lista completa por timestamp general, para evitar pérdida de cambios parciales entre web/cel.
 - [x] Corrección aplicada: marcar `comprado` ahora usa valor explícito del checkbox (true/false) en vez de toggle implícito por estado actual, evitando rebotes a `false` en eventos duplicados.
-- [ ] Pendiente observado: revalidar en Android/Web que `Pan` (manual, en Mesa) conserve `comprado=true` luego de marcarlo y sincronizar.
+- [x] Revalidado en Android/Web/Firebase: `Pan` (manual, en Mesa) conserva `comprado=true` luego de marcarlo y sincronizar.
+- [x] Validado en `N 1`: cambio de precio del libro (`Habla menos, actúa más`) a `1006 UYU`, precio manual del `Dulce De Leche` a `250 UYU` y alta manual de `Agua si gas` a `10 UYU` llegaron a Firebase.
 - [ ] Validar Web -> Celular y Celular -> Web para lista vacia, lista con items y lista renombrada sin accion manual.
 - [ ] Validar borrado de lista desde web y desde celular, confirmando borrado fisico/remoto o tombstone correcto y que no reaparezca.
 - [ ] Validar borrar item individual, comprar/descomprar, cambiar cantidad y cambiar moneda, confirmando sincronizacion en Firestore.
