@@ -509,7 +509,7 @@
 
 <script setup>
 import InputFormularioReutilizable from '../../components/Compartidos/InputFormularioReutilizable.vue'
-import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { IconShoppingBag, IconTrash } from '@tabler/icons-vue'
@@ -543,7 +543,6 @@ const productosStore = useProductosStore()
 const preferenciasStore = usePreferenciasStore()
 const sesionEscaneoStore = useSesionEscaneoStore()
 const usuarioStore = useUsuarioStore()
-let intervaloRefrescoRemotoId = null
 
 const filtroEstado = ref('pendientes')
 
@@ -1686,20 +1685,6 @@ onMounted(async () => {
   formularioPrecioManual.value = {
     ...formularioPrecioManual.value,
     moneda: preferenciasStore.monedaDefaultEfectiva,
-  }
-
-  if (typeof window !== 'undefined') {
-    intervaloRefrescoRemotoId = window.setInterval(async () => {
-      await usuarioStore.sincronizarRemotoAhora('detalle_lista_justa_intervalo', { forzar: true })
-      await listaJustaStore.cargarListas()
-    }, 12000)
-  }
-})
-
-onBeforeUnmount(() => {
-  if (intervaloRefrescoRemotoId && typeof window !== 'undefined') {
-    window.clearInterval(intervaloRefrescoRemotoId)
-    intervaloRefrescoRemotoId = null
   }
 })
 </script>

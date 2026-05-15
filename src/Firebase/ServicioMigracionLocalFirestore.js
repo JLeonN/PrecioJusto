@@ -1,4 +1,4 @@
-﻿import { collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, setDoc, writeBatch } from 'firebase/firestore'
+﻿import { collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, serverTimestamp, setDoc, writeBatch } from 'firebase/firestore'
 import { firestoreDb } from './ClienteFirebase.js'
 import servicioFirestoreDisponibilidad from './ServicioFirestoreDisponibilidad.js'
 import {
@@ -216,6 +216,27 @@ async function obtenerEstadoSincronizacionRemoto(usuarioId) {
   return snapshot.exists() ? snapshot.data() : null
 }
 
+function escucharEstadoSincronizacion(usuarioId, alCambio, alError) {
+  const uid = String(usuarioId || '').trim()
+  if (!uid) return () => {}
+  verificarFirestoreDisponible()
+
+  return onSnapshot(
+    crearReferenciaEstadoSincronizacion(uid),
+    (snapshot) => {
+      if (typeof alCambio === 'function') {
+        alCambio(snapshot.exists() ? snapshot.data() : null)
+      }
+    },
+    (error) => {
+      servicioFirestoreDisponibilidad.registrarFalloFirestore(error)
+      if (typeof alError === 'function') {
+        alError(error)
+      }
+    },
+  )
+}
+
 function obtenerClavePrecio(precio) {
   const comercioId = String(precio?.comercioId || '').trim().toLowerCase()
   const direccionId = String(precio?.direccionId || '').trim().toLowerCase()
@@ -385,21 +406,59 @@ function fusionarComerciosConRemoto(comerciosRemotos = [], comerciosLocales = []
   return Array.from(mapaComercios.values())
 }
 
+function normalizarItemsEliminadosLista(itemsEliminados = []) {
+  if (!Array.isArray(itemsEliminados)) return []
+
+  const mapa = new Map()
+
+  itemsEliminados.forEach((itemEliminado) => {
+    const id = String(
+      typeof itemEliminado === 'string' ? itemEliminado : itemEliminado?.id || '',
+    ).trim()
+    if (!id) return
+
+    const eliminadoEn = String(
+      typeof itemEliminado === 'string'
+        ? ''
+        : itemEliminado?.eliminadoEn || itemEliminado?.fechaEliminacion || '',
+    ).trim() || new Date(0).toISOString()
+    const previo = mapa.get(id)
+
+    if (convertirFechaAms(eliminadoEn) >= convertirFechaAms(previo?.eliminadoEn)) {
+      mapa.set(id, { id, eliminadoEn })
+    }
+  })
+
+  return Array.from(mapa.values())
+}
+
+function fusionarItemsEliminadosLista(...origenes) {
+  return normalizarItemsEliminadosLista(
+    origenes.flatMap((origen) => normalizarItemsEliminadosLista(origen?.itemsEliminados)),
+  )
+}
+
+function filtrarItemsVigentesLista(items = [], itemsEliminados = []) {
+  const idsEliminados = new Set(itemsEliminados.map((item) => item.id))
+  return (Array.isArray(items) ? items : []).filter((item) => {
+    const id = String(item?.id || '').trim()
+    return id && !idsEliminados.has(id)
+  })
+}
+
 function fusionarListaExistente(listaBase, listaNueva, opciones = {}) {
   const priorizarRemoto = opciones.priorizarRemoto === true
   const fechaBaseMs = obtenerMarcaActualizacion(listaBase)
   const fechaNuevaMs = obtenerMarcaActualizacion(listaNueva)
   const baseReciente = fechaBaseMs >= fechaNuevaMs ? listaBase : listaNueva
   const baseVieja = baseReciente === listaBase ? listaNueva : listaBase
+  const itemsEliminados = fusionarItemsEliminadosLista(listaBase, listaNueva)
 
-  const itemsBase = Array.isArray(listaBase?.items) ? listaBase.items : []
-  const itemsNueva = Array.isArray(listaNueva?.items) ? listaNueva.items : []
+  const itemsBase = filtrarItemsVigentesLista(listaBase?.items, itemsEliminados)
+  const itemsNueva = filtrarItemsVigentesLista(listaNueva?.items, itemsEliminados)
   const mapaItems = new Map()
 
   const fusionarItem = (itemA, itemB) => {
-    if (priorizarRemoto) {
-      return { ...itemB, ...itemA }
-    }
     const marcaA = obtenerMarcaActualizacion(itemA)
     const marcaB = obtenerMarcaActualizacion(itemB)
     // En empate de marca temporal, priorizamos remoto/base para evitar
@@ -427,14 +486,25 @@ function fusionarListaExistente(listaBase, listaNueva, opciones = {}) {
     return {
       ...listaNueva,
       ...listaBase,
-      items: Array.from(mapaItems.values()),
+      items: filtrarItemsVigentesLista(Array.from(mapaItems.values()), itemsEliminados),
+      itemsEliminados,
     }
   }
 
   return {
     ...baseVieja,
     ...baseReciente,
-    items: Array.from(mapaItems.values()),
+    items: filtrarItemsVigentesLista(Array.from(mapaItems.values()), itemsEliminados),
+    itemsEliminados,
+  }
+}
+
+function normalizarListaParaFusion(lista = {}) {
+  const itemsEliminados = normalizarItemsEliminadosLista(lista.itemsEliminados)
+  return {
+    ...lista,
+    items: filtrarItemsVigentesLista(lista.items, itemsEliminados),
+    itemsEliminados,
   }
 }
 
@@ -444,7 +514,7 @@ function fusionarListasConRemoto(listasRemotas = [], listasLocales = [], opcione
   for (const lista of listasRemotas) {
     const id = String(lista?.id || '').trim()
     if (!id) continue
-    mapaListas.set(id, lista)
+    mapaListas.set(id, normalizarListaParaFusion(lista))
   }
 
   for (const listaLocal of listasLocales) {
@@ -452,7 +522,7 @@ function fusionarListasConRemoto(listasRemotas = [], listasLocales = [], opcione
     if (!id) continue
 
     if (!mapaListas.has(id)) {
-      mapaListas.set(id, listaLocal)
+      mapaListas.set(id, normalizarListaParaFusion(listaLocal))
       continue
     }
 
@@ -932,7 +1002,7 @@ async function sincronizarCambiosLocalesAFirestore(usuarioId, cambios = {}) {
       const listaRemota = mapaListasRemotas.get(idLista)
       const listaSincronizada = listaRemota
         ? fusionarListaExistente(listaRemota, lista)
-        : lista
+        : normalizarListaParaFusion(lista)
       lote.set(
         doc(firestoreDb, 'users', uid, 'listasJustas', idLista),
         {
@@ -1451,6 +1521,7 @@ export default {
   sincronizarCambiosLocalesAFirestore,
   sincronizarDesdeFirestoreALocal,
   sincronizarDesdeFirestoreALocalSiCambio,
+  escucharEstadoSincronizacion,
   registrarEliminacionListaLocal,
   registrarEliminacionComercioLocal,
   registrarEliminacionProductoLocal,

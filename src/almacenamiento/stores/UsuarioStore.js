@@ -32,6 +32,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
   const pendientesSincronizacion = ref([])
 
   let detenerEscuchaSesion = null
+  let detenerEscuchaEstadoSincronizacion = null
   let promesaInicializacion = null
   let espacioTrabajoActual = null
   let uidMigracionAutomaticaEnSesion = null
@@ -143,7 +144,8 @@ export const useUsuarioStore = defineStore('usuario', () => {
     return `uid-${usuario.uid}`
   }
 
-  async function recargarContextoDatos() {
+  async function recargarContextoDatos(opciones = {}) {
+    const limpiarAntes = opciones?.limpiarAntes === true
     const productosStore = useProductosStore()
     const comerciosStore = useComerciStore()
     const listaJustaStore = useListaJustaStore()
@@ -151,14 +153,16 @@ export const useUsuarioStore = defineStore('usuario', () => {
     const { usePreferenciasStore } = await import('./preferenciasStore.js')
     const preferenciasStore = usePreferenciasStore()
 
-    productosStore.limpiarEstado()
-    comerciosStore.comercios = []
-    listaJustaStore.listas = []
+    if (limpiarAntes) {
+      productosStore.limpiarEstado()
+      comerciosStore.comercios = []
+      listaJustaStore.listas = []
+    }
 
     await Promise.all([
       productosStore.cargarProductos(),
       comerciosStore.cargarComercios(),
-      listaJustaStore.cargarListas(),
+      listaJustaStore.cargarListas({ silencioso: !limpiarAntes }),
       sesionEscaneoStore.cargarSesion(),
       preferenciasStore.inicializar(),
     ])
@@ -170,9 +174,10 @@ export const useUsuarioStore = defineStore('usuario', () => {
 
     if (!cambioEspacioTrabajo) return
 
+    detenerEscuchaEstadoSincronizacionRemota()
     configurarEspacioTrabajoAlmacenamiento(nuevoEspacioTrabajo)
     espacioTrabajoActual = nuevoEspacioTrabajo
-    await recargarContextoDatos()
+    await recargarContextoDatos({ limpiarAntes: true })
   }
 
   async function ejecutarMigracionAutomaticaSiCorresponde(usuario) {
@@ -445,6 +450,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
             aplicarEstadoUsuario(usuario)
 
             if (!usuario) {
+              detenerEscuchaEstadoSincronizacionRemota()
               detenerIntervaloSincronizacionRemota()
               await asegurarSesionAnonima()
               return
@@ -460,6 +466,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
             void solicitarSincronizacionRemota('arranque_sesion', {
               retrasoMs: RETRASO_SINCRONIZACION_REMOTA_ARRANQUE_MS,
             })
+            iniciarEscuchaEstadoSincronizacionRemota()
             iniciarIntervaloSincronizacionRemota()
 
             if (!primerEventoRecibido) {
@@ -506,10 +513,12 @@ export const useUsuarioStore = defineStore('usuario', () => {
               }
             })
             iniciarIntervaloSincronizacionRemota()
+            iniciarEscuchaEstadoSincronizacionRemota()
             void solicitarSincronizacionRemota('arranque_sesion', {
               retrasoMs: RETRASO_SINCRONIZACION_REMOTA_ARRANQUE_MS,
             })
           } else {
+            detenerEscuchaEstadoSincronizacionRemota()
             detenerIntervaloSincronizacionRemota()
           }
           cargandoSesion.value = false
@@ -668,6 +677,14 @@ export const useUsuarioStore = defineStore('usuario', () => {
     return true
   }
 
+  function hayCambiosLocalesPendientes() {
+    return (
+      motivosPendientes.size > 0 ||
+      pendientesSincronizacion.value.length > 0 ||
+      sincronizacionAutomaticaEnCurso
+    )
+  }
+
   function agregarIdsPendientes(campo, ids) {
     const destino = cambiosPendientesSincronizacion[campo]
     if (!(destino instanceof Set)) return
@@ -798,6 +815,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
       limpiarCambiosPendientesSincronizacion()
       await limpiarSincronizacionPendienteLocal()
       solicitarSincronizacionRemota('post_sincronizacion_local', {
+        forzar: true,
         retrasoMs: RETRASO_SINCRONIZACION_REMOTA_POST_LOCAL_MS,
       })
       return true
@@ -852,8 +870,59 @@ export const useUsuarioStore = defineStore('usuario', () => {
     return true
   }
 
+  function detenerEscuchaEstadoSincronizacionRemota() {
+    if (!detenerEscuchaEstadoSincronizacion) return
+    detenerEscuchaEstadoSincronizacion()
+    detenerEscuchaEstadoSincronizacion = null
+  }
+
+  function iniciarEscuchaEstadoSincronizacionRemota() {
+    if (detenerEscuchaEstadoSincronizacion) return
+    if (!tieneSesionRealActiva.value || !usuarioId.value) return
+
+    try {
+      detenerEscuchaEstadoSincronizacion =
+        servicioMigracionLocalFirestore.escucharEstadoSincronizacion(
+          usuarioId.value,
+          (estado) => {
+            const sincronizacionId = String(estado?.sincronizacionId || '').trim()
+            if (!sincronizacionId) return
+            if (hayCambiosLocalesPendientes()) return
+
+            void ejecutarSincronizacionRemota('estado_sincronizacion_remoto', {
+              forzar: false,
+            })
+          },
+          (error) => {
+            if (esErrorConectividad(error)) {
+              console.info(
+                'Escucha de sincronización remota pausada:',
+                error?.code || error?.message,
+              )
+              return
+            }
+
+            console.warn('Error en escucha de estado de sincronización:', error)
+          },
+        )
+    } catch (error) {
+      if (esErrorConectividad(error)) {
+        console.info(
+          'No se inició la escucha de sincronización remota:',
+          error?.code || error?.message,
+        )
+        return
+      }
+
+      console.warn('No se pudo iniciar la escucha de estado de sincronización:', error)
+    }
+  }
+
   async function ejecutarSincronizacionRemota(motivo = 'remoto', opciones = {}) {
     if (!puedeSincronizarRemoto()) return false
+    if (hayCambiosLocalesPendientes() && opciones?.permitirConPendientes !== true) {
+      return false
+    }
     if (sincronizacionRemotaEnCurso && promesaSincronizacionRemotaEnCurso) {
       return promesaSincronizacionRemotaEnCurso
     }
@@ -1037,6 +1106,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
       clearTimeout(temporizadorSolicitudSincronizacionRemota)
       temporizadorSolicitudSincronizacionRemota = null
     }
+    detenerEscuchaEstadoSincronizacionRemota()
     detenerIntervaloSincronizacionRemota()
     sincronizacionAutomaticaEnCurso = false
     sincronizacionAutomaticaReprogramada = false

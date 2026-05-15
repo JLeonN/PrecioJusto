@@ -24,6 +24,49 @@ Migrar Precio Justo desde almacenamiento local a Firebase de forma incremental, 
 - En web, la cache local debe soportar volumen alto mediante IndexedDB; `localStorage` queda como legado/migracion, no como cache principal
 - Considerar que Leo esta aprendiendo Firebase y requiere guia paso a paso en Firebase.com para cada accion de consola
 
+## HITO ESTABLE BLOQUEADO (15 Mayo 2026)
+
+### Estado validado por CH + Leo
+
+- [x] MCP abierto en `http://localhost:9000` y app operativa.
+- [x] Firebase/Firestore y UI en navegador quedaron alineados en Lista Justa para la cuenta real activa.
+- [x] Lista confirmada: `Probando 1` (`listaJusta_1778840416526_v97sgj`).
+- [x] Conteo actual confirmado en Firestore: `4` items activos, `0` en `itemsEliminados`.
+- [x] Estado de items en Firebase confirmado:
+  - `comprados=0`
+  - `pendientes=4`
+  - `conPrecio=2`
+  - `sinPrecio=2`
+  - `manuales=2`
+  - `misProductos=2`
+  - `estadoDerivacion enMisProductos=2`
+  - `estadoDerivacion ninguno=2`
+  - `estadoDerivacion enMesa=0`
+
+### Exito documentado
+
+- [x] Se comprobo que **Firebase tiene los datos correctos** y consistentes con la UI al momento de la verificacion.
+- [x] Se comprobo que `sincronizacionId` local/remoto coincide cuando no hay cambios pendientes.
+- [x] Se comprobo que Firestore guarda `itemsEliminados` en Lista Justa y la estructura soporta tombstones por item.
+
+### NO VOLVER A HACER (regla obligatoria)
+
+- [ ] No volver a meter polling agresivo de Lista Justa (ejemplo: recarga forzada cada pocos segundos).
+- [ ] No volver a usar `forzar: true` en sincronizacion remota al entrar en paginas de Lista Justa salvo diagnostico puntual.
+- [ ] No volver a recargar contexto completo de datos si no cambio `sincronizacionId` remoto.
+- [ ] No volver a vaciar stores antes de una recarga silenciosa de fondo.
+- [ ] No volver a pisar `actualizadoEn` por normalizacion al leer datos; solo actualizar timestamp cuando hay cambio real.
+- [ ] No volver a fusionar listas pisando lista completa cuando hay conflicto por item; la fusion debe ser por item y respetar `itemsEliminados`.
+- [ ] No volver a permitir que un item borrado reaparezca por merge; tombstone siempre gana.
+
+### Nota operativa permanente
+
+- Si reaparece parpadeo o reaparicion de items, revisar primero:
+  1. triggers con `forzar: true` en montaje de paginas,
+  2. recargas globales innecesarias de stores,
+  3. merge de Lista Justa sin respeto de `itemsEliminados`,
+  4. escritura de timestamps falsos (`actualizadoEn`) en lecturas.
+
 ## FASE 1: Consolidar base Firebase en pruebas
 
 ### Objetivo

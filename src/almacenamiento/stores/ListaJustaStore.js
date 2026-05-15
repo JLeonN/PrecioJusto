@@ -28,8 +28,11 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     return listas.value.find((lista) => lista.id === listaId) || null
   }
 
-  async function cargarListas() {
-    cargando.value = true
+  async function cargarListas(opciones = {}) {
+    const silencioso = opciones?.silencioso === true
+    if (!silencioso) {
+      cargando.value = true
+    }
     error.value = null
 
     try {
@@ -38,7 +41,9 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
       error.value = 'No se pudieron cargar las listas.'
       console.error('Error al cargar listas de Lista Justa:', err)
     } finally {
-      cargando.value = false
+      if (!silencioso) {
+        cargando.value = false
+      }
     }
   }
 
@@ -339,8 +344,22 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     const lista = obtenerListaPorId(listaId)
     if (!lista) return false
 
-    lista.items = lista.items.filter((item) => item.id !== itemId)
-    lista.fechaActualizacion = new Date().toISOString()
+    const idNormalizado = String(itemId || '').trim()
+    if (!idNormalizado) return false
+
+    lista.items = lista.items.filter((item) => String(item?.id || '').trim() !== idNormalizado)
+    const ahora = new Date().toISOString()
+    const itemsEliminados = Array.isArray(lista.itemsEliminados) ? lista.itemsEliminados : []
+    const indiceEliminado = itemsEliminados.findIndex((item) => item?.id === idNormalizado)
+
+    if (indiceEliminado >= 0) {
+      itemsEliminados[indiceEliminado] = { id: idNormalizado, eliminadoEn: ahora }
+    } else {
+      itemsEliminados.push({ id: idNormalizado, eliminadoEn: ahora })
+    }
+
+    lista.itemsEliminados = itemsEliminados
+    lista.fechaActualizacion = ahora
     await persistir({ listaId })
     return true
   }

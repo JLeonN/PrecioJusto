@@ -42,8 +42,9 @@ class ListaJustaService {
       comercioActual: null,
       configuracionInteligente: this._normalizarConfiguracionInteligente(null, null),
       items: [],
+      itemsEliminados: [],
       metadatos: {
-        version: 2,
+        version: 3,
       },
     }
   }
@@ -90,6 +91,8 @@ class ListaJustaService {
 
   _normalizarLista(lista = {}) {
     const items = Array.isArray(lista.items) ? lista.items : []
+    const itemsEliminados = this._normalizarItemsEliminados(lista.itemsEliminados)
+    const idsEliminados = new Set(itemsEliminados.map((item) => item.id))
     const comercioActual = lista.comercioActual || null
 
     return {
@@ -106,11 +109,40 @@ class ListaJustaService {
         lista.configuracionInteligente,
         comercioActual,
       ),
-      items: items.map((item) => this.normalizarItem(item)),
+      items: items
+        .map((item) => this.normalizarItem(item))
+        .filter((item) => !idsEliminados.has(item.id)),
+      itemsEliminados,
       metadatos: {
-        version: Math.max(Number(lista.metadatos?.version || 1), 2),
+        version: Math.max(Number(lista.metadatos?.version || 1), 3),
       },
     }
+  }
+
+  _normalizarItemsEliminados(itemsEliminados) {
+    if (!Array.isArray(itemsEliminados)) return []
+
+    const mapa = new Map()
+
+    itemsEliminados.forEach((itemEliminado) => {
+      const id = String(
+        typeof itemEliminado === 'string' ? itemEliminado : itemEliminado?.id || '',
+      ).trim()
+      if (!id) return
+
+      const eliminadoEn = String(
+        typeof itemEliminado === 'string'
+          ? ''
+          : itemEliminado?.eliminadoEn || itemEliminado?.fechaEliminacion || '',
+      ).trim() || new Date(0).toISOString()
+      const previo = mapa.get(id)
+
+      if (!previo || new Date(eliminadoEn).getTime() > new Date(previo.eliminadoEn).getTime()) {
+        mapa.set(id, { id, eliminadoEn })
+      }
+    })
+
+    return Array.from(mapa.values())
   }
 
   _generarId(prefijo) {
