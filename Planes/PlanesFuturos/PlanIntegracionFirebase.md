@@ -67,6 +67,42 @@ Migrar Precio Justo desde almacenamiento local a Firebase de forma incremental, 
   3. merge de Lista Justa sin respeto de `itemsEliminados`,
   4. escritura de timestamps falsos (`actualizadoEn`) en lecturas.
 
+## HITO ESTABLE - PARIDAD DE FOTOS (15 Mayo 2026)
+
+### Estado validado por Leo + CH
+
+- [x] Flujo de foto en `Mis Comercios` confirmado funcionando en celular y persistiendo en Firebase.
+- [x] Se logro paridad funcional en `Mesa de trabajo` y `Mis Productos` tomando `Mis Comercios` como referencia.
+- [x] Se mantiene estrategia actual: `imagen` en Base64/URL + metadato `fotoFuente` (sin migrar a Firebase Storage en esta fase).
+
+### Aciertos implementados (detalle tecnico)
+
+- [x] Se agrego helper unico `resolverFotoFuenteDesdeImagen()` en `src/utils/FotoFuenteUtils.js`:
+  - `data:image/...` => `usuario`
+  - `http/https` => `api`
+  - vacio/null => `null`
+- [x] `MesaTrabajoPage.vue` ahora propaga `imagen` + `fotoFuente` al guardar/enviar item:
+  - cuando actualiza producto existente,
+  - cuando crea producto nuevo desde la mesa.
+- [x] `DialogoAgregarProducto.vue` (Mis Productos) quedo consistente:
+  - en alta nueva deriva `fotoFuente` desde la imagen final,
+  - en flujo de producto existente (agregar precio por codigo) ahora tambien actualiza foto/metadato cuando el usuario definio foto.
+- [x] `ProductosService.guardarProducto()` normaliza `fotoFuente` en cada guardado para blindar coherencia en todos los puntos de persistencia.
+- [x] `npm run lint` ejecutado sin errores luego de los cambios.
+
+### Exito funcional esperado en Firebase
+
+- [x] Producto guardado desde Mesa con foto queda persistido en `users/{uid}/productos` con `imagen` y `fotoFuente` alineados.
+- [x] Alta manual en Mis Productos con foto conserva `imagen` y `fotoFuente` correctos en local y remoto.
+- [x] Flujo "producto existente + foto nueva" deja de perder foto: ahora actualiza el documento del producto existente en Firestore.
+
+### NO VOLVER A HACER (regla obligatoria de fotos)
+
+- [ ] No hardcodear `fotoFuente` por pantalla sin derivarla del valor real de `imagen`.
+- [ ] No agregar precio a producto existente ignorando la foto capturada en el formulario.
+- [ ] No persistir productos con `imagen` y `fotoFuente` desalineados (ejemplo: Base64 con `fotoFuente='api'`).
+- [ ] No duplicar logica de clasificacion de fuente de foto en varios componentes; mantener helper unico.
+
 ## FASE 1: Consolidar base Firebase en pruebas
 
 ### Objetivo

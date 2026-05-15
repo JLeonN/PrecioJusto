@@ -125,29 +125,34 @@ export const useProductosStore = defineStore('productos', () => {
    *     }))
    *   })
    */
-  async function cargarProductos() {
+  async function cargarProductos(opciones = {}) {
     if (promesaCargaProductos) {
       return promesaCargaProductos
     }
 
+    const silencioso = opciones?.silencioso === true
     promesaCargaProductos = (async () => {
-    cargando.value = true
-    error.value = null
+      if (!silencioso) {
+        cargando.value = true
+      }
+      error.value = null
 
-    try {
-      console.log('📥 Cargando productos...')
+      try {
+        console.log('📥 Cargando productos...')
 
-      const productosObtenidos = await productosService.obtenerTodos()
-      productos.value = productosObtenidos
+        const productosObtenidos = await productosService.obtenerTodos()
+        productos.value = productosObtenidos
 
-      console.log(`✅ ${productosObtenidos.length} productos cargados`)
-    } catch (err) {
-      console.error('❌ Error al cargar productos:', err)
-      error.value = 'No se pudieron cargar los productos'
-    } finally {
-      cargando.value = false
-      promesaCargaProductos = null
-    }
+        console.log(`✅ ${productosObtenidos.length} productos cargados`)
+      } catch (err) {
+        console.error('❌ Error al cargar productos:', err)
+        error.value = 'No se pudieron cargar los productos'
+      } finally {
+        if (!silencioso) {
+          cargando.value = false
+        }
+        promesaCargaProductos = null
+      }
     })()
 
     return promesaCargaProductos
@@ -157,8 +162,8 @@ export const useProductosStore = defineStore('productos', () => {
    * 🔄 RECARGAR PRODUCTOS
    * Fuerza una recarga completa (útil para pull-to-refresh)
    */
-  async function recargarProductos() {
-    await cargarProductos()
+  async function recargarProductos(opciones = {}) {
+    await cargarProductos(opciones)
   }
 
   // ========================================

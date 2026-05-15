@@ -1028,9 +1028,7 @@ watch(
 )
 
 onMounted(async () => {
-  await usuarioStore.sincronizarRemotoAhora('detalle_lista_justa_inteligente_abierto', {
-    forzar: true,
-  })
+  await usuarioStore.sincronizarRemotoAhora('detalle_lista_justa_inteligente_abierto')
   await Promise.all([
     listaJustaStore.cargarListas(),
     productosStore.cargarProductos(),

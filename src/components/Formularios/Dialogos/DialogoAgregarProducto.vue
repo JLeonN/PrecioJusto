@@ -99,6 +99,7 @@ import busquedaProductosHibridaService, {
 import { usePreferenciasStore } from '../../../almacenamiento/stores/preferenciasStore.js'
 import { useTecladoVirtual } from '../../../composables/useTecladoVirtual.js'
 import { formatearPrecioConCodigo } from '../../../utils/PrecioUtils.js'
+import { resolverFotoFuenteDesdeImagen } from '../../../utils/FotoFuenteUtils.js'
 
 const props = defineProps({
   modelValue: {
@@ -359,9 +360,9 @@ function autoCompletarFormulario(producto) {
   }
   fuenteDatoActual.value = producto.fuenteDato || null
   if (producto.fuenteDato === FUENTE_DATO_LOCAL) {
-    fotoFuenteActual.value = producto.fotoFuente ?? (producto.imagen ? 'usuario' : null)
+    fotoFuenteActual.value = producto.fotoFuente ?? resolverFotoFuenteDesdeImagen(producto.imagen)
   } else {
-    fotoFuenteActual.value = producto.imagen ? 'api' : null
+    fotoFuenteActual.value = resolverFotoFuenteDesdeImagen(producto.imagen)
   }
   console.log('✅ Formulario auto-completado')
 }
@@ -437,6 +438,13 @@ async function guardarProducto() {
       )
 
       if (productoActualizado) {
+        if (datosProducto.value.imagen) {
+          await productosStore.actualizarProducto(productoExistente.id, {
+            imagen: datosProducto.value.imagen,
+            fotoFuente: resolverFotoFuenteDesdeImagen(datosProducto.value.imagen),
+          })
+        }
+
         if (nuevoPrecio.comercioId && nuevoPrecio.direccionId) {
           await comerciosStore.registrarUso(nuevoPrecio.comercioId, nuevoPrecio.direccionId)
         }
@@ -471,7 +479,7 @@ async function guardarProducto() {
       categoria: datosProducto.value.categoria?.trim() || '',
       imagen: datosProducto.value.imagen || null,
       fuenteDato: fuenteDatoActual.value || null,
-      fotoFuente: fotoFuenteActual.value || null,
+      fotoFuente: resolverFotoFuenteDesdeImagen(datosProducto.value.imagen),
       precios: [],
     }
 

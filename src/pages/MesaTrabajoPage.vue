@@ -288,6 +288,7 @@ import { useListaJustaStore } from '../almacenamiento/stores/ListaJustaStore.js'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
 import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
 import { useSeleccionMultiple } from '../composables/useSeleccionMultiple.js'
+import { resolverFotoFuenteDesdeImagen } from '../utils/FotoFuenteUtils.js'
 import { IconShoppingBag, IconSend, IconHome, IconMapPin } from '@tabler/icons-vue'
 
 const OPCIONES_ORDEN = [
@@ -394,6 +395,7 @@ const itemsFiltrados = computed(() => {
 
 async function _guardarItem(item) {
   const comercio = item.comercio
+  const fotoFuente = resolverFotoFuenteDesdeImagen(item.imagen)
   let productoDestinoId = item.productoExistenteId || null
   const datoPrecio = {
     comercioId: comercio?.id || null,
@@ -416,6 +418,7 @@ async function _guardarItem(item) {
     await productosStore.actualizarProducto(item.productoExistenteId, {
       nombre: item.nombre,
       imagen: item.imagen,
+      fotoFuente,
       marca: item.marca,
       cantidad: item.cantidad,
       unidad: item.unidad,
@@ -425,6 +428,7 @@ async function _guardarItem(item) {
       codigoBarras: item.codigoBarras,
       nombre: item.nombre,
       imagen: item.imagen,
+      fotoFuente,
       marca: item.marca,
       cantidad: item.cantidad,
       unidad: item.unidad,

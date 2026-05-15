@@ -146,6 +146,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
 
   async function recargarContextoDatos(opciones = {}) {
     const limpiarAntes = opciones?.limpiarAntes === true
+    const silencioso = !limpiarAntes
     const productosStore = useProductosStore()
     const comerciosStore = useComerciStore()
     const listaJustaStore = useListaJustaStore()
@@ -160,11 +161,11 @@ export const useUsuarioStore = defineStore('usuario', () => {
     }
 
     await Promise.all([
-      productosStore.cargarProductos(),
-      comerciosStore.cargarComercios(),
-      listaJustaStore.cargarListas({ silencioso: !limpiarAntes }),
-      sesionEscaneoStore.cargarSesion(),
-      preferenciasStore.inicializar(),
+      productosStore.cargarProductos({ silencioso }),
+      comerciosStore.cargarComercios({ silencioso }),
+      listaJustaStore.cargarListas({ silencioso }),
+      sesionEscaneoStore.cargarSesion({ silencioso }),
+      preferenciasStore.inicializar({ silencioso }),
     ])
   }
 
@@ -815,7 +816,6 @@ export const useUsuarioStore = defineStore('usuario', () => {
       limpiarCambiosPendientesSincronizacion()
       await limpiarSincronizacionPendienteLocal()
       solicitarSincronizacionRemota('post_sincronizacion_local', {
-        forzar: true,
         retrasoMs: RETRASO_SINCRONIZACION_REMOTA_POST_LOCAL_MS,
       })
       return true

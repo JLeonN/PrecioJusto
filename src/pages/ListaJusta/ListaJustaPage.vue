@@ -261,7 +261,7 @@ async function onSwipeLargoLista(listaId, detalles) {
 }
 
 onMounted(async () => {
-  await usuarioStore.sincronizarRemotoAhora('entrar_lista_justa', { forzar: true })
+  await usuarioStore.sincronizarRemotoAhora('entrar_lista_justa')
   await listaJustaStore.cargarListas()
 })
 </script>

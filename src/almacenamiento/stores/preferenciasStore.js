@@ -66,7 +66,8 @@ export const usePreferenciasStore = defineStore('preferencias', () => {
     solicitarSincronizacionPreferencias('preferencias_region_actualizada')
   }
 
-  async function inicializar() {
+  async function inicializar(opciones = {}) {
+    const silencioso = opciones?.silencioso === true
     try {
       const preferencias = await preferenciasService.obtenerPreferencias()
       modoMoneda.value = preferencias.modoMoneda || 'automatica'
@@ -77,7 +78,7 @@ export const usePreferenciasStore = defineStore('preferencias', () => {
       unidad.value = preferencias.unidad || 'unidad'
       aplicarModoTema()
 
-      if (modoMoneda.value === 'automatica') {
+      if (modoMoneda.value === 'automatica' && !silencioso) {
         await detectarMonedaAutomatica()
       }
     } catch (error) {

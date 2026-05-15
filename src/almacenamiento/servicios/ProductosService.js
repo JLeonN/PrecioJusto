@@ -18,6 +18,7 @@
 
 import { adaptadorActual } from './AlmacenamientoService.js'
 import { normalizarEscalasPorCantidad, obtenerResumenEscalas } from '../../utils/EscalasCantidadUtils.js'
+import { resolverFotoFuenteDesdeImagen } from '../../utils/FotoFuenteUtils.js'
 
 class ProductosService {
   constructor() {
@@ -57,6 +58,7 @@ class ProductosService {
       const ahora = new Date().toISOString()
       producto.fechaCreacion = producto.fechaCreacion || ahora
       producto.fechaActualizacion = ahora
+      producto.fotoFuente = resolverFotoFuenteDesdeImagen(producto.imagen)
 
       // Calcular campos automáticos
       producto = this._calcularCamposAutomaticos(producto)

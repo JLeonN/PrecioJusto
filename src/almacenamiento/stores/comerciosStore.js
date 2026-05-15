@@ -144,8 +144,11 @@ export const useComerciStore = defineStore('comercios', {
     /**
      * Carga todos los comercios desde el servicio
      */
-    async cargarComercios() {
-      this.cargando = true
+    async cargarComercios(opciones = {}) {
+      const silencioso = opciones?.silencioso === true
+      if (!silencioso) {
+        this.cargando = true
+      }
       this.error = null
 
       try {
@@ -156,7 +159,9 @@ export const useComerciStore = defineStore('comercios', {
         this.error = 'No se pudieron cargar los comercios'
         throw error
       } finally {
-        this.cargando = false
+        if (!silencioso) {
+          this.cargando = false
+        }
       }
     },
 

@@ -66,8 +66,11 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
   // ========================================
 
   // Carga la sesión guardada al iniciar la app
-  async function cargarSesion() {
-    cargando.value = true
+  async function cargarSesion(opciones = {}) {
+    const silencioso = opciones?.silencioso === true
+    if (!silencioso) {
+      cargando.value = true
+    }
     try {
       const datos = await adaptadorActual.obtener(CLAVE_SESION)
       persistenciaPausada = true
@@ -87,7 +90,9 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
       console.error('Error al cargar sesión de escaneo:', error)
     } finally {
       persistenciaPausada = false
-      cargando.value = false
+      if (!silencioso) {
+        cargando.value = false
+      }
     }
   }
 
