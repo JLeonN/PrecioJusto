@@ -675,25 +675,6 @@ onMounted(async () => {
   width: min(92vw, 420px);
   border-radius: 18px;
 }
-.input-codigo-manual :deep(.q-field--labeled .q-field__label) {
-  top: 7px;
-}
-.input-codigo-manual :deep(.q-field--labeled .q-field__native) {
-  padding-top: 24px !important;
-  padding-bottom: 6px !important;
-}
-.input-codigo-manual :deep(.q-field--labeled.q-field--float .q-field__native) {
-  padding-top: 20px !important;
-  padding-bottom: 0 !important;
-  line-height: 1.3 !important;
-}
-.input-codigo-manual :deep(.q-field--stacked .q-field__native),
-.input-codigo-manual :deep(.q-field--stacked.q-field--dense .q-field__native),
-.input-codigo-manual :deep(input.q-field__native) {
-  padding-top: 20px !important;
-  padding-bottom: 0 !important;
-  line-height: 1.3 !important;
-}
 .escaneo-api-overlay {
   position: fixed;
   inset: 0;
@@ -853,7 +834,6 @@ onMounted(async () => {
   transform: translateX(-50%) translateY(-16px);
 }
 </style>
-
 
 
 

@@ -359,18 +359,6 @@ defineExpose({ validarFormulario })
   flex-direction: column;
   gap: 16px;
 }
-.formulario-producto :deep(.input-formulario-reutilizable.q-field--labeled .q-field__native) {
-  padding-top: 24px;
-  padding-bottom: 6px;
-}
-.formulario-producto :deep(.input-formulario-reutilizable.q-field--labeled .q-field__label) {
-  top: 7px;
-}
-.formulario-producto :deep(.input-formulario-reutilizable.q-field--labeled.q-field--float .q-field__native) {
-  padding-top: 20px;
-  padding-bottom: 0;
-  line-height: 1.3;
-}
 .foto-fila {
   display: flex;
   align-items: center;
@@ -399,5 +387,4 @@ defineExpose({ validarFormulario })
   display: none;
 }
 </style>
-
 

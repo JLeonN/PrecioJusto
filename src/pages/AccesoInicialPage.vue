@@ -178,17 +178,6 @@ async function manejarInvitado() {
   width: 100%;
   margin: 0;
 }
-.input-acceso :deep(.q-field--labeled .q-field__native),
-.input-acceso :deep(.q-field--labeled.q-field--dense .q-field__native),
-.input-acceso :deep(.q-field--labeled.q-field--float .q-field__native),
-.input-acceso :deep(.q-field--labeled.q-field--dense.q-field--float .q-field__native),
-.input-acceso :deep(.q-field--stacked .q-field__native),
-.input-acceso :deep(.q-field--stacked.q-field--dense .q-field__native),
-.input-acceso :deep(input.q-field__native) {
-  padding-top: 20px !important;
-  padding-bottom: 0 !important;
-  line-height: 1.3 !important;
-}
 @media (max-width: 520px) {
   .acciones-correo {
     grid-template-columns: 1fr;

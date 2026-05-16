@@ -328,30 +328,30 @@ onBeforeUnmount(() => {
   opacity: 0.8;
   left: 14px;
 }
-.input-formulario-reutilizable :deep(.q-field--labeled .q-field__label) {
+.input-formulario-reutilizable :deep(.q-field--labeled .q-field__label),
+.input-formulario-reutilizable.q-field--labeled :deep(.q-field__label) {
   top: 7px;
   font-size: 12px;
 }
-.input-formulario-reutilizable :deep(.q-field--labeled .q-field__native) {
+.input-formulario-reutilizable :deep(.q-field--labeled .q-field__native),
+.input-formulario-reutilizable :deep(.q-field--labeled.q-field--dense .q-field__native),
+.input-formulario-reutilizable.q-field--labeled :deep(.q-field__native),
+.input-formulario-reutilizable.q-field--labeled.q-field--dense :deep(.q-field__native) {
   padding-top: 24px !important;
   padding-bottom: 6px !important;
 }
-.input-formulario-reutilizable :deep(.q-field--labeled.q-field--float .q-field__native) {
-  padding-top: 20px !important;
-  padding-bottom: 0 !important;
-  line-height: 1.3 !important;
-}
-.input-formulario-reutilizable :deep(.q-field--labeled.q-field--dense .q-field__native) {
-  padding-top: 24px !important;
-  padding-bottom: 6px !important;
-}
-.input-formulario-reutilizable :deep(.q-field--labeled.q-field--dense.q-field--float .q-field__native) {
+.input-formulario-reutilizable :deep(.q-field--labeled.q-field--float .q-field__native),
+.input-formulario-reutilizable :deep(.q-field--labeled.q-field--dense.q-field--float .q-field__native),
+.input-formulario-reutilizable.q-field--labeled.q-field--float :deep(.q-field__native),
+.input-formulario-reutilizable.q-field--labeled.q-field--dense.q-field--float :deep(.q-field__native) {
   padding-top: 20px !important;
   padding-bottom: 0 !important;
   line-height: 1.3 !important;
 }
 .input-formulario-reutilizable :deep(.q-field--stacked .q-field__native),
-.input-formulario-reutilizable :deep(.q-field--stacked.q-field--dense .q-field__native) {
+.input-formulario-reutilizable :deep(.q-field--stacked.q-field--dense .q-field__native),
+.input-formulario-reutilizable.q-field--stacked :deep(.q-field__native),
+.input-formulario-reutilizable.q-field--stacked.q-field--dense :deep(.q-field__native) {
   padding-top: 20px !important;
   padding-bottom: 0 !important;
   line-height: 1.3 !important;

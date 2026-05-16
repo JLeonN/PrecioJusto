@@ -540,18 +540,6 @@ function cerrar() {
 .q-card {
   border-radius: 8px;
 }
-.input-nuevo-precio-modal :deep(.q-field--labeled.q-field--float .q-field__native),
-.input-nuevo-precio-modal :deep(.q-field--labeled.q-field--dense.q-field--float .q-field__native) {
-  padding-top: 20px !important;
-  padding-bottom: 0 !important;
-  line-height: 1.3 !important;
-}
-.input-nuevo-precio-modal :deep(input.q-field__native) {
-  padding-top: 20px !important;
-  padding-bottom: 0 !important;
-  line-height: 1.3 !important;
-}
 </style>
-
 
 

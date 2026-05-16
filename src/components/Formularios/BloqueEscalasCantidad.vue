@@ -483,20 +483,6 @@ defineExpose({ validarEscalas })
 :deep(.inputPrecioEscala .q-btn) {
   border-radius: 4px;
 }
-:deep(.inputCantidadEscala .q-field--labeled.q-field--float .q-field__native),
-:deep(.inputCantidadEscala .q-field--labeled.q-field--dense.q-field--float .q-field__native),
-:deep(.inputPrecioEscala .q-field--labeled.q-field--float .q-field__native),
-:deep(.inputPrecioEscala .q-field--labeled.q-field--dense.q-field--float .q-field__native) {
-  padding-top: 20px !important;
-  padding-bottom: 0 !important;
-  line-height: 1.3 !important;
-}
-:deep(.inputCantidadEscala input.q-field__native),
-:deep(.inputPrecioEscala input.q-field__native) {
-  padding-top: 20px !important;
-  padding-bottom: 0 !important;
-  line-height: 1.3 !important;
-}
 :deep(.inputCantidadEscala input[type='number']) {
   -moz-appearance: textfield;
 }

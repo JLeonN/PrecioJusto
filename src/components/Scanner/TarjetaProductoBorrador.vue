@@ -625,18 +625,6 @@ function emitirEnviar() {
   flex-direction: column;
   gap: 10px;
 }
-.edit-campos :deep(.input-formulario-reutilizable.q-field--labeled .q-field__native) {
-  padding-top: 24px;
-  padding-bottom: 6px;
-}
-.edit-campos :deep(.input-formulario-reutilizable.q-field--labeled .q-field__label) {
-  top: 7px;
-}
-.edit-campos :deep(.input-formulario-reutilizable.q-field--labeled.q-field--float .q-field__native) {
-  padding-top: 20px;
-  padding-bottom: 0;
-  line-height: 1.3;
-}
 .boton-recuperar-datos {
   align-self: flex-end;
 }
@@ -683,5 +671,4 @@ function emitirEnviar() {
   display: none;
 }
 </style>
-
 

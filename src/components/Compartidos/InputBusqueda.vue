@@ -55,12 +55,15 @@ function obtenerColorFoco(color) {
   padding-top: 0;
   padding-bottom: 0;
 }
-.input-busqueda-reutilizable :deep(.q-field__native) {
+.input-busqueda-reutilizable :deep(.q-field__native),
+.input-busqueda-reutilizable.q-field--labeled :deep(.q-field__native),
+.input-busqueda-reutilizable.q-field--labeled.q-field--float :deep(.q-field__native),
+.input-busqueda-reutilizable.q-field--stacked :deep(.q-field__native) {
   min-height: 46px;
-  padding-top: 0;
-  padding-bottom: 0;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
   font-size: 16px;
-  line-height: 1.2;
+  line-height: 1.2 !important;
 }
 .input-busqueda-reutilizable :deep(.q-field__native::placeholder) {
   font-size: 16px;
