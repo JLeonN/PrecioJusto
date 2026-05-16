@@ -147,7 +147,7 @@
 
 <script setup>
 import InputFormularioReutilizable from '../../components/Compartidos/InputFormularioReutilizable.vue'
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { IconEdit, IconListDetails, IconTrash } from '@tabler/icons-vue'
@@ -155,6 +155,10 @@ import { useListaJustaStore } from '../../almacenamiento/stores/ListaJustaStore.
 import { useUsuarioStore } from '../../almacenamiento/stores/UsuarioStore.js'
 import BotonConfirmacionEliminar from '../../components/Compartidos/BotonConfirmacionEliminar.vue'
 import BotonAccionSticky from '../../components/Compartidos/BotonAccionSticky.vue'
+import {
+  obtenerPlaceholderAleatorio,
+  PLACEHOLDERS_LISTA_JUSTA,
+} from '../../utils/PlaceholdersAleatorios.js'
 
 const router = useRouter()
 const quasar = useQuasar()
@@ -164,16 +168,12 @@ const usuarioStore = useUsuarioStore()
 const dialogoListaAbierto = ref(false)
 const nombreLista = ref('')
 const listaEnEdicion = ref(null)
-
-const placeholderNombre = computed(() => {
-  const ejemplos = ['Compra semanal', 'Asado del sábado', 'Cumple de Leo']
-  const indice = Math.floor(Math.random() * ejemplos.length)
-  return ejemplos[indice]
-})
+const placeholderNombre = ref(obtenerPlaceholderAleatorio(PLACEHOLDERS_LISTA_JUSTA))
 
 function abrirDialogoLista(lista = null) {
   listaEnEdicion.value = lista
   nombreLista.value = lista?.nombre || ''
+  if (!lista) placeholderNombre.value = obtenerPlaceholderAleatorio(PLACEHOLDERS_LISTA_JUSTA)
   dialogoListaAbierto.value = true
 }
 

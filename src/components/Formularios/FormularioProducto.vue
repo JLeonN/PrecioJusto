@@ -7,7 +7,7 @@
       label="Nombre del producto"
       outlined
       dense
-      placeholder="Ej: Leche La Serenísima"
+      :placeholder="`Ej: ${productoPlaceholder.nombre}`"
       :rules="modo === 'comunidad' ? [requerido] : [requeridoNombreLocal]"
       :error="!!errorNombreMsg"
       :error-message="errorNombreMsg"
@@ -39,7 +39,7 @@
       label="Marca"
       outlined
       dense
-      placeholder="Ej: La Serenísima, Conaprole"
+      :placeholder="`Ej: ${productoPlaceholder.marca}`"
       hint="Opcional"
       :rules="modo === 'comunidad' ? [requerido] : []"
       @update:model-value="emitirCambios"
@@ -51,7 +51,7 @@
       label="Código de barras"
       outlined
       dense
-      placeholder="Ej: 7790742005526"
+      :placeholder="`Ej: ${productoPlaceholder.codigoBarras}`"
       hint="Opcional"
       :rules="modo === 'comunidad' ? [requerido] : []"
       :loading="buscandoCodigo"
@@ -150,6 +150,10 @@ import { ref, watch, computed } from 'vue'
 import { IconSearch, IconCamera, IconPhoto, IconTrash } from '@tabler/icons-vue'
 import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
 import { usePreferenciasStore } from '../../almacenamiento/stores/preferenciasStore.js'
+import {
+  obtenerPlaceholderAleatorio,
+  PRODUCTOS_PLACEHOLDER_API,
+} from '../../utils/PlaceholdersAleatorios.js'
 
 // Refs para validación
 const qInputNombreRef = ref(null)
@@ -197,6 +201,7 @@ const opcionesUnidades = [
 
 const { inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo } = useCamaraFoto()
 const preferenciasStore = usePreferenciasStore()
+const productoPlaceholder = ref(obtenerPlaceholderAleatorio(PRODUCTOS_PLACEHOLDER_API))
 
 // Estado interno
 const datosInternos = ref({
@@ -387,4 +392,3 @@ defineExpose({ validarFormulario })
   display: none;
 }
 </style>
-

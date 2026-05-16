@@ -18,7 +18,7 @@
           label="Calle y número *"
           outlined
           dense
-          placeholder="Ej: Av. 18 de Julio 1234"
+          :placeholder="`Ej: ${placeholderDireccion}`"
           :rules="[val => !!val || 'La dirección es obligatoria']"
         />
 
@@ -28,7 +28,7 @@
           label="Barrio (opcional)"
           outlined
           dense
-          placeholder="Ej: Centro, Pocitos"
+          :placeholder="`Ej: ${placeholderBarrio}`"
         />
 
         <!-- Ciudad (opcional) -->
@@ -37,7 +37,7 @@
           label="Ciudad (opcional)"
           outlined
           dense
-          placeholder="Ej: Montevideo"
+          :placeholder="`Ej: ${placeholderCiudad}`"
         />
 
         <!-- Info de categoría heredada -->
@@ -64,9 +64,15 @@
 
 <script setup>
 import InputFormularioReutilizable from '../../Compartidos/InputFormularioReutilizable.vue'
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.js'
 import { useTecladoVirtual } from '../../../composables/useTecladoVirtual.js'
+import {
+  BARRIOS_PLACEHOLDER,
+  CIUDADES_PLACEHOLDER,
+  DIRECCIONES_PLACEHOLDER,
+  obtenerPlaceholderAleatorio,
+} from '../../../utils/PlaceholdersAleatorios.js'
 
 const props = defineProps({
   modelValue: {
@@ -94,11 +100,25 @@ const { estiloTarjeta } = useTecladoVirtual()
 const comerciosStore = useComerciStore()
 
 const guardando = ref(false)
+const placeholderDireccion = ref(obtenerPlaceholderAleatorio(DIRECCIONES_PLACEHOLDER))
+const placeholderBarrio = ref(obtenerPlaceholderAleatorio(BARRIOS_PLACEHOLDER))
+const placeholderCiudad = ref(obtenerPlaceholderAleatorio(CIUDADES_PLACEHOLDER))
 const datos = reactive({
   calle: '',
   barrio: '',
   ciudad: '',
 })
+
+watch(
+  () => props.modelValue,
+  (nuevoValor) => {
+    if (nuevoValor) {
+      placeholderDireccion.value = obtenerPlaceholderAleatorio(DIRECCIONES_PLACEHOLDER)
+      placeholderBarrio.value = obtenerPlaceholderAleatorio(BARRIOS_PLACEHOLDER)
+      placeholderCiudad.value = obtenerPlaceholderAleatorio(CIUDADES_PLACEHOLDER)
+    }
+  },
+)
 
 function limpiar() {
   datos.calle = ''

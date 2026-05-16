@@ -6,7 +6,7 @@
       label="Nombre del comercio *"
       outlined
       dense
-      placeholder="Ej: TATA, DISCO, Almacén Don Pedro"
+      :placeholder="`Ej: ${placeholderComercio}`"
       :rules="[requerido]"
       @update:model-value="emitirCambios"
     >
@@ -45,7 +45,7 @@
       label="Calle y número *"
       outlined
       dense
-      placeholder="Ej: Av. Brasil 2550"
+      :placeholder="`Ej: ${placeholderDireccion}`"
       :rules="[requerido]"
       @update:model-value="emitirCambios"
     >
@@ -60,7 +60,7 @@
       label="Barrio (opcional)"
       outlined
       dense
-      placeholder="Ej: Centro, Pocitos, Cordón"
+      :placeholder="`Ej: ${placeholderBarrio}`"
       @update:model-value="emitirCambios"
     >
       <template #prepend>
@@ -74,7 +74,7 @@
       label="Ciudad (opcional)"
       outlined
       dense
-      placeholder="Ej: Montevideo, Punta del Este"
+      :placeholder="`Ej: ${placeholderCiudad}`"
       @update:model-value="emitirCambios"
     >
       <template #prepend>
@@ -128,6 +128,13 @@ import InputFormularioReutilizable from '../Compartidos/InputFormularioReutiliza
 import { ref, watch } from 'vue'
 import { IconCamera, IconPhoto, IconTrash } from '@tabler/icons-vue'
 import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
+import {
+  BARRIOS_PLACEHOLDER,
+  CIUDADES_PLACEHOLDER,
+  COMERCIOS_PLACEHOLDER,
+  DIRECCIONES_PLACEHOLDER,
+  obtenerPlaceholderAleatorio,
+} from '../../utils/PlaceholdersAleatorios.js'
 
 const props = defineProps({
   modelValue: {
@@ -167,6 +174,10 @@ const opcionesTipo = [
 ]
 
 const { inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo } = useCamaraFoto()
+const placeholderComercio = ref(obtenerPlaceholderAleatorio(COMERCIOS_PLACEHOLDER))
+const placeholderDireccion = ref(obtenerPlaceholderAleatorio(DIRECCIONES_PLACEHOLDER))
+const placeholderBarrio = ref(obtenerPlaceholderAleatorio(BARRIOS_PLACEHOLDER))
+const placeholderCiudad = ref(obtenerPlaceholderAleatorio(CIUDADES_PLACEHOLDER))
 
 // Estado interno
 const datosInternos = ref({
@@ -277,6 +288,5 @@ function requerido(val) {
   }
 }
 </style>
-
 
 

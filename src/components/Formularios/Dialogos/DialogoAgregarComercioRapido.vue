@@ -22,7 +22,7 @@
           outlined
           dense
           autofocus
-          placeholder="Ej: Disco ABC"
+          :placeholder="`Ej: ${placeholderComercio}`"
           :rules="[requerido]"
           :disable="!!validacionPendiente"
           class="q-mb-md"
@@ -34,7 +34,7 @@
           label="Dirección *"
           outlined
           dense
-          placeholder="Ej: Av. Italia 1234"
+          :placeholder="`Ej: ${placeholderDireccion}`"
           :rules="[requerido]"
           :disable="!!validacionPendiente"
         />
@@ -144,6 +144,11 @@ import { IconCamera, IconPhoto, IconTrash } from '@tabler/icons-vue'
 import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.js'
 import { useCamaraFoto } from '../../../composables/useCamaraFoto.js'
 import { useTecladoVirtual } from '../../../composables/useTecladoVirtual.js'
+import {
+  COMERCIOS_PLACEHOLDER,
+  DIRECCIONES_PLACEHOLDER,
+  obtenerPlaceholderAleatorio,
+} from '../../../utils/PlaceholdersAleatorios.js'
 
 const props = defineProps({
   modelValue: {
@@ -178,6 +183,8 @@ const direccionInterna = ref('')
 const fotoTemporal = ref(null)
 const guardando = ref(false)
 const validacionPendiente = ref(null)
+const placeholderComercio = ref(obtenerPlaceholderAleatorio(COMERCIOS_PLACEHOLDER))
+const placeholderDireccion = ref(obtenerPlaceholderAleatorio(DIRECCIONES_PLACEHOLDER))
 
 // Nombre del comercio similar encontrado (para mostrar en el mensaje)
 const comercioSimilarNombre = computed(() => {
@@ -190,6 +197,8 @@ watch(
   () => props.modelValue,
   (nuevoValor) => {
     if (nuevoValor) {
+      placeholderComercio.value = obtenerPlaceholderAleatorio(COMERCIOS_PLACEHOLDER)
+      placeholderDireccion.value = obtenerPlaceholderAleatorio(DIRECCIONES_PLACEHOLDER)
       nombreInterno.value = props.nombreInicial || ''
       direccionInterna.value = props.direccionInicial || ''
       validacionPendiente.value = null
