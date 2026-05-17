@@ -395,7 +395,207 @@ export const useComerciStore = defineStore('comercios', {
     },
 
     /**
-     * Agrega una dirección a un comercio
+     * Fusiona comercios duplicados en un comercio destino y mueve sus precios.
+     * @param {string} comercioDestinoId - ID del comercio que queda vigente
+     * @param {Array<string>} comercioOrigenIds - IDs de comercios que se absorben
+     * @returns {Promise<Object>} Resultado de la fusión
+     */
+    async fusionarComercios(comercioDestinoId, comercioOrigenIds = []) {
+      this.cargando = true
+      this.error = null
+
+      try {
+        const idsOrigen = Array.from(
+          new Set(
+            (Array.isArray(comercioOrigenIds) ? comercioOrigenIds : [])
+              .map((id) => String(id || '').trim())
+              .filter((id) => id && id !== comercioDestinoId),
+          ),
+        )
+
+        if (!comercioDestinoId || idsOrigen.length === 0) {
+          throw new Error('No hay comercios origen para fusionar')
+        }
+
+        const resultado = await ComerciosService.fusionarComercios(comercioDestinoId, idsOrigen)
+        if (!resultado?.comercio || resultado.idsEliminados.length === 0) {
+          throw new Error('No se pudo fusionar comercios')
+        }
+
+        this.comercios = this.comercios
+          .filter((comercio) => !resultado.idsEliminados.includes(comercio.id))
+          .map((comercio) =>
+            comercio.id === comercioDestinoId ? resultado.comercio : comercio,
+          )
+
+        const productosStore = useProductosStore()
+        if (productosStore.productos.length === 0) {
+          await productosStore.cargarProductos({ silencioso: true })
+        }
+
+        const idsProductosActualizados = []
+        const nombreDestino = resultado.comercio.nombre
+
+        for (const producto of productosStore.productos) {
+          let modificado = false
+          const preciosActualizados = (producto.precios || []).map((precio) => {
+            if (!resultado.idsEliminados.includes(precio.comercioId)) return precio
+
+            const mapaComercio = resultado.mapaDireccionesPorComercio?.[precio.comercioId] || {}
+            const datosDireccion =
+              mapaComercio[precio.direccionId] || Object.values(mapaComercio)[0] || null
+            const direccion = datosDireccion?.direccion || precio.direccion || ''
+            const nombreCompleto =
+              datosDireccion?.nombreCompleto ||
+              (direccion ? `${nombreDestino} - ${direccion}` : nombreDestino)
+
+            modificado = true
+            return {
+              ...precio,
+              comercioId: comercioDestinoId,
+              direccionId: datosDireccion?.direccionId || precio.direccionId,
+              comercio: nombreDestino,
+              direccion,
+              nombreCompleto,
+            }
+          })
+
+          if (modificado) {
+            const actualizado = await productosStore.actualizarProducto(producto.id, {
+              precios: preciosActualizados,
+            })
+            if (actualizado) idsProductosActualizados.push(producto.id)
+          }
+        }
+
+        const usuarioStore = useUsuarioStore()
+        if (usuarioStore.tieneSesionRealActiva && usuarioStore.usuarioId) {
+          await Promise.all(
+            resultado.idsEliminados.map((idEliminado) =>
+              servicioMigracionLocalFirestore.registrarEliminacionComercioLocal(idEliminado),
+            ),
+          )
+          for (const idEliminado of resultado.idsEliminados) {
+            servicioMigracionLocalFirestore
+              .eliminarComercioRemoto(usuarioStore.usuarioId, idEliminado)
+              .catch((errorRemoto) => {
+                console.warn('No se pudo eliminar un comercio fusionado en Firebase:', errorRemoto)
+              })
+          }
+        }
+
+        useUsuarioStore().solicitarSincronizacionAutomatica('comercios_fusionados', {
+          comercioId: comercioDestinoId,
+          comercios: [comercioDestinoId],
+          productos: idsProductosActualizados,
+          eliminaciones: true,
+        })
+
+        return {
+          ...resultado,
+          idsProductosActualizados,
+        }
+      } catch (error) {
+        console.error('Error al fusionar comercios:', error)
+        this.error = 'No se pudo fusionar los comercios'
+        throw error
+      } finally {
+        this.cargando = false
+      }
+    },
+
+    async fusionarSucursales(direccionDestinoId, direccionOrigenId) {
+      this.cargando = true
+      this.error = null
+
+      try {
+        const destinoId = String(direccionDestinoId || '').trim()
+        const origenId = String(direccionOrigenId || '').trim()
+        if (!destinoId || !origenId || destinoId === origenId) {
+          throw new Error('Seleccioná dos sucursales distintas para fusionar')
+        }
+
+        const buscarPorDireccion = (direccionId) => {
+          const comercio = this.comercios.find((item) =>
+            (item.direcciones || []).some((direccion) => direccion.id === direccionId),
+          )
+          const direccion = comercio?.direcciones?.find((item) => item.id === direccionId) || null
+          return { comercio: comercio || null, direccion }
+        }
+        const { comercio: comercioDestino, direccion: direccionDestino } =
+          buscarPorDireccion(destinoId)
+        const { comercio: comercioOrigen, direccion: direccionOrigen } = buscarPorDireccion(origenId)
+
+        if (!comercioDestino || !direccionDestino || !comercioOrigen || !direccionOrigen) {
+          throw new Error('No se encontraron las sucursales seleccionadas')
+        }
+
+        const debeEliminarComercioOrigen = comercioOrigen.direcciones.length === 1
+        const productosStore = useProductosStore()
+        if (productosStore.productos.length === 0) {
+          await productosStore.cargarProductos({ silencioso: true })
+        }
+
+        const idsProductosActualizados = []
+        for (const producto of productosStore.productos) {
+          let modificado = false
+          const preciosActualizados = (producto.precios || []).map((precio) => {
+            if (precio.comercioId !== comercioOrigen.id || precio.direccionId !== origenId) {
+              return precio
+            }
+
+            modificado = true
+            return {
+              ...precio,
+              comercioId: comercioDestino.id,
+              direccionId: destinoId,
+              nombreCompleto: direccionDestino.calle
+                ? `${comercioDestino.nombre} - ${direccionDestino.calle}`
+                : comercioDestino.nombre,
+              comercio: comercioDestino.nombre,
+              direccion: direccionDestino.calle || '',
+            }
+          })
+
+          if (modificado) {
+            const actualizado = await productosStore.actualizarProducto(producto.id, {
+              precios: preciosActualizados,
+            })
+            if (actualizado) idsProductosActualizados.push(producto.id)
+          }
+        }
+
+        if (debeEliminarComercioOrigen) {
+          await this.eliminarComercio(comercioOrigen.id)
+        } else {
+          await this.eliminarDireccion(comercioOrigen.id, origenId)
+        }
+
+        useUsuarioStore().solicitarSincronizacionAutomatica('sucursales_fusionadas', {
+          comercioId: comercioDestino.id,
+          comercios: [comercioDestino.id],
+          productos: idsProductosActualizados,
+          eliminaciones: debeEliminarComercioOrigen,
+        })
+
+        return {
+          comercioDestinoId: comercioDestino.id,
+          comercioOrigenId: comercioOrigen.id,
+          direccionDestinoId: destinoId,
+          direccionOrigenId: origenId,
+          idsProductosActualizados,
+        }
+      } catch (error) {
+        console.error('Error al fusionar sucursales:', error)
+        this.error = 'No se pudieron fusionar las sucursales'
+        throw error
+      } finally {
+        this.cargando = false
+      }
+    },
+
+    /**
+     * Agrega una dirección a un comercio.
      * @param {string} comercioId - ID del comercio
      * @param {Object} datosDireccion - Datos de la dirección
      * @returns {Promise<Object|null>} Comercio actualizado o null

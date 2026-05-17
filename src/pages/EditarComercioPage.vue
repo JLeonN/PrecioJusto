@@ -209,7 +209,7 @@
 
         <!-- SECCIÓN: FUSIONAR SUCURSALES -->
         <div
-          v-if="comercioActual.esCadena && comercioActual.direcciones.length >= 2"
+          v-if="comercioActual.direcciones.length >= 2"
           class="seccion-campos q-mb-lg"
         >
           <div class="seccion-titulo q-mb-sm">
@@ -219,7 +219,7 @@
 
           <template v-if="!modoFusion">
             <p class="text-caption text-grey-6 q-mb-sm">
-              Selecciona 2 sucursales para fusionar (mover precios y eliminar una)
+              Selecciona 2 sucursales para fusionar. Los precios de la segunda se moverán a la primera.
             </p>
             <q-btn
               outline
@@ -235,8 +235,6 @@
             <p class="text-caption text-grey-7 q-mb-sm">
               Selecciona 2 sucursales. La primera será el destino, la segunda será eliminada.
             </p>
-
-            <!-- Lista de sucursales seleccionables -->
             <q-list dense class="q-mb-sm">
               <q-item
                 v-for="dir in comercioActual.direcciones"
@@ -451,7 +449,7 @@ const articulosPorDireccion = computed(() => {
 // Estado de diálogos
 const dialogoSucursalAbierto = ref(false)
 
-// Estado de fusión
+// Estado de fusión de sucursales
 const modoFusion = ref(false)
 const fusionSeleccionadas = ref([])
 const fusionando = ref(false)
@@ -577,19 +575,19 @@ function confirmarEliminarSucursal() {
   })
 }
 
-// Busca el comercio original que contiene una dirección por su id
 function encontrarComercioOriginalPorDireccion(direccionId) {
   if (!comercioActual.value) return null
-  return comercioActual.value.comerciosOriginales?.find((c) =>
-    c.direcciones.some((d) => d.id === direccionId),
-  ) || null
+  return (
+    comercioActual.value.comerciosOriginales?.find((comercio) =>
+      comercio.direcciones.some((direccion) => direccion.id === direccionId),
+    ) || null
+  )
 }
 
-// Toggle selección de sucursal para fusión (max 2)
 function toggleFusionSeleccion(direccionId) {
-  const idx = fusionSeleccionadas.value.indexOf(direccionId)
-  if (idx >= 0) {
-    fusionSeleccionadas.value.splice(idx, 1)
+  const indice = fusionSeleccionadas.value.indexOf(direccionId)
+  if (indice >= 0) {
+    fusionSeleccionadas.value.splice(indice, 1)
   } else if (fusionSeleccionadas.value.length < 2) {
     fusionSeleccionadas.value.push(direccionId)
   }
@@ -600,84 +598,51 @@ function cancelarFusion() {
   fusionSeleccionadas.value = []
 }
 
-// Confirmar y ejecutar fusión
 function confirmarFusion() {
   if (fusionSeleccionadas.value.length !== 2) return
 
   const destinoDir = comercioActual.value.direcciones.find(
-    (d) => d.id === fusionSeleccionadas.value[0],
+    (direccion) => direccion.id === fusionSeleccionadas.value[0],
   )
   const origenDir = comercioActual.value.direcciones.find(
-    (d) => d.id === fusionSeleccionadas.value[1],
+    (direccion) => direccion.id === fusionSeleccionadas.value[1],
   )
-
-  // Contar precios que se moverán
+  const comercioOrigen = encontrarComercioOriginalPorDireccion(origenDir?.id)
   const preciosAMover = productosStore.productos.reduce((total, producto) => {
-    return total + (producto.precios?.filter((p) => {
-      const comercioOrigen = encontrarComercioOriginalPorDireccion(origenDir.id)
-      return p.comercioId === comercioOrigen?.id && p.direccionId === origenDir.id
-    }).length || 0)
+    return (
+      total +
+      (producto.precios?.filter(
+        (precio) =>
+          precio.comercioId === comercioOrigen?.id && precio.direccionId === origenDir?.id,
+      ).length || 0)
+    )
   }, 0)
 
   $q.dialog({
     title: 'Confirmar fusión',
-    message: `Mover ${preciosAMover} precios de "${origenDir.calle}" a "${destinoDir.calle}" y eliminar la sucursal origen.`,
+    message: `Mover ${preciosAMover} precios de "${origenDir?.calle}" a "${destinoDir?.calle}" y eliminar la sucursal origen.`,
     cancel: { flat: true, label: 'Cancelar', color: 'grey' },
     ok: { label: 'Fusionar', color: 'orange' },
     persistent: true,
   }).onOk(() => ejecutarFusion(fusionSeleccionadas.value[0], fusionSeleccionadas.value[1]))
 }
 
-// Ejecutar fusión de sucursales
 async function ejecutarFusion(destinoId, origenId) {
   fusionando.value = true
 
   try {
-    const comercioDestino = encontrarComercioOriginalPorDireccion(destinoId)
-    const comercioOrigen = encontrarComercioOriginalPorDireccion(origenId)
-
-    if (!comercioDestino || !comercioOrigen) {
-      throw new Error('No se encontraron los comercios originales')
-    }
-
-    const destinoDir = comercioDestino.direcciones.find((d) => d.id === destinoId)
-
-    // Actualizar precios en todos los productos
-    for (const producto of productosStore.productos) {
-      let modificado = false
-      const preciosActualizados = producto.precios?.map((precio) => {
-        if (precio.comercioId === comercioOrigen.id && precio.direccionId === origenId) {
-          modificado = true
-          return {
-            ...precio,
-            comercioId: comercioDestino.id,
-            direccionId: destinoId,
-            nombreCompleto: `${comercioDestino.nombre} - ${destinoDir.calle}`,
-            comercio: comercioDestino.nombre,
-            direccion: destinoDir.calle,
-          }
-        }
-        return precio
-      }) || []
-
-      if (modificado) {
-        await productosStore.actualizarProducto(producto.id, { precios: preciosActualizados })
-      }
-    }
-
-    // Eliminar sucursal origen
-    if (comercioOrigen.direcciones.length === 1) {
-      await comerciosStore.eliminarComercio(comercioOrigen.id)
-    } else {
-      await comerciosStore.eliminarDireccion(comercioOrigen.id, origenId)
-    }
-
+    const resultado = await comerciosStore.fusionarSucursales(destinoId, origenId)
     cancelarFusion()
-    direccionSeleccionada.value = null
+    direccionSeleccionada.value =
+      comercioActual.value?.direcciones.find(
+        (direccion) => direccion.id === resultado?.direccionDestinoId,
+      ) ||
+      comercioActual.value?.direcciones[0] ||
+      null
 
     $q.notify({ type: 'positive', message: 'Sucursales fusionadas', position: 'top' })
   } catch (err) {
-    console.error('Error al fusionar:', err)
+    console.error('Error al fusionar sucursales:', err)
     $q.notify({ type: 'negative', message: 'Error al fusionar sucursales', position: 'top' })
   } finally {
     fusionando.value = false

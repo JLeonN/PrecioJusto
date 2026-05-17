@@ -15,6 +15,16 @@ function limpiarTextoOpcional(valor) {
   return valor === undefined ? undefined : limpiarTexto(valor)
 }
 
+function generarIdLocal() {
+  return `${Date.now()}${Math.random().toString(36).substring(2, 9)}`
+}
+
+function construirNombreCompleto(nombreComercio, calle) {
+  const nombre = limpiarTexto(nombreComercio)
+  const direccion = limpiarTexto(calle)
+  return direccion ? `${nombre} - ${direccion}` : nombre
+}
+
 async function guardarComercios(comercios) {
   const guardado = await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
   if (!guardado) {
@@ -277,18 +287,16 @@ async function agregarComercio(datosComercio) {
   const ahora = new Date().toISOString()
 
   const nuevoComercio = {
-    id: `${Date.now()}${Math.random().toString(36).substring(2, 9)}`,
+    id: generarIdLocal(),
     nombre: datosComercio.nombre.trim(),
     tipo: datosComercio.tipo || 'Otro',
     direcciones: [
       {
-        id: `${Date.now()}${Math.random().toString(36).substring(2, 9)}`,
+        id: generarIdLocal(),
         calle: datosComercio.calle?.trim() || '',
         barrio: datosComercio.barrio?.trim() || '',
         ciudad: datosComercio.ciudad?.trim() || '',
-        nombreCompleto: datosComercio.calle?.trim()
-          ? `${datosComercio.nombre.trim()} - ${datosComercio.calle.trim()}`
-          : datosComercio.nombre.trim(),
+        nombreCompleto: construirNombreCompleto(datosComercio.nombre, datosComercio.calle),
         fechaUltimoUso: ahora,
         foto: datosComercio.foto || null,
       },
@@ -380,11 +388,11 @@ async function agregarDireccion(comercioId, datosDireccion) {
   const barrio = limpiarTexto(datosDireccion.barrio)
   const ciudad = limpiarTexto(datosDireccion.ciudad)
   const nuevaDireccion = {
-    id: `${Date.now()}${Math.random().toString(36).substring(2, 9)}`,
+    id: generarIdLocal(),
     calle,
     barrio,
     ciudad,
-    nombreCompleto: `${comercio.nombre} - ${calle}`,
+    nombreCompleto: construirNombreCompleto(comercio.nombre, calle),
     fechaUltimoUso: ahora,
     foto: datosDireccion.foto || null,
   }
@@ -453,6 +461,99 @@ async function eliminarDireccion(comercioId, direccionId) {
   comercio.fechaActualizacion = new Date().toISOString()
   await guardarComercios(comercios)
   return true
+}
+
+async function fusionarComercios(comercioDestinoId, comercioOrigenIds = []) {
+  const destinoId = limpiarTexto(comercioDestinoId)
+  const idsOrigen = Array.from(
+    new Set(
+      (Array.isArray(comercioOrigenIds) ? comercioOrigenIds : [])
+        .map((id) => limpiarTexto(id))
+        .filter((id) => id && id !== destinoId),
+    ),
+  )
+
+  if (!destinoId || idsOrigen.length === 0) return null
+
+  const comercios = await obtenerTodos()
+  const indiceDestino = comercios.findIndex((comercio) => comercio.id === destinoId)
+  if (indiceDestino === -1) return null
+
+  const ahora = new Date().toISOString()
+  const comercioDestino = {
+    ...comercios[indiceDestino],
+    direcciones: [...(comercios[indiceDestino].direcciones || [])],
+  }
+  const idsDireccionesDestino = new Set(
+    comercioDestino.direcciones.map((direccion) => limpiarTexto(direccion.id)).filter(Boolean),
+  )
+  const mapaDireccionesPorComercio = {}
+  const idsEliminados = []
+  const idsIgnorados = []
+
+  idsOrigen.forEach((origenId) => {
+    const comercioOrigen = comercios.find((comercio) => comercio.id === origenId)
+    if (!comercioOrigen) {
+      idsIgnorados.push(origenId)
+      return
+    }
+
+    mapaDireccionesPorComercio[origenId] = {}
+    ;(comercioOrigen.direcciones || []).forEach((direccionOrigen) => {
+      const direccionIdOriginal = limpiarTexto(direccionOrigen.id) || generarIdLocal()
+      let direccionIdDestino = direccionIdOriginal
+
+      if (idsDireccionesDestino.has(direccionIdDestino)) {
+        direccionIdDestino = generarIdLocal()
+      }
+
+      idsDireccionesDestino.add(direccionIdDestino)
+
+      const direccionMovida = {
+        ...direccionOrigen,
+        id: direccionIdDestino,
+        nombreCompleto: construirNombreCompleto(comercioDestino.nombre, direccionOrigen.calle),
+      }
+
+      comercioDestino.direcciones.push(direccionMovida)
+      mapaDireccionesPorComercio[origenId][direccionIdOriginal] = {
+        direccionId: direccionIdDestino,
+        direccion: limpiarTexto(direccionMovida.calle),
+        nombreCompleto: direccionMovida.nombreCompleto,
+      }
+    })
+
+    idsEliminados.push(origenId)
+  })
+
+  if (idsEliminados.length === 0) {
+    return {
+      comercio: comercioDestino,
+      idsEliminados,
+      idsIgnorados,
+      mapaDireccionesPorComercio,
+    }
+  }
+
+  const usosOrigen = idsEliminados.reduce((total, origenId) => {
+    const comercioOrigen = comercios.find((comercio) => comercio.id === origenId)
+    return total + Number(comercioOrigen?.cantidadUsos || 0)
+  }, 0)
+
+  comercioDestino.cantidadUsos = Number(comercioDestino.cantidadUsos || 0) + usosOrigen
+  comercioDestino.fechaActualizacion = ahora
+  comercioDestino.fechaUltimoUso = ahora
+  comercios[indiceDestino] = comercioDestino
+
+  const comerciosFusionados = comercios.filter((comercio) => !idsEliminados.includes(comercio.id))
+  await guardarComercios(comerciosFusionados)
+
+  return {
+    comercio: comercioDestino,
+    idsEliminados,
+    idsIgnorados,
+    mapaDireccionesPorComercio,
+  }
 }
 
 /**
@@ -527,6 +628,7 @@ export default {
   agregarComercio,
   editarComercio,
   eliminarComercio,
+  fusionarComercios,
   agregarDireccion,
   editarDireccion,
   eliminarDireccion,
