@@ -11,6 +11,7 @@ Este resumen concentra el estado actual de la integración gradual de Precio Jus
 - El plan `PlanSegundoIntentoFirebase.md` quedó ejecutado y marcado como `TERMINADO`.
 - El plan `PlanFirebaseBaseNuevoProyecto.md` quedó ejecutado y marcado como `TERMINADO`.
 - El plan `PlanAutenticacionFirebase.md` quedó ejecutado y marcado como `TERMINADO`.
+- El plan `PlanModeloFirestoreYMigracion.md` quedó ejecutado y marcado como `TERMINADO`.
 - Proyecto Firebase actual: `PrecioJustoPruebas2` (`preciojustopruebas2`).
 - Firebase SDK instalado como dependencia del proyecto.
 - Firebase Auth quedó preparado con proveedor `Correo electrónico/contraseña`.
@@ -20,7 +21,8 @@ Este resumen concentra el estado actual de la integración gradual de Precio Jus
 - Storage no se usa todavía.
 - La app mantiene el comportamiento visible actual y sigue usando persistencia local.
 - El enfoque definido es primero backup privado por usuario; la comunidad queda para una etapa posterior.
-- La arquitectura quedó preparada para asignar dueño (`usuarioId`) a los datos cuando exista Firebase Auth.
+- La arquitectura quedó preparada para asignar dueño (`usuarioId`) a todos los datos privados.
+- El modelo Firestore definitivo queda documentado en `Planes/Resumenes/ModeloFirestoreMigracion.md`.
 
 ---
 
@@ -101,6 +103,19 @@ Claves persistidas actuales:
 - `ConfiguracionPage` muestra el estado de cuenta y permite cerrar sesión con confirmación.
 - Al cerrar sesión se restaura el usuario local legacy y no se borran datos locales.
 
+### Modelo Firestore y migración
+
+- Se definió el modelo privado bajo `usuarios/{usuarioId}`.
+- Productos quedan en `usuarios/{usuarioId}/productos/{productoId}`.
+- Precios quedan en subcolección `usuarios/{usuarioId}/productos/{productoId}/precios/{precioId}` para evitar documentos gigantes.
+- Comercios quedan en `usuarios/{usuarioId}/comercios/{comercioId}` con direcciones embebidas mientras no superen 50 sucursales.
+- Listas Justas quedan en `usuarios/{usuarioId}/listasJustas/{listaId}` con items embebidos hasta 100 items.
+- Preferencias quedan en `usuarios/{usuarioId}/configuracion/preferencias`.
+- Confirmaciones quedan en `usuarios/{usuarioId}/confirmaciones/{confirmacionId}`.
+- Fotos no guardan base64 en Firestore; se guardará URL o ruta Storage cuando exista el plan de Storage.
+- `sesion_escaneo`, backups y cola de sincronización quedan locales.
+- Se agregaron constantes de rutas, límites y campos del modelo en `PreparacionFirebase.js`.
+
 ---
 
 ## ARCHIVOS PRINCIPALES
@@ -109,6 +124,7 @@ Claves persistidas actuales:
 
 - `src/almacenamiento/constantes/ClavesAlmacenamiento.js`
 - `src/almacenamiento/constantes/PreparacionFirebase.js`
+- `Planes/Resumenes/ModeloFirestoreMigracion.md`
 
 ### Servicios nuevos
 
@@ -134,9 +150,9 @@ Claves persistidas actuales:
 
 ---
 
-## MODELO FUTURO RECOMENDADO
+## MODELO FIRESTORE APROBADO
 
-Estructura privada inicial:
+Estructura privada aprobada:
 
 ```text
 usuarios/{usuarioId}/productos/{productoId}
@@ -146,6 +162,7 @@ usuarios/{usuarioId}/listasJustas/{listaId}
 usuarios/{usuarioId}/configuracion/preferencias
 usuarios/{usuarioId}/confirmaciones/{confirmacionId}
 usuarios/{usuarioId}/fotos/{fotoId}
+usuarios/{usuarioId}/configuracion/migracionLocal
 ```
 
 Recomendación práctica:
@@ -157,6 +174,7 @@ Recomendación práctica:
 - Sesión de escaneo: mantener local por defecto; sincronizar solo si luego se decide que aporta valor.
 - Preferencias: migrar a documento de configuración por usuario.
 - Confirmaciones: migrar a documentos separados por usuario/precio.
+- Reglas privadas: habilitar escrituras solo después de probar `request.auth.uid == usuarioId`.
 
 ---
 
@@ -181,6 +199,8 @@ Recomendación práctica:
 - Firebase base inicializó con `projectId: preciojustopruebas2`, Auth activo y Firestore Offline activo.
 - MCP Browser validó redirección a login sin sesión, registro de usuario, login correcto, contraseña incorrecta con error claro, persistencia tras recarga y logout.
 - La red observada mostró llamadas a `identitytoolkit.googleapis.com` para Auth y no mostró escrituras de documentos Firestore.
+- MCP Browser ejecutó inventario local con `InventarioMigracionFirebaseService`: el origen probado no tenía productos, precios, comercios, listas, preferencias, confirmaciones ni fotos.
+- `npm run lint` validó las constantes nuevas del modelo Firestore.
 - Se confirmó que los servicios de datos siguen usando `AlmacenamientoService` con adaptadores locales.
 - Se detectó CORS en `version.json` contra GitHub Pages durante dev; no pertenece a Firebase.
 
@@ -188,13 +208,12 @@ Recomendación práctica:
 
 ## PRÓXIMO PASO RECOMENDADO
 
-Antes de migrar datos reales a Firestore, conviene cerrar un plan específico de modelo de datos y migración:
+El modelo ya está cerrado para una primera migración privada. El próximo plan debería implementar Firestore privado en código, en este orden:
 
-- definir documentos definitivos de Firestore;
-- definir subcolección de precios;
-- diseñar diálogo de migración local a cuenta;
-- decidir si sesión de escaneo queda solo local;
-- preparar reglas privadas reales de Firestore y Storage;
+- crear y probar reglas privadas en Firebase Console;
+- crear servicios específicos `FirestoreProductosService`, `FirestorePreciosService`, `FirestoreComerciosService`, `FirestoreListasJustasService`, `FirestorePreferenciasService` y `FirestoreMigracionService`;
+- crear migración guiada con backup local, resumen, confirmación, reintento y validación de cantidades;
+- mantener Storage fuera hasta tener plan de fotos;
 - corregir el CORS de `version.json` en dev para no contaminar la consola durante pruebas.
 
-Mi recomendación práctica: no migrar datos todavía hasta decidir el modelo final de `productos`, `precios`, `comercios` y `listasJustas`. Firestore es fácil de empezar, pero caro de corregir si el modelo nace con documentos grandes o escrituras en bloque.
+Mi recomendación práctica: implementar primero productos y precios privados con reglas probadas. Recién después sumar comercios, listas y migración completa.
