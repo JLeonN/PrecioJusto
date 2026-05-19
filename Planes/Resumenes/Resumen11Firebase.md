@@ -2,15 +2,20 @@
 
 ## PROPÓSITO
 
-Este resumen concentra el estado actual de la preparación de Precio Justo para una futura integración con Firebase. La app todavía no usa Firebase SDK en producción, pero ya quedó ordenada para que la llegada de Firebase Auth, Firestore Offline y Firebase Storage sea gradual y sin pérdida de datos locales.
+Este resumen concentra el estado actual de la integración gradual de Precio Justo con Firebase. La app ya tiene un proyecto Firebase nuevo, SDK instalado e inicialización base de Firebase Auth y Firestore Offline, pero todavía mantiene LocalStorage/Capacitor como persistencia principal y no migra datos reales.
 
 ---
 
 ## ESTADO ACTUAL
 
 - El plan `PlanSegundoIntentoFirebase.md` quedó ejecutado y marcado como `TERMINADO`.
-- No se instaló Firebase SDK.
-- No se conectó Firestore, Auth ni Storage.
+- El plan `PlanFirebaseBaseNuevoProyecto.md` quedó ejecutado y marcado como `TERMINADO`.
+- Proyecto Firebase actual: `PrecioJustoPruebas2` (`preciojustopruebas2`).
+- Firebase SDK instalado como dependencia del proyecto.
+- Firebase Auth quedó preparado con proveedor `Correo electrónico/contraseña`.
+- Firestore quedó creado en `nam5 (United States)` con reglas iniciales de producción cerradas.
+- Firestore Offline quedó inicializado con caché persistente multi-tab cuando el navegador lo permite.
+- Storage no se usa todavía.
 - La app mantiene el comportamiento visible actual y sigue usando persistencia local.
 - El enfoque definido es primero backup privado por usuario; la comunidad queda para una etapa posterior.
 - La arquitectura quedó preparada para asignar dueño (`usuarioId`) a los datos cuando exista Firebase Auth.
@@ -75,6 +80,15 @@ Claves persistidas actuales:
 - Se creó `ConexionService` usando `@capacitor/network`.
 - Queda como base para indicadores futuros de offline, sincronizando y error de sincronización.
 
+### Base Firebase
+
+- Se creó el proyecto `PrecioJustoPruebas2` desde Firebase Console.
+- Se registró la app web `PrecioJustoWebPruebas2`.
+- Se registró la app Android `PrecioJustoAndroidPruebas2` con package `com.preciojusto.app`.
+- Se reemplazó `android/app/google-services.json` con la configuración nueva.
+- Se agregó `FirebaseBaseService` para centralizar App, Auth y Firestore.
+- Se agregó `FirebaseBoot` para verificar inicialización en desarrollo sin leer ni escribir documentos.
+
 ---
 
 ## ARCHIVOS PRINCIPALES
@@ -91,6 +105,8 @@ Claves persistidas actuales:
 - `src/almacenamiento/servicios/ContadorGraciasService.js`
 - `src/almacenamiento/servicios/ConexionService.js`
 - `src/almacenamiento/servicios/InventarioMigracionFirebaseService.js`
+- `src/almacenamiento/servicios/FirebaseBaseService.js`
+- `src/boot/FirebaseBoot.js`
 
 ### Servicios ajustados
 
@@ -132,7 +148,9 @@ Recomendación práctica:
 
 - `google-services.json` no se considera secreto crítico, pero debe tratarse con cuidado.
 - `.env.local` está ignorado por Git y concentra configuración local.
+- `DatosLocalesProyectos.md` documenta el proyecto nuevo y deja los proyectos anteriores como históricos.
 - La seguridad real dependerá de Firebase Security Rules.
+- Regla base actual de Firestore: lectura y escritura denegadas por defecto.
 - Regla base futura: cada usuario solo puede leer/escribir sus datos privados.
 - Storage debe limitar fotos a `usuarios/{usuarioId}/fotos`.
 
@@ -144,19 +162,21 @@ Recomendación práctica:
 - `npm run build` pasó correctamente.
 - `npm run androidReleaseConSimbolos` pasó correctamente.
 - La app cargó en navegador local con MCP Browser.
+- Firebase base inicializó con `projectId: preciojustopruebas2`, Auth activo y Firestore Offline activo.
+- Se confirmó que los servicios de datos siguen usando `AlmacenamientoService` con adaptadores locales.
 - Se detectó CORS en `version.json` contra GitHub Pages durante dev; no pertenece a Firebase.
 
 ---
 
 ## PRÓXIMO PASO RECOMENDADO
 
-Antes de implementar Firebase real, conviene cerrar un plan específico de modelo de datos y migración:
+Antes de migrar datos reales a Firestore, conviene cerrar un plan específico de modelo de datos y migración:
 
 - definir documentos definitivos de Firestore;
 - definir subcolección de precios;
 - diseñar diálogo de migración local a cuenta;
 - decidir si sesión de escaneo queda solo local;
-- preparar reglas de Firestore y Storage;
+- preparar reglas privadas reales de Firestore y Storage;
 - corregir el CORS de `version.json` en dev para no contaminar la consola durante pruebas.
 
-Mi recomendación práctica: no instalar Firebase todavía hasta decidir el modelo final de `productos`, `precios`, `comercios` y `listasJustas`. Firestore es fácil de empezar, pero caro de corregir si el modelo nace con documentos grandes o escrituras en bloque.
+Mi recomendación práctica: no migrar datos todavía hasta decidir el modelo final de `productos`, `precios`, `comercios` y `listasJustas`. Firestore es fácil de empezar, pero caro de corregir si el modelo nace con documentos grandes o escrituras en bloque.
