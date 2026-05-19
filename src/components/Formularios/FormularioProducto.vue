@@ -205,6 +205,7 @@ const datosInternos = ref({
   cantidad: props.modelValue.cantidad || 1,
   unidad: props.modelValue.unidad || preferenciasStore.unidad,
   imagen: props.modelValue.imagen || null,
+  fotoFuente: props.modelValue.fotoFuente || null,
 })
 
 // Estados de búsqueda
@@ -234,6 +235,7 @@ watch(
       cantidad: nuevoValor.cantidad || 1,
       unidad: nuevoValor.unidad || 'unidad',
       imagen: nuevoValor.imagen || null,
+      fotoFuente: nuevoValor.fotoFuente || null,
     }
   },
   { deep: true },
@@ -244,6 +246,7 @@ async function seleccionarCamara() {
   const resultado = await abrirCamara()
   if (resultado) {
     datosInternos.value.imagen = resultado
+    datosInternos.value.fotoFuente = 'usuario'
     emitirCambios()
   }
 }
@@ -251,11 +254,13 @@ async function alSeleccionarArchivo(event) {
   const resultado = await leerArchivo(event)
   if (resultado) {
     datosInternos.value.imagen = resultado
+    datosInternos.value.fotoFuente = 'usuario'
     emitirCambios()
   }
 }
 function quitarFoto() {
   datosInternos.value.imagen = null
+  datosInternos.value.fotoFuente = null
   emitirCambios()
 }
 

@@ -503,5 +503,11 @@ export const useComerciStore = defineStore('comercios', {
         }
       }
     },
+
+    limpiarEstado() {
+      this.comercios = []
+      this.cargando = false
+      this.error = null
+    },
   },
 })

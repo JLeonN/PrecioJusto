@@ -116,6 +116,16 @@ export const usePreferenciasStore = defineStore('preferencias', () => {
     await preferenciasService.guardarUnidad(unidad.value)
   }
 
+  function limpiarEstado() {
+    modoMoneda.value = 'automatica'
+    modoTema.value = 'sistema'
+    monedaManual.value = MONEDA_DEFAULT
+    paisDetectado.value = null
+    monedaDetectada.value = null
+    unidad.value = 'unidad'
+    aplicarModoTema()
+  }
+
   return {
     modoMoneda,
     modoTema,
@@ -135,5 +145,6 @@ export const usePreferenciasStore = defineStore('preferencias', () => {
     guardarMonedaManual,
     guardarMoneda,
     guardarUnidad,
+    limpiarEstado,
   }
 })

@@ -5,6 +5,8 @@
 
 import { adaptadorActual } from './AlmacenamientoService.js'
 import { MONEDA_DEFAULT } from '../constantes/Monedas.js'
+import { CLAVE_PREFERENCIAS_USUARIO } from '../constantes/ClavesAlmacenamiento.js'
+import usuarioActualService from './UsuarioActualService.js'
 
 const PREFERENCIAS_BASE = {
   modoMoneda: 'automatica',
@@ -17,7 +19,10 @@ const PREFERENCIAS_BASE = {
 
 function normalizarPreferencias(preferenciasCrudas) {
   if (!preferenciasCrudas || typeof preferenciasCrudas !== 'object') {
-    return { ...PREFERENCIAS_BASE }
+    return {
+      usuarioId: usuarioActualService.obtenerUsuarioIdActual(),
+      ...PREFERENCIAS_BASE,
+    }
   }
 
   const monedaManual =
@@ -36,6 +41,7 @@ function normalizarPreferencias(preferenciasCrudas) {
       : PREFERENCIAS_BASE.modoTema
 
   return {
+    usuarioId: preferenciasCrudas.usuarioId || usuarioActualService.obtenerUsuarioIdActual(),
     modoMoneda,
     modoTema,
     monedaManual,
@@ -48,7 +54,7 @@ function normalizarPreferencias(preferenciasCrudas) {
 class PreferenciasService {
   constructor() {
     this.adaptador = adaptadorActual
-    this.clavePreferencias = 'preferencias_usuario'
+    this.clavePreferencias = CLAVE_PREFERENCIAS_USUARIO
   }
 
   async obtenerPreferencias() {

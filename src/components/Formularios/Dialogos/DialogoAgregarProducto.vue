@@ -93,6 +93,7 @@ import EscaneadorCodigo from '../../Scanner/EscaneadorCodigo.vue'
 import { useProductosStore } from '../../../almacenamiento/stores/productosStore.js'
 import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.js'
 import productosService from '../../../almacenamiento/servicios/ProductosService.js'
+import usuarioActualService from '../../../almacenamiento/servicios/UsuarioActualService.js'
 import busquedaProductosHibridaService, {
   FUENTE_DATO_LOCAL,
 } from '../../../almacenamiento/servicios/BusquedaProductosHibridaService.js'
@@ -145,6 +146,7 @@ const datosProducto = ref({
   unidad: 'unidad',
   categoria: '',
   imagen: null,
+  fotoFuente: null,
 })
 
 // Datos del formulario de precio
@@ -356,6 +358,7 @@ function autoCompletarFormulario(producto) {
     unidad: producto.unidad || datosProducto.value.unidad,
     categoria: producto.categoria || datosProducto.value.categoria,
     imagen: producto.imagen || datosProducto.value.imagen,
+    fotoFuente: producto.fotoFuente || datosProducto.value.fotoFuente || null,
   }
   fuenteDatoActual.value = producto.fuenteDato || null
   if (producto.fuenteDato === FUENTE_DATO_LOCAL) {
@@ -428,7 +431,7 @@ async function guardarProducto() {
           : [],
         fecha: new Date().toISOString(),
         confirmaciones: 0,
-        usuarioId: 'user_actual_123',
+        usuarioId: usuarioActualService.obtenerUsuarioIdActual(),
       }
 
       const productoActualizado = await productosStore.agregarPrecioAProducto(
@@ -471,7 +474,7 @@ async function guardarProducto() {
       categoria: datosProducto.value.categoria?.trim() || '',
       imagen: datosProducto.value.imagen || null,
       fuenteDato: fuenteDatoActual.value || null,
-      fotoFuente: fotoFuenteActual.value || null,
+      fotoFuente: fotoFuenteActual.value || datosProducto.value.fotoFuente || null,
       precios: [],
     }
 
@@ -496,7 +499,7 @@ async function guardarProducto() {
           : [],
         fecha: new Date().toISOString(),
         confirmaciones: 0,
-        usuarioId: 'user_actual_123',
+        usuarioId: usuarioActualService.obtenerUsuarioIdActual(),
       })
     }
 
@@ -553,6 +556,7 @@ function limpiarFormulario() {
     unidad: preferenciasStore.unidad,
     categoria: '',
     imagen: null,
+    fotoFuente: null,
   }
   fuenteDatoActual.value = null
   fotoFuenteActual.value = null

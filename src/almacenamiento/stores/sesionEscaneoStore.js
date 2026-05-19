@@ -1,9 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
-import { adaptadorActual } from '../servicios/AlmacenamientoService.js'
-
-// Clave usada para persistir la sesión en el adaptador
-const CLAVE_SESION = 'sesion_escaneo'
+import sesionEscaneoService from '../servicios/SesionEscaneoService.js'
+import { ORIGENES_FOTO } from '../constantes/PreparacionFirebase.js'
 
 export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
   // ========================================
@@ -33,7 +31,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
 
   // Guarda el estado completo en el adaptador
   async function _persistir() {
-    await adaptadorActual.guardar(CLAVE_SESION, { items: items.value })
+    await sesionEscaneoService.guardarSesion(items.value)
   }
 
   // Observa cambios y guarda automáticamente
@@ -47,12 +45,13 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
   async function cargarSesion() {
     cargando.value = true
     try {
-      const datos = await adaptadorActual.obtener(CLAVE_SESION)
+      const datos = await sesionEscaneoService.obtenerSesion()
       if (datos) {
         // Migración: ítems guardados sin campo `comercio` reciben comercio: null
         items.value = (datos.items || []).map((item) => ({
           ...item,
           comercio: item.comercio ?? null,
+          fotoFuente: item.fotoFuente || _normalizarFotoFuente(item),
           sinCoincidencia: item.sinCoincidencia ?? false,
           activarPreciosMayoristas: item.activarPreciosMayoristas ?? false,
           escalasPorCantidad: Array.isArray(item.escalasPorCantidad) ? item.escalasPorCantidad : [],
@@ -75,6 +74,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
       cantidad: item.cantidad || 1,
       unidad: item.unidad || 'unidad',
       imagen: item.imagen || null,
+      fotoFuente: item.fotoFuente || _normalizarFotoFuente(item),
       precio: item.precio || 0,
       moneda: item.moneda || 'UYU',
       activarPreciosMayoristas: item.activarPreciosMayoristas || false,
@@ -93,6 +93,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
             cantidad: item.cantidad || 1,
             unidad: item.unidad || 'unidad',
             imagen: item.imagen || null,
+            fotoFuente: item.fotoFuente || _normalizarFotoFuente(item),
           }
         : null,
     }
@@ -125,7 +126,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
   // Vacía la mesa de trabajo por completo
   async function limpiarTodo() {
     items.value = []
-    await adaptadorActual.eliminar(CLAVE_SESION)
+    await sesionEscaneoService.eliminarSesion()
   }
 
   // ========================================
@@ -135,6 +136,12 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
   // Genera un ID único simple para cada item
   function _generarId() {
     return `escaneo_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
+  }
+
+  function _normalizarFotoFuente(item) {
+    if (!item?.imagen) return null
+    if (item.origenApi || item.fuenteDato) return ORIGENES_FOTO.API
+    return ORIGENES_FOTO.USUARIO
   }
 
   return {

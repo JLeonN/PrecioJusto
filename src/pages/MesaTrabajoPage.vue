@@ -287,6 +287,7 @@ import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoSto
 import { useListaJustaStore } from '../almacenamiento/stores/ListaJustaStore.js'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
 import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
+import usuarioActualService from '../almacenamiento/servicios/UsuarioActualService.js'
 import { useSeleccionMultiple } from '../composables/useSeleccionMultiple.js'
 import { IconShoppingBag, IconSend, IconHome, IconMapPin } from '@tabler/icons-vue'
 
@@ -409,13 +410,14 @@ async function _guardarItem(item) {
     escalasPorCantidad: Array.isArray(item.escalasPorCantidad) ? item.escalasPorCantidad : [],
     fecha: new Date().toISOString(),
     confirmaciones: 0,
-    usuarioId: 'user_actual_123',
+    usuarioId: usuarioActualService.obtenerUsuarioIdActual(),
   }
   if (item.productoExistenteId) {
     await productosStore.agregarPrecioAProducto(item.productoExistenteId, datoPrecio)
     await productosStore.actualizarProducto(item.productoExistenteId, {
       nombre: item.nombre,
       imagen: item.imagen,
+      fotoFuente: item.fotoFuente || (item.imagen ? 'usuario' : null),
       marca: item.marca,
       cantidad: item.cantidad,
       unidad: item.unidad,
@@ -425,6 +427,7 @@ async function _guardarItem(item) {
       codigoBarras: item.codigoBarras,
       nombre: item.nombre,
       imagen: item.imagen,
+      fotoFuente: item.fotoFuente || (item.imagen ? 'usuario' : null),
       marca: item.marca,
       cantidad: item.cantidad,
       unidad: item.unidad,

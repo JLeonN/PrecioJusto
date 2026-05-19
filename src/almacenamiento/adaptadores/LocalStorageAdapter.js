@@ -15,9 +15,11 @@
  * Todos los métodos tienen la misma firma que FirestoreAdapter.
  */
 
+import { PREFIJO_ALMACENAMIENTO } from '../constantes/ClavesAlmacenamiento.js'
+
 class LocalStorageAdapter {
   constructor() {
-    this.prefijo = 'precio_justo_' // Prefijo para evitar colisiones con otras apps
+    this.prefijo = PREFIJO_ALMACENAMIENTO // Prefijo para evitar colisiones con otras apps
 
     // Verificar que localStorage esté disponible
     if (typeof window === 'undefined' || !window.localStorage) {

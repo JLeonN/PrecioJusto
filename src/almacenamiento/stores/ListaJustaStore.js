@@ -348,6 +348,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
       cantidad: item.cantidad,
       unidad: item.unidad,
       imagen: item.imagen,
+      fotoFuente: item.fotoFuente || null,
       precio: item.precioManual || 0,
       moneda: item.moneda || 'UYU',
       origenApi: false,
@@ -549,6 +550,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
       cantidad: item.cantidad,
       unidad: item.unidad,
       imagen: item.imagen,
+      fotoFuente: item.fotoFuente || null,
       precios: [
         {
           id: `precio_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
@@ -794,6 +796,12 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     }
   }
 
+  function limpiarEstado() {
+    listas.value = []
+    cargando.value = false
+    error.value = null
+  }
+
   return {
     listas,
     cargando,
@@ -824,5 +832,6 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     sincronizarComercioBaseInteligente,
     marcarItemComoEnMisProductos,
     restaurarPreciosOriginales,
+    limpiarEstado,
   }
 })

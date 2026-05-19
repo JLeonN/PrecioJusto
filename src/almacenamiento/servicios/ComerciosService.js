@@ -1,11 +1,12 @@
 import { adaptadorActual } from './AlmacenamientoService.js'
+import { CLAVE_COMERCIOS } from '../constantes/ClavesAlmacenamiento.js'
+import { ORIGENES_FOTO } from '../constantes/PreparacionFirebase.js'
+import usuarioActualService from './UsuarioActualService.js'
 
 /**
  * COMERCIOS SERVICE
  * Servicio para gestión de comercios con validación inteligente de duplicados
  */
-
-const CLAVE_COMERCIOS = 'comercios'
 
 // ═══════════════════════════════════════════════════════════
 // ABREVIATURAS COMUNES
@@ -258,9 +259,12 @@ async function validarDuplicados(nuevoComercio, comerciosParaValidar = null) {
  */
 async function agregarComercio(datosComercio) {
   const comercios = await obtenerTodos()
+  const ahora = new Date().toISOString()
+  const usuarioId = usuarioActualService.obtenerUsuarioIdActual()
 
   const nuevoComercio = {
     id: `${Date.now()}${Math.random().toString(36).substring(2, 9)}`,
+    usuarioId,
     nombre: datosComercio.nombre.trim(),
     tipo: datosComercio.tipo || 'Otro',
     direcciones: [
@@ -272,13 +276,14 @@ async function agregarComercio(datosComercio) {
         nombreCompleto: datosComercio.calle?.trim()
           ? `${datosComercio.nombre.trim()} - ${datosComercio.calle.trim()}`
           : datosComercio.nombre.trim(),
-        fechaUltimoUso: new Date().toISOString(),
+        fechaUltimoUso: ahora,
         foto: datosComercio.foto || null,
+        fotoFuente: datosComercio.foto ? ORIGENES_FOTO.USUARIO : null,
       },
     ],
     foto: null,
-    fechaCreacion: new Date().toISOString(),
-    fechaUltimoUso: new Date().toISOString(),
+    fechaCreacion: ahora,
+    fechaUltimoUso: ahora,
     cantidadUsos: 0,
   }
 
@@ -336,6 +341,7 @@ async function eliminarComercio(id) {
 async function agregarDireccion(comercioId, datosDireccion) {
   const comercios = await obtenerTodos()
   const comercio = comercios.find((c) => c.id === comercioId)
+  const ahora = new Date().toISOString()
 
   if (!comercio) return null
 
@@ -345,8 +351,9 @@ async function agregarDireccion(comercioId, datosDireccion) {
     barrio: datosDireccion.barrio?.trim() || '',
     ciudad: datosDireccion.ciudad?.trim() || '',
     nombreCompleto: `${comercio.nombre} - ${datosDireccion.calle.trim()}`,
-    fechaUltimoUso: new Date().toISOString(),
+    fechaUltimoUso: ahora,
     foto: datosDireccion.foto || null,
+    fotoFuente: datosDireccion.foto ? ORIGENES_FOTO.USUARIO : null,
   }
 
   comercio.direcciones.push(nuevaDireccion)
@@ -420,6 +427,7 @@ async function actualizarFotoDireccion(comercioId, direccionId, base64) {
   const direccion = comercio.direcciones.find((d) => d.id === direccionId)
   if (!direccion) return false
   direccion.foto = base64 || null
+  direccion.fotoFuente = base64 ? ORIGENES_FOTO.USUARIO : null
   await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
   return true
 }

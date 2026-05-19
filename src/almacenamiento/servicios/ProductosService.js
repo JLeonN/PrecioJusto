@@ -18,11 +18,14 @@
 
 import { adaptadorActual } from './AlmacenamientoService.js'
 import { normalizarEscalasPorCantidad, obtenerResumenEscalas } from '../../utils/EscalasCantidadUtils.js'
+import { PREFIJO_PRODUCTOS } from '../constantes/ClavesAlmacenamiento.js'
+import { ORIGENES_FOTO } from '../constantes/PreparacionFirebase.js'
+import usuarioActualService from './UsuarioActualService.js'
 
 class ProductosService {
   constructor() {
     this.adaptador = adaptadorActual
-    this.prefijoProductos = 'producto_'
+    this.prefijoProductos = PREFIJO_PRODUCTOS
 
     console.log('ProductosService inicializado con', this.adaptador.constructor.name)
   }
@@ -52,6 +55,9 @@ class ProductosService {
       if (!producto.id) {
         producto.id = this._generarId()
       }
+
+      producto.usuarioId = producto.usuarioId || usuarioActualService.obtenerUsuarioIdActual()
+      producto.fotoFuente = this._normalizarFotoFuente(producto)
 
       // Agregar timestamps
       const ahora = new Date().toISOString()
@@ -413,6 +419,7 @@ class ProductosService {
   _normalizarPrecioConEscalas(precio) {
     const base = Number(precio?.valor)
     const precioBase = Number.isFinite(base) ? base : null
+    const usuarioId = precio?.usuarioId || usuarioActualService.obtenerUsuarioIdActual()
     const activarPreciosMayoristas = Boolean(precio?.activarPreciosMayoristas)
     const escalasPorCantidad = activarPreciosMayoristas
       ? normalizarEscalasPorCantidad(precio?.escalasPorCantidad, precioBase)
@@ -421,6 +428,7 @@ class ProductosService {
 
     return {
       ...precio,
+      usuarioId,
       activarPreciosMayoristas,
       escalasPorCantidad,
       escalasResumen,
@@ -514,6 +522,13 @@ class ProductosService {
     }
 
     return errores
+  }
+
+  _normalizarFotoFuente(producto) {
+    if (!producto.imagen) return null
+    if (producto.fotoFuente) return producto.fotoFuente
+    if (producto.fuenteDato) return ORIGENES_FOTO.API
+    return ORIGENES_FOTO.USUARIO
   }
 
   // ========================================

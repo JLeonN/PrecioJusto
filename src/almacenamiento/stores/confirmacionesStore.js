@@ -20,6 +20,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import confirmacionesService from '../servicios/ConfirmacionesService.js'
 import { useProductosStore } from './productosStore.js'
+import usuarioActualService from '../servicios/UsuarioActualService.js'
 
 export const useConfirmacionesStore = defineStore('confirmaciones', () => {
   // ========================================
@@ -33,7 +34,7 @@ export const useConfirmacionesStore = defineStore('confirmaciones', () => {
    * const user = auth.currentUser
    * usuarioActualId.value = user.uid
    */
-  const usuarioActualId = ref('user_actual_123') // Temporal (hardcoded)
+  const usuarioActualId = ref(usuarioActualService.obtenerUsuarioIdActual())
 
   /**
    * ✅ SET DE PRECIOS CONFIRMADOS
@@ -377,7 +378,7 @@ export const useConfirmacionesStore = defineStore('confirmaciones', () => {
     limpiarEstado()
 
     // Actualizar ID
-    usuarioActualId.value = nuevoUsuarioId
+    usuarioActualId.value = usuarioActualService.cambiarUsuarioActual(nuevoUsuarioId).id
 
     // Cargar confirmaciones del nuevo usuario
     await cargarConfirmaciones()

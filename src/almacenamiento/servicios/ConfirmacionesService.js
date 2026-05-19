@@ -26,11 +26,12 @@
 
 import { adaptadorActual } from './AlmacenamientoService.js'
 import productosService from './ProductosService.js'
+import { PREFIJO_CONFIRMACIONES } from '../constantes/ClavesAlmacenamiento.js'
 
 class ConfirmacionesService {
   constructor() {
     this.adaptador = adaptadorActual
-    this.prefijoConfirmaciones = 'confirmaciones_'
+    this.prefijoConfirmaciones = PREFIJO_CONFIRMACIONES
 
     console.log('👍 ConfirmacionesService inicializado con', this.adaptador.constructor.name)
   }

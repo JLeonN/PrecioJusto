@@ -1,6 +1,10 @@
 ﻿import { adaptadorActual } from './AlmacenamientoService.js'
 
-const CLAVE_LISTAS = 'lista_justa'
+import { CLAVE_LISTA_JUSTA } from '../constantes/ClavesAlmacenamiento.js'
+import { ORIGENES_FOTO } from '../constantes/PreparacionFirebase.js'
+import usuarioActualService from './UsuarioActualService.js'
+
+const CLAVE_LISTAS = CLAVE_LISTA_JUSTA
 
 class ListaJustaService {
   constructor() {
@@ -32,6 +36,7 @@ class ListaJustaService {
 
     return {
       id: this._generarId('listaJusta'),
+      usuarioId: usuarioActualService.obtenerUsuarioIdActual(),
       nombre: (nombre || '').trim(),
       orden,
       estadoGeneral: 'activa',
@@ -69,6 +74,7 @@ class ListaJustaService {
       comercio: (nuevoItem.comercio || '').trim() || null,
       unidad: (nuevoItem.unidad || '').trim() || 'unidad',
       imagen: nuevoItem.imagen || null,
+      fotoFuente: this._normalizarFotoFuente(nuevoItem),
       usaPreciosLocales: Boolean(nuevoItem.usaPreciosLocales),
       activarPreciosMayoristas: Boolean(nuevoItem.activarPreciosMayoristas) && escalasPorCantidad.length > 0,
       escalasPorCantidad,
@@ -90,6 +96,7 @@ class ListaJustaService {
 
     return {
       id: lista.id || this._generarId('listaJusta'),
+      usuarioId: lista.usuarioId || usuarioActualService.obtenerUsuarioIdActual(),
       nombre: (lista.nombre || 'Lista sin nombre').trim(),
       orden: Number.isFinite(Number(lista.orden)) ? Number(lista.orden) : 0,
       estadoGeneral: lista.estadoGeneral || 'activa',
@@ -125,6 +132,13 @@ class ListaJustaService {
         }))
         .filter((escala) => escala.cantidadMinima >= 2 && escala.precioUnitario !== null)
       : []
+  }
+
+  _normalizarFotoFuente(item) {
+    if (!item?.imagen) return null
+    if (item.fotoFuente) return item.fotoFuente
+    if (item.origenApi || item.fuenteDato) return ORIGENES_FOTO.API
+    return ORIGENES_FOTO.USUARIO
   }
 
   _normalizarConfiguracionInteligente(configuracion, comercioActual = null) {

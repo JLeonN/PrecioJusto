@@ -21,10 +21,11 @@
  */
 
 import { Preferences } from '@capacitor/preferences'
+import { PREFIJO_ALMACENAMIENTO } from '../constantes/ClavesAlmacenamiento.js'
 
 class CapacitorAdapter {
   constructor() {
-    this.prefijo = 'precio_justo_' // Prefijo para organizar las claves
+    this.prefijo = PREFIJO_ALMACENAMIENTO // Prefijo para organizar las claves
 
     console.log('📱 CapacitorAdapter inicializado')
 
