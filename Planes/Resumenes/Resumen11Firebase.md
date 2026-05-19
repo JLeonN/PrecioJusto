@@ -10,9 +10,11 @@ Este resumen concentra el estado actual de la integración gradual de Precio Jus
 
 - El plan `PlanSegundoIntentoFirebase.md` quedó ejecutado y marcado como `TERMINADO`.
 - El plan `PlanFirebaseBaseNuevoProyecto.md` quedó ejecutado y marcado como `TERMINADO`.
+- El plan `PlanAutenticacionFirebase.md` quedó ejecutado y marcado como `TERMINADO`.
 - Proyecto Firebase actual: `PrecioJustoPruebas2` (`preciojustopruebas2`).
 - Firebase SDK instalado como dependencia del proyecto.
 - Firebase Auth quedó preparado con proveedor `Correo electrónico/contraseña`.
+- Firebase Auth ahora tiene flujo real de registro, login, recuperación de contraseña, persistencia de sesión y logout.
 - Firestore quedó creado en `nam5 (United States)` con reglas iniciales de producción cerradas.
 - Firestore Offline quedó inicializado con caché persistente multi-tab cuando el navegador lo permite.
 - Storage no se usa todavía.
@@ -89,6 +91,16 @@ Claves persistidas actuales:
 - Se agregó `FirebaseBaseService` para centralizar App, Auth y Firestore.
 - Se agregó `FirebaseBoot` para verificar inicialización en desarrollo sin leer ni escribir documentos.
 
+### Autenticación Firebase
+
+- Se agregó `AutenticacionFirebaseService` para centralizar Firebase Auth.
+- Se agregó `UsuarioStore` con usuario, email, nombre, foto, carga, errores y acciones de sesión.
+- Se agregó `UsuarioBoot` para iniciar la escucha de sesión al arrancar la app.
+- Se agregó `AutenticacionPage` con ingreso, registro y recuperación de contraseña.
+- Las rutas principales ahora requieren sesión y redirigen a `/acceso`.
+- `ConfiguracionPage` muestra el estado de cuenta y permite cerrar sesión con confirmación.
+- Al cerrar sesión se restaura el usuario local legacy y no se borran datos locales.
+
 ---
 
 ## ARCHIVOS PRINCIPALES
@@ -106,7 +118,11 @@ Claves persistidas actuales:
 - `src/almacenamiento/servicios/ConexionService.js`
 - `src/almacenamiento/servicios/InventarioMigracionFirebaseService.js`
 - `src/almacenamiento/servicios/FirebaseBaseService.js`
+- `src/almacenamiento/servicios/AutenticacionFirebaseService.js`
 - `src/boot/FirebaseBoot.js`
+- `src/boot/UsuarioBoot.js`
+- `src/almacenamiento/stores/UsuarioStore.js`
+- `src/pages/AutenticacionPage.vue`
 
 ### Servicios ajustados
 
@@ -163,6 +179,8 @@ Recomendación práctica:
 - `npm run androidReleaseConSimbolos` pasó correctamente.
 - La app cargó en navegador local con MCP Browser.
 - Firebase base inicializó con `projectId: preciojustopruebas2`, Auth activo y Firestore Offline activo.
+- MCP Browser validó redirección a login sin sesión, registro de usuario, login correcto, contraseña incorrecta con error claro, persistencia tras recarga y logout.
+- La red observada mostró llamadas a `identitytoolkit.googleapis.com` para Auth y no mostró escrituras de documentos Firestore.
 - Se confirmó que los servicios de datos siguen usando `AlmacenamientoService` con adaptadores locales.
 - Se detectó CORS en `version.json` contra GitHub Pages durante dev; no pertenece a Firebase.
 

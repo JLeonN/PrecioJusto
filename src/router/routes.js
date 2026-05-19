@@ -2,6 +2,7 @@ const routes = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
+    meta: { requiereAuth: true },
     children: [
       // Página principal
       { path: '', component: () => import('pages/ListaJusta/ListaJustaPage.vue') },
@@ -34,6 +35,11 @@ const routes = [
       // Gracias
       { path: 'gracias', component: () => import('pages/GraciasPage.vue') },
     ],
+  },
+  {
+    path: '/acceso',
+    component: () => import('pages/AutenticacionPage.vue'),
+    meta: { publica: true, soloInvitado: true },
   },
   {
     path: '/:catchAll(.*)*',

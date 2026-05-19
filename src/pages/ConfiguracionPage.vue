@@ -7,6 +7,31 @@
       </div>
       <q-card flat bordered>
         <q-card-section>
+          <div class="text-subtitle1 text-weight-medium">Cuenta</div>
+          <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
+            {{ textoEstadoCuenta }}
+          </p>
+        </q-card-section>
+        <q-separator />
+        <q-card-section>
+          <div class="fila-cuenta">
+            <div>
+              <div class="text-body2 text-weight-medium">{{ etiquetaCuenta }}</div>
+              <div class="text-caption text-grey-7">Los datos locales se conservan al cerrar sesión.</div>
+            </div>
+            <q-btn
+              no-caps
+              unelevated
+              :color="usuarioStore.estaAutenticado ? 'negative' : 'primary'"
+              :label="usuarioStore.estaAutenticado ? 'Cerrar sesión' : 'Ingresar'"
+              :loading="usuarioStore.cargandoAccion"
+              @click="gestionarCuenta"
+            />
+          </div>
+        </q-card-section>
+      </q-card>
+      <q-card flat bordered class="q-mt-md">
+        <q-card-section>
           <div class="text-subtitle1 text-weight-medium">Modo oscuro</div>
           <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
             Elegí cómo querés que se vea la app: claro, oscuro o automático según el sistema.
@@ -103,12 +128,16 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
+import { useRouter } from 'vue-router'
 import { MONEDAS } from '../almacenamiento/constantes/Monedas.js'
 import { usePublicidad } from '../composables/usePublicidad.js'
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
+import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
 
 const quasar = useQuasar()
+const router = useRouter()
 const preferenciasStore = usePreferenciasStore()
+const usuarioStore = useUsuarioStore()
 const { mostrarInterstitial } = usePublicidad()
 const ultimoIntersticialMostrado = ref(0)
 const TIEMPO_ESPERA_INTERSTICIAL_MS = 60000
@@ -120,6 +149,12 @@ const opcionesModoTema = [
 
 const esModoAutomatico = computed(() => preferenciasStore.modoMoneda === 'automatica')
 const etiquetaTemaActivo = computed(() => (quasar.dark.isActive ? 'Oscuro' : 'Claro'))
+const etiquetaCuenta = computed(() => usuarioStore.email || 'Sin sesión iniciada')
+const textoEstadoCuenta = computed(() =>
+  usuarioStore.estaAutenticado
+    ? 'Sesión activa con Firebase Auth.'
+    : 'Ingresá para usar la app con una cuenta Firebase.',
+)
 
 async function mostrarPublicidadConfiguracion() {
   const ahora = Date.now()
@@ -151,6 +186,34 @@ async function cambiarMonedaManual(moneda) {
   await preferenciasStore.guardarMonedaManual(moneda)
 }
 
+async function gestionarCuenta() {
+  if (!usuarioStore.estaAutenticado) {
+    await router.push('/acceso')
+    return
+  }
+
+  quasar
+    .dialog({
+      title: 'Cerrar sesión',
+      message: 'No se borrarán productos, comercios, listas ni preferencias locales.',
+      cancel: true,
+      persistent: true,
+      ok: {
+        label: 'Cerrar sesión',
+        color: 'negative',
+        noCaps: true,
+      },
+    })
+    .onOk(async () => {
+      await usuarioStore.cerrarSesion()
+      quasar.notify({
+        type: 'positive',
+        message: 'Sesión cerrada.',
+      })
+      await router.push('/acceso')
+    })
+}
+
 onMounted(async () => {
   if (preferenciasStore.modoMoneda === 'automatica' && !preferenciasStore.paisDetectado) {
     await preferenciasStore.detectarMonedaAutomatica()
@@ -165,6 +228,12 @@ onMounted(async () => {
 .contenedor-configuracion {
   max-width: 720px;
   margin: 0 auto;
+}
+.fila-cuenta {
+  display: flex;
+  gap: var(--espaciado-md);
+  align-items: center;
+  justify-content: space-between;
 }
 .selector-modo-tema {
   display: grid;
@@ -196,6 +265,10 @@ onMounted(async () => {
   border: 1px solid var(--borde-color);
 }
 @media (max-width: 640px) {
+  .fila-cuenta {
+    align-items: stretch;
+    flex-direction: column;
+  }
   .selector-modo-tema {
     grid-template-columns: 1fr;
   }
