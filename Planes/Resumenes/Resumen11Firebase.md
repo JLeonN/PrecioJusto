@@ -16,6 +16,7 @@ Este resumen concentra el estado actual de la integración gradual de Precio Jus
 - El plan `PlanReglasFirestoreVersionadas.md` quedó ejecutado y marcado como `TERMINADO`.
 - El plan `PlanFirestorePrivadoComercios.md` quedó ejecutado y marcado como `TERMINADO`.
 - El plan `PlanMigracionLocalGuiadaFirebase.md` quedó ejecutado y marcado como `TERMINADO`.
+- El plan `PlanFirestorePrivadoListasJustas.md` quedó ejecutado y marcado como `TERMINADO`.
 - Proyecto Firebase actual: `PrecioJustoPruebas2` (`preciojustopruebas2`).
 - Firebase SDK instalado como dependencia del proyecto.
 - Firebase Auth quedó preparado con proveedor `Correo electrónico/contraseña`.
@@ -27,6 +28,7 @@ Este resumen concentra el estado actual de la integración gradual de Precio Jus
 - La app mantiene el comportamiento visible actual y sigue usando persistencia local como fuente principal visible.
 - Productos y precios ya se sincronizan a Firestore como espejo privado validado cuando hay usuario Firebase autenticado.
 - Comercios y direcciones ya se sincronizan a Firestore como espejo privado validado cuando hay usuario Firebase autenticado.
+- Lista Justa ya se sincroniza a Firestore como espejo privado validado cuando hay usuario Firebase autenticado.
 - Productos, precios, comercios y direcciones ya tienen migración local guiada con backup local previo, estado Firestore y reintento idempotente.
 - El enfoque definido es primero backup privado por usuario; la comunidad queda para una etapa posterior.
 - La arquitectura quedó preparada para asignar dueño (`usuarioId`) a todos los datos privados.
@@ -178,6 +180,19 @@ Claves persistidas actuales:
 - Firestore sigue sin ser fuente principal de UI; la app continúa leyendo datos visibles desde LocalStorage/Capacitor.
 - Listas, preferencias, confirmaciones, comunidad, Storage y fotos base64 quedan fuera de esta migración.
 
+### Firestore privado de Lista Justa
+
+- Se creó `FirestoreListasJustasService` para escribir y leer listas privadas.
+- Ruta activa de listas: `usuarios/{usuarioId}/listasJustas/{listaId}`.
+- Los items quedan embebidos dentro del documento de lista mientras respeten el límite de 100 items del modelo.
+- `ListaJustaService` guarda primero en LocalStorage/Capacitor y luego intenta sincronizar Firestore.
+- Si no hay usuario Firebase autenticado, la sincronización Firestore se omite y la lista queda local.
+- Si Firestore queda pendiente por conexión, la app devuelve estado `pendiente` con timeout controlado.
+- La eliminación local de lista marca `eliminado: true` y `estadoGeneral: eliminada` en Firestore.
+- Firestore no guarda imágenes base64 de items; Storage sigue pendiente.
+- Firestore todavía no es fuente principal de UI; queda como espejo privado de Lista Justa.
+- No se agregaron referencias Firestore obligatorias desde items a productos o comercios; los items conservan `productoId`, `comercioActual` y datos visuales.
+
 ---
 
 ## ARCHIVOS PRINCIPALES
@@ -198,6 +213,7 @@ Claves persistidas actuales:
 - `src/almacenamiento/servicios/MigracionLocalFirebaseService.js`
 - `src/almacenamiento/servicios/FirebaseBaseService.js`
 - `src/almacenamiento/servicios/AutenticacionFirebaseService.js`
+- `src/almacenamiento/servicios/FirestoreListasJustasService.js`
 - `src/boot/FirebaseBoot.js`
 - `src/boot/UsuarioBoot.js`
 - `src/almacenamiento/stores/UsuarioStore.js`
@@ -287,6 +303,12 @@ Recomendación práctica:
 - MCP Browser simuló desconexión: el flujo quedó `parcial`, registró 3 items en cola y luego reintentó online hasta `completada` sin duplicar documentos.
 - MCP Browser validó que usuario B recibe `permission-denied` al intentar leer datos migrados del usuario A.
 - MCP Browser validó que la tarjeta de configuración muestra inventario, conexión, estado y acciones de backup/migración.
+- MCP Browser validó creación, edición de item, marcado como comprado, comercio actual y eliminación lógica de Lista Justa en Firestore.
+- MCP Browser validó que Lista Justa sin usuario Firebase queda solo local.
+- MCP Browser validó Lista Justa offline con estado `pendiente` y sincronización manual al reconectar.
+- MCP Browser validó que usuario B y usuario sin sesión reciben `permission-denied` al intentar leer listas del usuario A.
+- MCP Browser validó que imágenes base64 de items no se escriben como base64 en Firestore.
+- MCP Browser validó que productos/precios y comercios siguen sincronizando después de integrar Lista Justa.
 - Se confirmó que los servicios de datos siguen usando `AlmacenamientoService` con adaptadores locales.
 - Se detectó CORS en `version.json` contra GitHub Pages durante dev; no pertenece a Firebase.
 - Durante la simulación offline se observaron errores `ERR_INTERNET_DISCONNECTED` esperados en consola; no son regresión funcional.
@@ -295,10 +317,10 @@ Recomendación práctica:
 
 ## PRÓXIMO PASO RECOMENDADO
 
-Productos, precios y comercios ya tienen espejo privado validado y migración guiada. El próximo plan debería avanzar con uno de estos caminos:
+Productos, precios, comercios y Lista Justa ya tienen espejo privado validado. El próximo plan debería avanzar con uno de estos caminos:
 
-- listas privadas en Firestore;
+- preferencias privadas en Firestore;
 - Storage de fotos, para subir imágenes base64 locales y guardar solo URLs/rutas en Firestore;
 - corrección del CORS de `version.json` en dev para no contaminar la consola durante pruebas.
 
-Mi recomendación práctica: seguir con listas privadas o Storage de fotos antes de convertir Firestore en fuente principal.
+Mi recomendación práctica: seguir con preferencias privadas y luego Storage de fotos antes de convertir Firestore en fuente principal.

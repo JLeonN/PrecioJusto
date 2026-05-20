@@ -137,8 +137,14 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
   }
 
   async function eliminarLista(listaId) {
+    const listaEliminada = obtenerListaPorId(listaId)
     listas.value = listas.value.filter((lista) => lista.id !== listaId)
     await persistir()
+
+    if (listaEliminada) {
+      await ListaJustaService.sincronizarEliminacionListaFirestore(listaEliminada.id)
+    }
+
     return true
   }
 

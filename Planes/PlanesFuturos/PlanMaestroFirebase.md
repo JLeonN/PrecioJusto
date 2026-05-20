@@ -51,7 +51,7 @@ Registrar los dominios privados que ya tienen espejo Firestore validado.
 
 Ordenar los planes que todavía faltan para completar el backup privado por usuario.
 
-- [ ] `PlanFirestorePrivadoListasJustas.md`: sincronizar Lista Justa privada en Firestore.
+- [x] `PlanFirestorePrivadoListasJustas.md`: sincronizar Lista Justa privada en Firestore.
 - [ ] `PlanFirestorePrivadoPreferencias.md`: sincronizar preferencias privadas en Firestore.
 - [ ] `PlanFirestorePrivadoConfirmaciones.md`: sincronizar confirmaciones privadas en Firestore si se confirma que aportan valor.
 - [ ] Actualizar migración guiada para incluir listas, preferencias y confirmaciones cuando esos servicios existan.
@@ -115,9 +115,9 @@ Validar que este plan maestro sirve como control antes de crear nuevos planes Fi
 
 ## Próximo plan recomendado
 
-El próximo plan recomendado es `PlanFirestorePrivadoListasJustas.md`.
+El próximo plan recomendado es `PlanFirestorePrivadoPreferencias.md`.
 
-Motivo: productos, precios y comercios ya tienen espejo Firestore y migración guiada. Lista Justa todavía sigue local y es el siguiente dato privado importante del usuario.
+Motivo: productos, precios, comercios y Lista Justa ya tienen espejo Firestore. Preferencias todavía siguen locales y son el siguiente dato privado simple antes de confirmaciones y Storage.
 
 ## Progreso del plan
 
@@ -132,4 +132,4 @@ Motivo: productos, precios y comercios ya tienen espejo Firestore y migración g
 
 Fecha de creación: 20 de Mayo 2026
 Fecha de última actualización: 20 de Mayo 2026
-Estado: BORRADOR
+Estado: ACTIVO
