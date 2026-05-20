@@ -12,14 +12,16 @@ Este resumen concentra el estado actual de la integración gradual de Precio Jus
 - El plan `PlanFirebaseBaseNuevoProyecto.md` quedó ejecutado y marcado como `TERMINADO`.
 - El plan `PlanAutenticacionFirebase.md` quedó ejecutado y marcado como `TERMINADO`.
 - El plan `PlanModeloFirestoreYMigracion.md` quedó ejecutado y marcado como `TERMINADO`.
+- El plan `PlanFirestorePrivadoProductos.md` quedó ejecutado y marcado como `TERMINADO`.
 - Proyecto Firebase actual: `PrecioJustoPruebas2` (`preciojustopruebas2`).
 - Firebase SDK instalado como dependencia del proyecto.
 - Firebase Auth quedó preparado con proveedor `Correo electrónico/contraseña`.
 - Firebase Auth ahora tiene flujo real de registro, login, recuperación de contraseña, persistencia de sesión y logout.
-- Firestore quedó creado en `nam5 (United States)` con reglas iniciales de producción cerradas.
+- Firestore quedó creado en `nam5 (United States)` y ahora tiene reglas privadas bajo `usuarios/{usuarioId}`.
 - Firestore Offline quedó inicializado con caché persistente multi-tab cuando el navegador lo permite.
 - Storage no se usa todavía.
-- La app mantiene el comportamiento visible actual y sigue usando persistencia local.
+- La app mantiene el comportamiento visible actual y sigue usando persistencia local como fuente principal visible.
+- Productos y precios ya se sincronizan a Firestore como espejo privado validado cuando hay usuario Firebase autenticado.
 - El enfoque definido es primero backup privado por usuario; la comunidad queda para una etapa posterior.
 - La arquitectura quedó preparada para asignar dueño (`usuarioId`) a todos los datos privados.
 - El modelo Firestore definitivo queda documentado en `Planes/Resumenes/ModeloFirestoreMigracion.md`.
@@ -116,6 +118,20 @@ Claves persistidas actuales:
 - `sesion_escaneo`, backups y cola de sincronización quedan locales.
 - Se agregaron constantes de rutas, límites y campos del modelo en `PreparacionFirebase.js`.
 
+### Firestore privado de productos
+
+- Se creó `FirestoreProductosService` para escribir y leer productos privados.
+- Se creó `FirestorePreciosService` para manejar precios como subcolección del producto.
+- Ruta activa de productos: `usuarios/{usuarioId}/productos/{productoId}`.
+- Ruta activa de precios: `usuarios/{usuarioId}/productos/{productoId}/precios/{precioId}`.
+- `ProductosService` guarda primero en LocalStorage/Capacitor y luego intenta sincronizar Firestore.
+- Si no hay usuario Firebase autenticado, la sincronización Firestore se omite y el dato queda local.
+- Si Firestore queda pendiente por conexión, la app devuelve estado `pendiente` con timeout controlado para no trabar la UI.
+- `productosStore` expone estado de sincronización y `MisProductosPage` muestra un aviso cuando hay error.
+- Firestore no guarda imágenes base64; las fotos locales siguen locales hasta el plan de Storage.
+- Firestore todavía no es fuente principal de UI; queda como espejo privado de productos/precios.
+- No se escriben comercios, listas, preferencias, fotos, comunidad ni Storage en esta fase.
+
 ---
 
 ## ARCHIVOS PRINCIPALES
@@ -185,7 +201,7 @@ Recomendación práctica:
 - `DatosLocalesProyectos.md` documenta el proyecto nuevo y deja los proyectos anteriores como históricos.
 - La seguridad real dependerá de Firebase Security Rules.
 - Regla base actual de Firestore: lectura y escritura denegadas por defecto.
-- Regla base futura: cada usuario solo puede leer/escribir sus datos privados.
+- Regla base activa: cada usuario solo puede leer/escribir sus datos privados bajo `usuarios/{usuarioId}`.
 - Storage debe limitar fotos a `usuarios/{usuarioId}/fotos`.
 
 ---
@@ -201,6 +217,14 @@ Recomendación práctica:
 - La red observada mostró llamadas a `identitytoolkit.googleapis.com` para Auth y no mostró escrituras de documentos Firestore.
 - MCP Browser ejecutó inventario local con `InventarioMigracionFirebaseService`: el origen probado no tenía productos, precios, comercios, listas, preferencias, confirmaciones ni fotos.
 - `npm run lint` validó las constantes nuevas del modelo Firestore.
+- `npm run lint` validó los servicios privados de productos/precios.
+- `npm run build` validó el bundle con la sincronización Firestore de productos/precios.
+- MCP Browser validó escritura online de producto y precio en Firestore.
+- MCP Browser validó que una imagen base64 queda local y no se escribe en Firestore.
+- MCP Browser validó guardado offline local con estado `pendiente` y sincronización al reconectar.
+- MCP Browser validó lectura desde cache Firestore después de recarga online y desconexión controlada.
+- MCP Browser validó aislamiento: usuario B y usuario no autenticado reciben `permission-denied` al intentar acceder a datos del usuario A.
+- MCP Browser validó que no se crearon documentos en `comercios`, `listas`, `preferencias` ni `fotos`.
 - Se confirmó que los servicios de datos siguen usando `AlmacenamientoService` con adaptadores locales.
 - Se detectó CORS en `version.json` contra GitHub Pages durante dev; no pertenece a Firebase.
 
@@ -208,12 +232,11 @@ Recomendación práctica:
 
 ## PRÓXIMO PASO RECOMENDADO
 
-El modelo ya está cerrado para una primera migración privada. El próximo plan debería implementar Firestore privado en código, en este orden:
+Productos y precios ya tienen espejo privado validado. El próximo plan debería avanzar con uno de estos caminos:
 
-- crear y probar reglas privadas en Firebase Console;
-- crear servicios específicos `FirestoreProductosService`, `FirestorePreciosService`, `FirestoreComerciosService`, `FirestoreListasJustasService`, `FirestorePreferenciasService` y `FirestoreMigracionService`;
-- crear migración guiada con backup local, resumen, confirmación, reintento y validación de cantidades;
-- mantener Storage fuera hasta tener plan de fotos;
-- corregir el CORS de `version.json` en dev para no contaminar la consola durante pruebas.
+- comercios privados en Firestore, para que los precios puedan referenciar comercios reales sincronizados;
+- migración local guiada de productos/precios, con backup previo, conteos y reintentos;
+- Storage de fotos, para subir imágenes base64 locales y guardar solo URLs/rutas en Firestore;
+- corrección del CORS de `version.json` en dev para no contaminar la consola durante pruebas.
 
-Mi recomendación práctica: implementar primero productos y precios privados con reglas probadas. Recién después sumar comercios, listas y migración completa.
+Mi recomendación práctica: seguir con comercios privados antes de la migración completa, porque precios ya dependen de `comercioId` y `direccionId`.

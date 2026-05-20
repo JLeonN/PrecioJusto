@@ -5,8 +5,8 @@
 - Fecha: 2026-05-19.
 - Proyecto Firebase: `PrecioJustoPruebas2` (`preciojustopruebas2`).
 - Auth: Email/Password operativo.
-- Firestore: creado en `nam5`, reglas cerradas por defecto.
-- Escrituras Firestore desde la app: no habilitadas todavía.
+- Firestore: creado en `nam5`, reglas privadas activas bajo `usuarios/{usuarioId}`.
+- Escrituras Firestore desde la app: habilitadas solo para productos y precios privados.
 - Inventario MCP en navegador local: adaptador `local`, sin productos, precios, comercios, listas, preferencias, confirmaciones ni fotos en ese origen.
 
 ## Decisión Principal
@@ -42,6 +42,8 @@ Campos principales:
 
 Decisión: los precios no quedan embebidos en producto. Van a subcolección para evitar documentos gigantes.
 
+Estado de implementación 2026-05-19: productos se guardan primero en almacenamiento local y luego se sincronizan como espejo Firestore privado cuando hay usuario Firebase autenticado.
+
 ## Precios
 
 Documento: `usuarios/{usuarioId}/productos/{productoId}/precios/{precioId}`.
@@ -56,6 +58,8 @@ Campos principales:
 - `origen`, `fechaCreacion`, `fechaActualizacion`, `eliminado`.
 
 Decisión: `precioMejor`, `comercioMejor`, `monedaReferencia` y tendencias pueden persistirse como resumen del producto para lectura rápida, pero deben recalcularse cuando cambia un precio.
+
+Estado de implementación 2026-05-19: precios se escriben en subcolección `precios` del producto y mantienen el historial local existente.
 
 ## Comercios
 
@@ -154,7 +158,7 @@ service cloud.firestore {
 }
 ```
 
-Estas reglas deben probarse manualmente en Firebase Console antes de activar escrituras desde la app.
+Estas reglas ya fueron aplicadas en Firebase Console y probadas con usuario A, usuario B y usuario sin sesión.
 
 ## Índices Recomendados
 
@@ -201,14 +205,14 @@ Después de migrar:
 
 ## Próximo Plan de Código
 
-Crear servicios específicos por dominio antes que un `FirestoreAdapter` genérico:
+Productos y precios ya tienen servicios específicos implementados. Mantener el criterio de crear servicios por dominio antes que un `FirestoreAdapter` genérico:
 
-- `FirestoreProductosService`
-- `FirestorePreciosService`
+- `FirestoreProductosService` implementado.
+- `FirestorePreciosService` implementado.
 - `FirestoreComerciosService`
 - `FirestoreListasJustasService`
 - `FirestorePreferenciasService`
 - `FirestoreMigracionService`
 - `ColaSincronizacionService`
 
-Orden recomendado: reglas privadas, productos, precios, comercios, listas, preferencias, migración guiada.
+Orden recomendado actual: comercios, listas, preferencias, migración guiada y recién después Storage/fotos si se decide subir imágenes locales.

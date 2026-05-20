@@ -43,6 +43,12 @@
 
       <!-- BUSCADOR + LISTA (cuando hay productos) -->
       <template v-else>
+        <q-banner v-if="productosStore.errorSincronizacion" class="banner-sincronizacion q-mb-md" rounded>
+          <template #avatar>
+            <q-icon name="cloud_off" />
+          </template>
+          {{ productosStore.errorSincronizacion }}
+        </q-banner>
         <ContenedorStickySuperior :top-extra="seleccion.modoSeleccion.value ? 56 : 0">
           <InputBusqueda
             v-model="textoBusqueda"
@@ -746,6 +752,11 @@ onMounted(async () => {
   line-height: 1.35;
 }
 /* Tarjetita de aviso sobre la cámara */
+.banner-sincronizacion {
+  background: var(--fondo-banner-informativo);
+  color: var(--texto-primario);
+  border: 1px solid var(--borde-color);
+}
 .aviso-escaneo {
   position: fixed;
   top: calc(var(--safe-area-top, 0px) + 60px);
