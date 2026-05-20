@@ -1,7 +1,10 @@
 import { adaptadorActual } from './AlmacenamientoService.js'
 import { CLAVE_COMERCIOS } from '../constantes/ClavesAlmacenamiento.js'
-import { ORIGENES_FOTO } from '../constantes/PreparacionFirebase.js'
+import { ESTADOS_SINCRONIZACION, ORIGENES_FOTO } from '../constantes/PreparacionFirebase.js'
+import firestoreComerciosService from './FirestoreComerciosService.js'
 import usuarioActualService from './UsuarioActualService.js'
+
+const TIEMPO_MAXIMO_SINCRONIZACION_FIRESTORE_MS = 7000
 
 /**
  * COMERCIOS SERVICE
@@ -289,6 +292,7 @@ async function agregarComercio(datosComercio) {
 
   comercios.push(nuevoComercio)
   await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  nuevoComercio.sincronizacionFirestore = await sincronizarComercioFirestore(nuevoComercio)
 
   return nuevoComercio
 }
@@ -309,9 +313,11 @@ async function editarComercio(id, datosActualizados) {
     ...comercios[indice],
     ...datosActualizados,
     id, // Mantener ID original
+    fechaActualizacion: new Date().toISOString(),
   }
 
   await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  comercios[indice].sincronizacionFirestore = await sincronizarComercioFirestore(comercios[indice])
   return comercios[indice]
 }
 
@@ -329,6 +335,7 @@ async function eliminarComercio(id) {
   }
 
   await adaptadorActual.guardar(CLAVE_COMERCIOS, comerciosFiltrados)
+  await sincronizarEliminacionComercioFirestore(id)
   return true
 }
 
@@ -351,14 +358,18 @@ async function agregarDireccion(comercioId, datosDireccion) {
     barrio: datosDireccion.barrio?.trim() || '',
     ciudad: datosDireccion.ciudad?.trim() || '',
     nombreCompleto: `${comercio.nombre} - ${datosDireccion.calle.trim()}`,
+    fechaCreacion: ahora,
+    fechaActualizacion: ahora,
     fechaUltimoUso: ahora,
     foto: datosDireccion.foto || null,
     fotoFuente: datosDireccion.foto ? ORIGENES_FOTO.USUARIO : null,
   }
 
   comercio.direcciones.push(nuevaDireccion)
+  comercio.fechaActualizacion = ahora
 
   await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  comercio.sincronizacionFirestore = await sincronizarComercioFirestore(comercio)
   return comercio
 }
 
@@ -379,14 +390,19 @@ async function editarDireccion(comercioId, direccionId, datosDireccion) {
   if (!direccion) return null
 
   // Aplicar cambios
-  Object.assign(direccion, datosDireccion)
+  Object.assign(direccion, datosDireccion, {
+    id: direccionId,
+    fechaActualizacion: new Date().toISOString(),
+  })
 
   // Recalcular nombreCompleto (calle puede estar vacía)
   direccion.nombreCompleto = direccion.calle
     ? `${comercio.nombre} - ${direccion.calle}`
     : comercio.nombre
 
+  comercio.fechaActualizacion = new Date().toISOString()
   await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  comercio.sincronizacionFirestore = await sincronizarComercioFirestore(comercio)
   return comercio
 }
 
@@ -409,7 +425,9 @@ async function eliminarDireccion(comercioId, direccionId) {
     return false // No se encontró la dirección
   }
 
+  comercio.fechaActualizacion = new Date().toISOString()
   await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  await sincronizarComercioFirestore(comercio)
   return true
 }
 
@@ -428,7 +446,10 @@ async function actualizarFotoDireccion(comercioId, direccionId, base64) {
   if (!direccion) return false
   direccion.foto = base64 || null
   direccion.fotoFuente = base64 ? ORIGENES_FOTO.USUARIO : null
+  direccion.fechaActualizacion = new Date().toISOString()
+  comercio.fechaActualizacion = new Date().toISOString()
   await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  await sincronizarComercioFirestore(comercio)
   return true
 }
 
@@ -444,18 +465,22 @@ async function registrarUsoComercio(comercioId, direccionId = null) {
 
   if (!comercio) return
 
-  comercio.fechaUltimoUso = new Date().toISOString()
+  const ahora = new Date().toISOString()
+  comercio.fechaUltimoUso = ahora
+  comercio.fechaActualizacion = ahora
   comercio.cantidadUsos = (comercio.cantidadUsos || 0) + 1
 
   // Si se especifica dirección, actualizar su fecha de uso
   if (direccionId) {
     const direccion = comercio.direcciones.find((d) => d.id === direccionId)
     if (direccion) {
-      direccion.fechaUltimoUso = new Date().toISOString()
+      direccion.fechaUltimoUso = ahora
+      direccion.fechaActualizacion = ahora
     }
   }
 
   await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  await sincronizarComercioFirestore(comercio)
 }
 
 /**
@@ -476,6 +501,80 @@ async function obtenerComercioPorUso() {
 // EXPORTACIÓN
 // ═══════════════════════════════════════════════════════════
 
+async function sincronizarComercioFirestore(comercio) {
+  try {
+    const resultado = await ejecutarConTimeoutFirestore(
+      firestoreComerciosService.guardarComercio(comercio),
+    )
+
+    if (resultado.omitido) {
+      return {
+        estado: ESTADOS_SINCRONIZACION.LOCAL,
+        fecha: new Date().toISOString(),
+        mensaje: resultado.mensaje,
+        error: null,
+      }
+    }
+
+    if (!resultado.exito) {
+      return {
+        estado: ESTADOS_SINCRONIZACION.ERROR,
+        fecha: new Date().toISOString(),
+        mensaje: resultado.mensaje || 'No se pudo sincronizar el comercio con Firestore.',
+        error: resultado.mensaje || 'Error de sincronización Firestore.',
+      }
+    }
+
+    return {
+      estado: resultado.estado || ESTADOS_SINCRONIZACION.SINCRONIZADO,
+      fecha: new Date().toISOString(),
+      mensaje:
+        resultado.estado === ESTADOS_SINCRONIZACION.PENDIENTE
+          ? 'Comercio guardado localmente y pendiente de sincronizar con Firestore.'
+          : 'Comercio sincronizado con Firestore.',
+      error: null,
+    }
+  } catch (error) {
+    console.error('Error al sincronizar comercio con Firestore:', error)
+    return {
+      estado: ESTADOS_SINCRONIZACION.ERROR,
+      fecha: new Date().toISOString(),
+      mensaje: 'El comercio quedó guardado localmente, pero no se sincronizó con Firestore.',
+      error: error.message || 'Error de sincronización Firestore.',
+    }
+  }
+}
+
+async function sincronizarEliminacionComercioFirestore(comercioId) {
+  try {
+    const resultado = await ejecutarConTimeoutFirestore(
+      firestoreComerciosService.eliminarComercio(comercioId),
+    )
+    if (!resultado.omitido && !resultado.exito) {
+      console.warn('El comercio se eliminó localmente, pero no se marcó como eliminado en Firestore.')
+    }
+  } catch (error) {
+    console.warn('El comercio se eliminó localmente, pero falló la eliminación Firestore.', error)
+  }
+}
+
+async function ejecutarConTimeoutFirestore(promesa) {
+  let timeoutId = null
+  const timeout = new Promise((resolve) => {
+    timeoutId = setTimeout(() => {
+      resolve({
+        exito: true,
+        estado: ESTADOS_SINCRONIZACION.PENDIENTE,
+        mensaje: 'Firestore aceptó la operación localmente o quedó pendiente por conectividad.',
+      })
+    }, TIEMPO_MAXIMO_SINCRONIZACION_FIRESTORE_MS)
+  })
+
+  const resultado = await Promise.race([promesa, timeout])
+  clearTimeout(timeoutId)
+  return resultado
+}
+
 export default {
   obtenerTodos,
   buscarPorNombre,
@@ -490,6 +589,7 @@ export default {
   actualizarFotoDireccion,
   registrarUsoComercio,
   obtenerComercioPorUso,
+  sincronizarComercioFirestore,
   // Utilidades exportadas para uso en otros módulos
   normalizar,
   similitudTexto,

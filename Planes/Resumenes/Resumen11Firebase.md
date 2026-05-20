@@ -14,6 +14,7 @@ Este resumen concentra el estado actual de la integración gradual de Precio Jus
 - El plan `PlanModeloFirestoreYMigracion.md` quedó ejecutado y marcado como `TERMINADO`.
 - El plan `PlanFirestorePrivadoProductos.md` quedó ejecutado y marcado como `TERMINADO`.
 - El plan `PlanReglasFirestoreVersionadas.md` quedó ejecutado y marcado como `TERMINADO`.
+- El plan `PlanFirestorePrivadoComercios.md` quedó ejecutado y marcado como `TERMINADO`.
 - Proyecto Firebase actual: `PrecioJustoPruebas2` (`preciojustopruebas2`).
 - Firebase SDK instalado como dependencia del proyecto.
 - Firebase Auth quedó preparado con proveedor `Correo electrónico/contraseña`.
@@ -24,6 +25,7 @@ Este resumen concentra el estado actual de la integración gradual de Precio Jus
 - Storage no se usa todavía.
 - La app mantiene el comportamiento visible actual y sigue usando persistencia local como fuente principal visible.
 - Productos y precios ya se sincronizan a Firestore como espejo privado validado cuando hay usuario Firebase autenticado.
+- Comercios y direcciones ya se sincronizan a Firestore como espejo privado validado cuando hay usuario Firebase autenticado.
 - El enfoque definido es primero backup privado por usuario; la comunidad queda para una etapa posterior.
 - La arquitectura quedó preparada para asignar dueño (`usuarioId`) a todos los datos privados.
 - El modelo Firestore definitivo queda documentado en `Planes/Resumenes/ModeloFirestoreMigracion.md`.
@@ -148,6 +150,19 @@ Claves persistidas actuales:
 - Comercios, listas y preferencias deberán reutilizar `esDueno(usuarioId)` cuando se agreguen.
 - Comunidad pública y Storage de fotos requieren planes y reglas separadas.
 
+### Firestore privado de comercios
+
+- Se creó `FirestoreComerciosService` para escribir y leer comercios privados.
+- Ruta activa de comercios: `usuarios/{usuarioId}/comercios/{comercioId}`.
+- Las direcciones quedan embebidas dentro del documento de comercio mientras respeten el límite del modelo.
+- `ComerciosService` guarda primero en LocalStorage/Capacitor y luego intenta sincronizar Firestore.
+- Si no hay usuario Firebase autenticado, la sincronización Firestore se omite y el comercio queda local.
+- Si Firestore queda pendiente por conexión, la app devuelve estado `pendiente` con timeout controlado.
+- La eliminación local de comercio marca `eliminado: true` en Firestore.
+- Firestore no guarda fotos base64 de comercios ni direcciones; Storage sigue pendiente.
+- Firestore todavía no es fuente principal de UI; queda como espejo privado de comercios/direcciones.
+- No se agregaron referencias Firestore obligatorias desde precios a comercios; precios siguen guardando `comercioId` y `direccionId`.
+
 ---
 
 ## ARCHIVOS PRINCIPALES
@@ -243,6 +258,12 @@ Recomendación práctica:
 - MCP Browser validó que no se crearon documentos en `comercios`, `listas`, `preferencias` ni `fotos`.
 - MCP Browser validó reglas versionadas: usuario A pudo leer/escribir su producto, usuario B quedó bloqueado, usuario sin sesión quedó bloqueado y una ruta fuera del modelo privado quedó denegada.
 - Se validó `firebase.json` como JSON correcto y sin secretos.
+- MCP Browser validó escritura, edición, uso, dirección embebida y eliminación lógica de comercios en Firestore.
+- MCP Browser validó que comercio sin usuario Firebase queda solo local.
+- MCP Browser validó comercio offline con estado `pendiente` y sincronización al reconectar.
+- MCP Browser validó cache offline de comercio.
+- MCP Browser validó que fotos base64 de comercios y direcciones no se escriben en Firestore.
+- MCP Browser validó que productos/precios siguen sincronizando y conservan `comercioId`/`direccionId`.
 - Se confirmó que los servicios de datos siguen usando `AlmacenamientoService` con adaptadores locales.
 - Se detectó CORS en `version.json` contra GitHub Pages durante dev; no pertenece a Firebase.
 
@@ -250,11 +271,11 @@ Recomendación práctica:
 
 ## PRÓXIMO PASO RECOMENDADO
 
-Productos y precios ya tienen espejo privado validado. El próximo plan debería avanzar con uno de estos caminos:
+Productos, precios y comercios ya tienen espejo privado validado. El próximo plan debería avanzar con uno de estos caminos:
 
-- comercios privados en Firestore, para que los precios puedan referenciar comercios reales sincronizados;
-- migración local guiada de productos/precios, con backup previo, conteos y reintentos;
+- migración local guiada de productos, precios y comercios, con backup previo, conteos y reintentos;
+- listas privadas en Firestore;
 - Storage de fotos, para subir imágenes base64 locales y guardar solo URLs/rutas en Firestore;
 - corrección del CORS de `version.json` en dev para no contaminar la consola durante pruebas.
 
-Mi recomendación práctica: seguir con comercios privados antes de la migración completa, porque precios ya dependen de `comercioId` y `direccionId`.
+Mi recomendación práctica: seguir con una migración guiada con backup y reintentos antes de convertir Firestore en fuente principal.

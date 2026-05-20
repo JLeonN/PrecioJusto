@@ -6,7 +6,7 @@
 - Proyecto Firebase: `PrecioJustoPruebas2` (`preciojustopruebas2`).
 - Auth: Email/Password operativo.
 - Firestore: creado en `nam5`, reglas privadas activas bajo `usuarios/{usuarioId}`.
-- Escrituras Firestore desde la app: habilitadas solo para productos y precios privados.
+- Escrituras Firestore desde la app: habilitadas para productos, precios y comercios privados.
 - Inventario MCP en navegador local: adaptador `local`, sin productos, precios, comercios, listas, preferencias, confirmaciones ni fotos en ese origen.
 
 ## Decisión Principal
@@ -79,6 +79,8 @@ Dirección embebida:
 - `fechaCreacion`, `fechaActualizacion`, `fechaUltimoUso`, `eliminado`.
 
 Decisión: conservar `comercioId` y `direccionId` en precios. Si un comercio cambia de nombre, los precios mantienen snapshot textual (`comercio`, `direccion`, `nombreCompleto`) para compatibilidad visual y los IDs para relación real.
+
+Estado de implementación 2026-05-20: comercios se guardan primero en almacenamiento local y luego se sincronizan como espejo Firestore privado. Las direcciones se mantienen embebidas en el documento de comercio. Las fotos base64 siguen locales y no se escriben en Firestore.
 
 ## Lista Justa
 
@@ -209,10 +211,10 @@ Productos y precios ya tienen servicios específicos implementados. Mantener el 
 
 - `FirestoreProductosService` implementado.
 - `FirestorePreciosService` implementado.
-- `FirestoreComerciosService`
+- `FirestoreComerciosService` implementado.
 - `FirestoreListasJustasService`
 - `FirestorePreferenciasService`
 - `FirestoreMigracionService`
 - `ColaSincronizacionService`
 
-Orden recomendado actual: comercios, listas, preferencias, migración guiada y recién después Storage/fotos si se decide subir imágenes locales.
+Orden recomendado actual: migración guiada con backup y reintentos, listas, preferencias y recién después Storage/fotos si se decide subir imágenes locales.
