@@ -13,11 +13,13 @@ Este resumen concentra el estado actual de la integración gradual de Precio Jus
 - El plan `PlanAutenticacionFirebase.md` quedó ejecutado y marcado como `TERMINADO`.
 - El plan `PlanModeloFirestoreYMigracion.md` quedó ejecutado y marcado como `TERMINADO`.
 - El plan `PlanFirestorePrivadoProductos.md` quedó ejecutado y marcado como `TERMINADO`.
+- El plan `PlanReglasFirestoreVersionadas.md` quedó ejecutado y marcado como `TERMINADO`.
 - Proyecto Firebase actual: `PrecioJustoPruebas2` (`preciojustopruebas2`).
 - Firebase SDK instalado como dependencia del proyecto.
 - Firebase Auth quedó preparado con proveedor `Correo electrónico/contraseña`.
 - Firebase Auth ahora tiene flujo real de registro, login, recuperación de contraseña, persistencia de sesión y logout.
 - Firestore quedó creado en `nam5 (United States)` y ahora tiene reglas privadas bajo `usuarios/{usuarioId}`.
+- Las reglas Firestore privadas quedaron versionadas en el repositorio con `firestore.rules`.
 - Firestore Offline quedó inicializado con caché persistente multi-tab cuando el navegador lo permite.
 - Storage no se usa todavía.
 - La app mantiene el comportamiento visible actual y sigue usando persistencia local como fuente principal visible.
@@ -132,6 +134,20 @@ Claves persistidas actuales:
 - Firestore todavía no es fuente principal de UI; queda como espejo privado de productos/precios.
 - No se escriben comercios, listas, preferencias, fotos, comunidad ni Storage en esta fase.
 
+### Reglas Firestore versionadas
+
+- Se agregó `firestore.rules` como fuente versionada local de reglas Firestore.
+- Se agregó `firebase.json` mínimo apuntando a `firestore.rules`.
+- La configuración local no incluye projectId, credenciales ni tokens.
+- Las reglas mantienen `rules_version = '2';`, `estaAutenticado()` y `esDueno(usuarioId)`.
+- El acceso queda permitido solo bajo `usuarios/{usuarioId}` cuando `request.auth.uid == usuarioId`.
+- Todas las subcolecciones privadas heredan la misma condición de dueño.
+- Toda ruta fuera de `usuarios/{usuarioId}` queda denegada explícitamente.
+- Firebase Console y el repo quedaron alineados en criterio de seguridad; la Console no conserva los comentarios locales.
+- No se hizo deploy automático. Comando manual futuro: `firebase deploy --only firestore:rules`.
+- Comercios, listas y preferencias deberán reutilizar `esDueno(usuarioId)` cuando se agreguen.
+- Comunidad pública y Storage de fotos requieren planes y reglas separadas.
+
 ---
 
 ## ARCHIVOS PRINCIPALES
@@ -225,6 +241,8 @@ Recomendación práctica:
 - MCP Browser validó lectura desde cache Firestore después de recarga online y desconexión controlada.
 - MCP Browser validó aislamiento: usuario B y usuario no autenticado reciben `permission-denied` al intentar acceder a datos del usuario A.
 - MCP Browser validó que no se crearon documentos en `comercios`, `listas`, `preferencias` ni `fotos`.
+- MCP Browser validó reglas versionadas: usuario A pudo leer/escribir su producto, usuario B quedó bloqueado, usuario sin sesión quedó bloqueado y una ruta fuera del modelo privado quedó denegada.
+- Se validó `firebase.json` como JSON correcto y sin secretos.
 - Se confirmó que los servicios de datos siguen usando `AlmacenamientoService` con adaptadores locales.
 - Se detectó CORS en `version.json` contra GitHub Pages durante dev; no pertenece a Firebase.
 
