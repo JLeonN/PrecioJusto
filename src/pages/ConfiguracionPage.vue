@@ -30,6 +30,83 @@
           </div>
         </q-card-section>
       </q-card>
+      <q-card v-if="usuarioStore.estaAutenticado" flat bordered class="q-mt-md">
+        <q-card-section>
+          <div class="fila-migracion">
+            <div>
+              <div class="text-subtitle1 text-weight-medium">Migración local a Firebase</div>
+              <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
+                Productos, precios y comercios se migran con backup local previo.
+              </p>
+            </div>
+            <q-btn
+              no-caps
+              outline
+              color="primary"
+              label="Actualizar"
+              :loading="cargandoMigracion"
+              @click="cargarPanelMigracion"
+            />
+          </div>
+        </q-card-section>
+        <q-separator />
+        <q-card-section>
+          <div class="grilla-conteos">
+            <q-banner rounded class="banner-migracion">
+              Productos: <strong>{{ conteosMigracion.productos }}</strong>
+            </q-banner>
+            <q-banner rounded class="banner-migracion">
+              Precios: <strong>{{ conteosMigracion.precios }}</strong>
+            </q-banner>
+            <q-banner rounded class="banner-migracion">
+              Comercios: <strong>{{ conteosMigracion.comercios }}</strong>
+            </q-banner>
+            <q-banner rounded class="banner-migracion">
+              Direcciones: <strong>{{ conteosMigracion.direcciones }}</strong>
+            </q-banner>
+          </div>
+          <q-linear-progress v-if="cargandoMigracion" indeterminate color="primary" class="q-mt-md" />
+          <q-banner rounded class="banner-tema-info q-mt-md">
+            Estado: <strong>{{ textoEstadoMigracion }}</strong> · Conexión:
+            <strong>{{ textoConexionMigracion }}</strong>
+          </q-banner>
+          <q-banner
+            v-if="estadoMigracion?.errores?.length"
+            rounded
+            class="bg-warning text-dark q-mt-sm"
+          >
+            {{ estadoMigracion.errores.length }} error(es) reintentables. Los datos locales y el
+            backup se conservan.
+          </q-banner>
+          <div class="fila-acciones-migracion q-mt-md">
+            <q-btn
+              no-caps
+              unelevated
+              color="secondary"
+              label="Crear backup"
+              :loading="cargandoMigracion"
+              @click="prepararBackupMigracion"
+            />
+            <q-btn
+              no-caps
+              unelevated
+              color="primary"
+              label="Migrar"
+              :loading="cargandoMigracion"
+              @click="confirmarMigracion"
+            />
+            <q-btn
+              v-if="puedeReintentarMigracion"
+              no-caps
+              outline
+              color="warning"
+              label="Reintentar"
+              :loading="cargandoMigracion"
+              @click="reintentarMigracion"
+            />
+          </div>
+        </q-card-section>
+      </q-card>
       <q-card flat bordered class="q-mt-md">
         <q-card-section>
           <div class="text-subtitle1 text-weight-medium">Modo oscuro</div>
@@ -130,9 +207,12 @@ import { computed, onMounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { useRouter } from 'vue-router'
 import { MONEDAS } from '../almacenamiento/constantes/Monedas.js'
+import { ESTADOS_MIGRACION_FIREBASE } from '../almacenamiento/constantes/PreparacionFirebase.js'
 import { usePublicidad } from '../composables/usePublicidad.js'
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
 import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
+import conexionService from '../almacenamiento/servicios/ConexionService.js'
+import migracionLocalFirebaseService from '../almacenamiento/servicios/MigracionLocalFirebaseService.js'
 
 const quasar = useQuasar()
 const router = useRouter()
@@ -140,6 +220,10 @@ const preferenciasStore = usePreferenciasStore()
 const usuarioStore = useUsuarioStore()
 const { mostrarInterstitial } = usePublicidad()
 const ultimoIntersticialMostrado = ref(0)
+const resumenMigracion = ref(null)
+const estadoMigracion = ref(null)
+const conexionMigracion = ref(null)
+const cargandoMigracion = ref(false)
 const TIEMPO_ESPERA_INTERSTICIAL_MS = 60000
 const opcionesModoTema = [
   { label: 'Claro', value: 'claro' },
@@ -154,6 +238,24 @@ const textoEstadoCuenta = computed(() =>
   usuarioStore.estaAutenticado
     ? 'Sesión activa con Firebase Auth.'
     : 'Ingresá para usar la app con una cuenta Firebase.',
+)
+const conteosMigracion = computed(
+  () =>
+    resumenMigracion.value?.conteosMigrables || {
+      productos: 0,
+      precios: 0,
+      comercios: 0,
+      direcciones: 0,
+    },
+)
+const textoEstadoMigracion = computed(() => estadoMigracion.value?.estado || 'sinIniciar')
+const textoConexionMigracion = computed(() =>
+  conexionMigracion.value?.conectado ? 'activa' : 'sin conexión',
+)
+const puedeReintentarMigracion = computed(() =>
+  [ESTADOS_MIGRACION_FIREBASE.PARCIAL, ESTADOS_MIGRACION_FIREBASE.ERROR].includes(
+    estadoMigracion.value?.estado,
+  ),
 )
 
 async function mostrarPublicidadConfiguracion() {
@@ -214,10 +316,103 @@ async function gestionarCuenta() {
     })
 }
 
+async function cargarPanelMigracion() {
+  if (!usuarioStore.estaAutenticado) return
+
+  cargandoMigracion.value = true
+
+  try {
+    const [resumen, estado, conexion] = await Promise.all([
+      migracionLocalFirebaseService.obtenerResumenLocal(),
+      migracionLocalFirebaseService.obtenerEstadoActual(),
+      conexionService.obtenerEstadoConexion(),
+    ])
+    resumenMigracion.value = resumen
+    estadoMigracion.value = estado
+    conexionMigracion.value = conexion
+  } catch (error) {
+    quasar.notify({
+      type: 'warning',
+      message: error.message || 'No se pudo cargar el panel de migración.',
+    })
+  } finally {
+    cargandoMigracion.value = false
+  }
+}
+
+async function prepararBackupMigracion() {
+  await ejecutarAccionMigracion(async () => {
+    estadoMigracion.value = await migracionLocalFirebaseService.prepararMigracionLocal()
+    quasar.notify({
+      type: 'positive',
+      message: 'Backup local creado y verificado.',
+    })
+  })
+}
+
+function confirmarMigracion() {
+  quasar
+    .dialog({
+      title: 'Migrar datos locales',
+      message:
+        'Se creará o usará un backup local previo. Firestore no será fuente principal todavía y no se borrarán datos locales.',
+      cancel: true,
+      persistent: true,
+      ok: {
+        label: 'Migrar datos',
+        color: 'primary',
+        noCaps: true,
+      },
+    })
+    .onOk(async () => {
+      await ejecutarAccionMigracion(async () => {
+        estadoMigracion.value = await migracionLocalFirebaseService.iniciarMigracion({
+          confirmarMigracion: true,
+        })
+        notificarResultadoMigracion()
+      })
+    })
+}
+
+async function reintentarMigracion() {
+  await ejecutarAccionMigracion(async () => {
+    estadoMigracion.value = await migracionLocalFirebaseService.reintentarMigracion()
+    notificarResultadoMigracion()
+  })
+}
+
+async function ejecutarAccionMigracion(accion) {
+  cargandoMigracion.value = true
+
+  try {
+    await accion()
+    await cargarPanelMigracion()
+  } catch (error) {
+    quasar.notify({
+      type: 'negative',
+      message: error.message || 'No se pudo ejecutar la migración.',
+    })
+  } finally {
+    cargandoMigracion.value = false
+  }
+}
+
+function notificarResultadoMigracion() {
+  const estado = estadoMigracion.value?.estado
+  quasar.notify({
+    type: estado === ESTADOS_MIGRACION_FIREBASE.COMPLETADA ? 'positive' : 'warning',
+    message:
+      estado === ESTADOS_MIGRACION_FIREBASE.COMPLETADA
+        ? 'Migración completada y validada.'
+        : 'Migración parcial. Revisá errores y reintentá cuando haya conexión.',
+  })
+}
+
 onMounted(async () => {
   if (preferenciasStore.modoMoneda === 'automatica' && !preferenciasStore.paisDetectado) {
     await preferenciasStore.detectarMonedaAutomatica()
   }
+  await cargarPanelMigracion()
 })
 </script>
 
@@ -234,6 +429,27 @@ onMounted(async () => {
   gap: var(--espaciado-md);
   align-items: center;
   justify-content: space-between;
+}
+.fila-migracion {
+  display: flex;
+  gap: var(--espaciado-md);
+  align-items: center;
+  justify-content: space-between;
+}
+.grilla-conteos {
+  display: grid;
+  gap: var(--espaciado-sm);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.banner-migracion {
+  background: var(--fondo-banner-suave);
+  color: var(--texto-primario);
+  border: 1px solid var(--borde-color);
+}
+.fila-acciones-migracion {
+  display: flex;
+  gap: var(--espaciado-sm);
+  flex-wrap: wrap;
 }
 .selector-modo-tema {
   display: grid;
@@ -268,6 +484,13 @@ onMounted(async () => {
   .fila-cuenta {
     align-items: stretch;
     flex-direction: column;
+  }
+  .fila-migracion {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .grilla-conteos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .selector-modo-tema {
     grid-template-columns: 1fr;

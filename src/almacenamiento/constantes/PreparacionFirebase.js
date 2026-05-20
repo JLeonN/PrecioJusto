@@ -12,6 +12,18 @@ export const ESTADOS_SINCRONIZACION = Object.freeze({
   ERROR: 'error',
 })
 
+export const ESTADOS_MIGRACION_FIREBASE = Object.freeze({
+  SIN_INICIAR: 'sinIniciar',
+  INVENTARIADO: 'inventariado',
+  BACKUP_CREADO: 'backupCreado',
+  EN_PROCESO: 'enProceso',
+  PARCIAL: 'parcial',
+  COMPLETADA: 'completada',
+  ERROR: 'error',
+})
+
+export const VERSION_MIGRACION_LOCAL_FIREBASE = 'migracionLocalFirebaseV1'
+
 export const ORIGENES_FOTO = Object.freeze({
   API: 'api',
   USUARIO: 'usuario',

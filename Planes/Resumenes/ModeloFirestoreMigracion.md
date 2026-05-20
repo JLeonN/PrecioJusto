@@ -7,6 +7,7 @@
 - Auth: Email/Password operativo.
 - Firestore: creado en `nam5`, reglas privadas activas bajo `usuarios/{usuarioId}`.
 - Escrituras Firestore desde la app: habilitadas para productos, precios y comercios privados.
+- Migración guiada: habilitada para productos, precios, comercios y direcciones con backup local previo.
 - Inventario MCP en navegador local: adaptador `local`, sin productos, precios, comercios, listas, preferencias, confirmaciones ni fotos en ese origen.
 
 ## Decisión Principal
@@ -174,24 +175,29 @@ Recomendación práctica: crear índices solo cuando una consulta real los pida 
 
 ## Migración Local a Firestore
 
-Orden seguro:
+Estado de implementación 2026-05-20: existe `MigracionLocalFirebaseService` y panel en `ConfiguracionPage` para ejecutar la migración guiada de productos, precios, comercios y direcciones.
+
+Orden seguro implementado:
 
 1. Verificar usuario autenticado.
 2. Ejecutar inventario local.
 3. Crear backup local previo con `InventarioMigracionFirebaseService.crearBackupLocalPrevio()`.
 4. Mostrar resumen de cantidades al usuario.
 5. Pedir confirmación explícita.
-6. Crear `usuarios/{usuarioId}` y `configuracion/migracionLocal` con estado `iniciada`.
-7. Migrar productos sin precios.
-8. Migrar precios por subcolección.
-9. Migrar comercios y conservar IDs locales.
-10. Migrar listas y preservar relación con productos.
-11. Migrar preferencias.
-12. Migrar confirmaciones.
-13. Validar cantidades antes/después.
-14. Marcar migración como `completada`.
+6. Crear `usuarios/{usuarioId}/configuracion/migracionLocal`.
+7. Migrar productos y precios con `FirestoreProductosService`.
+8. Migrar comercios y direcciones con `FirestoreComerciosService`.
+9. Registrar cola local bajo `colaSincronizacion_migracionFirebase` si algo falla o no hay conexión.
+10. Validar cantidades antes/después.
+11. Marcar migración como `completada` solo si los conteos coinciden.
 
-Si falla a mitad, guardar estado `error`, último paso completado y permitir reintento idempotente usando los mismos IDs locales.
+Si falla a mitad, guardar estado `parcial` o `error`, último paso completado y permitir reintento idempotente usando los mismos IDs locales.
+
+Límites actuales:
+
+- LocalStorage/Capacitor sigue como fuente principal visible.
+- Listas, preferencias, confirmaciones, comunidad, Storage y fotos base64 no se migran todavía.
+- Las fotos base64 locales no se escriben en Firestore; quedan para el plan de Storage.
 
 ## Sincronización Inicial
 

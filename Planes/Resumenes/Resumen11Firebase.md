@@ -15,6 +15,7 @@ Este resumen concentra el estado actual de la integración gradual de Precio Jus
 - El plan `PlanFirestorePrivadoProductos.md` quedó ejecutado y marcado como `TERMINADO`.
 - El plan `PlanReglasFirestoreVersionadas.md` quedó ejecutado y marcado como `TERMINADO`.
 - El plan `PlanFirestorePrivadoComercios.md` quedó ejecutado y marcado como `TERMINADO`.
+- El plan `PlanMigracionLocalGuiadaFirebase.md` quedó ejecutado y marcado como `TERMINADO`.
 - Proyecto Firebase actual: `PrecioJustoPruebas2` (`preciojustopruebas2`).
 - Firebase SDK instalado como dependencia del proyecto.
 - Firebase Auth quedó preparado con proveedor `Correo electrónico/contraseña`.
@@ -26,6 +27,7 @@ Este resumen concentra el estado actual de la integración gradual de Precio Jus
 - La app mantiene el comportamiento visible actual y sigue usando persistencia local como fuente principal visible.
 - Productos y precios ya se sincronizan a Firestore como espejo privado validado cuando hay usuario Firebase autenticado.
 - Comercios y direcciones ya se sincronizan a Firestore como espejo privado validado cuando hay usuario Firebase autenticado.
+- Productos, precios, comercios y direcciones ya tienen migración local guiada con backup local previo, estado Firestore y reintento idempotente.
 - El enfoque definido es primero backup privado por usuario; la comunidad queda para una etapa posterior.
 - La arquitectura quedó preparada para asignar dueño (`usuarioId`) a todos los datos privados.
 - El modelo Firestore definitivo queda documentado en `Planes/Resumenes/ModeloFirestoreMigracion.md`.
@@ -163,6 +165,19 @@ Claves persistidas actuales:
 - Firestore todavía no es fuente principal de UI; queda como espejo privado de comercios/direcciones.
 - No se agregaron referencias Firestore obligatorias desde precios a comercios; precios siguen guardando `comercioId` y `direccionId`.
 
+### Migración local guiada
+
+- Se creó `MigracionLocalFirebaseService` para centralizar inventario, backup, confirmación, migración, validación y reintentos.
+- El estado de migración se guarda en `usuarios/{usuarioId}/configuracion/migracionLocal`.
+- Estados definidos: `sinIniciar`, `inventariado`, `backupCreado`, `enProceso`, `parcial`, `completada`, `error`.
+- El backup local queda bajo `backupMigracionFirebase_{fecha}` y no se borra al terminar.
+- La cola local de reintentos queda bajo `colaSincronizacion_migracionFirebase`.
+- La migración usa los mismos IDs locales para productos, precios, comercios y direcciones, por lo que el reintento no duplica documentos.
+- Si no hay usuario Firebase autenticado, la migración queda bloqueada.
+- Si no hay conexión, el flujo queda `parcial`, registra cola local y permite reintentar.
+- Firestore sigue sin ser fuente principal de UI; la app continúa leyendo datos visibles desde LocalStorage/Capacitor.
+- Listas, preferencias, confirmaciones, comunidad, Storage y fotos base64 quedan fuera de esta migración.
+
 ---
 
 ## ARCHIVOS PRINCIPALES
@@ -180,6 +195,7 @@ Claves persistidas actuales:
 - `src/almacenamiento/servicios/ContadorGraciasService.js`
 - `src/almacenamiento/servicios/ConexionService.js`
 - `src/almacenamiento/servicios/InventarioMigracionFirebaseService.js`
+- `src/almacenamiento/servicios/MigracionLocalFirebaseService.js`
 - `src/almacenamiento/servicios/FirebaseBaseService.js`
 - `src/almacenamiento/servicios/AutenticacionFirebaseService.js`
 - `src/boot/FirebaseBoot.js`
@@ -264,18 +280,25 @@ Recomendación práctica:
 - MCP Browser validó cache offline de comercio.
 - MCP Browser validó que fotos base64 de comercios y direcciones no se escriben en Firestore.
 - MCP Browser validó que productos/precios siguen sincronizando y conservan `comercioId`/`direccionId`.
+- MCP Browser validó bloqueo de migración sin usuario Firebase.
+- MCP Browser validó inventario local, backup previo, migración online y documento `configuracion/migracionLocal` con estado `completada`.
+- MCP Browser validó migración de producto, precio, comercio y dirección con conteos `1/1/1/1`.
+- MCP Browser validó que fotos base64 locales no se guardan como base64 en Firestore durante la migración.
+- MCP Browser simuló desconexión: el flujo quedó `parcial`, registró 3 items en cola y luego reintentó online hasta `completada` sin duplicar documentos.
+- MCP Browser validó que usuario B recibe `permission-denied` al intentar leer datos migrados del usuario A.
+- MCP Browser validó que la tarjeta de configuración muestra inventario, conexión, estado y acciones de backup/migración.
 - Se confirmó que los servicios de datos siguen usando `AlmacenamientoService` con adaptadores locales.
 - Se detectó CORS en `version.json` contra GitHub Pages durante dev; no pertenece a Firebase.
+- Durante la simulación offline se observaron errores `ERR_INTERNET_DISCONNECTED` esperados en consola; no son regresión funcional.
 
 ---
 
 ## PRÓXIMO PASO RECOMENDADO
 
-Productos, precios y comercios ya tienen espejo privado validado. El próximo plan debería avanzar con uno de estos caminos:
+Productos, precios y comercios ya tienen espejo privado validado y migración guiada. El próximo plan debería avanzar con uno de estos caminos:
 
-- migración local guiada de productos, precios y comercios, con backup previo, conteos y reintentos;
 - listas privadas en Firestore;
 - Storage de fotos, para subir imágenes base64 locales y guardar solo URLs/rutas en Firestore;
 - corrección del CORS de `version.json` en dev para no contaminar la consola durante pruebas.
 
-Mi recomendación práctica: seguir con una migración guiada con backup y reintentos antes de convertir Firestore en fuente principal.
+Mi recomendación práctica: seguir con listas privadas o Storage de fotos antes de convertir Firestore en fuente principal.
