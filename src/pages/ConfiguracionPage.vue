@@ -30,6 +30,30 @@
           </div>
         </q-card-section>
       </q-card>
+      <q-card flat bordered class="q-mt-md">
+        <q-card-section>
+          <div class="text-subtitle1 text-weight-medium">Fuente de datos</div>
+          <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
+            Firestore es la lectura principal con sesión Firebase; local queda como respaldo.
+          </p>
+        </q-card-section>
+        <q-separator />
+        <q-card-section>
+          <div class="grilla-fuentes-datos">
+            <q-banner
+              v-for="estado in estadosFuenteDatos"
+              :key="estado.dominio"
+              rounded
+              class="banner-fuente-datos"
+            >
+              <div class="text-body2 text-weight-medium">{{ estado.etiquetaDominio }}</div>
+              <div class="text-caption">
+                {{ estado.etiquetaFuente }} · {{ estado.mensaje }}
+              </div>
+            </q-banner>
+          </div>
+        </q-card-section>
+      </q-card>
       <q-card v-if="usuarioStore.estaAutenticado" flat bordered class="q-mt-md">
         <q-card-section>
           <div class="fila-migracion">
@@ -230,8 +254,13 @@ import { useRouter } from 'vue-router'
 import { MONEDAS } from '../almacenamiento/constantes/Monedas.js'
 import { ESTADOS_MIGRACION_FIREBASE } from '../almacenamiento/constantes/PreparacionFirebase.js'
 import { usePublicidad } from '../composables/usePublicidad.js'
+import fuentePrincipalFirestoreService from '../almacenamiento/servicios/FuentePrincipalFirestoreService.js'
+import { useConfirmacionesStore } from '../almacenamiento/stores/confirmacionesStore.js'
+import { useListaJustaStore } from '../almacenamiento/stores/ListaJustaStore.js'
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
+import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
 import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
+import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
 import conexionService from '../almacenamiento/servicios/ConexionService.js'
 import migracionLocalFirebaseService from '../almacenamiento/servicios/MigracionLocalFirebaseService.js'
 import preferenciasService from '../almacenamiento/servicios/PreferenciasService.js'
@@ -240,6 +269,10 @@ const quasar = useQuasar()
 const router = useRouter()
 const preferenciasStore = usePreferenciasStore()
 const usuarioStore = useUsuarioStore()
+const productosStore = useProductosStore()
+const comerciosStore = useComerciStore()
+const listaJustaStore = useListaJustaStore()
+const confirmacionesStore = useConfirmacionesStore()
 const { mostrarInterstitial } = usePublicidad()
 const ultimoIntersticialMostrado = ref(0)
 const resumenMigracion = ref(null)
@@ -286,6 +319,26 @@ const puedeReintentarMigracion = computed(() =>
     estadoMigracion.value?.estado,
   ),
 )
+const estadosFuenteDatos = computed(() => {
+  const estados = [
+    { dominio: 'productos', etiquetaDominio: 'Productos', estado: productosStore.fuenteDatos },
+    { dominio: 'comercios', etiquetaDominio: 'Comercios', estado: comerciosStore.fuenteDatos },
+    { dominio: 'listas', etiquetaDominio: 'Listas', estado: listaJustaStore.fuenteDatos },
+    { dominio: 'preferencias', etiquetaDominio: 'Preferencias', estado: preferenciasStore.fuenteDatos },
+    {
+      dominio: 'confirmaciones',
+      etiquetaDominio: 'Confirmaciones',
+      estado: confirmacionesStore.fuenteDatos,
+    },
+  ]
+
+  return estados.map(({ dominio, etiquetaDominio, estado }) => ({
+    dominio,
+    etiquetaDominio,
+    etiquetaFuente: fuentePrincipalFirestoreService.obtenerEtiquetaFuente(estado?.fuente),
+    mensaje: estado?.mensaje || 'Sin carga registrada.',
+  }))
+})
 
 async function mostrarPublicidadConfiguracion() {
   const ahora = Date.now()
@@ -489,6 +542,16 @@ onMounted(async () => {
   color: var(--texto-primario);
   border: 1px solid var(--borde-color);
 }
+.grilla-fuentes-datos {
+  display: grid;
+  gap: var(--espaciado-sm);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.banner-fuente-datos {
+  background: var(--fondo-banner-suave);
+  color: var(--texto-primario);
+  border: 1px solid var(--borde-color);
+}
 .fila-acciones-migracion {
   display: flex;
   gap: var(--espaciado-sm);
@@ -534,6 +597,9 @@ onMounted(async () => {
   }
   .grilla-conteos {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .grilla-fuentes-datos {
+    grid-template-columns: 1fr;
   }
   .selector-modo-tema {
     grid-template-columns: 1fr;

@@ -37,7 +37,8 @@ export const useUsuarioStore = defineStore('usuario', () => {
     }
   }
 
-  function aplicarUsuarioAutenticado(usuarioFirebase) {
+  async function aplicarUsuarioAutenticado(usuarioFirebase) {
+    const usuarioAnteriorId = usuarioActualService.obtenerUsuarioIdActual()
     usuario.value = usuarioFirebase
 
     if (usuarioFirebase) {
@@ -49,6 +50,34 @@ export const useUsuarioStore = defineStore('usuario', () => {
     } else {
       usuarioActualService.restaurarUsuarioLocal()
     }
+
+    const usuarioSiguienteId = usuarioActualService.obtenerUsuarioIdActual()
+    if (usuarioAnteriorId !== usuarioSiguienteId) {
+      await limpiarStoresPrivados()
+    }
+  }
+
+  async function limpiarStoresPrivados() {
+    try {
+      const [
+        { useProductosStore },
+        { useComerciStore },
+        { useListaJustaStore },
+        { useConfirmacionesStore },
+      ] = await Promise.all([
+        import('./productosStore.js'),
+        import('./comerciosStore.js'),
+        import('./ListaJustaStore.js'),
+        import('./confirmacionesStore.js'),
+      ])
+
+      useProductosStore().limpiarEstado()
+      useComerciStore().limpiarEstado()
+      useListaJustaStore().limpiarEstado()
+      useConfirmacionesStore().limpiarEstado()
+    } catch (error) {
+      console.warn('No se pudieron limpiar stores privados al cambiar usuario:', error)
+    }
   }
 
   function inicializarSesion() {
@@ -57,8 +86,8 @@ export const useUsuarioStore = defineStore('usuario', () => {
     crearPromesaSesionLista()
     cargandoSesion.value = true
     escuchaInicializada.value = true
-    cancelarEscucha.value = autenticacionFirebaseService.observarSesion((usuarioFirebase) => {
-      aplicarUsuarioAutenticado(usuarioFirebase)
+    cancelarEscucha.value = autenticacionFirebaseService.observarSesion(async (usuarioFirebase) => {
+      await aplicarUsuarioAutenticado(usuarioFirebase)
       resolverCargaSesion()
     })
 
@@ -97,7 +126,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
   async function registrarUsuario(datosRegistro) {
     return ejecutarAccionAutenticacion(async () => {
       const usuarioRegistrado = await autenticacionFirebaseService.registrarConCorreo(datosRegistro)
-      aplicarUsuarioAutenticado(usuarioRegistrado)
+      await aplicarUsuarioAutenticado(usuarioRegistrado)
       return usuarioRegistrado
     })
   }
@@ -105,7 +134,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
   async function iniciarSesion(datosIngreso) {
     return ejecutarAccionAutenticacion(async () => {
       const usuarioIngresado = await autenticacionFirebaseService.iniciarSesionConCorreo(datosIngreso)
-      aplicarUsuarioAutenticado(usuarioIngresado)
+      await aplicarUsuarioAutenticado(usuarioIngresado)
       return usuarioIngresado
     })
   }
@@ -113,7 +142,7 @@ export const useUsuarioStore = defineStore('usuario', () => {
   async function cerrarSesion() {
     return ejecutarAccionAutenticacion(async () => {
       await autenticacionFirebaseService.cerrarSesion()
-      aplicarUsuarioAutenticado(null)
+      await aplicarUsuarioAutenticado(null)
     })
   }
 

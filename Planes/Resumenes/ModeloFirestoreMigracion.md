@@ -247,3 +247,14 @@ Conteos nuevos del estado:
 - `fotosListas`
 
 La migración sigue usando backup local previo, cola local de pendientes y escritura idempotente con los mismos IDs. Firestore no pasa a fuente principal todavía y LocalStorage/Capacitor conserva los datos originales.
+
+
+## Fuente Principal Firestore
+
+Fecha: 2026-05-21.
+
+Firestore pasó a ser la fuente visible principal para productos/precios, comercios/direcciones, Lista Justa, preferencias y confirmaciones cuando existe usuario Firebase autenticado. La decisión queda centralizada en `FuentePrincipalFirestoreService`: usuario local lee LocalStorage/Capacitor, usuario Firebase intenta Firestore primero y usa cache offline cuando no hay conexión.
+
+LocalStorage/Capacitor se conserva como respaldo temporal y no se sobrescribe automáticamente al hidratar desde Firestore. Si Firestore está vacío o falla y existen datos locales, la app muestra respaldo local con estado `fallbackLocal`. Las escrituras siguen local-first y luego sincronizan Firestore para no romper flujos existentes.
+
+`ConfiguracionPage` muestra la fuente activa por dominio y los stores privados se limpian al cambiar usuario o cerrar sesión para evitar mezcla visual de datos.

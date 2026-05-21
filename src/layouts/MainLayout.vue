@@ -370,6 +370,7 @@ const actualizarAppAhora = async () => {
 // Carga datos persistidos al iniciar la app
 onMounted(async () => {
   await Promise.all([sesionEscaneoStore.cargarSesion(), preferenciasStore.inicializar()])
+  await preferenciasStore.hidratarDesdeFuentePrincipal()
   await refrescarEstadoActualizacion({ mostrarModalSiHay: true })
 
   try {

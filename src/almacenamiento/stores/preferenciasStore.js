@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { Dark } from 'quasar'
+import fuentePrincipalFirestoreService from '../servicios/FuentePrincipalFirestoreService.js'
 import preferenciasService from '../servicios/PreferenciasService.js'
 import { MONEDA_DEFAULT } from '../constantes/Monedas.js'
 import { detectarMonedaPorRegion, obtenerMonedaFallback } from '../servicios/DeteccionRegionService.js'
+import { useUsuarioStore } from './UsuarioStore.js'
 
 export const usePreferenciasStore = defineStore('preferencias', () => {
   const modoMoneda = ref('automatica')
@@ -12,6 +14,11 @@ export const usePreferenciasStore = defineStore('preferencias', () => {
   const paisDetectado = ref(null)
   const monedaDetectada = ref(null)
   const unidad = ref('unidad')
+  const fuenteDatos = ref(
+    fuentePrincipalFirestoreService.crearEstadoInicial(
+      fuentePrincipalFirestoreService.DOMINIOS.PREFERENCIAS,
+    ),
+  )
 
   const monedaDefaultEfectiva = computed(() => {
     if (modoMoneda.value === 'manual') {
@@ -63,13 +70,7 @@ export const usePreferenciasStore = defineStore('preferencias', () => {
   async function inicializar() {
     try {
       const preferencias = await preferenciasService.obtenerPreferencias()
-      modoMoneda.value = preferencias.modoMoneda || 'automatica'
-      modoTema.value = preferencias.modoTema || 'sistema'
-      monedaManual.value = preferencias.monedaManual || MONEDA_DEFAULT
-      paisDetectado.value = preferencias.paisDetectado || null
-      monedaDetectada.value = preferencias.monedaDetectada || null
-      unidad.value = preferencias.unidad || 'unidad'
-      aplicarModoTema()
+      aplicarPreferencias(preferencias)
 
       if (modoMoneda.value === 'automatica') {
         await detectarMonedaAutomatica()
@@ -77,6 +78,34 @@ export const usePreferenciasStore = defineStore('preferencias', () => {
     } catch (error) {
       console.error('Error al cargar preferencias:', error)
     }
+  }
+
+  async function hidratarDesdeFuentePrincipal() {
+    try {
+      const usuarioStore = useUsuarioStore()
+      await usuarioStore.esperarSesionLista()
+
+      const resultado = await fuentePrincipalFirestoreService.cargarPreferencias({
+        cargarLocal: () => preferenciasService.obtenerPreferencias(),
+      })
+
+      if (resultado.datos) {
+        aplicarPreferencias(resultado.datos)
+        fuenteDatos.value = resultado
+      }
+    } catch (error) {
+      console.error('Error al hidratar preferencias desde la fuente principal:', error)
+    }
+  }
+
+  function aplicarPreferencias(preferencias = {}) {
+    modoMoneda.value = preferencias.modoMoneda || 'automatica'
+    modoTema.value = preferencias.modoTema || 'sistema'
+    monedaManual.value = preferencias.monedaManual || MONEDA_DEFAULT
+    paisDetectado.value = preferencias.paisDetectado || null
+    monedaDetectada.value = preferencias.monedaDetectada || null
+    unidad.value = preferencias.unidad || 'unidad'
+    aplicarModoTema()
   }
 
   async function guardarModoMoneda(valorModo) {
@@ -123,6 +152,9 @@ export const usePreferenciasStore = defineStore('preferencias', () => {
     paisDetectado.value = null
     monedaDetectada.value = null
     unidad.value = 'unidad'
+    fuenteDatos.value = fuentePrincipalFirestoreService.crearEstadoInicial(
+      fuentePrincipalFirestoreService.DOMINIOS.PREFERENCIAS,
+    )
     aplicarModoTema()
   }
 
@@ -137,8 +169,10 @@ export const usePreferenciasStore = defineStore('preferencias', () => {
     esTemaSistema,
     temaEfectivo,
     unidad,
+    fuenteDatos,
     aplicarModoTema,
     inicializar,
+    hidratarDesdeFuentePrincipal,
     detectarMonedaAutomatica,
     guardarModoMoneda,
     guardarModoTema,

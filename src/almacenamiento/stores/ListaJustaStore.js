@@ -1,10 +1,12 @@
 ﻿import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { useQuasar } from 'quasar'
+import fuentePrincipalFirestoreService from '../servicios/FuentePrincipalFirestoreService.js'
 import ListaJustaService from '../servicios/ListaJustaService.js'
 import productosService from '../servicios/ProductosService.js'
 import { useProductosStore } from './productosStore.js'
 import { useSesionEscaneoStore } from './sesionEscaneoStore.js'
+import { useUsuarioStore } from './UsuarioStore.js'
 
 export const useListaJustaStore = defineStore('listaJusta', () => {
   const quasar = useQuasar()
@@ -14,6 +16,11 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
   const listas = ref([])
   const cargando = ref(false)
   const error = ref(null)
+  const fuenteDatos = ref(
+    fuentePrincipalFirestoreService.crearEstadoInicial(
+      fuentePrincipalFirestoreService.DOMINIOS.LISTAS,
+    ),
+  )
 
   const tieneListas = computed(() => listas.value.length > 0)
   const totalListas = computed(() => listas.value.length)
@@ -30,7 +37,14 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     error.value = null
 
     try {
-      listas.value = await ListaJustaService.obtenerListas()
+      const usuarioStore = useUsuarioStore()
+      await usuarioStore.esperarSesionLista()
+
+      const resultado = await fuentePrincipalFirestoreService.cargarListas({
+        cargarLocal: () => ListaJustaService.obtenerListas(),
+      })
+      listas.value = resultado.datos || []
+      fuenteDatos.value = resultado
     } catch (err) {
       error.value = 'No se pudieron cargar las listas.'
       console.error('Error al cargar listas de Lista Justa:', err)
@@ -806,12 +820,16 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     listas.value = []
     cargando.value = false
     error.value = null
+    fuenteDatos.value = fuentePrincipalFirestoreService.crearEstadoInicial(
+      fuentePrincipalFirestoreService.DOMINIOS.LISTAS,
+    )
   }
 
   return {
     listas,
     cargando,
     error,
+    fuenteDatos,
     tieneListas,
     totalListas,
     listasOrdenadas,

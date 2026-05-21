@@ -27,7 +27,7 @@ Este resumen concentra el estado actual de la integración gradual de Precio Jus
 - Las reglas Firestore privadas quedaron versionadas en el repositorio con `firestore.rules`.
 - Firestore Offline quedó inicializado con caché persistente multi-tab cuando el navegador lo permite.
 - Storage no se usa todavía.
-- La app mantiene el comportamiento visible actual y sigue usando persistencia local como fuente principal visible.
+- La app mantiene LocalStorage/Capacitor como respaldo temporal, pero Firestore ya es fuente principal visible cuando hay usuario Firebase.
 - Productos y precios ya se sincronizan a Firestore como espejo privado validado cuando hay usuario Firebase autenticado.
 - Comercios y direcciones ya se sincronizan a Firestore como espejo privado validado cuando hay usuario Firebase autenticado.
 - Lista Justa ya se sincroniza a Firestore como espejo privado validado cuando hay usuario Firebase autenticado.
@@ -139,7 +139,7 @@ Claves persistidas actuales:
 - Si Firestore queda pendiente por conexión, la app devuelve estado `pendiente` con timeout controlado para no trabar la UI.
 - `productosStore` expone estado de sincronización y `MisProductosPage` muestra un aviso cuando hay error.
 - Firestore no guarda imágenes base64; las fotos locales siguen locales hasta el plan de Storage.
-- Firestore todavía no es fuente principal de UI; queda como espejo privado de productos/precios.
+- Firestore ya es fuente principal de UI para productos/precios con usuario Firebase; local queda como respaldo temporal.
 - No se escriben comercios, listas, preferencias, fotos, comunidad ni Storage en esta fase.
 
 ### Reglas Firestore versionadas
@@ -166,7 +166,7 @@ Claves persistidas actuales:
 - Si Firestore queda pendiente por conexión, la app devuelve estado `pendiente` con timeout controlado.
 - La eliminación local de comercio marca `eliminado: true` en Firestore.
 - Firestore no guarda fotos base64 de comercios ni direcciones; Storage sigue pendiente.
-- Firestore todavía no es fuente principal de UI; queda como espejo privado de comercios/direcciones.
+- Firestore ya es fuente principal de UI para comercios/direcciones con usuario Firebase; local queda como respaldo temporal.
 - No se agregaron referencias Firestore obligatorias desde precios a comercios; precios siguen guardando `comercioId` y `direccionId`.
 
 ### Migración local guiada
@@ -192,7 +192,7 @@ Claves persistidas actuales:
 - Si Firestore queda pendiente por conexión, la app devuelve estado `pendiente` con timeout controlado.
 - La eliminación local de lista marca `eliminado: true` y `estadoGeneral: eliminada` en Firestore.
 - Firestore no guarda imágenes base64 de items; Storage sigue pendiente.
-- Firestore todavía no es fuente principal de UI; queda como espejo privado de Lista Justa.
+- Firestore ya es fuente principal de UI para Lista Justa con usuario Firebase; local queda como respaldo temporal.
 - No se agregaron referencias Firestore obligatorias desde items a productos o comercios; los items conservan `productoId`, `comercioActual` y datos visuales.
 
 ### Firestore privado de preferencias
@@ -204,7 +204,7 @@ Claves persistidas actuales:
 - Si Firestore queda pendiente por conexión, la app devuelve estado `pendiente` con timeout controlado.
 - Se sincronizan solo campos del modelo (`modoMoneda`, `modoTema`, `monedaManual`, `paisDetectado`, `monedaDetectada`, `unidad`, `fechaActualizacion`).
 - Se agregó lectura controlada para comparar local vs Firestore en desarrollo sin cambiar la fuente principal de UI.
-- `TemaBoot` sigue leyendo preferencias locales; Firestore permanece como espejo privado en esta etapa.
+- `TemaBoot` sigue leyendo preferencias locales primero para evitar parpadeo; luego preferencias se hidratan desde Firestore si hay sesión Firebase.
 
 ### Firestore privado de confirmaciones
 
@@ -238,6 +238,7 @@ Claves persistidas actuales:
 - `src/almacenamiento/servicios/FirestoreListasJustasService.js`
 - `src/almacenamiento/servicios/FirestorePreferenciasService.js`
 - `src/almacenamiento/servicios/FirestoreConfirmacionesService.js`
+- `src/almacenamiento/servicios/FuentePrincipalFirestoreService.js`
 - `src/boot/FirebaseBoot.js`
 - `src/boot/UsuarioBoot.js`
 - `src/almacenamiento/stores/UsuarioStore.js`
@@ -352,7 +353,7 @@ Productos, precios, comercios, Lista Justa, preferencias y confirmaciones ya tie
 - Storage de fotos, para subir imágenes base64 locales y guardar solo URLs/rutas en Firestore;
 - corrección del CORS de `version.json` en dev para no contaminar la consola durante pruebas.
 
-Mi recomendación práctica: priorizar Storage de fotos y después pasar la lectura principal a Firestore.
+Mi recomendación práctica: ahora priorizar pruebas reales multiusuario/offline y luego planificar cuándo LocalStorage/Capacitor deja de ser respaldo visible.
 
 ## Actualización migración guiada restante
 
@@ -364,3 +365,15 @@ Fecha: 2026-05-21.
 - El inventario local ahora cuenta items de Lista Justa, fotos de productos, fotos de comercios/direcciones, fotos de listas, preferencias y confirmaciones.
 - La UI de Configuración muestra los conteos ampliados antes de crear backup o migrar.
 - Firestore sigue sin ser fuente principal y no se eliminan datos locales después de migrar.
+
+
+## Actualización fuente principal Firestore
+
+Fecha: 2026-05-21.
+
+- `PlanFuentePrincipalFirestore.md` quedó ejecutado y marcado como `TERMINADO`.
+- Firestore es la fuente principal de lectura visible con usuario Firebase para productos, precios, comercios, listas, preferencias y confirmaciones.
+- LocalStorage/Capacitor sigue como respaldo temporal y no se borra.
+- La UI de Configuración muestra el origen activo por dominio.
+- Validaciones ejecutadas: `npm run lint`, `npm run build`, `npm run androidReleaseConSimbolos` y carga básica con MCP Browser sin errores de consola.
+- Pendiente: prueba manual con usuario Firebase real, datos migrados, cache offline y cambio de usuario.

@@ -20,7 +20,9 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { ESTADOS_SINCRONIZACION } from '../constantes/PreparacionFirebase.js'
+import fuentePrincipalFirestoreService from '../servicios/FuentePrincipalFirestoreService.js'
 import productosService from '../servicios/ProductosService.js'
+import { useUsuarioStore } from './UsuarioStore.js'
 
 export const useProductosStore = defineStore('productos', () => {
   // ========================================
@@ -53,6 +55,11 @@ export const useProductosStore = defineStore('productos', () => {
    */
   const sincronizando = ref(false)
   const errorSincronizacion = ref(null)
+  const fuenteDatos = ref(
+    fuentePrincipalFirestoreService.crearEstadoInicial(
+      fuentePrincipalFirestoreService.DOMINIOS.PRODUCTOS,
+    ),
+  )
 
   // ========================================
   // 🧮 COMPUTED (GETTERS)
@@ -130,10 +137,15 @@ export const useProductosStore = defineStore('productos', () => {
     try {
       console.log('📥 Cargando productos...')
 
-      const productosObtenidos = await productosService.obtenerTodos()
-      productos.value = productosObtenidos
+      const usuarioStore = useUsuarioStore()
+      await usuarioStore.esperarSesionLista()
 
-      console.log(`✅ ${productosObtenidos.length} productos cargados`)
+      const resultado = await fuentePrincipalFirestoreService.cargarProductos({
+        cargarLocal: () => productosService.obtenerTodos(),
+      })
+      productos.value = resultado.datos || []
+      fuenteDatos.value = resultado
+      console.log(`Productos cargados: ${productos.value.length}`)
     } catch (err) {
       console.error('❌ Error al cargar productos:', err)
       error.value = 'No se pudieron cargar los productos'
@@ -413,6 +425,9 @@ export const useProductosStore = defineStore('productos', () => {
     error.value = null
     sincronizando.value = false
     errorSincronizacion.value = null
+    fuenteDatos.value = fuentePrincipalFirestoreService.crearEstadoInicial(
+      fuentePrincipalFirestoreService.DOMINIOS.PRODUCTOS,
+    )
     console.log('🧹 Estado del store limpiado')
   }
 
@@ -440,6 +455,7 @@ export const useProductosStore = defineStore('productos', () => {
     error,
     sincronizando,
     errorSincronizacion,
+    fuenteDatos,
 
     // Computed
     totalProductos,

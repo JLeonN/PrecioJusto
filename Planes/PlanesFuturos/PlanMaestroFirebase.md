@@ -73,12 +73,12 @@ Separar correctamente fotos de Firestore para no guardar base64 en documentos.
 
 Preparar el cambio de fuente principal después de que la sincronización privada esté madura.
 
-- [ ] Crear plan para lectura principal desde Firestore.
-- [ ] Mantener LocalStorage/Capacitor como respaldo temporal durante transición.
-- [ ] Implementar carga inicial desde Firestore por usuario.
-- [ ] Resolver estado al cerrar sesión, cambiar usuario o usar otro dispositivo.
-- [ ] Validar cache offline como experiencia principal.
-- [ ] Definir cuándo se puede dejar de depender del almacenamiento local como fuente visible.
+- [x] `PlanFuentePrincipalFirestore.md`: lectura principal desde Firestore.
+- [x] Mantener LocalStorage/Capacitor como respaldo temporal durante transición.
+- [x] Implementar carga inicial desde Firestore por usuario.
+- [x] Resolver estado al cerrar sesión, cambiar usuario o usar otro dispositivo.
+- [x] Validar cache offline como experiencia principal en código; queda pendiente prueba manual real.
+- [x] Definir que LocalStorage/Capacitor queda como respaldo temporal hasta un plan posterior de retiro.
 
 ## FASE 6: Comunidad y datos compartidos
 
@@ -125,11 +125,11 @@ Motivo: los datos privados principales y la migración guiada ampliada ya están
 - [x] Fase 2: Datos privados principales completados
 - [x] Fase 3: Próximos datos privados pendientes
 - [x] Fase 4: Fotos y Storage pendientes
-- [ ] Fase 5: Fuente principal Firestore
+- [x] Fase 5: Fuente principal Firestore
 - [ ] Fase 6: Comunidad y datos compartidos
 - [ ] Fase 7: Pendientes no Firebase que afectan pruebas
 - [ ] Fase Testing
 
 Fecha de creación: 20 de Mayo 2026
-Fecha de última actualización: 20 de Mayo 2026
+Fecha de última actualización: 21 de Mayo 2026
 Estado: ACTIVO

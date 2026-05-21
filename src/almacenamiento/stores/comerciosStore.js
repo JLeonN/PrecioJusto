@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import ComerciosService from '../servicios/ComerciosService'
+import fuentePrincipalFirestoreService from '../servicios/FuentePrincipalFirestoreService.js'
 import { useProductosStore } from './productosStore.js'
+import { useUsuarioStore } from './UsuarioStore.js'
 
 /**
  * COMERCIOS STORE
@@ -14,6 +16,9 @@ export const useComerciStore = defineStore('comercios', {
     comercios: [],
     cargando: false,
     error: null,
+    fuenteDatos: fuentePrincipalFirestoreService.crearEstadoInicial(
+      fuentePrincipalFirestoreService.DOMINIOS.COMERCIOS,
+    ),
   }),
 
   // ═══════════════════════════════════════════════════════════
@@ -146,8 +151,14 @@ export const useComerciStore = defineStore('comercios', {
       this.error = null
 
       try {
-        const comercios = await ComerciosService.obtenerTodos()
-        this.comercios = comercios
+        const usuarioStore = useUsuarioStore()
+        await usuarioStore.esperarSesionLista()
+
+        const resultado = await fuentePrincipalFirestoreService.cargarComercios({
+          cargarLocal: () => ComerciosService.obtenerTodos(),
+        })
+        this.comercios = resultado.datos || []
+        this.fuenteDatos = resultado
       } catch (error) {
         console.error('Error al cargar comercios:', error)
         this.error = 'No se pudieron cargar los comercios'
@@ -508,6 +519,9 @@ export const useComerciStore = defineStore('comercios', {
       this.comercios = []
       this.cargando = false
       this.error = null
+      this.fuenteDatos = fuentePrincipalFirestoreService.crearEstadoInicial(
+        fuentePrincipalFirestoreService.DOMINIOS.COMERCIOS,
+      )
     },
   },
 })

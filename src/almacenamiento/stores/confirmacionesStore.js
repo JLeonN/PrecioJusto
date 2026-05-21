@@ -19,7 +19,9 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import confirmacionesService from '../servicios/ConfirmacionesService.js'
+import fuentePrincipalFirestoreService from '../servicios/FuentePrincipalFirestoreService.js'
 import { useProductosStore } from './productosStore.js'
+import { useUsuarioStore } from './UsuarioStore.js'
 import usuarioActualService from '../servicios/UsuarioActualService.js'
 
 export const useConfirmacionesStore = defineStore('confirmaciones', () => {
@@ -51,6 +53,11 @@ export const useConfirmacionesStore = defineStore('confirmaciones', () => {
    * ❌ ERROR
    */
   const error = ref(null)
+  const fuenteDatos = ref(
+    fuentePrincipalFirestoreService.crearEstadoInicial(
+      fuentePrincipalFirestoreService.DOMINIOS.CONFIRMACIONES,
+    ),
+  )
 
   function sincronizarUsuarioActual() {
     usuarioActualId.value = usuarioActualService.obtenerUsuarioIdActual()
@@ -112,11 +119,17 @@ export const useConfirmacionesStore = defineStore('confirmaciones', () => {
     try {
       console.log(`📥 Cargando confirmaciones de ${usuarioActualId.value}...`)
 
-      const confirmaciones = await confirmacionesService.obtenerConfirmacionesUsuario(
-        usuarioActualId.value,
-      )
+      const usuarioStore = useUsuarioStore()
+      await usuarioStore.esperarSesionLista()
+      sincronizarUsuarioActual()
+
+      const resultado = await fuentePrincipalFirestoreService.cargarConfirmaciones({
+        cargarLocal: () => confirmacionesService.obtenerConfirmacionesUsuario(usuarioActualId.value),
+      })
+      const confirmaciones = resultado.datos instanceof Set ? resultado.datos : new Set()
 
       preciosConfirmados.value = confirmaciones
+      fuenteDatos.value = resultado
 
       console.log(`✅ ${confirmaciones.size} confirmaciones cargadas`)
     } catch (err) {
@@ -364,6 +377,9 @@ export const useConfirmacionesStore = defineStore('confirmaciones', () => {
     preciosConfirmados.value.clear()
     cargando.value = false
     error.value = null
+    fuenteDatos.value = fuentePrincipalFirestoreService.crearEstadoInicial(
+      fuentePrincipalFirestoreService.DOMINIOS.CONFIRMACIONES,
+    )
     console.log('🧹 Estado del store de confirmaciones limpiado')
   }
 
@@ -402,6 +418,7 @@ export const useConfirmacionesStore = defineStore('confirmaciones', () => {
     preciosConfirmados,
     cargando,
     error,
+    fuenteDatos,
 
     // Computed
     totalConfirmaciones,
