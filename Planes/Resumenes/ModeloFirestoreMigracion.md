@@ -106,6 +106,7 @@ Campos:
 - `usuarioId`, `modoMoneda`, `modoTema`, `monedaManual`, `paisDetectado`, `monedaDetectada`, `unidad`, `fechaActualizacion`.
 
 Decisión: sincronizar moneda, tema y unidad. Preferencias efímeras de sesión no se sincronizan.
+Estado de implementación 2026-05-20: `PreferenciasService` guarda primero en almacenamiento local y luego sincroniza como espejo Firestore privado mediante `FirestorePreferenciasService`. Si no hay sesión Firebase o falla Firestore, la preferencia queda guardada localmente y el estado de sincronización queda en `local`, `pendiente` o `error` sin bloquear la UI.
 
 ## Confirmaciones
 
@@ -221,8 +222,8 @@ Productos y precios ya tienen servicios específicos implementados. Mantener el 
 - `FirestorePreciosService` implementado.
 - `FirestoreComerciosService` implementado.
 - `FirestoreListasJustasService` implementado.
-- `FirestorePreferenciasService`
+- `FirestorePreferenciasService` implementado.
 - `FirestoreMigracionService`
 - `ColaSincronizacionService`
 
-Orden recomendado actual: preferencias, confirmaciones si aportan valor y recién después Storage/fotos si se decide subir imágenes locales.
+Orden recomendado actual: confirmaciones si aportan valor y recién después Storage/fotos si se decide subir imágenes locales.

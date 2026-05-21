@@ -17,6 +17,7 @@ Este resumen concentra el estado actual de la integración gradual de Precio Jus
 - El plan `PlanFirestorePrivadoComercios.md` quedó ejecutado y marcado como `TERMINADO`.
 - El plan `PlanMigracionLocalGuiadaFirebase.md` quedó ejecutado y marcado como `TERMINADO`.
 - El plan `PlanFirestorePrivadoListasJustas.md` quedó ejecutado y marcado como `TERMINADO`.
+- El plan `PlanFirestorePrivadoPreferencias.md` quedó ejecutado y marcado como `TERMINADO`.
 - Proyecto Firebase actual: `PrecioJustoPruebas2` (`preciojustopruebas2`).
 - Firebase SDK instalado como dependencia del proyecto.
 - Firebase Auth quedó preparado con proveedor `Correo electrónico/contraseña`.
@@ -193,6 +194,17 @@ Claves persistidas actuales:
 - Firestore todavía no es fuente principal de UI; queda como espejo privado de Lista Justa.
 - No se agregaron referencias Firestore obligatorias desde items a productos o comercios; los items conservan `productoId`, `comercioActual` y datos visuales.
 
+### Firestore privado de preferencias
+
+- Se creó `FirestorePreferenciasService` para escribir y leer preferencias privadas.
+- Ruta activa de preferencias: `usuarios/{usuarioId}/configuracion/preferencias`.
+- `PreferenciasService` guarda primero en LocalStorage/Capacitor y luego intenta sincronizar Firestore.
+- Si no hay usuario Firebase autenticado, la sincronización Firestore se omite y la preferencia queda local.
+- Si Firestore queda pendiente por conexión, la app devuelve estado `pendiente` con timeout controlado.
+- Se sincronizan solo campos del modelo (`modoMoneda`, `modoTema`, `monedaManual`, `paisDetectado`, `monedaDetectada`, `unidad`, `fechaActualizacion`).
+- Se agregó lectura controlada para comparar local vs Firestore en desarrollo sin cambiar la fuente principal de UI.
+- `TemaBoot` sigue leyendo preferencias locales; Firestore permanece como espejo privado en esta etapa.
+
 ---
 
 ## ARCHIVOS PRINCIPALES
@@ -214,6 +226,7 @@ Claves persistidas actuales:
 - `src/almacenamiento/servicios/FirebaseBaseService.js`
 - `src/almacenamiento/servicios/AutenticacionFirebaseService.js`
 - `src/almacenamiento/servicios/FirestoreListasJustasService.js`
+- `src/almacenamiento/servicios/FirestorePreferenciasService.js`
 - `src/boot/FirebaseBoot.js`
 - `src/boot/UsuarioBoot.js`
 - `src/almacenamiento/stores/UsuarioStore.js`
@@ -309,6 +322,8 @@ Recomendación práctica:
 - MCP Browser validó que usuario B y usuario sin sesión reciben `permission-denied` al intentar leer listas del usuario A.
 - MCP Browser validó que imágenes base64 de items no se escriben como base64 en Firestore.
 - MCP Browser validó que productos/precios y comercios siguen sincronizando después de integrar Lista Justa.
+- MCP Browser validó diagnóstico local/Firestore de preferencias sin sesión: queda en estado `local` y sin escritura remota.
+- MCP Browser validó normalización y whitelist del modelo de preferencias Firestore, sin campos extra.
 - Se confirmó que los servicios de datos siguen usando `AlmacenamientoService` con adaptadores locales.
 - Se detectó CORS en `version.json` contra GitHub Pages durante dev; no pertenece a Firebase.
 - Durante la simulación offline se observaron errores `ERR_INTERNET_DISCONNECTED` esperados en consola; no son regresión funcional.
@@ -317,10 +332,10 @@ Recomendación práctica:
 
 ## PRÓXIMO PASO RECOMENDADO
 
-Productos, precios, comercios y Lista Justa ya tienen espejo privado validado. El próximo plan debería avanzar con uno de estos caminos:
+Productos, precios, comercios, Lista Justa y preferencias ya tienen espejo privado validado. El próximo plan debería avanzar con uno de estos caminos:
 
-- preferencias privadas en Firestore;
+- confirmaciones privadas en Firestore, si se confirma valor real del dato;
 - Storage de fotos, para subir imágenes base64 locales y guardar solo URLs/rutas en Firestore;
 - corrección del CORS de `version.json` en dev para no contaminar la consola durante pruebas.
 
-Mi recomendación práctica: seguir con preferencias privadas y luego Storage de fotos antes de convertir Firestore en fuente principal.
+Mi recomendación práctica: ir con confirmaciones solo si aporta al producto; en paralelo, priorizar Storage antes de cambiar Firestore a fuente principal.

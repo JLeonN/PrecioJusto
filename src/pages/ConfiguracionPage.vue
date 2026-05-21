@@ -213,6 +213,7 @@ import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore
 import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
 import conexionService from '../almacenamiento/servicios/ConexionService.js'
 import migracionLocalFirebaseService from '../almacenamiento/servicios/MigracionLocalFirebaseService.js'
+import preferenciasService from '../almacenamiento/servicios/PreferenciasService.js'
 
 const quasar = useQuasar()
 const router = useRouter()
@@ -408,11 +409,25 @@ function notificarResultadoMigracion() {
   })
 }
 
+async function cargarDiagnosticoPreferenciasDev() {
+  if (!import.meta.env.DEV || !usuarioStore.estaAutenticado) return
+
+  const diagnostico = await preferenciasService.obtenerDiagnosticoSincronizacion()
+
+  console.info('Diagnóstico preferencias local/firestore', {
+    firestoreDisponible: diagnostico.firestoreDisponible,
+    mensajeFirestore: diagnostico.mensajeFirestore,
+    local: diagnostico.local,
+    firestore: diagnostico.firestore,
+  })
+}
+
 onMounted(async () => {
   if (preferenciasStore.modoMoneda === 'automatica' && !preferenciasStore.paisDetectado) {
     await preferenciasStore.detectarMonedaAutomatica()
   }
   await cargarPanelMigracion()
+  await cargarDiagnosticoPreferenciasDev()
 })
 </script>
 
