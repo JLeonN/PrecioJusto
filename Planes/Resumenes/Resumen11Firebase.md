@@ -18,6 +18,7 @@ Este resumen concentra el estado actual de la integración gradual de Precio Jus
 - El plan `PlanMigracionLocalGuiadaFirebase.md` quedó ejecutado y marcado como `TERMINADO`.
 - El plan `PlanFirestorePrivadoListasJustas.md` quedó ejecutado y marcado como `TERMINADO`.
 - El plan `PlanFirestorePrivadoPreferencias.md` quedó ejecutado y marcado como `TERMINADO`.
+- El plan `PlanFirestorePrivadoConfirmaciones.md` quedó ejecutado y marcado como `TERMINADO`.
 - Proyecto Firebase actual: `PrecioJustoPruebas2` (`preciojustopruebas2`).
 - Firebase SDK instalado como dependencia del proyecto.
 - Firebase Auth quedó preparado con proveedor `Correo electrónico/contraseña`.
@@ -205,6 +206,15 @@ Claves persistidas actuales:
 - Se agregó lectura controlada para comparar local vs Firestore en desarrollo sin cambiar la fuente principal de UI.
 - `TemaBoot` sigue leyendo preferencias locales; Firestore permanece como espejo privado en esta etapa.
 
+### Firestore privado de confirmaciones
+
+- Se creó `FirestoreConfirmacionesService` para escribir, leer y borrar confirmaciones privadas.
+- Ruta activa de confirmaciones: `usuarios/{usuarioId}/confirmaciones/{confirmacionId}`.
+- `ConfirmacionesService` mantiene local-first y luego sincroniza Firestore.
+- El `confirmacionId` se deriva de `productoId + precioId` para evitar duplicados por usuario.
+- Altas, bajas y limpieza de confirmaciones mantienen el estado local aunque Firestore falle.
+- No se creó colección pública de confirmaciones; sigue todo bajo `usuarios/{usuarioId}`.
+
 ---
 
 ## ARCHIVOS PRINCIPALES
@@ -227,6 +237,7 @@ Claves persistidas actuales:
 - `src/almacenamiento/servicios/AutenticacionFirebaseService.js`
 - `src/almacenamiento/servicios/FirestoreListasJustasService.js`
 - `src/almacenamiento/servicios/FirestorePreferenciasService.js`
+- `src/almacenamiento/servicios/FirestoreConfirmacionesService.js`
 - `src/boot/FirebaseBoot.js`
 - `src/boot/UsuarioBoot.js`
 - `src/almacenamiento/stores/UsuarioStore.js`
@@ -324,6 +335,10 @@ Recomendación práctica:
 - MCP Browser validó que productos/precios y comercios siguen sincronizando después de integrar Lista Justa.
 - MCP Browser validó diagnóstico local/Firestore de preferencias sin sesión: queda en estado `local` y sin escritura remota.
 - MCP Browser validó normalización y whitelist del modelo de preferencias Firestore, sin campos extra.
+- MCP Browser validó confirmación online en Firestore, prevención de duplicados y eliminación de confirmación sincronizada.
+- MCP Browser validó confirmación offline con estado `pendiente` y sincronización al reconectar.
+- MCP Browser validó limpieza de confirmaciones y bloqueo `PERMISSION_DENIED` para escritura/lectura ajena y ruta pública.
+- MCP Browser validó confirmación sin sesión Firebase con guardado local y sync omitida.
 - Se confirmó que los servicios de datos siguen usando `AlmacenamientoService` con adaptadores locales.
 - Se detectó CORS en `version.json` contra GitHub Pages durante dev; no pertenece a Firebase.
 - Durante la simulación offline se observaron errores `ERR_INTERNET_DISCONNECTED` esperados en consola; no son regresión funcional.
@@ -332,10 +347,9 @@ Recomendación práctica:
 
 ## PRÓXIMO PASO RECOMENDADO
 
-Productos, precios, comercios, Lista Justa y preferencias ya tienen espejo privado validado. El próximo plan debería avanzar con uno de estos caminos:
+Productos, precios, comercios, Lista Justa, preferencias y confirmaciones ya tienen espejo privado validado. El próximo plan debería avanzar con uno de estos caminos:
 
-- confirmaciones privadas en Firestore, si se confirma valor real del dato;
 - Storage de fotos, para subir imágenes base64 locales y guardar solo URLs/rutas en Firestore;
 - corrección del CORS de `version.json` en dev para no contaminar la consola durante pruebas.
 
-Mi recomendación práctica: ir con confirmaciones solo si aporta al producto; en paralelo, priorizar Storage antes de cambiar Firestore a fuente principal.
+Mi recomendación práctica: priorizar Storage de fotos y después pasar la lectura principal a Firestore.

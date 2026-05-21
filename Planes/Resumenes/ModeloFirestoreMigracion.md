@@ -117,6 +117,7 @@ Campos:
 - `id`, `usuarioId`, `productoId`, `precioId`, `fecha`, `origen`.
 
 Decisión: usar documento por confirmación para evitar arrays crecientes. El `confirmacionId` recomendado es `${productoId}_${precioId}` para prevenir duplicados por usuario.
+Estado de implementación 2026-05-21: `ConfirmacionesService` guarda primero en almacenamiento local y luego sincroniza como espejo Firestore privado mediante `FirestoreConfirmacionesService`. Las altas, bajas y limpiezas mantienen el flujo local aunque Firestore falle.
 
 ## Fotos y Storage
 
@@ -223,7 +224,8 @@ Productos y precios ya tienen servicios específicos implementados. Mantener el 
 - `FirestoreComerciosService` implementado.
 - `FirestoreListasJustasService` implementado.
 - `FirestorePreferenciasService` implementado.
+- `FirestoreConfirmacionesService` implementado.
 - `FirestoreMigracionService`
 - `ColaSincronizacionService`
 
-Orden recomendado actual: confirmaciones si aportan valor y recién después Storage/fotos si se decide subir imágenes locales.
+Orden recomendado actual: Storage/fotos y recién después migrar lectura principal a Firestore.

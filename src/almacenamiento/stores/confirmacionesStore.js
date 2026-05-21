@@ -52,6 +52,10 @@ export const useConfirmacionesStore = defineStore('confirmaciones', () => {
    */
   const error = ref(null)
 
+  function sincronizarUsuarioActual() {
+    usuarioActualId.value = usuarioActualService.obtenerUsuarioIdActual()
+  }
+
   // ========================================
   // 🧮 COMPUTED (GETTERS)
   // ========================================
@@ -101,6 +105,7 @@ export const useConfirmacionesStore = defineStore('confirmaciones', () => {
    *   })
    */
   async function cargarConfirmaciones() {
+    sincronizarUsuarioActual()
     cargando.value = true
     error.value = null
 
@@ -142,6 +147,7 @@ export const useConfirmacionesStore = defineStore('confirmaciones', () => {
    * 🔥 FIRESTORE: Usar transacciones para garantizar consistencia
    */
   async function confirmarPrecio(productoId, precioId) {
+    sincronizarUsuarioActual()
     // Verificar que no esté ya confirmado (validación local rápida)
     if (preciosConfirmados.value.has(precioId)) {
       return {
@@ -243,6 +249,7 @@ export const useConfirmacionesStore = defineStore('confirmaciones', () => {
    * Muchas apps no permiten des-confirmar (like de YouTube, por ejemplo).
    */
   async function eliminarConfirmacion(productoId, precioId) {
+    sincronizarUsuarioActual()
     // Verificar que esté confirmado
     if (!preciosConfirmados.value.has(precioId)) {
       return {
@@ -323,6 +330,7 @@ export const useConfirmacionesStore = defineStore('confirmaciones', () => {
    * ⚠️ PELIGROSO: No hay vuelta atrás
    */
   async function limpiarTodasLasConfirmaciones() {
+    sincronizarUsuarioActual()
     cargando.value = true
     error.value = null
 
