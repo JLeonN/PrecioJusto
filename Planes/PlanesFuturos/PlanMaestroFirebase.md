@@ -62,7 +62,7 @@ Ordenar los planes que todavía faltan para completar el backup privado por usua
 
 Separar correctamente fotos de Firestore para no guardar base64 en documentos.
 
-- [ ] `PlanFirebaseStorageFotos.md`: subir fotos locales a Firebase Storage y guardar solo URL/ruta.
+- [x] `PlanFirebaseStorageFotos.md`: subir fotos locales a Firebase Storage y guardar solo URL/ruta.
 - [ ] Definir reglas Storage privadas bajo `usuarios/{usuarioId}/fotos`.
 - [ ] Migrar fotos de productos, comercios/direcciones y listas si corresponde.
 - [ ] Validar que Firestore no reciba base64.

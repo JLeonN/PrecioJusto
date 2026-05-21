@@ -3,6 +3,7 @@
 import { CLAVE_LISTA_JUSTA } from '../constantes/ClavesAlmacenamiento.js'
 import { ESTADOS_SINCRONIZACION, ORIGENES_FOTO } from '../constantes/PreparacionFirebase.js'
 import firestoreListasJustasService from './FirestoreListasJustasService.js'
+import firebaseStorageFotosService from './FirebaseStorageFotosService.js'
 import usuarioActualService from './UsuarioActualService.js'
 
 const CLAVE_LISTAS = CLAVE_LISTA_JUSTA
@@ -47,6 +48,7 @@ class ListaJustaService {
 
   async sincronizarListaFirestore(lista) {
     try {
+      await this._prepararFotosStorageLista(lista)
       const resultado = await this._ejecutarConTimeoutFirestore(
         firestoreListasJustasService.guardarListaJusta(lista),
       )
@@ -301,6 +303,34 @@ class ListaJustaService {
     const resultado = await Promise.race([promesa, timeout])
     clearTimeout(timeoutId)
     return resultado
+  }
+
+  async _prepararFotosStorageLista(lista) {
+    if (!Array.isArray(lista?.items)) return
+
+    for (const item of lista.items) {
+      if (!item?.imagen) {
+        item.imagenUrl = null
+        item.imagenRutaStorage = null
+        continue
+      }
+
+      if (!firebaseStorageFotosService.esDataUriImagen(item.imagen)) {
+        continue
+      }
+
+      const resultado = await firebaseStorageFotosService.subirFotoPrivada({
+        tipo: 'listas',
+        ids: { idPrincipal: lista.id, idSecundario: item.id },
+        dataUri: item.imagen,
+      })
+
+      if (resultado.exito) {
+        item.imagenUrl = resultado.url
+        item.imagenRutaStorage = resultado.rutaStorage
+        item.fotoFuente = ORIGENES_FOTO.STORAGE
+      }
+    }
   }
 }
 

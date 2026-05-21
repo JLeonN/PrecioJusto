@@ -2,6 +2,7 @@ import { adaptadorActual } from './AlmacenamientoService.js'
 import { CLAVE_COMERCIOS } from '../constantes/ClavesAlmacenamiento.js'
 import { ESTADOS_SINCRONIZACION, ORIGENES_FOTO } from '../constantes/PreparacionFirebase.js'
 import firestoreComerciosService from './FirestoreComerciosService.js'
+import firebaseStorageFotosService from './FirebaseStorageFotosService.js'
 import usuarioActualService from './UsuarioActualService.js'
 
 const TIEMPO_MAXIMO_SINCRONIZACION_FIRESTORE_MS = 7000
@@ -291,6 +292,7 @@ async function agregarComercio(datosComercio) {
   }
 
   comercios.push(nuevoComercio)
+  await prepararFotosStorageComercio(nuevoComercio)
   await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
   nuevoComercio.sincronizacionFirestore = await sincronizarComercioFirestore(nuevoComercio)
 
@@ -315,6 +317,8 @@ async function editarComercio(id, datosActualizados) {
     id, // Mantener ID original
     fechaActualizacion: new Date().toISOString(),
   }
+
+  await prepararFotosStorageComercio(comercios[indice])
 
   await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
   comercios[indice].sincronizacionFirestore = await sincronizarComercioFirestore(comercios[indice])
@@ -367,6 +371,7 @@ async function agregarDireccion(comercioId, datosDireccion) {
 
   comercio.direcciones.push(nuevaDireccion)
   comercio.fechaActualizacion = ahora
+  await prepararFotosStorageComercio(comercio)
 
   await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
   comercio.sincronizacionFirestore = await sincronizarComercioFirestore(comercio)
@@ -401,6 +406,7 @@ async function editarDireccion(comercioId, direccionId, datosDireccion) {
     : comercio.nombre
 
   comercio.fechaActualizacion = new Date().toISOString()
+  await prepararFotosStorageComercio(comercio)
   await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
   comercio.sincronizacionFirestore = await sincronizarComercioFirestore(comercio)
   return comercio
@@ -426,6 +432,7 @@ async function eliminarDireccion(comercioId, direccionId) {
   }
 
   comercio.fechaActualizacion = new Date().toISOString()
+  await prepararFotosStorageComercio(comercio)
   await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
   await sincronizarComercioFirestore(comercio)
   return true
@@ -543,6 +550,51 @@ async function sincronizarComercioFirestore(comercio) {
       error: error.message || 'Error de sincronización Firestore.',
     }
   }
+}
+
+async function prepararFotosStorageComercio(comercio) {
+  if (!comercio) return comercio
+
+  if (!comercio.foto) {
+    comercio.fotoUrl = null
+    comercio.fotoRutaStorage = null
+  } else if (firebaseStorageFotosService.esDataUriImagen(comercio.foto)) {
+    const resultadoComercio = await firebaseStorageFotosService.subirFotoPrivada({
+      tipo: 'comercios',
+      ids: { idPrincipal: comercio.id },
+      dataUri: comercio.foto,
+    })
+    if (resultadoComercio.exito) {
+      comercio.fotoUrl = resultadoComercio.url
+      comercio.fotoRutaStorage = resultadoComercio.rutaStorage
+      comercio.fotoFuente = ORIGENES_FOTO.STORAGE
+    }
+  }
+
+  for (const direccion of comercio.direcciones || []) {
+    if (!direccion.foto) {
+      direccion.fotoUrl = null
+      direccion.fotoRutaStorage = null
+      continue
+    }
+
+    if (!firebaseStorageFotosService.esDataUriImagen(direccion.foto)) {
+      continue
+    }
+
+    const resultadoDireccion = await firebaseStorageFotosService.subirFotoPrivada({
+      tipo: 'direcciones',
+      ids: { idPrincipal: comercio.id, idSecundario: direccion.id },
+      dataUri: direccion.foto,
+    })
+    if (resultadoDireccion.exito) {
+      direccion.fotoUrl = resultadoDireccion.url
+      direccion.fotoRutaStorage = resultadoDireccion.rutaStorage
+      direccion.fotoFuente = ORIGENES_FOTO.STORAGE
+    }
+  }
+
+  return comercio
 }
 
 async function sincronizarEliminacionComercioFirestore(comercioId) {

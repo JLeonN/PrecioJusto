@@ -1,5 +1,6 @@
 import { getApps, initializeApp } from 'firebase/app'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
+import { getStorage } from 'firebase/storage'
 import {
   getFirestore,
   initializeFirestore,
@@ -19,6 +20,7 @@ const variablesFirebase = Object.freeze({
 let firebaseApp = null
 let firebaseAuth = null
 let firestoreDb = null
+let firebaseStorage = null
 let firestoreOfflineActivo = false
 let firestoreOfflineError = null
 
@@ -111,6 +113,14 @@ function observarUsuarioAutenticado(callback) {
   return onAuthStateChanged(obtenerFirebaseAuth(), callback)
 }
 
+function obtenerFirebaseStorage() {
+  if (!firebaseStorage) {
+    firebaseStorage = getStorage(obtenerFirebaseApp())
+  }
+
+  return firebaseStorage
+}
+
 function verificarInicializacionFirebase() {
   const estado = obtenerEstadoConfiguracion()
 
@@ -125,6 +135,7 @@ function verificarInicializacionFirebase() {
   obtenerFirebaseApp()
   obtenerFirebaseAuth()
   obtenerFirestoreDb()
+  obtenerFirebaseStorage()
 
   return {
     ok: true,
@@ -132,6 +143,7 @@ function verificarInicializacionFirebase() {
     projectId: estado.projectId,
     authInicializado: Boolean(firebaseAuth),
     firestoreInicializado: Boolean(firestoreDb),
+    storageInicializado: Boolean(firebaseStorage),
     firestoreOfflineActivo,
     firestoreOfflineError: firestoreOfflineError?.code || firestoreOfflineError?.message || null,
   }
@@ -143,6 +155,7 @@ export default {
   obtenerFirebaseApp,
   obtenerFirebaseAuth,
   obtenerFirestoreDb,
+  obtenerFirebaseStorage,
   observarUsuarioAutenticado,
   verificarInicializacionFirebase,
 }

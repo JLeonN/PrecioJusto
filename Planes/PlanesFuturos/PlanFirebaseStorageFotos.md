@@ -209,13 +209,13 @@ Validar que Storage recibe fotos privadas sin mandar base64 a Firestore ni rompe
 
 ## Progreso del plan
 
-- [ ] Fase 1: Revisar fotos actuales y alcance
-- [ ] Fase 2: Configurar Firebase Storage base
+- [x] Fase 1: Revisar fotos actuales y alcance
+- [x] Fase 2: Configurar Firebase Storage base
 - [ ] Fase 3: Crear reglas privadas de Storage
-- [ ] Fase 4: Crear servicio Storage de fotos
-- [ ] Fase 5: Integrar Storage con productos
-- [ ] Fase 6: Integrar Storage con comercios y direcciones
-- [ ] Fase 7: Integrar Storage con Lista Justa
+- [x] Fase 4: Crear servicio Storage de fotos
+- [x] Fase 5: Integrar Storage con productos
+- [x] Fase 6: Integrar Storage con comercios y direcciones
+- [x] Fase 7: Integrar Storage con Lista Justa
 - [ ] Fase 8: Preparar reintentos y estado de subida
 - [ ] Fase 9: Preparar migración guiada de fotos locales
 - [ ] Fase 10: Actualizar documentación
@@ -223,4 +223,4 @@ Validar que Storage recibe fotos privadas sin mandar base64 a Firestore ni rompe
 
 Fecha de creación: 21 de Mayo 2026
 Fecha de última actualización: 21 de Mayo 2026
-Estado: BORRADOR
+Estado: EN_PROGRESO

@@ -21,6 +21,7 @@ import { normalizarEscalasPorCantidad, obtenerResumenEscalas } from '../../utils
 import { PREFIJO_PRODUCTOS } from '../constantes/ClavesAlmacenamiento.js'
 import { ESTADOS_SINCRONIZACION, ORIGENES_FOTO } from '../constantes/PreparacionFirebase.js'
 import firestoreProductosService from './FirestoreProductosService.js'
+import firebaseStorageFotosService from './FirebaseStorageFotosService.js'
 import usuarioActualService from './UsuarioActualService.js'
 
 const TIEMPO_MAXIMO_SINCRONIZACION_FIRESTORE_MS = 7000
@@ -61,6 +62,7 @@ class ProductosService {
 
       producto.usuarioId = producto.usuarioId || usuarioActualService.obtenerUsuarioIdActual()
       producto.fotoFuente = this._normalizarFotoFuente(producto)
+      producto = await this._prepararFotoStorageProducto(producto)
 
       // Agregar timestamps
       const ahora = new Date().toISOString()
@@ -578,6 +580,52 @@ class ProductosService {
         error: error.message || 'Error de sincronización Firestore.',
       }
     }
+  }
+
+  async _prepararFotoStorageProducto(producto) {
+    if (!firebaseStorageFotosService.esDataUriImagen(producto?.imagen)) {
+      if (!producto?.imagen) {
+        producto.imagenUrl = null
+        producto.imagenRutaStorage = null
+      }
+      return producto
+    }
+
+    const resultado = await firebaseStorageFotosService.subirFotoPrivada({
+      tipo: 'productos',
+      ids: {
+        idPrincipal: producto?.id || this._generarId(),
+      },
+      dataUri: producto.imagen,
+    })
+
+    if (resultado.exito) {
+      producto.imagenUrl = resultado.url
+      producto.imagenRutaStorage = resultado.rutaStorage
+      producto.fotoFuente = ORIGENES_FOTO.STORAGE
+      producto.sincronizacionFoto = {
+        estado: resultado.estado,
+        fecha: new Date().toISOString(),
+        mensaje: 'Foto subida a Firebase Storage.',
+      }
+      return producto
+    }
+
+    if (resultado.omitido) {
+      producto.sincronizacionFoto = {
+        estado: ESTADOS_SINCRONIZACION.LOCAL,
+        fecha: new Date().toISOString(),
+        mensaje: resultado.mensaje,
+      }
+      return producto
+    }
+
+    producto.sincronizacionFoto = {
+      estado: ESTADOS_SINCRONIZACION.ERROR,
+      fecha: new Date().toISOString(),
+      mensaje: resultado.mensaje || 'No se pudo subir la foto a Firebase Storage.',
+    }
+    return producto
   }
 
   async _sincronizarEliminacionProductoFirestore(productoId) {
