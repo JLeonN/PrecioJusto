@@ -50,7 +50,13 @@ class InventarioMigracionFirebaseService {
       fotosProductos: datos.productos.filter((producto) => Boolean(producto.imagen)).length,
       fotosComercios: datos.comercios.reduce(
         (total, comercio) =>
-          total + (comercio.direcciones || []).filter((direccion) => Boolean(direccion.foto)).length,
+          total +
+          (comercio.foto ? 1 : 0) +
+          (comercio.direcciones || []).filter((direccion) => Boolean(direccion.foto)).length,
+        0,
+      ),
+      fotosListas: datos.listas.reduce(
+        (total, lista) => total + (lista.items || []).filter((item) => Boolean(item.imagen)).length,
         0,
       ),
       confirmaciones: datos.confirmaciones.length,

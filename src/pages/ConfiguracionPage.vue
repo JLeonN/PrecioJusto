@@ -36,7 +36,7 @@
             <div>
               <div class="text-subtitle1 text-weight-medium">Migración local a Firebase</div>
               <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
-                Productos, precios y comercios se migran con backup local previo.
+                Datos privados se migran con backup local previo; la app sigue leyendo local.
               </p>
             </div>
             <q-btn
@@ -63,6 +63,27 @@
             </q-banner>
             <q-banner rounded class="banner-migracion">
               Direcciones: <strong>{{ conteosMigracion.direcciones }}</strong>
+            </q-banner>
+            <q-banner rounded class="banner-migracion">
+              Listas: <strong>{{ conteosMigracion.listas }}</strong>
+            </q-banner>
+            <q-banner rounded class="banner-migracion">
+              Items: <strong>{{ conteosMigracion.itemsListaJusta }}</strong>
+            </q-banner>
+            <q-banner rounded class="banner-migracion">
+              Preferencias: <strong>{{ conteosMigracion.preferencias }}</strong>
+            </q-banner>
+            <q-banner rounded class="banner-migracion">
+              Confirmaciones: <strong>{{ conteosMigracion.confirmaciones }}</strong>
+            </q-banner>
+            <q-banner rounded class="banner-migracion">
+              Fotos producto: <strong>{{ conteosMigracion.fotosProductos }}</strong>
+            </q-banner>
+            <q-banner rounded class="banner-migracion">
+              Fotos comercio: <strong>{{ conteosMigracion.fotosComercios }}</strong>
+            </q-banner>
+            <q-banner rounded class="banner-migracion">
+              Fotos listas: <strong>{{ conteosMigracion.fotosListas }}</strong>
             </q-banner>
           </div>
           <q-linear-progress v-if="cargandoMigracion" indeterminate color="primary" class="q-mt-md" />
@@ -247,6 +268,13 @@ const conteosMigracion = computed(
       precios: 0,
       comercios: 0,
       direcciones: 0,
+      listas: 0,
+      itemsListaJusta: 0,
+      preferencias: 0,
+      confirmaciones: 0,
+      fotosProductos: 0,
+      fotosComercios: 0,
+      fotosListas: 0,
     },
 )
 const textoEstadoMigracion = computed(() => estadoMigracion.value?.estado || 'sinIniciar')
@@ -454,7 +482,7 @@ onMounted(async () => {
 .grilla-conteos {
   display: grid;
   gap: var(--espaciado-sm);
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 .banner-migracion {
   background: var(--fondo-banner-suave);

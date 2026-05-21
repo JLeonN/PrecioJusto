@@ -229,3 +229,21 @@ Productos y precios ya tienen servicios específicos implementados. Mantener el 
 - `ColaSincronizacionService`
 
 Orden recomendado actual: Storage/fotos y recién después migrar lectura principal a Firestore.
+
+## Actualización migración guiada V2
+
+Fecha: 2026-05-21.
+
+La migración guiada ahora incluye Lista Justa, preferencias, confirmaciones y fotos privadas cuando Storage está disponible. `VERSION_MIGRACION_LOCAL_FIREBASE` subió a `migracionLocalFirebaseV2`.
+
+Conteos nuevos del estado:
+
+- `listas`
+- `itemsListaJusta`
+- `preferencias`
+- `confirmaciones`
+- `fotosProductos`
+- `fotosComercios`
+- `fotosListas`
+
+La migración sigue usando backup local previo, cola local de pendientes y escritura idempotente con los mismos IDs. Firestore no pasa a fuente principal todavía y LocalStorage/Capacitor conserva los datos originales.

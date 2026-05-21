@@ -219,19 +219,19 @@ Validar que la migración ampliada es segura, repetible y no pierde datos.
 
 ## Progreso del plan
 
-- [ ] Fase 1: Revisar estado actual de migración
-- [ ] Fase 2: Ampliar inventario local
-- [ ] Fase 3: Ampliar conteos esperados y estado de migración
-- [ ] Fase 4: Migrar Lista Justa
-- [ ] Fase 5: Migrar preferencias
-- [ ] Fase 6: Migrar confirmaciones
-- [ ] Fase 7: Preparar migración de fotos a Storage
-- [ ] Fase 8: Ampliar cola de pendientes y reintentos
-- [ ] Fase 9: Actualizar UI de migración
-- [ ] Fase 10: Validar conteos finales
-- [ ] Fase 11: Actualizar documentación
-- [ ] Fase Testing
+- [x] Fase 1: Revisar estado actual de migración
+- [x] Fase 2: Ampliar inventario local
+- [x] Fase 3: Ampliar conteos esperados y estado de migración
+- [x] Fase 4: Migrar Lista Justa
+- [x] Fase 5: Migrar preferencias
+- [x] Fase 6: Migrar confirmaciones
+- [x] Fase 7: Preparar migración de fotos a Storage
+- [x] Fase 8: Ampliar cola de pendientes y reintentos
+- [x] Fase 9: Actualizar UI de migración
+- [x] Fase 10: Validar conteos finales
+- [x] Fase 11: Actualizar documentación
+- [x] Fase Testing
 
 Fecha de creación: 21 de Mayo 2026
 Fecha de última actualización: 21 de Mayo 2026
-Estado: BORRADOR
+Estado: TERMINADO

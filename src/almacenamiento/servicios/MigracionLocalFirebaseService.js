@@ -2,7 +2,11 @@ import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { adaptadorActual, infoAdaptador } from './AlmacenamientoService.js'
 import conexionService from './ConexionService.js'
 import firebaseBaseService from './FirebaseBaseService.js'
+import firebaseStorageFotosService from './FirebaseStorageFotosService.js'
 import firestoreComerciosService from './FirestoreComerciosService.js'
+import firestoreConfirmacionesService from './FirestoreConfirmacionesService.js'
+import firestoreListasJustasService from './FirestoreListasJustasService.js'
+import firestorePreferenciasService from './FirestorePreferenciasService.js'
 import firestoreProductosService from './FirestoreProductosService.js'
 import inventarioMigracionFirebaseService from './InventarioMigracionFirebaseService.js'
 import usuarioActualService from './UsuarioActualService.js'
@@ -60,12 +64,95 @@ function contarDireccionesMigrables(comercios) {
   )
 }
 
+function contarItemsListaJusta(listas) {
+  return listas.reduce(
+    (total, lista) =>
+      total +
+      Math.min(lista.items?.length || 0, LIMITES_MODELO_FIRESTORE.itemsListaEmbebidosMaximo),
+    0,
+  )
+}
+
+function contarFotosProductos(productos) {
+  return productos.filter((producto) => esBase64(producto.imagen)).length
+}
+
+function contarFotosComercios(comercios) {
+  return comercios.reduce(
+    (total, comercio) =>
+      total +
+      (esBase64(comercio.foto) ? 1 : 0) +
+      (comercio.direcciones || []).filter((direccion) => esBase64(direccion.foto)).length,
+    0,
+  )
+}
+
+function contarFotosListas(listas) {
+  return listas.reduce(
+    (total, lista) => total + (lista.items || []).filter((item) => esBase64(item.imagen)).length,
+    0,
+  )
+}
+
+function crearMapaPrecioAProducto(productos) {
+  const mapa = new Map()
+
+  productos.forEach((producto) => {
+    const precios = producto.precios || []
+    precios.forEach((precio) => {
+      if (precio?.id) {
+        mapa.set(String(precio.id), producto.id)
+      }
+    })
+  })
+
+  return mapa
+}
+
+function obtenerConfirmacionesMigrables(datosLocales) {
+  const mapaPrecioAProducto = crearMapaPrecioAProducto(datosLocales.productos)
+  const confirmaciones = []
+
+  datosLocales.confirmaciones.forEach((registro) => {
+    const valor = registro.valor
+    const usuarioIdLocal = valor?.usuarioId || String(registro.clave || '').replace(/^confirmaciones_/, '')
+    const preciosConfirmados = Array.isArray(valor)
+      ? valor
+      : Array.isArray(valor?.preciosConfirmados)
+        ? valor.preciosConfirmados
+        : []
+
+    preciosConfirmados.forEach((precioId) => {
+      const productoId = mapaPrecioAProducto.get(String(precioId)) || null
+      confirmaciones.push({
+        id: firestoreConfirmacionesService.crearConfirmacionId(productoId, precioId),
+        usuarioIdLocal,
+        productoId,
+        precioId,
+        fecha: valor?.fechaActualizacion || new Date().toISOString(),
+        origen: 'migracionLocal',
+      })
+    })
+  })
+
+  return confirmaciones
+}
+
 function obtenerConteosMigrables(datosLocales) {
+  const confirmaciones = obtenerConfirmacionesMigrables(datosLocales)
+
   return {
     productos: datosLocales.productos.length,
     precios: contarPrecios(datosLocales.productos),
     comercios: datosLocales.comercios.length,
     direcciones: contarDireccionesMigrables(datosLocales.comercios),
+    listas: datosLocales.listas.length,
+    itemsListaJusta: contarItemsListaJusta(datosLocales.listas),
+    preferencias: datosLocales.preferencias ? 1 : 0,
+    confirmaciones: confirmaciones.length,
+    fotosProductos: contarFotosProductos(datosLocales.productos),
+    fotosComercios: contarFotosComercios(datosLocales.comercios),
+    fotosListas: contarFotosListas(datosLocales.listas),
   }
 }
 
@@ -75,6 +162,13 @@ function crearConteosVacios() {
     precios: 0,
     comercios: 0,
     direcciones: 0,
+    listas: 0,
+    itemsListaJusta: 0,
+    preferencias: 0,
+    confirmaciones: 0,
+    fotosProductos: 0,
+    fotosComercios: 0,
+    fotosListas: 0,
   }
 }
 
@@ -271,13 +365,15 @@ class MigracionLocalFirebaseService {
       }
 
       try {
+        const resultadoFotos = await this._prepararFotosStorageProducto(producto)
+        this._agregarResultadoFotos(resultado, resultadoFotos, 'fotosProductos')
         const resultadoProducto = await ejecutarConTimeoutFirestore(
-          firestoreProductosService.guardarProductoConPrecios(producto),
+          firestoreProductosService.guardarProductoConPrecios(resultadoFotos.dato),
         )
 
         if (resultadoProducto.exito && !resultadoProducto.pendiente) {
           resultado.conteosMigrados.productos += 1
-          resultado.conteosMigrados.precios += producto.precios?.length || 0
+          resultado.conteosMigrados.precios += resultadoFotos.dato.precios?.length || 0
           continue
         }
 
@@ -305,14 +401,16 @@ class MigracionLocalFirebaseService {
       }
 
       try {
+        const resultadoFotos = await this._prepararFotosStorageComercio(comercio)
+        this._agregarResultadoFotos(resultado, resultadoFotos, 'fotosComercios')
         const resultadoComercio = await ejecutarConTimeoutFirestore(
-          firestoreComerciosService.guardarComercio(comercio),
+          firestoreComerciosService.guardarComercio(resultadoFotos.dato),
         )
 
         if (resultadoComercio.exito && !resultadoComercio.pendiente) {
           resultado.conteosMigrados.comercios += 1
           resultado.conteosMigrados.direcciones += Math.min(
-            comercio.direcciones?.length || 0,
+            resultadoFotos.dato.direcciones?.length || 0,
             LIMITES_MODELO_FIRESTORE.direccionesComercioEmbebidasMaximo,
           )
           continue
@@ -326,7 +424,204 @@ class MigracionLocalFirebaseService {
       }
     }
 
+    await this._guardarEstado(usuarioId, {
+      ...estadoBase,
+      estado: ESTADOS_MIGRACION_FIREBASE.EN_PROCESO,
+      conteosMigrados: resultado.conteosMigrados,
+      errores: resultado.errores,
+      ultimoPasoCompletado: 'comerciosYDirecciones',
+      fechaUltimoIntento: new Date().toISOString(),
+    })
+
+    for (const lista of datosLocales.listas) {
+      if (!conectado) {
+        resultado.colaPendiente.push(this._crearItemColaLista(lista, 'Sin conexión.'))
+        continue
+      }
+
+      try {
+        const resultadoFotos = await this._prepararFotosStorageLista(lista)
+        this._agregarResultadoFotos(resultado, resultadoFotos, 'fotosListas')
+        const resultadoLista = await ejecutarConTimeoutFirestore(
+          firestoreListasJustasService.guardarListaJusta(resultadoFotos.dato),
+        )
+
+        if (resultadoLista.exito && !resultadoLista.pendiente) {
+          resultado.conteosMigrados.listas += 1
+          resultado.conteosMigrados.itemsListaJusta += Math.min(
+            resultadoFotos.dato.items?.length || 0,
+            LIMITES_MODELO_FIRESTORE.itemsListaEmbebidosMaximo,
+          )
+          continue
+        }
+
+        this._registrarListaPendiente(resultado, lista, resultadoLista)
+      } catch (error) {
+        this._registrarListaPendiente(resultado, lista, {
+          mensaje: resumirError(error),
+        })
+      }
+    }
+
+    if (datosLocales.preferencias) {
+      if (!conectado) {
+        resultado.colaPendiente.push(this._crearItemColaPreferencias('Sin conexión.'))
+      } else {
+        try {
+          const resultadoPreferencias = await ejecutarConTimeoutFirestore(
+            firestorePreferenciasService.guardarPreferencias(datosLocales.preferencias),
+          )
+
+          if (resultadoPreferencias.exito && !resultadoPreferencias.pendiente) {
+            resultado.conteosMigrados.preferencias = 1
+          } else {
+            this._registrarPreferenciasPendiente(resultado, resultadoPreferencias)
+          }
+        } catch (error) {
+          this._registrarPreferenciasPendiente(resultado, {
+            mensaje: resumirError(error),
+          })
+        }
+      }
+    }
+
+    const confirmaciones = obtenerConfirmacionesMigrables(datosLocales)
+    for (const confirmacion of confirmaciones) {
+      if (!conectado) {
+        resultado.colaPendiente.push(this._crearItemColaConfirmacion(confirmacion, 'Sin conexión.'))
+        continue
+      }
+
+      try {
+        const resultadoConfirmacion = await ejecutarConTimeoutFirestore(
+          firestoreConfirmacionesService.guardarConfirmacion(confirmacion),
+        )
+
+        if (resultadoConfirmacion.exito && !resultadoConfirmacion.pendiente) {
+          resultado.conteosMigrados.confirmaciones += 1
+          continue
+        }
+
+        this._registrarConfirmacionPendiente(resultado, confirmacion, resultadoConfirmacion)
+      } catch (error) {
+        this._registrarConfirmacionPendiente(resultado, confirmacion, {
+          mensaje: resumirError(error),
+        })
+      }
+    }
+
     return resultado
+  }
+
+  async _prepararFotosStorageProducto(producto) {
+    const dato = clonarDato(producto)
+    const resultado = { dato, fotosMigradas: 0, errores: [], colaPendiente: [] }
+
+    if (!firebaseStorageFotosService.esDataUriImagen(dato?.imagen)) {
+      return resultado
+    }
+
+    const subida = await firebaseStorageFotosService.subirFotoPrivada({
+      tipo: 'productos',
+      ids: { idPrincipal: dato.id },
+      dataUri: dato.imagen,
+    })
+
+    if (subida.exito) {
+      dato.imagenUrl = subida.url
+      dato.imagenRutaStorage = subida.rutaStorage
+      dato.fotoFuente = subida.fotoFuente
+      resultado.fotosMigradas += 1
+      return resultado
+    }
+
+    const mensaje = subida.mensaje || 'No se pudo subir la foto del producto.'
+    resultado.errores.push({ tipoDato: 'fotoProducto', documentoId: dato.id, mensaje })
+    resultado.colaPendiente.push(this._crearItemColaFoto('fotoProducto', dato.id, mensaje))
+    return resultado
+  }
+
+  async _prepararFotosStorageComercio(comercio) {
+    const dato = clonarDato(comercio)
+    const resultado = { dato, fotosMigradas: 0, errores: [], colaPendiente: [] }
+
+    if (firebaseStorageFotosService.esDataUriImagen(dato?.foto)) {
+      const subidaComercio = await firebaseStorageFotosService.subirFotoPrivada({
+        tipo: 'comercios',
+        ids: { idPrincipal: dato.id },
+        dataUri: dato.foto,
+      })
+
+      if (subidaComercio.exito) {
+        dato.fotoUrl = subidaComercio.url
+        dato.fotoRutaStorage = subidaComercio.rutaStorage
+        dato.fotoFuente = subidaComercio.fotoFuente
+        resultado.fotosMigradas += 1
+      } else {
+        const mensaje = subidaComercio.mensaje || 'No se pudo subir la foto del comercio.'
+        resultado.errores.push({ tipoDato: 'fotoComercio', documentoId: dato.id, mensaje })
+        resultado.colaPendiente.push(this._crearItemColaFoto('fotoComercio', dato.id, mensaje))
+      }
+    }
+
+    for (const direccion of dato.direcciones || []) {
+      if (!firebaseStorageFotosService.esDataUriImagen(direccion?.foto)) continue
+
+      const subidaDireccion = await firebaseStorageFotosService.subirFotoPrivada({
+        tipo: 'direcciones',
+        ids: { idPrincipal: dato.id, idSecundario: direccion.id },
+        dataUri: direccion.foto,
+      })
+
+      if (subidaDireccion.exito) {
+        direccion.fotoUrl = subidaDireccion.url
+        direccion.fotoRutaStorage = subidaDireccion.rutaStorage
+        direccion.fotoFuente = subidaDireccion.fotoFuente
+        resultado.fotosMigradas += 1
+      } else {
+        const documentoId = `${dato.id}-${direccion.id}`
+        const mensaje = subidaDireccion.mensaje || 'No se pudo subir la foto de la dirección.'
+        resultado.errores.push({ tipoDato: 'fotoDireccion', documentoId, mensaje })
+        resultado.colaPendiente.push(this._crearItemColaFoto('fotoDireccion', documentoId, mensaje))
+      }
+    }
+
+    return resultado
+  }
+
+  async _prepararFotosStorageLista(lista) {
+    const dato = clonarDato(lista)
+    const resultado = { dato, fotosMigradas: 0, errores: [], colaPendiente: [] }
+
+    for (const item of dato.items || []) {
+      if (!firebaseStorageFotosService.esDataUriImagen(item?.imagen)) continue
+
+      const subidaItem = await firebaseStorageFotosService.subirFotoPrivada({
+        tipo: 'listas',
+        ids: { idPrincipal: dato.id, idSecundario: item.id },
+        dataUri: item.imagen,
+      })
+
+      if (subidaItem.exito) {
+        item.imagenUrl = subidaItem.url
+        item.imagenRutaStorage = subidaItem.rutaStorage
+        item.fotoFuente = subidaItem.fotoFuente
+        resultado.fotosMigradas += 1
+      } else {
+        const documentoId = `${dato.id}-${item.id}`
+        const mensaje = subidaItem.mensaje || 'No se pudo subir la foto del item de Lista Justa.'
+        resultado.errores.push({ tipoDato: 'fotoListaJusta', documentoId, mensaje })
+        resultado.colaPendiente.push(this._crearItemColaFoto('fotoListaJusta', documentoId, mensaje))
+      }
+    }
+
+    return resultado
+  }
+
+  _agregarResultadoFotos(resultado, resultadoFotos, claveConteo) {
+    resultado.conteosMigrados[claveConteo] += resultadoFotos.fotosMigradas
+    resultado.errores.push(...resultadoFotos.errores)
+    resultado.colaPendiente.push(...resultadoFotos.colaPendiente)
   }
 
   async _validarConteosFirestore(datosLocales) {
@@ -338,11 +633,34 @@ class MigracionLocalFirebaseService {
     const comerciosFirestore = await firestoreComerciosService.obtenerComerciosUsuario({
       limite: Math.max(esperados.comercios, 1),
     })
+    const listasFirestore = await firestoreListasJustasService.obtenerListasJustasUsuario({
+      limite: Math.max(esperados.listas, 1),
+    })
+    const preferenciasFirestore = await firestorePreferenciasService.obtenerPreferenciasUsuario()
+    const confirmacionesFirestore = await firestoreConfirmacionesService.obtenerConfirmacionesUsuario()
     const conteosFirestore = {
       productos: productosFirestore.length,
       precios: contarPrecios(productosFirestore),
       comercios: comerciosFirestore.length,
       direcciones: contarDireccionesMigrables(comerciosFirestore),
+      listas: listasFirestore.length,
+      itemsListaJusta: contarItemsListaJusta(listasFirestore),
+      preferencias: preferenciasFirestore ? 1 : 0,
+      confirmaciones: confirmacionesFirestore.size,
+      fotosProductos: productosFirestore.filter((producto) => producto.imagenRutaStorage).length,
+      fotosComercios: comerciosFirestore.reduce(
+        (total, comercio) =>
+          total +
+          (comercio.fotoRutaStorage ? 1 : 0) +
+          (comercio.direcciones || []).filter((direccion) => direccion.fotoRutaStorage).length,
+        0,
+      ),
+      fotosListas: listasFirestore.reduce(
+        (total, lista) =>
+          total +
+          (lista.items || []).filter((item) => item.imagenRutaStorage).length,
+        0,
+      ),
     }
     const diferencias = Object.entries(esperados)
       .filter(([clave, valor]) => conteosFirestore[clave] !== valor)
@@ -356,6 +674,9 @@ class MigracionLocalFirebaseService {
       ...comerciosFirestore.filter((comercio) => esBase64(comercio.fotoUrl)),
       ...comerciosFirestore.flatMap((comercio) =>
         (comercio.direcciones || []).filter((direccion) => esBase64(direccion.fotoUrl)),
+      ),
+      ...listasFirestore.flatMap((lista) =>
+        (lista.items || []).filter((item) => esBase64(item.imagenUrl)),
       ),
     ]
 
@@ -434,6 +755,33 @@ class MigracionLocalFirebaseService {
       resultado.colaPendiente.push(this._crearItemColaComercio(comercio, mensaje))
     }
 
+    for (const lista of datosLocales.listas) {
+      resultado.errores.push({
+        tipoDato: TIPOS_DATO_USUARIO.LISTA_JUSTA,
+        documentoId: lista.id,
+        mensaje,
+      })
+      resultado.colaPendiente.push(this._crearItemColaLista(lista, mensaje))
+    }
+
+    if (datosLocales.preferencias) {
+      resultado.errores.push({
+        tipoDato: TIPOS_DATO_USUARIO.PREFERENCIAS,
+        documentoId: 'preferencias',
+        mensaje,
+      })
+      resultado.colaPendiente.push(this._crearItemColaPreferencias(mensaje))
+    }
+
+    for (const confirmacion of obtenerConfirmacionesMigrables(datosLocales)) {
+      resultado.errores.push({
+        tipoDato: TIPOS_DATO_USUARIO.CONFIRMACION,
+        documentoId: confirmacion.id,
+        mensaje,
+      })
+      resultado.colaPendiente.push(this._crearItemColaConfirmacion(confirmacion, mensaje))
+    }
+
     return resultado
   }
 
@@ -478,6 +826,36 @@ class MigracionLocalFirebaseService {
     resultado.colaPendiente.push(this._crearItemColaComercio(comercio, mensaje))
   }
 
+  _registrarListaPendiente(resultado, lista, error) {
+    const mensaje = error?.mensaje || error?.message || 'No se pudo migrar la Lista Justa.'
+    resultado.errores.push({
+      tipoDato: TIPOS_DATO_USUARIO.LISTA_JUSTA,
+      documentoId: lista.id,
+      mensaje,
+    })
+    resultado.colaPendiente.push(this._crearItemColaLista(lista, mensaje))
+  }
+
+  _registrarPreferenciasPendiente(resultado, error) {
+    const mensaje = error?.mensaje || error?.message || 'No se pudieron migrar las preferencias.'
+    resultado.errores.push({
+      tipoDato: TIPOS_DATO_USUARIO.PREFERENCIAS,
+      documentoId: 'preferencias',
+      mensaje,
+    })
+    resultado.colaPendiente.push(this._crearItemColaPreferencias(mensaje))
+  }
+
+  _registrarConfirmacionPendiente(resultado, confirmacion, error) {
+    const mensaje = error?.mensaje || error?.message || 'No se pudo migrar la confirmación.'
+    resultado.errores.push({
+      tipoDato: TIPOS_DATO_USUARIO.CONFIRMACION,
+      documentoId: confirmacion.id,
+      mensaje,
+    })
+    resultado.colaPendiente.push(this._crearItemColaConfirmacion(confirmacion, mensaje))
+  }
+
   _crearItemColaProducto(producto, mensaje) {
     return {
       id: `${TIPOS_DATO_USUARIO.PRODUCTO}-${producto.id}`,
@@ -509,6 +887,56 @@ class MigracionLocalFirebaseService {
       tipoDato: TIPOS_DATO_USUARIO.COMERCIO,
       accion: ACCIONES_SINCRONIZABLES.ACTUALIZAR,
       documentoId: comercio.id,
+      intentos: 0,
+      ultimoError: mensaje,
+      fechaUltimoIntento: new Date().toISOString(),
+    }
+  }
+
+  _crearItemColaLista(lista, mensaje) {
+    return {
+      id: `${TIPOS_DATO_USUARIO.LISTA_JUSTA}-${lista.id}`,
+      tipoDato: TIPOS_DATO_USUARIO.LISTA_JUSTA,
+      accion: ACCIONES_SINCRONIZABLES.ACTUALIZAR,
+      documentoId: lista.id,
+      intentos: 0,
+      ultimoError: mensaje,
+      fechaUltimoIntento: new Date().toISOString(),
+    }
+  }
+
+  _crearItemColaPreferencias(mensaje) {
+    return {
+      id: `${TIPOS_DATO_USUARIO.PREFERENCIAS}-preferencias`,
+      tipoDato: TIPOS_DATO_USUARIO.PREFERENCIAS,
+      accion: ACCIONES_SINCRONIZABLES.ACTUALIZAR,
+      documentoId: 'preferencias',
+      intentos: 0,
+      ultimoError: mensaje,
+      fechaUltimoIntento: new Date().toISOString(),
+    }
+  }
+
+  _crearItemColaConfirmacion(confirmacion, mensaje) {
+    return {
+      id: `${TIPOS_DATO_USUARIO.CONFIRMACION}-${confirmacion.id}`,
+      tipoDato: TIPOS_DATO_USUARIO.CONFIRMACION,
+      accion: ACCIONES_SINCRONIZABLES.ACTUALIZAR,
+      documentoId: confirmacion.id,
+      productoId: confirmacion.productoId,
+      precioId: confirmacion.precioId,
+      intentos: 0,
+      ultimoError: mensaje,
+      fechaUltimoIntento: new Date().toISOString(),
+    }
+  }
+
+  _crearItemColaFoto(tipoDato, documentoId, mensaje) {
+    return {
+      id: `${tipoDato}-${documentoId}`,
+      tipoDato,
+      accion: ACCIONES_SINCRONIZABLES.SUBIR_FOTO,
+      documentoId,
       intentos: 0,
       ultimoError: mensaje,
       fechaUltimoIntento: new Date().toISOString(),

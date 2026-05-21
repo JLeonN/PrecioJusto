@@ -353,3 +353,14 @@ Productos, precios, comercios, Lista Justa, preferencias y confirmaciones ya tie
 - corrección del CORS de `version.json` en dev para no contaminar la consola durante pruebas.
 
 Mi recomendación práctica: priorizar Storage de fotos y después pasar la lectura principal a Firestore.
+
+## Actualización migración guiada restante
+
+Fecha: 2026-05-21.
+
+- `PlanMigracionGuiadaDatosRestantesFirebase.md` quedó ejecutado y marcado como `TERMINADO`.
+- `MigracionLocalFirebaseService` ahora migra productos/precios, comercios/direcciones, Lista Justa, preferencias y confirmaciones.
+- La migración intenta subir fotos base64 privadas a Storage antes de guardar URL/ruta en Firestore.
+- El inventario local ahora cuenta items de Lista Justa, fotos de productos, fotos de comercios/direcciones, fotos de listas, preferencias y confirmaciones.
+- La UI de Configuración muestra los conteos ampliados antes de crear backup o migrar.
+- Firestore sigue sin ser fuente principal y no se eliminan datos locales después de migrar.

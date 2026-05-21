@@ -54,7 +54,7 @@ Ordenar los planes que todavía faltan para completar el backup privado por usua
 - [x] `PlanFirestorePrivadoListasJustas.md`: sincronizar Lista Justa privada en Firestore.
 - [x] `PlanFirestorePrivadoPreferencias.md`: sincronizar preferencias privadas en Firestore.
 - [x] `PlanFirestorePrivadoConfirmaciones.md`: sincronizar confirmaciones privadas en Firestore si se confirma que aportan valor.
-- [ ] Actualizar migración guiada para incluir listas, preferencias y confirmaciones con servicios ya implementados.
+- [x] `PlanMigracionGuiadaDatosRestantesFirebase.md`: migración guiada ampliada para listas, preferencias, confirmaciones y fotos Storage.
 
 ## FASE 4: Fotos y Storage pendientes
 
@@ -63,9 +63,9 @@ Ordenar los planes que todavía faltan para completar el backup privado por usua
 Separar correctamente fotos de Firestore para no guardar base64 en documentos.
 
 - [x] `PlanFirebaseStorageFotos.md`: subir fotos locales a Firebase Storage y guardar solo URL/ruta.
-- [ ] Definir reglas Storage privadas bajo `usuarios/{usuarioId}/fotos`.
-- [ ] Migrar fotos de productos, comercios/direcciones y listas si corresponde.
-- [ ] Validar que Firestore no reciba base64.
+- [x] Definir reglas Storage privadas bajo `usuarios/{usuarioId}/fotos`.
+- [x] Migrar fotos de productos, comercios/direcciones y listas si corresponde.
+- [x] Validar que Firestore no reciba base64.
 
 ## FASE 5: Fuente principal Firestore
 
@@ -115,16 +115,16 @@ Validar que este plan maestro sirve como control antes de crear nuevos planes Fi
 
 ## Próximo plan recomendado
 
-El próximo plan recomendado es `PlanFirebaseStorageFotos.md`.
+El próximo plan recomendado es crear el plan de fuente principal Firestore.
 
-Motivo: productos, precios, comercios, Lista Justa, preferencias y confirmaciones ya tienen espejo Firestore. El próximo cuello de botella es mover fotos base64 a Storage antes de convertir Firestore en fuente principal.
+Motivo: los datos privados principales y la migración guiada ampliada ya están cubiertos. El siguiente cuello de botella es pasar la lectura principal a Firestore con cache offline y respaldo local.
 
 ## Progreso del plan
 
 - [x] Fase 1: Base Firebase completada
 - [x] Fase 2: Datos privados principales completados
-- [ ] Fase 3: Próximos datos privados pendientes
-- [ ] Fase 4: Fotos y Storage pendientes
+- [x] Fase 3: Próximos datos privados pendientes
+- [x] Fase 4: Fotos y Storage pendientes
 - [ ] Fase 5: Fuente principal Firestore
 - [ ] Fase 6: Comunidad y datos compartidos
 - [ ] Fase 7: Pendientes no Firebase que afectan pruebas

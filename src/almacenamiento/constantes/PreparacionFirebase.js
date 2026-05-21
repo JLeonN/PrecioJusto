@@ -22,7 +22,7 @@ export const ESTADOS_MIGRACION_FIREBASE = Object.freeze({
   ERROR: 'error',
 })
 
-export const VERSION_MIGRACION_LOCAL_FIREBASE = 'migracionLocalFirebaseV1'
+export const VERSION_MIGRACION_LOCAL_FIREBASE = 'migracionLocalFirebaseV2'
 
 export const ORIGENES_FOTO = Object.freeze({
   API: 'api',
