@@ -64,17 +64,20 @@ export const useUsuarioStore = defineStore('usuario', () => {
         { useComerciStore },
         { useListaJustaStore },
         { useConfirmacionesStore },
+        { useSesionEscaneoStore },
       ] = await Promise.all([
         import('./productosStore.js'),
         import('./comerciosStore.js'),
         import('./ListaJustaStore.js'),
         import('./confirmacionesStore.js'),
+        import('./sesionEscaneoStore.js'),
       ])
 
       useProductosStore().limpiarEstado()
       useComerciStore().limpiarEstado()
       useListaJustaStore().limpiarEstado()
       useConfirmacionesStore().limpiarEstado()
+      useSesionEscaneoStore().limpiarEstado()
     } catch (error) {
       console.warn('No se pudieron limpiar stores privados al cambiar usuario:', error)
     }

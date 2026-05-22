@@ -23,6 +23,7 @@ usuarios/{usuarioId}/productos/{productoId}
 usuarios/{usuarioId}/productos/{productoId}/precios/{precioId}
 usuarios/{usuarioId}/comercios/{comercioId}
 usuarios/{usuarioId}/listasJustas/{listaId}
+usuarios/{usuarioId}/mesaTrabajo/items/{itemId}
 usuarios/{usuarioId}/configuracion/preferencias
 usuarios/{usuarioId}/confirmaciones/{confirmacionId}
 usuarios/{usuarioId}/fotos/{fotoId}
@@ -108,6 +109,21 @@ Campos:
 
 Decisión: sincronizar moneda, tema y unidad. Preferencias efímeras de sesión no se sincronizan.
 Estado de implementación 2026-05-20: `PreferenciasService` guarda primero en almacenamiento local y luego sincroniza como espejo Firestore privado mediante `FirestorePreferenciasService`. Si no hay sesión Firebase o falla Firestore, la preferencia queda guardada localmente y el estado de sincronización queda en `local`, `pendiente` o `error` sin bloquear la UI.
+
+## Mesa de Trabajo
+
+Documento: `usuarios/{usuarioId}/mesaTrabajo/items/{itemId}`.
+
+Campos:
+
+- `id`, `usuarioId`, `codigoBarras`, `nombre`, `marca`, `cantidad`, `unidad`.
+- `precio`, `moneda`, `comercio`, `productoExistenteId`, `origenListaJusta`.
+- `imagenUrl`, `imagenRutaStorage`, `fotoFuente` (solo compatibilidad; sin subida nueva en este plan).
+- `activarPreciosMayoristas`, `escalasPorCantidad`, `sinCoincidencia`.
+- `datosOriginales`, `fechaCreacion`, `fechaActualizacion`.
+
+Decisión: Mesa usa Firestore como fuente principal cuando hay sesión Firebase, y LocalStorage/Capacitor como respaldo temporal para usuario local, fallback y contingencia offline.
+Estado de implementación 2026-05-22: existe `FirestoreMesaTrabajoService` y `sesionEscaneoStore` sincroniza automáticamente alta/edición/borrado/limpieza de ítems con esta ruta, manteniendo relación con Lista Justa.
 
 ## Confirmaciones
 

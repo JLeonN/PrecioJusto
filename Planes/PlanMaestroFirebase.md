@@ -83,17 +83,17 @@ Preparar el cambio de fuente principal después de que la sincronización privad
 - [x] Validar cache offline como experiencia principal en código; queda pendiente prueba manual real.
 - [x] Definir que LocalStorage/Capacitor queda como respaldo temporal hasta un plan posterior de retiro.
 
-## FASE 6: Mesa de Trabajo privada pendiente
+## FASE 6: Mesa de Trabajo privada
 
 ### Objetivo
 
 Completar el respaldo privado por usuario incorporando la Mesa de Trabajo a Firestore.
 
-- [ ] `PlanFirestoreMesaTrabajo.md`: sincronizar ítems pendientes de Mesa de Trabajo en Firestore.
-- [ ] Mantener LocalStorage/Capacitor como respaldo temporal para usuario local y modo offline.
-- [ ] Conservar la relación entre Mesa de Trabajo, Lista Justa y Mis Productos.
-- [ ] Validar que los cambios de nombre, precio, comercio, cantidad y eliminación persistan al recargar.
-- [ ] Validar Mesa de Trabajo en navegador y Android con usuario Firebase.
+- [x] `PlanFirestoreMesaTrabajo.md`: sincronizar ítems pendientes de Mesa de Trabajo en Firestore.
+- [x] Mantener LocalStorage/Capacitor como respaldo temporal para usuario local y modo offline.
+- [x] Conservar la relación entre Mesa de Trabajo, Lista Justa y Mis Productos.
+- [x] Validar que los cambios de nombre, precio, comercio, cantidad y eliminación persistan al recargar en pruebas locales.
+- [ ] Validar Mesa de Trabajo en navegador y Android con usuario Firebase real.
 
 ## FASE 7: Comunidad y datos compartidos
 
@@ -130,9 +130,9 @@ Validar que este plan maestro sirve como control antes de crear nuevos planes Fi
 
 ## Próximo plan recomendado
 
-El próximo plan recomendado es `PlanFirestoreMesaTrabajo.md`.
+El próximo plan recomendado es `PlanModeloComunitarioFirebase.md` después de cerrar validaciones manuales pendientes.
 
-Motivo: la base privada principal, migración ampliada y fuente principal Firestore ya están cubiertas para productos, comercios, listas y preferencias, pero la Mesa de Trabajo todavía depende del almacenamiento local. Antes de avanzar con comunidad, conviene asegurar que los ítems pendientes de trabajo diario se guarden por usuario en Firestore y se recuperen en navegador y Android.
+Motivo: la base privada principal, migración ampliada, fuente principal Firestore y Mesa de Trabajo ya están implementadas en código. Antes de pasar a comunidad conviene cerrar validaciones manuales pendientes (Storage real y Mesa de Trabajo real en Android/navegador con usuario Firebase).
 
 ## Progreso del plan
 
@@ -141,7 +141,7 @@ Motivo: la base privada principal, migración ampliada y fuente principal Firest
 - [x] Fase 3: Próximos datos privados pendientes
 - [ ] Fase 4: Fotos y Storage pendientes
 - [x] Fase 5: Fuente principal Firestore
-- [ ] Fase 6: Mesa de Trabajo privada pendiente
+- [ ] Fase 6: Mesa de Trabajo privada
 - [ ] Fase 7: Comunidad y datos compartidos
 - [ ] Fase 8: Pendientes no Firebase que afectan pruebas
 - [ ] Fase Testing

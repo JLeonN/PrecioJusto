@@ -3,6 +3,7 @@ import conexionService from './ConexionService.js'
 import firestoreComerciosService from './FirestoreComerciosService.js'
 import firestoreConfirmacionesService from './FirestoreConfirmacionesService.js'
 import firestoreListasJustasService from './FirestoreListasJustasService.js'
+import firestoreMesaTrabajoService from './FirestoreMesaTrabajoService.js'
 import firestorePreferenciasService from './FirestorePreferenciasService.js'
 import firestoreProductosService from './FirestoreProductosService.js'
 import usuarioActualService from './UsuarioActualService.js'
@@ -19,6 +20,7 @@ const DOMINIOS = Object.freeze({
   PRODUCTOS: 'productos',
   COMERCIOS: 'comercios',
   LISTAS: 'listas',
+  MESA_TRABAJO: 'mesaTrabajo',
   PREFERENCIAS: 'preferencias',
   CONFIRMACIONES: 'confirmaciones',
 })
@@ -253,6 +255,14 @@ async function cargarListas({ cargarLocal }) {
   })
 }
 
+async function cargarMesaTrabajo({ cargarLocal }) {
+  return cargarConFuentePrincipal({
+    dominio: DOMINIOS.MESA_TRABAJO,
+    cargarLocal,
+    cargarFirestore: () => firestoreMesaTrabajoService.obtenerItemsMesaTrabajoUsuario(),
+  })
+}
+
 async function cargarPreferencias({ cargarLocal }) {
   return cargarConFuentePrincipal({
     dominio: DOMINIOS.PREFERENCIAS,
@@ -298,6 +308,7 @@ export default {
   cargarProductos,
   cargarComercios,
   cargarListas,
+  cargarMesaTrabajo,
   cargarPreferencias,
   cargarConfirmaciones,
   registrarResultadoCarga,

@@ -15,6 +15,11 @@ class SesionEscaneoService {
     }
   }
 
+  async obtenerItemsSesion() {
+    const sesion = await this.obtenerSesion()
+    return Array.isArray(sesion?.items) ? sesion.items : []
+  }
+
   async guardarSesion(items) {
     try {
       return await this.adaptador.guardar(CLAVE_SESION_ESCANEO, { items })

@@ -259,6 +259,7 @@ import { useConfirmacionesStore } from '../almacenamiento/stores/confirmacionesS
 import { useListaJustaStore } from '../almacenamiento/stores/ListaJustaStore.js'
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
+import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
 import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
 import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
 import conexionService from '../almacenamiento/servicios/ConexionService.js'
@@ -270,6 +271,7 @@ const router = useRouter()
 const preferenciasStore = usePreferenciasStore()
 const usuarioStore = useUsuarioStore()
 const productosStore = useProductosStore()
+const sesionEscaneoStore = useSesionEscaneoStore()
 const comerciosStore = useComerciStore()
 const listaJustaStore = useListaJustaStore()
 const confirmacionesStore = useConfirmacionesStore()
@@ -324,6 +326,11 @@ const estadosFuenteDatos = computed(() => {
     { dominio: 'productos', etiquetaDominio: 'Productos', estado: productosStore.fuenteDatos },
     { dominio: 'comercios', etiquetaDominio: 'Comercios', estado: comerciosStore.fuenteDatos },
     { dominio: 'listas', etiquetaDominio: 'Listas', estado: listaJustaStore.fuenteDatos },
+    {
+      dominio: 'mesaTrabajo',
+      etiquetaDominio: 'Mesa de trabajo',
+      estado: sesionEscaneoStore.fuenteDatos,
+    },
     { dominio: 'preferencias', etiquetaDominio: 'Preferencias', estado: preferenciasStore.fuenteDatos },
     {
       dominio: 'confirmaciones',

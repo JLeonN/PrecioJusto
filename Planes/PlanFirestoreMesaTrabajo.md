@@ -154,16 +154,43 @@ Validar Mesa de Trabajo de punta a punta en navegador, Android y Firebase.
 
 ## Progreso del plan
 
-- [ ] Fase 1: Auditar Mesa De Trabajo Actual
-- [ ] Fase 2: Definir Modelo Firestore
-- [ ] Fase 3: Crear Servicio Firestore Mesa Trabajo
-- [ ] Fase 4: Integrar Fuente Principal Firestore
-- [ ] Fase 5: Adaptar SesionEscaneoStore
-- [ ] Fase 6: Sincronizar Con Lista Justa
-- [ ] Fase 7: Migración Local Guiada
-- [ ] Fase 8: Revisión De UI Y Estados
-- [ ] Fase Testing
+- [x] Fase 1: Auditar Mesa De Trabajo Actual
+- [x] Fase 2: Definir Modelo Firestore
+- [x] Fase 3: Crear Servicio Firestore Mesa Trabajo
+- [x] Fase 4: Integrar Fuente Principal Firestore
+- [x] Fase 5: Adaptar SesionEscaneoStore
+- [x] Fase 6: Sincronizar Con Lista Justa
+- [x] Fase 7: Migración Local Guiada
+- [x] Fase 8: Revisión De UI Y Estados
+- [x] Fase Testing local
+
+## Resultado de ejecución
+
+Fecha: 22 de Mayo 2026.
+
+- Se agregó `FirestoreMesaTrabajoService.js` con lectura, guardado individual, guardado masivo, borrado por ítem y limpieza completa de Mesa de Trabajo por usuario.
+- Se amplió `PreparacionFirebase.js` con ruta y campos de `mesaTrabajo` para mantener modelo privado consistente.
+- `FuentePrincipalFirestoreService` ahora incluye dominio `mesaTrabajo` y carga principal desde Firestore con fallback local.
+- `SesionEscaneoService` expone `obtenerItemsSesion()` para trabajar directamente con la lista local.
+- `sesionEscaneoStore` quedó adaptado a local + Firestore: carga por fuente principal, persistencia serializada, sincronización automática, limpieza remota y estado de fuente/sincronización.
+- Al cargar sesión con usuario Firebase, si Firestore está vacío y existe mesa local, se migra la mesa local a Firestore conservando IDs.
+- Al eliminar o limpiar ítems de Mesa, se sincroniza estado con Lista Justa para evitar `mesaTrabajoItemId` huérfanos.
+- `UsuarioStore` ahora limpia también `sesionEscaneoStore` al cambiar de usuario para evitar mezcla de datos.
+- `ConfiguracionPage` muestra el dominio “Mesa de trabajo” en la tarjeta de fuentes.
+
+## Validación ejecutada
+
+- [x] `npm run lint`
+- [x] `npm run build`
+- [x] `npm run androidReleaseConSimbolos`
+- [x] MCP Browser abrió `http://127.0.0.1:9000` y redirigió a `/acceso?redirigir=/` sin errores ni warnings nuevos en consola.
+
+## Validación externa pendiente
+
+- Falta prueba manual con usuario Firebase real para confirmar escritura/lectura de `usuarios/{usuarioId}/mesaTrabajo/items/{itemId}`.
+- Falta validación manual de flujo completo en Android con el mismo usuario.
+- Falta prueba manual específica de continuidad entre Lista Justa → Mesa de Trabajo → Mis Productos con sesión Firebase real.
 
 Fecha de creación: 22 de Mayo 2026
 Fecha de última actualización: 22 de Mayo 2026
-Estado: BORRADOR
+Estado: TERMINADO_LOCAL_CON_PENDIENTES_EXTERNOS

@@ -19,6 +19,7 @@ Este resumen concentra el estado actual de la integración gradual de Precio Jus
 - El plan `PlanFirestorePrivadoListasJustas.md` quedó ejecutado y marcado como `TERMINADO`.
 - El plan `PlanFirestorePrivadoPreferencias.md` quedó ejecutado y marcado como `TERMINADO`.
 - El plan `PlanFirestorePrivadoConfirmaciones.md` quedó ejecutado y marcado como `TERMINADO`.
+- El plan `PlanFirestoreMesaTrabajo.md` quedó ejecutado y marcado como `TERMINADO_LOCAL_CON_PENDIENTES_EXTERNOS`.
 - Proyecto Firebase actual: `PrecioJustoPruebas2` (`preciojustopruebas2`).
 - Firebase SDK instalado como dependencia del proyecto.
 - Firebase Auth quedó preparado con proveedor `Correo electrónico/contraseña`.
@@ -215,6 +216,16 @@ Claves persistidas actuales:
 - Altas, bajas y limpieza de confirmaciones mantienen el estado local aunque Firestore falle.
 - No se creó colección pública de confirmaciones; sigue todo bajo `usuarios/{usuarioId}`.
 
+### Firestore privado de Mesa de Trabajo
+
+- Se creó `FirestoreMesaTrabajoService` para escribir, leer y limpiar ítems de Mesa por usuario.
+- Ruta activa de Mesa: `usuarios/{usuarioId}/mesaTrabajo/items/{itemId}`.
+- `sesionEscaneoStore` ahora carga Mesa desde `FuentePrincipalFirestoreService` con fallback local.
+- La persistencia de Mesa quedó local-first con sincronización Firestore serializada para evitar carreras.
+- Si Firestore está vacío y existe `sesion_escaneo` local, la mesa local se migra automáticamente conservando IDs.
+- Al eliminar/limpiar ítems de Mesa se dispara sincronización de estados con Lista Justa para limpiar `mesaTrabajoItemId` huérfanos.
+- Al cambiar de usuario se limpia también `sesionEscaneoStore` para evitar mezcla visual de datos.
+
 ### Firebase Storage privado de fotos
 
 - `PlanFirebaseStorageFotos1.md` quedó como plan histórico de base Storage.
@@ -319,6 +330,9 @@ Recomendación práctica:
 - `PlanFirebaseStorageFotos2.md`: `npm run lint`, `npm run build` y `npm run androidReleaseConSimbolos` pasaron correctamente.
 - `PlanFirebaseStorageFotos2.md`: MCP Browser cargó `http://127.0.0.1:9000`, redirigió a `/acceso?redirigir=/` sin sesión y no mostró errores ni advertencias de consola.
 - `PlanFirebaseStorageFotos2.md`: no se pudo validar subida real a Storage porque falta aplicar CORS al bucket real y no hay sesión Firebase interactiva en esta ejecución.
+- `PlanFirestoreMesaTrabajo.md`: `npm run lint`, `npm run build` y `npm run androidReleaseConSimbolos` pasaron correctamente.
+- `PlanFirestoreMesaTrabajo.md`: MCP Browser cargó `http://127.0.0.1:9000`, redirigió a `/acceso?redirigir=/` y no mostró errores ni advertencias nuevas.
+- `PlanFirestoreMesaTrabajo.md`: falta prueba manual con login Firebase real para validar lectura/escritura de Mesa en Firestore y continuidad completa en Android.
 - La app cargó en navegador local con MCP Browser.
 - Firebase base inicializó con `projectId: preciojustopruebas2`, Auth activo y Firestore Offline activo.
 - MCP Browser validó redirección a login sin sesión, registro de usuario, login correcto, contraseña incorrecta con error claro, persistencia tras recarga y logout.
@@ -368,14 +382,15 @@ Recomendación práctica:
 
 ## PRÓXIMO PASO RECOMENDADO
 
-Productos, precios, comercios, Lista Justa, preferencias y confirmaciones ya tienen espejo privado validado. Storage de fotos quedó implementado en código, pero antes de avanzar fuerte con comunidad conviene cerrar la validación real del bucket:
+Productos, precios, comercios, Lista Justa, preferencias, confirmaciones y Mesa de Trabajo ya tienen espejo privado implementado. Antes de avanzar fuerte con comunidad conviene cerrar validaciones manuales pendientes:
 
 - aplicar `FirebaseStorageCors.json` al bucket real;
 - probar subida de foto en navegador y Android con usuario Firebase;
 - confirmar en Firebase Console que Storage contiene el archivo y Firestore solo guarda URL/ruta;
+- probar Mesa de Trabajo con usuario Firebase real en navegador y Android para validar continuidad entre Lista Justa → Mesa → Mis Productos;
 - corregir el CORS de `version.json` en dev para no contaminar la consola durante pruebas.
 
-Mi recomendación práctica: cerrar primero la prueba real de Storage con dos usuarios. Después sí avanzar con el modelo comunitario, porque ya no quedaría un pendiente técnico fuerte dentro del árbol privado `usuarios/{usuarioId}`.
+Mi recomendación práctica: cerrar primero la prueba real de Storage y Mesa con dos usuarios. Después sí avanzar con el modelo comunitario, porque ya no quedaría un pendiente técnico fuerte dentro del árbol privado `usuarios/{usuarioId}`.
 
 ## Actualización migración guiada restante
 
