@@ -86,7 +86,7 @@ Preparar el cambio de fuente principal después de que la sincronización privad
 
 Separar la base privada del usuario de una futura base comunitaria compartida.
 
-- [ ] Crear plan de modelo comunitario separado del árbol `usuarios/{usuarioId}`.
+- [x] `PlanModeloComunitarioFirebase.md`: crear plan de modelo comunitario separado del árbol `usuarios/{usuarioId}`.
 - [ ] Definir reglas públicas/semipúblicas sin exponer datos privados.
 - [ ] Definir moderación, confirmaciones y calidad de datos.
 - [ ] Definir qué datos pueden compartirse y cuáles quedan privados.
@@ -115,9 +115,9 @@ Validar que este plan maestro sirve como control antes de crear nuevos planes Fi
 
 ## Próximo plan recomendado
 
-El próximo plan recomendado es crear el plan de fuente principal Firestore.
+El próximo plan recomendado es `PlanModeloComunitarioFirebase.md`.
 
-Motivo: los datos privados principales y la migración guiada ampliada ya están cubiertos. El siguiente cuello de botella es pasar la lectura principal a Firestore con cache offline y respaldo local.
+Motivo: la base privada, Storage, migración ampliada y fuente principal Firestore ya están cubiertos. El siguiente cuello de botella es diseñar la base comunitaria compartida sin exponer datos privados ni mezclarla con `usuarios/{usuarioId}`.
 
 ## Progreso del plan
 
