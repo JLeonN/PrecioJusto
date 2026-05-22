@@ -247,6 +247,8 @@ import { useActualizacionApp } from '../composables/useActualizacionApp.js'
 import { MODO_PRUEBA } from '../almacenamiento/constantes/ConfigPublicidad.js'
 import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
+import conexionService from '../almacenamiento/servicios/ConexionService.js'
+import fotosPendientesStorageService from '../almacenamiento/servicios/FotosPendientesStorageService.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -263,6 +265,7 @@ const {
   abrirUrlPlayStore,
 } = useActualizacionApp()
 let removerListenerEstadoApp = null
+let removerListenerConexionFotos = null
 
 const toggleDrawer = () => {
   drawerAbierto.value = !drawerAbierto.value
@@ -371,6 +374,7 @@ const actualizarAppAhora = async () => {
 onMounted(async () => {
   await Promise.all([sesionEscaneoStore.cargarSesion(), preferenciasStore.inicializar()])
   await preferenciasStore.hidratarDesdeFuentePrincipal()
+  await fotosPendientesStorageService.sincronizarFotosPendientes()
   await refrescarEstadoActualizacion({ mostrarModalSiHay: true })
 
   try {
@@ -385,17 +389,32 @@ onMounted(async () => {
     const listenerEstadoApp = await App.addListener('appStateChange', ({ isActive }) => {
       if (!isActive) return
       refrescarEstadoActualizacion({ mostrarModalSiHay: true })
+      fotosPendientesStorageService.sincronizarFotosPendientes()
     })
     removerListenerEstadoApp = () => listenerEstadoApp.remove()
   } catch {
     // En web puede no estar disponible este evento.
   }
+
+  try {
+    removerListenerConexionFotos = await conexionService.escucharCambiosConexion((estado) => {
+      if (!estado.conectado) return
+      fotosPendientesStorageService.sincronizarFotosPendientes()
+    })
+  } catch {
+    // En web puede no estar disponible el listener nativo de red.
+  }
 })
 
 onUnmounted(() => {
-  if (!removerListenerEstadoApp) return
-  removerListenerEstadoApp()
+  if (removerListenerEstadoApp) {
+    removerListenerEstadoApp()
+  }
   removerListenerEstadoApp = null
+  if (removerListenerConexionFotos) {
+    removerListenerConexionFotos()
+  }
+  removerListenerConexionFotos = null
 })
 
 useBotonAtras({ drawerAbierto, router, route })

@@ -147,6 +147,8 @@ class ListaJustaService {
       comercio: (nuevoItem.comercio || '').trim() || null,
       unidad: (nuevoItem.unidad || '').trim() || 'unidad',
       imagen: nuevoItem.imagen || null,
+      imagenUrl: nuevoItem.imagenUrl || null,
+      imagenRutaStorage: nuevoItem.imagenRutaStorage || null,
       fotoFuente: this._normalizarFotoFuente(nuevoItem),
       usaPreciosLocales: Boolean(nuevoItem.usaPreciosLocales),
       activarPreciosMayoristas: Boolean(nuevoItem.activarPreciosMayoristas) && escalasPorCantidad.length > 0,
@@ -329,8 +331,31 @@ class ListaJustaService {
         item.imagenUrl = resultado.url
         item.imagenRutaStorage = resultado.rutaStorage
         item.fotoFuente = ORIGENES_FOTO.STORAGE
+        item.sincronizacionFoto = {
+          estado: resultado.estado,
+          fecha: new Date().toISOString(),
+          mensaje: 'Foto subida a Firebase Storage.',
+        }
+      } else if (!resultado.omitido) {
+        item.sincronizacionFoto = {
+          estado: ESTADOS_SINCRONIZACION.ERROR,
+          fecha: new Date().toISOString(),
+          mensaje: resultado.mensaje || 'No se pudo subir la foto a Firebase Storage.',
+        }
       }
     }
+  }
+
+  async sincronizarFotosPendientesStorage() {
+    const listas = await this.obtenerListas()
+    const tieneFotosPendientes = listas.some((lista) =>
+      (lista?.items || []).some((item) => firebaseStorageFotosService.esDataUriImagen(item?.imagen)),
+    )
+
+    if (!tieneFotosPendientes) return 0
+
+    await this.guardarListas(listas)
+    return listas.length
   }
 }
 

@@ -455,6 +455,7 @@ async function actualizarFotoDireccion(comercioId, direccionId, base64) {
   direccion.fotoFuente = base64 ? ORIGENES_FOTO.USUARIO : null
   direccion.fechaActualizacion = new Date().toISOString()
   comercio.fechaActualizacion = new Date().toISOString()
+  await prepararFotosStorageComercio(comercio)
   await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
   await sincronizarComercioFirestore(comercio)
   return true
@@ -556,6 +557,9 @@ async function prepararFotosStorageComercio(comercio) {
   if (!comercio) return comercio
 
   if (!comercio.foto) {
+    if (comercio.fotoRutaStorage) {
+      await firebaseStorageFotosService.eliminarFotoPrivada(comercio.fotoRutaStorage)
+    }
     comercio.fotoUrl = null
     comercio.fotoRutaStorage = null
   } else if (firebaseStorageFotosService.esDataUriImagen(comercio.foto)) {
@@ -573,6 +577,9 @@ async function prepararFotosStorageComercio(comercio) {
 
   for (const direccion of comercio.direcciones || []) {
     if (!direccion.foto) {
+      if (direccion.fotoRutaStorage) {
+        await firebaseStorageFotosService.eliminarFotoPrivada(direccion.fotoRutaStorage)
+      }
       direccion.fotoUrl = null
       direccion.fotoRutaStorage = null
       continue
@@ -595,6 +602,30 @@ async function prepararFotosStorageComercio(comercio) {
   }
 
   return comercio
+}
+
+async function sincronizarFotosPendientesStorage() {
+  const comercios = await obtenerTodos()
+  let procesados = 0
+
+  for (const comercio of comercios) {
+    const tieneFotoComercioPendiente = firebaseStorageFotosService.esDataUriImagen(comercio?.foto)
+    const tieneFotoDireccionPendiente = (comercio?.direcciones || []).some((direccion) =>
+      firebaseStorageFotosService.esDataUriImagen(direccion?.foto),
+    )
+
+    if (!tieneFotoComercioPendiente && !tieneFotoDireccionPendiente) continue
+
+    await prepararFotosStorageComercio(comercio)
+    await sincronizarComercioFirestore(comercio)
+    procesados += 1
+  }
+
+  if (procesados > 0) {
+    await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  }
+
+  return procesados
 }
 
 async function sincronizarEliminacionComercioFirestore(comercioId) {
@@ -642,6 +673,7 @@ export default {
   registrarUsoComercio,
   obtenerComercioPorUso,
   sincronizarComercioFirestore,
+  sincronizarFotosPendientesStorage,
   // Utilidades exportadas para uso en otros módulos
   normalizar,
   similitudTexto,

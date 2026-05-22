@@ -1,5 +1,7 @@
 # PLAN FIREBASE STORAGE FOTOS
 
+> Plan histórico renombrado como `PlanFirebaseStorageFotos1.md` porque existe un segundo plan de cierre y corrección llamado `PlanFirebaseStorageFotos2.md`.
+
 ## Descripción del plan
 
 Implementar Firebase Storage para fotos privadas de usuario en Precio Justo. La app ya sincroniza datos privados principales con Firestore, pero las fotos base64 siguen locales y Firestore evita guardarlas como base64.

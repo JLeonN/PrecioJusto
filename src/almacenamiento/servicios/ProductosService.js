@@ -583,8 +583,13 @@ class ProductosService {
   }
 
   async _prepararFotoStorageProducto(producto) {
+    if (!producto) return producto
+
     if (!firebaseStorageFotosService.esDataUriImagen(producto?.imagen)) {
       if (!producto?.imagen) {
+        if (producto.imagenRutaStorage) {
+          await firebaseStorageFotosService.eliminarFotoPrivada(producto.imagenRutaStorage)
+        }
         producto.imagenUrl = null
         producto.imagenRutaStorage = null
       }
@@ -626,6 +631,19 @@ class ProductosService {
       mensaje: resultado.mensaje || 'No se pudo subir la foto a Firebase Storage.',
     }
     return producto
+  }
+
+  async sincronizarFotosPendientesStorage() {
+    const productos = await this.obtenerTodos()
+    let procesados = 0
+
+    for (const producto of productos) {
+      if (!firebaseStorageFotosService.esDataUriImagen(producto?.imagen)) continue
+      await this.guardarProducto(producto)
+      procesados += 1
+    }
+
+    return procesados
   }
 
   async _sincronizarEliminacionProductoFirestore(productoId) {

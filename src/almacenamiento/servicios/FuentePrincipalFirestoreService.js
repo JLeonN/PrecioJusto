@@ -58,6 +58,38 @@ function filtrarEliminados(lista = []) {
     : []
 }
 
+function prepararProductosVisuales(productos = []) {
+  return filtrarEliminados(productos).map((producto) => ({
+    ...producto,
+    imagen: producto?.imagen || producto?.imagenUrl || null,
+  }))
+}
+
+function prepararComerciosVisuales(comercios = []) {
+  return filtrarEliminados(comercios).map((comercio) => ({
+    ...comercio,
+    foto: comercio?.foto || comercio?.fotoUrl || null,
+    direcciones: Array.isArray(comercio?.direcciones)
+      ? comercio.direcciones.map((direccion) => ({
+        ...direccion,
+        foto: direccion?.foto || direccion?.fotoUrl || null,
+      }))
+      : [],
+  }))
+}
+
+function prepararListasVisuales(listas = []) {
+  return filtrarEliminados(listas).map((lista) => ({
+    ...lista,
+    items: Array.isArray(lista?.items)
+      ? lista.items.map((item) => ({
+        ...item,
+        imagen: item?.imagen || item?.imagenUrl || null,
+      }))
+      : [],
+  }))
+}
+
 async function obtenerConexionSegura() {
   try {
     return await conexionService.obtenerEstadoConexion()
@@ -199,7 +231,7 @@ async function cargarProductos({ cargarLocal }) {
     dominio: DOMINIOS.PRODUCTOS,
     cargarLocal,
     cargarFirestore: () => firestoreProductosService.obtenerProductosUsuario({ incluirPrecios: true }),
-    normalizarFirestore: filtrarEliminados,
+    normalizarFirestore: prepararProductosVisuales,
   })
 }
 
@@ -208,7 +240,7 @@ async function cargarComercios({ cargarLocal }) {
     dominio: DOMINIOS.COMERCIOS,
     cargarLocal,
     cargarFirestore: () => firestoreComerciosService.obtenerComerciosUsuario(),
-    normalizarFirestore: filtrarEliminados,
+    normalizarFirestore: prepararComerciosVisuales,
   })
 }
 
@@ -217,7 +249,7 @@ async function cargarListas({ cargarLocal }) {
     dominio: DOMINIOS.LISTAS,
     cargarLocal,
     cargarFirestore: () => firestoreListasJustasService.obtenerListasJustasUsuario(),
-    normalizarFirestore: filtrarEliminados,
+    normalizarFirestore: prepararListasVisuales,
   })
 }
 

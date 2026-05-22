@@ -1,4 +1,4 @@
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
+import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage'
 import { ESTADOS_SINCRONIZACION, ORIGENES_FOTO, TIPOS_USUARIO } from '../constantes/PreparacionFirebase.js'
 import firebaseBaseService from './FirebaseBaseService.js'
 import usuarioActualService from './UsuarioActualService.js'
@@ -108,7 +108,55 @@ async function subirFotoPrivada({ tipo, ids, dataUri }) {
   }
 }
 
+async function eliminarFotoPrivada(rutaStorage) {
+  const ruta = String(rutaStorage || '').trim()
+  if (!ruta) {
+    return { exito: false, omitido: true, estado: ESTADOS_SINCRONIZACION.LOCAL }
+  }
+
+  const usuarioId = obtenerUsuarioFirebaseId()
+  if (!usuarioId) {
+    return { exito: false, omitido: true, estado: ESTADOS_SINCRONIZACION.LOCAL, mensaje: 'Sin usuario Firebase.' }
+  }
+
+  if (!ruta.startsWith(`usuarios/${usuarioId}/fotos/`)) {
+    return {
+      exito: false,
+      omitido: true,
+      estado: ESTADOS_SINCRONIZACION.LOCAL,
+      mensaje: 'La foto no pertenece al usuario actual.',
+    }
+  }
+
+  try {
+    const referencia = ref(firebaseBaseService.obtenerFirebaseStorage(), ruta)
+    await deleteObject(referencia)
+    return {
+      exito: true,
+      estado: ESTADOS_SINCRONIZACION.SINCRONIZADO,
+      rutaStorage: ruta,
+    }
+  } catch (error) {
+    if (error?.code === 'storage/object-not-found') {
+      return {
+        exito: true,
+        estado: ESTADOS_SINCRONIZACION.SINCRONIZADO,
+        rutaStorage: ruta,
+        mensaje: 'La foto ya no existía en Storage.',
+      }
+    }
+
+    return {
+      exito: false,
+      estado: ESTADOS_SINCRONIZACION.ERROR,
+      mensaje: error?.message || 'Error al eliminar foto de Firebase Storage.',
+      error,
+    }
+  }
+}
+
 export default {
   esDataUriImagen,
   subirFotoPrivada,
+  eliminarFotoPrivada,
 }

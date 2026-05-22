@@ -6,8 +6,9 @@
 - Proyecto Firebase: `PrecioJustoPruebas2` (`preciojustopruebas2`).
 - Auth: Email/Password operativo.
 - Firestore: creado en `nam5`, reglas privadas activas bajo `usuarios/{usuarioId}`.
-- Escrituras Firestore desde la app: habilitadas para productos, precios, comercios y Lista Justa privados.
-- Migración guiada: habilitada para productos, precios, comercios y direcciones con backup local previo.
+- Escrituras Firestore desde la app: habilitadas para productos, precios, comercios, Lista Justa, preferencias y confirmaciones privados.
+- Migración guiada: habilitada para productos, precios, comercios, direcciones, listas, preferencias y confirmaciones con backup local previo.
+- Storage privado: implementado en código para fotos de productos, comercios, direcciones e items; falta aplicar CORS al bucket real y validar subida real.
 - Inventario MCP en navegador local: adaptador `local`, sin productos, precios, comercios, listas, preferencias, confirmaciones ni fotos en ese origen.
 
 ## Decisión Principal
@@ -121,17 +122,27 @@ Estado de implementación 2026-05-21: `ConfirmacionesService` guarda primero en 
 
 ## Fotos y Storage
 
-Firestore no guarda base64. Guarda `imagenUrl` o `imagenRutaStorage`.
+Firestore no guarda base64. Guarda `imagenUrl`/`fotoUrl` y `imagenRutaStorage`/`fotoRutaStorage`.
 
-Storage futuro:
+Storage privado implementado:
 
 ```text
-usuarios/{usuarioId}/fotos/productos/{productoId}/{fotoId}
-usuarios/{usuarioId}/fotos/comercios/{comercioId}/{direccionId}/{fotoId}
-usuarios/{usuarioId}/fotos/listas/{listaId}/{itemId}/{fotoId}
+usuarios/{usuarioId}/fotos/productos/productos-{productoId}.{extension}
+usuarios/{usuarioId}/fotos/comercios/comercios-{comercioId}.{extension}
+usuarios/{usuarioId}/fotos/direcciones/direcciones-{comercioId}-{direccionId}.{extension}
+usuarios/{usuarioId}/fotos/listas/listas-{listaId}-{itemId}.{extension}
 ```
 
-Decisión: imágenes externas de API quedan como URL externa con `fotoFuente: api` o `externa`. Fotos de usuario en base64 se migran después a Storage; si Storage aumenta riesgo, la primera migración Firestore puede dejar esas fotos locales y registrar pendiente de subida.
+Decisión: imágenes externas de API quedan como URL externa con `fotoFuente: api` o `externa`. Fotos de usuario en base64 se suben a Storage cuando existe usuario Firebase y conexión; si falla, se conserva la foto local y queda pendiente de reintento.
+
+Estado de implementación 2026-05-22:
+
+- `FirebaseStorageFotosService` sube, obtiene URL de descarga, valida MIME/tamaño y borra fotos privadas.
+- `FotosPendientesStorageService` reintenta fotos pendientes al iniciar, recuperar conexión o volver la app a primer plano.
+- `FuentePrincipalFirestoreService` reconstruye `imagen` y `foto` desde URL Storage para compatibilidad visual de la UI.
+- `storage.rules` protege `usuarios/{usuarioId}/fotos/{archivo=**}` con usuario autenticado, archivos `image/*` y máximo 5 MB.
+- `FirebaseStorageCors.json` queda versionado para aplicar CORS de desarrollo al bucket real.
+- Pendiente externo: aplicar CORS con herramienta de Google y validar subida real desde navegador/Android.
 
 ## Datos Solo Locales
 
@@ -199,9 +210,9 @@ Si falla a mitad, guardar estado `parcial` o `error`, último paso completado y 
 
 Límites actuales:
 
-- LocalStorage/Capacitor sigue como fuente principal visible.
-- Listas, preferencias, confirmaciones, comunidad, Storage y fotos base64 no se migran todavía.
-- Las fotos base64 locales no se escriben en Firestore; quedan para el plan de Storage.
+- LocalStorage/Capacitor sigue como respaldo temporal.
+- Comunidad no se migra todavía.
+- Las fotos base64 locales no se escriben en Firestore; se intentan subir a Storage y, si falla, quedan locales para reintento.
 
 ## Sincronización Inicial
 
@@ -228,7 +239,7 @@ Productos y precios ya tienen servicios específicos implementados. Mantener el 
 - `FirestoreMigracionService`
 - `ColaSincronizacionService`
 
-Orden recomendado actual: Storage/fotos y recién después migrar lectura principal a Firestore.
+Orden recomendado actual: validar Storage real con CORS aplicado y después avanzar con el modelo comunitario.
 
 ## Actualización migración guiada V2
 

@@ -62,10 +62,13 @@ Ordenar los planes que todavía faltan para completar el backup privado por usua
 
 Separar correctamente fotos de Firestore para no guardar base64 en documentos.
 
-- [x] `PlanFirebaseStorageFotos.md`: subir fotos locales a Firebase Storage y guardar solo URL/ruta.
+- [x] `PlanFirebaseStorageFotos1.md`: base inicial de Firebase Storage para fotos privadas.
+- [x] `PlanFirebaseStorageFotos2.md`: cierre de rutas, reintentos, borrado, compatibilidad visual desde URL Storage y CORS documentado.
 - [x] Definir reglas Storage privadas bajo `usuarios/{usuarioId}/fotos`.
 - [x] Migrar fotos de productos, comercios/direcciones y listas si corresponde.
 - [x] Validar que Firestore no reciba base64.
+- [ ] Aplicar `FirebaseStorageCors.json` al bucket real con `firebase`, `gcloud` o `gsutil`.
+- [ ] Validar subida real de fotos en navegador y Android con usuario Firebase.
 
 ## FASE 5: Fuente principal Firestore
 
@@ -115,16 +118,16 @@ Validar que este plan maestro sirve como control antes de crear nuevos planes Fi
 
 ## Próximo plan recomendado
 
-El próximo plan recomendado es `PlanModeloComunitarioFirebase.md`.
+El próximo plan recomendado es `PlanModeloComunitarioFirebase.md` después de validar manualmente Storage real.
 
-Motivo: la base privada, Storage, migración ampliada y fuente principal Firestore ya están cubiertos. El siguiente cuello de botella es diseñar la base comunitaria compartida sin exponer datos privados ni mezclarla con `usuarios/{usuarioId}`.
+Motivo: la base privada, migración ampliada y fuente principal Firestore ya están cubiertas. Storage quedó implementado en código y configuración local, pero falta aplicar CORS al bucket real y probar subida real de fotos antes de darlo por cerrado en producción. Después de esa validación, el siguiente cuello de botella es diseñar la base comunitaria compartida sin exponer datos privados ni mezclarla con `usuarios/{usuarioId}`.
 
 ## Progreso del plan
 
 - [x] Fase 1: Base Firebase completada
 - [x] Fase 2: Datos privados principales completados
 - [x] Fase 3: Próximos datos privados pendientes
-- [x] Fase 4: Fotos y Storage pendientes
+- [ ] Fase 4: Fotos y Storage pendientes
 - [x] Fase 5: Fuente principal Firestore
 - [ ] Fase 6: Comunidad y datos compartidos
 - [ ] Fase 7: Pendientes no Firebase que afectan pruebas

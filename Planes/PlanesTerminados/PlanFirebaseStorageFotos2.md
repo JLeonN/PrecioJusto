@@ -1,5 +1,7 @@
 # PLAN FIREBASE STORAGE FOTOS
 
+> Segundo plan de Storage. El plan parecido anterior quedó renombrado como `Planes/PlanesTerminados/PlanFirebaseStorageFotos1.md`; este archivo es `PlanFirebaseStorageFotos2.md` para identificar la corrección y cierre posterior.
+
 ## Descripción del plan
 
 Preparar e implementar el flujo de fotos privadas con Firebase Storage para que productos, comercios, direcciones y listas puedan guardar imágenes de forma confiable. Firestore ya funciona como fuente principal de datos; este plan se enfoca solo en corregir y completar la parte de imágenes, incluyendo navegador, Android, permisos, CORS, rutas, respaldo local y sincronización.
@@ -166,17 +168,51 @@ Validar que las fotos funcionen de punta a punta en navegador, Android y Firebas
 
 ## Progreso del plan
 
-- [ ] Fase 1: Auditar Estado Actual De Fotos
-- [ ] Fase 2: Revisar Configuración De Firebase Storage
-- [ ] Fase 3: Definir Modelo De Rutas Y Metadatos
-- [ ] Fase 4: Crear Servicio Central De Fotos
-- [ ] Fase 5: Integrar Fotos En Productos
-- [ ] Fase 6: Integrar Fotos En Comercios Y Direcciones
-- [ ] Fase 7: Integrar Fotos En Lista Justa
-- [ ] Fase 8: Manejar Offline Y Reintentos
-- [ ] Fase 9: Limpieza Y Migración De Fotos Existentes
-- [ ] Fase Testing
+- [x] Fase 1: Auditar Estado Actual De Fotos
+- [x] Fase 2: Revisar Configuración De Firebase Storage
+- [x] Fase 3: Definir Modelo De Rutas Y Metadatos
+- [x] Fase 4: Crear Servicio Central De Fotos
+- [x] Fase 5: Integrar Fotos En Productos
+- [x] Fase 6: Integrar Fotos En Comercios Y Direcciones
+- [x] Fase 7: Integrar Fotos En Lista Justa
+- [x] Fase 8: Manejar Offline Y Reintentos
+- [x] Fase 9: Limpieza Y Migración De Fotos Existentes
+- [x] Fase Testing local
+
+## Resultado de ejecución
+
+Fecha: 22 de Mayo 2026.
+
+- Se confirmó que ya existía un plan Storage anterior con el mismo nombre y se renombró a `PlanFirebaseStorageFotos1.md`.
+- Este segundo plan quedó renombrado como `PlanFirebaseStorageFotos2.md`.
+- `FirebaseBaseService` ya inicializa Storage y valida `VITE_FIREBASE_STORAGE_BUCKET`.
+- `storage.rules` mantiene acceso privado bajo `usuarios/{usuarioId}/fotos/{archivo=**}`, solo para `request.auth.uid == usuarioId`, imágenes y tamaño máximo de 5 MB.
+- `firebase.json` referencia reglas de Firestore y Storage.
+- Se agregó `FirebaseStorageCors.json` para documentar la configuración CORS mínima de desarrollo.
+- `FirebaseStorageFotosService` centraliza subida, URL de descarga, validación de tipo/tamaño y borrado privado.
+- Productos, comercios, direcciones e items de Lista Justa preparan fotos base64 para Storage antes de sincronizar Firestore.
+- Firestore sigue recibiendo solo `imagenUrl`/`fotoUrl` y `imagenRutaStorage`/`fotoRutaStorage`; no se envía base64.
+- La lectura principal desde Firestore hidrata campos visuales compatibles (`imagen` y `foto`) desde las URL de Storage para que la UI pueda mostrar fotos después de recargar.
+- Se agregó `FotosPendientesStorageService` para reintentar fotos locales pendientes cuando hay usuario Firebase y vuelve la conexión.
+- `MainLayout` dispara reintentos al iniciar, volver la app a primer plano y recuperar conexión.
+- La eliminación de fotos limpia referencias y solicita borrado en Storage cuando existe ruta previa.
+
+## Validación ejecutada
+
+- [x] `npm run lint`
+- [x] `npm run build`
+- [x] `npm run androidReleaseConSimbolos`
+- [x] App abierta en `http://127.0.0.1:9000` con MCP Browser.
+- [x] La app redirige a `/acceso?redirigir=/` sin sesión.
+- [x] Consola del navegador sin errores ni advertencias nuevas.
+- [x] Servidor local respondió `200`.
+
+## Validación externa pendiente
+
+- No se pudo aplicar CORS al bucket porque esta máquina no tiene instalados `firebase`, `gcloud` ni `gsutil`.
+- Falta aplicar `FirebaseStorageCors.json` al bucket real desde una herramienta de Google.
+- Falta prueba manual con usuario Firebase real: subir foto desde navegador, revisar archivo en Storage, revisar campos en Firestore, repetir en Android y comprobar aislamiento entre dos usuarios.
 
 Fecha de creación: 22 de Mayo 2026
 Fecha de última actualización: 22 de Mayo 2026
-Estado: BORRADOR
+Estado: TERMINADO_LOCAL_CON_PENDIENTES_EXTERNOS

@@ -26,7 +26,7 @@ Este resumen concentra el estado actual de la integración gradual de Precio Jus
 - Firestore quedó creado en `nam5 (United States)` y ahora tiene reglas privadas bajo `usuarios/{usuarioId}`.
 - Las reglas Firestore privadas quedaron versionadas en el repositorio con `firestore.rules`.
 - Firestore Offline quedó inicializado con caché persistente multi-tab cuando el navegador lo permite.
-- Storage no se usa todavía.
+- Storage privado de fotos quedó implementado en código y configuración local; falta aplicar CORS al bucket real y probar subida real con usuario Firebase.
 - La app mantiene LocalStorage/Capacitor como respaldo temporal, pero Firestore ya es fuente principal visible cuando hay usuario Firebase.
 - Productos y precios ya se sincronizan a Firestore como espejo privado validado cuando hay usuario Firebase autenticado.
 - Comercios y direcciones ya se sincronizan a Firestore como espejo privado validado cuando hay usuario Firebase autenticado.
@@ -138,7 +138,7 @@ Claves persistidas actuales:
 - Si no hay usuario Firebase autenticado, la sincronización Firestore se omite y el dato queda local.
 - Si Firestore queda pendiente por conexión, la app devuelve estado `pendiente` con timeout controlado para no trabar la UI.
 - `productosStore` expone estado de sincronización y `MisProductosPage` muestra un aviso cuando hay error.
-- Firestore no guarda imágenes base64; las fotos locales siguen locales hasta el plan de Storage.
+- Firestore no guarda imágenes base64; las fotos de usuario se preparan para Storage y Firestore guarda solo URL/ruta cuando la subida se completa.
 - Firestore ya es fuente principal de UI para productos/precios con usuario Firebase; local queda como respaldo temporal.
 - No se escriben comercios, listas, preferencias, fotos, comunidad ni Storage en esta fase.
 
@@ -165,7 +165,7 @@ Claves persistidas actuales:
 - Si no hay usuario Firebase autenticado, la sincronización Firestore se omite y el comercio queda local.
 - Si Firestore queda pendiente por conexión, la app devuelve estado `pendiente` con timeout controlado.
 - La eliminación local de comercio marca `eliminado: true` en Firestore.
-- Firestore no guarda fotos base64 de comercios ni direcciones; Storage sigue pendiente.
+- Firestore no guarda fotos base64 de comercios ni direcciones; Storage privado queda preparado para subirlas y guardar solo URL/ruta.
 - Firestore ya es fuente principal de UI para comercios/direcciones con usuario Firebase; local queda como respaldo temporal.
 - No se agregaron referencias Firestore obligatorias desde precios a comercios; precios siguen guardando `comercioId` y `direccionId`.
 
@@ -191,7 +191,7 @@ Claves persistidas actuales:
 - Si no hay usuario Firebase autenticado, la sincronización Firestore se omite y la lista queda local.
 - Si Firestore queda pendiente por conexión, la app devuelve estado `pendiente` con timeout controlado.
 - La eliminación local de lista marca `eliminado: true` y `estadoGeneral: eliminada` en Firestore.
-- Firestore no guarda imágenes base64 de items; Storage sigue pendiente.
+- Firestore no guarda imágenes base64 de items; Storage privado queda preparado para subirlas y guardar solo URL/ruta.
 - Firestore ya es fuente principal de UI para Lista Justa con usuario Firebase; local queda como respaldo temporal.
 - No se agregaron referencias Firestore obligatorias desde items a productos o comercios; los items conservan `productoId`, `comercioActual` y datos visuales.
 
@@ -214,6 +214,21 @@ Claves persistidas actuales:
 - El `confirmacionId` se deriva de `productoId + precioId` para evitar duplicados por usuario.
 - Altas, bajas y limpieza de confirmaciones mantienen el estado local aunque Firestore falle.
 - No se creó colección pública de confirmaciones; sigue todo bajo `usuarios/{usuarioId}`.
+
+### Firebase Storage privado de fotos
+
+- `PlanFirebaseStorageFotos1.md` quedó como plan histórico de base Storage.
+- `PlanFirebaseStorageFotos2.md` quedó ejecutado como cierre local con pendientes externos.
+- `FirebaseStorageFotosService` centraliza subida, URL de descarga, validación de tipo/tamaño y borrado privado.
+- Ruta activa de Storage: `usuarios/{usuarioId}/fotos/{tipo}/{archivo}`.
+- Tipos permitidos por código: `image/jpeg`, `image/png`, `image/webp`, `image/heic` e `image/heif`.
+- Tamaño máximo inicial: 5 MB.
+- Productos, comercios, direcciones e items de Lista Justa convierten fotos base64 locales a Storage cuando hay usuario Firebase y conexión.
+- Firestore conserva solo `imagenUrl`/`fotoUrl` y `imagenRutaStorage`/`fotoRutaStorage`; no guarda base64.
+- La fuente principal Firestore reconstruye campos visuales `imagen` y `foto` desde URL Storage para que la UI siga mostrando fotos después de recargar.
+- `FotosPendientesStorageService` reintenta fotos locales pendientes al iniciar, al volver la app a primer plano y al recuperar conexión.
+- `FirebaseStorageCors.json` documenta la configuración CORS mínima de desarrollo para `localhost:9000`.
+- Pendiente externo: aplicar CORS al bucket real y validar subida real de fotos en navegador y Android.
 
 ---
 
@@ -239,6 +254,8 @@ Claves persistidas actuales:
 - `src/almacenamiento/servicios/FirestorePreferenciasService.js`
 - `src/almacenamiento/servicios/FirestoreConfirmacionesService.js`
 - `src/almacenamiento/servicios/FuentePrincipalFirestoreService.js`
+- `src/almacenamiento/servicios/FirebaseStorageFotosService.js`
+- `src/almacenamiento/servicios/FotosPendientesStorageService.js`
 - `src/boot/FirebaseBoot.js`
 - `src/boot/UsuarioBoot.js`
 - `src/almacenamiento/stores/UsuarioStore.js`
@@ -299,6 +316,9 @@ Recomendación práctica:
 - `npm run lint` pasó sin errores.
 - `npm run build` pasó correctamente.
 - `npm run androidReleaseConSimbolos` pasó correctamente.
+- `PlanFirebaseStorageFotos2.md`: `npm run lint`, `npm run build` y `npm run androidReleaseConSimbolos` pasaron correctamente.
+- `PlanFirebaseStorageFotos2.md`: MCP Browser cargó `http://127.0.0.1:9000`, redirigió a `/acceso?redirigir=/` sin sesión y no mostró errores ni advertencias de consola.
+- `PlanFirebaseStorageFotos2.md`: no se pudo validar subida real a Storage porque falta aplicar CORS al bucket real y no hay sesión Firebase interactiva en esta ejecución.
 - La app cargó en navegador local con MCP Browser.
 - Firebase base inicializó con `projectId: preciojustopruebas2`, Auth activo y Firestore Offline activo.
 - MCP Browser validó redirección a login sin sesión, registro de usuario, login correcto, contraseña incorrecta con error claro, persistencia tras recarga y logout.
@@ -348,12 +368,14 @@ Recomendación práctica:
 
 ## PRÓXIMO PASO RECOMENDADO
 
-Productos, precios, comercios, Lista Justa, preferencias y confirmaciones ya tienen espejo privado validado. El próximo plan debería avanzar con uno de estos caminos:
+Productos, precios, comercios, Lista Justa, preferencias y confirmaciones ya tienen espejo privado validado. Storage de fotos quedó implementado en código, pero antes de avanzar fuerte con comunidad conviene cerrar la validación real del bucket:
 
-- Storage de fotos, para subir imágenes base64 locales y guardar solo URLs/rutas en Firestore;
-- corrección del CORS de `version.json` en dev para no contaminar la consola durante pruebas.
+- aplicar `FirebaseStorageCors.json` al bucket real;
+- probar subida de foto en navegador y Android con usuario Firebase;
+- confirmar en Firebase Console que Storage contiene el archivo y Firestore solo guarda URL/ruta;
+- corregir el CORS de `version.json` en dev para no contaminar la consola durante pruebas.
 
-Mi recomendación práctica: ahora priorizar pruebas reales multiusuario/offline y luego planificar cuándo LocalStorage/Capacitor deja de ser respaldo visible.
+Mi recomendación práctica: cerrar primero la prueba real de Storage con dos usuarios. Después sí avanzar con el modelo comunitario, porque ya no quedaría un pendiente técnico fuerte dentro del árbol privado `usuarios/{usuarioId}`.
 
 ## Actualización migración guiada restante
 
