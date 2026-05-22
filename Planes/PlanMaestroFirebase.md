@@ -83,7 +83,19 @@ Preparar el cambio de fuente principal después de que la sincronización privad
 - [x] Validar cache offline como experiencia principal en código; queda pendiente prueba manual real.
 - [x] Definir que LocalStorage/Capacitor queda como respaldo temporal hasta un plan posterior de retiro.
 
-## FASE 6: Comunidad y datos compartidos
+## FASE 6: Mesa de Trabajo privada pendiente
+
+### Objetivo
+
+Completar el respaldo privado por usuario incorporando la Mesa de Trabajo a Firestore.
+
+- [ ] `PlanFirestoreMesaTrabajo.md`: sincronizar ítems pendientes de Mesa de Trabajo en Firestore.
+- [ ] Mantener LocalStorage/Capacitor como respaldo temporal para usuario local y modo offline.
+- [ ] Conservar la relación entre Mesa de Trabajo, Lista Justa y Mis Productos.
+- [ ] Validar que los cambios de nombre, precio, comercio, cantidad y eliminación persistan al recargar.
+- [ ] Validar Mesa de Trabajo en navegador y Android con usuario Firebase.
+
+## FASE 7: Comunidad y datos compartidos
 
 ### Objetivo
 
@@ -94,7 +106,7 @@ Separar la base privada del usuario de una futura base comunitaria compartida.
 - [ ] Definir moderación, confirmaciones y calidad de datos.
 - [ ] Definir qué datos pueden compartirse y cuáles quedan privados.
 
-## FASE 7: Pendientes no Firebase que afectan pruebas
+## FASE 8: Pendientes no Firebase que afectan pruebas
 
 ### Objetivo
 
@@ -118,9 +130,9 @@ Validar que este plan maestro sirve como control antes de crear nuevos planes Fi
 
 ## Próximo plan recomendado
 
-El próximo plan recomendado es `PlanModeloComunitarioFirebase.md` después de validar manualmente Storage real.
+El próximo plan recomendado es `PlanFirestoreMesaTrabajo.md`.
 
-Motivo: la base privada, migración ampliada y fuente principal Firestore ya están cubiertas. Storage quedó implementado en código y configuración local, pero falta aplicar CORS al bucket real y probar subida real de fotos antes de darlo por cerrado en producción. Después de esa validación, el siguiente cuello de botella es diseñar la base comunitaria compartida sin exponer datos privados ni mezclarla con `usuarios/{usuarioId}`.
+Motivo: la base privada principal, migración ampliada y fuente principal Firestore ya están cubiertas para productos, comercios, listas y preferencias, pero la Mesa de Trabajo todavía depende del almacenamiento local. Antes de avanzar con comunidad, conviene asegurar que los ítems pendientes de trabajo diario se guarden por usuario en Firestore y se recuperen en navegador y Android.
 
 ## Progreso del plan
 
@@ -129,10 +141,11 @@ Motivo: la base privada, migración ampliada y fuente principal Firestore ya est
 - [x] Fase 3: Próximos datos privados pendientes
 - [ ] Fase 4: Fotos y Storage pendientes
 - [x] Fase 5: Fuente principal Firestore
-- [ ] Fase 6: Comunidad y datos compartidos
-- [ ] Fase 7: Pendientes no Firebase que afectan pruebas
+- [ ] Fase 6: Mesa de Trabajo privada pendiente
+- [ ] Fase 7: Comunidad y datos compartidos
+- [ ] Fase 8: Pendientes no Firebase que afectan pruebas
 - [ ] Fase Testing
 
 Fecha de creación: 20 de Mayo 2026
-Fecha de última actualización: 21 de Mayo 2026
+Fecha de última actualización: 22 de Mayo 2026
 Estado: ACTIVO
