@@ -39,7 +39,7 @@ Entender el flujo completo de Mesa de Trabajo antes de moverlo a Firestore.
 
 Crear una estructura privada clara para guardar la Mesa de Trabajo por usuario.
 
-- [ ] Definir ruta principal `usuarios/{usuarioId}/mesaTrabajo/items/{itemId}`.
+- [ ] Definir ruta principal `usuarios/{usuarioId}/mesaTrabajoItems/{itemId}`.
 - [ ] Definir campos permitidos para cada ítem de Mesa de Trabajo.
 - [ ] Mantener campos necesarios: código de barras, nombre, marca, cantidad, unidad, precio, moneda, comercio, origen y fechas.
 - [ ] Mantener campos de relación con Lista Justa: `origenListaJusta` y `mesaTrabajoItemId` cuando corresponda.
@@ -187,7 +187,7 @@ Fecha: 22 de Mayo 2026.
 
 ## Validación externa pendiente
 
-- Falta prueba manual con usuario Firebase real para confirmar escritura/lectura de `usuarios/{usuarioId}/mesaTrabajo/items/{itemId}`.
+- Falta prueba manual con usuario Firebase real para confirmar escritura/lectura de `usuarios/{usuarioId}/mesaTrabajoItems/{itemId}`.
 - Falta validación manual de flujo completo en Android con el mismo usuario.
 - Falta prueba manual específica de continuidad entre Lista Justa → Mesa de Trabajo → Mis Productos con sesión Firebase real.
 

@@ -18,7 +18,6 @@ La app debe seguir usando el almacenamiento local actual durante este plan. Fire
 
 - No migrar datos locales a Firestore en este plan.
 - No escribir productos, comercios, listas, preferencias ni fotos en Firestore.
-- No activar comunidad en este plan.
 - No subir fotos a Firebase Storage en este plan.
 - No eliminar `LocalStorageAdapter`, `CapacitorAdapter` ni `AlmacenamientoService`.
 - Mantener compatibilidad con datos locales existentes.

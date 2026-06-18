@@ -1,4 +1,4 @@
-# PLAN FUENTE PRINCIPAL FIRESTORE
+﻿# PLAN FUENTE PRINCIPAL FIRESTORE
 
 ## Descripción del plan
 
@@ -21,7 +21,6 @@ La app ya tiene Auth, Firestore Offline, Storage de fotos, reglas privadas, serv
 - No eliminar LocalStorage/Capacitor en este plan.
 - No borrar datos locales del usuario automáticamente.
 - No abrir datos privados fuera de `usuarios/{usuarioId}`.
-- No cambiar comunidad ni datos compartidos en este plan.
 - No relajar `firestore.rules` ni `storage.rules`.
 - No depender de red para mostrar datos si Firestore Offline tiene cache válida.
 - No leer datos Firebase si no hay usuario autenticado.

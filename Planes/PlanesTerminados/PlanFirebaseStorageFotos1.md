@@ -1,4 +1,4 @@
-# PLAN FIREBASE STORAGE FOTOS
+﻿# PLAN FIREBASE STORAGE FOTOS
 
 > Plan histórico renombrado como `PlanFirebaseStorageFotos1.md` porque existe un segundo plan de cierre y corrección llamado `PlanFirebaseStorageFotos2.md`.
 
@@ -185,7 +185,6 @@ Mantener alineados planes, resumen y modelo técnico.
 - [ ] Actualizar `Planes/PlanesFuturos/PlanMaestroFirebase.md` cuando el plan quede completado.
 - [ ] Documentar rutas Storage privadas.
 - [ ] Documentar límite de tamaño y tipos MIME permitidos.
-- [ ] Documentar que Storage/fotos queda privado y separado de comunidad.
 
 ## FASE TESTING
 

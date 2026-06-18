@@ -1,4 +1,4 @@
-# PLAN REGLAS FIRESTORE VERSIONADAS
+﻿# PLAN REGLAS FIRESTORE VERSIONADAS
 
 ## Descripción del plan
 
@@ -88,7 +88,6 @@ Dejar una guía breve para ampliar reglas sin romper privacidad cuando se agregu
 
 - [x] Documentar que todo nuevo dominio privado debe vivir bajo `usuarios/{usuarioId}`.
 - [x] Documentar que comercios, listas y preferencias deben reutilizar `esDueno(usuarioId)`.
-- [x] Documentar que comunidad pública debe ir en otro plan y con reglas separadas.
 - [x] Documentar que Storage de fotos requiere reglas propias en otro archivo o plan.
 - [x] Actualizar `Planes/Resumenes/Resumen11Firebase.md` con el estado de reglas versionadas.
 

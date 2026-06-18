@@ -1,4 +1,4 @@
-# PLAN FIRESTORE PRIVADO LISTAS JUSTAS
+﻿# PLAN FIRESTORE PRIVADO LISTAS JUSTAS
 
 ## Descripción del plan
 
@@ -20,7 +20,6 @@ Este plan debe conectar `ListaJustaService` con Firestore bajo `usuarios/{usuari
 
 - No reemplazar todavía LocalStorage/Capacitor como fuente visible principal.
 - No migrar automáticamente todas las listas locales en este plan.
-- No tocar preferencias, confirmaciones, comunidad ni Storage.
 - No guardar imágenes base64 en Firestore.
 - No relajar `firestore.rules`.
 - No escribir en Firestore si no hay usuario Firebase autenticado.

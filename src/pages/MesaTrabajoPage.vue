@@ -1,7 +1,10 @@
 <template>
   <q-page class="mesa-trabajo-pagina">
     <!-- Estado vacío: llegó a la ruta con mesa vacía -->
-    <div v-if="mesaVaciaAlMontar" class="col flex flex-center column q-pa-xl">
+    <div
+      v-if="mesaVaciaAlMontar && !sesionStore.tieneItemsPendientes"
+      class="col flex flex-center column q-pa-xl"
+    >
       <IconShoppingBag :size="64" class="text-grey-4" />
       <div class="text-h6 text-grey-5 q-mt-md text-center">La mesa está vacía</div>
       <div class="text-body2 text-grey-5 q-mb-xl text-center">
@@ -331,6 +334,11 @@ onMounted(async () => {
 watch(
   () => sesionStore.tieneItemsPendientes,
   (tieneItems) => {
+    if (tieneItems) {
+      mesaVaciaAlMontar.value = false
+      return
+    }
+
     if (!tieneItems && !mesaVaciaAlMontar.value) router.push('/')
   },
 )

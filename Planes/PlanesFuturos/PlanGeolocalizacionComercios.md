@@ -1,4 +1,4 @@
-# Plan Futuro: Geolocalización para Autocompletar Comercios
+﻿# Plan Futuro: Geolocalización para Autocompletar Comercios
 
 **Fecha de exploración:** Febrero 2026
 **Estado:** Prototipo explorado — pendiente de implementar en versión futura
@@ -38,7 +38,6 @@ Facilitar al usuario la carga de la dirección de un comercio eliminando la escr
 - **URL:** `https://overpass-api.de/api/interpreter`
 - **Costo:** Gratuito, sin API key
 - **Pros:** CORS correcto, permite buscar POIs por radio GPS, filtra por nombre y tipo de comercio
-- **Contras:** Cobertura depende de lo que la comunidad OSM haya mapeado. Lento en radios grandes (>10km).
 - **Resultado en prueba:** No llegó a probarse en Android por el problema de permisos GPS (ver abajo).
 - **Query de ejemplo (Overpass QL):**
   ```
@@ -129,7 +128,6 @@ Cuando la app tenga base de datos en la nube (Firebase/Firestore), este sistema 
 
 - **Guardar coordenadas en cada comercio:** Al crear un comercio vía geolocalización, guardar `lat` y `lon`. Permitiría en el futuro mostrar un mapa con todos los comercios del usuario.
 - **Validación contra base de datos propia:** Antes de consultar Overpass/Photon, verificar si ya existe un comercio cercano en la base de datos del usuario (evita duplicados).
-- **Datos compartidos entre usuarios:** Si la app escala a múltiples usuarios, los comercios verificados podrían compartirse (similar a Google Maps Places pero propio).
 - **Historial de ubicaciones:** Guardar las últimas N ubicaciones GPS del usuario con timestamp. Al abrir el formulario, sugerir el comercio visitado más recientemente.
 
 ---

@@ -53,7 +53,7 @@ function seleccionarCamposPermitidos(datos, camposPermitidos) {
 }
 
 function obtenerColeccionMesaTrabajo(usuarioId) {
-  return collection(obtenerDb(), 'usuarios', usuarioId, 'mesaTrabajo', 'items')
+  return collection(obtenerDb(), 'usuarios', usuarioId, 'mesaTrabajoItems')
 }
 
 function obtenerReferenciaItemMesaTrabajo(usuarioId, itemId) {

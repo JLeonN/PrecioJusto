@@ -20,7 +20,6 @@ Este plan debe dejar preparada la arquitectura para que cada usuario autenticado
 - No migrar datos reales hasta cerrar el modelo de datos.
 - No escribir documentos Firestore desde la app hasta tener reglas privadas definidas.
 - No guardar imágenes base64 en Firestore.
-- No activar comunidad en este plan.
 - No eliminar almacenamiento local hasta verificar migración completa.
 - Mantener backup local antes de cualquier migración real.
 - Mantener compatibilidad con datos locales existentes.
@@ -126,7 +125,6 @@ Preparar Firebase Security Rules antes de permitir lecturas o escrituras reales.
 - [x] Definir reglas para subcolecciones de productos, precios, comercios y listas.
 - [x] Definir reglas futuras para Storage privado.
 - [x] Preparar pruebas manuales de reglas en Firebase Console.
-- [x] Documentar que comunidad tendrá reglas separadas en otro plan.
 
 ## FASE 8: Diseñar migración local a Firestore
 
@@ -170,7 +168,6 @@ Dejar listo el siguiente plan ejecutable para escribir código Firestore privado
 - [x] Definir si se crea un `FirestoreAdapter` o servicios específicos por dominio.
 - [x] Definir orden de implementación: productos, comercios, listas, preferencias.
 - [x] Definir qué pruebas deben hacerse por cada tipo de dato.
-- [x] Definir qué parte queda fuera de alcance hasta Storage o comunidad.
 - [x] Actualizar `Resumen11Firebase.md` con decisiones finales del modelo.
 
 ## FASE TESTING

@@ -1,4 +1,4 @@
-# PLAN FIRESTORE PRIVADO PREFERENCIAS
+﻿# PLAN FIRESTORE PRIVADO PREFERENCIAS
 
 ## Descripción del plan
 
@@ -18,7 +18,6 @@ Implementar la sincronización privada de preferencias de usuario en Firestore p
 
 - No reemplazar todavía LocalStorage/Capacitor como fuente visible principal.
 - No migrar automáticamente preferencias locales en este plan.
-- No tocar confirmaciones, comunidad, Storage ni fotos.
 - No relajar `firestore.rules`.
 - No escribir en Firestore si no hay usuario Firebase autenticado.
 - Mantener criterio local-first: guardar local primero y sincronizar Firestore después.

@@ -21,7 +21,6 @@ Este plan cubre la creación del proyecto nuevo, el registro de la app web y And
 - No migrar datos locales en este plan.
 - No subir fotos a Firebase Storage en este plan.
 - No reemplazar `LocalStorageAdapter` ni `CapacitorAdapter` en este plan.
-- No activar comunidad en este plan.
 - Mantener la app funcionando como hasta ahora mientras se agrega la base de Firebase.
 - Usar variables de entorno para configuración web cuando corresponda.
 - No hardcodear credenciales sensibles ni contraseñas en código.

@@ -1,10 +1,9 @@
-# PLAN FIRESTORE PRIVADO PRODUCTOS
+﻿# PLAN FIRESTORE PRIVADO PRODUCTOS
 
 ## Descripción del plan
 
 Implementar la primera escritura real de datos privados en Firestore para Precio Justo, limitada a productos y precios del usuario autenticado. La app ya tiene Firebase Auth, Firestore Offline y un modelo aprobado en `PlanModeloFirestoreYMigracion.md`.
 
-Este plan debe conectar productos y precios a Firestore bajo `usuarios/{usuarioId}`, manteniendo LocalStorage/Capacitor como respaldo temporal y sin migrar todavía comercios, listas, preferencias, fotos ni comunidad.
 
 ## Objetivo principal
 
@@ -20,7 +19,6 @@ Este plan debe conectar productos y precios a Firestore bajo `usuarios/{usuarioI
 - No migrar todos los datos locales en este plan.
 - No tocar comercios, listas, preferencias ni fotos salvo lectura mínima necesaria.
 - No usar Storage en este plan.
-- No activar comunidad en este plan.
 - No borrar datos locales actuales.
 - No eliminar `LocalStorageAdapter`, `CapacitorAdapter` ni `ProductosService` local hasta tener validación completa.
 - Usar Firebase Auth como fuente de `usuarioId`.
@@ -183,7 +181,6 @@ Validar productos y precios privados en Firestore sin romper almacenamiento loca
 - `productosStore` expone estado de sincronización y `MisProductosPage` muestra un aviso simple si aparece error de sincronización.
 - Se aplicaron reglas privadas en Firebase Console para permitir lectura/escritura solo cuando `request.auth.uid == usuarioId`.
 - Firestore sigue como espejo de productos/precios; LocalStorage/Capacitor no fue reemplazado como fuente visible principal.
-- No se migraron comercios, listas, preferencias, fotos, comunidad ni Storage.
 
 ## Resultado de pruebas
 

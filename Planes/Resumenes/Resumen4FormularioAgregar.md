@@ -1,4 +1,4 @@
-# FORMULARIO AGREGAR PRODUCTO - DOCUMENTACIÓN TÉCNICA
+﻿# FORMULARIO AGREGAR PRODUCTO - DOCUMENTACIÓN TÉCNICA
 
 ## COMPONENTES RELACIONADOS
 - FormularioProducto.vue (datos del producto en /components/Formularios/)
@@ -57,13 +57,11 @@ Todos los selectores de moneda y unidad usan `preferenciasStore` (Pinia) como fu
 - Solo valida que cantidad/precio > 0 si se ingresan
 - Ideal para uso personal
 
-### MODO COMUNIDAD (futuro)
 - Todos los campos obligatorios
 - Validaciones estrictas
 - Para compartir datos públicos
 
 ## VALIDACIONES IMPLEMENTADAS
-- Nombre: requerido en modo comunidad
 - Cantidad: > 0 si ingresada
 - Precio: > 0 si ingresado
 - Botón guardar deshabilitado si formulario inválido

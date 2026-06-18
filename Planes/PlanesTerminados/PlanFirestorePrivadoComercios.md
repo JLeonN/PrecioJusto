@@ -1,4 +1,4 @@
-# PLAN FIRESTORE PRIVADO COMERCIOS
+﻿# PLAN FIRESTORE PRIVADO COMERCIOS
 
 ## Descripción del plan
 
@@ -20,7 +20,6 @@ Este plan debe conectar `ComerciosService` con Firestore bajo `usuarios/{usuario
 
 - No reemplazar todavía LocalStorage/Capacitor como fuente visible principal.
 - No migrar todos los comercios locales automáticamente en este plan.
-- No tocar listas, preferencias, confirmaciones, comunidad ni Storage.
 - No guardar fotos base64 en Firestore.
 - No modificar el modelo Firestore aprobado salvo que se documente una razón concreta.
 - No relajar `firestore.rules`.
@@ -166,7 +165,6 @@ Validar comercios privados en Firestore sin romper almacenamiento local ni produ
 - Las fotos base64 de comercios y direcciones no se escriben en Firestore.
 - La eliminación local de comercio marca `eliminado: true` en Firestore.
 - Firestore queda como espejo privado validado; LocalStorage/Capacitor sigue siendo fuente visible principal.
-- No se tocaron listas, preferencias, confirmaciones, comunidad, Storage ni reglas Firestore.
 
 ## Resultado de pruebas
 

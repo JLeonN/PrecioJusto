@@ -109,7 +109,7 @@ const props = defineProps({
   modo: {
     type: String,
     default: 'local',
-    validator: (value) => ['local', 'comunidad'].includes(value),
+    validator: (value) => value === 'local',
   },
 })
 
@@ -383,7 +383,7 @@ async function guardarProducto() {
   guardando.value = true
 
   // 1. Validar datos del producto (nombre obligatorio en local)
-  if (props.modo === 'comunidad' || (datosProducto.value.nombre || '').trim() === '') {
+  if ((datosProducto.value.nombre || '').trim() === '') {
     const productoValido = refFormularioProducto.value?.validarFormulario()
     if (!productoValido) {
       guardando.value = false

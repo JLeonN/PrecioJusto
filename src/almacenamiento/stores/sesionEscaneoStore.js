@@ -225,6 +225,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
     })
 
     items.value.push(itemAgregado)
+    void encolarPersistencia()
     return itemAgregado
   }
 
@@ -237,6 +238,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
       ...cambios,
       fechaActualizacion: new Date().toISOString(),
     })
+    void encolarPersistencia()
   }
 
   function asignarComercio(ids, comercio) {
@@ -252,6 +254,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
         })
         : item,
     )
+    void encolarPersistencia()
   }
 
   async function eliminarItem(id) {

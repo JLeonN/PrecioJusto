@@ -2,26 +2,26 @@
 
 ## Descripción del plan
 
-Mantener un mapa maestro de la integración Firebase de Precio Justo para evitar repetir planes ya terminados, detectar el próximo paso correcto y conservar una visión clara del camino completo. Este archivo debe revisarse antes de crear o ejecutar cualquier nuevo plan relacionado con Firebase, Firestore, migración, Storage, comunidad o sincronización.
+Mantener un mapa maestro de la integración Firebase privada de Precio Justo para evitar repetir planes ya terminados, detectar el próximo paso correcto y conservar una visión clara del camino hasta dejar estable el respaldo privado por usuario.
 
-El objetivo no es reemplazar los planes detallados, sino ordenar qué ya está terminado, qué está pendiente y cuál es el siguiente plan recomendado.
+Este maestro solo cubre datos privados bajo `usuarios/{usuarioId}`, Firebase Auth, Firestore, Storage privado, migración, fuente principal y validaciones finales.
 
 ## Objetivo principal
 
 - Registrar los planes Firebase ya completados.
-- Registrar los planes Firebase pendientes en orden recomendado.
-- Evitar volver a generar o ejecutar un plan ya terminado.
-- Definir reglas para decidir el próximo paso.
-- Mantener una ruta clara hasta que Firestore pueda ser fuente principal.
+- Registrar el único plan pendiente de cierre.
+- Evitar repetir planes ya terminados.
+- Mantener el foco en datos privados por usuario.
+- Definir el orden correcto para cerrar Firebase privado.
 
 ## Reglas del plan
 
-- Antes de generar un plan Firebase nuevo, revisar este plan maestro.
+- Antes de crear o ejecutar un plan Firebase nuevo, revisar este plan maestro.
 - Antes de ejecutar un plan Firebase, comprobar si ya existe en `Planes/PlanesTerminados`.
-- Si un plan aparece como terminado, no repetirlo; auditarlo y seguir con el próximo pendiente.
+- Si un plan aparece como terminado, no repetirlo; auditarlo y seguir con el pendiente real.
 - Si se termina un plan Firebase, actualizar este plan maestro.
-- No convertir Firestore en fuente principal hasta completar datos privados principales, Storage pendiente y validación de migración.
-- No eliminar LocalStorage/Capacitor hasta que exista una migración completa validada y una etapa explícita de reemplazo.
+- No eliminar LocalStorage/Capacitor hasta completar pruebas reales de navegador y Android.
+- No dar por cerrada la integración privada hasta validar Storage y Mesa de Trabajo con usuario Firebase real.
 
 ## FASE 1: Base Firebase completada
 
@@ -43,109 +43,91 @@ Registrar los dominios privados que ya tienen espejo Firestore validado.
 
 - [x] `PlanFirestorePrivadoProductos.md`: productos y precios privados en Firestore.
 - [x] `PlanFirestorePrivadoComercios.md`: comercios y direcciones privadas en Firestore.
-- [x] `PlanMigracionLocalGuiadaFirebase.md`: migración guiada con backup, estado y reintentos para productos, precios y comercios.
+- [x] `PlanFirestorePrivadoListasJustas.md`: Lista Justa privada en Firestore.
+- [x] `PlanFirestorePrivadoPreferencias.md`: preferencias privadas en Firestore.
+- [x] `PlanFirestorePrivadoConfirmaciones.md`: confirmaciones privadas en Firestore.
+- [x] `PlanFirestoreMesaTrabajo.md`: Mesa de Trabajo privada en Firestore con validación local.
 
-## FASE 3: Próximos datos privados pendientes
-
-### Objetivo
-
-Ordenar los planes que todavía faltan para completar el backup privado por usuario.
-
-- [x] `PlanFirestorePrivadoListasJustas.md`: sincronizar Lista Justa privada en Firestore.
-- [x] `PlanFirestorePrivadoPreferencias.md`: sincronizar preferencias privadas en Firestore.
-- [x] `PlanFirestorePrivadoConfirmaciones.md`: sincronizar confirmaciones privadas en Firestore si se confirma que aportan valor.
-- [x] `PlanMigracionGuiadaDatosRestantesFirebase.md`: migración guiada ampliada para listas, preferencias, confirmaciones y fotos Storage.
-
-## FASE 4: Fotos y Storage pendientes
+## FASE 3: Migración y fuente principal completadas
 
 ### Objetivo
 
-Separar correctamente fotos de Firestore para no guardar base64 en documentos.
+Registrar que la app ya puede leer datos privados desde Firestore como fuente principal con respaldo local.
+
+- [x] `PlanMigracionLocalGuiadaFirebase.md`: migración guiada inicial con backup y reintentos.
+- [x] `PlanMigracionGuiadaDatosRestantesFirebase.md`: migración ampliada de listas, preferencias, confirmaciones y fotos.
+- [x] `PlanFuentePrincipalFirestore.md`: Firestore como fuente principal visible con usuario Firebase.
+- [x] Mantener LocalStorage/Capacitor como respaldo temporal durante transición.
+- [x] Resolver estado al cerrar sesión, cambiar usuario o usar otro dispositivo.
+
+## FASE 4: Fotos y Storage pendientes de validación real
+
+### Objetivo
+
+Registrar el estado real de Storage privado de fotos.
 
 - [x] `PlanFirebaseStorageFotos1.md`: base inicial de Firebase Storage para fotos privadas.
-- [x] `PlanFirebaseStorageFotos2.md`: cierre de rutas, reintentos, borrado, compatibilidad visual desde URL Storage y CORS documentado.
+- [x] `PlanFirebaseStorageFotos2.md`: rutas, reintentos, borrado, compatibilidad visual desde URL Storage y CORS documentado.
 - [x] Definir reglas Storage privadas bajo `usuarios/{usuarioId}/fotos`.
-- [x] Migrar fotos de productos, comercios/direcciones y listas si corresponde.
-- [x] Validar que Firestore no reciba base64.
+- [x] Validar en código que Firestore no debe recibir base64.
 - [ ] Aplicar `FirebaseStorageCors.json` al bucket real con `firebase`, `gcloud` o `gsutil`.
 - [ ] Validar subida real de fotos en navegador y Android con usuario Firebase.
 
-## FASE 5: Fuente principal Firestore
+## FASE 5: Mesa de Trabajo pendiente de validación real
 
 ### Objetivo
 
-Preparar el cambio de fuente principal después de que la sincronización privada esté madura.
+Registrar lo que falta para cerrar Mesa de Trabajo.
 
-- [x] `PlanFuentePrincipalFirestore.md`: lectura principal desde Firestore.
-- [x] Mantener LocalStorage/Capacitor como respaldo temporal durante transición.
-- [x] Implementar carga inicial desde Firestore por usuario.
-- [x] Resolver estado al cerrar sesión, cambiar usuario o usar otro dispositivo.
-- [x] Validar cache offline como experiencia principal en código; queda pendiente prueba manual real.
-- [x] Definir que LocalStorage/Capacitor queda como respaldo temporal hasta un plan posterior de retiro.
-
-## FASE 6: Mesa de Trabajo privada
-
-### Objetivo
-
-Completar el respaldo privado por usuario incorporando la Mesa de Trabajo a Firestore.
-
-- [x] `PlanFirestoreMesaTrabajo.md`: sincronizar ítems pendientes de Mesa de Trabajo en Firestore.
+- [x] Sincronizar ítems pendientes de Mesa de Trabajo en Firestore.
 - [x] Mantener LocalStorage/Capacitor como respaldo temporal para usuario local y modo offline.
 - [x] Conservar la relación entre Mesa de Trabajo, Lista Justa y Mis Productos.
-- [x] Validar que los cambios de nombre, precio, comercio, cantidad y eliminación persistan al recargar en pruebas locales.
+- [x] Validar cambios de nombre, precio, comercio, cantidad y eliminación en pruebas locales.
 - [ ] Validar Mesa de Trabajo en navegador y Android con usuario Firebase real.
+- [ ] Confirmar escritura/lectura real en `usuarios/{usuarioId}/mesaTrabajoItems/{itemId}`.
 
-## FASE 7: Comunidad y datos compartidos
-
-### Objetivo
-
-Separar la base privada del usuario de una futura base comunitaria compartida.
-
-- [x] `PlanModeloComunitarioFirebase.md`: crear plan de modelo comunitario separado del árbol `usuarios/{usuarioId}`.
-- [ ] Definir reglas públicas/semipúblicas sin exponer datos privados.
-- [ ] Definir moderación, confirmaciones y calidad de datos.
-- [ ] Definir qué datos pueden compartirse y cuáles quedan privados.
-
-## FASE 8: Pendientes no Firebase que afectan pruebas
+## FASE 6: Cierre privado pendiente
 
 ### Objetivo
 
-Registrar temas laterales que pueden ensuciar pruebas pero no bloquean Firebase.
+Ejecutar un único plan que concentre todo lo que falta para cerrar Firebase privado.
 
-- [ ] Evaluar corrección del CORS de `version.json` en desarrollo.
-- [ ] Mantener `PlanGeolocalizacionComercios.md` como plan futuro separado.
-- [ ] Revisar `TareasPendientes.md` antes de abrir planes generales no Firebase.
+- [ ] `PlanCierreFirebasePrivado.md`: ejecutar validaciones finales y limpieza.
+- [ ] Revisar cambios pendientes del repo antes de pruebas largas.
+- [ ] Confirmar si `Recursos/` debe versionarse.
+- [ ] Resolver o documentar CORS de `version.json` en desarrollo.
+- [ ] Confirmar `MODO_PRUEBA` de AdMob antes de publicar.
+- [ ] Ejecutar validación final con `npm run lint`, `npm run build` y `npm run cel`.
 
 ## FASE TESTING
 
 ### Objetivo
 
-Validar que este plan maestro sirve como control antes de crear nuevos planes Firebase.
+Validar que este maestro representa el estado real antes de crear nuevos planes.
 
-- [ ] Antes de crear un plan Firebase nuevo, buscar si ya existe en `Planes/PlanesTerminados`.
-- [ ] Confirmar que el próximo plan recomendado no está terminado.
-- [ ] Confirmar que el plan nuevo apunta al primer pendiente real.
-- [ ] Actualizar este plan maestro cuando un plan cambie de pendiente a completado.
-- [ ] Mantener `Planes/Resumenes/Resumen11Firebase.md` alineado con este plan maestro.
+- [ ] Confirmar que `PlanCierreFirebasePrivado.md` contiene todos los pendientes reales.
+- [ ] Confirmar que no queda ningún plan futuro Firebase duplicado para el cierre privado.
+- [ ] Confirmar que Storage y Mesa se prueban con usuario Firebase real.
+- [ ] Confirmar que Android y navegador cargan los mismos datos privados.
+- [ ] Actualizar este maestro cuando el cierre privado quede completado.
+- [ ] Mantener `Planes/Resumenes/Resumen11Firebase.md` alineado con este maestro.
 
 ## Próximo plan recomendado
 
-El próximo plan recomendado es `PlanModeloComunitarioFirebase.md` después de cerrar validaciones manuales pendientes.
+El próximo plan recomendado es `PlanCierreFirebasePrivado.md`.
 
-Motivo: la base privada principal, migración ampliada, fuente principal Firestore y Mesa de Trabajo ya están implementadas en código. Antes de pasar a comunidad conviene cerrar validaciones manuales pendientes (Storage real y Mesa de Trabajo real en Android/navegador con usuario Firebase).
+Motivo: la base privada principal, migración ampliada, fuente principal Firestore, Storage en código y Mesa de Trabajo ya están implementadas. Lo que falta no es diseñar más modelo, sino validar lo real: Storage con CORS aplicado, fotos reales, Mesa de Trabajo con usuario Firebase real, Android y limpieza de advertencias.
 
 ## Progreso del plan
 
 - [x] Fase 1: Base Firebase completada
 - [x] Fase 2: Datos privados principales completados
-- [x] Fase 3: Próximos datos privados pendientes
-- [ ] Fase 4: Fotos y Storage pendientes
-- [x] Fase 5: Fuente principal Firestore
-- [ ] Fase 6: Mesa de Trabajo privada
-- [ ] Fase 7: Comunidad y datos compartidos
-- [ ] Fase 8: Pendientes no Firebase que afectan pruebas
+- [x] Fase 3: Migración y fuente principal completadas
+- [ ] Fase 4: Fotos y Storage pendientes de validación real
+- [ ] Fase 5: Mesa de Trabajo pendiente de validación real
+- [ ] Fase 6: Cierre privado pendiente
 - [ ] Fase Testing
 
 Fecha de creación: 20 de Mayo 2026
-Fecha de última actualización: 22 de Mayo 2026
+Fecha de última actualización: 18 de Junio 2026
 Estado: ACTIVO

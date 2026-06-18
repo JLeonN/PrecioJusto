@@ -1,4 +1,4 @@
-# Modelo Firestore y Migración
+﻿# Modelo Firestore y Migración
 
 ## Estado
 
@@ -23,7 +23,7 @@ usuarios/{usuarioId}/productos/{productoId}
 usuarios/{usuarioId}/productos/{productoId}/precios/{precioId}
 usuarios/{usuarioId}/comercios/{comercioId}
 usuarios/{usuarioId}/listasJustas/{listaId}
-usuarios/{usuarioId}/mesaTrabajo/items/{itemId}
+usuarios/{usuarioId}/mesaTrabajoItems/{itemId}
 usuarios/{usuarioId}/configuracion/preferencias
 usuarios/{usuarioId}/confirmaciones/{confirmacionId}
 usuarios/{usuarioId}/fotos/{fotoId}
@@ -112,7 +112,7 @@ Estado de implementación 2026-05-20: `PreferenciasService` guarda primero en al
 
 ## Mesa de Trabajo
 
-Documento: `usuarios/{usuarioId}/mesaTrabajo/items/{itemId}`.
+Documento: `usuarios/{usuarioId}/mesaTrabajoItems/{itemId}`.
 
 Campos:
 
@@ -227,7 +227,6 @@ Si falla a mitad, guardar estado `parcial` o `error`, último paso completado y 
 Límites actuales:
 
 - LocalStorage/Capacitor sigue como respaldo temporal.
-- Comunidad no se migra todavía.
 - Las fotos base64 locales no se escriben en Firestore; se intentan subir a Storage y, si falla, quedan locales para reintento.
 
 ## Sincronización Inicial
@@ -255,7 +254,6 @@ Productos y precios ya tienen servicios específicos implementados. Mantener el 
 - `FirestoreMigracionService`
 - `ColaSincronizacionService`
 
-Orden recomendado actual: validar Storage real con CORS aplicado y después avanzar con el modelo comunitario.
 
 ## Actualización migración guiada V2
 

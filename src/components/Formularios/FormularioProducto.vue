@@ -8,7 +8,7 @@
       outlined
       dense
       placeholder="Ej: Leche La Serenísima"
-      :rules="modo === 'comunidad' ? [requerido] : [requeridoNombreLocal]"
+      :rules="[requeridoNombreLocal]"
       :error="!!errorNombreMsg"
       :error-message="errorNombreMsg"
       :class="{ 'shake': animarShakeNombre }"
@@ -41,7 +41,7 @@
       dense
       placeholder="Ej: La Serenísima, Conaprole"
       hint="Opcional"
-      :rules="modo === 'comunidad' ? [requerido] : []"
+      :rules="[]"
       @update:model-value="emitirCambios"
     />
 
@@ -53,7 +53,7 @@
       dense
       placeholder="Ej: 7790742005526"
       hint="Opcional"
-      :rules="modo === 'comunidad' ? [requerido] : []"
+      :rules="[]"
       :loading="buscandoCodigo"
       @update:model-value="emitirCambios"
     >
@@ -90,7 +90,7 @@
           min="0"
           :step="stepCantidad"
           placeholder="1"
-          :rules="modo === 'comunidad' ? [requerido, cantidadValida] : [cantidadValida]"
+          :rules="[cantidadValida]"
           @update:model-value="emitirCambios"
         />
       </div>
@@ -104,7 +104,7 @@
           :options="opcionesUnidades"
           emit-value
           map-options
-          :rules="modo === 'comunidad' ? [requerido] : []"
+          :rules="[]"
           @update:model-value="alCambiarUnidad"
         />
       </div>
@@ -169,7 +169,7 @@ const props = defineProps({
   modo: {
     type: String,
     default: 'local',
-    validator: (value) => ['local', 'comunidad'].includes(value),
+    validator: (value) => value === 'local',
   },
   mostrarMarca: {
     type: Boolean,
@@ -296,10 +296,6 @@ function buscarPorNombre() {
 }
 
 // Reglas de validación
-function requerido(val) {
-  return (val && val.length > 0) || 'Este campo es requerido'
-}
-
 function requeridoNombreLocal(val) {
   return (val && val.trim().length > 0) || 'El nombre es obligatorio'
 }

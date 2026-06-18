@@ -12,7 +12,7 @@
       dense
       use-input
       clearable
-      :rules="modo === 'comunidad' ? [requerido] : []"
+      :rules="[]"
       @filter="filtrarComercios"
       @update:model-value="alSeleccionarComercio"
       @input-value="alEscribirComercio"
@@ -69,7 +69,7 @@
             ? 'Opcional: ayuda a identificar la sucursal específica'
             : 'Escribí una dirección para este comercio nuevo'
       "
-      :rules="modo === 'comunidad' ? [requerido] : []"
+      :rules="[]"
       @update:model-value="alSeleccionarDireccion"
       @input-value="alEscribirDireccion"
       @focus="alEnfocarDireccion"
@@ -124,7 +124,7 @@
           :error="!!errorPrecioMsg"
           :error-message="errorPrecioMsg"
           :class="{ 'shake': animarShake }"
-          :rules="modo === 'comunidad' ? [requerido, precioValido] : [precioValido]"
+          :rules="[precioValido]"
           @update:model-value="alCambiarPrecio"
           @blur="alSalirPrecio"
           @keydown="soloNumerosDecimales"
@@ -186,7 +186,7 @@ const props = defineProps({
   modo: {
     type: String,
     default: 'local',
-    validator: (value) => ['local', 'comunidad'].includes(value),
+    validator: (value) => value === 'local',
   },
   mostrarComercio: {
     type: Boolean,
@@ -670,10 +670,6 @@ function validarPrecio() {
 defineExpose({ validarPrecio })
 
 // Reglas de validación
-function requerido(val) {
-  return (val && val.length > 0) || 'Este campo es requerido'
-}
-
 function precioValido(val) {
   if (val === null || val === undefined || val === '') return true
   return parseFloat(val) >= 1 || 'El precio debe ser al menos de 1'

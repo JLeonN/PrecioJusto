@@ -1,4 +1,4 @@
-# PLAN MIGRACIÓN LOCAL GUIADA FIREBASE
+﻿# PLAN MIGRACIÓN LOCAL GUIADA FIREBASE
 
 ## Descripción del plan
 
@@ -21,7 +21,6 @@ Este plan no convierte todavía Firestore en fuente principal de UI. Primero deb
 
 - No borrar datos locales en este plan.
 - No convertir Firestore en fuente principal de UI en este plan.
-- No migrar listas, preferencias, confirmaciones, comunidad ni Storage en este plan.
 - No subir fotos base64 a Firestore.
 - No ejecutar migración sin usuario Firebase autenticado.
 - No ejecutar migración sin backup local previo exitoso.

@@ -1,4 +1,4 @@
-# PLAN FIRESTORE PRIVADO CONFIRMACIONES
+﻿# PLAN FIRESTORE PRIVADO CONFIRMACIONES
 
 ## Descripción del plan
 
@@ -12,7 +12,6 @@ Implementar la sincronización privada de confirmaciones de precios en Firestore
 - Mantener compatibilidad con el flujo local actual.
 - Sincronizar altas, bajas y limpieza de confirmaciones.
 - Validar privacidad entre usuarios.
-- Preparar camino para comunidad y conteos globales en planes posteriores.
 
 ## FASE 1: Revisar valor y alcance de confirmaciones privadas
 
@@ -23,7 +22,6 @@ Implementar la sincronización privada de confirmaciones de precios en Firestore
 - [x] Revisar `src/almacenamiento/stores/confirmacionesStore.js`.
 - [x] Revisar `src/pages/DetalleProductoPage.vue`.
 - [x] Confirmar alcance privado de historial confirmado por usuario.
-- [x] Confirmar que conteos comunitarios quedan fuera.
 - [x] Confirmar continuidad offline.
 
 ## FASE 2: Crear servicio Firestore de confirmaciones
@@ -64,9 +62,7 @@ Implementar la sincronización privada de confirmaciones de precios en Firestore
 
 - [x] Confirmar que `precio.confirmaciones` sigue siendo dato local/espejo privado.
 - [x] Confirmar que no hay conteo global entre usuarios.
-- [x] Documentar que conteo comunitario real va en otro plan.
 - [x] Confirmar que no se escribe fuera de `usuarios/{usuarioId}`.
-- [x] Confirmar que no se agregan índices comunitarios en esta fase.
 - [x] Confirmar base lista para migración comunitaria futura.
 
 ## FASE 6: Preparar migración guiada futura de confirmaciones
@@ -83,7 +79,6 @@ Implementar la sincronización privada de confirmaciones de precios en Firestore
 - [x] Actualizar `Planes/Resumenes/Resumen11Firebase.md`.
 - [x] Actualizar `Planes/Resumenes/ModeloFirestoreMigracion.md`.
 - [x] Actualizar `Planes/PlanesFuturos/PlanMaestroFirebase.md`.
-- [x] Documentar pendientes de comunidad, Storage/fotos y fuente principal Firestore.
 
 ## FASE TESTING
 

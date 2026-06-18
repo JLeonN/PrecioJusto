@@ -1,8 +1,8 @@
-# RESUMEN 11 - FIREBASE
+﻿# RESUMEN 11 - FIREBASE
 
 ## PROPÓSITO
 
-Este resumen concentra el estado actual de la integración gradual de Precio Justo con Firebase. La app ya tiene un proyecto Firebase nuevo, SDK instalado e inicialización base de Firebase Auth y Firestore Offline, pero todavía mantiene LocalStorage/Capacitor como persistencia principal y no migra datos reales.
+Este resumen concentra el estado actual de la integración gradual de Precio Justo con Firebase. La app ya tiene proyecto Firebase nuevo, Firebase Auth, Firestore Offline, migración guiada, fuente principal Firestore para datos privados y Storage privado implementado en código. LocalStorage/Capacitor sigue activo como respaldo temporal hasta cerrar pruebas reales.
 
 ---
 
@@ -33,7 +33,6 @@ Este resumen concentra el estado actual de la integración gradual de Precio Jus
 - Comercios y direcciones ya se sincronizan a Firestore como espejo privado validado cuando hay usuario Firebase autenticado.
 - Lista Justa ya se sincroniza a Firestore como espejo privado validado cuando hay usuario Firebase autenticado.
 - Productos, precios, comercios y direcciones ya tienen migración local guiada con backup local previo, estado Firestore y reintento idempotente.
-- El enfoque definido es primero backup privado por usuario; la comunidad queda para una etapa posterior.
 - La arquitectura quedó preparada para asignar dueño (`usuarioId`) a todos los datos privados.
 - El modelo Firestore definitivo queda documentado en `Planes/Resumenes/ModeloFirestoreMigracion.md`.
 
@@ -141,7 +140,6 @@ Claves persistidas actuales:
 - `productosStore` expone estado de sincronización y `MisProductosPage` muestra un aviso cuando hay error.
 - Firestore no guarda imágenes base64; las fotos de usuario se preparan para Storage y Firestore guarda solo URL/ruta cuando la subida se completa.
 - Firestore ya es fuente principal de UI para productos/precios con usuario Firebase; local queda como respaldo temporal.
-- No se escriben comercios, listas, preferencias, fotos, comunidad ni Storage en esta fase.
 
 ### Reglas Firestore versionadas
 
@@ -155,7 +153,6 @@ Claves persistidas actuales:
 - Firebase Console y el repo quedaron alineados en criterio de seguridad; la Console no conserva los comentarios locales.
 - No se hizo deploy automático. Comando manual futuro: `firebase deploy --only firestore:rules`.
 - Comercios, listas y preferencias deberán reutilizar `esDueno(usuarioId)` cuando se agreguen.
-- Comunidad pública y Storage de fotos requieren planes y reglas separadas.
 
 ### Firestore privado de comercios
 
@@ -181,7 +178,6 @@ Claves persistidas actuales:
 - Si no hay usuario Firebase autenticado, la migración queda bloqueada.
 - Si no hay conexión, el flujo queda `parcial`, registra cola local y permite reintentar.
 - Firestore sigue sin ser fuente principal de UI; la app continúa leyendo datos visibles desde LocalStorage/Capacitor.
-- Listas, preferencias, confirmaciones, comunidad, Storage y fotos base64 quedan fuera de esta migración.
 
 ### Firestore privado de Lista Justa
 
@@ -219,7 +215,7 @@ Claves persistidas actuales:
 ### Firestore privado de Mesa de Trabajo
 
 - Se creó `FirestoreMesaTrabajoService` para escribir, leer y limpiar ítems de Mesa por usuario.
-- Ruta activa de Mesa: `usuarios/{usuarioId}/mesaTrabajo/items/{itemId}`.
+- Ruta activa de Mesa: `usuarios/{usuarioId}/mesaTrabajoItems/{itemId}`.
 - `sesionEscaneoStore` ahora carga Mesa desde `FuentePrincipalFirestoreService` con fallback local.
 - La persistencia de Mesa quedó local-first con sincronización Firestore serializada para evitar carreras.
 - Si Firestore está vacío y existe `sesion_escaneo` local, la mesa local se migra automáticamente conservando IDs.
@@ -382,7 +378,7 @@ Recomendación práctica:
 
 ## PRÓXIMO PASO RECOMENDADO
 
-Productos, precios, comercios, Lista Justa, preferencias, confirmaciones y Mesa de Trabajo ya tienen espejo privado implementado. Antes de avanzar fuerte con comunidad conviene cerrar validaciones manuales pendientes:
+Ejecutar `PlanCierreFirebasePrivado.md`.
 
 - aplicar `FirebaseStorageCors.json` al bucket real;
 - probar subida de foto en navegador y Android con usuario Firebase;
@@ -390,7 +386,8 @@ Productos, precios, comercios, Lista Justa, preferencias, confirmaciones y Mesa 
 - probar Mesa de Trabajo con usuario Firebase real en navegador y Android para validar continuidad entre Lista Justa → Mesa → Mis Productos;
 - corregir el CORS de `version.json` en dev para no contaminar la consola durante pruebas.
 
-Mi recomendación práctica: cerrar primero la prueba real de Storage y Mesa con dos usuarios. Después sí avanzar con el modelo comunitario, porque ya no quedaría un pendiente técnico fuerte dentro del árbol privado `usuarios/{usuarioId}`.
+Recomendación práctica: cerrar primero Storage real, Mesa de Trabajo real y Android. Después de ese cierre, recién conviene abrir planes nuevos no relacionados con Firebase privado.
+
 
 ## Actualización migración guiada restante
 

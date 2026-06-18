@@ -1,4 +1,4 @@
-# PLAN SEGUNDO INTENTO FIREBASE
+﻿# PLAN SEGUNDO INTENTO FIREBASE
 
 ## Descripción del plan
 
@@ -12,7 +12,6 @@ El enfoque acordado es comenzar con backup privado por usuario y dejar la base c
 - Reducir dependencias directas de `localStorage` y `@capacitor/preferences`.
 - Evitar documentos gigantes incompatibles con Firestore.
 - Separar datos, fotos y estado local temporal antes de integrar Firebase.
-- Dejar definido el camino hacia cuenta de usuario, backup privado y comunidad futura.
 
 ## Reglas del plan
 
@@ -22,7 +21,6 @@ El enfoque acordado es comenzar con backup privado por usuario y dejar la base c
 - No perder datos locales existentes.
 - No eliminar `LocalStorageAdapter` ni `CapacitorAdapter` hasta tener migración verificada.
 - No guardar fotos base64 en Firestore en el modelo futuro.
-- Mantener primero backup privado por usuario; la comunidad queda para otro plan.
 - Respetar la estructura y nombres en español del proyecto.
 
 ## Resultado de ejecución
@@ -61,7 +59,6 @@ Dejar documentado qué datos se guardan, dónde se guardan y qué tan preparados
 - [x] Identificar datos que se guardan como bloque grande.
 - [x] Identificar usos directos de `localStorage` fuera de los adaptadores.
 - [x] Identificar usos directos de `@capacitor/preferences` fuera de los adaptadores.
-- [x] Documentar qué datos son privados del usuario y qué datos podrían ser comunitarios en el futuro.
 
 ## FASE 2: Normalizar acceso a persistencia
 
