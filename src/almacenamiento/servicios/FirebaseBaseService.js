@@ -116,6 +116,8 @@ function observarUsuarioAutenticado(callback) {
 function obtenerFirebaseStorage() {
   if (!firebaseStorage) {
     firebaseStorage = getStorage(obtenerFirebaseApp())
+    firebaseStorage.maxUploadRetryTime = 15000
+    firebaseStorage.maxOperationRetryTime = 10000
   }
 
   return firebaseStorage
