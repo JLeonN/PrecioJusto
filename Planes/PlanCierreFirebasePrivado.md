@@ -27,15 +27,15 @@ Cerrar la integración privada de Firebase en Precio Justo antes de abrir nuevas
 
 Ordenar el estado actual antes de probar Firebase.
 
-- [ ] Revisar cambios pendientes con `git status`.
-- [ ] Confirmar si la carpeta `Recursos/` debe quedar versionada o ignorada.
+- [x] Revisar cambios pendientes con `git status`.
+- [x] Confirmar si la carpeta `Recursos/` debe quedar versionada o ignorada.
 - [x] Confirmar que las imágenes de `Recursos/Facebook` no son parte del build.
-- [ ] Revisar el cambio de ruta de Mesa a `usuarios/{usuarioId}/mesaTrabajoItems/{itemId}`.
-- [ ] Verificar que planes y resúmenes usan la misma ruta de Mesa.
+- [x] Revisar el cambio de ruta de Mesa a `usuarios/{usuarioId}/mesaTrabajoItems/{itemId}`.
+- [x] Verificar que planes y resúmenes usan la misma ruta de Mesa.
 - [x] Confirmar que no quedan referencias al flujo público descartado en planes ni código activo.
 - [x] Ejecutar `npm run lint`.
 - [x] Ejecutar `npm run build`.
-- [ ] Crear commit antes de pruebas largas si todo queda coherente.
+- [x] Crear commit antes de pruebas largas si todo queda coherente.
 
 ## FASE 2: Validar Mesa de Trabajo real
 
@@ -43,9 +43,13 @@ Ordenar el estado actual antes de probar Firebase.
 
 Confirmar que Mesa de Trabajo funciona con Firebase real y no solo en validación local.
 
+- [ ] Confirmar que el repo está limpio antes de iniciar pruebas reales.
 - [ ] Iniciar sesión en navegador con usuario Firebase real.
 - [ ] Crear un ítem en Mesa de Trabajo.
 - [ ] Editar nombre, precio, cantidad, moneda y comercio.
+- [ ] Cambiar comercio de un ítem existente y confirmar que se sincroniza.
+- [ ] Eliminar un ítem individual y confirmar que se elimina de Firestore.
+- [ ] Limpiar toda la Mesa y confirmar que Firestore queda sin ítems de Mesa.
 - [ ] Recargar la app y confirmar que el ítem sigue en Mesa.
 - [ ] Confirmar en Firebase Console que existe en `usuarios/{usuarioId}/mesaTrabajoItems/{itemId}`.
 - [ ] Enviar un ítem desde Lista Justa a Mesa de Trabajo.
@@ -60,13 +64,19 @@ Confirmar que Mesa de Trabajo funciona con Firebase real y no solo en validació
 
 Preparar el bucket real para subir fotos desde navegador y Android.
 
+- [ ] Confirmar proyecto Firebase activo antes de tocar reglas o CORS.
+- [ ] Confirmar si `firebase use` apunta al proyecto correcto.
 - [ ] Confirmar el bucket activo de Firebase Storage.
 - [ ] Confirmar que `FirebaseStorageCors.json` existe y contiene los orígenes necesarios.
+- [ ] Confirmar que `firebase.json` incluye `firestore.rules` y `storage.rules`.
+- [ ] Confirmar que `storage.rules` protege `usuarios/{usuarioId}/fotos/{archivo=**}`.
+- [ ] Aplicar o verificar reglas con `firebase deploy --only firestore:rules,storage`.
 - [ ] Aplicar CORS al bucket real con `firebase`, `gcloud` o `gsutil`.
 - [ ] Confirmar que la CLI usada está autenticada con el proyecto correcto.
 - [ ] Documentar el comando exacto usado.
 - [ ] Reintentar subida de foto desde navegador.
 - [ ] Confirmar que no aparece error CORS contra `firebasestorage.googleapis.com`.
+- [ ] Confirmar que un usuario no puede leer fotos de otro usuario.
 
 ## FASE 4: Validar fotos privadas
 
@@ -78,12 +88,15 @@ Confirmar que Storage funciona de punta a punta para fotos privadas.
 - [ ] Confirmar que Storage recibe el archivo en `usuarios/{usuarioId}/fotos`.
 - [ ] Confirmar que Firestore guarda solo URL/ruta, no base64.
 - [ ] Recargar la app y confirmar que la foto se muestra desde Firebase.
+- [ ] Cerrar sesión, volver a iniciar sesión y confirmar que la foto sigue visible.
 - [ ] Crear comercio o dirección con foto y repetir validación.
 - [ ] Crear ítem de Lista Justa con foto si el flujo lo permite.
 - [ ] Probar foto desde Android.
 - [ ] Confirmar que la foto subida desde Android aparece en navegador.
 - [ ] Probar sin conexión y verificar que la foto queda pendiente sin perderse.
 - [ ] Volver online y confirmar que la foto pendiente se sincroniza.
+- [ ] Reemplazar una foto existente y confirmar que la referencia nueva queda correcta.
+- [ ] Borrar una foto y confirmar que Firestore limpia la URL/ruta.
 
 ## FASE 5: Limpiar advertencias de pruebas
 
@@ -96,6 +109,9 @@ Reducir ruido y riesgos antes de dar por cerrada la integración privada.
 - [ ] Revisar `MODO_PRUEBA` en `ConfigPublicidad.js`.
 - [ ] Mantener `MODO_PRUEBA = true` solo para builds de prueba.
 - [ ] Definir cómo cambiar a IDs reales antes de publicación.
+- [ ] Confirmar que `MODO_PRUEBA = true` no se mezcla con un build final de publicación.
+- [ ] Confirmar que no quedan textos dañados por codificación.
+- [ ] Confirmar que no quedan referencias al flujo público descartado.
 - [ ] Revisar advertencia de chunks grandes del build y decidir si queda como pendiente no bloqueante.
 - [ ] Revisar advertencia de Browserslist desactualizado y decidir si actualizar dependencias.
 
@@ -113,6 +129,8 @@ Confirmar que el build móvil queda listo para prueba real.
 - [ ] Abrir Android Studio.
 - [ ] Instalar o generar APK de prueba.
 - [ ] Probar login, productos, comercios, listas, preferencias, Mesa y fotos en celular.
+- [ ] Confirmar que Android y navegador muestran los mismos datos con el mismo usuario.
+- [ ] Confirmar que Android no muestra datos del usuario anterior después de cerrar sesión.
 
 ## FASE 7: Actualizar documentación final
 
@@ -135,10 +153,14 @@ Dejar los planes como fuente confiable del estado real.
 Validar el cierre completo de Firebase privado.
 
 - [ ] `npm run lint` pasa sin errores.
+- [ ] `npm test` pasa o confirma que no hay tests configurados.
 - [ ] `npm run build` pasa sin errores.
 - [ ] `npm run cel` pasa sin errores.
+- [ ] `rg` no encuentra texto dañado por codificación en `Planes`, `src`, `AGENTS.md` ni `CLAUDE.md`.
+- [ ] `rg` no encuentra referencias al flujo público descartado.
 - [ ] Navegador con usuario Firebase real carga datos desde Firestore.
 - [ ] Android con el mismo usuario carga los mismos datos.
+- [ ] Un segundo usuario no puede leer datos, Mesa ni fotos del primero.
 - [ ] Mesa de Trabajo persiste después de recargar y cambiar dispositivo.
 - [ ] Fotos se suben a Storage y se ven después de recargar.
 - [ ] Firestore no guarda base64.
@@ -149,7 +171,7 @@ Validar el cierre completo de Firebase privado.
 
 ## Progreso del plan
 
-- [ ] Fase 1: Cerrar cambios pendientes del repo
+- [x] Fase 1: Cerrar cambios pendientes del repo
 - [ ] Fase 2: Validar Mesa de Trabajo real
 - [ ] Fase 3: Aplicar CORS real de Storage
 - [ ] Fase 4: Validar fotos privadas
@@ -159,5 +181,5 @@ Validar el cierre completo de Firebase privado.
 - [ ] Fase Testing
 
 Fecha de creación: 18 de Junio 2026
-Fecha de última actualización: 18 de Junio 2026
-Estado: ACTIVO
+Fecha de última actualización: 19 de Junio 2026
+Estado: EN PROCESO
