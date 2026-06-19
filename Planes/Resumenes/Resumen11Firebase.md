@@ -19,7 +19,8 @@ Este resumen concentra el estado actual de la integración gradual de Precio Jus
 - El plan `PlanFirestorePrivadoListasJustas.md` quedó ejecutado y marcado como `TERMINADO`.
 - El plan `PlanFirestorePrivadoPreferencias.md` quedó ejecutado y marcado como `TERMINADO`.
 - El plan `PlanFirestorePrivadoConfirmaciones.md` quedó ejecutado y marcado como `TERMINADO`.
-- El plan `PlanFirestoreMesaTrabajo.md` quedó ejecutado y marcado como `TERMINADO_LOCAL_CON_PENDIENTES_EXTERNOS`.
+- El plan `PlanFirestoreMesaTrabajo.md` quedó ejecutado y movido a planes terminados.
+- El plan `PlanCierreFirebasePrivado.md` quedó completado como cierre Firebase gratis sin fotos.
 - Proyecto Firebase actual: `PrecioJustoPruebas2` (`preciojustopruebas2`).
 - Firebase SDK instalado como dependencia del proyecto.
 - Firebase Auth quedó preparado con proveedor `Correo electrónico/contraseña`.
@@ -28,7 +29,7 @@ Este resumen concentra el estado actual de la integración gradual de Precio Jus
 - Las reglas Firestore privadas quedaron versionadas en el repositorio con `firestore.rules`.
 - Firestore Offline quedó inicializado con caché persistente multi-tab cuando el navegador lo permite.
 - Storage privado de fotos quedó implementado en código como preparación futura, pero no forma parte del cierre actual porque el proyecto se mantiene en Spark y no se usará Blaze.
-- La app mantiene LocalStorage/Capacitor como respaldo temporal, pero Firestore ya es fuente principal visible cuando hay usuario Firebase.
+- La app mantiene LocalStorage/Capacitor como respaldo local, pero Firestore ya es fuente principal visible cuando hay usuario Firebase.
 - Productos y precios ya se sincronizan a Firestore como espejo privado validado cuando hay usuario Firebase autenticado.
 - Comercios y direcciones ya se sincronizan a Firestore como espejo privado validado cuando hay usuario Firebase autenticado.
 - Lista Justa ya se sincroniza a Firestore como espejo privado validado cuando hay usuario Firebase autenticado.
@@ -329,7 +330,7 @@ Recomendación práctica:
 - `PlanFirebaseStorageFotos2.md`: no se valida subida real a Storage porque Leo decidió no activar Blaze y mantener el proyecto gratis.
 - `PlanFirestoreMesaTrabajo.md`: `npm run lint`, `npm run build` y `npm run androidReleaseConSimbolos` pasaron correctamente.
 - `PlanFirestoreMesaTrabajo.md`: MCP Browser cargó `http://127.0.0.1:9000`, redirigió a `/acceso?redirigir=/` y no mostró errores ni advertencias nuevas.
-- `PlanFirestoreMesaTrabajo.md`: Mesa de Trabajo fue validada en navegador con usuario Firebase real; queda pendiente prueba manual completa en Android.
+- `PlanFirestoreMesaTrabajo.md`: Mesa de Trabajo fue validada en navegador y Android con usuario Firebase real.
 - La app cargó en navegador local con MCP Browser.
 - Firebase base inicializó con `projectId: preciojustopruebas2`, Auth activo y Firestore Offline activo.
 - MCP Browser validó redirección a login sin sesión, registro de usuario, login correcto, contraseña incorrecta con error claro, persistencia tras recarga y logout.
@@ -378,20 +379,22 @@ Recomendación práctica:
 - `PlanCierreFirebasePrivado.md`: prueba automatizada en navegador validó productos, comercios, listas, preferencias y Mesa desde Firestore sin fotos.
 - `PlanCierreFirebasePrivado.md`: prueba de aislamiento creó un usuario temporal, confirmó `permission-denied` al leer datos de otro usuario y eliminó el usuario temporal.
 - `PlanCierreFirebasePrivado.md`: `npm run cel` pasó correctamente, generó AAB release, empaquetó símbolos nativos y abrió Android Studio.
+- `PlanCierreFirebasePrivado.md`: Leo probó la app instalada en celular y confirmó que funciona correctamente.
 
 ---
 
-## PRÓXIMO PASO RECOMENDADO
+## ESTADO FINAL DEL CIERRE FIREBASE
 
-Ejecutar el tramo final de `PlanCierreFirebasePrivado.md` sin fotos:
+Firebase privado queda cerrado para datos gratuitos sin fotos:
 
-- probar la app instalada en Android con el mismo usuario Firebase;
-- confirmar login, productos, comercios, listas, preferencias y Mesa de Trabajo en celular;
-- confirmar que Android y navegador muestran los mismos datos privados;
-- dejar `version.json` CORS como advertencia no bloqueante o corregirlo si molesta las pruebas;
-- cerrar documentación y preparar commit final cuando Leo lo pida.
+- Auth, Firestore privado y Firestore Offline quedan operativos.
+- Productos, comercios, listas, preferencias, confirmaciones y Mesa de Trabajo quedan bajo rutas privadas de usuario.
+- Navegador y Android fueron validados con usuario Firebase real.
+- Firestore Security Rules quedaron desplegadas y probadas con aislamiento entre usuarios.
+- Firebase Storage/fotos queda fuera del cierre por requerir Blaze.
+- El proyecto queda listo para pasar a la siguiente etapa.
 
-Recomendación práctica: cerrar Firebase gratis sin fotos. Si en el futuro se quieren fotos sincronizadas, abrir un plan separado solo si Leo decide usar un servicio gratuito viable o cambia la decisión sobre Blaze.
+Recomendación práctica: no abrir más planes de cierre Firebase privado. Si en el futuro se quieren fotos sincronizadas, abrir un plan separado solo si aparece una opción gratuita viable o si Leo cambia la decisión sobre Blaze.
 
 
 ## Actualización migración guiada restante

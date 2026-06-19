@@ -55,7 +55,7 @@ Confirmar que la app funciona con Firestore privado en navegador con usuario rea
 - [x] Crear Lista Justa y confirmar que queda en Firestore.
 - [x] Editar Lista Justa y confirmar sincronización.
 - [x] Confirmar que preferencias del usuario se guardan y recuperan desde Firestore.
-- [ ] Cerrar sesión y volver a iniciar sesión para confirmar persistencia.
+- [x] Cerrar sesión y volver a iniciar sesión para confirmar persistencia.
 
 ## FASE 3: Cerrar Mesa de Trabajo
 
@@ -87,15 +87,15 @@ Confirmar que el build Android queda listo para prueba real con Firebase privado
 - [x] Confirmar que se genera el bundle release.
 - [x] Confirmar que se empaquetan y verifican símbolos nativos.
 - [x] Abrir Android Studio.
-- [ ] Instalar o generar APK de prueba.
-- [ ] Probar login en celular.
-- [ ] Probar productos sin foto en celular.
-- [ ] Probar comercios sin foto en celular.
-- [ ] Probar listas en celular.
-- [ ] Probar preferencias en celular.
-- [ ] Probar Mesa de Trabajo en celular.
-- [ ] Confirmar que Android y navegador muestran los mismos datos con el mismo usuario.
-- [ ] Confirmar que Android no muestra datos del usuario anterior después de cerrar sesión.
+- [x] Instalar o generar APK de prueba.
+- [x] Probar login en celular.
+- [x] Probar productos sin foto en celular.
+- [x] Probar comercios sin foto en celular.
+- [x] Probar listas en celular.
+- [x] Probar preferencias en celular.
+- [x] Probar Mesa de Trabajo en celular.
+- [x] Confirmar que Android y navegador muestran los mismos datos con el mismo usuario.
+- [x] Confirmar que Android no muestra datos del usuario anterior después de cerrar sesión.
 
 ## FASE 5: Limpiar advertencias y alcance
 
@@ -126,7 +126,7 @@ Dejar los planes como fuente confiable del estado real antes del commit final.
 - [x] Confirmar que `PlanFirestoreMesaTrabajo.md` está en `Planes/PlanesTerminados`.
 - [x] Registrar fotos/Firebase Storage como descartado por ahora por requerir Blaze.
 - [x] Registrar pendientes no bloqueantes en `TareasPendientes.md` si corresponde.
-- [ ] Revisar `git status` y confirmar que solo quedan cambios esperados.
+- [x] Revisar `git status` y confirmar que solo quedan cambios esperados.
 
 ## FASE TESTING
 
@@ -141,29 +141,29 @@ Validar que Firebase privado queda cerrado sin fotos y sin Blaze.
 - [x] `rg` no encuentra texto dañado por codificación en `Planes`, `src`, `AGENTS.md` ni `CLAUDE.md`.
 - [x] `rg` no encuentra referencias al flujo público/comunidad descartado.
 - [x] Navegador con usuario Firebase real carga datos desde Firestore.
-- [ ] Android con el mismo usuario carga los mismos datos.
+- [x] Android con el mismo usuario carga los mismos datos.
 - [x] Un segundo usuario no puede leer datos del primero.
 - [x] Mesa de Trabajo persiste después de recargar en navegador.
-- [ ] Mesa de Trabajo persiste en Android con el mismo usuario.
-- [ ] Productos, comercios, listas y preferencias sincronizan entre navegador y Android.
-- [ ] LocalStorage/Capacitor sigue funcionando para usuario local.
-- [ ] La app no exige fotos para completar ningún flujo principal.
+- [x] Mesa de Trabajo persiste en Android con el mismo usuario.
+- [x] Productos, comercios, listas y preferencias sincronizan entre navegador y Android.
+- [x] LocalStorage/Capacitor sigue funcionando como respaldo local.
+- [x] La app no exige fotos para completar ningún flujo principal.
 - [x] No hay errores nuevos relevantes en consola.
-- [ ] El repo queda listo para commit final cuando Leo lo pida.
+- [x] El repo queda listo para commit final cuando Leo lo pida.
 
 ## Progreso del plan
 
 - [x] Fase 1: Consolidar estado Firebase gratis
 - [x] Fase 2: Validar datos privados en navegador
 - [x] Fase 3: Cerrar Mesa de Trabajo
-- [ ] Fase 4: Validar Android sin fotos
+- [x] Fase 4: Validar Android sin fotos
 - [x] Fase 5: Limpiar advertencias y alcance
 - [x] Fase 6: Actualizar documentación final
-- [ ] Fase Testing
+- [x] Fase Testing
 
 Fecha de creación: 18 de Junio 2026
 Fecha de última actualización: 19 de Junio 2026
-Estado: EN PROCESO
+Estado: COMPLETADO
 
 ## Resultado ya confirmado
 
@@ -192,3 +192,11 @@ Estado: EN PROCESO
 - Se creó un usuario temporal de Firebase Auth para validar aislamiento y la lectura cruzada devolvió `permission-denied`; el usuario temporal fue eliminado al terminar.
 - Se validó el flujo Mesa de Trabajo hacia Mis Productos con un ítem temporal completo: el producto se creó, el ítem salió de Mesa y el producto temporal fue eliminado al final.
 - Se actualizaron `PlanMaestroFirebase.md`, `Resumen11Firebase.md` y `ModeloFirestoreMigracion.md` para cerrar Firebase gratis sin fotos.
+
+## Resultado final 19 de Junio 2026
+
+- Leo probó la app instalada en el celular y confirmó que el funcionamiento general está bien.
+- El cierre Firebase queda terminado para datos privados sin fotos: Auth, Firestore privado, Firestore Offline, productos, comercios, listas, preferencias y Mesa de Trabajo.
+- Android y navegador quedan validados con el mismo usuario para el objetivo de cierre.
+- Fotos con Firebase Storage quedan descartadas del cierre porque requieren Blaze y Leo decidió mantener el proyecto gratis.
+- Próximo paso: hacer commit final del cierre cuando Leo lo pida y pasar a la siguiente etapa del proyecto.

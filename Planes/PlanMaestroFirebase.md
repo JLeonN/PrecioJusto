@@ -9,7 +9,7 @@ Este maestro cubre datos privados bajo `usuarios/{usuarioId}`, Firebase Auth, Fi
 ## Objetivo principal
 
 - Registrar los planes Firebase ya completados.
-- Registrar el único plan pendiente de cierre.
+- Registrar que el cierre Firebase privado gratis quedó completado.
 - Evitar repetir planes ya terminados.
 - Mantener el foco en datos privados por usuario.
 - Definir el orden correcto para cerrar Firebase privado.
@@ -21,7 +21,7 @@ Este maestro cubre datos privados bajo `usuarios/{usuarioId}`, Firebase Auth, Fi
 - Si un plan aparece como terminado, no repetirlo; auditarlo y seguir con el pendiente real.
 - Si se termina un plan Firebase, actualizar este plan maestro.
 - No eliminar LocalStorage/Capacitor hasta completar pruebas reales de navegador y Android.
-- No dar por cerrada la integración privada hasta validar Firestore privado, Mesa de Trabajo y Android con usuario Firebase real.
+- La integración privada queda cerrada cuando Firestore privado, Mesa de Trabajo y Android están validados con usuario Firebase real.
 - No activar Blaze ni bloquear el cierre por fotos con Firebase Storage.
 
 ## FASE 1: Base Firebase completada
@@ -76,11 +76,11 @@ Registrar que Storage privado de fotos no forma parte del cierre Firebase gratis
 - [x] Confirmar decisión de Leo: no activar Blaze y no implementar fotos si no son gratis.
 - [x] Dejar Storage/fotos como preparación futura fuera del cierre activo.
 
-## FASE 5: Mesa de Trabajo pendiente de validación real
+## FASE 5: Mesa de Trabajo validada
 
 ### Objetivo
 
-Registrar lo que falta para cerrar Mesa de Trabajo.
+Registrar que Mesa de Trabajo quedó dentro del cierre Firebase gratis.
 
 - [x] Sincronizar ítems pendientes de Mesa de Trabajo en Firestore.
 - [x] Mantener LocalStorage/Capacitor como respaldo temporal para usuario local y modo offline.
@@ -89,20 +89,20 @@ Registrar lo que falta para cerrar Mesa de Trabajo.
 - [x] Validar Mesa de Trabajo en navegador con usuario Firebase real.
 - [x] Confirmar escritura/lectura real en `usuarios/{usuarioId}/mesaTrabajoItems/{itemId}`.
 - [x] Validar continuidad Mesa de Trabajo hacia Mis Productos en navegador.
-- [ ] Validar Mesa de Trabajo en Android con usuario Firebase real.
+- [x] Validar Mesa de Trabajo en Android con usuario Firebase real.
 
-## FASE 6: Cierre privado pendiente
+## FASE 6: Cierre privado completado
 
 ### Objetivo
 
-Ejecutar un único plan que concentre todo lo que falta para cerrar Firebase privado.
+Registrar el cierre definitivo de Firebase privado sin fotos.
 
-- [ ] `PlanCierreFirebasePrivado.md`: ejecutar validaciones finales y limpieza sin fotos.
+- [x] `PlanCierreFirebasePrivado.md`: ejecutar validaciones finales y limpieza sin fotos.
 - [x] Revisar cambios pendientes del repo antes de pruebas largas.
 - [x] Resolver o documentar CORS de `version.json` en desarrollo como advertencia no bloqueante.
 - [x] Confirmar `MODO_PRUEBA` de AdMob para builds de prueba.
 - [x] Ejecutar validación final con `npm run lint`, `npm run build` y `npm run cel`.
-- [ ] Completar prueba manual Android con usuario Firebase real.
+- [x] Completar prueba manual Android con usuario Firebase real.
 
 ## FASE TESTING
 
@@ -110,19 +110,19 @@ Ejecutar un único plan que concentre todo lo que falta para cerrar Firebase pri
 
 Validar que este maestro representa el estado real antes de crear nuevos planes.
 
-- [ ] Confirmar que `PlanCierreFirebasePrivado.md` contiene todos los pendientes reales.
-- [ ] Confirmar que no queda ningún plan futuro Firebase duplicado para el cierre privado.
+- [x] Confirmar que `PlanCierreFirebasePrivado.md` contiene todos los pendientes reales.
+- [x] Confirmar que no queda ningún plan futuro Firebase duplicado para el cierre privado.
 - [x] Confirmar que Storage queda fuera del cierre Firebase gratis.
 - [x] Confirmar que Mesa se prueba con usuario Firebase real en navegador.
-- [ ] Confirmar que Android y navegador cargan los mismos datos privados.
-- [ ] Actualizar este maestro cuando el cierre privado quede completado.
-- [ ] Mantener `Planes/Resumenes/Resumen11Firebase.md` alineado con este maestro.
+- [x] Confirmar que Android y navegador cargan los mismos datos privados.
+- [x] Actualizar este maestro cuando el cierre privado quede completado.
+- [x] Mantener `Planes/Resumenes/Resumen11Firebase.md` alineado con este maestro.
 
 ## Próximo plan recomendado
 
-El próximo plan recomendado es `PlanCierreFirebasePrivado.md`.
+No queda un plan Firebase privado pendiente.
 
-Motivo: la base privada principal, migración ampliada, fuente principal Firestore y Mesa de Trabajo ya están implementadas. Lo que falta no es diseñar más modelo, sino cerrar validaciones reales sin fotos: navegador, Android, documentación final y limpieza de advertencias.
+Motivo: Firebase privado gratis quedó cerrado sin fotos. La siguiente etapa debe ser una mejora nueva de la app, no otro plan de cierre Firebase. Fotos solo deben retomarse si aparece una opción gratuita viable o si Leo cambia la decisión sobre Blaze.
 
 ## Progreso del plan
 
@@ -130,10 +130,18 @@ Motivo: la base privada principal, migración ampliada, fuente principal Firesto
 - [x] Fase 2: Datos privados principales completados
 - [x] Fase 3: Migración y fuente principal completadas
 - [x] Fase 4: Fotos y Storage descartados del cierre gratis
-- [ ] Fase 5: Mesa de Trabajo pendiente de validación real
-- [ ] Fase 6: Cierre privado pendiente
-- [ ] Fase Testing
+- [x] Fase 5: Mesa de Trabajo validada
+- [x] Fase 6: Cierre privado completado
+- [x] Fase Testing
 
 Fecha de creación: 20 de Mayo 2026
 Fecha de última actualización: 19 de Junio 2026
-Estado: ACTIVO
+Estado: COMPLETADO
+
+## Resultado final
+
+- Firebase privado queda cerrado para datos gratuitos sin fotos.
+- Firestore es la fuente principal visible con usuario Firebase para datos privados.
+- LocalStorage/Capacitor se conserva como respaldo local y para usuario local.
+- Firebase Storage/fotos queda fuera del alcance porque el proyecto seguirá en Spark y no se activará Blaze.
+- Leo probó la app en celular y confirmó que funciona correctamente para continuar con la siguiente etapa.

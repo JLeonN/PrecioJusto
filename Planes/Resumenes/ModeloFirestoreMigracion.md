@@ -7,6 +7,7 @@
 - Auth: Email/Password operativo.
 - Firestore: creado en `nam5`, reglas privadas activas bajo `usuarios/{usuarioId}`.
 - Escrituras Firestore desde la app: habilitadas para productos, precios, comercios, Lista Justa, preferencias y confirmaciones privados.
+- Cierre Firebase gratis: completado el 19 de Junio 2026 sin fotos ni Blaze.
 - Migración guiada: habilitada para productos, precios, comercios, direcciones, listas, preferencias y confirmaciones con backup local previo.
 - Storage privado: implementado en código como preparación futura, pero fuera del cierre actual porque Leo decidió mantener el proyecto en Spark y no activar Blaze.
 - Inventario MCP en navegador local: adaptador `local`, sin productos, precios, comercios, listas, preferencias, confirmaciones ni fotos en ese origen.
