@@ -8,7 +8,7 @@
 - Firestore: creado en `nam5`, reglas privadas activas bajo `usuarios/{usuarioId}`.
 - Escrituras Firestore desde la app: habilitadas para productos, precios, comercios, Lista Justa, preferencias y confirmaciones privados.
 - Migración guiada: habilitada para productos, precios, comercios, direcciones, listas, preferencias y confirmaciones con backup local previo.
-- Storage privado: implementado en código para fotos de productos, comercios, direcciones e items; falta aplicar CORS al bucket real y validar subida real.
+- Storage privado: implementado en código como preparación futura, pero fuera del cierre actual porque Leo decidió mantener el proyecto en Spark y no activar Blaze.
 - Inventario MCP en navegador local: adaptador `local`, sin productos, precios, comercios, listas, preferencias, confirmaciones ni fotos en ese origen.
 
 ## Decisión Principal
@@ -26,7 +26,7 @@ usuarios/{usuarioId}/listasJustas/{listaId}
 usuarios/{usuarioId}/mesaTrabajoItems/{itemId}
 usuarios/{usuarioId}/configuracion/preferencias
 usuarios/{usuarioId}/confirmaciones/{confirmacionId}
-usuarios/{usuarioId}/fotos/{fotoId}
+usuarios/{usuarioId}/fotos/{fotoId} (preparación futura, fuera del cierre gratis)
 usuarios/{usuarioId}/configuracion/migracionLocal
 ```
 
@@ -138,7 +138,7 @@ Estado de implementación 2026-05-21: `ConfirmacionesService` guarda primero en 
 
 ## Fotos y Storage
 
-Firestore no guarda base64. Guarda `imagenUrl`/`fotoUrl` y `imagenRutaStorage`/`fotoRutaStorage`.
+Firestore no debe guardar base64. En el cierre Firebase gratis actual, las fotos no forman parte del alcance porque Firebase Storage requiere activar Blaze en este proyecto nuevo.
 
 Storage privado implementado:
 
@@ -149,7 +149,7 @@ usuarios/{usuarioId}/fotos/direcciones/direcciones-{comercioId}-{direccionId}.{e
 usuarios/{usuarioId}/fotos/listas/listas-{listaId}-{itemId}.{extension}
 ```
 
-Decisión: imágenes externas de API quedan como URL externa con `fotoFuente: api` o `externa`. Fotos de usuario en base64 se suben a Storage cuando existe usuario Firebase y conexión; si falla, se conserva la foto local y queda pendiente de reintento.
+Decisión actual: imágenes externas de API quedan como URL externa con `fotoFuente: api` o `externa`. Fotos de usuario no se cierran con Firebase Storage mientras el proyecto siga en Spark.
 
 Estado de implementación 2026-05-22:
 
@@ -158,7 +158,7 @@ Estado de implementación 2026-05-22:
 - `FuentePrincipalFirestoreService` reconstruye `imagen` y `foto` desde URL Storage para compatibilidad visual de la UI.
 - `storage.rules` protege `usuarios/{usuarioId}/fotos/{archivo=**}` con usuario autenticado, archivos `image/*` y máximo 5 MB.
 - `FirebaseStorageCors.json` queda versionado para aplicar CORS de desarrollo al bucket real.
-- Pendiente externo: aplicar CORS con herramienta de Google y validar subida real desde navegador/Android.
+- Decisión 2026-06-19: no activar Blaze, no aplicar CORS y no validar subida real de fotos dentro del cierre Firebase gratis.
 
 ## Datos Solo Locales
 
@@ -227,7 +227,7 @@ Si falla a mitad, guardar estado `parcial` o `error`, último paso completado y 
 Límites actuales:
 
 - LocalStorage/Capacitor sigue como respaldo temporal.
-- Las fotos base64 locales no se escriben en Firestore; se intentan subir a Storage y, si falla, quedan locales para reintento.
+- Las fotos base64 locales no se escriben en Firestore. La sincronización de fotos con Storage queda fuera del cierre gratis.
 
 ## Sincronización Inicial
 

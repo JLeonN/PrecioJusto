@@ -2,7 +2,7 @@
 
 ## PROPÓSITO
 
-Este resumen concentra el estado actual de la integración gradual de Precio Justo con Firebase. La app ya tiene proyecto Firebase nuevo, Firebase Auth, Firestore Offline, migración guiada, fuente principal Firestore para datos privados y Storage privado implementado en código. LocalStorage/Capacitor sigue activo como respaldo temporal hasta cerrar pruebas reales.
+Este resumen concentra el estado actual de la integración gradual de Precio Justo con Firebase. La app ya tiene proyecto Firebase nuevo, Firebase Auth, Firestore Offline, migración guiada y fuente principal Firestore para datos privados. Firebase Storage/fotos queda fuera del cierre actual porque Leo decidió mantener el proyecto en plan gratis Spark y no activar Blaze. LocalStorage/Capacitor sigue activo como respaldo temporal hasta cerrar pruebas reales.
 
 ---
 
@@ -27,7 +27,7 @@ Este resumen concentra el estado actual de la integración gradual de Precio Jus
 - Firestore quedó creado en `nam5 (United States)` y ahora tiene reglas privadas bajo `usuarios/{usuarioId}`.
 - Las reglas Firestore privadas quedaron versionadas en el repositorio con `firestore.rules`.
 - Firestore Offline quedó inicializado con caché persistente multi-tab cuando el navegador lo permite.
-- Storage privado de fotos quedó implementado en código y configuración local; falta aplicar CORS al bucket real y probar subida real con usuario Firebase.
+- Storage privado de fotos quedó implementado en código como preparación futura, pero no forma parte del cierre actual porque el proyecto se mantiene en Spark y no se usará Blaze.
 - La app mantiene LocalStorage/Capacitor como respaldo temporal, pero Firestore ya es fuente principal visible cuando hay usuario Firebase.
 - Productos y precios ya se sincronizan a Firestore como espejo privado validado cuando hay usuario Firebase autenticado.
 - Comercios y direcciones ya se sincronizan a Firestore como espejo privado validado cuando hay usuario Firebase autenticado.
@@ -235,7 +235,8 @@ Claves persistidas actuales:
 - La fuente principal Firestore reconstruye campos visuales `imagen` y `foto` desde URL Storage para que la UI siga mostrando fotos después de recargar.
 - `FotosPendientesStorageService` reintenta fotos locales pendientes al iniciar, al volver la app a primer plano y al recuperar conexión.
 - `FirebaseStorageCors.json` documenta la configuración CORS mínima de desarrollo para `localhost:9000`.
-- Pendiente externo: aplicar CORS al bucket real y validar subida real de fotos en navegador y Android.
+- Decisión actual: no activar Blaze y no cerrar fotos con Firebase Storage.
+- Estado del cierre Firebase gratis: Storage/fotos queda fuera de alcance y no bloquea el cierre de Firestore privado.
 
 ---
 
@@ -289,7 +290,7 @@ usuarios/{usuarioId}/comercios/{comercioId}
 usuarios/{usuarioId}/listasJustas/{listaId}
 usuarios/{usuarioId}/configuracion/preferencias
 usuarios/{usuarioId}/confirmaciones/{confirmacionId}
-usuarios/{usuarioId}/fotos/{fotoId}
+usuarios/{usuarioId}/fotos/{fotoId} (preparación futura, fuera del cierre gratis)
 usuarios/{usuarioId}/configuracion/migracionLocal
 ```
 
@@ -325,10 +326,10 @@ Recomendación práctica:
 - `npm run androidReleaseConSimbolos` pasó correctamente.
 - `PlanFirebaseStorageFotos2.md`: `npm run lint`, `npm run build` y `npm run androidReleaseConSimbolos` pasaron correctamente.
 - `PlanFirebaseStorageFotos2.md`: MCP Browser cargó `http://127.0.0.1:9000`, redirigió a `/acceso?redirigir=/` sin sesión y no mostró errores ni advertencias de consola.
-- `PlanFirebaseStorageFotos2.md`: no se pudo validar subida real a Storage porque falta aplicar CORS al bucket real y no hay sesión Firebase interactiva en esta ejecución.
+- `PlanFirebaseStorageFotos2.md`: no se valida subida real a Storage porque Leo decidió no activar Blaze y mantener el proyecto gratis.
 - `PlanFirestoreMesaTrabajo.md`: `npm run lint`, `npm run build` y `npm run androidReleaseConSimbolos` pasaron correctamente.
 - `PlanFirestoreMesaTrabajo.md`: MCP Browser cargó `http://127.0.0.1:9000`, redirigió a `/acceso?redirigir=/` y no mostró errores ni advertencias nuevas.
-- `PlanFirestoreMesaTrabajo.md`: falta prueba manual con login Firebase real para validar lectura/escritura de Mesa en Firestore y continuidad completa en Android.
+- `PlanFirestoreMesaTrabajo.md`: Mesa de Trabajo fue validada en navegador con usuario Firebase real; queda pendiente prueba manual completa en Android.
 - La app cargó en navegador local con MCP Browser.
 - Firebase base inicializó con `projectId: preciojustopruebas2`, Auth activo y Firestore Offline activo.
 - MCP Browser validó redirección a login sin sesión, registro de usuario, login correcto, contraseña incorrecta con error claro, persistencia tras recarga y logout.
@@ -373,20 +374,24 @@ Recomendación práctica:
 - Se confirmó que los servicios de datos siguen usando `AlmacenamientoService` con adaptadores locales.
 - Se detectó CORS en `version.json` contra GitHub Pages durante dev; no pertenece a Firebase.
 - Durante la simulación offline se observaron errores `ERR_INTERNET_DISCONNECTED` esperados en consola; no son regresión funcional.
+- `PlanCierreFirebasePrivado.md`: Firebase CLI quedó autenticado, `firestore.rules` fue desplegado correctamente y `firebase use` confirmó `preciojustopruebas2`.
+- `PlanCierreFirebasePrivado.md`: prueba automatizada en navegador validó productos, comercios, listas, preferencias y Mesa desde Firestore sin fotos.
+- `PlanCierreFirebasePrivado.md`: prueba de aislamiento creó un usuario temporal, confirmó `permission-denied` al leer datos de otro usuario y eliminó el usuario temporal.
+- `PlanCierreFirebasePrivado.md`: `npm run cel` pasó correctamente, generó AAB release, empaquetó símbolos nativos y abrió Android Studio.
 
 ---
 
 ## PRÓXIMO PASO RECOMENDADO
 
-Ejecutar `PlanCierreFirebasePrivado.md`.
+Ejecutar el tramo final de `PlanCierreFirebasePrivado.md` sin fotos:
 
-- aplicar `FirebaseStorageCors.json` al bucket real;
-- probar subida de foto en navegador y Android con usuario Firebase;
-- confirmar en Firebase Console que Storage contiene el archivo y Firestore solo guarda URL/ruta;
-- probar Mesa de Trabajo con usuario Firebase real en navegador y Android para validar continuidad entre Lista Justa → Mesa → Mis Productos;
-- corregir el CORS de `version.json` en dev para no contaminar la consola durante pruebas.
+- probar la app instalada en Android con el mismo usuario Firebase;
+- confirmar login, productos, comercios, listas, preferencias y Mesa de Trabajo en celular;
+- confirmar que Android y navegador muestran los mismos datos privados;
+- dejar `version.json` CORS como advertencia no bloqueante o corregirlo si molesta las pruebas;
+- cerrar documentación y preparar commit final cuando Leo lo pida.
 
-Recomendación práctica: cerrar primero Storage real, Mesa de Trabajo real y Android. Después de ese cierre, recién conviene abrir planes nuevos no relacionados con Firebase privado.
+Recomendación práctica: cerrar Firebase gratis sin fotos. Si en el futuro se quieren fotos sincronizadas, abrir un plan separado solo si Leo decide usar un servicio gratuito viable o cambia la decisión sobre Blaze.
 
 
 ## Actualización migración guiada restante
