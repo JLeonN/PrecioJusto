@@ -1,43 +1,37 @@
-﻿import { defineBoot } from '#q-app/wrappers'
-import { signInAnonymously } from 'firebase/auth'
-import { doc, serverTimestamp, setDoc } from 'firebase/firestore'
-import { appFirebase, authFirebase, firestoreDb } from 'src/Firebase/ClienteFirebase.js'
+import { defineBoot } from '#q-app/wrappers'
+import { Notify } from 'quasar'
+import firebaseBaseService from '../almacenamiento/servicios/FirebaseBaseService.js'
 
-export default defineBoot(({ app }) => {
-  app.config.globalProperties.$appFirebase = appFirebase
-  app.config.globalProperties.$authFirebase = authFirebase
-  app.config.globalProperties.$firestoreDb = firestoreDb
+function debeVerificarFirebase() {
+  return import.meta.env.DEV || import.meta.env.VITE_FIREBASE_PRUEBA_AUTOMATICA === 'true'
+}
 
-  if (process.env.DEV) {
-    console.log('Firebase inicializado correctamente')
-  }
-
-  const ejecutarPruebaAutomatica =
-    process.env.DEV && import.meta.env.VITE_FIREBASE_PRUEBA_AUTOMATICA === 'true'
-
-  if (!ejecutarPruebaAutomatica) {
+export default defineBoot(() => {
+  if (!debeVerificarFirebase()) {
     return
   }
 
-  signInAnonymously(authFirebase)
-    .then(async (credencialUsuario) => {
-      const usuarioId = credencialUsuario.user.uid
-      const referenciaPrueba = doc(firestoreDb, 'pruebasIntegracion', usuarioId)
+  const resultado = firebaseBaseService.verificarInicializacionFirebase()
 
-      await setDoc(
-        referenciaPrueba,
-        {
-          usuarioId,
-          origen: 'quasar-dev',
-          actualizadoEn: serverTimestamp(),
-          pruebaFirestoreOk: true,
-        },
-        { merge: true },
-      )
+  if (!resultado.ok) {
+    console.warn(resultado.mensaje)
 
-      console.log('Prueba Firestore OK', { usuarioId })
-    })
-    .catch((error) => {
-      console.error('Error en prueba Firestore', error)
-    })
+    if (import.meta.env.DEV) {
+      Notify.create({
+        type: 'warning',
+        message: resultado.mensaje,
+        timeout: 8000,
+      })
+    }
+
+    return
+  }
+
+  console.info('Firebase base inicializado.', {
+    projectId: resultado.projectId,
+    authInicializado: resultado.authInicializado,
+    firestoreInicializado: resultado.firestoreInicializado,
+    firestoreOfflineActivo: resultado.firestoreOfflineActivo,
+    firestoreOfflineError: resultado.firestoreOfflineError,
+  })
 })

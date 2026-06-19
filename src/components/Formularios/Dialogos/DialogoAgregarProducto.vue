@@ -93,13 +93,13 @@ import EscaneadorCodigo from '../../Scanner/EscaneadorCodigo.vue'
 import { useProductosStore } from '../../../almacenamiento/stores/productosStore.js'
 import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.js'
 import productosService from '../../../almacenamiento/servicios/ProductosService.js'
+import usuarioActualService from '../../../almacenamiento/servicios/UsuarioActualService.js'
 import busquedaProductosHibridaService, {
   FUENTE_DATO_LOCAL,
 } from '../../../almacenamiento/servicios/BusquedaProductosHibridaService.js'
 import { usePreferenciasStore } from '../../../almacenamiento/stores/preferenciasStore.js'
 import { useTecladoVirtual } from '../../../composables/useTecladoVirtual.js'
 import { formatearPrecioConCodigo } from '../../../utils/PrecioUtils.js'
-import { resolverFotoFuenteDesdeImagen } from '../../../utils/FotoFuenteUtils.js'
 
 const props = defineProps({
   modelValue: {
@@ -109,7 +109,7 @@ const props = defineProps({
   modo: {
     type: String,
     default: 'local',
-    validator: (value) => ['local', 'comunidad'].includes(value),
+    validator: (value) => value === 'local',
   },
 })
 
@@ -146,6 +146,7 @@ const datosProducto = ref({
   unidad: 'unidad',
   categoria: '',
   imagen: null,
+  fotoFuente: null,
 })
 
 // Datos del formulario de precio
@@ -357,12 +358,13 @@ function autoCompletarFormulario(producto) {
     unidad: producto.unidad || datosProducto.value.unidad,
     categoria: producto.categoria || datosProducto.value.categoria,
     imagen: producto.imagen || datosProducto.value.imagen,
+    fotoFuente: producto.fotoFuente || datosProducto.value.fotoFuente || null,
   }
   fuenteDatoActual.value = producto.fuenteDato || null
   if (producto.fuenteDato === FUENTE_DATO_LOCAL) {
-    fotoFuenteActual.value = producto.fotoFuente ?? resolverFotoFuenteDesdeImagen(producto.imagen)
+    fotoFuenteActual.value = producto.fotoFuente ?? (producto.imagen ? 'usuario' : null)
   } else {
-    fotoFuenteActual.value = resolverFotoFuenteDesdeImagen(producto.imagen)
+    fotoFuenteActual.value = producto.imagen ? 'api' : null
   }
   console.log('✅ Formulario auto-completado')
 }
@@ -381,7 +383,7 @@ async function guardarProducto() {
   guardando.value = true
 
   // 1. Validar datos del producto (nombre obligatorio en local)
-  if (props.modo === 'comunidad' || (datosProducto.value.nombre || '').trim() === '') {
+  if ((datosProducto.value.nombre || '').trim() === '') {
     const productoValido = refFormularioProducto.value?.validarFormulario()
     if (!productoValido) {
       guardando.value = false
@@ -429,7 +431,7 @@ async function guardarProducto() {
           : [],
         fecha: new Date().toISOString(),
         confirmaciones: 0,
-        usuarioId: 'user_actual_123',
+        usuarioId: usuarioActualService.obtenerUsuarioIdActual(),
       }
 
       const productoActualizado = await productosStore.agregarPrecioAProducto(
@@ -438,13 +440,6 @@ async function guardarProducto() {
       )
 
       if (productoActualizado) {
-        if (datosProducto.value.imagen) {
-          await productosStore.actualizarProducto(productoExistente.id, {
-            imagen: datosProducto.value.imagen,
-            fotoFuente: resolverFotoFuenteDesdeImagen(datosProducto.value.imagen),
-          })
-        }
-
         if (nuevoPrecio.comercioId && nuevoPrecio.direccionId) {
           await comerciosStore.registrarUso(nuevoPrecio.comercioId, nuevoPrecio.direccionId)
         }
@@ -479,7 +474,7 @@ async function guardarProducto() {
       categoria: datosProducto.value.categoria?.trim() || '',
       imagen: datosProducto.value.imagen || null,
       fuenteDato: fuenteDatoActual.value || null,
-      fotoFuente: resolverFotoFuenteDesdeImagen(datosProducto.value.imagen),
+      fotoFuente: fotoFuenteActual.value || datosProducto.value.fotoFuente || null,
       precios: [],
     }
 
@@ -504,7 +499,7 @@ async function guardarProducto() {
           : [],
         fecha: new Date().toISOString(),
         confirmaciones: 0,
-        usuarioId: 'user_actual_123',
+        usuarioId: usuarioActualService.obtenerUsuarioIdActual(),
       })
     }
 
@@ -561,6 +556,7 @@ function limpiarFormulario() {
     unidad: preferenciasStore.unidad,
     categoria: '',
     imagen: null,
+    fotoFuente: null,
   }
   fuenteDatoActual.value = null
   fotoFuenteActual.value = null
@@ -638,12 +634,6 @@ async function alDetectarCodigo(codigo) {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.contenido-scroll::-webkit-scrollbar {
-  display: none;
 }
 .dialogo-landscape .contenido-scroll {
   max-height: 50vh;

@@ -1,22 +1,26 @@
 ﻿import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { useQuasar } from 'quasar'
+import fuentePrincipalFirestoreService from '../servicios/FuentePrincipalFirestoreService.js'
 import ListaJustaService from '../servicios/ListaJustaService.js'
 import productosService from '../servicios/ProductosService.js'
 import { useProductosStore } from './productosStore.js'
 import { useSesionEscaneoStore } from './sesionEscaneoStore.js'
 import { useUsuarioStore } from './UsuarioStore.js'
-import servicioMigracionLocalFirestore from '../../Firebase/ServicioMigracionLocalFirestore.js'
 
 export const useListaJustaStore = defineStore('listaJusta', () => {
   const quasar = useQuasar()
   const productosStore = useProductosStore()
   const sesionEscaneoStore = useSesionEscaneoStore()
-  const usuarioStore = useUsuarioStore()
 
   const listas = ref([])
   const cargando = ref(false)
   const error = ref(null)
+  const fuenteDatos = ref(
+    fuentePrincipalFirestoreService.crearEstadoInicial(
+      fuentePrincipalFirestoreService.DOMINIOS.LISTAS,
+    ),
+  )
 
   const tieneListas = computed(() => listas.value.length > 0)
   const totalListas = computed(() => listas.value.length)
@@ -28,22 +32,24 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     return listas.value.find((lista) => lista.id === listaId) || null
   }
 
-  async function cargarListas(opciones = {}) {
-    const silencioso = opciones?.silencioso === true
-    if (!silencioso) {
-      cargando.value = true
-    }
+  async function cargarListas() {
+    cargando.value = true
     error.value = null
 
     try {
-      listas.value = await ListaJustaService.obtenerListas()
+      const usuarioStore = useUsuarioStore()
+      await usuarioStore.esperarSesionLista()
+
+      const resultado = await fuentePrincipalFirestoreService.cargarListas({
+        cargarLocal: () => ListaJustaService.obtenerListas(),
+      })
+      listas.value = resultado.datos || []
+      fuenteDatos.value = resultado
     } catch (err) {
       error.value = 'No se pudieron cargar las listas.'
       console.error('Error al cargar listas de Lista Justa:', err)
     } finally {
-      if (!silencioso) {
-        cargando.value = false
-      }
+      cargando.value = false
     }
   }
 
@@ -55,7 +61,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
 
     const nuevaLista = ListaJustaService.crearListaVacia(nombreLimpio, listas.value.length)
     listas.value.unshift(nuevaLista)
-    await persistir({ listaId: nuevaLista.id })
+    await persistir()
 
     return nuevaLista
   }
@@ -69,7 +75,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
 
     lista.nombre = nombreLimpio
     lista.fechaActualizacion = new Date().toISOString()
-    await persistir({ listaId })
+    await persistir()
     return true
   }
 
@@ -85,7 +91,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     lista.comercioActual = null
     lista.configuracionInteligente = ListaJustaService._normalizarConfiguracionInteligente(null, null)
     lista.fechaActualizacion = new Date().toISOString()
-    await persistir({ listaId })
+    await persistir()
     return true
   }
 
@@ -105,7 +111,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
       )
     }
     lista.fechaActualizacion = new Date().toISOString()
-    await persistir({ listaId })
+    await persistir()
     return true
   }
 
@@ -121,7 +127,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
       lista.comercioActual,
     )
     lista.fechaActualizacion = new Date().toISOString()
-    await persistir({ listaId })
+    await persistir()
     return true
   }
 
@@ -140,25 +146,17 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
       lista.comercioActual,
     )
     lista.fechaActualizacion = new Date().toISOString()
-    await persistir({ listaId })
+    await persistir()
     return true
   }
 
   async function eliminarLista(listaId) {
+    const listaEliminada = obtenerListaPorId(listaId)
     listas.value = listas.value.filter((lista) => lista.id !== listaId)
+    await persistir()
 
-    if (usuarioStore.tieneSesionRealActiva && usuarioStore.usuarioId) {
-      await servicioMigracionLocalFirestore.registrarEliminacionListaLocal(listaId)
-    }
-
-    await persistir({ listaId, eliminaciones: true })
-
-    if (usuarioStore.tieneSesionRealActiva && usuarioStore.usuarioId) {
-      try {
-        await servicioMigracionLocalFirestore.eliminarListaRemota(usuarioStore.usuarioId, listaId)
-      } catch (error) {
-        console.warn('No se pudo eliminar la lista en Firebase:', error)
-      }
+    if (listaEliminada) {
+      await ListaJustaService.sincronizarEliminacionListaFirestore(listaEliminada.id)
     }
 
     return true
@@ -171,7 +169,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     const ahora = new Date().toISOString()
     lista.fechaUltimoUso = ahora
     lista.fechaActualizacion = ahora
-    await persistir({ listaId })
+    await persistir()
     return true
   }
 
@@ -215,7 +213,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     lista.fechaActualizacion = new Date().toISOString()
 
     await intentarEnviarAMisProductosSiCorresponde(lista, itemNormalizado)
-    await persistir({ listaId })
+    await persistir()
 
     return { exito: true, item: itemNormalizado }
   }
@@ -302,7 +300,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     lista.fechaActualizacion = new Date().toISOString()
 
     await intentarEnviarAMisProductosSiCorresponde(lista, itemActualizado)
-    await persistir({ listaId })
+    await persistir()
 
     return true
   }
@@ -320,15 +318,14 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     return actualizarItem(listaId, itemId, { cantidad: cantidadNueva })
   }
 
-  async function alternarComprado(listaId, itemId, compradoObjetivo = null) {
+  async function alternarComprado(listaId, itemId) {
     const lista = obtenerListaPorId(listaId)
     if (!lista) return false
 
     const item = lista.items.find((actual) => actual.id === itemId)
     if (!item) return false
 
-    const compradoSiguiente =
-      typeof compradoObjetivo === 'boolean' ? compradoObjetivo : !item.comprado
+    const compradoSiguiente = !item.comprado
     const actualizado = await actualizarItem(listaId, itemId, { comprado: compradoSiguiente })
 
     if (!actualizado) return false
@@ -344,23 +341,9 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     const lista = obtenerListaPorId(listaId)
     if (!lista) return false
 
-    const idNormalizado = String(itemId || '').trim()
-    if (!idNormalizado) return false
-
-    lista.items = lista.items.filter((item) => String(item?.id || '').trim() !== idNormalizado)
-    const ahora = new Date().toISOString()
-    const itemsEliminados = Array.isArray(lista.itemsEliminados) ? lista.itemsEliminados : []
-    const indiceEliminado = itemsEliminados.findIndex((item) => item?.id === idNormalizado)
-
-    if (indiceEliminado >= 0) {
-      itemsEliminados[indiceEliminado] = { id: idNormalizado, eliminadoEn: ahora }
-    } else {
-      itemsEliminados.push({ id: idNormalizado, eliminadoEn: ahora })
-    }
-
-    lista.itemsEliminados = itemsEliminados
-    lista.fechaActualizacion = ahora
-    await persistir({ listaId })
+    lista.items = lista.items.filter((item) => item.id !== itemId)
+    lista.fechaActualizacion = new Date().toISOString()
+    await persistir()
     return true
   }
 
@@ -385,6 +368,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
       cantidad: item.cantidad,
       unidad: item.unidad,
       imagen: item.imagen,
+      fotoFuente: item.fotoFuente || null,
       precio: item.precioManual || 0,
       moneda: item.moneda || 'UYU',
       origenApi: false,
@@ -403,7 +387,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     item.mesaTrabajoItemId = itemMesa?.id || null
     item.actualizadoEn = new Date().toISOString()
     lista.fechaActualizacion = new Date().toISOString()
-    await persistir({ listaId })
+    await persistir()
 
     return true
   }
@@ -555,7 +539,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     }).onOk(async (valor) => {
       lista.preferenciaPrecioFaltante = valor
       lista.fechaActualizacion = new Date().toISOString()
-      await persistir({ listaId: lista.id })
+      await persistir()
     })
   }
 
@@ -586,6 +570,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
       cantidad: item.cantidad,
       unidad: item.unidad,
       imagen: item.imagen,
+      fotoFuente: item.fotoFuente || null,
       precios: [
         {
           id: `precio_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
@@ -650,7 +635,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     }
     item.actualizadoEn = new Date().toISOString()
     lista.fechaActualizacion = new Date().toISOString()
-    await persistir({ listaId })
+    await persistir()
     return true
   }
 
@@ -690,7 +675,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     item.estadoDerivacion = item.mesaTrabajoItemId ? 'enMesa' : 'enMisProductos'
     item.actualizadoEn = new Date().toISOString()
     lista.fechaActualizacion = new Date().toISOString()
-    await persistir({ listaId })
+    await persistir()
     return true
   }
 
@@ -823,20 +808,28 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     return Number.isFinite(marca) ? marca : 0
   }
 
-  async function persistir(cambio = {}) {
+  async function persistir() {
     const guardado = await ListaJustaService.guardarListas(listas.value)
 
     if (!guardado) {
       throw new Error('No se pudo persistir Lista Justa.')
     }
+  }
 
-    usuarioStore.solicitarSincronizacionAutomatica('lista_justa_actualizada', cambio)
+  function limpiarEstado() {
+    listas.value = []
+    cargando.value = false
+    error.value = null
+    fuenteDatos.value = fuentePrincipalFirestoreService.crearEstadoInicial(
+      fuentePrincipalFirestoreService.DOMINIOS.LISTAS,
+    )
   }
 
   return {
     listas,
     cargando,
     error,
+    fuenteDatos,
     tieneListas,
     totalListas,
     listasOrdenadas,
@@ -863,5 +856,6 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     sincronizarComercioBaseInteligente,
     marcarItemComoEnMisProductos,
     restaurarPreciosOriginales,
+    limpiarEstado,
   }
 })

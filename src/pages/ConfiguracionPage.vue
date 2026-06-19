@@ -1,419 +1,287 @@
-﻿<template>
+<template>
   <q-page class="q-pa-md configuracion-page">
     <div class="contenedor-configuracion">
       <div class="q-mb-md">
         <h5 class="q-my-none">Configuración</h5>
+        <p class="text-grey-7 q-mt-xs q-mb-none">Preferencias globales de la app</p>
       </div>
-
-      <q-list bordered separator class="contenedor-acordeon">
-        <q-expansion-item
-          v-model="seccionesAbiertas.cuentaPerfil"
-          header-class="cabecera-seccion"
-          expand-separator
-          hide-expand-icon
-          ref="tarjetaCuentaCorreoRef"
-        >
-          <template #header="{ expanded }">
-            <q-item-section avatar>
-              <q-icon name="person" />
-            </q-item-section>
-            <q-item-section>
-              <div class="titulo-cabecera-cuenta">Cuenta y perfil</div>
-              <div class="nombre-cabecera-cuenta">{{ nombreResumenCuentaPerfil }}</div>
-              <div v-if="!expanded" class="correo-cabecera-cuenta">{{ correoResumenCuentaPerfil }}</div>
-            </q-item-section>
-            <q-item-section side>
-              <q-icon :name="expanded ? 'expand_less' : 'expand_more'" />
-            </q-item-section>
-          </template>
-          <div ref="bloquePerfilRef" class="bloque-contenido">
-            <div class="text-subtitle2 text-weight-medium">Cuenta</div>
-            <p class="text-caption text-grey-7 q-mt-xs q-mb-sm">
-              Podés usar la app con Google o como invitado.
-            </p>
-            <q-banner rounded class="banner-cuenta q-mb-sm">
-              Estado:
-              <strong>{{ etiquetaEstadoCuenta }}</strong>
-              <div v-if="correoEstadoCuenta" class="estado-cuenta-correo">
-                {{ correoEstadoCuenta }}
+      <q-card flat bordered>
+        <q-card-section>
+          <div class="text-subtitle1 text-weight-medium">Cuenta</div>
+          <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
+            {{ textoEstadoCuenta }}
+          </p>
+        </q-card-section>
+        <q-separator />
+        <q-card-section>
+          <div class="fila-cuenta">
+            <div>
+              <div class="text-body2 text-weight-medium">{{ etiquetaCuenta }}</div>
+              <div class="text-caption text-grey-7">Los datos locales se conservan al cerrar sesión.</div>
+            </div>
+            <q-btn
+              no-caps
+              unelevated
+              :color="usuarioStore.estaAutenticado ? 'negative' : 'primary'"
+              :label="usuarioStore.estaAutenticado ? 'Cerrar sesión' : 'Ingresar'"
+              :loading="usuarioStore.cargandoAccion"
+              @click="gestionarCuenta"
+            />
+          </div>
+        </q-card-section>
+      </q-card>
+      <q-card flat bordered class="q-mt-md">
+        <q-card-section>
+          <div class="text-subtitle1 text-weight-medium">Fuente de datos</div>
+          <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
+            Firestore es la lectura principal con sesión Firebase; local queda como respaldo.
+          </p>
+        </q-card-section>
+        <q-separator />
+        <q-card-section>
+          <div class="grilla-fuentes-datos">
+            <q-banner
+              v-for="estado in estadosFuenteDatos"
+              :key="estado.dominio"
+              rounded
+              class="banner-fuente-datos"
+            >
+              <div class="text-body2 text-weight-medium">{{ estado.etiquetaDominio }}</div>
+              <div class="text-caption">
+                {{ estado.etiquetaFuente }} · {{ estado.mensaje }}
               </div>
             </q-banner>
-            <div class="column q-gutter-sm">
-              <q-btn
-                color="primary"
-                unelevated
-                no-caps
-                icon="img:https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-                label="Entrar con Google"
-                :loading="cargandoAccionCuenta"
-                @click="manejarEntrarConGoogle"
-              />
-              <q-btn
-                outline
-                color="primary"
-                no-caps
-                label="Continuar como invitado"
-                :loading="cargandoAccionCuenta"
-                @click="manejarContinuarComoInvitado"
-              />
-            </div>
           </div>
-
-          <q-separator />
-
-          <div class="bloque-contenido">
-            <div class="text-subtitle2 text-weight-medium">Perfil</div>
-            <p class="text-caption text-grey-7 q-mt-xs q-mb-sm">
-              Datos visibles de tu cuenta. Podés editarlos cuando quieras.
-            </p>
-            <div class="preview-avatar-perfil q-mb-sm">
-              <q-avatar size="92px" class="avatar-perfil">
-                <img v-if="fotoPreviewPerfil" :src="fotoPreviewPerfil" alt="Foto de perfil" />
-                <span v-else class="iniciales-perfil">{{ inicialesPerfil }}</span>
-                <q-btn
-                  round
-                  dense
-                  unelevated
-                  color="primary"
-                  icon="photo_camera"
-                  class="boton-accion-avatar"
-                >
-                  <q-menu anchor="bottom right" self="top right">
-                    <q-list dense style="min-width: 180px">
-                      <q-item clickable v-close-popup @click="abrirSelectorFotoPerfil">
-                        <q-item-section avatar>
-                          <q-icon name="photo_library" />
-                        </q-item-section>
-                        <q-item-section>Cambiar foto</q-item-section>
-                      </q-item>
-                      <q-item
-                        v-if="perfilEditableFoto"
-                        clickable
-                        v-close-popup
-                        @click="quitarFotoPerfil"
-                      >
-                        <q-item-section avatar>
-                          <q-icon name="delete" color="negative" />
-                        </q-item-section>
-                        <q-item-section>Quitar foto</q-item-section>
-                      </q-item>
-                    </q-list>
-                  </q-menu>
-                </q-btn>
-              </q-avatar>
-            </div>
-            <div class="column q-gutter-sm">
-              <input
-                ref="inputArchivoFotoRef"
-                type="file"
-                accept="image/*"
-                class="input-archivo-oculto"
-                @change="manejarSeleccionArchivoFoto"
-              />
-              <InputFormularioReutilizable
-                ref="inputNombrePerfilRef"
-                v-model="perfilEditableNombre"
-                label="Nombre"
-              />
-              <InputFormularioReutilizable
-                v-model="perfilEditableFechaNacimiento"
-                label="Fecha de nacimiento"
-                type="date"
-              />
-              <q-banner rounded class="banner-cuenta">
-                Edad: <strong>{{ etiquetaEdadPerfil }}</strong>
-              </q-banner>
-              <q-banner rounded class="banner-cuenta">
-                Guardado automático de perfil:
-                <strong>{{ perfilGuardandoAutomatico ? ' sincronizando...' : ' activo' }}</strong>
-              </q-banner>
-              <q-btn
-                v-if="usuarioStore.tieneSesionRealActiva"
-                outline
-                color="negative"
-                no-caps
-                label="Cerrar sesión"
-                :loading="cargandoAccionCuenta"
-                @click="manejarCerrarSesionReal"
-              />
-            </div>
-          </div>
-
-          <q-separator />
-
-          <div class="bloque-contenido">
-            <div class="text-subtitle2 text-weight-medium">Cuenta por correo</div>
-            <p class="text-caption text-grey-7 q-mt-xs q-mb-sm">
-              Probá iniciar sesión, crear cuenta o recuperar contraseña por correo.
-            </p>
-            <div class="column q-gutter-sm bloque-correo-form">
-              <InputFormularioReutilizable
-                v-model="correoCuenta"
-                label="Correo"
-                type="email"
-                autocomplete="email"
-              />
-              <InputFormularioReutilizable
-                v-model="contrasenaCuenta"
-                label="Contraseña"
-                :type="mostrarContrasenaCuenta ? 'text' : 'password'"
-                autocomplete="current-password"
-              >
-                <template #append>
-                  <q-btn
-                    flat
-                    round
-                    dense
-                    :ripple="false"
-                    class="boton-ojo-cuenta"
-                    :icon="mostrarContrasenaCuenta ? 'visibility_off' : 'visibility'"
-                    @click="mostrarContrasenaCuenta = !mostrarContrasenaCuenta"
-                  />
-                </template>
-              </InputFormularioReutilizable>
-              <div class="acciones-correo">
-                <q-btn
-                  class="full-width boton-accion-correo"
-                  color="primary"
-                  no-caps
-                  label="Entrar con correo"
-                  :loading="cargandoAccionCuenta"
-                  @click="manejarEntrarConCorreo"
-                />
-                <q-btn
-                  class="full-width boton-accion-correo"
-                  outline
-                  color="primary"
-                  no-caps
-                  label="Crear cuenta"
-                  :loading="cargandoAccionCuenta"
-                  @click="manejarCrearCuentaConCorreo"
-                />
-                <q-btn
-                  class="full-width boton-accion-correo"
-                  outline
-                  no-caps
-                  color="primary"
-                  label="Recuperar contraseña"
-                  :loading="cargandoAccionCuenta"
-                  @click="manejarRecuperarContrasena"
-                />
-              </div>
-            </div>
-          </div>
-        </q-expansion-item>
-
-        <q-expansion-item
-          v-model="seccionesAbiertas.tema"
-          header-class="cabecera-seccion"
-          expand-separator
-          icon="palette"
-          label="Tema"
-          :caption="resumenTema"
-        >
-          <div class="bloque-contenido">
-            <p class="text-caption text-grey-7 q-mt-none q-mb-sm">
-              Elegí cómo querés que se vea la app: claro, oscuro o automático según el sistema.
-            </p>
-            <div class="selector-modo-tema q-gutter-sm">
-              <q-btn
-                v-for="opcion in opcionesModoTema"
-                :key="opcion.value"
-                no-caps
-                unelevated
-                class="boton-modo-tema"
-                :class="{ 'boton-modo-tema-activo': preferenciasStore.modoTema === opcion.value }"
-                :label="opcion.label"
-                @click="seleccionarModoTema(opcion.value)"
-              />
-            </div>
-            <div class="q-mt-md">
-              <q-banner rounded class="banner-tema-efectivo">
-                Tema activo: <strong>{{ etiquetaTemaActivo }}</strong>
-              </q-banner>
-            </div>
-            <div class="q-mt-sm">
-              <q-banner rounded class="banner-tema-info">
-                Si elegís Claro u Oscuro, esa preferencia manual se mantiene hasta volver a Seguir
-                sistema.
-              </q-banner>
-            </div>
-          </div>
-        </q-expansion-item>
-
-        <q-expansion-item
-          v-model="seccionesAbiertas.monedaRegion"
-          header-class="cabecera-seccion"
-          expand-separator
-          icon="payments"
-          label="Moneda y región"
-          :caption="resumenMoneda"
-        >
-          <div class="bloque-contenido">
-            <p class="text-caption text-grey-7 q-mt-none q-mb-sm">
-              Esta moneda se usa como valor inicial en formularios nuevos.
-            </p>
-            <q-toggle
-              :model-value="esModoAutomatico"
-              label="Usar moneda automática según país"
-              color="primary"
-              @update:model-value="cambiarModoAutomatico"
-            />
-            <div class="q-mt-md">
-              <q-banner rounded class="banner-moneda-efectiva">
-                Moneda predeterminada efectiva:
-                <strong>{{ preferenciasStore.monedaDefaultEfectiva }}</strong>
-              </q-banner>
-            </div>
-            <div v-if="esModoAutomatico" class="q-mt-md column q-gutter-sm">
-              <q-banner rounded class="bg-blue-1 text-blue-10">
-                País detectado:
-                <strong>{{ preferenciasStore.paisDetectado || 'No detectado' }}</strong>
-              </q-banner>
-              <q-banner v-if="preferenciasStore.monedaDetectada" rounded class="bg-positive text-white">
-                Moneda detectada automáticamente:
-                <strong>{{ preferenciasStore.monedaDetectada }}</strong>
-              </q-banner>
-              <q-banner v-else rounded class="bg-warning text-dark">
-                No se pudo detectar una moneda por región. Se usa la última moneda manual guardada.
-              </q-banner>
-            </div>
-            <div v-else class="q-mt-md">
-              <q-select
-                :model-value="preferenciasStore.monedaManual"
-                :options="MONEDAS"
-                label="Moneda manual"
-                emit-value
-                map-options
-                outlined
-                dense
-                @update:model-value="cambiarMonedaManual"
-              />
-            </div>
-            <div class="q-mt-md bloque-ayuda-moneda">
-              <div class="text-subtitle2">Información de monedas</div>
-              <p class="text-body2 q-mt-sm q-mb-none">
-                Cambiar la moneda en un precio puntual solo afecta ese registro. No modifica esta
-                preferencia global.
+        </q-card-section>
+      </q-card>
+      <q-card v-if="usuarioStore.estaAutenticado" flat bordered class="q-mt-md">
+        <q-card-section>
+          <div class="fila-migracion">
+            <div>
+              <div class="text-subtitle1 text-weight-medium">Migración local a Firebase</div>
+              <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
+                Datos privados se migran con backup local previo; la app sigue leyendo local.
               </p>
             </div>
+            <q-btn
+              no-caps
+              outline
+              color="primary"
+              label="Actualizar"
+              :loading="cargandoMigracion"
+              @click="cargarPanelMigracion"
+            />
           </div>
-        </q-expansion-item>
-
-        <q-expansion-item
-          v-model="seccionesAbiertas.datosSincronizacion"
-          header-class="cabecera-seccion"
-          expand-separator
-          icon="sync"
-          label="Datos y sincronización"
-          :caption="resumenSincronizacion"
-        >
-          <div class="bloque-contenido">
-            <p class="text-caption text-grey-7 q-mt-none q-mb-sm">
-              Tu información se sincroniza automáticamente cuando entrás con tu cuenta.
-            </p>
-            <q-banner
-              v-if="usuarioStore.hayPendientesSincronizacion"
-              rounded
-              class="banner-cuenta q-mb-sm"
-            >
-              Tenés
-              <strong>{{ usuarioStore.cantidadPendientesSincronizacion }}</strong>
-              cambio{{ usuarioStore.cantidadPendientesSincronizacion === 1 ? '' : 's' }}
-              pendiente{{ usuarioStore.cantidadPendientesSincronizacion === 1 ? '' : 's' }}.
-              Se subirán automáticamente.
+        </q-card-section>
+        <q-separator />
+        <q-card-section>
+          <div class="grilla-conteos">
+            <q-banner rounded class="banner-migracion">
+              Productos: <strong>{{ conteosMigracion.productos }}</strong>
             </q-banner>
-            <q-banner rounded class="banner-cuenta q-mb-sm">
-              No necesitás hacer nada: la app sincroniza sola en segundo plano.
+            <q-banner rounded class="banner-migracion">
+              Precios: <strong>{{ conteosMigracion.precios }}</strong>
             </q-banner>
-            <q-banner v-if="textoSincronizacionRemota" rounded class="banner-cuenta q-mb-sm">
-              {{ textoSincronizacionRemota }}
+            <q-banner rounded class="banner-migracion">
+              Comercios: <strong>{{ conteosMigracion.comercios }}</strong>
             </q-banner>
-            <div class="column q-gutter-sm">
-              <q-btn
-                v-if="mostrarBotonReintentarSync"
-                color="secondary"
-                unelevated
-                no-caps
-                label="Reintentar sincronización"
-                :loading="usuarioStore.cargandoMigracion"
-                @click="manejarMigracionDatos"
-              />
-              <q-banner v-if="textoResumenMigracion" rounded class="banner-cuenta">
-                {{ textoResumenMigracion }}
-              </q-banner>
-            </div>
+            <q-banner rounded class="banner-migracion">
+              Direcciones: <strong>{{ conteosMigracion.direcciones }}</strong>
+            </q-banner>
+            <q-banner rounded class="banner-migracion">
+              Listas: <strong>{{ conteosMigracion.listas }}</strong>
+            </q-banner>
+            <q-banner rounded class="banner-migracion">
+              Items: <strong>{{ conteosMigracion.itemsListaJusta }}</strong>
+            </q-banner>
+            <q-banner rounded class="banner-migracion">
+              Preferencias: <strong>{{ conteosMigracion.preferencias }}</strong>
+            </q-banner>
+            <q-banner rounded class="banner-migracion">
+              Confirmaciones: <strong>{{ conteosMigracion.confirmaciones }}</strong>
+            </q-banner>
+            <q-banner rounded class="banner-migracion">
+              Fotos producto: <strong>{{ conteosMigracion.fotosProductos }}</strong>
+            </q-banner>
+            <q-banner rounded class="banner-migracion">
+              Fotos comercio: <strong>{{ conteosMigracion.fotosComercios }}</strong>
+            </q-banner>
+            <q-banner rounded class="banner-migracion">
+              Fotos listas: <strong>{{ conteosMigracion.fotosListas }}</strong>
+            </q-banner>
           </div>
-        </q-expansion-item>
-
-      </q-list>
+          <q-linear-progress v-if="cargandoMigracion" indeterminate color="primary" class="q-mt-md" />
+          <q-banner rounded class="banner-tema-info q-mt-md">
+            Estado: <strong>{{ textoEstadoMigracion }}</strong> · Conexión:
+            <strong>{{ textoConexionMigracion }}</strong>
+          </q-banner>
+          <q-banner
+            v-if="estadoMigracion?.errores?.length"
+            rounded
+            class="bg-warning text-dark q-mt-sm"
+          >
+            {{ estadoMigracion.errores.length }} error(es) reintentables. Los datos locales y el
+            backup se conservan.
+          </q-banner>
+          <div class="fila-acciones-migracion q-mt-md">
+            <q-btn
+              no-caps
+              unelevated
+              color="secondary"
+              label="Crear backup"
+              :loading="cargandoMigracion"
+              @click="prepararBackupMigracion"
+            />
+            <q-btn
+              no-caps
+              unelevated
+              color="primary"
+              label="Migrar"
+              :loading="cargandoMigracion"
+              @click="confirmarMigracion"
+            />
+            <q-btn
+              v-if="puedeReintentarMigracion"
+              no-caps
+              outline
+              color="warning"
+              label="Reintentar"
+              :loading="cargandoMigracion"
+              @click="reintentarMigracion"
+            />
+          </div>
+        </q-card-section>
+      </q-card>
+      <q-card flat bordered class="q-mt-md">
+        <q-card-section>
+          <div class="text-subtitle1 text-weight-medium">Modo oscuro</div>
+          <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
+            Elegí cómo querés que se vea la app: claro, oscuro o automático según el sistema.
+          </p>
+        </q-card-section>
+        <q-separator />
+        <q-card-section>
+          <div class="selector-modo-tema q-gutter-sm">
+            <q-btn
+              v-for="opcion in opcionesModoTema"
+              :key="opcion.value"
+              no-caps
+              unelevated
+              class="boton-modo-tema"
+              :class="{ 'boton-modo-tema-activo': preferenciasStore.modoTema === opcion.value }"
+              :label="opcion.label"
+              @click="seleccionarModoTema(opcion.value)"
+            />
+          </div>
+          <div class="q-mt-md">
+            <q-banner rounded class="banner-tema-efectivo">
+              Tema activo: <strong>{{ etiquetaTemaActivo }}</strong>
+            </q-banner>
+          </div>
+          <div class="q-mt-sm">
+            <q-banner rounded class="banner-tema-info">
+              Si elegís Claro u Oscuro, esa preferencia manual se mantiene hasta volver a Seguir
+              sistema.
+            </q-banner>
+          </div>
+        </q-card-section>
+      </q-card>
+      <q-card flat bordered class="q-mt-md">
+        <q-card-section>
+          <div class="text-subtitle1 text-weight-medium">Moneda predeterminada</div>
+          <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
+            Esta moneda se usa como valor inicial en formularios nuevos.
+          </p>
+        </q-card-section>
+        <q-separator />
+        <q-card-section>
+          <q-toggle
+            :model-value="esModoAutomatico"
+            label="Usar moneda automática según país"
+            color="primary"
+            @update:model-value="cambiarModoAutomatico"
+          />
+          <div class="q-mt-md">
+            <q-banner rounded class="banner-moneda-efectiva">
+              Moneda predeterminada efectiva:
+              <strong>{{ preferenciasStore.monedaDefaultEfectiva }}</strong>
+            </q-banner>
+          </div>
+          <div v-if="esModoAutomatico" class="q-mt-md column q-gutter-sm">
+            <q-banner rounded class="bg-blue-1 text-blue-10">
+              País detectado:
+              <strong>{{ preferenciasStore.paisDetectado || 'No detectado' }}</strong>
+            </q-banner>
+            <q-banner v-if="preferenciasStore.monedaDetectada" rounded class="bg-positive text-white">
+              Moneda detectada automáticamente:
+              <strong>{{ preferenciasStore.monedaDetectada }}</strong>
+            </q-banner>
+            <q-banner v-else rounded class="bg-warning text-dark">
+              No se pudo detectar una moneda por región. Se usa la última moneda manual guardada.
+            </q-banner>
+          </div>
+          <div v-else class="q-mt-md">
+            <q-select
+              :model-value="preferenciasStore.monedaManual"
+              :options="MONEDAS"
+              label="Moneda manual"
+              emit-value
+              map-options
+              outlined
+              dense
+              @update:model-value="cambiarMonedaManual"
+            />
+          </div>
+        </q-card-section>
+      </q-card>
+      <q-card flat bordered class="q-mt-md">
+        <q-card-section>
+          <div class="text-subtitle2">Importante</div>
+          <p class="text-body2 q-mt-sm q-mb-none">
+            Cambiar la moneda en un precio puntual solo afecta ese registro. No modifica esta
+            preferencia global.
+          </p>
+        </q-card-section>
+      </q-card>
     </div>
-
-    <ModalConfirmacionReutilizable
-      v-model="modalInvitadoAbierto"
-      titulo="Modo invitado"
-      mensaje="Si continuás como invitado, tus datos se guardarán en este celular. Cuando te registres más adelante, tendrás que migrarlos para mantenerlos."
-      texto-principal="Aceptar"
-      texto-secundario="Registrarme ahora"
-      @accion-principal="confirmarModoInvitado"
-      @accion-secundaria="irARegistroDesdeModal"
-    />
-
-    <EditorImagen
-      v-model="editorFotoAbierto"
-      :src="fotoTemporalEdicion"
-      @guardar="manejarGuardarFotoEditada"
-      @cancelar="manejarCancelarFotoEditada"
-    />
   </q-page>
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed, onMounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
+import { useRouter } from 'vue-router'
 import { MONEDAS } from '../almacenamiento/constantes/Monedas.js'
-import { MODO_PRUEBA } from '../almacenamiento/constantes/ConfigPublicidad.js'
+import { ESTADOS_MIGRACION_FIREBASE } from '../almacenamiento/constantes/PreparacionFirebase.js'
 import { usePublicidad } from '../composables/usePublicidad.js'
+import fuentePrincipalFirestoreService from '../almacenamiento/servicios/FuentePrincipalFirestoreService.js'
+import { useConfirmacionesStore } from '../almacenamiento/stores/confirmacionesStore.js'
+import { useListaJustaStore } from '../almacenamiento/stores/ListaJustaStore.js'
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
+import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
+import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
 import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
-import ModalConfirmacionReutilizable from '../components/Compartidos/ModalConfirmacionReutilizable.vue'
-import InputFormularioReutilizable from '../components/Compartidos/InputFormularioReutilizable.vue'
-import EditorImagen from '../components/Compartidos/EditorImagen.vue'
+import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
+import conexionService from '../almacenamiento/servicios/ConexionService.js'
+import migracionLocalFirebaseService from '../almacenamiento/servicios/MigracionLocalFirebaseService.js'
+import preferenciasService from '../almacenamiento/servicios/PreferenciasService.js'
 
 const quasar = useQuasar()
-const route = useRoute()
 const router = useRouter()
 const preferenciasStore = usePreferenciasStore()
 const usuarioStore = useUsuarioStore()
+const productosStore = useProductosStore()
+const sesionEscaneoStore = useSesionEscaneoStore()
+const comerciosStore = useComerciStore()
+const listaJustaStore = useListaJustaStore()
+const confirmacionesStore = useConfirmacionesStore()
 const { mostrarInterstitial } = usePublicidad()
 const ultimoIntersticialMostrado = ref(0)
-const cargandoAccionCuenta = ref(false)
-const correoCuenta = ref('')
-const contrasenaCuenta = ref('')
-const mostrarContrasenaCuenta = ref(false)
-const modalInvitadoAbierto = ref(false)
-const tarjetaCuentaCorreoRef = ref(null)
-const bloquePerfilRef = ref(null)
-const inputNombrePerfilRef = ref(null)
-const inputArchivoFotoRef = ref(null)
-const perfilEditableNombre = ref('')
-const perfilEditableFoto = ref('')
-const perfilEditableFechaNacimiento = ref('')
-const fotoTemporalEdicion = ref('')
-const editorFotoAbierto = ref(false)
-const perfilGuardandoAutomatico = ref(false)
+const resumenMigracion = ref(null)
+const estadoMigracion = ref(null)
+const conexionMigracion = ref(null)
+const cargandoMigracion = ref(false)
 const TIEMPO_ESPERA_INTERSTICIAL_MS = 60000
-const RETRASO_AUTOGUARDADO_PERFIL_MS = 900
-const perfilGuardadoClave = ref('')
-let temporizadorAutoguardadoPerfil = null
-let sincronizandoFormularioPerfil = false
-const seccionesAbiertas = ref({
-  cuentaPerfil: false,
-  tema: false,
-  monedaRegion: false,
-  datosSincronizacion: false,
-})
 const opcionesModoTema = [
   { label: 'Claro', value: 'claro' },
   { label: 'Oscuro', value: 'oscuro' },
@@ -422,229 +290,62 @@ const opcionesModoTema = [
 
 const esModoAutomatico = computed(() => preferenciasStore.modoMoneda === 'automatica')
 const etiquetaTemaActivo = computed(() => (quasar.dark.isActive ? 'Oscuro' : 'Claro'))
-const etiquetaEstadoCuenta = computed(() => {
-  if (!usuarioStore.autenticado) return 'Sin sesión'
-  if (usuarioStore.esAnonimo) return 'Invitado'
-  return 'Registrada'
-})
-const correoEstadoCuenta = computed(() => {
-  if (!usuarioStore.autenticado || usuarioStore.esAnonimo) return ''
-  return usuarioStore.perfil?.email?.trim() || ''
-})
-const textoResumenMigracion = computed(() => {
-  const resumen = usuarioStore.ultimoResumenMigracion
-  if (!resumen) return ''
-
-  return `Migración completada. Productos: ${resumen.totalProductos}, comercios: ${resumen.totalComercios}, listas: ${resumen.totalListas}.`
-})
-const mostrarBotonReintentarSync = computed(
-  () =>
-    MODO_PRUEBA ||
-    usuarioStore.hayPendientesSincronizacion ||
-    Boolean(usuarioStore.ultimoErrorSincronizacionAutomatica),
+const etiquetaCuenta = computed(() => usuarioStore.email || 'Sin sesión iniciada')
+const textoEstadoCuenta = computed(() =>
+  usuarioStore.estaAutenticado
+    ? 'Sesión activa con Firebase Auth.'
+    : 'Ingresá para usar la app con una cuenta Firebase.',
 )
-const textoSincronizacionRemota = computed(() => {
-  const ultimaSyncRemota = usuarioStore.ultimaSincronizacionRemota
-  if (ultimaSyncRemota?.fecha) {
-    return `Última actualización en segundo plano: ${formatearFechaLegible(ultimaSyncRemota.fecha)}`
-  }
-  if (usuarioStore.ultimoErrorSincronizacionRemota) {
-    return usuarioStore.ultimoErrorSincronizacionRemota
-  }
-  return ''
+const conteosMigracion = computed(
+  () =>
+    resumenMigracion.value?.conteosMigrables || {
+      productos: 0,
+      precios: 0,
+      comercios: 0,
+      direcciones: 0,
+      listas: 0,
+      itemsListaJusta: 0,
+      preferencias: 0,
+      confirmaciones: 0,
+      fotosProductos: 0,
+      fotosComercios: 0,
+      fotosListas: 0,
+    },
+)
+const textoEstadoMigracion = computed(() => estadoMigracion.value?.estado || 'sinIniciar')
+const textoConexionMigracion = computed(() =>
+  conexionMigracion.value?.conectado ? 'activa' : 'sin conexión',
+)
+const puedeReintentarMigracion = computed(() =>
+  [ESTADOS_MIGRACION_FIREBASE.PARCIAL, ESTADOS_MIGRACION_FIREBASE.ERROR].includes(
+    estadoMigracion.value?.estado,
+  ),
+)
+const estadosFuenteDatos = computed(() => {
+  const estados = [
+    { dominio: 'productos', etiquetaDominio: 'Productos', estado: productosStore.fuenteDatos },
+    { dominio: 'comercios', etiquetaDominio: 'Comercios', estado: comerciosStore.fuenteDatos },
+    { dominio: 'listas', etiquetaDominio: 'Listas', estado: listaJustaStore.fuenteDatos },
+    {
+      dominio: 'mesaTrabajo',
+      etiquetaDominio: 'Mesa de trabajo',
+      estado: sesionEscaneoStore.fuenteDatos,
+    },
+    { dominio: 'preferencias', etiquetaDominio: 'Preferencias', estado: preferenciasStore.fuenteDatos },
+    {
+      dominio: 'confirmaciones',
+      etiquetaDominio: 'Confirmaciones',
+      estado: confirmacionesStore.fuenteDatos,
+    },
+  ]
+
+  return estados.map(({ dominio, etiquetaDominio, estado }) => ({
+    dominio,
+    etiquetaDominio,
+    etiquetaFuente: fuentePrincipalFirestoreService.obtenerEtiquetaFuente(estado?.fuente),
+    mensaje: estado?.mensaje || 'Sin carga registrada.',
+  }))
 })
-function formatearFechaLegible(fechaIso) {
-  if (!fechaIso) return ''
-  const fecha = new Date(fechaIso)
-  if (Number.isNaN(fecha.getTime())) return ''
-  return fecha.toLocaleString('es-UY')
-}
-const etiquetaEdadPerfil = computed(() => {
-  const edad = calcularEdadDesdeFecha(perfilEditableFechaNacimiento.value)
-  return Number.isInteger(edad) ? `${edad} años` : 'Sin definir'
-})
-const nombreResumenCuentaPerfil = computed(() => perfilEditableNombre.value?.trim() || 'Sin nombre')
-const correoResumenCuentaPerfil = computed(() => {
-  if (!usuarioStore.autenticado) return 'Sin sesión'
-  if (usuarioStore.esAnonimo) return 'Modo invitado'
-  return usuarioStore.perfil?.email || 'Cuenta registrada'
-})
-const resumenTema = computed(() => `Tema activo: ${etiquetaTemaActivo.value}`)
-const resumenMoneda = computed(() => {
-  const modo = esModoAutomatico.value ? 'Automática' : 'Manual'
-  return `${preferenciasStore.monedaDefaultEfectiva} (${modo})`
-})
-const resumenSincronizacion = computed(() => {
-  if (usuarioStore.cantidadPendientesSincronizacion > 0) {
-    const totalPendientes = usuarioStore.cantidadPendientesSincronizacion
-    return `${totalPendientes} cambio${totalPendientes === 1 ? '' : 's'} pendiente${totalPendientes === 1 ? '' : 's'}`
-  }
-  if (textoResumenMigracion.value) return 'Sincronización lista'
-  return 'Sincronización automática activa'
-})
-const fotoPreviewPerfil = computed(() => perfilEditableFoto.value?.trim() || null)
-const inicialesPerfil = computed(() => {
-  const nombre = perfilEditableNombre.value?.trim()
-  if (!nombre) return 'U'
-  const partes = nombre.split(' ').filter(Boolean).slice(0, 2)
-  return partes.map((parte) => parte.charAt(0).toUpperCase()).join('') || 'U'
-})
-
-function calcularEdadDesdeFecha(fechaNacimientoIso) {
-  if (!fechaNacimientoIso) return null
-
-  const fechaNacimiento = new Date(`${fechaNacimientoIso}T00:00:00`)
-  if (Number.isNaN(fechaNacimiento.getTime())) return null
-
-  const hoy = new Date()
-  let edad = hoy.getFullYear() - fechaNacimiento.getFullYear()
-  const aunNoCumplio =
-    hoy.getMonth() < fechaNacimiento.getMonth() ||
-    (hoy.getMonth() === fechaNacimiento.getMonth() && hoy.getDate() < fechaNacimiento.getDate())
-
-  if (aunNoCumplio) edad -= 1
-  return edad >= 0 ? edad : null
-}
-
-function sincronizarFormularioPerfil(perfil) {
-  sincronizandoFormularioPerfil = true
-  perfilEditableNombre.value = perfil?.perfilEditable?.nombre || perfil?.nombre || ''
-  perfilEditableFoto.value = perfil?.perfilEditable?.foto || perfil?.foto || ''
-  perfilEditableFechaNacimiento.value = perfil?.perfilEditable?.fechaNacimiento || perfil?.fechaNacimiento || ''
-  perfilGuardadoClave.value = construirClavePerfilEditable({
-    nombre: perfilEditableNombre.value,
-    foto: perfilEditableFoto.value,
-    fechaNacimiento: perfilEditableFechaNacimiento.value,
-  })
-  nextTick(() => {
-    sincronizandoFormularioPerfil = false
-  })
-}
-
-function abrirSelectorFotoPerfil() {
-  inputArchivoFotoRef.value?.click()
-}
-
-function quitarFotoPerfil() {
-  perfilEditableFoto.value = ''
-}
-
-function manejarCancelarFotoEditada() {
-  fotoTemporalEdicion.value = ''
-}
-
-function manejarGuardarFotoEditada(nuevaFotoBase64) {
-  perfilEditableFoto.value = nuevaFotoBase64 || ''
-  fotoTemporalEdicion.value = ''
-}
-
-async function manejarSeleccionArchivoFoto(evento) {
-  const archivo = evento?.target?.files?.[0]
-  if (!archivo) return
-
-  const lector = new FileReader()
-  lector.onload = () => {
-    fotoTemporalEdicion.value = String(lector.result || '')
-    editorFotoAbierto.value = true
-  }
-  lector.readAsDataURL(archivo)
-
-  if (inputArchivoFotoRef.value) {
-    inputArchivoFotoRef.value.value = ''
-  }
-}
-
-function validarPerfilEditable(opciones = {}) {
-  const notificar = opciones.notificar !== false
-  const nombreNormalizado = perfilEditableNombre.value.trim()
-  const fechaNacimiento = perfilEditableFechaNacimiento.value
-
-  if (!nombreNormalizado) {
-    if (notificar) {
-      quasar.notify({ type: 'warning', message: 'El nombre es obligatorio.' })
-    }
-    return false
-  }
-
-  if (fechaNacimiento) {
-    const hoy = new Date()
-    const hoyIso = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(
-      hoy.getDate(),
-    ).padStart(2, '0')}`
-
-    if (fechaNacimiento > hoyIso) {
-      if (notificar) {
-        quasar.notify({ type: 'warning', message: 'La fecha de nacimiento no puede ser futura.' })
-      }
-      return false
-    }
-  }
-
-  return true
-}
-
-function construirClavePerfilEditable(perfilEditable) {
-  return JSON.stringify({
-    nombre: String(perfilEditable?.nombre || '').trim(),
-    foto: String(perfilEditable?.foto || '').trim(),
-    fechaNacimiento: String(perfilEditable?.fechaNacimiento || '').trim(),
-  })
-}
-
-function limpiarTemporizadorAutoguardadoPerfil() {
-  if (!temporizadorAutoguardadoPerfil) return
-  clearTimeout(temporizadorAutoguardadoPerfil)
-  temporizadorAutoguardadoPerfil = null
-}
-
-async function guardarPerfilEditableAutomatico() {
-  if (!usuarioStore.tieneSesionActiva) return
-  if (!validarPerfilEditable({ notificar: false })) return
-
-  const datosPerfil = {
-    nombre: perfilEditableNombre.value.trim(),
-    foto: perfilEditableFoto.value || '',
-    fechaNacimiento: perfilEditableFechaNacimiento.value,
-  }
-  const claveActual = construirClavePerfilEditable(datosPerfil)
-  if (claveActual === perfilGuardadoClave.value) return
-
-  perfilGuardandoAutomatico.value = true
-  const perfilOk = await usuarioStore.actualizarPerfilEditable(datosPerfil)
-
-  if (perfilOk) {
-    perfilGuardadoClave.value = claveActual
-    if (usuarioStore.errorPerfil) {
-      quasar.notify({ type: 'warning', message: usuarioStore.errorPerfil })
-    }
-  } else {
-    quasar.notify({
-      type: 'negative',
-      message: usuarioStore.errorPerfil || 'No se pudo guardar el perfil.',
-    })
-  }
-
-  perfilGuardandoAutomatico.value = false
-}
-
-function programarAutoguardadoPerfil() {
-  if (sincronizandoFormularioPerfil) return
-  if (!usuarioStore.tieneSesionActiva) return
-  if (!validarPerfilEditable({ notificar: false })) return
-
-  const claveActual = construirClavePerfilEditable({
-    nombre: perfilEditableNombre.value,
-    foto: perfilEditableFoto.value,
-    fechaNacimiento: perfilEditableFechaNacimiento.value,
-  })
-  if (claveActual === perfilGuardadoClave.value) return
-
-  limpiarTemporizadorAutoguardadoPerfil()
-  temporizadorAutoguardadoPerfil = setTimeout(() => {
-    temporizadorAutoguardadoPerfil = null
-    void guardarPerfilEditableAutomatico()
-  }, RETRASO_AUTOGUARDADO_PERFIL_MS)
-}
 
 async function mostrarPublicidadConfiguracion() {
   const ahora = Date.now()
@@ -676,266 +377,146 @@ async function cambiarMonedaManual(moneda) {
   await preferenciasStore.guardarMonedaManual(moneda)
 }
 
-async function manejarEntrarConGoogle() {
-  cargandoAccionCuenta.value = true
-  const loginOk = await usuarioStore.iniciarSesionConGoogle()
-
-  if (loginOk) {
-    quasar.notify({
-      type: 'positive',
-      message: 'Continuá con Google si se abrió redirección o popup.',
-    })
-  } else {
-    quasar.notify({
-      type: 'negative',
-      message: usuarioStore.errorSesion || 'No se pudo iniciar sesión con Google.',
-    })
-  }
-
-  cargandoAccionCuenta.value = false
-}
-
-async function manejarCerrarSesionReal() {
-  cargandoAccionCuenta.value = true
-
-  try {
-    await usuarioStore.cerrarSesion()
-    quasar.notify({ type: 'info', message: 'Sesión cerrada. Podés entrar con otra cuenta.' })
+async function gestionarCuenta() {
+  if (!usuarioStore.estaAutenticado) {
     await router.push('/acceso')
-  } catch (error) {
-    console.error('Error al cerrar sesión:', error)
-    quasar.notify({ type: 'negative', message: 'No se pudo cerrar sesión.' })
-  } finally {
-    cargandoAccionCuenta.value = false
-  }
-}
-
-async function manejarContinuarComoInvitado() {
-  modalInvitadoAbierto.value = true
-}
-
-async function confirmarModoInvitado() {
-  modalInvitadoAbierto.value = false
-  cargandoAccionCuenta.value = true
-  const invitadoOk = await usuarioStore.continuarComoInvitado()
-
-  if (invitadoOk) {
-    quasar.notify({ type: 'positive', message: 'Modo invitado activo.' })
-  } else {
-    quasar.notify({
-      type: 'negative',
-      message: usuarioStore.errorSesion || 'No se pudo activar modo invitado.',
-    })
-  }
-
-  cargandoAccionCuenta.value = false
-}
-
-function irARegistroDesdeModal() {
-  modalInvitadoAbierto.value = false
-  if (seccionesAbiertas.value.cuentaPerfil) return
-
-  seccionesAbiertas.value.cuentaPerfil = true
-  const elemento = tarjetaCuentaCorreoRef.value?.$el || tarjetaCuentaCorreoRef.value
-  if (elemento?.scrollIntoView) {
-    elemento.scrollIntoView({ behavior: 'smooth', block: 'center' })
-  }
-}
-
-function enfocarCampoNombrePerfil() {
-  const componenteInput = inputNombrePerfilRef.value
-  const elementoInput =
-    componenteInput?.$el?.querySelector?.('input') ||
-    componenteInput?.querySelector?.('input') ||
-    null
-  if (!elementoInput) return
-
-  setTimeout(() => {
-    elementoInput.focus()
-    elementoInput.select?.()
-  }, 220)
-}
-
-function desplazarSuaveHastaPerfil() {
-  const elementoPerfil = bloquePerfilRef.value
-  if (!elementoPerfil?.getBoundingClientRect) return
-
-  const encabezado = document.querySelector('.q-header')
-  const altoEncabezado = encabezado?.getBoundingClientRect?.().height || 0
-  const margenSuperior = 10
-  const posicionActual = window.scrollY || window.pageYOffset || 0
-  const posicionObjetivo =
-    posicionActual + elementoPerfil.getBoundingClientRect().top - altoEncabezado - margenSuperior
-
-  window.scrollTo({
-    top: Math.max(0, posicionObjetivo),
-    behavior: 'smooth',
-  })
-}
-
-async function prepararVistaPerfilDesdeNavegacion(foco = '') {
-  seccionesAbiertas.value.cuentaPerfil = true
-  await nextTick()
-  desplazarSuaveHastaPerfil()
-
-  if (foco === 'nombre') {
-    enfocarCampoNombrePerfil()
-  }
-}
-
-function validarCorreoCuenta() {
-  if (!correoCuenta.value.trim()) {
-    quasar.notify({ type: 'warning', message: 'Ingresá un correo.' })
-    return false
-  }
-
-  return true
-}
-
-function validarCredencialesCuenta() {
-  if (!validarCorreoCuenta()) return false
-
-  if (!contrasenaCuenta.value.trim()) {
-    quasar.notify({ type: 'warning', message: 'Ingresá una contraseña.' })
-    return false
-  }
-
-  if (contrasenaCuenta.value.length < 6) {
-    quasar.notify({ type: 'warning', message: 'La contraseña debe tener al menos 6 caracteres.' })
-    return false
-  }
-
-  return true
-}
-
-async function manejarEntrarConCorreo() {
-  if (!validarCredencialesCuenta()) return
-
-  cargandoAccionCuenta.value = true
-  const loginOk = await usuarioStore.iniciarSesionConCorreo(
-    correoCuenta.value.trim(),
-    contrasenaCuenta.value,
-  )
-
-  if (loginOk) {
-    quasar.notify({ type: 'positive', message: 'Sesión iniciada con correo.' })
-  } else {
-    quasar.notify({
-      type: 'negative',
-      message: usuarioStore.errorSesion || 'No se pudo iniciar sesión con correo.',
-    })
-  }
-
-  cargandoAccionCuenta.value = false
-}
-
-async function manejarCrearCuentaConCorreo() {
-  if (!validarCredencialesCuenta()) return
-
-  cargandoAccionCuenta.value = true
-  const registroOk = await usuarioStore.registrarConCorreo(
-    correoCuenta.value.trim(),
-    contrasenaCuenta.value,
-  )
-
-  if (registroOk) {
-    quasar.notify({ type: 'positive', message: 'Cuenta creada correctamente.' })
-  } else {
-    quasar.notify({
-      type: 'negative',
-      message: usuarioStore.errorSesion || 'No se pudo crear la cuenta.',
-    })
-  }
-
-  cargandoAccionCuenta.value = false
-}
-
-async function manejarRecuperarContrasena() {
-  if (!validarCorreoCuenta()) return
-
-  cargandoAccionCuenta.value = true
-  const envioOk = await usuarioStore.recuperarContrasena(correoCuenta.value.trim())
-
-  if (envioOk) {
-    quasar.notify({
-      type: 'positive',
-      message: 'Te enviamos un correo para recuperar la contraseña.',
-    })
-  } else {
-    quasar.notify({
-      type: 'negative',
-      message: usuarioStore.errorSesion || 'No se pudo enviar el correo de recuperación.',
-    })
-  }
-
-  cargandoAccionCuenta.value = false
-}
-
-async function manejarMigracionDatos() {
-  if (!usuarioStore.tieneSesionActiva) {
-    quasar.notify({
-      type: 'warning',
-      message: 'Necesitás una sesión activa antes de migrar datos.',
-    })
     return
   }
 
   quasar
     .dialog({
-      title: 'Reintentar sincronización',
-      message: 'Vamos a volver a sincronizar tus datos de este dispositivo con tu cuenta. ¿Querés continuar?',
+      title: 'Cerrar sesión',
+      message: 'No se borrarán productos, comercios, listas ni preferencias locales.',
+      cancel: true,
       persistent: true,
-      ok: { label: 'Reintentar', color: 'secondary' },
-      cancel: { label: 'Cancelar', flat: true },
+      ok: {
+        label: 'Cerrar sesión',
+        color: 'negative',
+        noCaps: true,
+      },
     })
     .onOk(async () => {
-      const resumen = await usuarioStore.migrarDatosLocales()
-
-      if (resumen) {
-        quasar.notify({ type: 'positive', message: 'Sincronización completada correctamente.' })
-        return
-      }
-
+      await usuarioStore.cerrarSesion()
       quasar.notify({
-        type: 'negative',
-        message: usuarioStore.errorMigracion || 'No se pudo completar la sincronización.',
+        type: 'positive',
+        message: 'Sesión cerrada.',
+      })
+      await router.push('/acceso')
+    })
+}
+
+async function cargarPanelMigracion() {
+  if (!usuarioStore.estaAutenticado) return
+
+  cargandoMigracion.value = true
+
+  try {
+    const [resumen, estado, conexion] = await Promise.all([
+      migracionLocalFirebaseService.obtenerResumenLocal(),
+      migracionLocalFirebaseService.obtenerEstadoActual(),
+      conexionService.obtenerEstadoConexion(),
+    ])
+    resumenMigracion.value = resumen
+    estadoMigracion.value = estado
+    conexionMigracion.value = conexion
+  } catch (error) {
+    quasar.notify({
+      type: 'warning',
+      message: error.message || 'No se pudo cargar el panel de migración.',
+    })
+  } finally {
+    cargandoMigracion.value = false
+  }
+}
+
+async function prepararBackupMigracion() {
+  await ejecutarAccionMigracion(async () => {
+    estadoMigracion.value = await migracionLocalFirebaseService.prepararMigracionLocal()
+    quasar.notify({
+      type: 'positive',
+      message: 'Backup local creado y verificado.',
+    })
+  })
+}
+
+function confirmarMigracion() {
+  quasar
+    .dialog({
+      title: 'Migrar datos locales',
+      message:
+        'Se creará o usará un backup local previo. Firestore no será fuente principal todavía y no se borrarán datos locales.',
+      cancel: true,
+      persistent: true,
+      ok: {
+        label: 'Migrar datos',
+        color: 'primary',
+        noCaps: true,
+      },
+    })
+    .onOk(async () => {
+      await ejecutarAccionMigracion(async () => {
+        estadoMigracion.value = await migracionLocalFirebaseService.iniciarMigracion({
+          confirmarMigracion: true,
+        })
+        notificarResultadoMigracion()
       })
     })
 }
 
-watch(
-  () => usuarioStore.perfil,
-  (perfil) => {
-    sincronizarFormularioPerfil(perfil)
-  },
-  { immediate: true },
-)
+async function reintentarMigracion() {
+  await ejecutarAccionMigracion(async () => {
+    estadoMigracion.value = await migracionLocalFirebaseService.reintentarMigracion()
+    notificarResultadoMigracion()
+  })
+}
 
-watch([perfilEditableNombre, perfilEditableFoto, perfilEditableFechaNacimiento], () => {
-  programarAutoguardadoPerfil()
-})
+async function ejecutarAccionMigracion(accion) {
+  cargandoMigracion.value = true
 
-onBeforeUnmount(() => {
-  limpiarTemporizadorAutoguardadoPerfil()
-})
+  try {
+    await accion()
+    await cargarPanelMigracion()
+  } catch (error) {
+    quasar.notify({
+      type: 'negative',
+      message: error.message || 'No se pudo ejecutar la migración.',
+    })
+  } finally {
+    cargandoMigracion.value = false
+  }
+}
+
+function notificarResultadoMigracion() {
+  const estado = estadoMigracion.value?.estado
+  quasar.notify({
+    type: estado === ESTADOS_MIGRACION_FIREBASE.COMPLETADA ? 'positive' : 'warning',
+    message:
+      estado === ESTADOS_MIGRACION_FIREBASE.COMPLETADA
+        ? 'Migración completada y validada.'
+        : 'Migración parcial. Revisá errores y reintentá cuando haya conexión.',
+  })
+}
+
+async function cargarDiagnosticoPreferenciasDev() {
+  if (!import.meta.env.DEV || !usuarioStore.estaAutenticado) return
+
+  const diagnostico = await preferenciasService.obtenerDiagnosticoSincronizacion()
+
+  console.info('Diagnóstico preferencias local/firestore', {
+    firestoreDisponible: diagnostico.firestoreDisponible,
+    mensajeFirestore: diagnostico.mensajeFirestore,
+    local: diagnostico.local,
+    firestore: diagnostico.firestore,
+  })
+}
 
 onMounted(async () => {
   if (preferenciasStore.modoMoneda === 'automatica' && !preferenciasStore.paisDetectado) {
     await preferenciasStore.detectarMonedaAutomatica()
   }
-
-  if (route.query.seccion === 'perfil') {
-    await prepararVistaPerfilDesdeNavegacion(String(route.query.foco || ''))
-  }
+  await cargarPanelMigracion()
+  await cargarDiagnosticoPreferenciasDev()
 })
-
-watch(
-  () => [route.query.seccion, route.query.foco],
-  async ([seccion, foco]) => {
-    if (seccion !== 'perfil') return
-    await prepararVistaPerfilDesdeNavegacion(String(foco || ''))
-  },
-)
 </script>
 
 <style scoped>
@@ -945,111 +526,52 @@ watch(
 .contenedor-configuracion {
   max-width: 720px;
   margin: 0 auto;
-  padding-bottom: 20px;
 }
-.contenedor-acordeon {
-  border-radius: 12px;
-  background: var(--fondo-tarjeta);
-  border: 1px solid var(--borde-color);
-  overflow: hidden;
-}
-.cabecera-seccion {
-  color: var(--texto-primario);
-  min-height: 64px;
-  padding: 6px 4px;
-}
-.titulo-cabecera-cuenta {
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.1;
-}
-.nombre-cabecera-cuenta {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--color-primario);
-  margin-top: 2px;
-  line-height: 1.2;
-}
-.correo-cabecera-cuenta {
-  font-size: 0.82rem;
-  color: var(--texto-secundario);
-  line-height: 1.2;
-}
-.bloque-contenido {
-  padding: 18px 16px;
-}
-.bloque-contenido + .bloque-contenido {
-  padding-top: 14px;
-}
-.bloque-contenido .text-subtitle2 {
-  margin-bottom: 6px;
-}
-.bloque-contenido .text-caption {
-  line-height: 1.4;
-}
-.bloque-contenido .q-banner {
-  border-radius: 10px;
-}
-.preview-avatar-perfil {
+.fila-cuenta {
   display: flex;
-  justify-content: center;
+  gap: var(--espaciado-md);
+  align-items: center;
+  justify-content: space-between;
 }
-.avatar-perfil {
-  position: relative;
-  background: color-mix(in srgb, var(--color-primario) 20%, var(--fondo-tarjeta));
-  color: var(--texto-primario);
-  border: 1px solid color-mix(in srgb, var(--color-primario) 40%, var(--borde-color));
+.fila-migracion {
+  display: flex;
+  gap: var(--espaciado-md);
+  align-items: center;
+  justify-content: space-between;
 }
-.boton-accion-avatar {
-  position: absolute;
-  right: -6px;
-  bottom: -6px;
-  border: 2px solid var(--fondo-tarjeta);
-}
-.iniciales-perfil {
-  font-size: 1.2rem;
-  font-weight: 700;
-}
-.bloque-ayuda-moneda {
-  margin-top: 14px;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid var(--borde-color);
-  background: var(--fondo-banner-informativo);
-  color: var(--texto-primario);
-}
-.bloque-correo-form {
-  margin-top: 2px;
-  padding: 12px;
-  border: 1px solid var(--borde-color);
-  border-radius: 10px;
-  background: var(--fondo-banner-suave);
-}
-.boton-ojo-cuenta {
-  box-shadow: none;
-}
-.acciones-correo {
+.grilla-conteos {
   display: grid;
+  gap: var(--espaciado-sm);
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 2px;
 }
-.boton-accion-correo {
-  min-height: 42px;
+.banner-migracion {
+  background: var(--fondo-banner-suave);
+  color: var(--texto-primario);
+  border: 1px solid var(--borde-color);
 }
-.input-archivo-oculto {
-  display: none;
+.grilla-fuentes-datos {
+  display: grid;
+  gap: var(--espaciado-sm);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.banner-fuente-datos {
+  background: var(--fondo-banner-suave);
+  color: var(--texto-primario);
+  border: 1px solid var(--borde-color);
+}
+.fila-acciones-migracion {
+  display: flex;
+  gap: var(--espaciado-sm);
+  flex-wrap: wrap;
 }
 .selector-modo-tema {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
 }
 .boton-modo-tema {
   color: var(--texto-primario);
   background: var(--fondo-tarjeta);
   border: 1px solid var(--borde-color);
-  min-height: 42px;
 }
 .boton-modo-tema-activo {
   background: color-mix(in srgb, var(--color-primario) 16%, var(--fondo-tarjeta));
@@ -1071,30 +593,19 @@ watch(
   color: var(--texto-primario);
   border: 1px solid var(--borde-color);
 }
-.banner-cuenta {
-  background: var(--fondo-banner-suave);
-  color: var(--texto-primario);
-  border: 1px solid var(--borde-color);
-}
-.estado-cuenta-correo {
-  margin-top: 4px;
-  font-size: 0.84rem;
-  line-height: 1.2;
-  color: var(--texto-secundario);
-  word-break: break-all;
-}
 @media (max-width: 640px) {
-  .contenedor-configuracion {
-    padding-left: 2px;
-    padding-right: 2px;
+  .fila-cuenta {
+    align-items: stretch;
+    flex-direction: column;
   }
-  .cabecera-seccion {
-    min-height: 60px;
+  .fila-migracion {
+    align-items: stretch;
+    flex-direction: column;
   }
-  .bloque-contenido {
-    padding: 14px 12px;
+  .grilla-conteos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .acciones-correo {
+  .grilla-fuentes-datos {
     grid-template-columns: 1fr;
   }
   .selector-modo-tema {
@@ -1102,5 +613,3 @@ watch(
   }
 }
 </style>
-
-

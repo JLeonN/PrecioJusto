@@ -24,17 +24,6 @@
           >
             <span class="title-text">Precio Justo</span>
           </q-btn>
-          <q-btn
-            v-if="mostrarBotonAccesoHeader"
-            flat
-            dense
-            round
-            class="boton-acceso-header"
-            aria-label="Abrir acceso"
-            @click="irAAcceso"
-          >
-            <q-icon name="login" />
-          </q-btn>
         </div>
         <div v-if="MODO_PRUEBA" class="indicador-modo-prueba">MODO PRUEBA</div>
 
@@ -99,23 +88,10 @@
       <div class="fit drawer-contenedor">
         <q-scroll-area class="drawer-scroll">
           <q-list padding class="drawer-lista">
-                        <!-- Header del drawer -->
+            <!-- Header del drawer -->
             <q-item class="q-mb-md">
               <q-item-section avatar>
-                <div
-                  v-if="mostrarIdentidadUsuario"
-                  class="avatar-usuario-drawer-box clickable"
-                  role="button"
-                  tabindex="0"
-                  @click="irAPerfilDesdeDrawer('foto')"
-                  @keyup.enter="irAPerfilDesdeDrawer('foto')"
-                >
-                  <q-avatar size="56px" class="avatar-usuario-drawer">
-                    <img v-if="fotoUsuarioDrawer" :src="fotoUsuarioDrawer" alt="Foto de perfil" />
-                    <span v-else class="iniciales-usuario-drawer">{{ inicialesUsuarioDrawer }}</span>
-                  </q-avatar>
-                </div>
-                <div v-else class="logo-app-drawer-box">
+                <div class="logo-app-drawer-box">
                   <img
                     src="/icons/PrecioJusto-Icono.png"
                     alt="Icono de Precio Justo"
@@ -126,16 +102,6 @@
               <q-item-section>
                 <q-item-label class="text-h6 text-weight-bold"> Precio Justo </q-item-label>
                 <q-item-label caption> Compará y ahorrá </q-item-label>
-                <q-btn
-                  v-if="mostrarIdentidadUsuario"
-                  flat
-                  dense
-                  no-caps
-                  class="q-mt-xs boton-nombre-drawer"
-                  @click="irAPerfilDesdeDrawer('nombre')"
-                >
-                  {{ nombreUsuarioDrawer }}
-                </q-btn>
               </q-item-section>
             </q-item>
 
@@ -281,7 +247,8 @@ import { useActualizacionApp } from '../composables/useActualizacionApp.js'
 import { MODO_PRUEBA } from '../almacenamiento/constantes/ConfigPublicidad.js'
 import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
-import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
+import conexionService from '../almacenamiento/servicios/ConexionService.js'
+import fotosPendientesStorageService from '../almacenamiento/servicios/FotosPendientesStorageService.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -289,7 +256,6 @@ const quasar = useQuasar()
 const drawerAbierto = ref(false)
 const sesionEscaneoStore = useSesionEscaneoStore()
 const preferenciasStore = usePreferenciasStore()
-const usuarioStore = useUsuarioStore()
 const { inicializar, mostrarBanner, precargarInterstitial, altoBanner } = usePublicidad()
 const {
   estadoActualizacion,
@@ -299,6 +265,7 @@ const {
   abrirUrlPlayStore,
 } = useActualizacionApp()
 let removerListenerEstadoApp = null
+let removerListenerConexionFotos = null
 
 const toggleDrawer = () => {
   drawerAbierto.value = !drawerAbierto.value
@@ -333,47 +300,6 @@ const textoActualizacionDrawer = computed(() => {
   }
 
   return 'Buscar versión nueva'
-})
-const mostrarIdentidadUsuario = computed(
-  () => usuarioStore.tieneSesionActiva && !usuarioStore.esAnonimo,
-)
-const mostrarBotonAccesoHeader = computed(
-  () => !MODO_PRUEBA && !usuarioStore.cargandoSesion && !usuarioStore.tieneSesionRealActiva,
-)
-function esNombreGenericoAnonimo(nombre) {
-  return String(nombre || '').trim().toLowerCase() === 'usuario anónimo'
-}
-function construirNombreDesdeEmail(email) {
-  if (!email) return null
-  const local = String(email).split('@')[0] || ''
-  const normalizado = local.replace(/[._-]+/g, ' ').trim()
-  if (!normalizado) return null
-  return normalizado
-    .split(' ')
-    .filter(Boolean)
-    .map((parte) => parte.charAt(0).toUpperCase() + parte.slice(1))
-    .join(' ')
-}
-const nombreUsuarioDrawer = computed(() => {
-  const nombrePerfilEditable = usuarioStore.perfil?.perfilEditable?.nombre?.trim()
-  if (nombrePerfilEditable && !esNombreGenericoAnonimo(nombrePerfilEditable)) return nombrePerfilEditable
-  const nombrePerfil = usuarioStore.perfil?.nombre?.trim()
-  if (nombrePerfil && !esNombreGenericoAnonimo(nombrePerfil)) return nombrePerfil
-  const emailPerfil = usuarioStore.perfil?.email?.trim()
-  const nombreDesdeEmail = construirNombreDesdeEmail(emailPerfil)
-  if (nombreDesdeEmail) return nombreDesdeEmail
-  return 'Usuario registrado'
-})
-const fotoUsuarioDrawer = computed(() => {
-  const fotoPerfilEditable = usuarioStore.perfil?.perfilEditable?.foto?.trim()
-  if (fotoPerfilEditable) return fotoPerfilEditable
-  return usuarioStore.perfil?.foto || null
-})
-const inicialesUsuarioDrawer = computed(() => {
-  const nombre = nombreUsuarioDrawer.value
-  if (!nombre) return 'U'
-  const partes = nombre.split(' ').filter(Boolean).slice(0, 2)
-  return partes.map((parte) => parte.charAt(0).toUpperCase()).join('') || 'U'
 })
 
 const colorInactivoHeader = computed(() => (quasar.dark.isActive ? '#b0bec5' : '#757575'))
@@ -420,22 +346,10 @@ const irAComercios = () => {
   if (esComerciosActivo.value) return
   router.push('/comercios')
 }
-const irAAcceso = () => {
-  if (route.path === '/acceso') return
-  router.push('/acceso')
-}
 
 const irAMesaTrabajo = () => {
   if (esMesaActivo.value) return
   router.push('/mesa-trabajo')
-}
-const irAPerfilDesdeDrawer = (destino = 'foto') => {
-  drawerAbierto.value = false
-  const query =
-    destino === 'nombre'
-      ? { seccion: 'perfil', foco: 'nombre', accion: String(Date.now()) }
-      : { seccion: 'perfil', accion: String(Date.now()) }
-  router.push({ path: '/configuracion', query })
 }
 
 const manejarClickActualizarApp = async () => {
@@ -458,11 +372,9 @@ const actualizarAppAhora = async () => {
 
 // Carga datos persistidos al iniciar la app
 onMounted(async () => {
-  await Promise.all([
-    usuarioStore.inicializarSesion(),
-    sesionEscaneoStore.cargarSesion(),
-    preferenciasStore.inicializar(),
-  ])
+  await Promise.all([sesionEscaneoStore.cargarSesion(), preferenciasStore.inicializar()])
+  await preferenciasStore.hidratarDesdeFuentePrincipal()
+  await fotosPendientesStorageService.sincronizarFotosPendientes()
   await refrescarEstadoActualizacion({ mostrarModalSiHay: true })
 
   try {
@@ -477,17 +389,32 @@ onMounted(async () => {
     const listenerEstadoApp = await App.addListener('appStateChange', ({ isActive }) => {
       if (!isActive) return
       refrescarEstadoActualizacion({ mostrarModalSiHay: true })
+      fotosPendientesStorageService.sincronizarFotosPendientes()
     })
     removerListenerEstadoApp = () => listenerEstadoApp.remove()
   } catch {
     // En web puede no estar disponible este evento.
   }
+
+  try {
+    removerListenerConexionFotos = await conexionService.escucharCambiosConexion((estado) => {
+      if (!estado.conectado) return
+      fotosPendientesStorageService.sincronizarFotosPendientes()
+    })
+  } catch {
+    // En web puede no estar disponible el listener nativo de red.
+  }
 })
 
 onUnmounted(() => {
-  if (!removerListenerEstadoApp) return
-  removerListenerEstadoApp()
+  if (removerListenerEstadoApp) {
+    removerListenerEstadoApp()
+  }
   removerListenerEstadoApp = null
+  if (removerListenerConexionFotos) {
+    removerListenerConexionFotos()
+  }
+  removerListenerConexionFotos = null
 })
 
 useBotonAtras({ drawerAbierto, router, route })
@@ -527,9 +454,6 @@ useBotonAtras({ drawerAbierto, router, route })
   max-width: 100%;
   padding: 0 6px;
 }
-.boton-acceso-header {
-  color: var(--color-primario);
-}
 .title-text {
   display: block;
   min-width: 0;
@@ -548,18 +472,10 @@ useBotonAtras({ drawerAbierto, router, route })
 }
 .indicador-modo-prueba {
   position: absolute;
-  left: 58px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 20;
-  font-size: 11px;
-  font-weight: 700;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
   letter-spacing: 0.04em;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 8px;
-  padding: 3px 8px;
   pointer-events: none;
 }
 .quick-access-btn {
@@ -616,47 +532,11 @@ useBotonAtras({ drawerAbierto, router, route })
   overflow: hidden;
   background: var(--color-primario);
 }
-.avatar-usuario-drawer-box {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-}
-.avatar-usuario-drawer-box.clickable {
-  cursor: pointer;
-}
-.avatar-usuario-drawer-box.clickable:focus-visible {
-  outline: 2px solid var(--color-primario);
-  outline-offset: 2px;
-}
-.avatar-usuario-drawer {
-  background: color-mix(in srgb, var(--color-primario) 22%, var(--fondo-tarjeta));
-  color: var(--texto-primario);
-  border: 1px solid color-mix(in srgb, var(--color-primario) 40%, var(--borde-color));
-}
-.iniciales-usuario-drawer {
-  font-size: 0.9rem;
-  font-weight: 700;
-}
 .logo-app-drawer {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-}
-.boton-nombre-drawer {
-  padding: 0;
-  min-height: 22px;
-  width: 100%;
-  justify-content: flex-start;
-  align-self: flex-start;
-  text-align: left;
-  color: var(--color-primario);
-  font-weight: 600;
-}
-.boton-nombre-drawer :deep(.q-btn__content) {
-  justify-content: flex-start;
-  text-align: left;
-  width: 100%;
 }
 @media (max-width: 420px) {
   .title-text {

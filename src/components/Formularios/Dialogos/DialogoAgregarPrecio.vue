@@ -178,6 +178,7 @@ import { ref, computed, watch, nextTick } from 'vue'
 import { useQuasar } from 'quasar'
 import { useProductosStore } from '../../../almacenamiento/stores/productosStore.js'
 import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.js'
+import usuarioActualService from '../../../almacenamiento/servicios/UsuarioActualService.js'
 import { MONEDAS } from '../../../almacenamiento/constantes/Monedas.js'
 import { usePreferenciasStore } from '../../../almacenamiento/stores/preferenciasStore.js'
 import DialogoAgregarComercioRapido from './DialogoAgregarComercioRapido.vue'
@@ -479,7 +480,7 @@ async function guardarPrecio() {
         : [],
       fecha: new Date().toISOString(),
       confirmaciones: 0,
-      usuarioId: 'user_actual_123',
+      usuarioId: usuarioActualService.obtenerUsuarioIdActual(),
     }
 
     /* Guardar en el store */

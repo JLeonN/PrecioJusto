@@ -1,7 +1,10 @@
 <template>
   <q-page class="mesa-trabajo-pagina">
     <!-- Estado vacío: llegó a la ruta con mesa vacía -->
-    <div v-if="mesaVaciaAlMontar" class="col flex flex-center column q-pa-xl">
+    <div
+      v-if="mesaVaciaAlMontar && !sesionStore.tieneItemsPendientes"
+      class="col flex flex-center column q-pa-xl"
+    >
       <IconShoppingBag :size="64" class="text-grey-4" />
       <div class="text-h6 text-grey-5 q-mt-md text-center">La mesa está vacía</div>
       <div class="text-body2 text-grey-5 q-mb-xl text-center">
@@ -287,8 +290,8 @@ import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoSto
 import { useListaJustaStore } from '../almacenamiento/stores/ListaJustaStore.js'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
 import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
+import usuarioActualService from '../almacenamiento/servicios/UsuarioActualService.js'
 import { useSeleccionMultiple } from '../composables/useSeleccionMultiple.js'
-import { resolverFotoFuenteDesdeImagen } from '../utils/FotoFuenteUtils.js'
 import { IconShoppingBag, IconSend, IconHome, IconMapPin } from '@tabler/icons-vue'
 
 const OPCIONES_ORDEN = [
@@ -331,6 +334,11 @@ onMounted(async () => {
 watch(
   () => sesionStore.tieneItemsPendientes,
   (tieneItems) => {
+    if (tieneItems) {
+      mesaVaciaAlMontar.value = false
+      return
+    }
+
     if (!tieneItems && !mesaVaciaAlMontar.value) router.push('/')
   },
 )
@@ -395,7 +403,6 @@ const itemsFiltrados = computed(() => {
 
 async function _guardarItem(item) {
   const comercio = item.comercio
-  const fotoFuente = resolverFotoFuenteDesdeImagen(item.imagen)
   let productoDestinoId = item.productoExistenteId || null
   const datoPrecio = {
     comercioId: comercio?.id || null,
@@ -411,14 +418,14 @@ async function _guardarItem(item) {
     escalasPorCantidad: Array.isArray(item.escalasPorCantidad) ? item.escalasPorCantidad : [],
     fecha: new Date().toISOString(),
     confirmaciones: 0,
-    usuarioId: 'user_actual_123',
+    usuarioId: usuarioActualService.obtenerUsuarioIdActual(),
   }
   if (item.productoExistenteId) {
     await productosStore.agregarPrecioAProducto(item.productoExistenteId, datoPrecio)
     await productosStore.actualizarProducto(item.productoExistenteId, {
       nombre: item.nombre,
       imagen: item.imagen,
-      fotoFuente,
+      fotoFuente: item.fotoFuente || (item.imagen ? 'usuario' : null),
       marca: item.marca,
       cantidad: item.cantidad,
       unidad: item.unidad,
@@ -428,7 +435,7 @@ async function _guardarItem(item) {
       codigoBarras: item.codigoBarras,
       nombre: item.nombre,
       imagen: item.imagen,
-      fotoFuente,
+      fotoFuente: item.fotoFuente || (item.imagen ? 'usuario' : null),
       marca: item.marca,
       cantidad: item.cantidad,
       unidad: item.unidad,
@@ -593,12 +600,6 @@ function alCrearComercio(comercioCreado) {
 .mesa-lista-scroll {
   flex: 1;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.mesa-lista-scroll::-webkit-scrollbar {
-  display: none;
 }
 .mesa-trabajo-barra {
   border-bottom: 1px solid var(--borde-color);

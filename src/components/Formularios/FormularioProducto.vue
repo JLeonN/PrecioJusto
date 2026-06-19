@@ -1,14 +1,14 @@
-﻿<template>
+<template>
   <div class="formulario-producto">
     <!-- NOMBRE DEL PRODUCTO -->
-    <InputFormularioReutilizable
+    <q-input
       ref="qInputNombreRef"
       v-model="datosInternos.nombre"
       label="Nombre del producto"
       outlined
       dense
-      :placeholder="`Ej: ${productoPlaceholder.nombre}`"
-      :rules="modo === 'comunidad' ? [requerido] : [requeridoNombreLocal]"
+      placeholder="Ej: Leche La Serenísima"
+      :rules="[requeridoNombreLocal]"
       :error="!!errorNombreMsg"
       :error-message="errorNombreMsg"
       :class="{ 'shake': animarShakeNombre }"
@@ -30,30 +30,30 @@
           <q-tooltip>Buscar en base de datos</q-tooltip>
         </q-btn>
       </template>
-    </InputFormularioReutilizable>
+    </q-input>
 
     <!-- MARCA -->
-    <InputFormularioReutilizable
+    <q-input
       v-if="mostrarMarca"
       v-model="datosInternos.marca"
       label="Marca"
       outlined
       dense
-      :placeholder="`Ej: ${productoPlaceholder.marca}`"
+      placeholder="Ej: La Serenísima, Conaprole"
       hint="Opcional"
-      :rules="modo === 'comunidad' ? [requerido] : []"
+      :rules="[]"
       @update:model-value="emitirCambios"
     />
 
     <!-- CÓDIGO DE BARRAS -->
-    <InputFormularioReutilizable
+    <q-input
       v-model="datosInternos.codigoBarras"
       label="Código de barras"
       outlined
       dense
-      :placeholder="`Ej: ${productoPlaceholder.codigoBarras}`"
+      placeholder="Ej: 7790742005526"
       hint="Opcional"
-      :rules="modo === 'comunidad' ? [requerido] : []"
+      :rules="[]"
       :loading="buscandoCodigo"
       @update:model-value="emitirCambios"
     >
@@ -76,12 +76,12 @@
           <q-tooltip>Buscar por código</q-tooltip>
         </q-btn>
       </template>
-    </InputFormularioReutilizable>
+    </q-input>
 
     <!-- CANTIDAD Y UNIDAD -->
     <div class="row q-col-gutter-md">
       <div class="col-6">
-        <InputFormularioReutilizable
+        <q-input
           v-model.number="datosInternos.cantidad"
           label="Cantidad"
           outlined
@@ -90,7 +90,7 @@
           min="0"
           :step="stepCantidad"
           placeholder="1"
-          :rules="modo === 'comunidad' ? [requerido, cantidadValida] : [cantidadValida]"
+          :rules="[cantidadValida]"
           @update:model-value="emitirCambios"
         />
       </div>
@@ -104,7 +104,7 @@
           :options="opcionesUnidades"
           emit-value
           map-options
-          :rules="modo === 'comunidad' ? [requerido] : []"
+          :rules="[]"
           @update:model-value="alCambiarUnidad"
         />
       </div>
@@ -145,15 +145,10 @@
 </template>
 
 <script setup>
-import InputFormularioReutilizable from '../Compartidos/InputFormularioReutilizable.vue'
 import { ref, watch, computed } from 'vue'
 import { IconSearch, IconCamera, IconPhoto, IconTrash } from '@tabler/icons-vue'
 import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
 import { usePreferenciasStore } from '../../almacenamiento/stores/preferenciasStore.js'
-import {
-  obtenerPlaceholderAleatorio,
-  PRODUCTOS_PLACEHOLDER_API,
-} from '../../utils/PlaceholdersAleatorios.js'
 
 // Refs para validación
 const qInputNombreRef = ref(null)
@@ -174,7 +169,7 @@ const props = defineProps({
   modo: {
     type: String,
     default: 'local',
-    validator: (value) => ['local', 'comunidad'].includes(value),
+    validator: (value) => value === 'local',
   },
   mostrarMarca: {
     type: Boolean,
@@ -201,7 +196,6 @@ const opcionesUnidades = [
 
 const { inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo } = useCamaraFoto()
 const preferenciasStore = usePreferenciasStore()
-const productoPlaceholder = ref(obtenerPlaceholderAleatorio(PRODUCTOS_PLACEHOLDER_API))
 
 // Estado interno
 const datosInternos = ref({
@@ -211,6 +205,7 @@ const datosInternos = ref({
   cantidad: props.modelValue.cantidad || 1,
   unidad: props.modelValue.unidad || preferenciasStore.unidad,
   imagen: props.modelValue.imagen || null,
+  fotoFuente: props.modelValue.fotoFuente || null,
 })
 
 // Estados de búsqueda
@@ -240,16 +235,18 @@ watch(
       cantidad: nuevoValor.cantidad || 1,
       unidad: nuevoValor.unidad || 'unidad',
       imagen: nuevoValor.imagen || null,
+      fotoFuente: nuevoValor.fotoFuente || null,
     }
   },
   { deep: true },
 )
 
-// Foto del producto
+// ── Foto del producto ─────────────────────────────────────
 async function seleccionarCamara() {
   const resultado = await abrirCamara()
   if (resultado) {
     datosInternos.value.imagen = resultado
+    datosInternos.value.fotoFuente = 'usuario'
     emitirCambios()
   }
 }
@@ -257,11 +254,13 @@ async function alSeleccionarArchivo(event) {
   const resultado = await leerArchivo(event)
   if (resultado) {
     datosInternos.value.imagen = resultado
+    datosInternos.value.fotoFuente = 'usuario'
     emitirCambios()
   }
 }
 function quitarFoto() {
   datosInternos.value.imagen = null
+  datosInternos.value.fotoFuente = null
   emitirCambios()
 }
 
@@ -297,10 +296,6 @@ function buscarPorNombre() {
 }
 
 // Reglas de validación
-function requerido(val) {
-  return (val && val.length > 0) || 'Este campo es requerido'
-}
-
 function requeridoNombreLocal(val) {
   return (val && val.trim().length > 0) || 'El nombre es obligatorio'
 }
@@ -314,7 +309,7 @@ function cantidadValida(val) {
 function animarErrorNombre() {
   const el = qInputNombreRef.value?.$el
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-  qInputNombreRef.value?.focus?.()
+  qInputNombreRef.value?.focus()
 
   animarShakeNombre.value = false
   setTimeout(() => {
@@ -335,7 +330,7 @@ function validarFormulario() {
     return false
   }
 
-  const resultado = qInputNombreRef.value?.validate?.()
+  const resultado = qInputNombreRef.value?.validate()
   if (!resultado) {
     animarErrorNombre()
     return false

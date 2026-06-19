@@ -1,0 +1,28 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function estaAutenticado() {
+      return request.auth != null;
+    }
+
+    function esDueno(usuarioId) {
+      return estaAutenticado() && request.auth.uid == usuarioId;
+    }
+
+    // Datos privados de cada usuario. Todo nuevo dominio privado debe quedar debajo de esta ruta.
+    match /usuarios/{usuarioId} {
+      allow read, write: if esDueno(usuarioId);
+
+      // Productos, precios y futuras subcolecciones privadas heredan la misma regla de dueño.
+      match /{documento=**} {
+        allow read, write: if esDueno(usuarioId);
+      }
+    }
+
+    // Cualquier ruta fuera del modelo privado queda cerrada por defecto.
+    match /{documento=**} {
+      allow read, write: if false;
+    }
+  }
+}

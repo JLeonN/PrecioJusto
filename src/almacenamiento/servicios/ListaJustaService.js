@@ -1,6 +1,13 @@
 ﻿import { adaptadorActual } from './AlmacenamientoService.js'
 
-const CLAVE_LISTAS = 'lista_justa'
+import { CLAVE_LISTA_JUSTA } from '../constantes/ClavesAlmacenamiento.js'
+import { ESTADOS_SINCRONIZACION, ORIGENES_FOTO } from '../constantes/PreparacionFirebase.js'
+import firestoreListasJustasService from './FirestoreListasJustasService.js'
+import firebaseStorageFotosService from './FirebaseStorageFotosService.js'
+import usuarioActualService from './UsuarioActualService.js'
+
+const CLAVE_LISTAS = CLAVE_LISTA_JUSTA
+const TIEMPO_MAXIMO_SINCRONIZACION_FIRESTORE_MS = 7000
 
 class ListaJustaService {
   constructor() {
@@ -20,10 +27,80 @@ class ListaJustaService {
 
   async guardarListas(listas) {
     try {
-      return await this.adaptador.guardar(CLAVE_LISTAS, { listas })
+      const guardado = await this.adaptador.guardar(CLAVE_LISTAS, { listas })
+
+      if (guardado) {
+        await this.sincronizarListasFirestore(listas)
+      }
+
+      return guardado
     } catch (error) {
       console.error('Error al guardar listas de Lista Justa:', error)
       return false
+    }
+  }
+
+  async sincronizarListasFirestore(listas = []) {
+    for (const lista of listas) {
+      lista.sincronizacionFirestore = await this.sincronizarListaFirestore(lista)
+    }
+  }
+
+  async sincronizarListaFirestore(lista) {
+    try {
+      await this._prepararFotosStorageLista(lista)
+      const resultado = await this._ejecutarConTimeoutFirestore(
+        firestoreListasJustasService.guardarListaJusta(lista),
+      )
+
+      if (resultado.omitido) {
+        return {
+          estado: ESTADOS_SINCRONIZACION.LOCAL,
+          fecha: new Date().toISOString(),
+          mensaje: resultado.mensaje,
+          error: null,
+        }
+      }
+
+      if (!resultado.exito) {
+        return {
+          estado: ESTADOS_SINCRONIZACION.ERROR,
+          fecha: new Date().toISOString(),
+          mensaje: resultado.mensaje || 'No se pudo sincronizar la Lista Justa con Firestore.',
+          error: resultado.mensaje || 'Error de sincronización Firestore.',
+        }
+      }
+
+      return {
+        estado: resultado.estado || ESTADOS_SINCRONIZACION.SINCRONIZADO,
+        fecha: new Date().toISOString(),
+        mensaje:
+          resultado.estado === ESTADOS_SINCRONIZACION.PENDIENTE
+            ? 'Lista Justa guardada localmente y pendiente de sincronizar con Firestore.'
+            : 'Lista Justa sincronizada con Firestore.',
+        error: null,
+      }
+    } catch (error) {
+      console.error('Error al sincronizar Lista Justa con Firestore:', error)
+      return {
+        estado: ESTADOS_SINCRONIZACION.ERROR,
+        fecha: new Date().toISOString(),
+        mensaje: 'La Lista Justa quedó guardada localmente, pero no se sincronizó con Firestore.',
+        error: error.message || 'Error de sincronización Firestore.',
+      }
+    }
+  }
+
+  async sincronizarEliminacionListaFirestore(listaId) {
+    try {
+      const resultado = await this._ejecutarConTimeoutFirestore(
+        firestoreListasJustasService.eliminarListaJusta(listaId),
+      )
+      if (!resultado.omitido && !resultado.exito) {
+        console.warn('La lista se eliminó localmente, pero no se marcó como eliminada en Firestore.')
+      }
+    } catch (error) {
+      console.warn('La lista se eliminó localmente, pero falló la eliminación Firestore.', error)
     }
   }
 
@@ -32,6 +109,7 @@ class ListaJustaService {
 
     return {
       id: this._generarId('listaJusta'),
+      usuarioId: usuarioActualService.obtenerUsuarioIdActual(),
       nombre: (nombre || '').trim(),
       orden,
       estadoGeneral: 'activa',
@@ -74,6 +152,9 @@ class ListaJustaService {
       comercio: (nuevoItem.comercio || '').trim() || null,
       unidad: (nuevoItem.unidad || '').trim() || 'unidad',
       imagen: nuevoItem.imagen || null,
+      imagenUrl: nuevoItem.imagenUrl || null,
+      imagenRutaStorage: nuevoItem.imagenRutaStorage || null,
+      fotoFuente: this._normalizarFotoFuente(nuevoItem),
       usaPreciosLocales: Boolean(nuevoItem.usaPreciosLocales),
       activarPreciosMayoristas: Boolean(nuevoItem.activarPreciosMayoristas) && escalasPorCantidad.length > 0,
       escalasPorCantidad,
@@ -97,6 +178,7 @@ class ListaJustaService {
 
     return {
       id: lista.id || this._generarId('listaJusta'),
+      usuarioId: lista.usuarioId || usuarioActualService.obtenerUsuarioIdActual(),
       nombre: (lista.nombre || 'Lista sin nombre').trim(),
       orden: Number.isFinite(Number(lista.orden)) ? Number(lista.orden) : 0,
       estadoGeneral: lista.estadoGeneral || 'activa',
@@ -161,6 +243,13 @@ class ListaJustaService {
         }))
         .filter((escala) => escala.cantidadMinima >= 2 && escala.precioUnitario !== null)
       : []
+  }
+
+  _normalizarFotoFuente(item) {
+    if (!item?.imagen) return null
+    if (item.fotoFuente) return item.fotoFuente
+    if (item.origenApi || item.fuenteDato) return ORIGENES_FOTO.API
+    return ORIGENES_FOTO.USUARIO
   }
 
   _normalizarConfiguracionInteligente(configuracion, comercioActual = null) {
@@ -235,6 +324,74 @@ class ListaJustaService {
     }
 
     return comercio.nombre || ''
+  }
+
+  async _ejecutarConTimeoutFirestore(promesa) {
+    let timeoutId = null
+    const timeout = new Promise((resolve) => {
+      timeoutId = setTimeout(() => {
+        resolve({
+          exito: true,
+          estado: ESTADOS_SINCRONIZACION.PENDIENTE,
+          mensaje: 'Firestore aceptó la operación localmente o quedó pendiente por conectividad.',
+        })
+      }, TIEMPO_MAXIMO_SINCRONIZACION_FIRESTORE_MS)
+    })
+
+    const resultado = await Promise.race([promesa, timeout])
+    clearTimeout(timeoutId)
+    return resultado
+  }
+
+  async _prepararFotosStorageLista(lista) {
+    if (!Array.isArray(lista?.items)) return
+
+    for (const item of lista.items) {
+      if (!item?.imagen) {
+        item.imagenUrl = null
+        item.imagenRutaStorage = null
+        continue
+      }
+
+      if (!firebaseStorageFotosService.esDataUriImagen(item.imagen)) {
+        continue
+      }
+
+      const resultado = await firebaseStorageFotosService.subirFotoPrivada({
+        tipo: 'listas',
+        ids: { idPrincipal: lista.id, idSecundario: item.id },
+        dataUri: item.imagen,
+      })
+
+      if (resultado.exito) {
+        item.imagenUrl = resultado.url
+        item.imagenRutaStorage = resultado.rutaStorage
+        item.fotoFuente = ORIGENES_FOTO.STORAGE
+        item.sincronizacionFoto = {
+          estado: resultado.estado,
+          fecha: new Date().toISOString(),
+          mensaje: 'Foto subida a Firebase Storage.',
+        }
+      } else if (!resultado.omitido) {
+        item.sincronizacionFoto = {
+          estado: ESTADOS_SINCRONIZACION.ERROR,
+          fecha: new Date().toISOString(),
+          mensaje: resultado.mensaje || 'No se pudo subir la foto a Firebase Storage.',
+        }
+      }
+    }
+  }
+
+  async sincronizarFotosPendientesStorage() {
+    const listas = await this.obtenerListas()
+    const tieneFotosPendientes = listas.some((lista) =>
+      (lista?.items || []).some((item) => firebaseStorageFotosService.esDataUriImagen(item?.imagen)),
+    )
+
+    if (!tieneFotosPendientes) return 0
+
+    await this.guardarListas(listas)
+    return listas.length
   }
 }
 

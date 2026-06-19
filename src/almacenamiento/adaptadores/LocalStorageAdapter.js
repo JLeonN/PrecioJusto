@@ -15,10 +15,11 @@
  * Todos los métodos tienen la misma firma que FirestoreAdapter.
  */
 
+import { PREFIJO_ALMACENAMIENTO } from '../constantes/ClavesAlmacenamiento.js'
+
 class LocalStorageAdapter {
   constructor() {
-    this.prefijoBase = 'precio_justo_' // Prefijo para evitar colisiones con otras apps
-    this.espacioTrabajo = 'compartido'
+    this.prefijo = PREFIJO_ALMACENAMIENTO // Prefijo para evitar colisiones con otras apps
 
     // Verificar que localStorage esté disponible
     if (typeof window === 'undefined' || !window.localStorage) {
@@ -119,16 +120,12 @@ class LocalStorageAdapter {
       const resultados = []
       const claves = Object.keys(localStorage)
 
-      const prefijoActivo = this._construirPrefijoActivo()
       for (const claveCompleta of claves) {
-        // Filtrar solo claves del espacio activo
-        if (!claveCompleta.startsWith(prefijoActivo)) continue
-
-        // En espacio compartido, excluir claves de espacios por uid para no mezclar cuentas
-        if (this.espacioTrabajo === 'compartido' && this._esClaveEspacioUid(claveCompleta)) continue
+        // Filtrar solo claves de nuestra app
+        if (!claveCompleta.startsWith(this.prefijo)) continue
 
         // Extraer la clave sin prefijo
-        const clave = claveCompleta.replace(prefijoActivo, '')
+        const clave = claveCompleta.replace(this.prefijo, '')
 
         // Aplicar filtro adicional si existe
         if (prefijoBusqueda && !clave.startsWith(prefijoBusqueda)) continue
@@ -195,7 +192,7 @@ class LocalStorageAdapter {
       let contador = 0
 
       for (const claveCompleta of claves) {
-        if (claveCompleta.startsWith(this.prefijoBase)) {
+        if (claveCompleta.startsWith(this.prefijo)) {
           localStorage.removeItem(claveCompleta)
           contador++
         }
@@ -233,28 +230,7 @@ class LocalStorageAdapter {
    * @private
    */
   _construirClave(clave) {
-    return `${this._construirPrefijoActivo()}${clave}`
-  }
-
-  _esClaveEspacioUid(claveCompleta) {
-    return /^precio_justo_uid-[^_]+_/i.test(claveCompleta)
-  }
-
-  _construirPrefijoActivo() {
-    if (this.espacioTrabajo === 'compartido') {
-      return this.prefijoBase
-    }
-
-    return `${this.prefijoBase}${this.espacioTrabajo}_`
-  }
-
-  configurarEspacioTrabajo(espacioTrabajo) {
-    const valorNormalizado = String(espacioTrabajo || '')
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9-]/g, '')
-
-    this.espacioTrabajo = valorNormalizado || 'compartido'
+    return `${this.prefijo}${clave}`
   }
 }
 

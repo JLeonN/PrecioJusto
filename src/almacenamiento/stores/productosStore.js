@@ -19,12 +19,12 @@
 
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { ESTADOS_SINCRONIZACION } from '../constantes/PreparacionFirebase.js'
+import fuentePrincipalFirestoreService from '../servicios/FuentePrincipalFirestoreService.js'
 import productosService from '../servicios/ProductosService.js'
 import { useUsuarioStore } from './UsuarioStore.js'
-import servicioMigracionLocalFirestore from '../../Firebase/ServicioMigracionLocalFirestore.js'
 
 export const useProductosStore = defineStore('productos', () => {
-  const usuarioStore = useUsuarioStore()
   // ========================================
   // 📊 ESTADO
   // ========================================
@@ -54,7 +54,12 @@ export const useProductosStore = defineStore('productos', () => {
    * 🔥 FIRESTORE: Útil para mostrar badge "X pendientes"
    */
   const sincronizando = ref(false)
-  let promesaCargaProductos = null
+  const errorSincronizacion = ref(null)
+  const fuenteDatos = ref(
+    fuentePrincipalFirestoreService.crearEstadoInicial(
+      fuentePrincipalFirestoreService.DOMINIOS.PRODUCTOS,
+    ),
+  )
 
   // ========================================
   // 🧮 COMPUTED (GETTERS)
@@ -125,45 +130,36 @@ export const useProductosStore = defineStore('productos', () => {
    *     }))
    *   })
    */
-  async function cargarProductos(opciones = {}) {
-    if (promesaCargaProductos) {
-      return promesaCargaProductos
+  async function cargarProductos() {
+    cargando.value = true
+    error.value = null
+
+    try {
+      console.log('📥 Cargando productos...')
+
+      const usuarioStore = useUsuarioStore()
+      await usuarioStore.esperarSesionLista()
+
+      const resultado = await fuentePrincipalFirestoreService.cargarProductos({
+        cargarLocal: () => productosService.obtenerTodos(),
+      })
+      productos.value = resultado.datos || []
+      fuenteDatos.value = resultado
+      console.log(`Productos cargados: ${productos.value.length}`)
+    } catch (err) {
+      console.error('❌ Error al cargar productos:', err)
+      error.value = 'No se pudieron cargar los productos'
+    } finally {
+      cargando.value = false
     }
-
-    const silencioso = opciones?.silencioso === true
-    promesaCargaProductos = (async () => {
-      if (!silencioso) {
-        cargando.value = true
-      }
-      error.value = null
-
-      try {
-        console.log('📥 Cargando productos...')
-
-        const productosObtenidos = await productosService.obtenerTodos()
-        productos.value = productosObtenidos
-
-        console.log(`✅ ${productosObtenidos.length} productos cargados`)
-      } catch (err) {
-        console.error('❌ Error al cargar productos:', err)
-        error.value = 'No se pudieron cargar los productos'
-      } finally {
-        if (!silencioso) {
-          cargando.value = false
-        }
-        promesaCargaProductos = null
-      }
-    })()
-
-    return promesaCargaProductos
   }
 
   /**
    * 🔄 RECARGAR PRODUCTOS
    * Fuerza una recarga completa (útil para pull-to-refresh)
    */
-  async function recargarProductos(opciones = {}) {
-    await cargarProductos(opciones)
+  async function recargarProductos() {
+    await cargarProductos()
   }
 
   // ========================================
@@ -179,7 +175,9 @@ export const useProductosStore = defineStore('productos', () => {
    */
   async function agregarProducto(nuevoProducto) {
     cargando.value = true
+    sincronizando.value = true
     error.value = null
+    errorSincronizacion.value = null
 
     try {
       console.log('➕ Agregando producto:', nuevoProducto.nombre)
@@ -187,11 +185,9 @@ export const useProductosStore = defineStore('productos', () => {
       const productoGuardado = await productosService.guardarProducto(nuevoProducto)
 
       if (productoGuardado) {
+        registrarResultadoSincronizacion(productoGuardado)
         // Agregar al estado local
         productos.value.push(productoGuardado)
-        usuarioStore.solicitarSincronizacionAutomatica('producto_creado', {
-          productoId: productoGuardado.id,
-        })
         console.log('✅ Producto agregado al store')
         return productoGuardado
       }
@@ -204,6 +200,7 @@ export const useProductosStore = defineStore('productos', () => {
       return null
     } finally {
       cargando.value = false
+      sincronizando.value = false
     }
   }
 
@@ -215,7 +212,9 @@ export const useProductosStore = defineStore('productos', () => {
    */
   async function agregarPrecioAProducto(productoId, precio) {
     cargando.value = true
+    sincronizando.value = true
     error.value = null
+    errorSincronizacion.value = null
 
     try {
       console.log(`💰 Agregando precio a producto ${productoId}`)
@@ -223,13 +222,13 @@ export const useProductosStore = defineStore('productos', () => {
       const productoActualizado = await productosService.agregarPrecio(productoId, precio)
 
       if (productoActualizado) {
+        registrarResultadoSincronizacion(productoActualizado)
         // Actualizar en el estado local
         const index = productos.value.findIndex((p) => p.id === productoId)
         if (index !== -1) {
           productos.value[index] = productoActualizado
         }
 
-        usuarioStore.solicitarSincronizacionAutomatica('precio_agregado', { productoId })
         console.log('✅ Precio agregado al producto')
         return true
       }
@@ -242,6 +241,7 @@ export const useProductosStore = defineStore('productos', () => {
       return false
     } finally {
       cargando.value = false
+      sincronizando.value = false
     }
   }
 
@@ -257,7 +257,9 @@ export const useProductosStore = defineStore('productos', () => {
    */
   async function actualizarProducto(productoId, datosActualizados) {
     cargando.value = true
+    sincronizando.value = true
     error.value = null
+    errorSincronizacion.value = null
 
     try {
       console.log(`✏️ Actualizando producto ${productoId}`)
@@ -279,13 +281,13 @@ export const useProductosStore = defineStore('productos', () => {
       const guardado = await productosService.guardarProducto(productoActualizado)
 
       if (guardado) {
+        registrarResultadoSincronizacion(guardado)
         // Actualizar en estado local
         const index = productos.value.findIndex((p) => p.id === productoId)
         if (index !== -1) {
           productos.value[index] = guardado
         }
 
-        usuarioStore.solicitarSincronizacionAutomatica('producto_actualizado', { productoId })
         console.log('✅ Producto actualizado en el store')
         return true
       }
@@ -298,6 +300,7 @@ export const useProductosStore = defineStore('productos', () => {
       return false
     } finally {
       cargando.value = false
+      sincronizando.value = false
     }
   }
 
@@ -324,18 +327,6 @@ export const useProductosStore = defineStore('productos', () => {
       if (eliminado) {
         // Eliminar del estado local
         productos.value = productos.value.filter((p) => p.id !== productoId)
-        if (usuarioStore.tieneSesionRealActiva && usuarioStore.usuarioId) {
-          await servicioMigracionLocalFirestore.registrarEliminacionProductoLocal(productoId)
-          servicioMigracionLocalFirestore
-            .eliminarProductoRemoto(usuarioStore.usuarioId, productoId)
-            .catch((errorRemoto) => {
-              console.warn('No se pudo eliminar el producto en Firebase:', errorRemoto)
-            })
-        }
-        usuarioStore.solicitarSincronizacionAutomatica('producto_eliminado', {
-          productoId,
-          eliminaciones: true,
-        })
         console.log('✅ Producto eliminado del store')
         return true
       }
@@ -365,7 +356,6 @@ export const useProductosStore = defineStore('productos', () => {
       if (guardado) {
         const index = productos.value.findIndex((p) => p.id === productoId)
         if (index !== -1) productos.value[index] = guardado
-        usuarioStore.solicitarSincronizacionAutomatica('producto_interaccion', { productoId })
       }
     } catch (err) {
       console.error('❌ Error al registrar interacción:', err)
@@ -434,6 +424,10 @@ export const useProductosStore = defineStore('productos', () => {
     cargando.value = false
     error.value = null
     sincronizando.value = false
+    errorSincronizacion.value = null
+    fuenteDatos.value = fuentePrincipalFirestoreService.crearEstadoInicial(
+      fuentePrincipalFirestoreService.DOMINIOS.PRODUCTOS,
+    )
     console.log('🧹 Estado del store limpiado')
   }
 
@@ -441,12 +435,27 @@ export const useProductosStore = defineStore('productos', () => {
   // 📤 RETURN (EXPORTAR)
   // ========================================
 
+  function registrarResultadoSincronizacion(producto) {
+    const estado = producto?.sincronizacionFirestore?.estado
+
+    if (estado === ESTADOS_SINCRONIZACION.ERROR) {
+      errorSincronizacion.value =
+        producto.sincronizacionFirestore.mensaje ||
+        'El producto quedó local, pero no se pudo sincronizar con Firestore.'
+      return
+    }
+
+    errorSincronizacion.value = null
+  }
+
   return {
     // Estado
     productos,
     cargando,
     error,
     sincronizando,
+    errorSincronizacion,
+    fuenteDatos,
 
     // Computed
     totalProductos,

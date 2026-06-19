@@ -5,8 +5,8 @@ import {
   createWebHistory,
   createWebHashHistory,
 } from 'vue-router'
-import { useUsuarioStore } from 'src/almacenamiento/stores/UsuarioStore.js'
 import routes from './routes'
+import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
 
 /*
  * If not building with SSR mode, you can
@@ -36,28 +36,27 @@ export default defineRouter(function (/* { store, ssrContext } */) {
 
   Router.beforeEach(async (to) => {
     const usuarioStore = useUsuarioStore()
-    await usuarioStore.inicializarSesion()
+    const requiereAuth = to.matched.some((ruta) => ruta.meta?.requiereAuth)
+    const soloInvitado = to.matched.some((ruta) => ruta.meta?.soloInvitado)
 
-    if (to.path === '/acceso') {
-      if (usuarioStore.tieneSesionRealActiva) {
-        return { path: '/' }
+    if (!usuarioStore.escuchaInicializada) {
+      usuarioStore.inicializarSesion()
+    }
+
+    if (usuarioStore.cargandoSesion) {
+      await usuarioStore.esperarSesionLista()
+    }
+
+    if (requiereAuth && !usuarioStore.estaAutenticado) {
+      return {
+        path: '/acceso',
+        query: { redirigir: to.fullPath },
       }
-      return true
     }
 
-    if (!to.matched.some((registro) => registro.meta?.requiereSesion)) {
-      return true
+    if (soloInvitado && usuarioStore.estaAutenticado) {
+      return typeof to.query.redirigir === 'string' ? to.query.redirigir : '/'
     }
-
-    if (!usuarioStore.tieneSesionActiva) {
-      return { path: '/configuracion' }
-    }
-
-    if (!usuarioStore.accesoInicialCompletado && !usuarioStore.tieneSesionRealActiva) {
-      return { path: '/acceso' }
-    }
-
-    return true
   })
 
   return Router

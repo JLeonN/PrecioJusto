@@ -21,12 +21,11 @@
  */
 
 import { Preferences } from '@capacitor/preferences'
+import { PREFIJO_ALMACENAMIENTO } from '../constantes/ClavesAlmacenamiento.js'
 
 class CapacitorAdapter {
   constructor() {
-    this.prefijoBase = 'precio_justo_' // Prefijo para organizar las claves
-    this.espacioTrabajo = 'compartido'
-    this.tamanoLoteLectura = 25
+    this.prefijo = PREFIJO_ALMACENAMIENTO // Prefijo para organizar las claves
 
     console.log('📱 CapacitorAdapter inicializado')
 
@@ -146,36 +145,28 @@ class CapacitorAdapter {
       const { keys } = await Preferences.keys()
       const resultados = []
 
-      const prefijoActivo = this._construirPrefijoActivo()
-      // Filtrar claves que pertenecen al espacio activo
-      const clavesApp = keys.filter((claveCompleta) => claveCompleta.startsWith(prefijoActivo))
-      const clavesFiltradas = clavesApp.filter((claveCompleta) => {
-        const clave = claveCompleta.replace(prefijoActivo, '')
-        if (prefijoBusqueda && !clave.startsWith(prefijoBusqueda)) return false
-        return true
-      })
+      // Filtrar claves que pertenecen a nuestra app
+      const clavesApp = keys.filter((claveCompleta) => claveCompleta.startsWith(this.prefijo))
 
-      for (let indice = 0; indice < clavesFiltradas.length; indice += this.tamanoLoteLectura) {
-        const lote = clavesFiltradas.slice(indice, indice + this.tamanoLoteLectura)
-        const resultadosLote = await Promise.all(
-          lote.map(async (claveCompleta) => {
-            const clave = claveCompleta.replace(prefijoActivo, '')
-            const resultado = await Preferences.get({ key: claveCompleta })
-            if (!resultado.value) return null
+      // Procesar cada clave
+      for (const claveCompleta of clavesApp) {
+        // Extraer la clave sin prefijo
+        const clave = claveCompleta.replace(this.prefijo, '')
 
-            try {
-              const valor = JSON.parse(resultado.value)
-              return { clave, valor }
-            } catch (error) {
-              console.warn(`Dato corrupto en ${clave}, ignorando...`, error)
-              return null
-            }
-          }),
-        )
+        // Aplicar filtro adicional si existe
+        if (prefijoBusqueda && !clave.startsWith(prefijoBusqueda)) continue
 
-        resultadosLote.forEach((registro) => {
-          if (registro) resultados.push(registro)
-        })
+        // Obtener el valor
+        const resultado = await Preferences.get({ key: claveCompleta })
+
+        if (resultado.value) {
+          try {
+            const valor = JSON.parse(resultado.value)
+            resultados.push({ clave, valor })
+          } catch (error) {
+            console.warn(`⚠️ Dato corrupto en ${clave}, ignorando...`, error)
+          }
+        }
       }
 
       console.log(
@@ -241,7 +232,7 @@ class CapacitorAdapter {
       let contador = 0
 
       for (const claveCompleta of keys) {
-        if (claveCompleta.startsWith(this.prefijoBase)) {
+        if (claveCompleta.startsWith(this.prefijo)) {
           await Preferences.remove({ key: claveCompleta })
           contador++
         }
@@ -281,24 +272,7 @@ class CapacitorAdapter {
    * @private
    */
   _construirClave(clave) {
-    return `${this._construirPrefijoActivo()}${clave}`
-  }
-
-  _construirPrefijoActivo() {
-    if (this.espacioTrabajo === 'compartido') {
-      return this.prefijoBase
-    }
-
-    return `${this.prefijoBase}${this.espacioTrabajo}_`
-  }
-
-  configurarEspacioTrabajo(espacioTrabajo) {
-    const valorNormalizado = String(espacioTrabajo || '')
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9-]/g, '')
-
-    this.espacioTrabajo = valorNormalizado || 'compartido'
+    return `${this.prefijo}${clave}`
   }
 }
 

@@ -13,7 +13,7 @@
 
 - Guardar siempre archivos de texto en **UTF-8** para evitar caracteres corruptos.
 - No reemplazar acentos ni eñes por ASCII cuando el proyecto ya usa español.
-- Si aparece texto dañado (ej.: `Ã¡`, `Ã±`, `â†’`), corregirlo antes de cerrar la tarea.
+- Si aparece texto dañado por mala codificación, corregirlo antes de cerrar la tarea.
 - Mantener redacción natural en español en UI, documentación, comentarios y mensajes.
 
 ### Script Móvil (Android)

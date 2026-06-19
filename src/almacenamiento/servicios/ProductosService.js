@@ -18,12 +18,18 @@
 
 import { adaptadorActual } from './AlmacenamientoService.js'
 import { normalizarEscalasPorCantidad, obtenerResumenEscalas } from '../../utils/EscalasCantidadUtils.js'
-import { resolverFotoFuenteDesdeImagen } from '../../utils/FotoFuenteUtils.js'
+import { PREFIJO_PRODUCTOS } from '../constantes/ClavesAlmacenamiento.js'
+import { ESTADOS_SINCRONIZACION, ORIGENES_FOTO } from '../constantes/PreparacionFirebase.js'
+import firestoreProductosService from './FirestoreProductosService.js'
+import firebaseStorageFotosService from './FirebaseStorageFotosService.js'
+import usuarioActualService from './UsuarioActualService.js'
+
+const TIEMPO_MAXIMO_SINCRONIZACION_FIRESTORE_MS = 7000
 
 class ProductosService {
   constructor() {
     this.adaptador = adaptadorActual
-    this.prefijoProductos = 'producto_'
+    this.prefijoProductos = PREFIJO_PRODUCTOS
 
     console.log('ProductosService inicializado con', this.adaptador.constructor.name)
   }
@@ -54,11 +60,14 @@ class ProductosService {
         producto.id = this._generarId()
       }
 
+      producto.usuarioId = producto.usuarioId || usuarioActualService.obtenerUsuarioIdActual()
+      producto.fotoFuente = this._normalizarFotoFuente(producto)
+      producto = await this._prepararFotoStorageProducto(producto)
+
       // Agregar timestamps
       const ahora = new Date().toISOString()
       producto.fechaCreacion = producto.fechaCreacion || ahora
       producto.fechaActualizacion = ahora
-      producto.fotoFuente = resolverFotoFuenteDesdeImagen(producto.imagen)
 
       // Calcular campos automáticos
       producto = this._calcularCamposAutomaticos(producto)
@@ -68,6 +77,7 @@ class ProductosService {
       const guardado = await this.adaptador.guardar(clave, producto)
 
       if (guardado) {
+        producto.sincronizacionFirestore = await this._sincronizarProductoFirestore(producto)
         console.log(`Producto guardado: ${producto.nombre} (ID: ${producto.id})`)
         return producto
       }
@@ -318,6 +328,7 @@ class ProductosService {
       const eliminado = await this.adaptador.eliminar(clave)
 
       if (eliminado) {
+        await this._sincronizarEliminacionProductoFirestore(productoId)
         console.log(`Producto ${productoId} eliminado`)
       }
 
@@ -415,6 +426,7 @@ class ProductosService {
   _normalizarPrecioConEscalas(precio) {
     const base = Number(precio?.valor)
     const precioBase = Number.isFinite(base) ? base : null
+    const usuarioId = precio?.usuarioId || usuarioActualService.obtenerUsuarioIdActual()
     const activarPreciosMayoristas = Boolean(precio?.activarPreciosMayoristas)
     const escalasPorCantidad = activarPreciosMayoristas
       ? normalizarEscalasPorCantidad(precio?.escalasPorCantidad, precioBase)
@@ -423,6 +435,7 @@ class ProductosService {
 
     return {
       ...precio,
+      usuarioId,
       activarPreciosMayoristas,
       escalasPorCantidad,
       escalasResumen,
@@ -516,6 +529,151 @@ class ProductosService {
     }
 
     return errores
+  }
+
+  _normalizarFotoFuente(producto) {
+    if (!producto.imagen) return null
+    if (producto.fotoFuente) return producto.fotoFuente
+    if (producto.fuenteDato) return ORIGENES_FOTO.API
+    return ORIGENES_FOTO.USUARIO
+  }
+
+  async _sincronizarProductoFirestore(producto) {
+    try {
+      const resultado = await this._ejecutarConTimeoutFirestore(
+        firestoreProductosService.guardarProductoConPrecios(producto),
+      )
+
+      if (resultado.omitido) {
+        return {
+          estado: ESTADOS_SINCRONIZACION.LOCAL,
+          fecha: new Date().toISOString(),
+          mensaje: resultado.mensaje,
+          error: null,
+        }
+      }
+
+      if (!resultado.exito) {
+        return {
+          estado: ESTADOS_SINCRONIZACION.ERROR,
+          fecha: new Date().toISOString(),
+          mensaje: resultado.mensaje || 'No se pudo sincronizar con Firestore.',
+          error: resultado.mensaje || 'Error de sincronización Firestore.',
+        }
+      }
+
+      return {
+        estado: resultado.estado || ESTADOS_SINCRONIZACION.SINCRONIZADO,
+        fecha: new Date().toISOString(),
+        mensaje:
+          resultado.estado === ESTADOS_SINCRONIZACION.PENDIENTE
+            ? 'Producto guardado localmente y pendiente de sincronizar con Firestore.'
+            : 'Producto sincronizado con Firestore.',
+        error: null,
+      }
+    } catch (error) {
+      console.error('Error al sincronizar producto con Firestore:', error)
+      return {
+        estado: ESTADOS_SINCRONIZACION.ERROR,
+        fecha: new Date().toISOString(),
+        mensaje: 'El producto quedó guardado localmente, pero no se sincronizó con Firestore.',
+        error: error.message || 'Error de sincronización Firestore.',
+      }
+    }
+  }
+
+  async _prepararFotoStorageProducto(producto) {
+    if (!producto) return producto
+
+    if (!firebaseStorageFotosService.esDataUriImagen(producto?.imagen)) {
+      if (!producto?.imagen) {
+        if (producto.imagenRutaStorage) {
+          await firebaseStorageFotosService.eliminarFotoPrivada(producto.imagenRutaStorage)
+        }
+        producto.imagenUrl = null
+        producto.imagenRutaStorage = null
+      }
+      return producto
+    }
+
+    const resultado = await firebaseStorageFotosService.subirFotoPrivada({
+      tipo: 'productos',
+      ids: {
+        idPrincipal: producto?.id || this._generarId(),
+      },
+      dataUri: producto.imagen,
+    })
+
+    if (resultado.exito) {
+      producto.imagenUrl = resultado.url
+      producto.imagenRutaStorage = resultado.rutaStorage
+      producto.fotoFuente = ORIGENES_FOTO.STORAGE
+      producto.sincronizacionFoto = {
+        estado: resultado.estado,
+        fecha: new Date().toISOString(),
+        mensaje: 'Foto subida a Firebase Storage.',
+      }
+      return producto
+    }
+
+    if (resultado.omitido) {
+      producto.sincronizacionFoto = {
+        estado: ESTADOS_SINCRONIZACION.LOCAL,
+        fecha: new Date().toISOString(),
+        mensaje: resultado.mensaje,
+      }
+      return producto
+    }
+
+    producto.sincronizacionFoto = {
+      estado: ESTADOS_SINCRONIZACION.ERROR,
+      fecha: new Date().toISOString(),
+      mensaje: resultado.mensaje || 'No se pudo subir la foto a Firebase Storage.',
+    }
+    return producto
+  }
+
+  async sincronizarFotosPendientesStorage() {
+    const productos = await this.obtenerTodos()
+    let procesados = 0
+
+    for (const producto of productos) {
+      if (!firebaseStorageFotosService.esDataUriImagen(producto?.imagen)) continue
+      await this.guardarProducto(producto)
+      procesados += 1
+    }
+
+    return procesados
+  }
+
+  async _sincronizarEliminacionProductoFirestore(productoId) {
+    try {
+      const resultado = await this._ejecutarConTimeoutFirestore(
+        firestoreProductosService.eliminarProducto(productoId),
+      )
+      if (!resultado.omitido && !resultado.exito) {
+        console.warn('El producto se eliminó localmente, pero no se marcó como eliminado en Firestore.')
+      }
+    } catch (error) {
+      console.warn('El producto se eliminó localmente, pero falló la eliminación Firestore.', error)
+    }
+  }
+
+  async _ejecutarConTimeoutFirestore(promesa) {
+    let timeoutId = null
+    const timeout = new Promise((resolve) => {
+      timeoutId = setTimeout(() => {
+        resolve({
+          exito: true,
+          estado: ESTADOS_SINCRONIZACION.PENDIENTE,
+          mensaje: 'Firestore aceptó la operación localmente o quedó pendiente por conectividad.',
+        })
+      }, TIEMPO_MAXIMO_SINCRONIZACION_FIRESTORE_MS)
+    })
+
+    const resultado = await Promise.race([promesa, timeout])
+    clearTimeout(timeoutId)
+    return resultado
   }
 
   // ========================================

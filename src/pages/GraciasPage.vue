@@ -24,24 +24,26 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { IconHeart } from '@tabler/icons-vue'
 import { usePublicidad } from '../composables/usePublicidad.js'
+import contadorGraciasService from '../almacenamiento/servicios/ContadorGraciasService.js'
 
-const CLAVE_CONTADOR_GRACIAS = 'contadorGracias'
 const $q = useQuasar()
 const { mostrarRecompensado } = usePublicidad()
 
-const valorInicial = Number.parseInt(localStorage.getItem(CLAVE_CONTADOR_GRACIAS) ?? '0', 10)
-const contadorGracias = ref(Number.isNaN(valorInicial) ? 0 : valorInicial)
+const contadorGracias = ref(0)
+
+onMounted(async () => {
+  contadorGracias.value = await contadorGraciasService.obtenerContador()
+})
 
 const darGracias = async () => {
   const videoCompletado = await mostrarRecompensado()
   if (!videoCompletado) return
 
-  contadorGracias.value += 1
-  localStorage.setItem(CLAVE_CONTADOR_GRACIAS, String(contadorGracias.value))
+  contadorGracias.value = await contadorGraciasService.incrementar()
   $q.notify({
     type: 'positive',
     message: 'Gracias por apoyar Precio Justo',

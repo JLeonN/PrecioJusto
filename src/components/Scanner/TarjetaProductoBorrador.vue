@@ -108,7 +108,7 @@
                   v-if="datosEditando.imagen"
                   clickable
                   v-close-popup
-                  @click="actualizar('imagen', null)"
+                  @click="actualizarFoto(null, null)"
                 >
                   <q-item-section avatar
                     ><IconTrash :size="16" class="text-negative"
@@ -125,7 +125,7 @@
             dense
             size="sm"
             class="boton-foto-overlay"
-            @click.stop="actualizar('imagen', datosOriginales.imagen)"
+            @click.stop="actualizarFoto(datosOriginales.imagen, datosOriginales.fotoFuente || null)"
           >
             <IconRefresh :size="18" />
             <q-tooltip>Recuperar foto original</q-tooltip>
@@ -452,6 +452,15 @@ function actualizar(campo, valor) {
   emit('update:item', { ...datosEditando.value })
 }
 
+function actualizarFoto(imagen, fotoFuente) {
+  datosEditando.value = {
+    ...datosEditando.value,
+    imagen,
+    fotoFuente,
+  }
+  emit('update:item', { ...datosEditando.value })
+}
+
 function alCambiarEscalas(valor) {
   datosEscalas.value = valor
   datosEditando.value = {
@@ -465,14 +474,14 @@ function alCambiarEscalas(valor) {
 // Foto
 async function tomarFotoCamara() {
   const res = await abrirCamara()
-  if (res) actualizar('imagen', res)
+  if (res) actualizarFoto(res, 'usuario')
 }
 async function alSeleccionarArchivo(event) {
   const res = await leerArchivo(event)
-  if (res) actualizar('imagen', res)
+  if (res) actualizarFoto(res, 'usuario')
 }
 function alGuardarFotoEditada(nuevaImagenBase64) {
-  actualizar('imagen', nuevaImagenBase64)
+  actualizarFoto(nuevaImagenBase64, 'usuario')
 }
 
 function recuperarDatos() {

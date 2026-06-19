@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import ComerciosService from '../servicios/ComerciosService'
+import fuentePrincipalFirestoreService from '../servicios/FuentePrincipalFirestoreService.js'
 import { useProductosStore } from './productosStore.js'
 import { useUsuarioStore } from './UsuarioStore.js'
-import servicioMigracionLocalFirestore from '../../Firebase/ServicioMigracionLocalFirestore.js'
 
 /**
  * COMERCIOS STORE
@@ -16,6 +16,9 @@ export const useComerciStore = defineStore('comercios', {
     comercios: [],
     cargando: false,
     error: null,
+    fuenteDatos: fuentePrincipalFirestoreService.crearEstadoInicial(
+      fuentePrincipalFirestoreService.DOMINIOS.COMERCIOS,
+    ),
   }),
 
   // ═══════════════════════════════════════════════════════════
@@ -75,15 +78,14 @@ export const useComerciStore = defineStore('comercios', {
         const nombreNormalizado = ComerciosService.normalizar(comercio.nombre)
 
         if (!agrupados.has(nombreNormalizado)) {
-          const totalDirecciones = comercio.direcciones?.length || 0
           // Primer comercio con este nombre
           agrupados.set(nombreNormalizado, {
             id: comercio.id,
             nombre: comercio.nombre,
             tipo: comercio.tipo,
             foto: null,
-            esCadena: totalDirecciones > 1,
-            totalSucursales: totalDirecciones,
+            esCadena: false,
+            totalSucursales: 1,
             direcciones: [...comercio.direcciones],
             fechaUltimoUso: comercio.fechaUltimoUso,
             cantidadUsos: comercio.cantidadUsos,
@@ -93,7 +95,7 @@ export const useComerciStore = defineStore('comercios', {
           // Agregar sucursal a la cadena existente
           const grupo = agrupados.get(nombreNormalizado)
           grupo.esCadena = true
-          grupo.totalSucursales += comercio.direcciones?.length || 0
+          grupo.totalSucursales++
           grupo.direcciones.push(...comercio.direcciones)
           grupo.comerciosOriginales.push(comercio)
 
@@ -144,24 +146,25 @@ export const useComerciStore = defineStore('comercios', {
     /**
      * Carga todos los comercios desde el servicio
      */
-    async cargarComercios(opciones = {}) {
-      const silencioso = opciones?.silencioso === true
-      if (!silencioso) {
-        this.cargando = true
-      }
+    async cargarComercios() {
+      this.cargando = true
       this.error = null
 
       try {
-        const comercios = await ComerciosService.obtenerTodos()
-        this.comercios = comercios
+        const usuarioStore = useUsuarioStore()
+        await usuarioStore.esperarSesionLista()
+
+        const resultado = await fuentePrincipalFirestoreService.cargarComercios({
+          cargarLocal: () => ComerciosService.obtenerTodos(),
+        })
+        this.comercios = resultado.datos || []
+        this.fuenteDatos = resultado
       } catch (error) {
         console.error('Error al cargar comercios:', error)
         this.error = 'No se pudieron cargar los comercios'
         throw error
       } finally {
-        if (!silencioso) {
-          this.cargando = false
-        }
+        this.cargando = false
       }
     },
 
@@ -193,33 +196,28 @@ export const useComerciStore = defineStore('comercios', {
      * @param {Object} datosComercio - Datos del comercio
      * @returns {Promise<Object>} Comercio agregado
      */
-    async agregarComercio(datosComercio, opciones = {}) {
+    async agregarComercio(datosComercio) {
       this.cargando = true
       this.error = null
 
       try {
         // Validar duplicados antes de agregar (usa comercios agrupados)
-        if (opciones.omitirValidacionDuplicados !== true) {
-          const validacion = await ComerciosService.validarDuplicados(
-            datosComercio,
-            this.comerciosAgrupados,
-          )
+        const validacion = await ComerciosService.validarDuplicados(
+          datosComercio,
+          this.comerciosAgrupados,
+        )
 
-          if (validacion.esDuplicado) {
-            // Retornar validación para que el componente maneje el diálogo
-            return {
-              exito: false,
-              validacion,
-            }
+        if (validacion.esDuplicado) {
+          // Retornar validación para que el componente maneje el diálogo
+          return {
+            exito: false,
+            validacion,
           }
         }
 
         // No es duplicado, agregar
         const nuevoComercio = await ComerciosService.agregarComercio(datosComercio)
         this.comercios.push(nuevoComercio)
-        useUsuarioStore().solicitarSincronizacionAutomatica('comercio_creado', {
-          comercioId: nuevoComercio.id,
-        })
 
         return {
           exito: true,
@@ -257,7 +255,6 @@ export const useComerciStore = defineStore('comercios', {
           if (datosActualizados.nombre) {
             await this._sincronizarNombreEnPrecios(id, datosActualizados.nombre)
           }
-          useUsuarioStore().solicitarSincronizacionAutomatica('comercio_editado', { comercioId: id })
         }
 
         return comercioActualizado
@@ -311,19 +308,6 @@ export const useComerciStore = defineStore('comercios', {
 
         if (eliminado) {
           this.comercios = this.comercios.filter((c) => c.id !== id)
-          const usuarioStore = useUsuarioStore()
-          if (usuarioStore.tieneSesionRealActiva && usuarioStore.usuarioId) {
-            await servicioMigracionLocalFirestore.registrarEliminacionComercioLocal(id)
-            servicioMigracionLocalFirestore
-              .eliminarComercioRemoto(usuarioStore.usuarioId, id)
-              .catch((errorRemoto) => {
-                console.warn('No se pudo eliminar el comercio en Firebase:', errorRemoto)
-              })
-          }
-          useUsuarioStore().solicitarSincronizacionAutomatica('comercio_eliminado', {
-            comercioId: id,
-            eliminaciones: true,
-          })
         }
 
         return eliminado
@@ -362,27 +346,6 @@ export const useComerciStore = defineStore('comercios', {
 
         // Actualizar estado local
         this.comercios = this.comercios.filter((c) => !resultados.exitosos.includes(c.id))
-        if (resultados.exitosos.length > 0) {
-          const usuarioStore = useUsuarioStore()
-          if (usuarioStore.tieneSesionRealActiva && usuarioStore.usuarioId) {
-            await Promise.all(
-              resultados.exitosos.map((idExitoso) =>
-                servicioMigracionLocalFirestore.registrarEliminacionComercioLocal(idExitoso),
-              ),
-            )
-            for (const idExitoso of resultados.exitosos) {
-              servicioMigracionLocalFirestore
-                .eliminarComercioRemoto(usuarioStore.usuarioId, idExitoso)
-                .catch((errorRemoto) => {
-                  console.warn('No se pudo eliminar un comercio en Firebase:', errorRemoto)
-                })
-            }
-          }
-          useUsuarioStore().solicitarSincronizacionAutomatica('comercios_eliminados', {
-            comercios: resultados.exitosos,
-            eliminaciones: true,
-          })
-        }
 
         return resultados
       } catch (error) {
@@ -395,207 +358,7 @@ export const useComerciStore = defineStore('comercios', {
     },
 
     /**
-     * Fusiona comercios duplicados en un comercio destino y mueve sus precios.
-     * @param {string} comercioDestinoId - ID del comercio que queda vigente
-     * @param {Array<string>} comercioOrigenIds - IDs de comercios que se absorben
-     * @returns {Promise<Object>} Resultado de la fusión
-     */
-    async fusionarComercios(comercioDestinoId, comercioOrigenIds = []) {
-      this.cargando = true
-      this.error = null
-
-      try {
-        const idsOrigen = Array.from(
-          new Set(
-            (Array.isArray(comercioOrigenIds) ? comercioOrigenIds : [])
-              .map((id) => String(id || '').trim())
-              .filter((id) => id && id !== comercioDestinoId),
-          ),
-        )
-
-        if (!comercioDestinoId || idsOrigen.length === 0) {
-          throw new Error('No hay comercios origen para fusionar')
-        }
-
-        const resultado = await ComerciosService.fusionarComercios(comercioDestinoId, idsOrigen)
-        if (!resultado?.comercio || resultado.idsEliminados.length === 0) {
-          throw new Error('No se pudo fusionar comercios')
-        }
-
-        this.comercios = this.comercios
-          .filter((comercio) => !resultado.idsEliminados.includes(comercio.id))
-          .map((comercio) =>
-            comercio.id === comercioDestinoId ? resultado.comercio : comercio,
-          )
-
-        const productosStore = useProductosStore()
-        if (productosStore.productos.length === 0) {
-          await productosStore.cargarProductos({ silencioso: true })
-        }
-
-        const idsProductosActualizados = []
-        const nombreDestino = resultado.comercio.nombre
-
-        for (const producto of productosStore.productos) {
-          let modificado = false
-          const preciosActualizados = (producto.precios || []).map((precio) => {
-            if (!resultado.idsEliminados.includes(precio.comercioId)) return precio
-
-            const mapaComercio = resultado.mapaDireccionesPorComercio?.[precio.comercioId] || {}
-            const datosDireccion =
-              mapaComercio[precio.direccionId] || Object.values(mapaComercio)[0] || null
-            const direccion = datosDireccion?.direccion || precio.direccion || ''
-            const nombreCompleto =
-              datosDireccion?.nombreCompleto ||
-              (direccion ? `${nombreDestino} - ${direccion}` : nombreDestino)
-
-            modificado = true
-            return {
-              ...precio,
-              comercioId: comercioDestinoId,
-              direccionId: datosDireccion?.direccionId || precio.direccionId,
-              comercio: nombreDestino,
-              direccion,
-              nombreCompleto,
-            }
-          })
-
-          if (modificado) {
-            const actualizado = await productosStore.actualizarProducto(producto.id, {
-              precios: preciosActualizados,
-            })
-            if (actualizado) idsProductosActualizados.push(producto.id)
-          }
-        }
-
-        const usuarioStore = useUsuarioStore()
-        if (usuarioStore.tieneSesionRealActiva && usuarioStore.usuarioId) {
-          await Promise.all(
-            resultado.idsEliminados.map((idEliminado) =>
-              servicioMigracionLocalFirestore.registrarEliminacionComercioLocal(idEliminado),
-            ),
-          )
-          for (const idEliminado of resultado.idsEliminados) {
-            servicioMigracionLocalFirestore
-              .eliminarComercioRemoto(usuarioStore.usuarioId, idEliminado)
-              .catch((errorRemoto) => {
-                console.warn('No se pudo eliminar un comercio fusionado en Firebase:', errorRemoto)
-              })
-          }
-        }
-
-        useUsuarioStore().solicitarSincronizacionAutomatica('comercios_fusionados', {
-          comercioId: comercioDestinoId,
-          comercios: [comercioDestinoId],
-          productos: idsProductosActualizados,
-          eliminaciones: true,
-        })
-
-        return {
-          ...resultado,
-          idsProductosActualizados,
-        }
-      } catch (error) {
-        console.error('Error al fusionar comercios:', error)
-        this.error = 'No se pudo fusionar los comercios'
-        throw error
-      } finally {
-        this.cargando = false
-      }
-    },
-
-    async fusionarSucursales(direccionDestinoId, direccionOrigenId) {
-      this.cargando = true
-      this.error = null
-
-      try {
-        const destinoId = String(direccionDestinoId || '').trim()
-        const origenId = String(direccionOrigenId || '').trim()
-        if (!destinoId || !origenId || destinoId === origenId) {
-          throw new Error('Seleccioná dos sucursales distintas para fusionar')
-        }
-
-        const buscarPorDireccion = (direccionId) => {
-          const comercio = this.comercios.find((item) =>
-            (item.direcciones || []).some((direccion) => direccion.id === direccionId),
-          )
-          const direccion = comercio?.direcciones?.find((item) => item.id === direccionId) || null
-          return { comercio: comercio || null, direccion }
-        }
-        const { comercio: comercioDestino, direccion: direccionDestino } =
-          buscarPorDireccion(destinoId)
-        const { comercio: comercioOrigen, direccion: direccionOrigen } = buscarPorDireccion(origenId)
-
-        if (!comercioDestino || !direccionDestino || !comercioOrigen || !direccionOrigen) {
-          throw new Error('No se encontraron las sucursales seleccionadas')
-        }
-
-        const debeEliminarComercioOrigen = comercioOrigen.direcciones.length === 1
-        const productosStore = useProductosStore()
-        if (productosStore.productos.length === 0) {
-          await productosStore.cargarProductos({ silencioso: true })
-        }
-
-        const idsProductosActualizados = []
-        for (const producto of productosStore.productos) {
-          let modificado = false
-          const preciosActualizados = (producto.precios || []).map((precio) => {
-            if (precio.comercioId !== comercioOrigen.id || precio.direccionId !== origenId) {
-              return precio
-            }
-
-            modificado = true
-            return {
-              ...precio,
-              comercioId: comercioDestino.id,
-              direccionId: destinoId,
-              nombreCompleto: direccionDestino.calle
-                ? `${comercioDestino.nombre} - ${direccionDestino.calle}`
-                : comercioDestino.nombre,
-              comercio: comercioDestino.nombre,
-              direccion: direccionDestino.calle || '',
-            }
-          })
-
-          if (modificado) {
-            const actualizado = await productosStore.actualizarProducto(producto.id, {
-              precios: preciosActualizados,
-            })
-            if (actualizado) idsProductosActualizados.push(producto.id)
-          }
-        }
-
-        if (debeEliminarComercioOrigen) {
-          await this.eliminarComercio(comercioOrigen.id)
-        } else {
-          await this.eliminarDireccion(comercioOrigen.id, origenId)
-        }
-
-        useUsuarioStore().solicitarSincronizacionAutomatica('sucursales_fusionadas', {
-          comercioId: comercioDestino.id,
-          comercios: [comercioDestino.id],
-          productos: idsProductosActualizados,
-          eliminaciones: debeEliminarComercioOrigen,
-        })
-
-        return {
-          comercioDestinoId: comercioDestino.id,
-          comercioOrigenId: comercioOrigen.id,
-          direccionDestinoId: destinoId,
-          direccionOrigenId: origenId,
-          idsProductosActualizados,
-        }
-      } catch (error) {
-        console.error('Error al fusionar sucursales:', error)
-        this.error = 'No se pudieron fusionar las sucursales'
-        throw error
-      } finally {
-        this.cargando = false
-      }
-    },
-
-    /**
-     * Agrega una dirección a un comercio.
+     * Agrega una dirección a un comercio
      * @param {string} comercioId - ID del comercio
      * @param {Object} datosDireccion - Datos de la dirección
      * @returns {Promise<Object|null>} Comercio actualizado o null
@@ -615,7 +378,6 @@ export const useComerciStore = defineStore('comercios', {
           if (indice !== -1) {
             this.comercios[indice] = comercioActualizado
           }
-          useUsuarioStore().solicitarSincronizacionAutomatica('direccion_agregada', { comercioId })
         }
 
         return comercioActualizado
@@ -648,7 +410,6 @@ export const useComerciStore = defineStore('comercios', {
           if (indice !== -1) {
             this.comercios[indice] = comercioActualizado
           }
-          useUsuarioStore().solicitarSincronizacionAutomatica('direccion_editada', { comercioId })
         }
 
         return comercioActualizado
@@ -678,7 +439,6 @@ export const useComerciStore = defineStore('comercios', {
           if (comercio) {
             comercio.direcciones = comercio.direcciones.filter((d) => d.id !== direccionId)
           }
-          useUsuarioStore().solicitarSincronizacionAutomatica('direccion_eliminada', { comercioId })
         }
 
         return eliminado
@@ -713,9 +473,6 @@ export const useComerciStore = defineStore('comercios', {
             }
           }
         }
-        useUsuarioStore().solicitarSincronizacionAutomatica('comercio_uso_actualizado', {
-          comercioId,
-        })
       } catch (error) {
         console.error('Error al registrar uso:', error)
       }
@@ -731,9 +488,6 @@ export const useComerciStore = defineStore('comercios', {
             const direccion = comercio.direcciones.find((d) => d.id === direccionId)
             if (direccion) direccion.foto = base64 || null
           }
-          useUsuarioStore().solicitarSincronizacionAutomatica('foto_direccion_actualizada', {
-            comercioId,
-          })
         }
         return guardado
       } catch (error) {
@@ -759,6 +513,15 @@ export const useComerciStore = defineStore('comercios', {
           mensaje: 'Error al validar',
         }
       }
+    },
+
+    limpiarEstado() {
+      this.comercios = []
+      this.cargando = false
+      this.error = null
+      this.fuenteDatos = fuentePrincipalFirestoreService.crearEstadoInicial(
+        fuentePrincipalFirestoreService.DOMINIOS.COMERCIOS,
+      )
     },
   },
 })
