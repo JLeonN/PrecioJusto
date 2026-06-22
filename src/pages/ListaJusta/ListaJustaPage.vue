@@ -152,7 +152,6 @@ import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { IconEdit, IconListDetails, IconTrash } from '@tabler/icons-vue'
 import { useListaJustaStore } from '../../almacenamiento/stores/ListaJustaStore.js'
-import { useUsuarioStore } from '../../almacenamiento/stores/UsuarioStore.js'
 import BotonConfirmacionEliminar from '../../components/Compartidos/BotonConfirmacionEliminar.vue'
 import BotonAccionSticky from '../../components/Compartidos/BotonAccionSticky.vue'
 import {
@@ -163,7 +162,6 @@ import {
 const router = useRouter()
 const quasar = useQuasar()
 const listaJustaStore = useListaJustaStore()
-const usuarioStore = useUsuarioStore()
 
 const dialogoListaAbierto = ref(false)
 const nombreLista = ref('')
@@ -261,7 +259,6 @@ async function onSwipeLargoLista(listaId, detalles) {
 }
 
 onMounted(async () => {
-  await usuarioStore.sincronizarRemotoAhora('entrar_lista_justa')
   await listaJustaStore.cargarListas()
 })
 </script>

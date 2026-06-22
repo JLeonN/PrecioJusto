@@ -468,7 +468,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { useListaJustaStore } from '../../almacenamiento/stores/ListaJustaStore.js'
 import { usePreferenciasStore } from '../../almacenamiento/stores/preferenciasStore.js'
 import { useProductosStore } from '../../almacenamiento/stores/productosStore.js'
-import { useUsuarioStore } from '../../almacenamiento/stores/UsuarioStore.js'
 import SelectorComercioDireccion from '../../components/Compartidos/SelectorComercioDireccion.vue'
 import BotonAccionSticky from '../../components/Compartidos/BotonAccionSticky.vue'
 import { formatearPrecioConCodigo } from '../../utils/PrecioUtils.js'
@@ -483,7 +482,6 @@ const router = useRouter()
 const listaJustaStore = useListaJustaStore()
 const productosStore = useProductosStore()
 const preferenciasStore = usePreferenciasStore()
-const usuarioStore = useUsuarioStore()
 
 const filasComparacion = ref([])
 const mostrarEditorComercioBase = ref(false)
@@ -1028,7 +1026,6 @@ watch(
 )
 
 onMounted(async () => {
-  await usuarioStore.sincronizarRemotoAhora('detalle_lista_justa_inteligente_abierto')
   await Promise.all([
     listaJustaStore.cargarListas(),
     productosStore.cargarProductos(),

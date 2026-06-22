@@ -348,7 +348,6 @@ import {
 } from '@tabler/icons-vue'
 import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
-import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
 import ComerciosService from '../almacenamiento/servicios/ComerciosService.js'
 import SelectorSucursales from '../components/EditarComercio/SelectorSucursales.vue'
 import CampoEditable from '../components/EditarComercio/CampoEditable.vue'
@@ -364,7 +363,6 @@ const router = useRouter()
 const $q = useQuasar()
 const comerciosStore = useComerciStore()
 const productosStore = useProductosStore()
-const usuarioStore = useUsuarioStore()
 const { inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo } = useCamaraFoto()
 
 // Opciones de tipo (mismas que FormularioComercio)
@@ -714,7 +712,6 @@ watch(comercioActual, (nuevo) => {
 
 // Cargar datos al montar
 onMounted(async () => {
-  await usuarioStore.solicitarSincronizacionRemota('entrar_editar_comercio')
   if (comerciosStore.comercios.length === 0) {
     await comerciosStore.cargarComercios()
   }

@@ -525,7 +525,6 @@ import { useListaJustaStore } from '../../almacenamiento/stores/ListaJustaStore.
 import { useProductosStore } from '../../almacenamiento/stores/productosStore.js'
 import { usePreferenciasStore } from '../../almacenamiento/stores/preferenciasStore.js'
 import { useSesionEscaneoStore } from '../../almacenamiento/stores/sesionEscaneoStore.js'
-import { useUsuarioStore } from '../../almacenamiento/stores/UsuarioStore.js'
 import busquedaProductosHibridaService from '../../almacenamiento/servicios/BusquedaProductosHibridaService.js'
 import {
   filtrarInputPrecio,
@@ -542,7 +541,6 @@ const listaJustaStore = useListaJustaStore()
 const productosStore = useProductosStore()
 const preferenciasStore = usePreferenciasStore()
 const sesionEscaneoStore = useSesionEscaneoStore()
-const usuarioStore = useUsuarioStore()
 
 const filtroEstado = ref('pendientes')
 
@@ -1668,7 +1666,6 @@ watch(
 )
 
 onMounted(async () => {
-  await usuarioStore.sincronizarRemotoAhora('detalle_lista_justa_abierta')
   await Promise.all([
     listaJustaStore.cargarListas(),
     productosStore.cargarProductos(),

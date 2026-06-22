@@ -117,7 +117,6 @@ import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
-import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
 import { useSeleccionMultiple } from '../composables/useSeleccionMultiple.js'
 import { IconPlus } from '@tabler/icons-vue'
 import InputBusqueda from '../components/Compartidos/InputBusqueda.vue'
@@ -133,7 +132,6 @@ import ComerciosService from '../almacenamiento/servicios/ComerciosService.js'
 const router = useRouter()
 const comerciosStore = useComerciStore()
 const productosStore = useProductosStore()
-const usuarioStore = useUsuarioStore()
 const $q = useQuasar()
 
 // Estado de búsqueda
@@ -520,7 +518,6 @@ async function deshacerEliminacion() {
 
 // Cargar datos al montar
 onMounted(async () => {
-  await usuarioStore.solicitarSincronizacionRemota('entrar_comercios')
   await cargarComercios()
 })
 </script>
