@@ -634,6 +634,12 @@ async function alDetectarCodigo(codigo) {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.contenido-scroll::-webkit-scrollbar {
+  display: none;
 }
 .dialogo-landscape .contenido-scroll {
   max-height: 50vh;
@@ -655,7 +661,20 @@ async function alDetectarCodigo(codigo) {
   font-weight: bold;
   font-size: 14px;
   color: var(--color-primario);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
+}
+:deep(.formulario-producto),
+:deep(.formulario-precio) {
+  gap: 10px;
+}
+:deep(.formulario-producto .q-field__bottom),
+:deep(.formulario-precio .q-field__bottom) {
+  min-height: 16px;
+  padding-top: 4px;
+}
+:deep(.formulario-producto .q-field--with-bottom),
+:deep(.formulario-precio .q-field--with-bottom) {
+  padding-bottom: 14px;
 }
 .dialogo-agregar {
   transition: all 0.3s ease;
