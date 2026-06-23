@@ -40,6 +40,38 @@ body.body--dark .q-field__input,
 body.body--dark .q-field__label {
   color: var(--texto-primario);
 }
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--texto-primario) !important;
+  caret-color: var(--texto-primario);
+  box-shadow: 0 0 0 1000px var(--fondo-input) inset !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--fondo-input) inset !important;
+  transition: background-color 9999s ease-out 0s;
+}
+.q-field--outlined .q-field__control:has(input:-webkit-autofill),
+.q-field--outlined .q-field__control:has(textarea:-webkit-autofill) {
+  background: var(--fondo-input);
+}
+body.body--dark input:-webkit-autofill,
+body.body--dark input:-webkit-autofill:hover,
+body.body--dark input:-webkit-autofill:focus,
+body.body--dark textarea:-webkit-autofill,
+body.body--dark textarea:-webkit-autofill:hover,
+body.body--dark textarea:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--texto-primario) !important;
+  caret-color: var(--texto-primario);
+  box-shadow: 0 0 0 1000px var(--fondo-input) inset !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--fondo-input) inset !important;
+  transition: background-color 9999s ease-out 0s;
+}
+body.body--dark .q-field--outlined .q-field__control:has(input:-webkit-autofill),
+body.body--dark .q-field--outlined .q-field__control:has(textarea:-webkit-autofill) {
+  background: var(--fondo-input);
+}
 body.body--dark .q-separator {
   background: var(--borde-color);
 }

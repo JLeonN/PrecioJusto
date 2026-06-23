@@ -408,7 +408,7 @@ onBeforeUnmount(() => {
 .input-formulario-reutilizable :deep(input:-webkit-autofill:hover),
 .input-formulario-reutilizable :deep(input:-webkit-autofill:focus) {
   -webkit-text-fill-color: var(--texto-primario);
-  -webkit-box-shadow: 0 0 0 1000px var(--fondo-tarjeta) inset;
+  -webkit-box-shadow: 0 0 0 1000px var(--fondo-input) inset;
   transition: background-color 9999s ease-out 0s;
 }
 @keyframes recorridoLuzBorde {
