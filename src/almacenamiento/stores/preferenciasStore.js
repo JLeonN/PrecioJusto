@@ -55,10 +55,6 @@ export const usePreferenciasStore = defineStore('preferencias', () => {
     Dark.set(modoTema.value === 'oscuro')
   }
 
-  function solicitarSincronizacionPreferencias(motivo = 'preferencias_actualizadas') {
-    useUsuarioStore().solicitarSincronizacionAutomatica(motivo, { preferencias: true })
-  }
-
   async function detectarMonedaAutomatica() {
     const resultadoDeteccion = detectarMonedaPorRegion()
 
@@ -69,7 +65,6 @@ export const usePreferenciasStore = defineStore('preferencias', () => {
       paisDetectado: paisDetectado.value,
       monedaDetectada: monedaDetectada.value,
     })
-    solicitarSincronizacionPreferencias('preferencias_region_actualizada')
   }
 
   async function inicializar(opciones = {}) {
@@ -117,7 +112,6 @@ export const usePreferenciasStore = defineStore('preferencias', () => {
   async function guardarModoMoneda(valorModo) {
     modoMoneda.value = valorModo === 'manual' ? 'manual' : 'automatica'
     await preferenciasService.guardarModoMoneda(modoMoneda.value)
-    solicitarSincronizacionPreferencias('preferencias_moneda_actualizada')
 
     if (modoMoneda.value === 'automatica') {
       await detectarMonedaAutomatica()
@@ -135,13 +129,11 @@ export const usePreferenciasStore = defineStore('preferencias', () => {
     modoTema.value = modoNormalizado
     aplicarModoTema()
     await preferenciasService.guardarModoTema(modoTema.value)
-    solicitarSincronizacionPreferencias('preferencias_tema_actualizado')
   }
 
   async function guardarMonedaManual(moneda) {
     monedaManual.value = moneda || MONEDA_DEFAULT
     await preferenciasService.guardarMonedaManual(monedaManual.value)
-    solicitarSincronizacionPreferencias('preferencias_moneda_actualizada')
   }
 
   // Compatibilidad con componentes viejos.
@@ -152,7 +144,6 @@ export const usePreferenciasStore = defineStore('preferencias', () => {
   async function guardarUnidad(valorUnidad) {
     unidad.value = valorUnidad || 'unidad'
     await preferenciasService.guardarUnidad(unidad.value)
-    solicitarSincronizacionPreferencias('preferencias_unidad_actualizada')
   }
 
   function limpiarEstado() {
