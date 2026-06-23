@@ -389,6 +389,8 @@ Firebase privado queda cerrado para datos gratuitos sin fotos:
 
 - Auth, Firestore privado y Firestore Offline quedan operativos.
 - Productos, comercios, listas, preferencias, confirmaciones y Mesa de Trabajo quedan bajo rutas privadas de usuario.
+- El perfil editable de Configuración queda guardado en `usuarios/{usuarioId}/configuracion/perfil` con nombre de usuario y fecha de nacimiento opcional.
+- Configuración queda reorganizada en acordeones cerrados por defecto para separar opciones de usuario de herramientas técnicas de prueba.
 - Navegador y Android fueron validados con usuario Firebase real.
 - Firestore Security Rules quedaron desplegadas y probadas con aislamiento entre usuarios.
 - Firebase Storage/fotos queda fuera del cierre por requerir Blaze.

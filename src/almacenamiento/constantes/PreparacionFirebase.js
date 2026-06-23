@@ -71,6 +71,7 @@ export const COLECCIONES_FIRESTORE_FUTURAS = Object.freeze({
   listasPrivadas: 'usuarios/{usuarioId}/listasJustas',
   mesaTrabajoPrivada: 'usuarios/{usuarioId}/mesaTrabajoItems',
   preferenciasUsuario: 'usuarios/{usuarioId}/configuracion/preferencias',
+  perfilUsuario: 'usuarios/{usuarioId}/configuracion/perfil',
   confirmacionesUsuario: 'usuarios/{usuarioId}/confirmaciones',
   fotosPrivadas: 'usuarios/{usuarioId}/fotos',
 })
@@ -88,6 +89,7 @@ export const RUTAS_FIRESTORE_PRIVADAS = Object.freeze({
   mesaTrabajoItems: 'usuarios/{usuarioId}/mesaTrabajoItems',
   mesaTrabajoItem: 'usuarios/{usuarioId}/mesaTrabajoItems/{itemId}',
   preferencias: 'usuarios/{usuarioId}/configuracion/preferencias',
+  perfil: 'usuarios/{usuarioId}/configuracion/perfil',
   confirmaciones: 'usuarios/{usuarioId}/confirmaciones',
   confirmacion: 'usuarios/{usuarioId}/confirmaciones/{confirmacionId}',
   fotos: 'usuarios/{usuarioId}/fotos',
@@ -263,6 +265,12 @@ export const CAMPOS_MODELO_FIRESTORE = Object.freeze({
     'paisDetectado',
     'monedaDetectada',
     'unidad',
+    'fechaActualizacion',
+  ]),
+  perfil: Object.freeze([
+    'usuarioId',
+    'nombreUsuario',
+    'fechaNacimiento',
     'fechaActualizacion',
   ]),
   confirmacion: Object.freeze([

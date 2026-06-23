@@ -208,6 +208,7 @@ usuarios/{usuarioId}/comercios/{comercioId}
 usuarios/{usuarioId}/listas/{listaId}
 usuarios/{usuarioId}/mesaTrabajoItems/{itemId}
 usuarios/{usuarioId}/configuracion/preferencias
+usuarios/{usuarioId}/configuracion/perfil
 usuarios/{usuarioId}/confirmaciones/{confirmacionId}
 ```
 
@@ -551,6 +552,41 @@ Checklist específico:
 - Abrir sesión en celular.
 - Confirmar que Firestore tiene el documento de preferencias.
 - Confirmar que el UID del documento coincide con el usuario autenticado.
+
+---
+
+## Perfil Del Usuario
+
+El perfil del usuario debe ser un documento privado separado de las preferencias.
+
+Ruta recomendada:
+
+```text
+usuarios/{usuarioId}/configuracion/perfil
+```
+
+Campos típicos:
+
+```text
+usuarioId
+nombreUsuario
+fechaNacimiento
+fechaActualizacion
+```
+
+Reglas prácticas:
+
+- Guardar solo datos necesarios para la app.
+- Hacer opcionales los datos personales que no sean imprescindibles.
+- No guardar información sensible si la app no la necesita.
+- Mantener el correo como dato de Firebase Auth, no como campo editable común.
+- Usar un service propio, por ejemplo `FirestorePerfilService`.
+- Cargar el perfil al iniciar sesión o al abrir el panel de cuenta.
+- Limpiar datos visibles al cerrar sesión para no mezclar usuarios.
+
+Recomendación:
+
+> No mezclar perfil con preferencias. El perfil describe a la persona; las preferencias describen cómo quiere usar la app.
 
 ---
 

@@ -3,252 +3,309 @@
     <div class="contenedor-configuracion">
       <div class="q-mb-md">
         <h5 class="q-my-none">Configuración</h5>
-        <p class="text-grey-7 q-mt-xs q-mb-none">Preferencias globales de la app</p>
       </div>
-      <q-card flat bordered>
-        <q-card-section>
-          <div class="text-subtitle1 text-weight-medium">Cuenta</div>
-          <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
-            {{ textoEstadoCuenta }}
-          </p>
-        </q-card-section>
-        <q-separator />
-        <q-card-section>
-          <div class="fila-cuenta">
-            <div>
-              <div class="text-body2 text-weight-medium">{{ etiquetaCuenta }}</div>
-              <div class="text-caption text-grey-7">Los datos locales se conservan al cerrar sesión.</div>
-            </div>
-            <q-btn
-              no-caps
-              unelevated
-              :color="usuarioStore.estaAutenticado ? 'negative' : 'primary'"
-              :label="usuarioStore.estaAutenticado ? 'Cerrar sesión' : 'Ingresar'"
-              :loading="usuarioStore.cargandoAccion"
-              @click="gestionarCuenta"
-            />
-          </div>
-        </q-card-section>
-      </q-card>
-      <q-card flat bordered class="q-mt-md">
-        <q-card-section>
-          <div class="text-subtitle1 text-weight-medium">Fuente de datos</div>
-          <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
-            Firestore es la lectura principal con sesión Firebase; local queda como respaldo.
-          </p>
-        </q-card-section>
-        <q-separator />
-        <q-card-section>
-          <div class="grilla-fuentes-datos">
-            <q-banner
-              v-for="estado in estadosFuenteDatos"
-              :key="estado.dominio"
-              rounded
-              class="banner-fuente-datos"
-            >
-              <div class="text-body2 text-weight-medium">{{ estado.etiquetaDominio }}</div>
-              <div class="text-caption">
-                {{ estado.etiquetaFuente }} · {{ estado.mensaje }}
+      <q-list bordered class="lista-configuracion">
+        <q-expansion-item group="configuracion" icon="account_circle" label="Cuenta" :caption="resumenCuenta">
+          <q-card flat>
+            <q-card-section>
+              <div v-if="usuarioStore.estaAutenticado" class="column q-gutter-md">
+                <q-banner rounded class="banner-tema-info">
+                  <div class="text-body2 text-weight-medium">{{ usuarioStore.email }}</div>
+                  <div class="text-caption">Los datos de la cuenta se guardan en Firebase.</div>
+                </q-banner>
+                <q-input
+                  v-model="formularioPerfil.nombreUsuario"
+                  label="Nombre de usuario"
+                  outlined
+                  dense
+                  maxlength="60"
+                  :disable="guardandoPerfil"
+                />
+                <q-input
+                  v-model="formularioPerfil.fechaNacimiento"
+                  label="Fecha de nacimiento (opcional)"
+                  type="date"
+                  outlined
+                  dense
+                  :disable="guardandoPerfil"
+                />
+                <div class="fila-acciones-panel">
+                  <q-btn
+                    no-caps
+                    unelevated
+                    color="primary"
+                    label="Guardar perfil"
+                    :loading="guardandoPerfil"
+                    @click="guardarPerfilUsuario"
+                  />
+                  <q-btn
+                    no-caps
+                    outline
+                    color="negative"
+                    label="Cerrar sesión"
+                    :loading="usuarioStore.cargandoAccion"
+                    @click="gestionarCuenta"
+                  />
+                </div>
               </div>
-            </q-banner>
-          </div>
-        </q-card-section>
-      </q-card>
-      <q-card v-if="usuarioStore.estaAutenticado" flat bordered class="q-mt-md">
-        <q-card-section>
-          <div class="fila-migracion">
-            <div>
-              <div class="text-subtitle1 text-weight-medium">Migración local a Firebase</div>
-              <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
-                Datos privados se migran con backup local previo; la app sigue leyendo local.
+              <div v-else class="column q-gutter-md">
+                <q-banner rounded class="banner-tema-info">
+                  Iniciá sesión para guardar tus datos en tu cuenta y usarlos en otros dispositivos.
+                </q-banner>
+                <q-btn
+                  no-caps
+                  unelevated
+                  color="primary"
+                  label="Ingresar"
+                  :loading="usuarioStore.cargandoAccion"
+                  @click="gestionarCuenta"
+                />
+              </div>
+            </q-card-section>
+          </q-card>
+        </q-expansion-item>
+        <q-separator />
+        <q-expansion-item group="configuracion" icon="palette" label="Apariencia" :caption="resumenApariencia">
+          <q-card flat>
+            <q-card-section>
+              <p class="text-body2 q-mt-none">
+                Elegí cómo querés ver la app. Si usás "Según el sistema", la app sigue el tema del
+                celular o navegador.
               </p>
-            </div>
-            <q-btn
-              no-caps
-              outline
-              color="primary"
-              label="Actualizar"
-              :loading="cargandoMigracion"
-              @click="cargarPanelMigracion"
-            />
-          </div>
-        </q-card-section>
+              <div class="selector-modo-tema q-gutter-sm">
+                <q-btn
+                  v-for="opcion in opcionesModoTema"
+                  :key="opcion.value"
+                  no-caps
+                  unelevated
+                  class="boton-modo-tema"
+                  :class="{ 'boton-modo-tema-activo': preferenciasStore.modoTema === opcion.value }"
+                  :label="opcion.label"
+                  @click="seleccionarModoTema(opcion.value)"
+                />
+              </div>
+              <q-banner rounded class="banner-tema-efectivo q-mt-md">
+                Tema activo: <strong>{{ etiquetaTemaActivo }}</strong>
+              </q-banner>
+            </q-card-section>
+          </q-card>
+        </q-expansion-item>
         <q-separator />
-        <q-card-section>
-          <div class="grilla-conteos">
-            <q-banner rounded class="banner-migracion">
-              Productos: <strong>{{ conteosMigracion.productos }}</strong>
-            </q-banner>
-            <q-banner rounded class="banner-migracion">
-              Precios: <strong>{{ conteosMigracion.precios }}</strong>
-            </q-banner>
-            <q-banner rounded class="banner-migracion">
-              Comercios: <strong>{{ conteosMigracion.comercios }}</strong>
-            </q-banner>
-            <q-banner rounded class="banner-migracion">
-              Direcciones: <strong>{{ conteosMigracion.direcciones }}</strong>
-            </q-banner>
-            <q-banner rounded class="banner-migracion">
-              Listas: <strong>{{ conteosMigracion.listas }}</strong>
-            </q-banner>
-            <q-banner rounded class="banner-migracion">
-              Items: <strong>{{ conteosMigracion.itemsListaJusta }}</strong>
-            </q-banner>
-            <q-banner rounded class="banner-migracion">
-              Preferencias: <strong>{{ conteosMigracion.preferencias }}</strong>
-            </q-banner>
-            <q-banner rounded class="banner-migracion">
-              Confirmaciones: <strong>{{ conteosMigracion.confirmaciones }}</strong>
-            </q-banner>
-            <q-banner rounded class="banner-migracion">
-              Fotos producto: <strong>{{ conteosMigracion.fotosProductos }}</strong>
-            </q-banner>
-            <q-banner rounded class="banner-migracion">
-              Fotos comercio: <strong>{{ conteosMigracion.fotosComercios }}</strong>
-            </q-banner>
-            <q-banner rounded class="banner-migracion">
-              Fotos listas: <strong>{{ conteosMigracion.fotosListas }}</strong>
-            </q-banner>
-          </div>
-          <q-linear-progress v-if="cargandoMigracion" indeterminate color="primary" class="q-mt-md" />
-          <q-banner rounded class="banner-tema-info q-mt-md">
-            Estado: <strong>{{ textoEstadoMigracion }}</strong> · Conexión:
-            <strong>{{ textoConexionMigracion }}</strong>
-          </q-banner>
-          <q-banner
-            v-if="estadoMigracion?.errores?.length"
-            rounded
-            class="bg-warning text-dark q-mt-sm"
-          >
-            {{ estadoMigracion.errores.length }} error(es) reintentables. Los datos locales y el
-            backup se conservan.
-          </q-banner>
-          <div class="fila-acciones-migracion q-mt-md">
-            <q-btn
-              no-caps
-              unelevated
-              color="secondary"
-              label="Crear backup"
-              :loading="cargandoMigracion"
-              @click="prepararBackupMigracion"
-            />
-            <q-btn
-              no-caps
-              unelevated
-              color="primary"
-              label="Migrar"
-              :loading="cargandoMigracion"
-              @click="confirmarMigracion"
-            />
-            <q-btn
-              v-if="puedeReintentarMigracion"
-              no-caps
-              outline
-              color="warning"
-              label="Reintentar"
-              :loading="cargandoMigracion"
-              @click="reintentarMigracion"
-            />
-          </div>
-        </q-card-section>
-      </q-card>
-      <q-card flat bordered class="q-mt-md">
-        <q-card-section>
-          <div class="text-subtitle1 text-weight-medium">Modo oscuro</div>
-          <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
-            Elegí cómo querés que se vea la app: claro, oscuro o automático según el sistema.
-          </p>
-        </q-card-section>
+        <q-expansion-item group="configuracion" icon="payments" label="Moneda" :caption="resumenMoneda">
+          <q-card flat>
+            <q-card-section>
+              <p class="text-body2 q-mt-none">
+                La moneda principal se usa como valor por defecto al crear precios nuevos.
+              </p>
+              <q-toggle
+                :model-value="esModoAutomatico"
+                label="Usar moneda automática según país"
+                color="primary"
+                @update:model-value="cambiarModoAutomatico"
+              />
+              <q-banner rounded class="banner-moneda-efectiva q-mt-md">
+                Moneda actual: <strong>{{ preferenciasStore.monedaDefaultEfectiva }}</strong>
+              </q-banner>
+              <div v-if="esModoAutomatico" class="q-mt-md column q-gutter-sm">
+                <q-banner rounded class="bg-blue-1 text-blue-10">
+                  País detectado: <strong>{{ preferenciasStore.paisDetectado || 'No detectado' }}</strong>
+                </q-banner>
+                <q-banner v-if="preferenciasStore.monedaDetectada" rounded class="bg-positive text-white">
+                  Moneda detectada automáticamente:
+                  <strong>{{ preferenciasStore.monedaDetectada }}</strong>
+                </q-banner>
+                <q-banner v-else rounded class="bg-warning text-dark">
+                  No se pudo detectar una moneda por región. Se usa la última moneda manual guardada.
+                </q-banner>
+              </div>
+              <q-select
+                v-else
+                :model-value="preferenciasStore.monedaManual"
+                :options="MONEDAS"
+                label="Moneda manual"
+                emit-value
+                map-options
+                outlined
+                dense
+                class="q-mt-md"
+                @update:model-value="cambiarMonedaManual"
+              />
+              <q-banner rounded class="banner-tema-info q-mt-md">
+                Cambiar la moneda no modifica precios ya guardados. Solo cambia el valor por defecto
+                para nuevos precios.
+              </q-banner>
+            </q-card-section>
+          </q-card>
+        </q-expansion-item>
         <q-separator />
-        <q-card-section>
-          <div class="selector-modo-tema q-gutter-sm">
-            <q-btn
-              v-for="opcion in opcionesModoTema"
-              :key="opcion.value"
-              no-caps
-              unelevated
-              class="boton-modo-tema"
-              :class="{ 'boton-modo-tema-activo': preferenciasStore.modoTema === opcion.value }"
-              :label="opcion.label"
-              @click="seleccionarModoTema(opcion.value)"
-            />
-          </div>
-          <div class="q-mt-md">
-            <q-banner rounded class="banner-tema-efectivo">
-              Tema activo: <strong>{{ etiquetaTemaActivo }}</strong>
-            </q-banner>
-          </div>
-          <div class="q-mt-sm">
-            <q-banner rounded class="banner-tema-info">
-              Si elegís Claro u Oscuro, esa preferencia manual se mantiene hasta volver a Seguir
-              sistema.
-            </q-banner>
-          </div>
-        </q-card-section>
-      </q-card>
-      <q-card flat bordered class="q-mt-md">
-        <q-card-section>
-          <div class="text-subtitle1 text-weight-medium">Moneda predeterminada</div>
-          <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
-            Esta moneda se usa como valor inicial en formularios nuevos.
-          </p>
-        </q-card-section>
+        <q-expansion-item
+          group="configuracion"
+          icon="sync"
+          label="Datos y sincronización"
+          :caption="resumenSincronizacion"
+        >
+          <q-card flat>
+            <q-card-section>
+              <div class="column q-gutter-md">
+                <q-banner rounded class="banner-tema-info">
+                  Tus datos se guardan en tu cuenta cuando iniciás sesión. Este dispositivo conserva
+                  una copia local como respaldo.
+                </q-banner>
+                <q-banner rounded class="banner-moneda-efectiva">
+                  Estado: <strong>{{ resumenSincronizacion }}</strong>
+                </q-banner>
+                <q-btn
+                  no-caps
+                  outline
+                  color="primary"
+                  label="Actualizar estado"
+                  :loading="cargandoMigracion"
+                  @click="cargarPanelMigracion"
+                />
+              </div>
+            </q-card-section>
+          </q-card>
+        </q-expansion-item>
         <q-separator />
-        <q-card-section>
-          <q-toggle
-            :model-value="esModoAutomatico"
-            label="Usar moneda automática según país"
-            color="primary"
-            @update:model-value="cambiarModoAutomatico"
-          />
-          <div class="q-mt-md">
-            <q-banner rounded class="banner-moneda-efectiva">
-              Moneda predeterminada efectiva:
-              <strong>{{ preferenciasStore.monedaDefaultEfectiva }}</strong>
-            </q-banner>
-          </div>
-          <div v-if="esModoAutomatico" class="q-mt-md column q-gutter-sm">
-            <q-banner rounded class="bg-blue-1 text-blue-10">
-              País detectado:
-              <strong>{{ preferenciasStore.paisDetectado || 'No detectado' }}</strong>
-            </q-banner>
-            <q-banner v-if="preferenciasStore.monedaDetectada" rounded class="bg-positive text-white">
-              Moneda detectada automáticamente:
-              <strong>{{ preferenciasStore.monedaDetectada }}</strong>
-            </q-banner>
-            <q-banner v-else rounded class="bg-warning text-dark">
-              No se pudo detectar una moneda por región. Se usa la última moneda manual guardada.
-            </q-banner>
-          </div>
-          <div v-else class="q-mt-md">
-            <q-select
-              :model-value="preferenciasStore.monedaManual"
-              :options="MONEDAS"
-              label="Moneda manual"
-              emit-value
-              map-options
-              outlined
-              dense
-              @update:model-value="cambiarMonedaManual"
-            />
-          </div>
-        </q-card-section>
-      </q-card>
-      <q-card flat bordered class="q-mt-md">
-        <q-card-section>
-          <div class="text-subtitle2">Importante</div>
-          <p class="text-body2 q-mt-sm q-mb-none">
-            Cambiar la moneda en un precio puntual solo afecta ese registro. No modifica esta
-            preferencia global.
-          </p>
-        </q-card-section>
-      </q-card>
+        <q-expansion-item
+          group="configuracion"
+          icon="science"
+          label="Herramientas de prueba"
+          caption="Información técnica para revisar Firebase"
+        >
+          <q-card flat>
+            <q-card-section>
+              <q-banner rounded class="banner-tema-info">
+                Información técnica para revisar sincronización mientras probás la app.
+              </q-banner>
+            </q-card-section>
+            <q-card-section>
+              <div class="text-subtitle1 text-weight-medium">Fuente de datos</div>
+              <p class="text-caption text-grey-7 q-mt-xs">
+                Firestore es la lectura principal con sesión Firebase; local queda como respaldo.
+              </p>
+              <div class="grilla-fuentes-datos">
+                <q-banner
+                  v-for="estado in estadosFuenteDatos"
+                  :key="estado.dominio"
+                  rounded
+                  class="banner-fuente-datos"
+                >
+                  <div class="text-body2 text-weight-medium">{{ estado.etiquetaDominio }}</div>
+                  <div class="text-caption">
+                    {{ estado.etiquetaFuente }} · {{ estado.mensaje }}
+                  </div>
+                </q-banner>
+              </div>
+            </q-card-section>
+            <q-separator />
+            <q-card-section v-if="usuarioStore.estaAutenticado">
+              <div class="fila-migracion">
+                <div>
+                  <div class="text-subtitle1 text-weight-medium">Migración local a Firebase</div>
+                  <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
+                    Datos privados se migran con copia local previa; la app conserva respaldo local.
+                  </p>
+                </div>
+                <q-btn
+                  no-caps
+                  outline
+                  color="primary"
+                  label="Actualizar"
+                  :loading="cargandoMigracion"
+                  @click="cargarPanelMigracion"
+                />
+              </div>
+              <div class="grilla-conteos q-mt-md">
+                <q-banner rounded class="banner-migracion">
+                  Productos: <strong>{{ conteosMigracion.productos }}</strong>
+                </q-banner>
+                <q-banner rounded class="banner-migracion">
+                  Precios: <strong>{{ conteosMigracion.precios }}</strong>
+                </q-banner>
+                <q-banner rounded class="banner-migracion">
+                  Comercios: <strong>{{ conteosMigracion.comercios }}</strong>
+                </q-banner>
+                <q-banner rounded class="banner-migracion">
+                  Direcciones: <strong>{{ conteosMigracion.direcciones }}</strong>
+                </q-banner>
+                <q-banner rounded class="banner-migracion">
+                  Listas: <strong>{{ conteosMigracion.listas }}</strong>
+                </q-banner>
+                <q-banner rounded class="banner-migracion">
+                  Items: <strong>{{ conteosMigracion.itemsListaJusta }}</strong>
+                </q-banner>
+                <q-banner rounded class="banner-migracion">
+                  Preferencias: <strong>{{ conteosMigracion.preferencias }}</strong>
+                </q-banner>
+                <q-banner rounded class="banner-migracion">
+                  Confirmaciones: <strong>{{ conteosMigracion.confirmaciones }}</strong>
+                </q-banner>
+                <q-banner rounded class="banner-migracion">
+                  Fotos producto: <strong>{{ conteosMigracion.fotosProductos }}</strong>
+                </q-banner>
+                <q-banner rounded class="banner-migracion">
+                  Fotos comercio: <strong>{{ conteosMigracion.fotosComercios }}</strong>
+                </q-banner>
+                <q-banner rounded class="banner-migracion">
+                  Fotos listas: <strong>{{ conteosMigracion.fotosListas }}</strong>
+                </q-banner>
+              </div>
+              <q-linear-progress v-if="cargandoMigracion" indeterminate color="primary" class="q-mt-md" />
+              <q-banner rounded class="banner-tema-info q-mt-md">
+                Estado: <strong>{{ textoEstadoMigracion }}</strong> · Conexión:
+                <strong>{{ textoConexionMigracion }}</strong>
+              </q-banner>
+              <q-banner
+                v-if="estadoMigracion?.errores?.length"
+                rounded
+                class="bg-warning text-dark q-mt-sm"
+              >
+                {{ estadoMigracion.errores.length }} error(es) reintentables. Los datos locales y la
+                copia se conservan.
+              </q-banner>
+              <div class="fila-acciones-migracion q-mt-md">
+                <q-btn
+                  no-caps
+                  unelevated
+                  color="secondary"
+                  label="Crear copia"
+                  :loading="cargandoMigracion"
+                  @click="prepararBackupMigracion"
+                />
+                <q-btn
+                  no-caps
+                  unelevated
+                  color="primary"
+                  label="Pasar datos a mi cuenta"
+                  :loading="cargandoMigracion"
+                  @click="confirmarMigracion"
+                />
+                <q-btn
+                  v-if="puedeReintentarMigracion"
+                  no-caps
+                  outline
+                  color="warning"
+                  label="Reintentar"
+                  :loading="cargandoMigracion"
+                  @click="reintentarMigracion"
+                />
+              </div>
+            </q-card-section>
+            <q-card-section v-else>
+              <q-banner rounded class="banner-tema-info">
+                Iniciá sesión para revisar herramientas de Firebase.
+              </q-banner>
+            </q-card-section>
+          </q-card>
+        </q-expansion-item>
+      </q-list>
     </div>
   </q-page>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import { useRouter } from 'vue-router'
 import { MONEDAS } from '../almacenamiento/constantes/Monedas.js'
@@ -263,6 +320,7 @@ import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoSto
 import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
 import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
 import conexionService from '../almacenamiento/servicios/ConexionService.js'
+import firestorePerfilService from '../almacenamiento/servicios/FirestorePerfilService.js'
 import migracionLocalFirebaseService from '../almacenamiento/servicios/MigracionLocalFirebaseService.js'
 import preferenciasService from '../almacenamiento/servicios/PreferenciasService.js'
 
@@ -281,20 +339,38 @@ const resumenMigracion = ref(null)
 const estadoMigracion = ref(null)
 const conexionMigracion = ref(null)
 const cargandoMigracion = ref(false)
+const cargandoPerfil = ref(false)
+const guardandoPerfil = ref(false)
+const formularioPerfil = ref({
+  nombreUsuario: '',
+  fechaNacimiento: '',
+})
 const TIEMPO_ESPERA_INTERSTICIAL_MS = 60000
 const opcionesModoTema = [
   { label: 'Claro', value: 'claro' },
   { label: 'Oscuro', value: 'oscuro' },
-  { label: 'Seguir sistema', value: 'sistema' },
+  { label: 'Según el sistema', value: 'sistema' },
 ]
 
 const esModoAutomatico = computed(() => preferenciasStore.modoMoneda === 'automatica')
 const etiquetaTemaActivo = computed(() => (quasar.dark.isActive ? 'Oscuro' : 'Claro'))
-const etiquetaCuenta = computed(() => usuarioStore.email || 'Sin sesión iniciada')
-const textoEstadoCuenta = computed(() =>
-  usuarioStore.estaAutenticado
-    ? 'Sesión activa con Firebase Auth.'
-    : 'Ingresá para usar la app con una cuenta Firebase.',
+const etiquetaModoTema = computed(() => {
+  const etiquetas = {
+    claro: 'Claro',
+    oscuro: 'Oscuro',
+    sistema: 'Según el sistema',
+  }
+
+  return etiquetas[preferenciasStore.modoTema] || 'Según el sistema'
+})
+const resumenCuenta = computed(() => {
+  if (!usuarioStore.estaAutenticado) return 'Sin sesión iniciada'
+  return formularioPerfil.value.nombreUsuario || usuarioStore.email || 'Sesión activa'
+})
+const resumenApariencia = computed(() => `Actual: ${etiquetaModoTema.value}`)
+const resumenMoneda = computed(() => `Actual: ${preferenciasStore.monedaDefaultEfectiva}`)
+const resumenSincronizacion = computed(() =>
+  usuarioStore.estaAutenticado ? 'Sincronización activa' : 'Solo datos de este dispositivo',
 )
 const conteosMigracion = computed(
   () =>
@@ -347,6 +423,61 @@ const estadosFuenteDatos = computed(() => {
   }))
 })
 
+function limpiarFormularioPerfil() {
+  formularioPerfil.value = {
+    nombreUsuario: '',
+    fechaNacimiento: '',
+  }
+}
+
+async function cargarPerfilUsuario() {
+  if (!usuarioStore.estaAutenticado) {
+    limpiarFormularioPerfil()
+    return
+  }
+
+  cargandoPerfil.value = true
+
+  try {
+    const perfil = await firestorePerfilService.obtenerPerfilUsuario()
+    formularioPerfil.value = {
+      nombreUsuario: perfil?.nombreUsuario || usuarioStore.nombre || '',
+      fechaNacimiento: perfil?.fechaNacimiento || '',
+    }
+  } catch (error) {
+    quasar.notify({
+      type: 'warning',
+      message: error.message || 'No se pudo cargar el perfil.',
+    })
+  } finally {
+    cargandoPerfil.value = false
+  }
+}
+
+async function guardarPerfilUsuario() {
+  if (!usuarioStore.estaAutenticado) return
+
+  guardandoPerfil.value = true
+
+  try {
+    await firestorePerfilService.guardarPerfil({
+      nombreUsuario: formularioPerfil.value.nombreUsuario,
+      fechaNacimiento: formularioPerfil.value.fechaNacimiento || null,
+    })
+    quasar.notify({
+      type: 'positive',
+      message: 'Perfil guardado.',
+    })
+  } catch (error) {
+    quasar.notify({
+      type: 'negative',
+      message: error.message || 'No se pudo guardar el perfil.',
+    })
+  } finally {
+    guardandoPerfil.value = false
+  }
+}
+
 async function mostrarPublicidadConfiguracion() {
   const ahora = Date.now()
   if (ahora - ultimoIntersticialMostrado.value < TIEMPO_ESPERA_INTERSTICIAL_MS) return
@@ -397,6 +528,7 @@ async function gestionarCuenta() {
     })
     .onOk(async () => {
       await usuarioStore.cerrarSesion()
+      limpiarFormularioPerfil()
       quasar.notify({
         type: 'positive',
         message: 'Sesión cerrada.',
@@ -434,7 +566,7 @@ async function prepararBackupMigracion() {
     estadoMigracion.value = await migracionLocalFirebaseService.prepararMigracionLocal()
     quasar.notify({
       type: 'positive',
-      message: 'Backup local creado y verificado.',
+      message: 'Copia local creada y verificada.',
     })
   })
 }
@@ -442,13 +574,13 @@ async function prepararBackupMigracion() {
 function confirmarMigracion() {
   quasar
     .dialog({
-      title: 'Migrar datos locales',
+      title: 'Pasar datos a mi cuenta',
       message:
-        'Se creará o usará un backup local previo. Firestore no será fuente principal todavía y no se borrarán datos locales.',
+        'Se creará o usará una copia local previa. Tus datos locales no se borrarán al terminar.',
       cancel: true,
       persistent: true,
       ok: {
-        label: 'Migrar datos',
+        label: 'Pasar datos',
         color: 'primary',
         noCaps: true,
       },
@@ -492,8 +624,8 @@ function notificarResultadoMigracion() {
     type: estado === ESTADOS_MIGRACION_FIREBASE.COMPLETADA ? 'positive' : 'warning',
     message:
       estado === ESTADOS_MIGRACION_FIREBASE.COMPLETADA
-        ? 'Migración completada y validada.'
-        : 'Migración parcial. Revisá errores y reintentá cuando haya conexión.',
+        ? 'Datos pasados a tu cuenta y validados.'
+        : 'Quedaron datos pendientes. Revisá errores y reintentá cuando haya conexión.',
   })
 }
 
@@ -514,9 +646,15 @@ onMounted(async () => {
   if (preferenciasStore.modoMoneda === 'automatica' && !preferenciasStore.paisDetectado) {
     await preferenciasStore.detectarMonedaAutomatica()
   }
-  await cargarPanelMigracion()
-  await cargarDiagnosticoPreferenciasDev()
+  await Promise.all([cargarPerfilUsuario(), cargarPanelMigracion(), cargarDiagnosticoPreferenciasDev()])
 })
+
+watch(
+  () => usuarioStore.usuarioId,
+  async () => {
+    await Promise.all([cargarPerfilUsuario(), cargarPanelMigracion()])
+  },
+)
 </script>
 
 <style scoped>
@@ -527,11 +665,16 @@ onMounted(async () => {
   max-width: 720px;
   margin: 0 auto;
 }
-.fila-cuenta {
+.lista-configuracion {
+  background: var(--fondo-tarjeta);
+  border-color: var(--borde-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.fila-acciones-panel {
   display: flex;
-  gap: var(--espaciado-md);
-  align-items: center;
-  justify-content: space-between;
+  gap: var(--espaciado-sm);
+  flex-wrap: wrap;
 }
 .fila-migracion {
   display: flex;
@@ -594,10 +737,6 @@ onMounted(async () => {
   border: 1px solid var(--borde-color);
 }
 @media (max-width: 640px) {
-  .fila-cuenta {
-    align-items: stretch;
-    flex-direction: column;
-  }
   .fila-migracion {
     align-items: stretch;
     flex-direction: column;
