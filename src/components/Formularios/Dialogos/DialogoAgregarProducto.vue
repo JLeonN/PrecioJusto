@@ -599,7 +599,7 @@ function alEscanerNoDisponible() {
   escanerUnitarioActivo.value = false
   $q.notify({
     type: 'info',
-    message: 'En web escribí el código de barras manualmente.',
+    message: 'Escribí el código de barras manualmente.',
     position: 'top',
     timeout: 2500,
   })

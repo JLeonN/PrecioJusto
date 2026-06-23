@@ -70,7 +70,7 @@
             <q-card-section>
               <p class="text-body2 q-mt-none">
                 Elegí cómo querés ver la app. Si usás "Según el sistema", la app sigue el tema del
-                celular o navegador.
+                celular.
               </p>
               <div class="selector-modo-tema q-gutter-sm">
                 <q-btn
