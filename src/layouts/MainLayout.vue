@@ -14,13 +14,28 @@
             />
           </q-btn>
 
+          <transition name="inicio-header">
+            <div v-if="!esInicioActivo" class="inicio-header-wrapper">
+              <q-btn
+                flat
+                dense
+                round
+                aria-label="Ir a Inicio"
+                class="boton-inicio-header"
+                @click="irAInicio"
+              >
+                <IconHome :size="22" :style="obtenerEstiloIconoHeader(esInicioActivo, 'inicio')" />
+              </q-btn>
+            </div>
+          </transition>
+
           <q-btn
             v-if="!MODO_PRUEBA"
             flat
             no-caps
             class="title-link"
             :style="estiloTituloHeader"
-            @click="irAListaJusta"
+            @click="irAInicio"
           >
             <span class="title-text">Precio Justo</span>
           </q-btn>
@@ -108,7 +123,18 @@
             <q-separator class="q-mb-md" />
 
             <!-- Opciones del menú -->
-            <q-item clickable v-ripple to="/" exact>
+            <transition name="inicio-drawer">
+              <q-item v-if="!esInicioActivo" clickable v-ripple to="/" exact>
+                <q-item-section avatar>
+                  <IconHome :size="24" class="text-primary" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="text-primary text-weight-medium">Inicio</q-item-label>
+                </q-item-section>
+              </q-item>
+            </transition>
+
+            <q-item clickable v-ripple to="/lista-justa" exact>
               <q-item-section avatar>
                 <IconListDetails :size="24" class="text-secondary" />
               </q-item-section>
@@ -238,6 +264,7 @@ import {
   IconHeart,
   IconSettings,
   IconRefresh,
+  IconHome,
 } from '@tabler/icons-vue'
 import { useQuasar } from 'quasar'
 import { App } from '@capacitor/app'
@@ -272,8 +299,9 @@ const toggleDrawer = () => {
 }
 
 const esListaJustaActiva = computed(
-  () => route.path === '/' || route.path.startsWith('/lista-justa'),
+  () => route.path === '/lista-justa' || route.path.startsWith('/lista-justa/'),
 )
+const esInicioActivo = computed(() => route.path === '/')
 const esMisProductosActivo = computed(() => route.path === '/mis-productos')
 const esComerciosActivo = computed(() => route.path.startsWith('/comercios'))
 const esMesaActivo = computed(() => route.path === '/mesa-trabajo')
@@ -304,12 +332,14 @@ const textoActualizacionDrawer = computed(() => {
 
 const colorInactivoHeader = computed(() => (quasar.dark.isActive ? '#b0bec5' : '#757575'))
 const coloresHeaderPorSeccion = {
+  inicio: 'var(--color-primario)',
   listaJusta: 'var(--color-secundario)',
   misProductos: 'var(--color-primario)',
   comercios: 'var(--color-acento)',
   mesa: 'var(--color-primario)',
 }
 const seccionHeaderActiva = computed(() => {
+  if (esInicioActivo.value) return 'inicio'
   if (esListaJustaActiva.value) return 'listaJusta'
   if (esMisProductosActivo.value) return 'misProductos'
   if (esComerciosActivo.value) return 'comercios'
@@ -337,9 +367,14 @@ const irAMisProductos = () => {
   router.push('/mis-productos')
 }
 
+const irAInicio = () => {
+  if (esInicioActivo.value) return
+  router.push('/')
+}
+
 const irAListaJusta = () => {
   if (esListaJustaActiva.value) return
-  router.push('/')
+  router.push('/lista-justa')
 }
 
 const irAComercios = () => {
@@ -453,6 +488,43 @@ useBotonAtras({ drawerAbierto, router, route })
   min-width: 0;
   max-width: 100%;
   padding: 0 6px;
+}
+.inicio-header-wrapper {
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+.boton-inicio-header {
+  min-width: 40px;
+  min-height: 40px;
+}
+.inicio-header-enter-active,
+.inicio-header-leave-active,
+.inicio-drawer-enter-active,
+.inicio-drawer-leave-active {
+  transition:
+    max-width 0.2s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+.inicio-header-enter-from,
+.inicio-header-leave-to,
+.inicio-drawer-enter-from,
+.inicio-drawer-leave-to {
+  max-width: 0;
+  opacity: 0;
+  transform: translateX(-6px);
+}
+.inicio-header-enter-to,
+.inicio-header-leave-from {
+  max-width: 48px;
+  opacity: 1;
+  transform: translateX(0);
+}
+.inicio-drawer-enter-to,
+.inicio-drawer-leave-from {
+  max-width: 280px;
+  opacity: 1;
+  transform: translateX(0);
 }
 .title-text {
   display: block;

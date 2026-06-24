@@ -5,7 +5,10 @@ const routes = [
     meta: { requiereAuth: true },
     children: [
       // Página principal
-      { path: '', component: () => import('pages/ListaJusta/ListaJustaPage.vue') },
+      { path: '', component: () => import('pages/InicioPage.vue') },
+
+      // Lista Justa
+      { path: 'lista-justa', component: () => import('pages/ListaJusta/ListaJustaPage.vue') },
 
       // Mis Productos
       { path: 'mis-productos', component: () => import('pages/MisProductosPage.vue') },
@@ -22,7 +25,7 @@ const routes = [
       // Mesa de trabajo
       { path: 'mesa-trabajo', component: () => import('pages/MesaTrabajoPage.vue') },
 
-      // Lista Justa
+      // Detalle de Lista Justa
       { path: 'lista-justa/:id', component: () => import('pages/ListaJusta/DetalleListaJustaPage.vue') },
       {
         path: 'lista-justa/:id/inteligente',

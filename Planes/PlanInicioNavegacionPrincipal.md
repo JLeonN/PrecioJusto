@@ -25,10 +25,10 @@ Crear una nueva pagina de inicio para Precio Justo que funcione como pantalla pr
 
 Identificar como estan definidas las rutas, el layout principal, el header y el drawer para integrar Inicio respetando el patron existente.
 
-- [ ] Revisar el archivo de rutas para ubicar las paginas actuales de Lista justa, Mis productos y Comercios.
-- [ ] Revisar el layout principal para identificar el boton de menu hamburguesa y la estructura del header.
-- [ ] Revisar el drawer actual para entender como se renderizan las opciones de navegacion.
-- [ ] Confirmar el nombre real de las rutas que se usaran en los accesos de Inicio.
+- [x] Revisar el archivo de rutas para ubicar las paginas actuales de Lista justa, Mis productos y Comercios.
+- [x] Revisar el layout principal para identificar el boton de menu hamburguesa y la estructura del header.
+- [x] Revisar el drawer actual para entender como se renderizan las opciones de navegacion.
+- [x] Confirmar el nombre real de las rutas que se usaran en los accesos de Inicio.
 
 ## FASE 2: Crear pagina Inicio
 
@@ -36,13 +36,13 @@ Identificar como estan definidas las rutas, el layout principal, el header y el 
 
 Construir una pagina nueva que muestre accesos principales con formato de tarjetas tipo icono de celular.
 
-- [ ] Crear la pagina `InicioPage.vue` en la carpeta correspondiente de paginas.
-- [ ] Agregar un titulo simple para la pantalla de inicio.
-- [ ] Agregar la descripcion `Accedé rápido a tus listas, productos y comercios.`
-- [ ] Definir un array de accesos con Lista justa, Mis productos y Comercios en ese orden.
-- [ ] Asignar a cada acceso un icono, titulo, subtitulo y ruta.
-- [ ] Renderizar las tarjetas desde el array para facilitar futuras secciones.
-- [ ] Hacer que cada tarjeta navegue a su ruta al tocarla o hacer click.
+- [x] Crear la pagina `InicioPage.vue` en la carpeta correspondiente de paginas.
+- [x] Agregar un titulo simple para la pantalla de inicio.
+- [x] Agregar la descripcion `Accedé rápido a tus listas, productos y comercios.`
+- [x] Definir un array de accesos con Lista justa, Mis productos y Comercios en ese orden.
+- [x] Asignar a cada acceso un icono, titulo, subtitulo y ruta.
+- [x] Renderizar las tarjetas desde el array para facilitar futuras secciones.
+- [x] Hacer que cada tarjeta navegue a su ruta al tocarla o hacer click.
 
 ## FASE 3: Ajustar estilo responsive
 
@@ -50,13 +50,13 @@ Construir una pagina nueva que muestre accesos principales con formato de tarjet
 
 Lograr que la pagina se vea bien en celular, tablet y escritorio sin que las tarjetas se estiren demasiado.
 
-- [ ] Crear una grilla responsive para las tarjetas.
-- [ ] Usar una columna en pantallas chicas cuando sea necesario.
-- [ ] Permitir dos columnas en celulares grandes o pantallas medianas si el texto entra bien.
-- [ ] Centrar la grilla con un ancho maximo para tablet y escritorio.
-- [ ] Definir una altura minima estable para que las tarjetas queden parejas.
-- [ ] Usar variables de color del proyecto y evitar colores inventados.
-- [ ] Verificar que titulo, subtitulo e icono no se superpongan ni corten texto.
+- [x] Crear una grilla responsive para las tarjetas.
+- [x] Usar una columna en pantallas chicas cuando sea necesario.
+- [x] Permitir dos columnas en celulares grandes o pantallas medianas si el texto entra bien.
+- [x] Centrar la grilla con un ancho maximo para tablet y escritorio.
+- [x] Definir una altura minima estable para que las tarjetas queden parejas.
+- [x] Usar variables de color del proyecto y evitar colores inventados.
+- [x] Verificar que titulo, subtitulo e icono no se superpongan ni corten texto.
 
 ## FASE 4: Integrar ruta principal
 
@@ -64,10 +64,10 @@ Lograr que la pagina se vea bien en celular, tablet y escritorio sin que las tar
 
 Hacer que Inicio sea la pantalla principal por defecto sin perder acceso a las paginas actuales.
 
-- [ ] Cambiar la ruta principal para que apunte a la nueva pagina Inicio.
-- [ ] Mantener accesibles las rutas existentes de Lista justa, Mis productos y Comercios.
-- [ ] Verificar que la redireccion despues del login lleve a Inicio por defecto.
-- [ ] Ajustar nombres de ruta si el proyecto usa rutas nombradas para navegacion.
+- [x] Cambiar la ruta principal para que apunte a la nueva pagina Inicio.
+- [x] Mantener accesibles las rutas existentes de Lista justa, Mis productos y Comercios.
+- [x] Verificar que la redireccion despues del login lleve a Inicio por defecto.
+- [x] Ajustar nombres de ruta si el proyecto usa rutas nombradas para navegacion.
 
 ## FASE 5: Integrar header y drawer
 
@@ -75,12 +75,12 @@ Hacer que Inicio sea la pantalla principal por defecto sin perder acceso a las p
 
 Agregar acceso a Inicio en los puntos principales de navegacion sin duplicarlo cuando el usuario ya esta en Inicio.
 
-- [ ] Agregar un boton de Inicio junto al boton de tres rayitas del header.
-- [ ] Mostrar el boton de Inicio del header solo cuando la ruta actual no sea Inicio.
-- [ ] Aplicar una transicion suave al aparecer y desaparecer el boton de Inicio.
-- [ ] Agregar Inicio arriba del drawer manteniendo el resto de opciones igual.
-- [ ] Mostrar Inicio en el drawer solo cuando la ruta actual no sea Inicio.
-- [ ] Marcar el estado activo de Inicio cuando corresponda en los lugares donde este visible.
+- [x] Agregar un boton de Inicio junto al boton de tres rayitas del header.
+- [x] Mostrar el boton de Inicio del header solo cuando la ruta actual no sea Inicio.
+- [x] Aplicar una transicion suave al aparecer y desaparecer el boton de Inicio.
+- [x] Agregar Inicio arriba del drawer manteniendo el resto de opciones igual.
+- [x] Mostrar Inicio en el drawer solo cuando la ruta actual no sea Inicio.
+- [x] Marcar el estado activo de Inicio cuando corresponda en los lugares donde este visible.
 
 ## FASE TESTING
 
@@ -88,9 +88,10 @@ Agregar acceso a Inicio en los puntos principales de navegacion sin duplicarlo c
 
 Validar que la nueva pagina y la navegacion funcionen correctamente en escritorio y mobile.
 
-- [ ] Ejecutar `npm run lint` y corregir cualquier error.
-- [ ] Levantar la app en modo desarrollo y abrir la ruta principal.
-- [ ] Verificar que la pagina inicial muestra titulo, descripcion y las tres tarjetas en el orden correcto.
+- [x] Ejecutar `npm run lint` y corregir cualquier error.
+- [x] Ejecutar `npm run build` y verificar que la app compile correctamente.
+- [x] Levantar la app en modo desarrollo y abrir la ruta principal.
+- [ ] Verificar con sesion iniciada que la pagina inicial muestra titulo, descripcion y las tres tarjetas en el orden correcto.
 - [ ] Entrar a Lista justa desde su tarjeta y verificar que navega correctamente.
 - [ ] Entrar a Mis productos desde su tarjeta y verificar que navega correctamente.
 - [ ] Entrar a Comercios desde su tarjeta y verificar que navega correctamente.
@@ -103,13 +104,13 @@ Validar que la nueva pagina y la navegacion funcionen correctamente en escritori
 
 ## Progreso del plan
 
-- [ ] Fase 1: Relevar navegacion actual
-- [ ] Fase 2: Crear pagina Inicio
-- [ ] Fase 3: Ajustar estilo responsive
-- [ ] Fase 4: Integrar ruta principal
-- [ ] Fase 5: Integrar header y drawer
+- [x] Fase 1: Relevar navegacion actual
+- [x] Fase 2: Crear pagina Inicio
+- [x] Fase 3: Ajustar estilo responsive
+- [x] Fase 4: Integrar ruta principal
+- [x] Fase 5: Integrar header y drawer
 - [ ] Fase Testing
 
 Fecha de creacion: 24 de Junio 2026
 Fecha de ultima actualizacion: 24 de Junio 2026
-Estado: BORRADOR
+Estado: EN PROCESO
