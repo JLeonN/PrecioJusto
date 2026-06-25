@@ -1,8 +1,22 @@
 {
   "versionDisponible": "1.2.3",
   "urlPlayStore": "https://play.google.com/store/apps/details?id=com.preciojusto.app",
-  "mostrarActualizacion": false,
+  "mostrarActualizacion": true,
   "cambios": {
-    "es-AR": []
+    "es-AR": [
+      {
+        "apartado": "Actualizaciones",
+        "novedades": [
+          "Nueva pantalla de inicio para entrar más rápido a las secciones principales.",
+          "Navegación más clara con accesos rápidos y un menú lateral más ordenado.",
+          "Mejor respaldo de productos, comercios, listas y preferencias cuando iniciás sesión.",
+          "Formularios más cómodos y consistentes al cargar productos, precios y comercios.",
+          "Mejor experiencia en celulares, con textos, botones e inputs más prolijos.",
+          "Ajustes visuales en configuración, perfil, drawer y modales.",
+          "Mejor manejo de fotos y datos pendientes para evitar pérdidas al reconectar.",
+          "El aviso de actualización ahora puede mostrar estas novedades dentro de la app."
+        ]
+      }
+    ]
   }
 }
