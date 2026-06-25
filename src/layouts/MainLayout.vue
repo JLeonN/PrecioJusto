@@ -258,9 +258,15 @@
         <q-separator />
 
         <q-list padding class="drawer-lista-inferior">
-          <q-item clickable v-ripple @click="manejarClickActualizarApp">
+          <q-item
+            clickable
+            v-ripple
+            class="item-drawer-secundario"
+            :class="{ 'item-drawer-secundario-destacado': estadoActualizacion.hayActualizacion }"
+            @click="manejarClickActualizarApp"
+          >
             <q-item-section avatar>
-              <IconRefresh :size="24" />
+              <IconRefresh :size="24" class="icono-drawer-secundario" />
             </q-item-section>
             <q-item-section>
               <q-item-label class="text-weight-medium">Actualizar app</q-item-label>
@@ -272,12 +278,13 @@
               <q-chip color="positive" text-color="white" dense>Nuevo</q-chip>
             </q-item-section>
           </q-item>
-          <q-item clickable v-ripple to="/configuracion">
+          <q-item clickable v-ripple to="/configuracion" class="item-drawer-secundario">
             <q-item-section avatar>
-              <IconSettings :size="24" />
+              <IconSettings :size="24" class="icono-drawer-secundario" />
             </q-item-section>
             <q-item-section>
               <q-item-label class="text-weight-medium">Configuración</q-item-label>
+              <q-item-label caption>Preferencias y cuenta</q-item-label>
             </q-item-section>
           </q-item>
         </q-list>
@@ -701,6 +708,28 @@ useBotonAtras({ drawerAbierto, router, route })
 .drawer-lista-inferior {
   padding-top: 8px;
   padding-bottom: calc(12px + var(--safe-area-bottom) + var(--espacio-publicidad, 0px)) !important;
+}
+.item-drawer-secundario {
+  margin: 2px 8px;
+  border-radius: 10px;
+  color: var(--texto-primario);
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease;
+}
+.item-drawer-secundario:hover,
+.item-drawer-secundario.q-router-link--active,
+.item-drawer-secundario.q-router-link--exact-active {
+  background: color-mix(in srgb, var(--color-primario) 8%, transparent);
+}
+.item-drawer-secundario-destacado {
+  background: color-mix(in srgb, var(--color-exito) 10%, transparent);
+}
+.item-drawer-secundario-destacado .icono-drawer-secundario {
+  color: var(--color-exito);
+}
+.icono-drawer-secundario {
+  color: var(--texto-secundario);
 }
 .bandeja-drawer-item {
   background: color-mix(in srgb, var(--color-primario) 8%, transparent);
