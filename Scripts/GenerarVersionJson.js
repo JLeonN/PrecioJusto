@@ -32,10 +32,17 @@ function obtenerOwnerRepoDesdeRemote() {
   }
 }
 
-async function leerJson(rutaRelativa) {
+async function leerJson(rutaRelativa, valorPredeterminado = null) {
   const rutaAbsoluta = path.join(rutaRaiz, rutaRelativa)
-  const contenido = await readFile(rutaAbsoluta, 'utf8')
-  return JSON.parse(contenido)
+  try {
+    const contenido = await readFile(rutaAbsoluta, 'utf8')
+    return JSON.parse(contenido)
+  } catch (error) {
+    if (error.code === 'ENOENT' && valorPredeterminado !== null) {
+      return valorPredeterminado
+    }
+    throw error
+  }
 }
 
 function construirUrlPlayStore(appId) {
@@ -63,6 +70,10 @@ function crearContenidoConstantes(datos) {
 async function main() {
   const packageJson = await leerJson('package.json')
   const capacitorConfig = await leerJson('capacitor.config.json')
+  const versionJsonActual = await leerJson('public/version.json', {})
+  const catalogoIdiomas = await leerJson('src/i18n/IdiomasApp.json', {
+    idiomas: [{ codigoApp: 'es-AR', habilitado: true }],
+  })
   const { owner, repo } = obtenerOwnerRepoDesdeRemote()
 
   const versionDisponible = packageJson.version || '0.0.0'
@@ -71,11 +82,25 @@ async function main() {
 
   const urlPlayStore = process.env.URL_PLAY_STORE || urlPlayStoreCalculada
   const urlVersionRemota = process.env.URL_VERSION_REMOTA || urlVersionCalculada
+  const cambiosActuales =
+    versionJsonActual.cambios && typeof versionJsonActual.cambios === 'object'
+      ? versionJsonActual.cambios
+      : {}
+  const idiomasHabilitados = Array.isArray(catalogoIdiomas.idiomas)
+    ? catalogoIdiomas.idiomas.filter((idioma) => idioma.habilitado && idioma.codigoApp)
+    : []
+  const cambios = Object.fromEntries(
+    idiomasHabilitados.map((idioma) => [
+      idioma.codigoApp,
+      cambiosActuales[idioma.codigoApp] ?? [],
+    ]),
+  )
 
   const versionJson = {
     versionDisponible,
     urlPlayStore,
-    mostrarActualizacion: true,
+    mostrarActualizacion: versionJsonActual.mostrarActualizacion === true,
+    cambios,
   }
 
   const rutaPublic = path.join(rutaRaiz, 'public')

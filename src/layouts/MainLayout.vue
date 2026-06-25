@@ -296,30 +296,14 @@
       <router-view />
     </q-page-container>
 
-    <q-dialog v-model="modalActualizacionAbierto" persistent>
-      <q-card style="min-width: 320px; max-width: 92vw">
-        <q-card-section class="row items-center q-gutter-sm">
-          <q-icon name="system_update" color="primary" size="26px" />
-          <div class="text-h6">Nueva actualización disponible</div>
-        </q-card-section>
-        <q-card-section class="q-pt-none">
-          <p class="q-ma-none">
-            Tenés la versión {{ estadoActualizacion.versionInstalada || 'actual' }} y ya existe la
-            versión {{ estadoActualizacion.versionDisponible || 'nueva' }}.
-          </p>
-        </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat no-caps label="Más tarde" @click="cerrarModalActualizacion" />
-          <q-btn
-            color="primary"
-            unelevated
-            no-caps
-            label="Ir a Play Store"
-            @click="actualizarAppAhora"
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    <ModalActualizacion
+      :visible="modalActualizacionAbierto"
+      :version-instalada="estadoActualizacion.versionInstalada"
+      :version-disponible="estadoActualizacion.versionDisponible"
+      :cambios="estadoActualizacion.cambios"
+      @cerrar="cerrarModalActualizacion"
+      @actualizar="actualizarAppAhora"
+    />
   </q-layout>
 </template>
 
@@ -341,6 +325,7 @@ import { App } from '@capacitor/app'
 import { useBotonAtras } from '../composables/useBotonAtras.js'
 import { usePublicidad } from '../composables/usePublicidad.js'
 import { useActualizacionApp } from '../composables/useActualizacionApp.js'
+import ModalActualizacion from '../components/Actualizacion/ModalActualizacion.vue'
 import { MODO_PRUEBA } from '../almacenamiento/constantes/ConfigPublicidad.js'
 import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'

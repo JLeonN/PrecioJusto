@@ -5,19 +5,24 @@ import { urlPlayStoreDefecto } from '../almacenamiento/constantes/ActualizacionA
 
 const cargandoActualizacion = ref(false)
 const modalActualizacionAbierto = ref(false)
+const idiomaActualizacion = ref('es-AR')
 const estadoActualizacion = ref({
   hayActualizacion: false,
   versionInstalada: null,
   versionDisponible: null,
   urlPlayStore: urlPlayStoreDefecto,
   debeMostrarModal: false,
+  cambios: [],
 })
 let promesaActualizacionEnCurso = null
 let ultimoChequeoMs = 0
 const INTERVALO_MINIMO_CHEQUEO_MS = 30000
 
 function obtenerUrlPlayStoreNativa(urlPlayStore) {
-  if (typeof urlPlayStore !== 'string' || !urlPlayStore.includes('play.google.com/store/apps/details')) {
+  if (
+    typeof urlPlayStore !== 'string' ||
+    !urlPlayStore.includes('play.google.com/store/apps/details')
+  ) {
     return urlPlayStore
   }
 
@@ -41,22 +46,24 @@ async function refrescarEstadoActualizacion({ mostrarModalSiHay = false } = {}) 
   }
 
   promesaActualizacionEnCurso = (async () => {
-  cargandoActualizacion.value = true
+    cargandoActualizacion.value = true
 
-  try {
-    const nuevoEstado = await verificarActualizacionApp()
-    estadoActualizacion.value = nuevoEstado
-    ultimoChequeoMs = Date.now()
+    try {
+      const nuevoEstado = await verificarActualizacionApp({
+        idiomaActual: idiomaActualizacion.value,
+      })
+      estadoActualizacion.value = nuevoEstado
+      ultimoChequeoMs = Date.now()
 
-    if (mostrarModalSiHay && nuevoEstado.debeMostrarModal) {
-      modalActualizacionAbierto.value = true
+      if (mostrarModalSiHay && nuevoEstado.debeMostrarModal) {
+        modalActualizacionAbierto.value = true
+      }
+    } finally {
+      cargandoActualizacion.value = false
+      promesaActualizacionEnCurso = null
     }
-  } finally {
-    cargandoActualizacion.value = false
-    promesaActualizacionEnCurso = null
-  }
 
-  return estadoActualizacion.value
+    return estadoActualizacion.value
   })()
 
   return promesaActualizacionEnCurso
@@ -94,6 +101,7 @@ export function useActualizacionApp() {
     cargandoActualizacion,
     modalActualizacionAbierto,
     estadoActualizacion,
+    idiomaActualizacion,
     refrescarEstadoActualizacion,
     cerrarModalActualizacion,
     abrirUrlPlayStore,

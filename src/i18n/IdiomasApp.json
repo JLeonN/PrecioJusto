@@ -1,0 +1,15 @@
+{
+  "idiomaPredeterminado": "es-AR",
+  "idiomas": [
+    {
+      "codigoApp": "es-AR",
+      "nombre": "Español",
+      "habilitado": true
+    },
+    {
+      "codigoApp": "en-US",
+      "nombre": "English",
+      "habilitado": false
+    }
+  ]
+}

@@ -1,12 +1,19 @@
 import { App } from '@capacitor/app'
 import { versionLocalBuild, urlVersionRemota } from '../constantes/ActualizacionApp.js'
 
+const IDIOMA_PREDETERMINADO = 'es-AR'
+const MAXIMO_GRUPOS = 4
+const MAXIMO_NOVEDADES = 8
+const MAXIMO_CARACTERES_APARTADO = 80
+const MAXIMO_CARACTERES_NOVEDAD = 500
+
 const ESTADO_BASE_ACTUALIZACION = {
   hayActualizacion: false,
   versionInstalada: versionLocalBuild,
   versionDisponible: null,
   urlPlayStore: '',
   debeMostrarModal: false,
+  cambios: [],
 }
 
 function normalizarVersion(version) {
@@ -36,6 +43,58 @@ function compararVersionesSemanticas(versionA, versionB) {
   return 0
 }
 
+function normalizarGruposCambios(cambios) {
+  if (!Array.isArray(cambios)) return []
+
+  const grupos = []
+  let cantidadNovedades = 0
+
+  cambios.slice(0, MAXIMO_GRUPOS).forEach((cambio) => {
+    if (typeof cambio === 'string' && cambio.trim()) {
+      if (cantidadNovedades >= MAXIMO_NOVEDADES) return
+      grupos.push({
+        apartado: '',
+        novedades: [cambio.trim().slice(0, MAXIMO_CARACTERES_NOVEDAD)],
+      })
+      cantidadNovedades += 1
+      return
+    }
+
+    if (!cambio || typeof cambio !== 'object' || !Array.isArray(cambio.novedades)) return
+
+    const novedades = cambio.novedades
+      .filter((novedad) => typeof novedad === 'string' && novedad.trim())
+      .slice(0, Math.max(0, MAXIMO_NOVEDADES - cantidadNovedades))
+      .map((novedad) => novedad.trim().slice(0, MAXIMO_CARACTERES_NOVEDAD))
+
+    if (novedades.length === 0) return
+
+    grupos.push({
+      apartado:
+        typeof cambio.apartado === 'string'
+          ? cambio.apartado.trim().slice(0, MAXIMO_CARACTERES_APARTADO)
+          : '',
+      novedades,
+    })
+    cantidadNovedades += novedades.length
+  })
+
+  return grupos
+}
+
+export function normalizarCambiosActualizacion(cambios, idiomaActual = IDIOMA_PREDETERMINADO) {
+  if (Array.isArray(cambios)) return normalizarGruposCambios(cambios)
+  if (!cambios || typeof cambios !== 'object') return []
+
+  const cambiosIdioma = cambios[idiomaActual] ?? cambios[IDIOMA_PREDETERMINADO]
+  if (Array.isArray(cambiosIdioma)) return normalizarGruposCambios(cambiosIdioma)
+  if (cambiosIdioma && typeof cambiosIdioma === 'object') {
+    return normalizarGruposCambios([cambiosIdioma])
+  }
+
+  return []
+}
+
 async function obtenerVersionInstalada() {
   try {
     const infoApp = await App.getInfo()
@@ -48,7 +107,7 @@ async function obtenerVersionInstalada() {
   return versionLocalBuild
 }
 
-async function obtenerVersionRemota() {
+async function obtenerVersionRemota(idiomaActual) {
   if (!urlVersionRemota) return null
 
   const separadorQuery = urlVersionRemota.includes('?') ? '&' : '?'
@@ -67,14 +126,15 @@ async function obtenerVersionRemota() {
     versionDisponible,
     urlPlayStore,
     mostrarActualizacion,
+    cambios: normalizarCambiosActualizacion(datos?.cambios, idiomaActual),
   }
 }
 
-export async function verificarActualizacionApp() {
+export async function verificarActualizacionApp({ idiomaActual = IDIOMA_PREDETERMINADO } = {}) {
   const versionInstalada = await obtenerVersionInstalada()
 
   try {
-    const datosRemotos = await obtenerVersionRemota()
+    const datosRemotos = await obtenerVersionRemota(idiomaActual)
     if (!datosRemotos) {
       return {
         ...ESTADO_BASE_ACTUALIZACION,
@@ -91,6 +151,7 @@ export async function verificarActualizacionApp() {
       versionDisponible: datosRemotos.versionDisponible,
       urlPlayStore: datosRemotos.urlPlayStore,
       debeMostrarModal: hayActualizacion && datosRemotos.mostrarActualizacion,
+      cambios: datosRemotos.cambios,
     }
   } catch {
     return {
