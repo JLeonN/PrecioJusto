@@ -124,40 +124,91 @@
 
             <!-- Opciones del menú -->
             <transition name="inicio-drawer">
-              <q-item v-if="!esInicioActivo" clickable v-ripple to="/" exact>
+              <q-item
+                v-if="!esInicioActivo"
+                clickable
+                v-ripple
+                to="/"
+                exact
+                class="item-drawer-principal"
+                :class="{ 'item-drawer-principal-activo': esInicioActivo }"
+                :style="{ '--color-item-drawer': 'var(--color-primario)' }"
+              >
                 <q-item-section avatar>
-                  <IconHome :size="24" class="text-primary" />
+                  <div class="icono-drawer-principal">
+                    <IconHome :size="24" />
+                  </div>
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label class="text-primary text-weight-medium">Inicio</q-item-label>
+                  <q-item-label class="titulo-drawer-principal">Inicio</q-item-label>
+                  <q-item-label caption class="subtitulo-drawer-principal">
+                    Pantalla principal
+                  </q-item-label>
                 </q-item-section>
               </q-item>
             </transition>
 
-            <q-item clickable v-ripple to="/lista-justa" exact>
+            <q-item
+              clickable
+              v-ripple
+              to="/lista-justa"
+              exact
+              class="item-drawer-principal"
+              :class="{ 'item-drawer-principal-activo': esListaJustaActiva }"
+              :style="{ '--color-item-drawer': 'var(--color-secundario)' }"
+            >
               <q-item-section avatar>
-                <IconListDetails :size="24" class="text-secondary" />
+                <div class="icono-drawer-principal">
+                  <IconListDetails :size="24" />
+                </div>
               </q-item-section>
               <q-item-section>
-                <q-item-label class="text-secondary text-weight-medium">Lista Justa</q-item-label>
+                <q-item-label class="titulo-drawer-principal">Lista Justa</q-item-label>
+                <q-item-label caption class="subtitulo-drawer-principal">
+                  Armá tu compra
+                </q-item-label>
               </q-item-section>
             </q-item>
 
-            <q-item clickable v-ripple to="/mis-productos">
+            <q-item
+              clickable
+              v-ripple
+              to="/mis-productos"
+              class="item-drawer-principal"
+              :class="{ 'item-drawer-principal-activo': esMisProductosActivo }"
+              :style="{ '--color-item-drawer': 'var(--color-primario)' }"
+            >
               <q-item-section avatar>
-                <IconClipboardList :size="24" />
+                <div class="icono-drawer-principal">
+                  <IconClipboardList :size="24" />
+                </div>
               </q-item-section>
               <q-item-section>
-                <q-item-label>Mis Productos</q-item-label>
+                <q-item-label class="titulo-drawer-principal">Mis Productos</q-item-label>
+                <q-item-label caption class="subtitulo-drawer-principal">
+                  Gestioná productos
+                </q-item-label>
               </q-item-section>
             </q-item>
 
-            <q-item clickable v-ripple to="/comercios">
+            <q-item
+              clickable
+              v-ripple
+              to="/comercios"
+              class="item-drawer-principal"
+              :class="{ 'item-drawer-principal-activo': esComerciosActivo }"
+              :style="{ '--color-item-drawer': 'var(--color-acento)' }"
+            >
               <q-item-section avatar>
-                <IconMapPin :size="24" />
+                <div class="icono-drawer-principal">
+                  <IconMapPin :size="24" />
+                </div>
               </q-item-section>
               <q-item-section>
-                <q-item-label>Comercios</q-item-label>
+                <q-item-label class="titulo-drawer-principal">Comercios</q-item-label>
+                <q-item-label caption class="subtitulo-drawer-principal">
+                  Locales y sucursales
+                </q-item-label>
               </q-item-section>
             </q-item>
 
@@ -181,12 +232,24 @@
                 </q-chip>
               </q-item-section>
             </q-item>
-            <q-item clickable v-ripple to="/gracias">
+            <q-item
+              clickable
+              v-ripple
+              to="/gracias"
+              class="item-drawer-principal"
+              :class="{ 'item-drawer-principal-activo': esGraciasActivo }"
+              :style="{ '--color-item-drawer': 'var(--color-error)' }"
+            >
               <q-item-section avatar>
-                <IconHeart :size="24" />
+                <div class="icono-drawer-principal">
+                  <IconHeart :size="24" />
+                </div>
               </q-item-section>
               <q-item-section>
-                <q-item-label>Gracias</q-item-label>
+                <q-item-label class="titulo-drawer-principal">Gracias</q-item-label>
+                <q-item-label caption class="subtitulo-drawer-principal">
+                  Apoyá el proyecto
+                </q-item-label>
               </q-item-section>
             </q-item>
           </q-list>
@@ -305,6 +368,7 @@ const esInicioActivo = computed(() => route.path === '/')
 const esMisProductosActivo = computed(() => route.path === '/mis-productos')
 const esComerciosActivo = computed(() => route.path.startsWith('/comercios'))
 const esMesaActivo = computed(() => route.path === '/mesa-trabajo')
+const esGraciasActivo = computed(() => route.path === '/gracias')
 const clasesHeader = computed(() => {
   if (MODO_PRUEBA) return 'bg-orange-8 text-white'
   return quasar.dark.isActive ? 'header-tema-oscuro text-white' : 'header-tema-claro text-primary'
@@ -579,6 +643,52 @@ useBotonAtras({ drawerAbierto, router, route })
 }
 .drawer-lista {
   padding-top: calc(8px + var(--safe-area-top)) !important;
+}
+.item-drawer-principal {
+  --color-item-drawer: var(--color-primario);
+  min-height: 64px;
+  margin: 4px 8px;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--color-item-drawer) 12%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-item-drawer) 8%, transparent);
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease;
+}
+.item-drawer-principal:hover {
+  border-color: color-mix(in srgb, var(--color-item-drawer) 28%, transparent);
+  background: color-mix(in srgb, var(--color-item-drawer) 13%, transparent);
+}
+.item-drawer-principal-activo,
+.item-drawer-principal.q-router-link--active,
+.item-drawer-principal.q-router-link--exact-active {
+  border-color: color-mix(in srgb, var(--color-item-drawer) 45%, var(--borde-color));
+  background: color-mix(in srgb, var(--color-item-drawer) 18%, transparent);
+}
+.item-drawer-principal .q-item__section--avatar {
+  min-width: 46px;
+  padding-right: 10px;
+}
+.icono-drawer-principal {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  color: var(--color-item-drawer);
+  background: color-mix(in srgb, var(--color-item-drawer) 16%, transparent);
+}
+.titulo-drawer-principal {
+  color: var(--color-item-drawer);
+  font-weight: 700;
+  line-height: 1.15;
+}
+.subtitulo-drawer-principal {
+  color: var(--texto-secundario);
+  line-height: 1.2;
 }
 .drawer-contenedor {
   display: flex;
