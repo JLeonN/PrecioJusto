@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "499606102795",
-    "project_id": "preciojustopruebas2",
-    "storage_bucket": "preciojustopruebas2.firebasestorage.app"
+    "project_number": "809147089510",
+    "project_id": "preciojustoprod",
+    "storage_bucket": "preciojustoprod.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:499606102795:android:627c2858be538b2bbf380e",
+        "mobilesdk_app_id": "1:809147089510:android:81a1407744ed12aa9463a7",
         "android_client_info": {
           "package_name": "com.preciojusto.app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCYV6ELvkrabUyq0uRzcO7JiEd4Do7gVbU"
+          "current_key": "AIzaSyDHoBtorx6be6VK-GB3KHWMWvYe3RE9YcY"
         }
       ],
       "services": {

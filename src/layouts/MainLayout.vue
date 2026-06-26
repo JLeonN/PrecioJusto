@@ -30,7 +30,6 @@
           </transition>
 
           <q-btn
-            v-if="!MODO_PRUEBA"
             flat
             no-caps
             class="title-link"
@@ -40,7 +39,6 @@
             <span class="title-text">Precio Justo</span>
           </q-btn>
         </div>
-        <div v-if="MODO_PRUEBA" class="indicador-modo-prueba">MODO PRUEBA</div>
 
         <div class="header-actions">
           <q-btn
@@ -326,7 +324,6 @@ import { useBotonAtras } from '../composables/useBotonAtras.js'
 import { usePublicidad } from '../composables/usePublicidad.js'
 import { useActualizacionApp } from '../composables/useActualizacionApp.js'
 import ModalActualizacion from '../components/Actualizacion/ModalActualizacion.vue'
-import { MODO_PRUEBA } from '../almacenamiento/constantes/ConfigPublicidad.js'
 import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
 import conexionService from '../almacenamiento/servicios/ConexionService.js'
@@ -362,14 +359,12 @@ const esComerciosActivo = computed(() => route.path.startsWith('/comercios'))
 const esMesaActivo = computed(() => route.path === '/mesa-trabajo')
 const esGraciasActivo = computed(() => route.path === '/gracias')
 const clasesHeader = computed(() => {
-  if (MODO_PRUEBA) return 'bg-orange-8 text-white'
   return quasar.dark.isActive ? 'header-tema-oscuro text-white' : 'header-tema-claro text-primary'
 })
 const clasesDrawer = computed(() =>
   quasar.dark.isActive ? 'drawer-tema drawer-tema-oscuro' : 'drawer-tema drawer-tema-claro',
 )
 const colorBotonMenu = computed(() => {
-  if (MODO_PRUEBA) return 'white'
   return quasar.dark.isActive ? 'white' : 'primary'
 })
 const estiloLayout = computed(() => ({
@@ -403,16 +398,11 @@ const seccionHeaderActiva = computed(() => {
   return null
 })
 const estiloTituloHeader = computed(() => {
-  if (MODO_PRUEBA) return { color: 'white' }
   const colorActivo = coloresHeaderPorSeccion[seccionHeaderActiva.value]
   return { color: colorActivo || colorInactivoHeader.value }
 })
 
 const obtenerEstiloIconoHeader = (estaActivo, seccion) => {
-  if (MODO_PRUEBA) {
-    return { color: estaActivo.value ? 'white' : '#e0e0e0' }
-  }
-
   return {
     color: estaActivo.value ? coloresHeaderPorSeccion[seccion] : colorInactivoHeader.value,
   }
@@ -597,14 +587,6 @@ useBotonAtras({ drawerAbierto, router, route })
   align-items: center;
   gap: 2px;
   flex: 0 0 auto;
-}
-.indicador-modo-prueba {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 12px;
-  letter-spacing: 0.04em;
-  pointer-events: none;
 }
 .quick-access-btn {
   min-width: 40px;

@@ -28,12 +28,12 @@ Pasar Precio Justo desde el proyecto Firebase de pruebas `preciojustopruebas2` a
 
 Confirmar desde dónde está apuntando la app antes de cambiar a producción.
 
-- [ ] Revisar `.firebaserc` y confirmar el proyecto Firebase activo actual.
-- [ ] Revisar `.env.local` o variables locales usadas por Firebase.
+- [x] Revisar `.firebaserc` y confirmar el proyecto Firebase activo actual.
+- [x] Revisar `.env.local` o variables locales usadas por Firebase.
 - [ ] Revisar `android/app/google-services.json` y confirmar a qué proyecto pertenece.
-- [ ] Revisar `firebase.json` y confirmar que apunta a `firestore.rules`.
-- [ ] Buscar referencias activas a `preciojustopruebas2`.
-- [ ] Buscar referencias activas a `PrecioJustoPruebas2`.
+- [x] Revisar `firebase.json` y confirmar que apunta a `firestore.rules`.
+- [x] Buscar referencias activas a `preciojustopruebas2`.
+- [x] Buscar referencias activas a `PrecioJustoPruebas2`.
 - [ ] Separar referencias técnicas/documentación de referencias usadas por la app.
 - [ ] Confirmar que el repo está limpio o anotar cambios pendientes antes de tocar configuración.
 
@@ -43,7 +43,7 @@ Confirmar desde dónde está apuntando la app antes de cambiar a producción.
 
 Confirmar que `PrecioJustoProd` existe y tiene los servicios necesarios para la app.
 
-- [ ] Usar Firebase CLI para listar proyectos disponibles.
+- [x] Usar Firebase CLI para listar proyectos disponibles.
 - [ ] Confirmar que existe el proyecto de producción `PrecioJustoProd`.
 - [ ] Confirmar el `projectId` real de producción.
 - [ ] Confirmar que Firebase Auth está activado con correo y contraseña.
@@ -63,7 +63,7 @@ Reemplazar la configuración activa de Firebase para que la app use producción.
 - [ ] Actualizar `.firebaserc` para que el default apunte al proyecto de producción.
 - [ ] Actualizar `.env.local` con la configuración web de producción.
 - [ ] Reemplazar `android/app/google-services.json` por el archivo de producción.
-- [ ] Verificar que no queden credenciales o tokens sensibles en archivos versionados.
+- [x] Verificar que no queden credenciales o tokens sensibles en archivos versionados.
 - [ ] Ejecutar una búsqueda global de `preciojustopruebas2` en archivos activos.
 - [ ] Mantener referencias históricas solo en planes, resúmenes o documentación cuando sean útiles.
 - [ ] Confirmar que `FirebaseBaseService` inicializa con el `projectId` de producción.
@@ -74,9 +74,9 @@ Reemplazar la configuración activa de Firebase para que la app use producción.
 
 Aplicar las reglas privadas actuales al proyecto Firebase de producción.
 
-- [ ] Revisar `firestore.rules` antes del deploy.
-- [ ] Confirmar que las reglas solo permiten acceso bajo `usuarios/{usuarioId}`.
-- [ ] Confirmar que toda ruta fuera del modelo privado queda denegada.
+- [x] Revisar `firestore.rules` antes del deploy.
+- [x] Confirmar que las reglas solo permiten acceso bajo `usuarios/{usuarioId}`.
+- [x] Confirmar que toda ruta fuera del modelo privado queda denegada.
 - [ ] Ejecutar deploy de reglas contra producción.
 - [ ] Confirmar desde Firebase CLI o Console que el deploy terminó correctamente.
 - [ ] No modificar reglas para fotos, comunidad ni datos públicos.
@@ -87,13 +87,13 @@ Aplicar las reglas privadas actuales al proyecto Firebase de producción.
 
 Quitar de la interfaz cualquier marca que haga pensar al usuario que está en pruebas.
 
-- [ ] Buscar `MODO PRUEBA` en `src`.
-- [ ] Buscar textos visibles con `prueba`, `pruebas`, `testing`, `debug`, `demo` o similares.
-- [ ] Revisar `MainLayout.vue` y encabezados visibles.
+- [x] Buscar `MODO PRUEBA` en `src`.
+- [x] Buscar textos visibles con `prueba`, `pruebas`, `testing`, `debug`, `demo` o similares.
+- [x] Revisar `MainLayout.vue` y encabezados visibles.
 - [ ] Revisar Configuración y Autenticación.
 - [ ] Revisar textos de Firebase visibles para usuario normal.
 - [ ] Mantener texto técnico solo si está dentro de herramientas de prueba o documentación.
-- [ ] No tocar AdMob ni banners de publicidad.
+- [x] No tocar AdMob ni banners de publicidad.
 
 ## FASE 6: Validar datos privados en producción
 
@@ -121,10 +121,10 @@ Confirmar que producción mantiene aislamiento real entre cuentas.
 
 - [ ] Crear o usar una segunda cuenta de prueba en producción.
 - [ ] Confirmar que usuario B no ve datos de usuario A.
-- [ ] Intentar leer datos de usuario A desde usuario B y confirmar `permission-denied`.
+- [x] Intentar leer datos de usuario A desde usuario B y confirmar `permission-denied`.
 - [ ] Confirmar que usuario sin sesión no puede leer rutas privadas.
-- [ ] Confirmar que rutas fuera de `usuarios/{usuarioId}` quedan bloqueadas.
-- [ ] Eliminar cuentas temporales solo si Leo lo autoriza.
+- [x] Confirmar que rutas fuera de `usuarios/{usuarioId}` quedan bloqueadas.
+- [x] Eliminar cuentas temporales solo si Leo lo autoriza.
 
 ## FASE 8: Validar Android con Firebase Producción
 
@@ -132,9 +132,9 @@ Confirmar que producción mantiene aislamiento real entre cuentas.
 
 Confirmar que la app Android usa el proyecto Firebase de producción.
 
-- [ ] Ejecutar `npm run lint`.
-- [ ] Ejecutar `npm run build`.
-- [ ] Ejecutar `npm run cel`.
+- [x] Ejecutar `npm run lint`.
+- [x] Ejecutar `npm run build`.
+- [x] Ejecutar `npm run cel`.
 - [ ] Instalar o abrir la app en Android.
 - [ ] Iniciar sesión con cuenta de producción.
 - [ ] Crear o editar datos desde Android.
@@ -148,7 +148,7 @@ Confirmar que la app Android usa el proyecto Firebase de producción.
 
 Dejar claro para futuras IA y para Leo qué proyecto Firebase usa producción.
 
-- [ ] Actualizar resumen Firebase si corresponde.
+- [x] Actualizar resumen Firebase si corresponde.
 - [ ] Documentar que `preciojustopruebas2` queda como respaldo histórico.
 - [ ] Documentar el `projectId` de producción usado realmente.
 - [ ] Anotar cuentas temporales usadas para prueba si Leo quiere conservarlas.
@@ -160,14 +160,14 @@ Dejar claro para futuras IA y para Leo qué proyecto Firebase usa producción.
 
 Validar de forma ejecutable por IA y revisable por Leo que producción quedó lista sin tocar AdMob.
 
-- [ ] `npm run lint` pasa sin errores.
-- [ ] `npm run build` pasa sin errores.
-- [ ] `npm run cel` pasa y abre Android Studio.
+- [x] `npm run lint` pasa sin errores.
+- [x] `npm run build` pasa sin errores.
+- [x] `npm run cel` pasa y abre Android Studio.
 - [ ] Firebase CLI confirma el proyecto de producción activo.
 - [ ] Firebase Auth producción permite crear cuenta nueva.
 - [ ] Firestore producción recibe perfil, productos, comercios, listas, preferencias y Mesa.
 - [ ] Firestore reglas producción bloquean acceso entre usuarios.
-- [ ] La app no muestra `MODO PRUEBA` ni textos visibles de pruebas.
+- [x] La app no muestra `MODO PRUEBA` ni textos visibles de pruebas.
 - [ ] Android usa Firebase producción.
 - [ ] Leo prueba en celular y confirma que funciona correctamente.
 
@@ -182,8 +182,29 @@ Validar de forma ejecutable por IA y revisable por Leo que producción quedó li
 - [ ] Fase 7: Validar seguridad entre usuarios
 - [ ] Fase 8: Validar Android con Firebase Producción
 - [ ] Fase 9: Documentar cierre de producción
-- [ ] Fase Testing
+- [ ] Fase Testing (automatizado OK, prueba manual de Leo pendiente)
 
 Fecha de creación: 25 de junio 2026
 Fecha de última actualización: 25 de junio 2026
-Estado: BORRADOR
+Estado: EN EJECUCIÓN
+
+## Ejecución 25 de junio 2026
+
+- Producción verificada: proyecto `PrecioJustoProd` con `projectId` real `preciojustoprod`.
+- Se crearon las apps Firebase `PrecioJustoWebProd` y `PrecioJustoAndroidProd` con package `com.preciojusto.app`.
+- Se activó Cloud Firestore y se creó la base `(default)` en `nam5` con Free Tier activo.
+- Se desplegaron reglas privadas de Firestore a producción.
+- Se activó Firebase Auth con Email/Password desde `firebase.json`.
+- Se actualizó `.firebaserc`, `.env.local` y `android/app/google-services.json` para apuntar a producción.
+- Se validó por API que un usuario puede escribir/leer sus datos y que otro usuario recibe bloqueo `permission-denied`.
+- Se limpiaron usuarios y documentos temporales usados en la validación automatizada.
+- Queda pendiente validar flujo completo de pantallas y Android con `npm run cel` y prueba real de Leo.
+
+## Validación técnica
+
+- `npm run lint`: OK.
+- `npm run build`: OK.
+- `npm run cel`: OK, compilación Android release ejecutada.
+- `firebase use`: `preciojustoprod`.
+- Validación Firestore/Auth por API: OK, con usuarios temporales creados y eliminados.
+- Pendiente real: prueba manual de Leo en celular creando datos reales en producción.

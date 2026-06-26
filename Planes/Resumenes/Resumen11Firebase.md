@@ -21,7 +21,8 @@ Este resumen concentra el estado actual de la integración gradual de Precio Jus
 - El plan `PlanFirestorePrivadoConfirmaciones.md` quedó ejecutado y marcado como `TERMINADO`.
 - El plan `PlanFirestoreMesaTrabajo.md` quedó ejecutado y movido a planes terminados.
 - El plan `PlanCierreFirebasePrivado.md` quedó completado como cierre Firebase gratis sin fotos.
-- Proyecto Firebase actual: `PrecioJustoPruebas2` (`preciojustopruebas2`).
+- Proyecto Firebase actual de producción: `PrecioJustoProd` (`preciojustoprod`).
+- Proyecto Firebase anterior de pruebas: `PrecioJustoPruebas2` (`preciojustopruebas2`), conservado como respaldo histórico.
 - Firebase SDK instalado como dependencia del proyecto.
 - Firebase Auth quedó preparado con proveedor `Correo electrónico/contraseña`.
 - Firebase Auth ahora tiene flujo real de registro, login, recuperación de contraseña, persistencia de sesión y logout.
@@ -102,6 +103,11 @@ Claves persistidas actuales:
 - Se creó el proyecto `PrecioJustoPruebas2` desde Firebase Console.
 - Se registró la app web `PrecioJustoWebPruebas2`.
 - Se registró la app Android `PrecioJustoAndroidPruebas2` con package `com.preciojusto.app`.
+- Se creó el proyecto/app de producción `PrecioJustoProd` (`preciojustoprod`) como destino final de la app.
+- Se registró la app web de producción `PrecioJustoWebProd`.
+- Se registró la app Android de producción `PrecioJustoAndroidProd` con package `com.preciojusto.app`.
+- Se creó Firestore producción en `nam5` y se desplegaron reglas privadas desde `firestore.rules`.
+- Se activó Firebase Auth producción con Email/Password desde `firebase.json`.
 - Se reemplazó `android/app/google-services.json` con la configuración nueva.
 - Se agregó `FirebaseBaseService` para centralizar App, Auth y Firestore.
 - Se agregó `FirebaseBoot` para verificar inicialización en desarrollo sin leer ni escribir documentos.
