@@ -182,26 +182,26 @@ async function cargarConFuentePrincipal({
       })
     }
 
-    const datosLocales = await cargarLocal()
-    if (tieneDatos(datosLocales)) {
-      return crearResultado({
-        dominio,
-        datos: datosLocales,
-        fuente: FUENTES_DATOS.FALLBACK_LOCAL,
-        mensaje: 'Firestore no tiene datos; se muestra respaldo local.',
-        conexion,
-      })
-    }
-
     return crearResultado({
       dominio,
       datos: datosFirestore,
       fuente: resolverFuenteFirestore(conexion),
-      mensaje: 'Firestore está vacío para este usuario.',
+      mensaje: 'Tu cuenta no tiene datos guardados en esta sección.',
       conexion,
     })
   } catch (error) {
     console.warn(`No se pudo cargar ${dominio} desde Firestore:`, error)
+
+    if (debeUsarFirestore(usuario)) {
+      return crearResultado({
+        dominio,
+        datos: null,
+        fuente: FUENTES_DATOS.ERROR,
+        mensaje: 'No se pudieron cargar datos de tu cuenta.',
+        conexion,
+        error: error.message || 'Error al cargar Firestore.',
+      })
+    }
 
     try {
       const datosLocales = await cargarLocal()

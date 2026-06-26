@@ -148,8 +148,8 @@
             <q-card-section>
               <div class="column q-gutter-md">
                 <q-banner rounded class="banner-tema-info">
-                  Tus datos se guardan en tu cuenta cuando iniciás sesión. Este dispositivo conserva
-                  una copia local como respaldo.
+                  Tus datos nuevos se guardan en la nube cuando iniciás sesión. Si tenés datos
+                  antiguos en este dispositivo, podés guardarlos en la nube o borrarlos.
                 </q-banner>
                 <q-banner rounded class="banner-moneda-efectiva">
                   Estado: <strong>{{ resumenSincronizacion }}</strong>
@@ -161,6 +161,24 @@
                   label="Actualizar estado"
                   :loading="cargandoMigracion"
                   @click="cargarPanelMigracion"
+                />
+                <q-btn
+                  v-if="usuarioStore.estaAutenticado && tieneDatosLocalesMigrables"
+                  no-caps
+                  unelevated
+                  color="primary"
+                  label="Guardar en la nube"
+                  :loading="cargandoMigracion"
+                  @click="confirmarMigracion"
+                />
+                <q-btn
+                  v-if="usuarioStore.estaAutenticado && tieneDatosLocalesMigrables"
+                  no-caps
+                  outline
+                  color="negative"
+                  label="Borrar del dispositivo"
+                  :loading="cargandoMigracion"
+                  @click="confirmarBorradoDatosLocales"
                 />
               </div>
             </q-card-section>
@@ -202,9 +220,9 @@
             <q-card-section v-if="usuarioStore.estaAutenticado">
               <div class="fila-migracion">
                 <div>
-                  <div class="text-subtitle1 text-weight-medium">Migración local a Firebase</div>
+                  <div class="text-subtitle1 text-weight-medium">Datos del dispositivo</div>
                   <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
-                    Datos privados se migran con copia local previa; la app conserva respaldo local.
+                    Conteo técnico de datos antiguos guardados solo en este dispositivo.
                   </p>
                 </div>
                 <q-btn
@@ -277,9 +295,18 @@
                   no-caps
                   unelevated
                   color="primary"
-                  label="Pasar datos a mi cuenta"
+                  label="Guardar en la nube"
                   :loading="cargandoMigracion"
                   @click="confirmarMigracion"
+                />
+                <q-btn
+                  v-if="tieneDatosLocalesMigrables"
+                  no-caps
+                  outline
+                  color="negative"
+                  label="Borrar del dispositivo"
+                  :loading="cargandoMigracion"
+                  @click="confirmarBorradoDatosLocales"
                 />
                 <q-btn
                   v-if="puedeReintentarMigracion"
@@ -322,6 +349,7 @@ import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
 import conexionService from '../almacenamiento/servicios/ConexionService.js'
 import firestorePerfilService from '../almacenamiento/servicios/FirestorePerfilService.js'
 import migracionLocalFirebaseService from '../almacenamiento/servicios/MigracionLocalFirebaseService.js'
+import migracionLocalPreguntadaService from '../almacenamiento/servicios/MigracionLocalPreguntadaService.js'
 import preferenciasService from '../almacenamiento/servicios/PreferenciasService.js'
 
 const quasar = useQuasar()
@@ -396,6 +424,12 @@ const puedeReintentarMigracion = computed(() =>
   [ESTADOS_MIGRACION_FIREBASE.PARCIAL, ESTADOS_MIGRACION_FIREBASE.ERROR].includes(
     estadoMigracion.value?.estado,
   ),
+)
+const tieneDatosLocalesMigrables = computed(() =>
+  migracionLocalPreguntadaService.tieneDatosLocalesMigrables({
+    ...(resumenMigracion.value || {}),
+    ...(resumenMigracion.value?.conteosMigrables || {}),
+  }),
 )
 const estadosFuenteDatos = computed(() => {
   const estados = [
@@ -574,13 +608,13 @@ async function prepararBackupMigracion() {
 function confirmarMigracion() {
   quasar
     .dialog({
-      title: 'Pasar datos a mi cuenta',
+      title: 'Guardar datos en la nube',
       message:
-        'Se creará o usará una copia local previa. Tus datos locales no se borrarán al terminar.',
+        'Vamos a guardar en la nube los datos que ya están en este dispositivo. La copia del dispositivo no se borra.',
       cancel: true,
       persistent: true,
       ok: {
-        label: 'Pasar datos',
+        label: 'Guardar en la nube',
         color: 'primary',
         noCaps: true,
       },
@@ -590,9 +624,68 @@ function confirmarMigracion() {
         estadoMigracion.value = await migracionLocalFirebaseService.iniciarMigracion({
           confirmarMigracion: true,
         })
+        await migracionLocalPreguntadaService.guardarDecision(
+          usuarioStore.usuarioId,
+          migracionLocalPreguntadaService.DECISIONES_MIGRACION_LOCAL.MIGRADA,
+        )
         notificarResultadoMigracion()
       })
     })
+}
+
+function confirmarBorradoDatosLocales() {
+  quasar
+    .dialog({
+      title: 'Borrar datos del dispositivo',
+      message:
+        'Esto borra los datos antiguos guardados solo en este dispositivo. Si no los guardaste en la nube, no se podrán recuperar.',
+      cancel: true,
+      persistent: true,
+      ok: {
+        label: 'Continuar',
+        color: 'negative',
+        noCaps: true,
+      },
+    })
+    .onOk(() => {
+      quasar
+        .dialog({
+          title: 'Confirmar borrado',
+          message: '¿Seguro que querés borrar estos datos del dispositivo?',
+          cancel: true,
+          persistent: true,
+          ok: {
+            label: 'Borrar del dispositivo',
+            color: 'negative',
+            noCaps: true,
+          },
+        })
+        .onOk(borrarDatosLocalesDispositivo)
+    })
+}
+
+async function borrarDatosLocalesDispositivo() {
+  await ejecutarAccionMigracion(async () => {
+    await migracionLocalPreguntadaService.borrarDatosLocalesMigrables()
+    await migracionLocalPreguntadaService.guardarDecision(
+      usuarioStore.usuarioId,
+      migracionLocalPreguntadaService.DECISIONES_MIGRACION_LOCAL.BORRADA,
+    )
+    limpiarStoresPrivados()
+    quasar.notify({
+      type: 'positive',
+      message: 'Datos del dispositivo borrados.',
+    })
+  })
+}
+
+function limpiarStoresPrivados() {
+  productosStore.limpiarEstado()
+  comerciosStore.limpiarEstado()
+  listaJustaStore.limpiarEstado()
+  confirmacionesStore.limpiarEstado()
+  sesionEscaneoStore.limpiarEstado()
+  preferenciasStore.limpiarEstado()
 }
 
 async function reintentarMigracion() {
@@ -624,8 +717,8 @@ function notificarResultadoMigracion() {
     type: estado === ESTADOS_MIGRACION_FIREBASE.COMPLETADA ? 'positive' : 'warning',
     message:
       estado === ESTADOS_MIGRACION_FIREBASE.COMPLETADA
-        ? 'Datos pasados a tu cuenta y validados.'
-        : 'Quedaron datos pendientes. Revisá errores y reintentá cuando haya conexión.',
+        ? 'Datos guardados en la nube.'
+        : 'Quedaron datos pendientes. Reintentá cuando haya conexión.',
   })
 }
 

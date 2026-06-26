@@ -306,7 +306,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   IconClipboardList,
@@ -326,8 +326,9 @@ import { useActualizacionApp } from '../composables/useActualizacionApp.js'
 import ModalActualizacion from '../components/Actualizacion/ModalActualizacion.vue'
 import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
-import conexionService from '../almacenamiento/servicios/ConexionService.js'
-import fotosPendientesStorageService from '../almacenamiento/servicios/FotosPendientesStorageService.js'
+import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
+import migracionLocalFirebaseService from '../almacenamiento/servicios/MigracionLocalFirebaseService.js'
+import migracionLocalPreguntadaService from '../almacenamiento/servicios/MigracionLocalPreguntadaService.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -335,6 +336,7 @@ const quasar = useQuasar()
 const drawerAbierto = ref(false)
 const sesionEscaneoStore = useSesionEscaneoStore()
 const preferenciasStore = usePreferenciasStore()
+const usuarioStore = useUsuarioStore()
 const { inicializar, mostrarBanner, precargarInterstitial, altoBanner } = usePublicidad()
 const {
   estadoActualizacion,
@@ -344,7 +346,7 @@ const {
   abrirUrlPlayStore,
 } = useActualizacionApp()
 let removerListenerEstadoApp = null
-let removerListenerConexionFotos = null
+const evaluandoMigracionLocal = ref(false)
 
 const toggleDrawer = () => {
   drawerAbierto.value = !drawerAbierto.value
@@ -451,12 +453,140 @@ const actualizarAppAhora = async () => {
   cerrarModalActualizacion()
 }
 
+const recargarDatosPrivados = async () => {
+  const [
+    { useProductosStore },
+    { useComerciStore },
+    { useListaJustaStore },
+    { useConfirmacionesStore },
+  ] = await Promise.all([
+    import('../almacenamiento/stores/productosStore.js'),
+    import('../almacenamiento/stores/comerciosStore.js'),
+    import('../almacenamiento/stores/ListaJustaStore.js'),
+    import('../almacenamiento/stores/confirmacionesStore.js'),
+  ])
+
+  await Promise.all([
+    useProductosStore().cargarProductos(),
+    useComerciStore().cargarComercios(),
+    useListaJustaStore().cargarListas(),
+    useConfirmacionesStore().cargarConfirmaciones(),
+    sesionEscaneoStore.cargarSesion(),
+    preferenciasStore.hidratarDesdeFuentePrincipal(),
+  ])
+}
+
+const ofrecerMigracionLocalSiCorresponde = async () => {
+  if (!usuarioStore.estaAutenticado || evaluandoMigracionLocal.value) {
+    return { accion: 'omitida' }
+  }
+
+  evaluandoMigracionLocal.value = true
+
+  try {
+    const evaluacion = await migracionLocalPreguntadaService.evaluarOfertaMigracion(
+      usuarioStore.usuarioId,
+    )
+
+    if (!evaluacion.debeMostrar) {
+      return { accion: 'sinOferta', evaluacion }
+    }
+
+    return await new Promise((resolve) => {
+      quasar
+        .dialog({
+          title: 'Encontramos datos guardados',
+          message:
+            'Tenés datos anteriores guardados solo en este dispositivo. Podés guardarlos en la nube para usarlos con tu cuenta o dejarlos solo en este dispositivo.',
+          cancel: {
+            label: 'Dejar en este dispositivo',
+            flat: true,
+            noCaps: true,
+          },
+          ok: {
+            label: 'Guardar en la nube',
+            color: 'primary',
+            noCaps: true,
+          },
+          persistent: true,
+        })
+        .onOk(async () => {
+          try {
+            await migracionLocalFirebaseService.iniciarMigracion({ confirmarMigracion: true })
+            await migracionLocalPreguntadaService.guardarDecision(
+              usuarioStore.usuarioId,
+              migracionLocalPreguntadaService.DECISIONES_MIGRACION_LOCAL.MIGRADA,
+            )
+            await recargarDatosPrivados()
+            quasar.notify({
+              type: 'positive',
+              message: 'Datos guardados en la nube.',
+            })
+            resolve({ accion: 'migrada' })
+          } catch (error) {
+            quasar.notify({
+              type: 'negative',
+              message: error.message || 'No se pudieron guardar los datos en tu cuenta.',
+            })
+            resolve({ accion: 'error', error })
+          } finally {
+            evaluandoMigracionLocal.value = false
+          }
+        })
+        .onCancel(async () => {
+          try {
+            await migracionLocalPreguntadaService.guardarDecision(
+              usuarioStore.usuarioId,
+              migracionLocalPreguntadaService.DECISIONES_MIGRACION_LOCAL.AHORA_NO,
+            )
+            quasar.notify({
+              type: 'info',
+              message:
+                'Tu cuenta queda vacía. Podés guardar o borrar esos datos más adelante desde Configuración.',
+            })
+            resolve({ accion: 'rechazada' })
+          } finally {
+            evaluandoMigracionLocal.value = false
+          }
+        })
+    })
+  } catch (error) {
+    console.warn('No se pudo evaluar la migración local preguntada:', error)
+    return { accion: 'error', error }
+  } finally {
+    if (evaluandoMigracionLocal.value) {
+      evaluandoMigracionLocal.value = false
+    }
+  }
+}
+
+const inicializarPreferenciasSinGuardar = async () => {
+  await preferenciasStore.inicializar({ silencioso: true })
+  await preferenciasStore.hidratarDesdeFuentePrincipal()
+}
+
+const inicializarPreferenciasPostMigracion = async () => {
+  if (preferenciasStore.modoMoneda === 'automatica' && !preferenciasStore.paisDetectado) {
+    await preferenciasStore.detectarMonedaAutomatica()
+  }
+}
+
+const puedeSincronizarPreferenciasDespuesDeMigracion = (resultadoMigracion) =>
+  resultadoMigracion?.accion === 'sinOferta' || resultadoMigracion?.accion === 'migrada'
+
 // Carga datos persistidos al iniciar la app
 onMounted(async () => {
-  await Promise.all([sesionEscaneoStore.cargarSesion(), preferenciasStore.inicializar()])
-  await preferenciasStore.hidratarDesdeFuentePrincipal()
-  await fotosPendientesStorageService.sincronizarFotosPendientes()
+  await Promise.all([sesionEscaneoStore.cargarSesion(), inicializarPreferenciasSinGuardar()])
   await refrescarEstadoActualizacion({ mostrarModalSiHay: true })
+  const resultadoMigracion = await ofrecerMigracionLocalSiCorresponde()
+
+  if (puedeSincronizarPreferenciasDespuesDeMigracion(resultadoMigracion)) {
+    try {
+      await inicializarPreferenciasPostMigracion()
+    } catch {
+      // Las preferencias locales deben seguir funcionando aunque no se puedan sincronizar.
+    }
+  }
 
   try {
     await inicializar()
@@ -470,32 +600,28 @@ onMounted(async () => {
     const listenerEstadoApp = await App.addListener('appStateChange', ({ isActive }) => {
       if (!isActive) return
       refrescarEstadoActualizacion({ mostrarModalSiHay: true })
-      fotosPendientesStorageService.sincronizarFotosPendientes()
     })
     removerListenerEstadoApp = () => listenerEstadoApp.remove()
   } catch {
     // En web puede no estar disponible este evento.
   }
-
-  try {
-    removerListenerConexionFotos = await conexionService.escucharCambiosConexion((estado) => {
-      if (!estado.conectado) return
-      fotosPendientesStorageService.sincronizarFotosPendientes()
-    })
-  } catch {
-    // En web puede no estar disponible el listener nativo de red.
-  }
 })
+
+watch(
+  () => usuarioStore.usuarioId,
+  async () => {
+    const resultadoMigracion = await ofrecerMigracionLocalSiCorresponde()
+    if (puedeSincronizarPreferenciasDespuesDeMigracion(resultadoMigracion)) {
+      await inicializarPreferenciasPostMigracion()
+    }
+  },
+)
 
 onUnmounted(() => {
   if (removerListenerEstadoApp) {
     removerListenerEstadoApp()
   }
   removerListenerEstadoApp = null
-  if (removerListenerConexionFotos) {
-    removerListenerConexionFotos()
-  }
-  removerListenerConexionFotos = null
 })
 
 useBotonAtras({ drawerAbierto, router, route })
