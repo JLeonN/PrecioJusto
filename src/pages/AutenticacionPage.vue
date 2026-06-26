@@ -86,7 +86,12 @@
               no-caps
               :label="etiquetaBoton"
               :loading="usuarioStore.cargandoAccion"
-            />
+              :disable="usuarioStore.cargandoAccion"
+            >
+              <template #loading>
+                <span>{{ etiquetaBoton }}</span>
+              </template>
+            </q-btn>
           </q-form>
         </q-card-section>
       </q-card>
@@ -99,6 +104,10 @@ import { computed, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { useRoute, useRouter } from 'vue-router'
 import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
+import {
+  MENSAJES_VALIDACION_AUTH,
+  esCorreoValido,
+} from '../almacenamiento/servicios/MensajesErroresFirebaseAuth.js'
 
 const quasar = useQuasar()
 const route = useRoute()
@@ -118,11 +127,19 @@ const tituloModo = computed(() => {
   return 'Ingresar'
 })
 const textoModo = computed(() => {
-  if (modo.value === 'registro') return 'Tu sesión queda lista para la futura sincronización.'
-  if (modo.value === 'recuperacion') return 'Te enviamos un correo para cambiar la contraseña.'
+  if (modo.value === 'registro') return 'Creá tu cuenta para guardar tus datos.'
+  if (modo.value === 'recuperacion') {
+    return 'Ingresá tu correo y te enviaremos un enlace para recuperar el acceso.'
+  }
   return 'Entrá para usar tus datos locales de Precio Justo.'
 })
 const etiquetaBoton = computed(() => {
+  if (usuarioStore.cargandoAccion) {
+    if (modo.value === 'registro') return 'Creando cuenta…'
+    if (modo.value === 'recuperacion') return 'Enviando…'
+    return 'Ingresando…'
+  }
+
   if (modo.value === 'registro') return 'Crear cuenta'
   if (modo.value === 'recuperacion') return 'Enviar correo'
   return 'Ingresar'
@@ -136,22 +153,23 @@ function limpiarEstadoFormulario() {
 
 function validarCorreo(valor) {
   const correoNormalizado = String(valor || '').trim()
-  const esValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoNormalizado)
-  return esValido || 'Ingresá un correo válido.'
+  if (!correoNormalizado) return MENSAJES_VALIDACION_AUTH.correoVacio
+  return esCorreoValido(correoNormalizado) || MENSAJES_VALIDACION_AUTH.correoInvalido
 }
 
 function validarContrasena(valor) {
-  if (!valor) return 'Ingresá una contraseña.'
+  if (!valor) return MENSAJES_VALIDACION_AUTH.contrasenaVacia
 
   if (modo.value === 'registro' && valor.length < 6) {
-    return 'La contraseña debe tener al menos 6 caracteres.'
+    return MENSAJES_VALIDACION_AUTH.contrasenaNoValida
   }
 
   return true
 }
 
 function validarConfirmacionContrasena(valor) {
-  return valor === contrasena.value || 'Las contraseñas no coinciden.'
+  if (!valor) return MENSAJES_VALIDACION_AUTH.confirmacionVacia
+  return valor === contrasena.value || MENSAJES_VALIDACION_AUTH.contrasenasDistintas
 }
 
 function obtenerRutaDestino() {
@@ -162,6 +180,8 @@ async function enviarFormulario() {
   limpiarEstadoFormulario()
 
   try {
+    if (!validarCamposFormulario()) return
+
     if (modo.value === 'registro') {
       await usuarioStore.registrarUsuario({
         correo: correo.value,
@@ -176,7 +196,7 @@ async function enviarFormulario() {
       await usuarioStore.recuperarContrasena(correo.value)
       quasar.notify({
         type: 'positive',
-        message: 'Correo de recuperación enviado.',
+        message: MENSAJES_VALIDACION_AUTH.recuperacionEnviada,
       })
       modo.value = 'ingreso'
       return
@@ -190,6 +210,32 @@ async function enviarFormulario() {
   } catch (error) {
     mensajeErrorLocal.value = error.message || 'No se pudo completar la autenticación.'
   }
+}
+
+function validarCamposFormulario() {
+  const validacionCorreo = validarCorreo(correo.value)
+  if (validacionCorreo !== true) {
+    mensajeErrorLocal.value = validacionCorreo
+    return false
+  }
+
+  if (modo.value === 'recuperacion') return true
+
+  const validacionContrasena = validarContrasena(contrasena.value)
+  if (validacionContrasena !== true) {
+    mensajeErrorLocal.value = validacionContrasena
+    return false
+  }
+
+  if (modo.value !== 'registro') return true
+
+  const validacionConfirmacion = validarConfirmacionContrasena(confirmacionContrasena.value)
+  if (validacionConfirmacion !== true) {
+    mensajeErrorLocal.value = validacionConfirmacion
+    return false
+  }
+
+  return true
 }
 </script>
 
