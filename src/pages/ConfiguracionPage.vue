@@ -184,148 +184,6 @@
             </q-card-section>
           </q-card>
         </q-expansion-item>
-        <q-separator />
-        <q-expansion-item
-          group="configuracion"
-          icon="science"
-          label="Herramientas de prueba"
-          caption="Información técnica para revisar Firebase"
-        >
-          <q-card flat>
-            <q-card-section>
-              <q-banner rounded class="banner-tema-info">
-                Información técnica para revisar sincronización mientras probás la app.
-              </q-banner>
-            </q-card-section>
-            <q-card-section>
-              <div class="text-subtitle1 text-weight-medium">Fuente de datos</div>
-              <p class="text-caption text-grey-7 q-mt-xs">
-                Firestore es la lectura principal con sesión Firebase; local queda como respaldo.
-              </p>
-              <div class="grilla-fuentes-datos">
-                <q-banner
-                  v-for="estado in estadosFuenteDatos"
-                  :key="estado.dominio"
-                  rounded
-                  class="banner-fuente-datos"
-                >
-                  <div class="text-body2 text-weight-medium">{{ estado.etiquetaDominio }}</div>
-                  <div class="text-caption">
-                    {{ estado.etiquetaFuente }} · {{ estado.mensaje }}
-                  </div>
-                </q-banner>
-              </div>
-            </q-card-section>
-            <q-separator />
-            <q-card-section v-if="usuarioStore.estaAutenticado">
-              <div class="fila-migracion">
-                <div>
-                  <div class="text-subtitle1 text-weight-medium">Datos del dispositivo</div>
-                  <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
-                    Conteo técnico de datos antiguos guardados solo en este dispositivo.
-                  </p>
-                </div>
-                <q-btn
-                  no-caps
-                  outline
-                  color="primary"
-                  label="Actualizar"
-                  :loading="cargandoMigracion"
-                  @click="cargarPanelMigracion"
-                />
-              </div>
-              <div class="grilla-conteos q-mt-md">
-                <q-banner rounded class="banner-migracion">
-                  Productos: <strong>{{ conteosMigracion.productos }}</strong>
-                </q-banner>
-                <q-banner rounded class="banner-migracion">
-                  Precios: <strong>{{ conteosMigracion.precios }}</strong>
-                </q-banner>
-                <q-banner rounded class="banner-migracion">
-                  Comercios: <strong>{{ conteosMigracion.comercios }}</strong>
-                </q-banner>
-                <q-banner rounded class="banner-migracion">
-                  Direcciones: <strong>{{ conteosMigracion.direcciones }}</strong>
-                </q-banner>
-                <q-banner rounded class="banner-migracion">
-                  Listas: <strong>{{ conteosMigracion.listas }}</strong>
-                </q-banner>
-                <q-banner rounded class="banner-migracion">
-                  Items: <strong>{{ conteosMigracion.itemsListaJusta }}</strong>
-                </q-banner>
-                <q-banner rounded class="banner-migracion">
-                  Preferencias: <strong>{{ conteosMigracion.preferencias }}</strong>
-                </q-banner>
-                <q-banner rounded class="banner-migracion">
-                  Confirmaciones: <strong>{{ conteosMigracion.confirmaciones }}</strong>
-                </q-banner>
-                <q-banner rounded class="banner-migracion">
-                  Fotos producto: <strong>{{ conteosMigracion.fotosProductos }}</strong>
-                </q-banner>
-                <q-banner rounded class="banner-migracion">
-                  Fotos comercio: <strong>{{ conteosMigracion.fotosComercios }}</strong>
-                </q-banner>
-                <q-banner rounded class="banner-migracion">
-                  Fotos listas: <strong>{{ conteosMigracion.fotosListas }}</strong>
-                </q-banner>
-              </div>
-              <q-linear-progress v-if="cargandoMigracion" indeterminate color="primary" class="q-mt-md" />
-              <q-banner rounded class="banner-tema-info q-mt-md">
-                Estado: <strong>{{ textoEstadoMigracion }}</strong> · Conexión:
-                <strong>{{ textoConexionMigracion }}</strong>
-              </q-banner>
-              <q-banner
-                v-if="estadoMigracion?.errores?.length"
-                rounded
-                class="bg-warning text-dark q-mt-sm"
-              >
-                {{ estadoMigracion.errores.length }} error(es) reintentables. Los datos locales y la
-                copia se conservan.
-              </q-banner>
-              <div class="fila-acciones-migracion q-mt-md">
-                <q-btn
-                  no-caps
-                  unelevated
-                  color="secondary"
-                  label="Crear copia"
-                  :loading="cargandoMigracion"
-                  @click="prepararBackupMigracion"
-                />
-                <q-btn
-                  no-caps
-                  unelevated
-                  color="primary"
-                  label="Guardar en la nube"
-                  :loading="cargandoMigracion"
-                  @click="confirmarMigracion"
-                />
-                <q-btn
-                  v-if="tieneDatosLocalesMigrables"
-                  no-caps
-                  outline
-                  color="negative"
-                  label="Borrar del dispositivo"
-                  :loading="cargandoMigracion"
-                  @click="confirmarBorradoDatosLocales"
-                />
-                <q-btn
-                  v-if="puedeReintentarMigracion"
-                  no-caps
-                  outline
-                  color="warning"
-                  label="Reintentar"
-                  :loading="cargandoMigracion"
-                  @click="reintentarMigracion"
-                />
-              </div>
-            </q-card-section>
-            <q-card-section v-else>
-              <q-banner rounded class="banner-tema-info">
-                Iniciá sesión para revisar herramientas de Firebase.
-              </q-banner>
-            </q-card-section>
-          </q-card>
-        </q-expansion-item>
       </q-list>
     </div>
   </q-page>
@@ -338,7 +196,6 @@ import { useRouter } from 'vue-router'
 import { MONEDAS } from '../almacenamiento/constantes/Monedas.js'
 import { ESTADOS_MIGRACION_FIREBASE } from '../almacenamiento/constantes/PreparacionFirebase.js'
 import { usePublicidad } from '../composables/usePublicidad.js'
-import fuentePrincipalFirestoreService from '../almacenamiento/servicios/FuentePrincipalFirestoreService.js'
 import { useConfirmacionesStore } from '../almacenamiento/stores/confirmacionesStore.js'
 import { useListaJustaStore } from '../almacenamiento/stores/ListaJustaStore.js'
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
@@ -346,11 +203,9 @@ import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
 import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
 import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
 import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
-import conexionService from '../almacenamiento/servicios/ConexionService.js'
 import firestorePerfilService from '../almacenamiento/servicios/FirestorePerfilService.js'
 import migracionLocalFirebaseService from '../almacenamiento/servicios/MigracionLocalFirebaseService.js'
 import migracionLocalPreguntadaService from '../almacenamiento/servicios/MigracionLocalPreguntadaService.js'
-import preferenciasService from '../almacenamiento/servicios/PreferenciasService.js'
 
 const quasar = useQuasar()
 const router = useRouter()
@@ -365,7 +220,6 @@ const { mostrarInterstitial } = usePublicidad()
 const ultimoIntersticialMostrado = ref(0)
 const resumenMigracion = ref(null)
 const estadoMigracion = ref(null)
-const conexionMigracion = ref(null)
 const cargandoMigracion = ref(false)
 const cargandoPerfil = ref(false)
 const guardandoPerfil = ref(false)
@@ -400,62 +254,12 @@ const resumenMoneda = computed(() => `Actual: ${preferenciasStore.monedaDefaultE
 const resumenSincronizacion = computed(() =>
   usuarioStore.estaAutenticado ? 'Sincronización activa' : 'Solo datos de este dispositivo',
 )
-const conteosMigracion = computed(
-  () =>
-    resumenMigracion.value?.conteosMigrables || {
-      productos: 0,
-      precios: 0,
-      comercios: 0,
-      direcciones: 0,
-      listas: 0,
-      itemsListaJusta: 0,
-      preferencias: 0,
-      confirmaciones: 0,
-      fotosProductos: 0,
-      fotosComercios: 0,
-      fotosListas: 0,
-    },
-)
-const textoEstadoMigracion = computed(() => estadoMigracion.value?.estado || 'sinIniciar')
-const textoConexionMigracion = computed(() =>
-  conexionMigracion.value?.conectado ? 'activa' : 'sin conexión',
-)
-const puedeReintentarMigracion = computed(() =>
-  [ESTADOS_MIGRACION_FIREBASE.PARCIAL, ESTADOS_MIGRACION_FIREBASE.ERROR].includes(
-    estadoMigracion.value?.estado,
-  ),
-)
 const tieneDatosLocalesMigrables = computed(() =>
   migracionLocalPreguntadaService.tieneDatosLocalesMigrables({
     ...(resumenMigracion.value || {}),
     ...(resumenMigracion.value?.conteosMigrables || {}),
   }),
 )
-const estadosFuenteDatos = computed(() => {
-  const estados = [
-    { dominio: 'productos', etiquetaDominio: 'Productos', estado: productosStore.fuenteDatos },
-    { dominio: 'comercios', etiquetaDominio: 'Comercios', estado: comerciosStore.fuenteDatos },
-    { dominio: 'listas', etiquetaDominio: 'Listas', estado: listaJustaStore.fuenteDatos },
-    {
-      dominio: 'mesaTrabajo',
-      etiquetaDominio: 'Mesa de trabajo',
-      estado: sesionEscaneoStore.fuenteDatos,
-    },
-    { dominio: 'preferencias', etiquetaDominio: 'Preferencias', estado: preferenciasStore.fuenteDatos },
-    {
-      dominio: 'confirmaciones',
-      etiquetaDominio: 'Confirmaciones',
-      estado: confirmacionesStore.fuenteDatos,
-    },
-  ]
-
-  return estados.map(({ dominio, etiquetaDominio, estado }) => ({
-    dominio,
-    etiquetaDominio,
-    etiquetaFuente: fuentePrincipalFirestoreService.obtenerEtiquetaFuente(estado?.fuente),
-    mensaje: estado?.mensaje || 'Sin carga registrada.',
-  }))
-})
 
 function limpiarFormularioPerfil() {
   formularioPerfil.value = {
@@ -577,14 +381,12 @@ async function cargarPanelMigracion() {
   cargandoMigracion.value = true
 
   try {
-    const [resumen, estado, conexion] = await Promise.all([
+    const [resumen, estado] = await Promise.all([
       migracionLocalFirebaseService.obtenerResumenLocal(),
       migracionLocalFirebaseService.obtenerEstadoActual(),
-      conexionService.obtenerEstadoConexion(),
     ])
     resumenMigracion.value = resumen
     estadoMigracion.value = estado
-    conexionMigracion.value = conexion
   } catch (error) {
     quasar.notify({
       type: 'warning',
@@ -593,16 +395,6 @@ async function cargarPanelMigracion() {
   } finally {
     cargandoMigracion.value = false
   }
-}
-
-async function prepararBackupMigracion() {
-  await ejecutarAccionMigracion(async () => {
-    estadoMigracion.value = await migracionLocalFirebaseService.prepararMigracionLocal()
-    quasar.notify({
-      type: 'positive',
-      message: 'Copia local creada y verificada.',
-    })
-  })
 }
 
 function confirmarMigracion() {
@@ -688,13 +480,6 @@ function limpiarStoresPrivados() {
   preferenciasStore.limpiarEstado()
 }
 
-async function reintentarMigracion() {
-  await ejecutarAccionMigracion(async () => {
-    estadoMigracion.value = await migracionLocalFirebaseService.reintentarMigracion()
-    notificarResultadoMigracion()
-  })
-}
-
 async function ejecutarAccionMigracion(accion) {
   cargandoMigracion.value = true
 
@@ -722,24 +507,11 @@ function notificarResultadoMigracion() {
   })
 }
 
-async function cargarDiagnosticoPreferenciasDev() {
-  if (!import.meta.env.DEV || !usuarioStore.estaAutenticado) return
-
-  const diagnostico = await preferenciasService.obtenerDiagnosticoSincronizacion()
-
-  console.info('Diagnóstico preferencias local/firestore', {
-    firestoreDisponible: diagnostico.firestoreDisponible,
-    mensajeFirestore: diagnostico.mensajeFirestore,
-    local: diagnostico.local,
-    firestore: diagnostico.firestore,
-  })
-}
-
 onMounted(async () => {
   if (preferenciasStore.modoMoneda === 'automatica' && !preferenciasStore.paisDetectado) {
     await preferenciasStore.detectarMonedaAutomatica()
   }
-  await Promise.all([cargarPerfilUsuario(), cargarPanelMigracion(), cargarDiagnosticoPreferenciasDev()])
+  await Promise.all([cargarPerfilUsuario(), cargarPanelMigracion()])
 })
 
 watch(
@@ -765,37 +537,6 @@ watch(
   overflow: hidden;
 }
 .fila-acciones-panel {
-  display: flex;
-  gap: var(--espaciado-sm);
-  flex-wrap: wrap;
-}
-.fila-migracion {
-  display: flex;
-  gap: var(--espaciado-md);
-  align-items: center;
-  justify-content: space-between;
-}
-.grilla-conteos {
-  display: grid;
-  gap: var(--espaciado-sm);
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-.banner-migracion {
-  background: var(--fondo-banner-suave);
-  color: var(--texto-primario);
-  border: 1px solid var(--borde-color);
-}
-.grilla-fuentes-datos {
-  display: grid;
-  gap: var(--espaciado-sm);
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-.banner-fuente-datos {
-  background: var(--fondo-banner-suave);
-  color: var(--texto-primario);
-  border: 1px solid var(--borde-color);
-}
-.fila-acciones-migracion {
   display: flex;
   gap: var(--espaciado-sm);
   flex-wrap: wrap;
@@ -830,16 +571,6 @@ watch(
   border: 1px solid var(--borde-color);
 }
 @media (max-width: 640px) {
-  .fila-migracion {
-    align-items: stretch;
-    flex-direction: column;
-  }
-  .grilla-conteos {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .grilla-fuentes-datos {
-    grid-template-columns: 1fr;
-  }
   .selector-modo-tema {
     grid-template-columns: 1fr;
   }

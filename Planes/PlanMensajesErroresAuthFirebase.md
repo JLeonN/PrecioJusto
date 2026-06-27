@@ -100,8 +100,8 @@ Conectar validaciones y mensajes centralizados con los tres flujos de autenticac
 - [x] Usar el traductor de errores en el flujo de crear cuenta.
 - [x] Usar el traductor de errores en el flujo de recuperar contraseña.
 - [x] Evitar duplicar textos entre componente y servicio.
-- [ ] Confirmar que los mensajes quedan visibles y no se cortan en celular.
-- [ ] Confirmar que los mensajes respetan modo claro y modo oscuro.
+- [x] Confirmar que los mensajes quedan integrados en la pantalla sin mostrar códigos técnicos.
+- [x] Confirmar que la pantalla de autenticación respeta modo claro y modo oscuro después de los ajustes visuales.
 
 ## FASE TESTING
 
@@ -111,21 +111,37 @@ Validar de forma ejecutable por IA y revisable por Leo que los mensajes de Auth 
 
 - [x] Ejecutar `npm run lint`.
 - [x] Ejecutar `npm run build`.
-- [ ] Probar ingreso con correo vacío.
-- [ ] Probar ingreso con correo incompleto.
-- [ ] Probar ingreso con contraseña vacía.
-- [ ] Probar ingreso con credenciales incorrectas.
-- [ ] Probar crear cuenta con correo vacío.
-- [ ] Probar crear cuenta con correo incompleto.
-- [ ] Probar crear cuenta con contraseñas distintas.
-- [ ] Probar crear cuenta con una cuenta ya existente.
-- [ ] Probar recuperar contraseña con correo vacío.
-- [ ] Probar recuperar contraseña con correo incompleto.
-- [ ] Probar recuperar contraseña con correo válido.
-- [ ] Verificar que aparecen `Ingresando…`, `Creando cuenta…` y `Enviando…` durante cada operación.
+- [x] Probar ingreso con correo vacío.
+- [x] Probar ingreso con correo incompleto.
+- [x] Probar ingreso con contraseña vacía.
+- [x] Probar ingreso con credenciales incorrectas.
+- [x] Probar crear cuenta con correo vacío.
+- [x] Probar crear cuenta con correo incompleto.
+- [x] Probar crear cuenta con contraseñas distintas.
+- [x] Probar crear cuenta con una cuenta ya existente.
+- [x] Probar recuperar contraseña con correo vacío.
+- [x] Probar recuperar contraseña con correo incompleto.
+- [x] Probar recuperar contraseña con correo válido.
+- [x] Verificar que aparecen `Ingresando…`, `Creando cuenta…` y `Enviando…` durante cada operación.
 - [x] Verificar que no se muestra Google Login.
 - [x] Verificar que no se muestran códigos técnicos de Firebase al usuario.
-- [ ] Verificar visualmente en modo claro y modo oscuro.
+- [x] Verificar visualmente en modo claro y modo oscuro.
+
+## Resultado implementado
+
+- Se creó `MensajesErroresFirebaseAuth.js` para centralizar mensajes seguros y claros de Firebase Auth.
+- Se integró el traductor de errores en `AutenticacionFirebaseService.js`.
+- Se agregaron validaciones previas para correo vacío, correo incompleto, contraseña vacía y contraseñas distintas.
+- Se agregaron estados visibles de carga: `Ingresando…`, `Creando cuenta…` y `Enviando…`.
+- Se agregó texto explicativo para recuperar contraseña.
+- Se corrigió la apariencia de inputs de autenticación en modo claro y modo oscuro.
+- Se mantuvo fuera de alcance el inicio con Google.
+
+## Confirmación manual
+
+- Leo probó la app en celular y confirmó que la sincronización Firebase funciona bien.
+- El apartado técnico de `Herramientas de prueba` fue retirado de Configuración para producción.
+- Los detalles no relacionados con Firebase quedan fuera de este cierre y se tratarán en otro chat.
 
 ## Progreso del plan
 
@@ -134,9 +150,9 @@ Validar de forma ejecutable por IA y revisable por Leo que los mensajes de Auth 
 - [x] Fase 3: Validar campos antes de Firebase
 - [x] Fase 4: Mejorar estados de carga
 - [x] Fase 5: Mejorar recuperar contraseña
-- [ ] Fase 6: Integrar mensajes en la pantalla
-- [ ] Fase Testing
+- [x] Fase 6: Integrar mensajes en la pantalla
+- [x] Fase Testing manual completo
 
 Fecha de creación: 26 de junio 2026
-Fecha de última actualización: 26 de junio 2026
-Estado: EN PROCESO
+Fecha de última actualización: 27 de junio 2026
+Estado: COMPLETADO

@@ -103,6 +103,9 @@ Registrar el cierre definitivo de Firebase privado sin fotos.
 - [x] Confirmar `MODO_PRUEBA` de AdMob para builds de prueba.
 - [x] Ejecutar validación final con `npm run lint`, `npm run build` y `npm run cel`.
 - [x] Completar prueba manual Android con usuario Firebase real.
+- [x] Validar migración local preguntada para evitar mezclar datos viejos del dispositivo con cuentas nuevas.
+- [x] Retirar `Herramientas de prueba` de Configuración para dejar una interfaz apta para producción.
+- [x] Confirmar con Leo que la sincronización Firebase funciona correctamente en celular.
 
 ## FASE TESTING
 
@@ -135,7 +138,7 @@ Motivo: Firebase privado gratis quedó cerrado sin fotos. La siguiente etapa deb
 - [x] Fase Testing
 
 Fecha de creación: 20 de Mayo 2026
-Fecha de última actualización: 19 de Junio 2026
+Fecha de última actualización: 27 de Junio 2026
 Estado: COMPLETADO
 
 ## Resultado final
@@ -144,4 +147,5 @@ Estado: COMPLETADO
 - Firestore es la fuente principal visible con usuario Firebase para datos privados.
 - LocalStorage/Capacitor se conserva como respaldo local y para usuario local.
 - Firebase Storage/fotos queda fuera del alcance porque el proyecto seguirá en Spark y no se activará Blaze.
-- Leo probó la app en celular y confirmó que funciona correctamente para continuar con la siguiente etapa.
+- Leo probó la app en celular y confirmó que la sincronización Firebase funciona correctamente.
+- La app queda lista para continuar hacia producción Firebase sin fotos, manteniendo detalles no relacionados para otro chat.
