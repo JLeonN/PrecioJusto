@@ -216,16 +216,23 @@
               clickable
               v-ripple
               to="/mesa-trabajo"
-              class="bandeja-drawer-item"
+              class="item-drawer-principal"
+              :class="{ 'item-drawer-principal-activo': esMesaActivo }"
+              :style="{ '--color-item-drawer': 'var(--color-primario)' }"
             >
               <q-item-section avatar>
-                <IconBriefcase :size="24" />
+                <div class="icono-drawer-principal">
+                  <IconBriefcase :size="24" />
+                </div>
               </q-item-section>
               <q-item-section>
-                <q-item-label class="text-primary text-weight-medium">Mesa de trabajo</q-item-label>
+                <q-item-label class="titulo-drawer-principal">Mesa de trabajo</q-item-label>
+                <q-item-label caption class="subtitulo-drawer-principal">
+                  Completá pendientes
+                </q-item-label>
               </q-item-section>
               <q-item-section side>
-                <q-chip color="primary" text-color="white" dense>
+                <q-chip color="primary" text-color="white" dense class="chip-drawer-principal">
                   {{ sesionEscaneoStore.cantidadItems }}
                 </q-chip>
               </q-item-section>
@@ -824,10 +831,8 @@ useBotonAtras({ drawerAbierto, router, route })
 .icono-drawer-secundario {
   color: var(--texto-secundario);
 }
-.bandeja-drawer-item {
-  background: color-mix(in srgb, var(--color-primario) 8%, transparent);
-  border-radius: 8px;
-  margin: 0 8px;
+.chip-drawer-principal {
+  font-weight: 700;
 }
 .logo-app-drawer-box {
   width: 56px;

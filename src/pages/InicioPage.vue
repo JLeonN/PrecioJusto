@@ -18,6 +18,9 @@
           @keydown.enter="navegarA(acceso.ruta)"
           @keydown.space.prevent="navegarA(acceso.ruta)"
         >
+          <span v-if="acceso.cantidadPendiente" class="chip-pendientes-acceso">
+            {{ acceso.cantidadPendiente }}
+          </span>
           <q-card-section class="contenido-acceso">
             <div class="icono-acceso" :class="acceso.claseIcono">
               <component :is="acceso.icono" :size="34" />
@@ -34,12 +37,15 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { IconClipboardList, IconListDetails, IconMapPin } from '@tabler/icons-vue'
+import { IconBriefcase, IconClipboardList, IconListDetails, IconMapPin } from '@tabler/icons-vue'
+import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
 
 const router = useRouter()
+const sesionEscaneoStore = useSesionEscaneoStore()
 
-const accesosPrincipales = [
+const accesosBase = [
   {
     titulo: 'Lista justa',
     subtitulo: 'Armá tu compra',
@@ -62,6 +68,21 @@ const accesosPrincipales = [
     claseIcono: 'icono-acceso-comercios',
   },
 ]
+
+const accesosPrincipales = computed(() => {
+  if (!sesionEscaneoStore.tieneItemsPendientes) return accesosBase
+  return [
+    ...accesosBase,
+    {
+      titulo: 'Mesa de trabajo',
+      subtitulo: 'Completá pendientes',
+      ruta: '/mesa-trabajo',
+      icono: IconBriefcase,
+      claseIcono: 'icono-acceso-mesa',
+      cantidadPendiente: sesionEscaneoStore.cantidadItems,
+    },
+  ]
+})
 
 function navegarA(ruta) {
   router.push(ruta)
@@ -86,6 +107,7 @@ function navegarA(ruta) {
   margin: 0 auto;
 }
 .tarjeta-acceso {
+  position: relative;
   min-height: 150px;
   border-radius: 14px;
   border-color: var(--borde-color);
@@ -104,6 +126,24 @@ function navegarA(ruta) {
 .tarjeta-acceso:focus-visible {
   outline: 2px solid var(--color-primario);
   outline-offset: 3px;
+}
+.chip-pendientes-acceso {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  min-width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 7px;
+  border-radius: 999px;
+  color: var(--texto-sobre-primario);
+  background: var(--color-error);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  z-index: 1;
 }
 .contenido-acceso {
   height: 100%;
@@ -129,6 +169,10 @@ function navegarA(ruta) {
   background: color-mix(in srgb, var(--color-secundario) 16%, transparent);
 }
 .icono-acceso-productos {
+  color: var(--color-primario);
+  background: color-mix(in srgb, var(--color-primario) 16%, transparent);
+}
+.icono-acceso-mesa {
   color: var(--color-primario);
   background: color-mix(in srgb, var(--color-primario) 16%, transparent);
 }
