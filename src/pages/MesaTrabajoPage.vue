@@ -26,32 +26,21 @@
     <template v-else>
       <!-- Cabecera -->
       <div class="mesa-trabajo-barra">
-        <div class="contenedor-pagina row items-center no-wrap q-px-md">
-          <div class="col">
-            <div class="text-subtitle1 text-weight-bold">Mesa de trabajo</div>
-            <div class="text-caption text-grey-6">
-              {{ cantidadListos }} / {{ sesionStore.items.length }} artículos listos
-            </div>
+        <div class="contenedor-pagina mesa-trabajo-header q-px-md">
+          <div class="mesa-trabajo-titulos">
+            <div class="mesa-trabajo-titulo">Mesa de trabajo</div>
+            <div class="mesa-trabajo-subtitulo">Productos pendientes</div>
+          </div>
+          <div class="mesa-trabajo-contador-chip">
+            <span>{{ cantidadListos }} / {{ sesionStore.items.length }}</span>
+            <span class="mesa-trabajo-contador-texto">artículos</span>
           </div>
         </div>
       </div>
 
-      <!-- Filtro de ordenamiento -->
-      <div class="contenedor-pagina q-px-md q-pt-sm q-pb-xs">
-        <q-select
-          v-model="ordenActual"
-          dense
-          outlined
-          :options="OPCIONES_ORDEN"
-          emit-value
-          map-options
-          style="max-width: 280px"
-        />
-      </div>
-
       <!-- Buscador sticky -->
       <div class="buscador-mesa-sticky">
-        <div class="contenedor-pagina q-px-md q-pb-xs">
+        <div class="contenedor-pagina buscador-mesa-contenido q-px-md q-pb-xs">
           <InputBusqueda
             v-model="textoBusqueda"
             placeholder="Buscar por nombre, marca o código..."
@@ -294,14 +283,6 @@ import usuarioActualService from '../almacenamiento/servicios/UsuarioActualServi
 import { useSeleccionMultiple } from '../composables/useSeleccionMultiple.js'
 import { IconShoppingBag, IconSend, IconHome, IconMapPin } from '@tabler/icons-vue'
 
-const OPCIONES_ORDEN = [
-  { label: 'Menos completo primero', value: 'menos-a-mas' },
-  { label: 'Más completo primero', value: 'mas-a-menos' },
-  { label: 'Por comercio', value: 'por-comercio' },
-  { label: 'Sin comercio asignado', value: 'sin-comercio' },
-  { label: 'Alfabético', value: 'alfabetico' },
-]
-
 const router = useRouter()
 const $q = useQuasar()
 const sesionStore = useSesionEscaneoStore()
@@ -310,13 +291,14 @@ const productosStore = useProductosStore()
 const comerciosStore = useComerciStore()
 const seleccion = useSeleccionMultiple()
 
-const ordenActual = ref('menos-a-mas')
 const textoBusqueda = ref('')
 const guardando = ref(false)
 const dialogoAsignarComercio = ref(false)
 const comercioParaAsignar = ref(null)
 const menuEliminacionAbierto = ref(false)
 const confirmacionEliminarActiva = ref(false)
+const ordenItemsEstable = ref([])
+const ordenEstableInicializado = ref(false)
 
 const dialogoNuevoComercioAbierto = ref(false)
 const itemIdParaNuevoComercio = ref(null)
@@ -350,6 +332,12 @@ watch(
   { immediate: true, deep: true },
 )
 
+watch(
+  () => sesionStore.items.map((item) => item.id),
+  () => sincronizarOrdenItemsEstable(sesionStore.items),
+  { immediate: true },
+)
+
 // Auto-cancela selección si el usuario deselecciona el último ítem
 watch(seleccion.cantidadSeleccionados, (cantidad) => {
   if (cantidad === 0 && seleccion.modoSeleccion.value) {
@@ -359,9 +347,33 @@ watch(seleccion.cantidadSeleccionados, (cantidad) => {
   }
 })
 
-const cantidadListos = computed(
-  () => sesionStore.items.filter((i) => !!i.nombre?.trim() && i.precio > 0 && !!i.comercio).length,
-)
+function esItemCompleto(item) {
+  return !!item.nombre?.trim() && item.precio > 0 && !!item.comercio
+}
+
+const cantidadListos = computed(() => sesionStore.items.filter((i) => esItemCompleto(i)).length)
+
+function ordenarIdsParaEntrada(items) {
+  const incompletos = items.filter((item) => !esItemCompleto(item))
+  const completos = items.filter((item) => esItemCompleto(item))
+  return [...incompletos, ...completos].map((item) => item.id)
+}
+
+function sincronizarOrdenItemsEstable(items) {
+  if (!ordenEstableInicializado.value && items.length === 0) return
+  if (!ordenEstableInicializado.value) {
+    ordenItemsEstable.value = ordenarIdsParaEntrada(items)
+    ordenEstableInicializado.value = true
+    return
+  }
+
+  const idsActuales = items.map((item) => item.id)
+  const idsActualesSet = new Set(idsActuales)
+  const idsOrdenadosExistentes = ordenItemsEstable.value.filter((id) => idsActualesSet.has(id))
+  const idsOrdenadosSet = new Set(idsOrdenadosExistentes)
+  const idsNuevos = idsActuales.filter((id) => !idsOrdenadosSet.has(id))
+  ordenItemsEstable.value = [...idsOrdenadosExistentes, ...idsNuevos]
+}
 
 // Normaliza texto: minúsculas + sin tildes
 function normalizarTexto(texto) {
@@ -372,16 +384,8 @@ function normalizarTexto(texto) {
 }
 
 const itemsOrdenados = computed(() => {
-  const lista = [...sesionStore.items]
-  if (ordenActual.value === 'sin-comercio') return lista.filter((i) => !i.comercio)
-  const puntaje = (i) => [!!i.nombre?.trim(), i.precio > 0, !!i.comercio].filter(Boolean).length
-  if (ordenActual.value === 'menos-a-mas') return lista.sort((a, b) => puntaje(a) - puntaje(b))
-  if (ordenActual.value === 'mas-a-menos') return lista.sort((a, b) => puntaje(b) - puntaje(a))
-  if (ordenActual.value === 'por-comercio')
-    return lista.sort((a, b) => (a.comercio?.nombre || '').localeCompare(b.comercio?.nombre || ''))
-  if (ordenActual.value === 'alfabetico')
-    return lista.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''))
-  return lista
+  const itemsPorId = new Map(sesionStore.items.map((item) => [item.id, item]))
+  return ordenItemsEstable.value.map((id) => itemsPorId.get(id)).filter(Boolean)
 })
 
 // Items filtrados por buscador (sobre la lista ya ordenada)
@@ -608,14 +612,51 @@ function alCrearComercio(comercioCreado) {
   top: 0;
   z-index: 10;
 }
-.mesa-trabajo-barra .contenedor-pagina {
-  min-height: 60px;
+.mesa-trabajo-header {
+  min-height: 66px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.mesa-trabajo-titulos {
+  min-width: 0;
+}
+.mesa-trabajo-titulo {
+  color: var(--texto-primario);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.mesa-trabajo-subtitulo {
+  margin-top: 3px;
+  color: var(--texto-secundario);
+  font-size: 12px;
+  line-height: 1.2;
+}
+.mesa-trabajo-contador-chip {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-shrink: 0;
+  padding: 0 10px;
+  border-radius: 999px;
+  color: var(--texto-sobre-primario);
+  background: var(--color-primario);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
 }
 .buscador-mesa-sticky {
   position: sticky;
-  top: 60px;
+  top: 66px;
   z-index: 11;
   background: var(--fondo-app);
+}
+.buscador-mesa-contenido {
+  padding-top: 10px;
 }
 .seleccion-barra-flotante {
   position: fixed;
@@ -733,5 +774,28 @@ function alCrearComercio(comercioCreado) {
 }
 .boton-agregar-masivo:hover {
   background: color-mix(in srgb, var(--color-primario) 8%, transparent) !important;
+}
+@media (max-width: 360px) {
+  .mesa-trabajo-header {
+    min-height: 62px;
+    gap: 8px;
+  }
+  .mesa-trabajo-titulo {
+    font-size: 14px;
+  }
+  .mesa-trabajo-subtitulo {
+    font-size: 11px;
+  }
+  .mesa-trabajo-contador-chip {
+    min-height: 26px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+  .mesa-trabajo-contador-texto {
+    display: none;
+  }
+  .buscador-mesa-sticky {
+    top: 62px;
+  }
 }
 </style>
