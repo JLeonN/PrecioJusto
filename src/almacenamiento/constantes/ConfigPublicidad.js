@@ -1,7 +1,7 @@
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // MODO PRUEBA: cambiar a false antes de publicar
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-export const MODO_PRUEBA = true
+export const MODO_PRUEBA = false
 
 const IDS_PRUEBA = {
   appId: 'ca-app-pub-3940256099942544~3347511713',

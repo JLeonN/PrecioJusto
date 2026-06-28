@@ -1198,7 +1198,7 @@ H. Arquitectura y Código
 
 ### Estado Actual
 
-- **Versión:** 1.2.3
+- **Versión:** 1.2.4
 - **Almacenamiento:** Local (Capacitor Storage)
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
@@ -1250,4 +1250,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 27 de Abril de 2026 — Se preparó el release `1.2.3` con ajustes de navegación y sticky en buscadores, mejoras visuales y funcionales en Lista Justa Inteligente, validación más estricta al agregar productos (precio + comercio), soporte robusto para decimales con `.` y `,`, y corrección del botón mayorista para evitar solapes con el precio.
+**Última actualización:** 28 de Junio de 2026 — Se preparó el release `1.2.4` con inicio renovado, respaldo Firebase más robusto, Mesa de trabajo más estable al editar y refrescar, mejoras en drawer, formularios, actualización interna y publicación Android con AdMob en producción.
