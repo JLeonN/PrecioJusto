@@ -1,25 +1,11 @@
 <template>
   <q-page class="mesa-trabajo-pagina">
-    <!-- Estado vacío: llegó a la ruta con mesa vacía -->
     <div
-      v-if="mesaVaciaAlMontar && !sesionStore.tieneItemsPendientes"
+      v-if="mesaCargando"
       class="col flex flex-center column q-pa-xl"
     >
-      <IconShoppingBag :size="64" class="text-grey-4" />
-      <div class="text-h6 text-grey-5 q-mt-md text-center">La mesa está vacía</div>
-      <div class="text-body2 text-grey-5 q-mb-xl text-center">
-        Escaneá productos para agregarlos a la mesa de trabajo
-      </div>
-      <div class="column q-gutter-sm estado-vacio-botones">
-        <q-btn unelevated no-caps color="primary" @click="router.push('/')">
-          <IconHome :size="18" class="q-mr-xs" />
-          Mis Productos
-        </q-btn>
-        <q-btn unelevated no-caps color="orange" @click="router.push('/comercios')">
-          <IconMapPin :size="18" class="q-mr-xs" />
-          Comercios
-        </q-btn>
-      </div>
+      <q-spinner color="primary" size="42px" />
+      <div class="text-body2 text-grey-6 q-mt-md text-center">Cargando mesa de trabajo...</div>
     </div>
 
     <!-- Contenido normal -->
@@ -281,7 +267,7 @@ import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
 import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
 import usuarioActualService from '../almacenamiento/servicios/UsuarioActualService.js'
 import { useSeleccionMultiple } from '../composables/useSeleccionMultiple.js'
-import { IconShoppingBag, IconSend, IconHome, IconMapPin } from '@tabler/icons-vue'
+import { IconSend } from '@tabler/icons-vue'
 
 const router = useRouter()
 const $q = useQuasar()
@@ -304,8 +290,7 @@ const dialogoNuevoComercioAbierto = ref(false)
 const itemIdParaNuevoComercio = ref(null)
 const datosInicialesNuevoComercio = ref({ nombre: '', direccion: '' })
 
-// Si la mesa estaba vacía al montar → muestra estado vacío (no auto-navega)
-const mesaVaciaAlMontar = ref(!sesionStore.tieneItemsPendientes)
+const mesaCargando = computed(() => sesionStore.cargando || !sesionStore.sesionCargada)
 
 onMounted(async () => {
   await comerciosStore.cargarComercios()
@@ -316,12 +301,7 @@ onMounted(async () => {
 watch(
   () => sesionStore.tieneItemsPendientes,
   (tieneItems) => {
-    if (tieneItems) {
-      mesaVaciaAlMontar.value = false
-      return
-    }
-
-    if (!tieneItems && !mesaVaciaAlMontar.value) router.push('/')
+    if (!mesaCargando.value && !tieneItems) router.push('/')
   },
 )
 
@@ -596,10 +576,6 @@ function alCrearComercio(comercioCreado) {
   display: flex;
   flex-direction: column;
   min-height: 100%;
-}
-.estado-vacio-botones {
-  width: 100%;
-  max-width: 280px;
 }
 .mesa-lista-scroll {
   flex: 1;

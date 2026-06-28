@@ -583,7 +583,7 @@ const puedeSincronizarPreferenciasDespuesDeMigracion = (resultadoMigracion) =>
 
 // Carga datos persistidos al iniciar la app
 onMounted(async () => {
-  await Promise.all([sesionEscaneoStore.cargarSesion(), inicializarPreferenciasSinGuardar()])
+  await Promise.all([sesionEscaneoStore.asegurarSesionCargada(), inicializarPreferenciasSinGuardar()])
   await refrescarEstadoActualizacion({ mostrarModalSiHay: true })
   const resultadoMigracion = await ofrecerMigracionLocalSiCorresponde()
 

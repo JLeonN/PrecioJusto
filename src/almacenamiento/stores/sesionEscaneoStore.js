@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed, watch } from 'vue'
+import { ref, computed, nextTick, watch } from 'vue'
 import {
   ESTADOS_SINCRONIZACION,
   ORIGENES_FOTO,
@@ -13,7 +13,8 @@ const RETARDO_PERSISTENCIA_MS = 220
 
 export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
   const items = ref([])
-  const cargando = ref(false)
+  const cargando = ref(true)
+  const sesionCargada = ref(false)
   const fuenteDatos = ref(
     fuentePrincipalFirestoreService.crearEstadoInicial(
       fuentePrincipalFirestoreService.DOMINIOS.MESA_TRABAJO,
@@ -29,6 +30,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
   const suprimirPersistencia = ref(false)
   const temporizadorPersistencia = ref(null)
   let colaPersistencia = Promise.resolve()
+  let promesaCargaSesion = null
 
   const cantidadItems = computed(() => items.value.length)
   const tieneItemsPendientes = computed(() => items.value.length > 0)
@@ -110,6 +112,10 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
   }
 
   function encolarPersistencia() {
+    if (!suprimirPersistencia.value && !cargando.value) {
+      sesionEscaneoService.guardarRespaldoUrgente(items.value)
+    }
+
     colaPersistencia = colaPersistencia
       .then(() => ejecutarPersistencia())
       .catch((error) => {
@@ -126,7 +132,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
   }
 
   function programarPersistencia() {
-    if (suprimirPersistencia.value) return
+    if (suprimirPersistencia.value || cargando.value) return
     limpiarTimerPersistencia()
     temporizadorPersistencia.value = setTimeout(() => {
       encolarPersistencia()
@@ -141,27 +147,60 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
     { deep: true },
   )
 
-  async function cargarSesion() {
+  async function asignarItemsCargados(itemsCargados) {
+    suprimirPersistencia.value = true
+    items.value = itemsCargados
+    await nextTick()
+    suprimirPersistencia.value = false
+  }
+
+  function resolverCargaMesaConRespaldoLocal(resultado, datosLocales) {
+    const datosPrincipal = Array.isArray(resultado?.datos) ? resultado.datos : []
+    const tieneRespaldoLocal = Array.isArray(datosLocales) && datosLocales.length > 0
+    const fuenteRemota = [
+      fuentePrincipalFirestoreService.FUENTES_DATOS.FIRESTORE,
+      fuentePrincipalFirestoreService.FUENTES_DATOS.FIRESTORE_CACHE,
+      fuentePrincipalFirestoreService.FUENTES_DATOS.ERROR,
+    ].includes(resultado?.fuente)
+
+    if (!debeSincronizarConFirestore() || datosPrincipal.length > 0 || !tieneRespaldoLocal || !fuenteRemota) {
+      return { resultado, datos: datosPrincipal }
+    }
+
+    return {
+      resultado: {
+        ...resultado,
+        datos: datosLocales,
+        fuente: fuentePrincipalFirestoreService.FUENTES_DATOS.FALLBACK_LOCAL,
+        mensaje: 'Firestore no devolvió la mesa; se usa respaldo local.',
+        error: resultado?.error || null,
+      },
+      datos: datosLocales,
+    }
+  }
+
+  async function ejecutarCargaSesion() {
     cargando.value = true
+    sesionCargada.value = false
+    limpiarTimerPersistencia()
     const usuarioStore = useUsuarioStore()
 
     try {
       await usuarioStore.esperarSesionLista()
+      const datosLocales = await sesionEscaneoService.obtenerItemsSesion()
 
       const resultado = await fuentePrincipalFirestoreService.cargarMesaTrabajo({
-        cargarLocal: () => sesionEscaneoService.obtenerItemsSesion(),
+        cargarLocal: () => datosLocales,
       })
+      const cargaMesa = resolverCargaMesaConRespaldoLocal(resultado, datosLocales)
 
-      const datos = Array.isArray(resultado?.datos) ? resultado.datos : []
-      const itemsNormalizados = datos.map((item) => normalizarItem(item))
+      const itemsNormalizados = cargaMesa.datos.map((item) => normalizarItem(item))
 
-      suprimirPersistencia.value = true
-      items.value = itemsNormalizados
-      suprimirPersistencia.value = false
-      fuenteDatos.value = resultado
+      await asignarItemsCargados(itemsNormalizados)
+      fuenteDatos.value = cargaMesa.resultado
 
       if (
-        resultado?.fuente === fuentePrincipalFirestoreService.FUENTES_DATOS.FALLBACK_LOCAL &&
+        cargaMesa.resultado?.fuente === fuentePrincipalFirestoreService.FUENTES_DATOS.FALLBACK_LOCAL &&
         itemsNormalizados.length > 0 &&
         debeSincronizarConFirestore()
       ) {
@@ -175,9 +214,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
       }
     } catch (error) {
       console.error('Error al cargar sesión de escaneo:', error)
-      suprimirPersistencia.value = true
-      items.value = []
-      suprimirPersistencia.value = false
+      await asignarItemsCargados([])
       sincronizacionFirestore.value = {
         estado: ESTADOS_SINCRONIZACION.ERROR,
         mensaje: 'No se pudo cargar la mesa de trabajo.',
@@ -185,8 +222,24 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
         error: error?.message || 'Error de carga.',
       }
     } finally {
+      sesionCargada.value = true
       cargando.value = false
     }
+  }
+
+  async function cargarSesion() {
+    if (promesaCargaSesion) return promesaCargaSesion
+
+    promesaCargaSesion = ejecutarCargaSesion().finally(() => {
+      promesaCargaSesion = null
+    })
+
+    return promesaCargaSesion
+  }
+
+  async function asegurarSesionCargada() {
+    if (sesionCargada.value && !cargando.value) return
+    await cargarSesion()
   }
 
   function agregarItem(item) {
@@ -259,6 +312,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
 
   async function eliminarItem(id) {
     items.value = items.value.filter((item) => item.id !== id)
+    void encolarPersistencia()
 
     if (debeSincronizarConFirestore()) {
       const resultado = await firestoreMesaTrabajoService.eliminarItemMesaTrabajo(id)
@@ -296,6 +350,8 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
     items.value = []
     suprimirPersistencia.value = false
     limpiarTimerPersistencia()
+    cargando.value = false
+    sesionCargada.value = false
     fuenteDatos.value = fuentePrincipalFirestoreService.crearEstadoInicial(
       fuentePrincipalFirestoreService.DOMINIOS.MESA_TRABAJO,
     )
@@ -319,11 +375,13 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
   return {
     items,
     cargando,
+    sesionCargada,
     fuenteDatos,
     sincronizacionFirestore,
     cantidadItems,
     tieneItemsPendientes,
     cargarSesion,
+    asegurarSesionCargada,
     agregarItem,
     actualizarItem,
     asignarComercio,

@@ -7,6 +7,7 @@ import {
 } from 'vue-router'
 import routes from './routes'
 import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
+import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
 
 /*
  * If not building with SSR mode, you can
@@ -52,6 +53,10 @@ export default defineRouter(function (/* { store, ssrContext } */) {
         path: '/acceso',
         query: { redirigir: to.fullPath },
       }
+    }
+
+    if (requiereAuth) {
+      await useSesionEscaneoStore().asegurarSesionCargada()
     }
 
     if (soloInvitado && usuarioStore.estaAutenticado) {
