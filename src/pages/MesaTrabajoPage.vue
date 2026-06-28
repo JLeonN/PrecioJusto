@@ -580,6 +580,7 @@ function alCrearComercio(comercioCreado) {
 .mesa-lista-scroll {
   flex: 1;
   overflow-y: auto;
+  padding-bottom: 78px;
 }
 .mesa-trabajo-barra {
   border-bottom: 1px solid var(--borde-color);
@@ -707,6 +708,7 @@ function alCrearComercio(comercioCreado) {
   background: var(--fondo-tarjeta);
   position: sticky;
   bottom: var(--espacio-publicidad, 0px);
+  z-index: 30;
 }
 .mesa-trabajo-footer .contenedor-pagina {
   padding: 10px 16px;
