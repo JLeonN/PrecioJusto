@@ -116,13 +116,14 @@ function normalizarOrigenListaJusta(origenListaJusta) {
 
 function normalizarDatosOriginales(datosOriginales) {
   if (!datosOriginales) return null
+  const imagen = String(datosOriginales.imagen || '').trim()
 
   return {
     nombre: datosOriginales.nombre || '',
     marca: datosOriginales.marca || null,
     cantidad: Number(datosOriginales.cantidad || 1),
     unidad: datosOriginales.unidad || 'unidad',
-    imagen: datosOriginales.imagen || null,
+    imagen: imagen.startsWith('data:') ? null : datosOriginales.imagen || null,
     fotoFuente: datosOriginales.fotoFuente || null,
   }
 }

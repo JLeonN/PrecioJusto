@@ -334,6 +334,7 @@ import ModalActualizacion from '../components/Actualizacion/ModalActualizacion.v
 import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoStore.js'
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
 import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
+import { ESTADOS_MIGRACION_FIREBASE } from '../almacenamiento/constantes/PreparacionFirebase.js'
 import migracionLocalFirebaseService from '../almacenamiento/servicios/MigracionLocalFirebaseService.js'
 import migracionLocalPreguntadaService from '../almacenamiento/servicios/MigracionLocalPreguntadaService.js'
 
@@ -519,17 +520,22 @@ const ofrecerMigracionLocalSiCorresponde = async () => {
         })
         .onOk(async () => {
           try {
-            await migracionLocalFirebaseService.iniciarMigracion({ confirmarMigracion: true })
-            await migracionLocalPreguntadaService.guardarDecision(
-              usuarioStore.usuarioId,
-              migracionLocalPreguntadaService.DECISIONES_MIGRACION_LOCAL.MIGRADA,
-            )
+            const resultado = await ejecutarMigracionLocalConFeedback()
             await recargarDatosPrivados()
+            if (resultado.estado === ESTADOS_MIGRACION_FIREBASE.COMPLETADA) {
+              quasar.notify({
+                type: 'positive',
+                message: 'Datos guardados en la nube.',
+              })
+              resolve({ accion: 'migrada' })
+              return
+            }
+
             quasar.notify({
-              type: 'positive',
-              message: 'Datos guardados en la nube.',
+              type: 'warning',
+              message: 'Quedaron datos pendientes. Podés reintentarlo desde Configuración.',
             })
-            resolve({ accion: 'migrada' })
+            resolve({ accion: 'parcial', resultado })
           } catch (error) {
             quasar.notify({
               type: 'negative',
@@ -580,6 +586,45 @@ const inicializarPreferenciasPostMigracion = async () => {
 
 const puedeSincronizarPreferenciasDespuesDeMigracion = (resultadoMigracion) =>
   resultadoMigracion?.accion === 'sinOferta' || resultadoMigracion?.accion === 'migrada'
+
+function crearMensajeProgresoMigracion(progreso) {
+  if (!progreso?.total) return progreso?.mensaje || 'Guardando tus datos en la nube...'
+  return `${progreso.mensaje} ${progreso.procesados}/${progreso.total}`
+}
+
+async function ejecutarMigracionLocalConFeedback() {
+  const dialogoProgreso = quasar.dialog({
+    title: 'Guardando datos',
+    message: 'Guardando tus datos en la nube...',
+    progress: true,
+    persistent: true,
+    ok: false,
+  })
+
+  try {
+    const resultado = await migracionLocalFirebaseService.iniciarMigracion({
+      confirmarMigracion: true,
+      onProgreso: (progreso) => {
+        if (dialogoProgreso?.update) {
+          dialogoProgreso.update({ message: crearMensajeProgresoMigracion(progreso) })
+        }
+      },
+    })
+
+    if (resultado.estado === ESTADOS_MIGRACION_FIREBASE.COMPLETADA) {
+      await migracionLocalPreguntadaService.guardarDecision(
+        usuarioStore.usuarioId,
+        migracionLocalPreguntadaService.DECISIONES_MIGRACION_LOCAL.MIGRADA,
+      )
+    }
+
+    return resultado
+  } finally {
+    if (dialogoProgreso?.hide) {
+      dialogoProgreso.hide()
+    }
+  }
+}
 
 // Carga datos persistidos al iniciar la app
 onMounted(async () => {

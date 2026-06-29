@@ -21,7 +21,6 @@ import { normalizarEscalasPorCantidad, obtenerResumenEscalas } from '../../utils
 import { PREFIJO_PRODUCTOS } from '../constantes/ClavesAlmacenamiento.js'
 import { ESTADOS_SINCRONIZACION, ORIGENES_FOTO } from '../constantes/PreparacionFirebase.js'
 import firestoreProductosService from './FirestoreProductosService.js'
-import firebaseStorageFotosService from './FirebaseStorageFotosService.js'
 import usuarioActualService from './UsuarioActualService.js'
 
 const TIEMPO_MAXIMO_SINCRONIZACION_FIRESTORE_MS = 7000
@@ -62,7 +61,7 @@ class ProductosService {
 
       producto.usuarioId = producto.usuarioId || usuarioActualService.obtenerUsuarioIdActual()
       producto.fotoFuente = this._normalizarFotoFuente(producto)
-      producto = await this._prepararFotoStorageProducto(producto)
+      producto = this._prepararFotoLocalProducto(producto)
 
       // Agregar timestamps
       const ahora = new Date().toISOString()
@@ -582,68 +581,40 @@ class ProductosService {
     }
   }
 
-  async _prepararFotoStorageProducto(producto) {
+  _prepararFotoLocalProducto(producto) {
     if (!producto) return producto
 
-    if (!firebaseStorageFotosService.esDataUriImagen(producto?.imagen)) {
-      if (!producto?.imagen) {
-        if (producto.imagenRutaStorage) {
-          await firebaseStorageFotosService.eliminarFotoPrivada(producto.imagenRutaStorage)
-        }
-        producto.imagenUrl = null
-        producto.imagenRutaStorage = null
-      }
+    if (!producto?.imagen) {
+      producto.imagenUrl = null
+      producto.imagenRutaStorage = null
       return producto
     }
 
-    const resultado = await firebaseStorageFotosService.subirFotoPrivada({
-      tipo: 'productos',
-      ids: {
-        idPrincipal: producto?.id || this._generarId(),
-      },
-      dataUri: producto.imagen,
-    })
-
-    if (resultado.exito) {
-      producto.imagenUrl = resultado.url
-      producto.imagenRutaStorage = resultado.rutaStorage
-      producto.fotoFuente = ORIGENES_FOTO.STORAGE
-      producto.sincronizacionFoto = {
-        estado: resultado.estado,
-        fecha: new Date().toISOString(),
-        mensaje: 'Foto subida a Firebase Storage.',
-      }
-      return producto
-    }
-
-    if (resultado.omitido) {
+    if (this._esDataUriImagen(producto.imagen)) {
+      producto.imagenUrl = null
+      producto.imagenRutaStorage = null
+      producto.fotoFuente = ORIGENES_FOTO.USUARIO
       producto.sincronizacionFoto = {
         estado: ESTADOS_SINCRONIZACION.LOCAL,
         fecha: new Date().toISOString(),
-        mensaje: resultado.mensaje,
+        mensaje: 'Foto guardada solo en este dispositivo.',
       }
       return producto
     }
 
-    producto.sincronizacionFoto = {
-      estado: ESTADOS_SINCRONIZACION.ERROR,
-      fecha: new Date().toISOString(),
-      mensaje: resultado.mensaje || 'No se pudo subir la foto a Firebase Storage.',
+    if (/^https?:\/\//.test(String(producto.imagen))) {
+      producto.imagenUrl = producto.imagen
+      producto.imagenRutaStorage = null
     }
     return producto
   }
 
+  _esDataUriImagen(valor) {
+    return /^data:image\/[a-zA-Z0-9.+-]+;base64,/.test(String(valor || '').trim())
+  }
+
   async sincronizarFotosPendientesStorage() {
-    const productos = await this.obtenerTodos()
-    let procesados = 0
-
-    for (const producto of productos) {
-      if (!firebaseStorageFotosService.esDataUriImagen(producto?.imagen)) continue
-      await this.guardarProducto(producto)
-      procesados += 1
-    }
-
-    return procesados
+    return 0
   }
 
   async _sincronizarEliminacionProductoFirestore(productoId) {

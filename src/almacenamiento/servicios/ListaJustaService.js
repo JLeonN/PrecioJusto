@@ -3,7 +3,6 @@
 import { CLAVE_LISTA_JUSTA } from '../constantes/ClavesAlmacenamiento.js'
 import { ESTADOS_SINCRONIZACION, ORIGENES_FOTO } from '../constantes/PreparacionFirebase.js'
 import firestoreListasJustasService from './FirestoreListasJustasService.js'
-import firebaseStorageFotosService from './FirebaseStorageFotosService.js'
 import usuarioActualService from './UsuarioActualService.js'
 
 const CLAVE_LISTAS = CLAVE_LISTA_JUSTA
@@ -48,7 +47,7 @@ class ListaJustaService {
 
   async sincronizarListaFirestore(lista) {
     try {
-      await this._prepararFotosStorageLista(lista)
+      this._prepararFotosLocalesLista(lista)
       const resultado = await this._ejecutarConTimeoutFirestore(
         firestoreListasJustasService.guardarListaJusta(lista),
       )
@@ -343,7 +342,7 @@ class ListaJustaService {
     return resultado
   }
 
-  async _prepararFotosStorageLista(lista) {
+  _prepararFotosLocalesLista(lista) {
     if (!Array.isArray(lista?.items)) return
 
     for (const item of lista.items) {
@@ -353,45 +352,31 @@ class ListaJustaService {
         continue
       }
 
-      if (!firebaseStorageFotosService.esDataUriImagen(item.imagen)) {
+      if (this._esDataUriImagen(item.imagen)) {
+        item.imagenUrl = null
+        item.imagenRutaStorage = null
+        item.fotoFuente = ORIGENES_FOTO.USUARIO
+        item.sincronizacionFoto = {
+          estado: ESTADOS_SINCRONIZACION.LOCAL,
+          fecha: new Date().toISOString(),
+          mensaje: 'Foto guardada solo en este dispositivo.',
+        }
         continue
       }
 
-      const resultado = await firebaseStorageFotosService.subirFotoPrivada({
-        tipo: 'listas',
-        ids: { idPrincipal: lista.id, idSecundario: item.id },
-        dataUri: item.imagen,
-      })
-
-      if (resultado.exito) {
-        item.imagenUrl = resultado.url
-        item.imagenRutaStorage = resultado.rutaStorage
-        item.fotoFuente = ORIGENES_FOTO.STORAGE
-        item.sincronizacionFoto = {
-          estado: resultado.estado,
-          fecha: new Date().toISOString(),
-          mensaje: 'Foto subida a Firebase Storage.',
-        }
-      } else if (!resultado.omitido) {
-        item.sincronizacionFoto = {
-          estado: ESTADOS_SINCRONIZACION.ERROR,
-          fecha: new Date().toISOString(),
-          mensaje: resultado.mensaje || 'No se pudo subir la foto a Firebase Storage.',
-        }
+      if (/^https?:\/\//.test(String(item.imagen))) {
+        item.imagenUrl = item.imagen
+        item.imagenRutaStorage = null
       }
     }
   }
 
+  _esDataUriImagen(valor) {
+    return /^data:image\/[a-zA-Z0-9.+-]+;base64,/.test(String(valor || '').trim())
+  }
+
   async sincronizarFotosPendientesStorage() {
-    const listas = await this.obtenerListas()
-    const tieneFotosPendientes = listas.some((lista) =>
-      (lista?.items || []).some((item) => firebaseStorageFotosService.esDataUriImagen(item?.imagen)),
-    )
-
-    if (!tieneFotosPendientes) return 0
-
-    await this.guardarListas(listas)
-    return listas.length
+    return 0
   }
 }
 

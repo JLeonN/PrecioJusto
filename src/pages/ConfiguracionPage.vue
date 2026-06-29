@@ -11,7 +11,7 @@
               <div v-if="usuarioStore.estaAutenticado" class="column q-gutter-md">
                 <q-banner rounded class="banner-tema-info">
                   <div class="text-body2 text-weight-medium">{{ usuarioStore.email }}</div>
-                  <div class="text-caption">Los datos de la cuenta se guardan en Firebase.</div>
+                  <div class="text-caption">Los datos de la cuenta se guardan en la nube.</div>
                 </q-banner>
                 <q-input
                   v-model="formularioPerfil.nombreUsuario"
@@ -149,7 +149,8 @@
               <div class="column q-gutter-md">
                 <q-banner rounded class="banner-tema-info">
                   Tus datos nuevos se guardan en la nube cuando iniciás sesión. Si tenés datos
-                  antiguos en este dispositivo, podés guardarlos en la nube o borrarlos.
+                  antiguos en este dispositivo, podés guardarlos en la nube o borrarlos. Las fotos
+                  guardadas en este dispositivo no se suben en esta versión.
                 </q-banner>
                 <q-banner rounded class="banner-moneda-efectiva">
                   Estado: <strong>{{ resumenSincronizacion }}</strong>
@@ -390,10 +391,40 @@ async function cargarPanelMigracion() {
   } catch (error) {
     quasar.notify({
       type: 'warning',
-      message: error.message || 'No se pudo cargar el panel de migración.',
+      message: error.message || 'No se pudo cargar el estado de tus datos.',
     })
   } finally {
     cargandoMigracion.value = false
+  }
+}
+
+function crearMensajeProgresoMigracion(progreso) {
+  if (!progreso?.total) return progreso?.mensaje || 'Guardando tus datos en la nube...'
+  return `${progreso.mensaje} ${progreso.procesados}/${progreso.total}`
+}
+
+async function ejecutarMigracionConFeedback() {
+  const dialogoProgreso = quasar.dialog({
+    title: 'Guardando datos',
+    message: 'Guardando tus datos en la nube...',
+    progress: true,
+    persistent: true,
+    ok: false,
+  })
+
+  try {
+    return await migracionLocalFirebaseService.iniciarMigracion({
+      confirmarMigracion: true,
+      onProgreso: (progreso) => {
+        if (dialogoProgreso?.update) {
+          dialogoProgreso.update({ message: crearMensajeProgresoMigracion(progreso) })
+        }
+      },
+    })
+  } finally {
+    if (dialogoProgreso?.hide) {
+      dialogoProgreso.hide()
+    }
   }
 }
 
@@ -413,13 +444,13 @@ function confirmarMigracion() {
     })
     .onOk(async () => {
       await ejecutarAccionMigracion(async () => {
-        estadoMigracion.value = await migracionLocalFirebaseService.iniciarMigracion({
-          confirmarMigracion: true,
-        })
-        await migracionLocalPreguntadaService.guardarDecision(
-          usuarioStore.usuarioId,
-          migracionLocalPreguntadaService.DECISIONES_MIGRACION_LOCAL.MIGRADA,
-        )
+        estadoMigracion.value = await ejecutarMigracionConFeedback()
+        if (estadoMigracion.value?.estado === ESTADOS_MIGRACION_FIREBASE.COMPLETADA) {
+          await migracionLocalPreguntadaService.guardarDecision(
+            usuarioStore.usuarioId,
+            migracionLocalPreguntadaService.DECISIONES_MIGRACION_LOCAL.MIGRADA,
+          )
+        }
         notificarResultadoMigracion()
       })
     })
@@ -489,7 +520,7 @@ async function ejecutarAccionMigracion(accion) {
   } catch (error) {
     quasar.notify({
       type: 'negative',
-      message: error.message || 'No se pudo ejecutar la migración.',
+      message: error.message || 'No se pudieron guardar los datos en la nube.',
     })
   } finally {
     cargandoMigracion.value = false

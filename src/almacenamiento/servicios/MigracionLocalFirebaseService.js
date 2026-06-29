@@ -2,10 +2,10 @@ import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { adaptadorActual, infoAdaptador } from './AlmacenamientoService.js'
 import conexionService from './ConexionService.js'
 import firebaseBaseService from './FirebaseBaseService.js'
-import firebaseStorageFotosService from './FirebaseStorageFotosService.js'
 import firestoreComerciosService from './FirestoreComerciosService.js'
 import firestoreConfirmacionesService from './FirestoreConfirmacionesService.js'
 import firestoreListasJustasService from './FirestoreListasJustasService.js'
+import firestoreMesaTrabajoService from './FirestoreMesaTrabajoService.js'
 import firestorePreferenciasService from './FirestorePreferenciasService.js'
 import firestoreProductosService from './FirestoreProductosService.js'
 import inventarioMigracionFirebaseService from './InventarioMigracionFirebaseService.js'
@@ -23,6 +23,7 @@ import {
 
 const CLAVE_COLA_MIGRACION_FIREBASE = `${PREFIJO_COLA_SINCRONIZACION}migracionFirebase`
 const TIEMPO_MAXIMO_OPERACION_FIRESTORE_MS = 7000
+const TAMANO_TANDA_MIGRACION = 20
 
 function obtenerUsuarioFirebaseActual() {
   const usuario = usuarioActualService.obtenerUsuarioActual()
@@ -73,25 +74,20 @@ function contarItemsListaJusta(listas) {
   )
 }
 
-function contarFotosProductos(productos) {
-  return productos.filter((producto) => esBase64(producto.imagen)).length
+function obtenerItemsMesaTrabajo(datosLocales) {
+  return Array.isArray(datosLocales.sesionEscaneo?.items) ? datosLocales.sesionEscaneo.items : []
 }
 
-function contarFotosComercios(comercios) {
-  return comercios.reduce(
-    (total, comercio) =>
-      total +
-      (esBase64(comercio.foto) ? 1 : 0) +
-      (comercio.direcciones || []).filter((direccion) => esBase64(direccion.foto)).length,
-    0,
-  )
+function contarFotosProductos() {
+  return 0
 }
 
-function contarFotosListas(listas) {
-  return listas.reduce(
-    (total, lista) => total + (lista.items || []).filter((item) => esBase64(item.imagen)).length,
-    0,
-  )
+function contarFotosComercios() {
+  return 0
+}
+
+function contarFotosListas() {
+  return 0
 }
 
 function crearMapaPrecioAProducto(productos) {
@@ -150,6 +146,7 @@ function obtenerConteosMigrables(datosLocales) {
     itemsListaJusta: contarItemsListaJusta(datosLocales.listas),
     preferencias: datosLocales.preferencias ? 1 : 0,
     confirmaciones: confirmaciones.length,
+    mesaTrabajoItems: obtenerItemsMesaTrabajo(datosLocales).length,
     fotosProductos: contarFotosProductos(datosLocales.productos),
     fotosComercios: contarFotosComercios(datosLocales.comercios),
     fotosListas: contarFotosListas(datosLocales.listas),
@@ -166,6 +163,7 @@ function crearConteosVacios() {
     itemsListaJusta: 0,
     preferencias: 0,
     confirmaciones: 0,
+    mesaTrabajoItems: 0,
     fotosProductos: 0,
     fotosComercios: 0,
     fotosListas: 0,
@@ -178,6 +176,62 @@ function resumirError(error) {
 
 function esBase64(valor) {
   return typeof valor === 'string' && valor.trim().startsWith('data:')
+}
+
+function dividirEnTandas(items, tamano = TAMANO_TANDA_MIGRACION) {
+  const tandas = []
+  for (let indice = 0; indice < items.length; indice += tamano) {
+    tandas.push(items.slice(indice, indice + tamano))
+  }
+  return tandas
+}
+
+function limpiarImagenBase64(entidad, campoImagen, campoUrl, campoRuta) {
+  if (!entidad) return
+
+  if (esBase64(entidad[campoImagen])) {
+    entidad[campoImagen] = null
+    entidad[campoUrl] = null
+    entidad[campoRuta] = null
+  }
+}
+
+function prepararProductoSinFotosStorage(producto) {
+  const dato = clonarDato(producto)
+  limpiarImagenBase64(dato, 'imagen', 'imagenUrl', 'imagenRutaStorage')
+  return dato
+}
+
+function prepararComercioSinFotosStorage(comercio) {
+  const dato = clonarDato(comercio)
+  limpiarImagenBase64(dato, 'foto', 'fotoUrl', 'fotoRutaStorage')
+
+  for (const direccion of dato.direcciones || []) {
+    limpiarImagenBase64(direccion, 'foto', 'fotoUrl', 'fotoRutaStorage')
+  }
+
+  return dato
+}
+
+function prepararListaSinFotosStorage(lista) {
+  const dato = clonarDato(lista)
+
+  for (const item of dato.items || []) {
+    limpiarImagenBase64(item, 'imagen', 'imagenUrl', 'imagenRutaStorage')
+  }
+
+  return dato
+}
+
+function prepararItemMesaSinFotosStorage(item) {
+  const dato = clonarDato(item)
+  limpiarImagenBase64(dato, 'imagen', 'imagenUrl', 'imagenRutaStorage')
+
+  if (dato.datosOriginales) {
+    limpiarImagenBase64(dato.datosOriginales, 'imagen', 'imagenUrl', 'imagenRutaStorage')
+  }
+
+  return dato
 }
 
 async function ejecutarConTimeoutFirestore(promesa) {
@@ -307,7 +361,19 @@ class MigracionLocalFirebaseService {
 
     await this._guardarEstado(usuarioId, estadoEnProceso)
 
-    const resultado = await this._migrarDatosLocales(usuarioId, datosLocales, estadoEnProceso)
+    await this._notificarProgreso(opciones.onProgreso, {
+      sector: 'inicio',
+      mensaje: 'Preparando tus datos...',
+      procesados: 0,
+      total: 0,
+    })
+
+    const resultado = await this._migrarDatosLocales(
+      usuarioId,
+      datosLocales,
+      estadoEnProceso,
+      opciones.onProgreso,
+    )
     await this._guardarColaPendiente(resultado.colaPendiente)
 
     const tienePendientes = resultado.colaPendiente.length > 0
@@ -350,7 +416,7 @@ class MigracionLocalFirebaseService {
     await this.adaptador.guardar(CLAVE_COLA_MIGRACION_FIREBASE, [])
   }
 
-  async _migrarDatosLocales(usuarioId, datosLocales, estadoBase) {
+  async _migrarDatosLocales(usuarioId, datosLocales, estadoBase, onProgreso) {
     const resultado = {
       conteosMigrados: crearConteosVacios(),
       errores: [],
@@ -358,32 +424,37 @@ class MigracionLocalFirebaseService {
     }
     const conectado = await this._estaConectado()
 
-    for (const producto of datosLocales.productos) {
-      if (!conectado) {
-        resultado.colaPendiente.push(this._crearItemColaProducto(producto, 'Sin conexión.'))
-        continue
-      }
-
-      try {
-        const resultadoFotos = await this._prepararFotosStorageProducto(producto)
-        this._agregarResultadoFotos(resultado, resultadoFotos, 'fotosProductos')
-        const resultadoProducto = await ejecutarConTimeoutFirestore(
-          firestoreProductosService.guardarProductoConPrecios(resultadoFotos.dato),
-        )
-
-        if (resultadoProducto.exito && !resultadoProducto.pendiente) {
-          resultado.conteosMigrados.productos += 1
-          resultado.conteosMigrados.precios += resultadoFotos.dato.precios?.length || 0
-          continue
+    await this._procesarTandas({
+      items: datosLocales.productos,
+      sector: 'productos',
+      mensaje: 'Guardando productos...',
+      onProgreso,
+      procesar: async (producto) => {
+        if (!conectado) {
+          resultado.colaPendiente.push(this._crearItemColaProducto(producto, 'Sin conexion.'))
+          return
         }
 
-        this._registrarProductoPendiente(resultado, producto, resultadoProducto)
-      } catch (error) {
-        this._registrarProductoPendiente(resultado, producto, {
-          mensaje: resumirError(error),
-        })
-      }
-    }
+        try {
+          const productoFirestore = prepararProductoSinFotosStorage(producto)
+          const resultadoProducto = await ejecutarConTimeoutFirestore(
+            firestoreProductosService.guardarProductoConPrecios(productoFirestore),
+          )
+
+          if (resultadoProducto.exito && !resultadoProducto.pendiente) {
+            resultado.conteosMigrados.productos += 1
+            resultado.conteosMigrados.precios += productoFirestore.precios?.length || 0
+            return
+          }
+
+          this._registrarProductoPendiente(resultado, producto, resultadoProducto)
+        } catch (error) {
+          this._registrarProductoPendiente(resultado, producto, {
+            mensaje: resumirError(error),
+          })
+        }
+      },
+    })
 
     await this._guardarEstado(usuarioId, {
       ...estadoBase,
@@ -394,35 +465,40 @@ class MigracionLocalFirebaseService {
       fechaUltimoIntento: new Date().toISOString(),
     })
 
-    for (const comercio of datosLocales.comercios) {
-      if (!conectado) {
-        resultado.colaPendiente.push(this._crearItemColaComercio(comercio, 'Sin conexión.'))
-        continue
-      }
-
-      try {
-        const resultadoFotos = await this._prepararFotosStorageComercio(comercio)
-        this._agregarResultadoFotos(resultado, resultadoFotos, 'fotosComercios')
-        const resultadoComercio = await ejecutarConTimeoutFirestore(
-          firestoreComerciosService.guardarComercio(resultadoFotos.dato),
-        )
-
-        if (resultadoComercio.exito && !resultadoComercio.pendiente) {
-          resultado.conteosMigrados.comercios += 1
-          resultado.conteosMigrados.direcciones += Math.min(
-            resultadoFotos.dato.direcciones?.length || 0,
-            LIMITES_MODELO_FIRESTORE.direccionesComercioEmbebidasMaximo,
-          )
-          continue
+    await this._procesarTandas({
+      items: datosLocales.comercios,
+      sector: 'comercios',
+      mensaje: 'Guardando comercios...',
+      onProgreso,
+      procesar: async (comercio) => {
+        if (!conectado) {
+          resultado.colaPendiente.push(this._crearItemColaComercio(comercio, 'Sin conexion.'))
+          return
         }
 
-        this._registrarComercioPendiente(resultado, comercio, resultadoComercio)
-      } catch (error) {
-        this._registrarComercioPendiente(resultado, comercio, {
-          mensaje: resumirError(error),
-        })
-      }
-    }
+        try {
+          const comercioFirestore = prepararComercioSinFotosStorage(comercio)
+          const resultadoComercio = await ejecutarConTimeoutFirestore(
+            firestoreComerciosService.guardarComercio(comercioFirestore),
+          )
+
+          if (resultadoComercio.exito && !resultadoComercio.pendiente) {
+            resultado.conteosMigrados.comercios += 1
+            resultado.conteosMigrados.direcciones += Math.min(
+              comercioFirestore.direcciones?.length || 0,
+              LIMITES_MODELO_FIRESTORE.direccionesComercioEmbebidasMaximo,
+            )
+            return
+          }
+
+          this._registrarComercioPendiente(resultado, comercio, resultadoComercio)
+        } catch (error) {
+          this._registrarComercioPendiente(resultado, comercio, {
+            mensaje: resumirError(error),
+          })
+        }
+      },
+    })
 
     await this._guardarEstado(usuarioId, {
       ...estadoBase,
@@ -433,39 +509,92 @@ class MigracionLocalFirebaseService {
       fechaUltimoIntento: new Date().toISOString(),
     })
 
-    for (const lista of datosLocales.listas) {
-      if (!conectado) {
-        resultado.colaPendiente.push(this._crearItemColaLista(lista, 'Sin conexión.'))
-        continue
-      }
-
-      try {
-        const resultadoFotos = await this._prepararFotosStorageLista(lista)
-        this._agregarResultadoFotos(resultado, resultadoFotos, 'fotosListas')
-        const resultadoLista = await ejecutarConTimeoutFirestore(
-          firestoreListasJustasService.guardarListaJusta(resultadoFotos.dato),
-        )
-
-        if (resultadoLista.exito && !resultadoLista.pendiente) {
-          resultado.conteosMigrados.listas += 1
-          resultado.conteosMigrados.itemsListaJusta += Math.min(
-            resultadoFotos.dato.items?.length || 0,
-            LIMITES_MODELO_FIRESTORE.itemsListaEmbebidosMaximo,
-          )
-          continue
+    await this._procesarTandas({
+      items: datosLocales.listas,
+      sector: 'listas',
+      mensaje: 'Guardando listas...',
+      onProgreso,
+      procesar: async (lista) => {
+        if (!conectado) {
+          resultado.colaPendiente.push(this._crearItemColaLista(lista, 'Sin conexion.'))
+          return
         }
 
-        this._registrarListaPendiente(resultado, lista, resultadoLista)
-      } catch (error) {
-        this._registrarListaPendiente(resultado, lista, {
-          mensaje: resumirError(error),
-        })
-      }
-    }
+        try {
+          const listaFirestore = prepararListaSinFotosStorage(lista)
+          const resultadoLista = await ejecutarConTimeoutFirestore(
+            firestoreListasJustasService.guardarListaJusta(listaFirestore),
+          )
+
+          if (resultadoLista.exito && !resultadoLista.pendiente) {
+            resultado.conteosMigrados.listas += 1
+            resultado.conteosMigrados.itemsListaJusta += Math.min(
+              listaFirestore.items?.length || 0,
+              LIMITES_MODELO_FIRESTORE.itemsListaEmbebidosMaximo,
+            )
+            return
+          }
+
+          this._registrarListaPendiente(resultado, lista, resultadoLista)
+        } catch (error) {
+          this._registrarListaPendiente(resultado, lista, {
+            mensaje: resumirError(error),
+          })
+        }
+      },
+    })
+
+    const itemsMesaTrabajo = obtenerItemsMesaTrabajo(datosLocales)
+    await this._procesarTandas({
+      items: itemsMesaTrabajo,
+      sector: 'mesaTrabajo',
+      mensaje: 'Guardando mesa de trabajo...',
+      onProgreso,
+      procesar: async (item) => {
+        if (!conectado) {
+          resultado.colaPendiente.push(this._crearItemColaMesaTrabajo(item, 'Sin conexion.'))
+          return
+        }
+
+        try {
+          const itemFirestore = prepararItemMesaSinFotosStorage(item)
+          const resultadoMesa = await ejecutarConTimeoutFirestore(
+            firestoreMesaTrabajoService.guardarItemMesaTrabajo(itemFirestore),
+          )
+
+          if (resultadoMesa.exito && !resultadoMesa.pendiente) {
+            resultado.conteosMigrados.mesaTrabajoItems += 1
+            return
+          }
+
+          this._registrarMesaTrabajoPendiente(resultado, item, resultadoMesa)
+        } catch (error) {
+          this._registrarMesaTrabajoPendiente(resultado, item, {
+            mensaje: resumirError(error),
+          })
+        }
+      },
+    })
+
+    await this._guardarEstado(usuarioId, {
+      ...estadoBase,
+      estado: ESTADOS_MIGRACION_FIREBASE.EN_PROCESO,
+      conteosMigrados: resultado.conteosMigrados,
+      errores: resultado.errores,
+      ultimoPasoCompletado: 'mesaTrabajo',
+      fechaUltimoIntento: new Date().toISOString(),
+    })
 
     if (datosLocales.preferencias) {
+      await this._notificarProgreso(onProgreso, {
+        sector: 'preferencias',
+        mensaje: 'Guardando preferencias...',
+        procesados: 0,
+        total: 1,
+      })
+
       if (!conectado) {
-        resultado.colaPendiente.push(this._crearItemColaPreferencias('Sin conexión.'))
+        resultado.colaPendiente.push(this._crearItemColaPreferencias('Sin conexion.'))
       } else {
         try {
           const resultadoPreferencias = await ejecutarConTimeoutFirestore(
@@ -483,145 +612,68 @@ class MigracionLocalFirebaseService {
           })
         }
       }
+
+      await this._notificarProgreso(onProgreso, {
+        sector: 'preferencias',
+        mensaje: 'Guardando preferencias...',
+        procesados: 1,
+        total: 1,
+      })
     }
 
     const confirmaciones = obtenerConfirmacionesMigrables(datosLocales)
-    for (const confirmacion of confirmaciones) {
-      if (!conectado) {
-        resultado.colaPendiente.push(this._crearItemColaConfirmacion(confirmacion, 'Sin conexión.'))
-        continue
-      }
-
-      try {
-        const resultadoConfirmacion = await ejecutarConTimeoutFirestore(
-          firestoreConfirmacionesService.guardarConfirmacion(confirmacion),
-        )
-
-        if (resultadoConfirmacion.exito && !resultadoConfirmacion.pendiente) {
-          resultado.conteosMigrados.confirmaciones += 1
-          continue
+    await this._procesarTandas({
+      items: confirmaciones,
+      sector: 'confirmaciones',
+      mensaje: 'Guardando confirmaciones...',
+      onProgreso,
+      procesar: async (confirmacion) => {
+        if (!conectado) {
+          resultado.colaPendiente.push(this._crearItemColaConfirmacion(confirmacion, 'Sin conexion.'))
+          return
         }
 
-        this._registrarConfirmacionPendiente(resultado, confirmacion, resultadoConfirmacion)
-      } catch (error) {
-        this._registrarConfirmacionPendiente(resultado, confirmacion, {
-          mensaje: resumirError(error),
-        })
-      }
-    }
+        try {
+          const resultadoConfirmacion = await ejecutarConTimeoutFirestore(
+            firestoreConfirmacionesService.guardarConfirmacion(confirmacion),
+          )
 
-    return resultado
-  }
+          if (resultadoConfirmacion.exito && !resultadoConfirmacion.pendiente) {
+            resultado.conteosMigrados.confirmaciones += 1
+            return
+          }
 
-  async _prepararFotosStorageProducto(producto) {
-    const dato = clonarDato(producto)
-    const resultado = { dato, fotosMigradas: 0, errores: [], colaPendiente: [] }
-
-    if (!firebaseStorageFotosService.esDataUriImagen(dato?.imagen)) {
-      return resultado
-    }
-
-    const subida = await firebaseStorageFotosService.subirFotoPrivada({
-      tipo: 'productos',
-      ids: { idPrincipal: dato.id },
-      dataUri: dato.imagen,
+          this._registrarConfirmacionPendiente(resultado, confirmacion, resultadoConfirmacion)
+        } catch (error) {
+          this._registrarConfirmacionPendiente(resultado, confirmacion, {
+            mensaje: resumirError(error),
+          })
+        }
+      },
     })
 
-    if (subida.exito) {
-      dato.imagenUrl = subida.url
-      dato.imagenRutaStorage = subida.rutaStorage
-      dato.fotoFuente = subida.fotoFuente
-      resultado.fotosMigradas += 1
-      return resultado
-    }
-
-    const mensaje = subida.mensaje || 'No se pudo subir la foto del producto.'
-    resultado.errores.push({ tipoDato: 'fotoProducto', documentoId: dato.id, mensaje })
-    resultado.colaPendiente.push(this._crearItemColaFoto('fotoProducto', dato.id, mensaje))
     return resultado
   }
 
-  async _prepararFotosStorageComercio(comercio) {
-    const dato = clonarDato(comercio)
-    const resultado = { dato, fotosMigradas: 0, errores: [], colaPendiente: [] }
+  async _procesarTandas({ items = [], sector, mensaje, onProgreso, procesar }) {
+    let procesados = 0
+    const total = items.length
 
-    if (firebaseStorageFotosService.esDataUriImagen(dato?.foto)) {
-      const subidaComercio = await firebaseStorageFotosService.subirFotoPrivada({
-        tipo: 'comercios',
-        ids: { idPrincipal: dato.id },
-        dataUri: dato.foto,
-      })
+    await this._notificarProgreso(onProgreso, { sector, mensaje, procesados, total })
 
-      if (subidaComercio.exito) {
-        dato.fotoUrl = subidaComercio.url
-        dato.fotoRutaStorage = subidaComercio.rutaStorage
-        dato.fotoFuente = subidaComercio.fotoFuente
-        resultado.fotosMigradas += 1
-      } else {
-        const mensaje = subidaComercio.mensaje || 'No se pudo subir la foto del comercio.'
-        resultado.errores.push({ tipoDato: 'fotoComercio', documentoId: dato.id, mensaje })
-        resultado.colaPendiente.push(this._crearItemColaFoto('fotoComercio', dato.id, mensaje))
+    for (const tanda of dividirEnTandas(items)) {
+      for (const item of tanda) {
+        await procesar(item)
+        procesados += 1
       }
+
+      await this._notificarProgreso(onProgreso, { sector, mensaje, procesados, total })
     }
-
-    for (const direccion of dato.direcciones || []) {
-      if (!firebaseStorageFotosService.esDataUriImagen(direccion?.foto)) continue
-
-      const subidaDireccion = await firebaseStorageFotosService.subirFotoPrivada({
-        tipo: 'direcciones',
-        ids: { idPrincipal: dato.id, idSecundario: direccion.id },
-        dataUri: direccion.foto,
-      })
-
-      if (subidaDireccion.exito) {
-        direccion.fotoUrl = subidaDireccion.url
-        direccion.fotoRutaStorage = subidaDireccion.rutaStorage
-        direccion.fotoFuente = subidaDireccion.fotoFuente
-        resultado.fotosMigradas += 1
-      } else {
-        const documentoId = `${dato.id}-${direccion.id}`
-        const mensaje = subidaDireccion.mensaje || 'No se pudo subir la foto de la dirección.'
-        resultado.errores.push({ tipoDato: 'fotoDireccion', documentoId, mensaje })
-        resultado.colaPendiente.push(this._crearItemColaFoto('fotoDireccion', documentoId, mensaje))
-      }
-    }
-
-    return resultado
   }
 
-  async _prepararFotosStorageLista(lista) {
-    const dato = clonarDato(lista)
-    const resultado = { dato, fotosMigradas: 0, errores: [], colaPendiente: [] }
-
-    for (const item of dato.items || []) {
-      if (!firebaseStorageFotosService.esDataUriImagen(item?.imagen)) continue
-
-      const subidaItem = await firebaseStorageFotosService.subirFotoPrivada({
-        tipo: 'listas',
-        ids: { idPrincipal: dato.id, idSecundario: item.id },
-        dataUri: item.imagen,
-      })
-
-      if (subidaItem.exito) {
-        item.imagenUrl = subidaItem.url
-        item.imagenRutaStorage = subidaItem.rutaStorage
-        item.fotoFuente = subidaItem.fotoFuente
-        resultado.fotosMigradas += 1
-      } else {
-        const documentoId = `${dato.id}-${item.id}`
-        const mensaje = subidaItem.mensaje || 'No se pudo subir la foto del item de Lista Justa.'
-        resultado.errores.push({ tipoDato: 'fotoListaJusta', documentoId, mensaje })
-        resultado.colaPendiente.push(this._crearItemColaFoto('fotoListaJusta', documentoId, mensaje))
-      }
-    }
-
-    return resultado
-  }
-
-  _agregarResultadoFotos(resultado, resultadoFotos, claveConteo) {
-    resultado.conteosMigrados[claveConteo] += resultadoFotos.fotosMigradas
-    resultado.errores.push(...resultadoFotos.errores)
-    resultado.colaPendiente.push(...resultadoFotos.colaPendiente)
+  async _notificarProgreso(onProgreso, datos) {
+    if (typeof onProgreso !== 'function') return
+    await onProgreso(datos)
   }
 
   async _validarConteosFirestore(datosLocales) {
@@ -636,6 +688,9 @@ class MigracionLocalFirebaseService {
     const listasFirestore = await firestoreListasJustasService.obtenerListasJustasUsuario({
       limite: Math.max(esperados.listas, 1),
     })
+    const mesaTrabajoFirestore = await firestoreMesaTrabajoService.obtenerItemsMesaTrabajoUsuario({
+      limite: Math.max(esperados.mesaTrabajoItems, 1),
+    })
     const preferenciasFirestore = await firestorePreferenciasService.obtenerPreferenciasUsuario()
     const confirmacionesFirestore = await firestoreConfirmacionesService.obtenerConfirmacionesUsuario()
     const conteosFirestore = {
@@ -647,20 +702,10 @@ class MigracionLocalFirebaseService {
       itemsListaJusta: contarItemsListaJusta(listasFirestore),
       preferencias: preferenciasFirestore ? 1 : 0,
       confirmaciones: confirmacionesFirestore.size,
-      fotosProductos: productosFirestore.filter((producto) => producto.imagenRutaStorage).length,
-      fotosComercios: comerciosFirestore.reduce(
-        (total, comercio) =>
-          total +
-          (comercio.fotoRutaStorage ? 1 : 0) +
-          (comercio.direcciones || []).filter((direccion) => direccion.fotoRutaStorage).length,
-        0,
-      ),
-      fotosListas: listasFirestore.reduce(
-        (total, lista) =>
-          total +
-          (lista.items || []).filter((item) => item.imagenRutaStorage).length,
-        0,
-      ),
+      mesaTrabajoItems: mesaTrabajoFirestore.length,
+      fotosProductos: 0,
+      fotosComercios: 0,
+      fotosListas: 0,
     }
     const diferencias = Object.entries(esperados)
       .filter(([clave, valor]) => conteosFirestore[clave] !== valor)
@@ -678,6 +723,7 @@ class MigracionLocalFirebaseService {
       ...listasFirestore.flatMap((lista) =>
         (lista.items || []).filter((item) => esBase64(item.imagenUrl)),
       ),
+      ...mesaTrabajoFirestore.filter((item) => esBase64(item.imagenUrl)),
     ]
 
     if (base64EnFirestore.length > 0) {
@@ -764,6 +810,15 @@ class MigracionLocalFirebaseService {
       resultado.colaPendiente.push(this._crearItemColaLista(lista, mensaje))
     }
 
+    for (const item of obtenerItemsMesaTrabajo(datosLocales)) {
+      resultado.errores.push({
+        tipoDato: TIPOS_DATO_USUARIO.MESA_TRABAJO,
+        documentoId: item.id,
+        mensaje,
+      })
+      resultado.colaPendiente.push(this._crearItemColaMesaTrabajo(item, mensaje))
+    }
+
     if (datosLocales.preferencias) {
       resultado.errores.push({
         tipoDato: TIPOS_DATO_USUARIO.PREFERENCIAS,
@@ -836,6 +891,16 @@ class MigracionLocalFirebaseService {
     resultado.colaPendiente.push(this._crearItemColaLista(lista, mensaje))
   }
 
+  _registrarMesaTrabajoPendiente(resultado, item, error) {
+    const mensaje = error?.mensaje || error?.message || 'No se pudo migrar la mesa de trabajo.'
+    resultado.errores.push({
+      tipoDato: TIPOS_DATO_USUARIO.MESA_TRABAJO,
+      documentoId: item.id,
+      mensaje,
+    })
+    resultado.colaPendiente.push(this._crearItemColaMesaTrabajo(item, mensaje))
+  }
+
   _registrarPreferenciasPendiente(resultado, error) {
     const mensaje = error?.mensaje || error?.message || 'No se pudieron migrar las preferencias.'
     resultado.errores.push({
@@ -899,6 +964,18 @@ class MigracionLocalFirebaseService {
       tipoDato: TIPOS_DATO_USUARIO.LISTA_JUSTA,
       accion: ACCIONES_SINCRONIZABLES.ACTUALIZAR,
       documentoId: lista.id,
+      intentos: 0,
+      ultimoError: mensaje,
+      fechaUltimoIntento: new Date().toISOString(),
+    }
+  }
+
+  _crearItemColaMesaTrabajo(item, mensaje) {
+    return {
+      id: `${TIPOS_DATO_USUARIO.MESA_TRABAJO}-${item.id}`,
+      tipoDato: TIPOS_DATO_USUARIO.MESA_TRABAJO,
+      accion: ACCIONES_SINCRONIZABLES.ACTUALIZAR,
+      documentoId: item.id,
       intentos: 0,
       ultimoError: mensaje,
       fechaUltimoIntento: new Date().toISOString(),
