@@ -1198,7 +1198,7 @@ H. Arquitectura y Código
 
 ### Estado Actual
 
-- **Versión:** 1.2.5
+- **Versión:** 1.2.6
 - **Almacenamiento:** Firebase/Firestore como fuente principal con respaldo local del dispositivo
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
@@ -1250,4 +1250,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 29 de Junio de 2026 — Se preparó el release `1.2.5` con migración local a la nube más estable, progreso visible al guardar datos antiguos, fotos locales excluidas del envío a la nube y publicación Android con AdMob en producción.
+**Última actualización:** 29 de Junio de 2026 — Se preparó el release `1.2.6` como hotfix de producción para evitar cierres por memoria al guardar datos antiguos en la nube, conservando las fotos locales en el dispositivo.
