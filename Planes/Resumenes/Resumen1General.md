@@ -1198,8 +1198,8 @@ H. Arquitectura y Código
 
 ### Estado Actual
 
-- **Versión:** 1.2.4
-- **Almacenamiento:** Local (Capacitor Storage)
+- **Versión:** 1.2.5
+- **Almacenamiento:** Firebase/Firestore como fuente principal con respaldo local del dispositivo
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
 - **Sección Mis Productos:** Completada
@@ -1216,7 +1216,7 @@ H. Arquitectura y Código
 - **Splash screen:** Completada (imagen aleatoria, sin distorsión)
 - **Fotos de productos y comercios:** Completada (useCamaraFoto, q-menu contextual, 5 componentes)
 - **Pie de atribución:** Completado (PieAtribucion.vue en DetalleProductoPage + EditarComercioPage; campo fotoFuente en productos)
-- **Preparación:** Lista para migración a Firebase
+- **Firebase:** Completado en producción para cuenta, productos, comercios, listas, preferencias y mesa de trabajo; las fotos locales quedan en el dispositivo
 - **Configuración global:** Completada (moneda predeterminada manual/automática; ver Resumen9Configuracion.md)
 - **Publicidad AdMob:** Integrada y en producción; banner, interstitial y rewarded activos. Los IDs de producción fueron regenerados para corregir fallos de serving en algunas unidades (ver PlanPublicidadAdMob.md)
 - **app-ads.txt:** Publicado en GitHub Pages para ayudar a la verificación de AdMob
@@ -1250,4 +1250,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 28 de Junio de 2026 — Se preparó el release `1.2.4` con inicio renovado, respaldo Firebase más robusto, Mesa de trabajo más estable al editar y refrescar, mejoras en drawer, formularios, actualización interna y publicación Android con AdMob en producción.
+**Última actualización:** 29 de Junio de 2026 — Se preparó el release `1.2.5` con migración local a la nube más estable, progreso visible al guardar datos antiguos, fotos locales excluidas del envío a la nube y publicación Android con AdMob en producción.
