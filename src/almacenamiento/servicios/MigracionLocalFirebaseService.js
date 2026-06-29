@@ -197,41 +197,37 @@ function limpiarImagenBase64(entidad, campoImagen, campoUrl, campoRuta) {
 }
 
 function prepararProductoSinFotosStorage(producto) {
+  limpiarImagenBase64(producto, 'imagen', 'imagenUrl', 'imagenRutaStorage')
   const dato = clonarDato(producto)
-  limpiarImagenBase64(dato, 'imagen', 'imagenUrl', 'imagenRutaStorage')
   return dato
 }
 
 function prepararComercioSinFotosStorage(comercio) {
-  const dato = clonarDato(comercio)
-  limpiarImagenBase64(dato, 'foto', 'fotoUrl', 'fotoRutaStorage')
+  limpiarImagenBase64(comercio, 'foto', 'fotoUrl', 'fotoRutaStorage')
 
-  for (const direccion of dato.direcciones || []) {
+  for (const direccion of comercio.direcciones || []) {
     limpiarImagenBase64(direccion, 'foto', 'fotoUrl', 'fotoRutaStorage')
   }
 
-  return dato
+  return clonarDato(comercio)
 }
 
 function prepararListaSinFotosStorage(lista) {
-  const dato = clonarDato(lista)
-
-  for (const item of dato.items || []) {
+  for (const item of lista.items || []) {
     limpiarImagenBase64(item, 'imagen', 'imagenUrl', 'imagenRutaStorage')
   }
 
-  return dato
+  return clonarDato(lista)
 }
 
 function prepararItemMesaSinFotosStorage(item) {
-  const dato = clonarDato(item)
-  limpiarImagenBase64(dato, 'imagen', 'imagenUrl', 'imagenRutaStorage')
+  limpiarImagenBase64(item, 'imagen', 'imagenUrl', 'imagenRutaStorage')
 
-  if (dato.datosOriginales) {
-    limpiarImagenBase64(dato.datosOriginales, 'imagen', 'imagenUrl', 'imagenRutaStorage')
+  if (item.datosOriginales) {
+    limpiarImagenBase64(item.datosOriginales, 'imagen', 'imagenUrl', 'imagenRutaStorage')
   }
 
-  return dato
+  return clonarDato(item)
 }
 
 async function ejecutarConTimeoutFirestore(promesa) {
@@ -258,8 +254,12 @@ class MigracionLocalFirebaseService {
   }
 
   async obtenerResumenLocal() {
-    const datosLocales = await inventarioMigracionFirebaseService.leerDatosLocalesActuales()
-    const resumen = await inventarioMigracionFirebaseService.obtenerResumenMigracionLocal()
+    const datosLocales = await inventarioMigracionFirebaseService.leerDatosLocalesActuales({
+      incluirFotos: false,
+    })
+    const resumen = await inventarioMigracionFirebaseService.obtenerResumenMigracionLocal({
+      incluirFotos: false,
+    })
 
     return {
       ...resumen,
@@ -283,12 +283,14 @@ class MigracionLocalFirebaseService {
 
   async prepararMigracionLocal() {
     const usuarioId = obtenerUsuarioFirebaseActual()
-    const datosLocales = await inventarioMigracionFirebaseService.leerDatosLocalesActuales()
-    const resumen = await inventarioMigracionFirebaseService.obtenerResumenMigracionLocal()
+    const datosLocales = await inventarioMigracionFirebaseService.leerDatosLocalesActuales({
+      incluirFotos: false,
+    })
+    const resumen = await inventarioMigracionFirebaseService.obtenerResumenMigracionLocal({
+      incluirFotos: false,
+    })
     const backup = await inventarioMigracionFirebaseService.crearBackupLocalPrevio()
-    const backupGuardado = backup.guardado ? await this.adaptador.obtener(backup.clave) : null
-
-    if (!backup.guardado || !backupGuardado) {
+    if (!backup.guardado) {
       throw new Error('No se pudo confirmar el backup local previo.')
     }
 
@@ -320,16 +322,13 @@ class MigracionLocalFirebaseService {
     }
 
     const usuarioId = obtenerUsuarioFirebaseActual()
-    const datosLocales = await inventarioMigracionFirebaseService.leerDatosLocalesActuales()
+    const datosLocales = await inventarioMigracionFirebaseService.leerDatosLocalesActuales({
+      incluirFotos: false,
+    })
     let estadoActual = await this.obtenerEstadoActual()
 
     if (!estadoActual.backupLocal?.clave) {
       estadoActual = await this.prepararMigracionLocal()
-    }
-
-    const backupGuardado = await this.adaptador.obtener(estadoActual.backupLocal.clave)
-    if (!backupGuardado) {
-      throw new Error('No se encontró el backup local requerido para iniciar la migración.')
     }
 
     const estadoEnProceso = {
