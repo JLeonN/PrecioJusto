@@ -731,6 +731,44 @@ Por qué:
 - Base64 agranda los archivos.
 - La app se vuelve lenta.
 - Sincronizar muchas fotos puede disparar costos o errores.
+- En Android, clonar o serializar fotos base64 grandes puede cerrar la app por memoria.
+
+### Memoria Del Dispositivo
+
+Una foto base64 no solo pesa en disco. Durante una migración puede duplicarse varias veces en memoria:
+
+- Valor leído desde LocalStorage o Capacitor Preferences.
+- Objeto armado para inventario.
+- Copia para backup.
+- Copia por `JSON.stringify`.
+- Copia para enviar a Firestore.
+- Copia interna del WebView.
+
+En celulares reales esto puede terminar en `OutOfMemoryError`, incluso si el usuario tiene pocos productos. El caso real que originó esta regla fue una app Android que intentó reservar más de 140 MB de una vez dentro del WebView durante la migración local a Firestore.
+
+Regla práctica:
+
+> Antes de clonar, serializar, guardar backup o migrar, quitar fotos base64 del objeto de trabajo.
+
+Patrón recomendado:
+
+```text
+leer dato local
+quitar foto base64 del objeto de migración
+conservar dato local original en el dispositivo
+guardar en Firestore solo datos livianos
+```
+
+Evitar:
+
+```text
+JSON.parse(JSON.stringify(productoConFotoBase64))
+backup completo con fotos base64
+cola pendiente con fotos base64
+validación que vuelva a leer backups pesados
+```
+
+Si se necesita backup, que sea un backup liviano sin fotos. El respaldo real de la foto sigue siendo el dato local original del dispositivo.
 
 ### Firebase Storage
 
@@ -789,7 +827,7 @@ Orden recomendado:
 
 1. Inventariar datos locales.
 2. Mostrar conteos al usuario o al desarrollador.
-3. Crear backup local.
+3. Crear backup local liviano sin fotos pesadas.
 4. Migrar por dominio.
 5. Usar los mismos IDs locales.
 6. Guardar estado de migración en Firestore.
@@ -826,6 +864,13 @@ Para lograrlo:
 - Evitar `addDoc` en migraciones.
 - Registrar errores por item.
 - Reintentar solo lo pendiente.
+- Migrar datos pesados por tandas pequeñas.
+- No incluir fotos base64 en backups, colas pendientes ni estados de migración.
+- No leer backups viejos con fotos durante un reintento.
+
+Recomendación para Android:
+
+> Probar migraciones con datos reales y logcat conectado. Si aparece `OutOfMemoryError`, revisar primero fotos base64, backups completos, `JSON.stringify` sobre objetos grandes y colas pendientes con datos pesados.
 
 ---
 
@@ -1061,6 +1106,36 @@ Siempre limpiar:
 No hacerlo.
 
 Firestore debe guardar datos livianos. Las fotos van locales, por URL externa o a Storage si se acepta esa estrategia.
+
+### Error 8.1: Clonar O Respaldar Fotos Base64 Durante La Migración
+
+Aunque no se guarden en Firestore, las fotos base64 pueden romper la app si pasan por el flujo de migración.
+
+No hacer:
+
+- Crear backups completos con fotos base64.
+- Guardar colas pendientes con fotos base64.
+- Ejecutar `JSON.stringify` sobre productos, comercios, listas o mesa con fotos base64.
+- Leer un backup viejo con fotos para validar que existe.
+- Contar fotos cargando todas las fotos completas en memoria.
+
+Hacer:
+
+- Mantener las fotos locales en el dispositivo.
+- Crear copias de migración sin fotos antes de clonar.
+- Usar conteos livianos cuando el objetivo sea migrar datos a Firestore.
+- Guardar en Firestore solo URL externa, metadatos o `null` si la foto es local.
+- Probar en Android real con datos del usuario y revisar logcat.
+
+Síntoma típico:
+
+```text
+java.lang.OutOfMemoryError
+Failed to allocate ... byte allocation
+Process: com.nombre.app
+```
+
+Si aparece ese error, la primera sospecha debe ser memoria por fotos/base64, no reglas de Firestore.
 
 ### Error 9: Borrar Local Demasiado Pronto
 
