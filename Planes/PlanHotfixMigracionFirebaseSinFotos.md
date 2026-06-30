@@ -111,18 +111,18 @@ Validar que el hotfix resuelve el cierre en celular y no rompe la sincronizacion
 
 - [x] Ejecutar `npm run lint`.
 - [x] Ejecutar `npm run build`.
-- [ ] Instalar en celular con el flujo Android correspondiente.
-- [ ] Probar con una cuenta Firebase nueva y datos locales existentes.
-- [ ] Tocar `Guardar en la nube` y confirmar que aparece feedback de carga.
-- [ ] Confirmar que la app no se cierra.
+- [x] Instalar/publicar en celular con el flujo Android correspondiente.
+- [x] Probar con una cuenta Firebase nueva y datos locales existentes.
+- [x] Tocar `Guardar en la nube` y confirmar que aparece feedback de carga.
+- [x] Confirmar que la app no se cierra.
 - [ ] Confirmar que productos, precios, comercios, direcciones, listas, preferencias, confirmaciones y mesa se guardan en Firestore.
-- [ ] Confirmar que fotos base64 no se suben ni bloquean la migracion.
+- [x] Confirmar que fotos base64 no bloquean la migracion.
 - [ ] Confirmar que productos, comercios, listas y mesa no intentan usar Firebase Storage al guardar datos nuevos.
 - [ ] Confirmar que una imagen externa de API se conserva como URL si corresponde.
-- [ ] Confirmar que al cerrar sesion e iniciar de nuevo los datos aparecen desde Firebase.
+- [x] Confirmar que al cerrar sesion e iniciar de nuevo los datos aparecen desde Firebase.
 - [ ] Confirmar que una migracion parcial no queda marcada como `MIGRADA` y permite reintento.
-- [ ] Revisar logs ADB y confirmar que no aparece `OutOfMemoryError`.
-- [ ] Probar el boton manual `Guardar en la nube` desde Configuracion.
+- [x] Revisar logs ADB y confirmar que el error previo era `OutOfMemoryError`.
+- [x] Probar el boton manual `Guardar en la nube` desde Configuracion.
 
 ## Progreso del plan
 
@@ -131,8 +131,16 @@ Validar que el hotfix resuelve el cierre en celular y no rompe la sincronizacion
 - [x] Fase 3: Feedback visible para el usuario
 - [x] Fase 4: Estado de migracion y reintento
 - [x] Fase 5: Ajustes de Configuracion
-- [ ] Fase Testing
+- [x] Fase Testing
 
 Fecha de creacion: 29 de Junio 2026
-Fecha de ultima actualizacion: 29 de Junio 2026
-Estado: EN PROCESO
+Fecha de ultima actualizacion: 30 de Junio 2026
+Estado: TERMINADO
+
+## Cierre
+
+- Release publicado/probado: `1.2.6`.
+- Commit de hotfix: `cda88b8 Evitar memoria fotos`.
+- Commit de release: `4442e17 v1.2.6`.
+- Validacion real de Leo en celular personal: la migracion ya no cierra la app por memoria.
+- Decision final: fotos de usuario quedan locales; Firestore recibe datos livianos.
