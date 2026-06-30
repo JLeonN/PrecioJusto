@@ -1,4 +1,8 @@
-import { adaptadorActual, infoAdaptador } from './AlmacenamientoService.js'
+import {
+  adaptadorActual,
+  ejecutarConEspacioTrabajoAlmacenamiento,
+  infoAdaptador,
+} from './AlmacenamientoService.js'
 import {
   CLAVE_COMERCIOS,
   CLAVE_LISTA_JUSTA,
@@ -70,6 +74,12 @@ class InventarioMigracionFirebaseService {
   }
 
   async leerDatosLocalesActuales(opciones = {}) {
+    return ejecutarConEspacioTrabajoAlmacenamiento('compartido', () =>
+      this._leerDatosLocalesActuales(opciones),
+    )
+  }
+
+  async _leerDatosLocalesActuales(opciones = {}) {
     const incluirFotos = opciones.incluirFotos !== false
     const productos = await this.adaptador.listarTodo(PREFIJO_PRODUCTOS)
     const confirmaciones = await this.adaptador.listarTodo(PREFIJO_CONFIRMACIONES)
@@ -131,20 +141,22 @@ class InventarioMigracionFirebaseService {
   }
 
   async crearBackupLocalPrevio() {
-    const datos = await this.leerDatosLocalesActuales({ incluirFotos: false })
-    const fecha = new Date().toISOString()
-    const clave = `${PREFIJO_BACKUP_MIGRACION_FIREBASE}${fecha.replace(/[:.]/g, '')}`
-    const guardado = await this.adaptador.guardar(clave, {
-      fecha,
-      datos,
-      fotosLocalesConservadasEnDispositivo: true,
-    })
+    return ejecutarConEspacioTrabajoAlmacenamiento('compartido', async () => {
+      const datos = await this._leerDatosLocalesActuales({ incluirFotos: false })
+      const fecha = new Date().toISOString()
+      const clave = `${PREFIJO_BACKUP_MIGRACION_FIREBASE}${fecha.replace(/[:.]/g, '')}`
+      const guardado = await this.adaptador.guardar(clave, {
+        fecha,
+        datos,
+        fotosLocalesConservadasEnDispositivo: true,
+      })
 
-    return {
-      guardado,
-      clave,
-      fecha,
-    }
+      return {
+        guardado,
+        clave,
+        fecha,
+      }
+    })
   }
 }
 

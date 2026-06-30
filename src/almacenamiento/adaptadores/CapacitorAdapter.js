@@ -25,7 +25,8 @@ import { PREFIJO_ALMACENAMIENTO } from '../constantes/ClavesAlmacenamiento.js'
 
 class CapacitorAdapter {
   constructor() {
-    this.prefijo = PREFIJO_ALMACENAMIENTO // Prefijo para organizar las claves
+    this.prefijoBase = PREFIJO_ALMACENAMIENTO
+    this.espacioTrabajo = 'compartido'
 
     console.log('📱 CapacitorAdapter inicializado')
 
@@ -144,17 +145,17 @@ class CapacitorAdapter {
       // Obtener todas las claves almacenadas
       const { keys } = await Preferences.keys()
       const resultados = []
+      const prefijoActivo = this._construirPrefijoActivo()
 
       // Filtrar claves que pertenecen a nuestra app
-      const clavesApp = keys.filter((claveCompleta) => claveCompleta.startsWith(this.prefijo))
+      const clavesApp = keys.filter((claveCompleta) =>
+        this._debeIncluirClave(claveCompleta, prefijoActivo, prefijoBusqueda),
+      )
 
       // Procesar cada clave
       for (const claveCompleta of clavesApp) {
         // Extraer la clave sin prefijo
-        const clave = claveCompleta.replace(this.prefijo, '')
-
-        // Aplicar filtro adicional si existe
-        if (prefijoBusqueda && !clave.startsWith(prefijoBusqueda)) continue
+        const clave = claveCompleta.replace(prefijoActivo, '')
 
         // Obtener el valor
         const resultado = await Preferences.get({ key: claveCompleta })
@@ -230,9 +231,10 @@ class CapacitorAdapter {
     try {
       const { keys } = await Preferences.keys()
       let contador = 0
+      const prefijoActivo = this._construirPrefijoActivo()
 
       for (const claveCompleta of keys) {
-        if (claveCompleta.startsWith(this.prefijo)) {
+        if (this._debeIncluirClave(claveCompleta, prefijoActivo)) {
           await Preferences.remove({ key: claveCompleta })
           contador++
         }
@@ -263,6 +265,19 @@ class CapacitorAdapter {
     }
   }
 
+  configurarEspacioTrabajo(espacioTrabajo) {
+    const valorNormalizado = String(espacioTrabajo || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, '')
+
+    this.espacioTrabajo = valorNormalizado || 'compartido'
+  }
+
+  obtenerEspacioTrabajo() {
+    return this.espacioTrabajo
+  }
+
   // ========================================
   // 🔧 MÉTODOS PRIVADOS (HELPERS)
   // ========================================
@@ -272,7 +287,28 @@ class CapacitorAdapter {
    * @private
    */
   _construirClave(clave) {
-    return `${this.prefijo}${clave}`
+    return `${this._construirPrefijoActivo()}${clave}`
+  }
+
+  _debeIncluirClave(claveCompleta, prefijoActivo, prefijoBusqueda = '') {
+    if (!claveCompleta.startsWith(prefijoActivo)) return false
+    if (this.espacioTrabajo === 'compartido' && this._esClaveEspacioUid(claveCompleta)) return false
+
+    const clave = claveCompleta.replace(prefijoActivo, '')
+    if (prefijoBusqueda && !clave.startsWith(prefijoBusqueda)) return false
+    return true
+  }
+
+  _esClaveEspacioUid(claveCompleta) {
+    return /^precio_justo_uid-[^_]+_/i.test(claveCompleta)
+  }
+
+  _construirPrefijoActivo() {
+    if (this.espacioTrabajo === 'compartido') {
+      return this.prefijoBase
+    }
+
+    return `${this.prefijoBase}${this.espacioTrabajo}_`
   }
 }
 

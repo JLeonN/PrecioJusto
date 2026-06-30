@@ -61,6 +61,26 @@ export const configurarEspacioTrabajoAlmacenamiento = (espacioTrabajo = 'compart
   }
 }
 
+export const obtenerEspacioTrabajoAlmacenamiento = () => {
+  if (typeof adaptadorActual.obtenerEspacioTrabajo === 'function') {
+    return adaptadorActual.obtenerEspacioTrabajo()
+  }
+
+  return 'compartido'
+}
+
+export const ejecutarConEspacioTrabajoAlmacenamiento = async (espacioTrabajo, operacion) => {
+  const espacioAnterior = obtenerEspacioTrabajoAlmacenamiento()
+
+  configurarEspacioTrabajoAlmacenamiento(espacioTrabajo)
+
+  try {
+    return await operacion()
+  } finally {
+    configurarEspacioTrabajoAlmacenamiento(espacioAnterior)
+  }
+}
+
 /**
  * 📊 INFO DEL ADAPTADOR ACTIVO (útil para debugging)
  */

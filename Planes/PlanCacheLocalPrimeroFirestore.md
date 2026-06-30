@@ -42,12 +42,12 @@ La regla central del plan es: mostrar local primero, actualizar desde la nube de
 
 Confirmar los puntos exactos donde la app bloquea la pantalla esperando Firestore, reemplaza estado local o pierde fotos.
 
-- [ ] Revisar `FuentePrincipalFirestoreService.js` y confirmar como decide entre local, Firestore, error y cuenta vacia.
-- [ ] Revisar `productosStore.js` y confirmar que `cargarProductos()` bloquea con `cargando` hasta recibir Firestore.
-- [ ] Revisar `MisProductosPage.vue` y confirmar donde se muestra el loader grande.
-- [ ] Revisar `ProductosService.js` y confirmar que `guardarProducto()` sincroniza hacia Firestore.
-- [ ] Revisar `FirestoreProductosService.js` y confirmar que `obtenerProductosUsuario()` solo trae pagina limitada por `fechaActualizacion`.
-- [ ] Revisar `UsuarioStore.js`, `UsuarioActualService.js`, `AlmacenamientoService.js`, `IndexedDbAdapter.js` y `CapacitorAdapter.js` para confirmar separacion de cache por usuario.
+- [x] Revisar `FuentePrincipalFirestoreService.js` y confirmar como decide entre local, Firestore, error y cuenta vacia.
+- [x] Revisar `productosStore.js` y confirmar que `cargarProductos()` bloquea con `cargando` hasta recibir Firestore.
+- [x] Revisar `MisProductosPage.vue` y confirmar donde se muestra el loader grande.
+- [x] Revisar `ProductosService.js` y confirmar que `guardarProducto()` sincroniza hacia Firestore.
+- [x] Revisar `FirestoreProductosService.js` y confirmar que `obtenerProductosUsuario()` solo trae pagina limitada por `fechaActualizacion`.
+- [x] Revisar `UsuarioStore.js`, `UsuarioActualService.js`, `AlmacenamientoService.js`, `IndexedDbAdapter.js` y `CapacitorAdapter.js` para confirmar separacion de cache por usuario.
 - [ ] Repetir auditoria rapida en comercios, Lista Justa, preferencias y mesa para ubicar stores y servicios equivalentes.
 - [ ] Documentar en el mismo plan cualquier archivo adicional encontrado antes de implementar.
 
@@ -57,13 +57,13 @@ Confirmar los puntos exactos donde la app bloquea la pantalla esperando Firestor
 
 Asegurar que el cache local de una cuenta Firebase no se mezcle con otra cuenta ni con datos locales anteriores.
 
-- [ ] Definir un identificador local seguro para cada usuario: `uid-${usuarioIdNormalizado}`.
-- [ ] Conectar `UsuarioStore.aplicarUsuarioAutenticado()` con `configurarEspacioTrabajoAlmacenamiento()`.
-- [ ] Al iniciar sesion Firebase, configurar el espacio de trabajo con el `usuarioId`.
-- [ ] Al cerrar sesion, volver al espacio de trabajo `compartido` o al usuario local legacy, segun el flujo actual.
-- [ ] Agregar `configurarEspacioTrabajo()` a `CapacitorAdapter` con la misma logica que `IndexedDbAdapter`.
-- [ ] Ajustar `CapacitorAdapter.listarTodo()`, `guardar()`, `obtener()`, `eliminar()` y `limpiarTodo()` para usar el prefijo activo del espacio de trabajo.
-- [ ] Evitar que `listarTodo()` en modo compartido lea claves de otros espacios `uid-*`.
+- [x] Definir un identificador local seguro para cada usuario: `uid-${usuarioIdNormalizado}`.
+- [x] Conectar `UsuarioStore.aplicarUsuarioAutenticado()` con `configurarEspacioTrabajoAlmacenamiento()`.
+- [x] Al iniciar sesion Firebase, configurar el espacio de trabajo con el `usuarioId`.
+- [x] Al cerrar sesion, volver al espacio de trabajo `compartido` o al usuario local legacy, segun el flujo actual.
+- [x] Agregar `configurarEspacioTrabajo()` a `CapacitorAdapter` con la misma logica que `IndexedDbAdapter`.
+- [x] Ajustar `CapacitorAdapter.listarTodo()`, `guardar()`, `obtener()`, `eliminar()` y `limpiarTodo()` para usar el prefijo activo del espacio de trabajo.
+- [x] Evitar que `listarTodo()` en modo compartido lea claves de otros espacios `uid-*`.
 - [ ] Probar que dos cuentas distintas no lean los mismos productos desde cache local.
 - [ ] Mantener intactos los datos locales existentes para que sigan disponibles para migracion manual.
 
@@ -73,10 +73,10 @@ Asegurar que el cache local de una cuenta Firebase no se mezcle con otra cuenta 
 
 Permitir guardar en el dispositivo datos recibidos desde Firestore sin reenviarlos a Firestore ni cambiar fechas artificialmente.
 
-- [ ] Agregar en `ProductosService.js` un metodo local-only, por ejemplo `guardarProductoEnCacheLocal(producto)`.
-- [ ] El metodo local-only debe escribir con `adaptadorActual.guardar()` y no llamar a `_sincronizarProductoFirestore()`.
-- [ ] Agregar un metodo para guardar varios productos en cache local por tandas, por ejemplo `guardarProductosEnCacheLocal(productos, opciones)`.
-- [ ] Procesar la escritura local por lotes chicos para no bloquear el hilo principal.
+- [x] Agregar en `ProductosService.js` un metodo local-only, por ejemplo `guardarProductoEnCacheLocal(producto)`.
+- [x] El metodo local-only debe escribir con `adaptadorActual.guardar()` y no llamar a `_sincronizarProductoFirestore()`.
+- [x] Agregar un metodo para guardar varios productos en cache local por tandas, por ejemplo `guardarProductosEnCacheLocal(productos, opciones)`.
+- [x] Procesar la escritura local por lotes chicos para no bloquear el hilo principal.
 - [ ] No clonar ni serializar fotos base64 mas de lo necesario.
 - [ ] No modificar `fechaActualizacion` cuando el dato viene de Firestore.
 - [ ] Si el producto remoto esta marcado como `eliminado: true`, eliminarlo o marcarlo localmente sin volver a enviarlo a Firestore.
@@ -88,16 +88,16 @@ Permitir guardar en el dispositivo datos recibidos desde Firestore sin reenviarl
 
 Hacer que Mis Productos muestre datos locales inmediatamente y actualice desde Firestore en segundo plano.
 
-- [ ] Modificar `productosStore.cargarProductos()` para cargar primero `productosService.obtenerTodos()`.
-- [ ] Asignar `productos.value` con los datos locales apenas esten disponibles.
-- [ ] Apagar `cargando` despues de la carga local, no despues de Firestore, si ya hay datos locales.
-- [ ] Usar `sincronizando` para indicar la actualizacion remota en segundo plano.
-- [ ] Lanzar la consulta Firestore sin bloquear la pantalla.
-- [ ] Si Firestore devuelve error, conservar datos locales visibles y mostrar error no bloqueante.
-- [ ] Si Firestore devuelve datos, fusionarlos con el estado local.
-- [ ] Guardar el resultado fusionado en cache local usando metodos local-only.
-- [ ] Evitar recargas visibles al cambiar de seccion si la ultima sincronizacion fue reciente.
-- [ ] Mantener `recargarProductos()` como accion manual que si puede forzar consulta remota.
+- [x] Modificar `productosStore.cargarProductos()` para cargar primero `productosService.obtenerTodos()`.
+- [x] Asignar `productos.value` con los datos locales apenas esten disponibles.
+- [x] Apagar `cargando` despues de la carga local, no despues de Firestore, si ya hay datos locales.
+- [x] Usar `sincronizando` para indicar la actualizacion remota en segundo plano.
+- [x] Lanzar la consulta Firestore sin bloquear la pantalla.
+- [x] Si Firestore devuelve error, conservar datos locales visibles y mostrar error no bloqueante.
+- [x] Si Firestore devuelve datos, fusionarlos con el estado local.
+- [x] Guardar el resultado fusionado en cache local usando metodos local-only.
+- [x] Evitar recargas visibles al cambiar de seccion si la ultima sincronizacion fue reciente.
+- [x] Mantener `recargarProductos()` como accion manual que si puede forzar consulta remota.
 
 ## FASE 5: Merge Sin Perder Fotos
 
@@ -105,14 +105,14 @@ Hacer que Mis Productos muestre datos locales inmediatamente y actualice desde F
 
 Evitar que una lectura de Firestore sin fotos elimine fotos locales tomadas por el usuario.
 
-- [ ] Crear una funcion pura de merge para producto local + producto Firestore.
-- [ ] Identificar el producto por `id`.
-- [ ] Usar campos remotos para datos de negocio porque Firestore es la fuente principal.
-- [ ] Conservar `imagen` local si contiene base64 del usuario y Firestore no trae `imagenUrl` valida.
-- [ ] Usar `imagenUrl` remota si existe y representa una URL externa valida.
-- [ ] No copiar base64 local hacia campos remotos ni hacia Firestore.
-- [ ] Preservar `fotoFuente`, `imagenRutaStorage`, `fechaCreacion`, `fechaActualizacion`, `ultimaInteraccion` y `eliminado` de forma coherente.
-- [ ] Si Firestore trae `eliminado: true`, quitar el producto del listado visible y limpiar cache local de ese producto.
+- [x] Crear una funcion pura de merge para producto local + producto Firestore.
+- [x] Identificar el producto por `id`.
+- [x] Usar campos remotos para datos de negocio porque Firestore es la fuente principal.
+- [x] Conservar `imagen` local si contiene base64 del usuario y Firestore no trae `imagenUrl` valida.
+- [x] Usar `imagenUrl` remota si existe y representa una URL externa valida.
+- [x] No copiar base64 local hacia campos remotos ni hacia Firestore.
+- [x] Preservar `fotoFuente`, `imagenRutaStorage`, `fechaCreacion`, `fechaActualizacion`, `ultimaInteraccion` y `eliminado` de forma coherente.
+- [x] Si Firestore trae `eliminado: true`, quitar el producto del listado visible y limpiar cache local de ese producto.
 - [ ] Probar merge con producto local con foto y Firestore sin foto.
 - [ ] Probar merge con producto local sin foto y Firestore con URL externa.
 - [ ] Probar producto de API con imagen externa para confirmar que no se pierde.
@@ -123,12 +123,12 @@ Evitar que una lectura de Firestore sin fotos elimine fotos locales tomadas por 
 
 Reducir consultas repetidas sin asumir que ya existe sincronizacion incremental completa.
 
-- [ ] Guardar por dominio una marca local de ultima sincronizacion, por ejemplo `cacheFirestoreProductosMeta`.
-- [ ] La marca debe incluir `usuarioId`, `fechaUltimaSincronizacion`, `fechaUltimoIntento`, `cantidadRemota` y `versionCache`.
-- [ ] Definir una ventana minima para no consultar Firestore en cada entrada de pantalla, por ejemplo 1 a 5 minutos.
-- [ ] Mantener una opcion de recarga manual que ignore esa ventana.
-- [ ] En esta primera ejecucion, usar carga remota limitada existente como refresh de fondo.
-- [ ] No implementar incremental por fecha hasta agregar metodos claros en `FirestoreProductosService`.
+- [x] Guardar por dominio una marca local de ultima sincronizacion, por ejemplo `cacheFirestoreProductosMeta`.
+- [x] La marca debe incluir `usuarioId`, `fechaUltimaSincronizacion`, `fechaUltimoIntento`, `cantidadRemota` y `versionCache`.
+- [x] Definir una ventana minima para no consultar Firestore en cada entrada de pantalla, por ejemplo 1 a 5 minutos.
+- [x] Mantener una opcion de recarga manual que ignore esa ventana.
+- [x] En esta primera ejecucion, usar carga remota limitada existente como refresh de fondo.
+- [x] No implementar incremental por fecha hasta agregar metodos claros en `FirestoreProductosService`.
 - [ ] Si se decide implementar incremental en esta fase, agregar metodo separado `obtenerProductosActualizadosDesde(fechaIso, opciones)`.
 - [ ] El incremental debe usar `where('fechaActualizacion', '>', fechaIso)` + `orderBy('fechaActualizacion', 'asc')` y contemplar indices de Firestore si aparecen errores.
 - [ ] Mantener fallback a refresh completo si falta fecha, falla el indice o la cuenta no tiene marca local.
@@ -168,8 +168,8 @@ Hacer que el usuario sienta la app rapida sin mostrar informacion tecnica innece
 Validar de forma ejecutable por IA y revisable por humano que la app carga rapido, conserva fotos locales y sincroniza sin mezclar usuarios.
 
 - [ ] Ejecutar `rg -n "\\x{00C3}|\\x{00C2}|\\x{00E2}|\\x{FFFD}" src Planes`.
-- [ ] Ejecutar `npm run lint`.
-- [ ] Ejecutar `npm run build`.
+- [x] Ejecutar `npm run lint`.
+- [x] Ejecutar `npm run build`.
 - [ ] Probar con una cuenta que tenga mas de 80 productos.
 - [ ] Entrar a Mis Productos y confirmar que muestra cache local de inmediato.
 - [ ] Cambiar de seccion y volver a Mis Productos, confirmando que no descarga todo otra vez de forma visible.
@@ -185,16 +185,16 @@ Validar de forma ejecutable por IA y revisable por humano que la app carga rapid
 
 ## Progreso del plan
 
-- [ ] Fase 1: Auditar Lectura Actual
-- [ ] Fase 2: Separar Cache Local Por Usuario
-- [ ] Fase 3: Crear Escritura Local Solo Cache
-- [ ] Fase 4: Implementar Local Primero En Mis Productos
-- [ ] Fase 5: Merge Sin Perder Fotos
-- [ ] Fase 6: Control De Sincronizacion Y Lecturas
+- [x] Fase 1: Auditar Lectura Actual
+- [x] Fase 2: Separar Cache Local Por Usuario
+- [x] Fase 3: Crear Escritura Local Solo Cache
+- [x] Fase 4: Implementar Local Primero En Mis Productos
+- [x] Fase 5: Merge Sin Perder Fotos
+- [x] Fase 6: Control De Sincronizacion Y Lecturas
 - [ ] Fase 7: Extender Patron A Otros Dominios
 - [ ] Fase 8: Ajustes De UX
 - [ ] Fase Testing
 
 Fecha de creacion: 30 de Junio 2026
 Fecha de ultima actualizacion: 30 de Junio 2026
-Estado: BORRADOR
+Estado: EN PROCESO

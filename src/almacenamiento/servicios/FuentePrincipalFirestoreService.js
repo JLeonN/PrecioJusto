@@ -60,11 +60,67 @@ function filtrarEliminados(lista = []) {
     : []
 }
 
+function esImagenBase64(valor) {
+  return /^data:image\/[a-zA-Z0-9.+-]+;base64,/.test(String(valor || '').trim())
+}
+
+function esUrlImagen(valor) {
+  return /^https?:\/\//.test(String(valor || '').trim())
+}
+
 function prepararProductosVisuales(productos = []) {
   return filtrarEliminados(productos).map((producto) => ({
     ...producto,
     imagen: producto?.imagen || producto?.imagenUrl || null,
   }))
+}
+
+function fusionarProductoLocalFirestore(productoLocal, productoFirestore) {
+  if (!productoFirestore) return productoLocal
+  if (productoFirestore.eliminado) return { ...productoFirestore }
+
+  const imagenLocal = productoLocal?.imagen
+  const imagenRemota = productoFirestore?.imagen || productoFirestore?.imagenUrl
+  const conservaFotoLocal =
+    esImagenBase64(imagenLocal) && !esUrlImagen(imagenRemota) && !esImagenBase64(imagenRemota)
+  const imagen = conservaFotoLocal ? imagenLocal : imagenRemota || null
+
+  return {
+    ...productoLocal,
+    ...productoFirestore,
+    imagen,
+    imagenUrl: productoFirestore.imagenUrl || (esUrlImagen(imagen) ? imagen : null),
+    imagenRutaStorage: productoFirestore.imagenRutaStorage || null,
+    sincronizacionFoto: conservaFotoLocal
+      ? productoLocal?.sincronizacionFoto
+      : productoFirestore?.sincronizacionFoto,
+  }
+}
+
+function fusionarProductosLocalFirestore(productosLocales = [], productosFirestore = []) {
+  const productosPorId = new Map()
+
+  for (const productoLocal of productosLocales) {
+    if (!productoLocal?.id || productoLocal.eliminado) continue
+    productosPorId.set(String(productoLocal.id), productoLocal)
+  }
+
+  for (const productoFirestore of productosFirestore) {
+    if (!productoFirestore?.id) continue
+
+    const clave = String(productoFirestore.id)
+    const productoLocal = productosPorId.get(clave)
+    const productoFusionado = fusionarProductoLocalFirestore(productoLocal, productoFirestore)
+
+    if (productoFusionado?.eliminado) {
+      productosPorId.delete(clave)
+      continue
+    }
+
+    productosPorId.set(clave, productoFusionado)
+  }
+
+  return prepararProductosVisuales([...productosPorId.values()])
 }
 
 function prepararComerciosVisuales(comercios = []) {
@@ -237,6 +293,47 @@ async function cargarProductos({ cargarLocal }) {
   })
 }
 
+async function cargarProductosFirestoreCrudos({ usuarioId } = {}) {
+  const conexion = await obtenerConexionSegura()
+  const usuario = obtenerUsuarioActual()
+  const idUsuario = usuarioId || usuario.id
+
+  if (!debeUsarFirestore(usuario) || !idUsuario) {
+    return crearResultado({
+      dominio: DOMINIOS.PRODUCTOS,
+      datos: [],
+      fuente: FUENTES_DATOS.LOCAL,
+      mensaje: 'Usuario local: se usa almacenamiento local.',
+      conexion,
+    })
+  }
+
+  try {
+    const productos = await firestoreProductosService.obtenerProductosUsuario({
+      usuarioId: idUsuario,
+      limite: 200,
+      incluirPrecios: true,
+    })
+
+    return crearResultado({
+      dominio: DOMINIOS.PRODUCTOS,
+      datos: productos,
+      fuente: resolverFuenteFirestore(conexion),
+      mensaje: 'Datos actualizados desde la nube.',
+      conexion,
+    })
+  } catch (error) {
+    return crearResultado({
+      dominio: DOMINIOS.PRODUCTOS,
+      datos: null,
+      fuente: FUENTES_DATOS.ERROR,
+      mensaje: 'No se pudieron actualizar productos desde la nube.',
+      conexion,
+      error: error.message || 'Error al cargar Firestore.',
+    })
+  }
+}
+
 async function cargarComercios({ cargarLocal }) {
   return cargarConFuentePrincipal({
     dominio: DOMINIOS.COMERCIOS,
@@ -306,12 +403,15 @@ export default {
   debeUsarFirestore,
   obtenerUsuarioActual,
   cargarProductos,
+  cargarProductosFirestoreCrudos,
   cargarComercios,
   cargarListas,
   cargarMesaTrabajo,
   cargarPreferencias,
   cargarConfirmaciones,
   registrarResultadoCarga,
+  fusionarProductoLocalFirestore,
+  fusionarProductosLocalFirestore,
   obtenerEstadoDominio,
   obtenerResumenFuentes,
   obtenerEtiquetaFuente,

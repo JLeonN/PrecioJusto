@@ -169,6 +169,10 @@ class IndexedDbAdapter {
     this.espacioTrabajo = valorNormalizado || 'compartido'
   }
 
+  obtenerEspacioTrabajo() {
+    return this.espacioTrabajo
+  }
+
   async _obtenerBaseDatos() {
     if (this.baseDatos) return this.baseDatos
     return this.promesaInicializacion

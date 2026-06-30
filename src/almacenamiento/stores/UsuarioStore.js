@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { TIPOS_USUARIO } from '../constantes/PreparacionFirebase.js'
 import autenticacionFirebaseService from '../servicios/AutenticacionFirebaseService.js'
+import { configurarEspacioTrabajoAlmacenamiento } from '../servicios/AlmacenamientoService.js'
 import usuarioActualService from '../servicios/UsuarioActualService.js'
 
 export const useUsuarioStore = defineStore('usuario', () => {
@@ -37,9 +38,19 @@ export const useUsuarioStore = defineStore('usuario', () => {
     }
   }
 
+  function configurarEspacioTrabajoUsuario(usuarioFirebase) {
+    if (!usuarioFirebase?.id) {
+      configurarEspacioTrabajoAlmacenamiento('compartido')
+      return
+    }
+
+    configurarEspacioTrabajoAlmacenamiento(`uid-${usuarioFirebase.id}`)
+  }
+
   async function aplicarUsuarioAutenticado(usuarioFirebase) {
     const usuarioAnteriorId = usuarioActualService.obtenerUsuarioIdActual()
     usuario.value = usuarioFirebase
+    configurarEspacioTrabajoUsuario(usuarioFirebase)
 
     if (usuarioFirebase) {
       usuarioActualService.cambiarUsuarioActual({

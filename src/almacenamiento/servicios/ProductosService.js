@@ -18,7 +18,10 @@
 
 import { adaptadorActual } from './AlmacenamientoService.js'
 import { normalizarEscalasPorCantidad, obtenerResumenEscalas } from '../../utils/EscalasCantidadUtils.js'
-import { PREFIJO_PRODUCTOS } from '../constantes/ClavesAlmacenamiento.js'
+import {
+  CLAVE_CACHE_FIRESTORE_PRODUCTOS_META,
+  PREFIJO_PRODUCTOS,
+} from '../constantes/ClavesAlmacenamiento.js'
 import { ESTADOS_SINCRONIZACION, ORIGENES_FOTO } from '../constantes/PreparacionFirebase.js'
 import firestoreProductosService from './FirestoreProductosService.js'
 import usuarioActualService from './UsuarioActualService.js'
@@ -609,6 +612,62 @@ class ProductosService {
     return producto
   }
 
+  async guardarProductoEnCacheLocal(producto) {
+    try {
+      if (!producto?.id) return false
+
+      const clave = `${this.prefijoProductos}${producto.id}`
+      return await this.adaptador.guardar(clave, producto)
+    } catch (error) {
+      console.error('Error al guardar producto en caché local:', error)
+      return false
+    }
+  }
+
+  async guardarProductosEnCacheLocal(productos = [], opciones = {}) {
+    const tamanoLote = Number(opciones.tamanoLote || 20)
+    let guardados = 0
+
+    for (let indice = 0; indice < productos.length; indice += tamanoLote) {
+      const lote = productos.slice(indice, indice + tamanoLote)
+
+      for (const producto of lote) {
+        if (producto?.eliminado) {
+          await this.eliminarProductoDeCacheLocal(producto.id)
+          continue
+        }
+
+        const guardado = await this.guardarProductoEnCacheLocal(producto)
+        if (guardado) guardados++
+      }
+
+      await this._cederHilo()
+    }
+
+    return guardados
+  }
+
+  async eliminarProductoDeCacheLocal(productoId) {
+    try {
+      const clave = `${this.prefijoProductos}${productoId}`
+      return await this.adaptador.eliminar(clave)
+    } catch (error) {
+      console.error(`Error al eliminar producto ${productoId} del caché local:`, error)
+      return false
+    }
+  }
+
+  async obtenerMetaCacheFirestore() {
+    return (await this.adaptador.obtener(CLAVE_CACHE_FIRESTORE_PRODUCTOS_META)) || null
+  }
+
+  async guardarMetaCacheFirestore(meta) {
+    return this.adaptador.guardar(CLAVE_CACHE_FIRESTORE_PRODUCTOS_META, {
+      ...meta,
+      fechaGuardado: new Date().toISOString(),
+    })
+  }
+
   _esDataUriImagen(valor) {
     return /^data:image\/[a-zA-Z0-9.+-]+;base64,/.test(String(valor || '').trim())
   }
@@ -645,6 +704,10 @@ class ProductosService {
     const resultado = await Promise.race([promesa, timeout])
     clearTimeout(timeoutId)
     return resultado
+  }
+
+  _cederHilo() {
+    return new Promise((resolve) => setTimeout(resolve, 0))
   }
 
   // ========================================

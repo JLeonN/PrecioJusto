@@ -24,6 +24,8 @@ import fuentePrincipalFirestoreService from '../servicios/FuentePrincipalFiresto
 import productosService from '../servicios/ProductosService.js'
 import { useUsuarioStore } from './UsuarioStore.js'
 
+const TIEMPO_MINIMO_REFRESCO_FIRESTORE_MS = 3 * 60 * 1000
+
 export const useProductosStore = defineStore('productos', () => {
   // ========================================
   // 📊 ESTADO
@@ -130,7 +132,7 @@ export const useProductosStore = defineStore('productos', () => {
    *     }))
    *   })
    */
-  async function cargarProductos() {
+  async function cargarProductos(opciones = {}) {
     cargando.value = true
     error.value = null
 
@@ -139,12 +141,36 @@ export const useProductosStore = defineStore('productos', () => {
 
       const usuarioStore = useUsuarioStore()
       await usuarioStore.esperarSesionLista()
+      const usuarioActual = fuentePrincipalFirestoreService.obtenerUsuarioActual()
+      const datosLocales = await productosService.obtenerTodos()
+      const productosLocalesVisibles = fuentePrincipalFirestoreService.fusionarProductosLocalFirestore(
+        datosLocales,
+        [],
+      )
 
-      const resultado = await fuentePrincipalFirestoreService.cargarProductos({
-        cargarLocal: () => productosService.obtenerTodos(),
-      })
-      productos.value = resultado.datos || []
-      fuenteDatos.value = resultado
+      productos.value = productosLocalesVisibles
+      fuenteDatos.value = {
+        ...fuentePrincipalFirestoreService.crearEstadoInicial(
+          fuentePrincipalFirestoreService.DOMINIOS.PRODUCTOS,
+        ),
+        datos: productosLocalesVisibles,
+        fechaActualizacion: new Date().toISOString(),
+      }
+
+      if (!fuentePrincipalFirestoreService.debeUsarFirestore(usuarioActual)) {
+        console.log(`Productos cargados: ${productos.value.length}`)
+        return
+      }
+
+      if (productosLocalesVisibles.length > 0) {
+        cargando.value = false
+        if (opciones.sincronizarFondo !== false) {
+          void sincronizarProductosDesdeFirestore({ datosLocales })
+        }
+      } else {
+        await sincronizarProductosDesdeFirestore({ datosLocales, forzar: true })
+      }
+
       console.log(`Productos cargados: ${productos.value.length}`)
     } catch (err) {
       console.error('❌ Error al cargar productos:', err)
@@ -159,7 +185,68 @@ export const useProductosStore = defineStore('productos', () => {
    * Fuerza una recarga completa (útil para pull-to-refresh)
    */
   async function recargarProductos() {
-    await cargarProductos()
+    await cargarProductos({ sincronizarFondo: false })
+    await sincronizarProductosDesdeFirestore({
+      datosLocales: productos.value,
+      forzar: true,
+    })
+  }
+
+  async function sincronizarProductosDesdeFirestore({ datosLocales = [], forzar = false } = {}) {
+    const usuarioActual = fuentePrincipalFirestoreService.obtenerUsuarioActual()
+    if (!fuentePrincipalFirestoreService.debeUsarFirestore(usuarioActual)) return
+
+    if (!forzar && (await cacheFirestoreReciente(usuarioActual.id))) return
+
+    sincronizando.value = true
+    errorSincronizacion.value = null
+
+    try {
+      const resultado = await fuentePrincipalFirestoreService.cargarProductosFirestoreCrudos({
+        usuarioId: usuarioActual.id,
+      })
+
+      fuenteDatos.value = resultado
+
+      if (resultado.error || !Array.isArray(resultado.datos)) {
+        errorSincronizacion.value = resultado.mensaje || 'No se pudo actualizar desde la nube.'
+        return
+      }
+
+      const productosFusionados = fuentePrincipalFirestoreService.fusionarProductosLocalFirestore(
+        datosLocales,
+        resultado.datos,
+      )
+      const productosEliminados = resultado.datos.filter((producto) => producto?.eliminado)
+
+      productos.value = productosFusionados
+      for (const producto of productosEliminados) {
+        await productosService.eliminarProductoDeCacheLocal(producto.id)
+      }
+      await productosService.guardarProductosEnCacheLocal(productosFusionados)
+      await productosService.guardarMetaCacheFirestore({
+        usuarioId: usuarioActual.id,
+        fechaUltimaSincronizacion: new Date().toISOString(),
+        fechaUltimoIntento: new Date().toISOString(),
+        cantidadRemota: resultado.datos.length,
+        versionCache: 1,
+      })
+    } catch (err) {
+      console.error('Error al sincronizar productos desde Firestore:', err)
+      errorSincronizacion.value = 'No se pudo actualizar desde la nube.'
+    } finally {
+      sincronizando.value = false
+    }
+  }
+
+  async function cacheFirestoreReciente(usuarioId) {
+    const meta = await productosService.obtenerMetaCacheFirestore()
+    if (!meta || meta.usuarioId !== usuarioId || !meta.fechaUltimaSincronizacion) return false
+
+    const fecha = new Date(meta.fechaUltimaSincronizacion).getTime()
+    if (!Number.isFinite(fecha)) return false
+
+    return Date.now() - fecha < TIEMPO_MINIMO_REFRESCO_FIRESTORE_MS
   }
 
   // ========================================

@@ -5,7 +5,7 @@ import firestoreMesaTrabajoService from './FirestoreMesaTrabajoService.js'
 import firestorePreferenciasService from './FirestorePreferenciasService.js'
 import firestoreProductosService from './FirestoreProductosService.js'
 import inventarioMigracionFirebaseService from './InventarioMigracionFirebaseService.js'
-import { adaptadorActual } from './AlmacenamientoService.js'
+import { adaptadorActual, ejecutarConEspacioTrabajoAlmacenamiento } from './AlmacenamientoService.js'
 import {
   CLAVE_COMERCIOS,
   CLAVE_LISTA_JUSTA,
@@ -46,7 +46,15 @@ function tieneDatosLocalesMigrables(resumen = {}) {
 
 async function obtenerDecision(usuarioId) {
   if (!usuarioId) return null
-  return (await adaptadorActual.obtener(obtenerClaveDecision(usuarioId))) || null
+
+  const clave = obtenerClaveDecision(usuarioId)
+  const decisionActual = await adaptadorActual.obtener(clave)
+  if (decisionActual) return decisionActual
+
+  return (
+    (await ejecutarConEspacioTrabajoAlmacenamiento('compartido', () => adaptadorActual.obtener(clave))) ||
+    null
+  )
 }
 
 async function guardarDecision(usuarioId, decision) {
@@ -69,35 +77,37 @@ async function borrarPorPrefijo(prefijo) {
 }
 
 async function borrarDatosLocalesMigrables() {
-  const [productos, confirmaciones] = await Promise.all([
-    borrarPorPrefijo(PREFIJO_PRODUCTOS),
-    borrarPorPrefijo(PREFIJO_CONFIRMACIONES),
-  ])
-  const [backups, colas] = await Promise.all([
-    borrarPorPrefijo(PREFIJO_BACKUP_MIGRACION_FIREBASE),
-    borrarPorPrefijo(PREFIJO_COLA_SINCRONIZACION),
-  ])
+  return ejecutarConEspacioTrabajoAlmacenamiento('compartido', async () => {
+    const [productos, confirmaciones] = await Promise.all([
+      borrarPorPrefijo(PREFIJO_PRODUCTOS),
+      borrarPorPrefijo(PREFIJO_CONFIRMACIONES),
+    ])
+    const [backups, colas] = await Promise.all([
+      borrarPorPrefijo(PREFIJO_BACKUP_MIGRACION_FIREBASE),
+      borrarPorPrefijo(PREFIJO_COLA_SINCRONIZACION),
+    ])
 
-  const clavesDirectas = [
-    CLAVE_COMERCIOS,
-    CLAVE_LISTA_JUSTA,
-    CLAVE_PREFERENCIAS_USUARIO,
-    CLAVE_SESION_ESCANEO,
-  ]
-  const resultadosDirectos = await Promise.all(
-    clavesDirectas.map(async (clave) => ({
-      clave,
-      borrado: await adaptadorActual.eliminar(clave),
-    })),
-  )
+    const clavesDirectas = [
+      CLAVE_COMERCIOS,
+      CLAVE_LISTA_JUSTA,
+      CLAVE_PREFERENCIAS_USUARIO,
+      CLAVE_SESION_ESCANEO,
+    ]
+    const resultadosDirectos = await Promise.all(
+      clavesDirectas.map(async (clave) => ({
+        clave,
+        borrado: await adaptadorActual.eliminar(clave),
+      })),
+    )
 
-  return {
-    productos,
-    confirmaciones,
-    backups,
-    colas,
-    clavesDirectas: resultadosDirectos.filter((resultado) => resultado.borrado).length,
-  }
+    return {
+      productos,
+      confirmaciones,
+      backups,
+      colas,
+      clavesDirectas: resultadosDirectos.filter((resultado) => resultado.borrado).length,
+    }
+  })
 }
 
 async function cuentaFirestoreTieneDatos(usuarioId) {

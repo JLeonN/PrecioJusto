@@ -5,6 +5,7 @@ export const CLAVE_CONTADOR_GRACIAS = 'contadorGracias'
 export const CLAVE_LISTA_JUSTA = 'lista_justa'
 export const CLAVE_PREFERENCIAS_USUARIO = 'preferencias_usuario'
 export const CLAVE_SESION_ESCANEO = 'sesion_escaneo'
+export const CLAVE_CACHE_FIRESTORE_PRODUCTOS_META = 'cacheFirestoreProductosMeta'
 
 export const PREFIJO_BACKUP_MIGRACION_FIREBASE = 'backupMigracionFirebase_'
 export const PREFIJO_COLA_SINCRONIZACION = 'colaSincronizacion_'
