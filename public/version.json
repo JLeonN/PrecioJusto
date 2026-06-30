@@ -1,5 +1,5 @@
 {
-  "versionDisponible": "1.2.6",
+  "versionDisponible": "1.2.7",
   "urlPlayStore": "https://play.google.com/store/apps/details?id=com.preciojusto.app",
   "mostrarActualizacion": true,
   "cambios": {
@@ -7,9 +7,9 @@
       {
         "apartado": "Actualizaciones",
         "novedades": [
-          "Se corrigió un cierre inesperado al guardar datos antiguos en la nube.",
-          "La app ahora prepara productos, comercios, listas y mesa de trabajo sin cargar fotos pesadas en memoria.",
-          "Las fotos guardadas en este dispositivo se mantienen locales y no bloquean el guardado de tus datos."
+          "Mis Productos ahora muestra primero los datos guardados en este dispositivo y actualiza en segundo plano.",
+          "Se mejoró la separación de datos entre cuentas para evitar mezclas al cambiar de usuario.",
+          "Las fotos locales de productos se conservan aunque la nube no tenga una copia de esa imagen."
         ]
       }
     ]
