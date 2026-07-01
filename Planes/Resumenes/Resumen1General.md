@@ -39,6 +39,8 @@ La app está desarrollada con **Vue.js 3**, **Quasar Framework** y **Capacitor**
 
 - **Pinia** (gestión de estado global)
 - **Patrón Strategy** (adaptadores de almacenamiento)
+- **Firebase Auth + Firestore** para datos privados por cuenta
+- **Cache local por usuario** para mostrar datos del dispositivo primero y actualizar desde la nube en segundo plano
 
 ### APIs Externas
 
