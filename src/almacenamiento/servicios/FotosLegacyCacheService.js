@@ -5,6 +5,7 @@ import {
   CLAVE_SESION_ESCANEO,
   PREFIJO_PRODUCTOS,
 } from '../constantes/ClavesAlmacenamiento.js'
+import fotosLocalesService from './FotosLocalesService.js'
 
 function esBase64Imagen(valor) {
   return /^data:image\/[a-zA-Z0-9.+-]+;base64,/.test(String(valor || '').trim())
@@ -80,12 +81,12 @@ async function recuperarFotoProducto(producto) {
   if (!producto?.id || tieneImagenActual(producto, 'imagen', 'imagenUrl')) return producto
 
   const legacy = await obtenerProductoLegacy(producto.id)
-  return copiarCamposImagen(producto, legacy, {
+  return fotosLocalesService.protegerProducto(copiarCamposImagen(producto, legacy, {
     campoImagen: 'imagen',
     campoFuente: 'fotoFuente',
     campoUrl: 'imagenUrl',
     campoRuta: 'imagenRutaStorage',
-  })
+  }))
 }
 
 async function recuperarFotosProductos(productos = []) {
@@ -95,14 +96,14 @@ async function recuperarFotosProductos(productos = []) {
     recuperados.push(await recuperarFotoProducto(producto))
   }
 
-  return recuperados
+  return fotosLocalesService.protegerProductos(recuperados)
 }
 
 async function recuperarFotosComercios(comercios = []) {
   const comerciosLegacy = await obtenerComerciosLegacy()
   const legacyPorComercio = new Map(comerciosLegacy.map((comercio) => [String(comercio.id), comercio]))
 
-  return comercios.map((comercio) => {
+  const recuperados = comercios.map((comercio) => {
     const legacy = legacyPorComercio.get(String(comercio?.id))
     const comercioConFoto = copiarCamposImagen(comercio, legacy, {
       campoImagen: 'foto',
@@ -127,13 +128,15 @@ async function recuperarFotosComercios(comercios = []) {
       ),
     }
   })
+
+  return fotosLocalesService.protegerComercios(recuperados)
 }
 
 async function recuperarFotosListas(listas = []) {
   const listasLegacy = await obtenerListasLegacy()
   const legacyPorLista = new Map(listasLegacy.map((lista) => [String(lista.id), lista]))
 
-  return listas.map((lista) => {
+  const recuperadas = listas.map((lista) => {
     const legacy = legacyPorLista.get(String(lista?.id))
     const itemsLegacy = new Map((legacy?.items || []).map((item) => [String(item.id), item]))
 
@@ -149,13 +152,15 @@ async function recuperarFotosListas(listas = []) {
       ),
     }
   })
+
+  return fotosLocalesService.protegerListas(recuperadas)
 }
 
 async function recuperarFotosMesa(items = []) {
   const itemsLegacy = await obtenerMesaLegacy()
   const legacyPorItem = new Map(itemsLegacy.map((item) => [String(item.id), item]))
 
-  return items.map((item) => {
+  const recuperados = items.map((item) => {
     const legacy = legacyPorItem.get(String(item?.id))
     const itemConFoto = copiarCamposImagen(item, legacy, {
       campoImagen: 'imagen',
@@ -176,6 +181,8 @@ async function recuperarFotosMesa(items = []) {
       }),
     }
   })
+
+  return fotosLocalesService.protegerItemsMesa(recuperados)
 }
 
 export default {

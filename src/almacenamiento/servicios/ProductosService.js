@@ -23,6 +23,7 @@ import {
   PREFIJO_PRODUCTOS,
 } from '../constantes/ClavesAlmacenamiento.js'
 import { ESTADOS_SINCRONIZACION, ORIGENES_FOTO } from '../constantes/PreparacionFirebase.js'
+import fotosLocalesService from './FotosLocalesService.js'
 import firestoreProductosService from './FirestoreProductosService.js'
 import usuarioActualService from './UsuarioActualService.js'
 
@@ -75,13 +76,14 @@ class ProductosService {
       producto = this._calcularCamposAutomaticos(producto)
 
       // Guardar en el adaptador
+      const productoParaCache = await fotosLocalesService.protegerProducto(producto)
       const clave = `${this.prefijoProductos}${producto.id}`
-      const guardado = await this.adaptador.guardar(clave, producto)
+      const guardado = await this.adaptador.guardar(clave, productoParaCache)
 
       if (guardado) {
-        producto.sincronizacionFirestore = await this._sincronizarProductoFirestore(producto)
+        productoParaCache.sincronizacionFirestore = await this._sincronizarProductoFirestore(producto)
         console.log(`Producto guardado: ${producto.nombre} (ID: ${producto.id})`)
-        return producto
+        return productoParaCache
       }
 
       return null
@@ -167,12 +169,15 @@ class ProductosService {
     try {
       const clave = `${this.prefijoProductos}${productoId}`
       const producto = await this.adaptador.obtener(clave)
+      const productoProtegido = producto
+        ? await fotosLocalesService.protegerProducto(producto)
+        : null
 
-      if (producto) {
-        console.log(`Producto obtenido: ${producto.nombre}`)
+      if (productoProtegido) {
+        console.log(`Producto obtenido: ${productoProtegido.nombre}`)
       }
 
-      return producto
+      return productoProtegido
     } catch (error) {
       console.error(`Error al obtener producto ${productoId}:`, error)
       return null
@@ -192,7 +197,7 @@ class ProductosService {
   async obtenerTodos() {
     try {
       const resultados = await this.adaptador.listarTodo(this.prefijoProductos)
-      const productos = resultados.map((r) => r.valor)
+      const productos = await fotosLocalesService.protegerProductos(resultados.map((r) => r.valor))
 
       console.log(`Obtenidos ${productos.length} productos`)
       return productos
@@ -616,8 +621,9 @@ class ProductosService {
     try {
       if (!producto?.id) return false
 
+      const productoParaCache = await fotosLocalesService.protegerProducto(producto)
       const clave = `${this.prefijoProductos}${producto.id}`
-      return await this.adaptador.guardar(clave, producto)
+      return await this.adaptador.guardar(clave, productoParaCache)
     } catch (error) {
       console.error('Error al guardar producto en caché local:', error)
       return false
@@ -625,7 +631,7 @@ class ProductosService {
   }
 
   async guardarProductosEnCacheLocal(productos = [], opciones = {}) {
-    const tamanoLote = Number(opciones.tamanoLote || 20)
+    const tamanoLote = Number(opciones.tamanoLote || 10)
     let guardados = 0
 
     for (let indice = 0; indice < productos.length; indice += tamanoLote) {

@@ -5,6 +5,7 @@ import {
   CLAVE_LISTA_JUSTA,
 } from '../constantes/ClavesAlmacenamiento.js'
 import { ESTADOS_SINCRONIZACION, ORIGENES_FOTO } from '../constantes/PreparacionFirebase.js'
+import fotosLocalesService from './FotosLocalesService.js'
 import firestoreListasJustasService from './FirestoreListasJustasService.js'
 import usuarioActualService from './UsuarioActualService.js'
 
@@ -20,7 +21,8 @@ class ListaJustaService {
     try {
       const datos = await this.adaptador.obtener(CLAVE_LISTAS)
       const listas = Array.isArray(datos?.listas) ? datos.listas : []
-      return listas.map((lista) => this._normalizarLista(lista))
+      const listasNormalizadas = listas.map((lista) => this._normalizarLista(lista))
+      return await fotosLocalesService.protegerListas(listasNormalizadas)
     } catch (error) {
       console.error('Error al obtener listas de Lista Justa:', error)
       return []
@@ -29,7 +31,8 @@ class ListaJustaService {
 
   async guardarListas(listas) {
     try {
-      const guardado = await this.adaptador.guardar(CLAVE_LISTAS, { listas })
+      const listasParaCache = await fotosLocalesService.protegerListas(listas)
+      const guardado = await this.adaptador.guardar(CLAVE_LISTAS, { listas: listasParaCache })
 
       if (guardado) {
         await this.sincronizarListasFirestore(listas)
@@ -376,7 +379,8 @@ class ListaJustaService {
 
   async guardarListasEnCacheLocal(listas = []) {
     try {
-      return await this.adaptador.guardar(CLAVE_LISTAS, { listas })
+      const listasParaCache = await fotosLocalesService.protegerListas(listas)
+      return await this.adaptador.guardar(CLAVE_LISTAS, { listas: listasParaCache })
     } catch (error) {
       console.error('Error al guardar cache local de Lista Justa:', error)
       return false

@@ -30,8 +30,16 @@ import IndexedDbAdapter from '../adaptadores/IndexedDbAdapter.js'
  * 4. Crear índices en Firestore para queries rápidas
  * 5. Configurar reglas de seguridad en Firebase Console
  */
-// En web usa IndexedDB para soportar Firebase con más datos; en móvil nativo usa Capacitor Storage.
-const ADAPTADOR_ACTIVO = Capacitor.isNativePlatform() ? 'capacitor' : 'indexeddb'
+function soportaIndexedDb() {
+  return typeof window !== 'undefined' && Boolean(window.indexedDB)
+}
+
+// IndexedDB es la ruta principal también en Android: evita OOM al leer JSON gigante desde Preferences.
+const ADAPTADOR_ACTIVO = soportaIndexedDb()
+  ? 'indexeddb'
+  : Capacitor.isNativePlatform()
+    ? 'capacitor'
+    : 'local'
 
 // Mapa de fábricas para no inicializar adaptadores que no se usan en la plataforma actual.
 const fabricasAdaptadores = {

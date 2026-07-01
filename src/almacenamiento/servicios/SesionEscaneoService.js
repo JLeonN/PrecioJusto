@@ -3,6 +3,7 @@ import {
   CLAVE_CACHE_FIRESTORE_MESA_META,
   CLAVE_SESION_ESCANEO,
 } from '../constantes/ClavesAlmacenamiento.js'
+import fotosLocalesService from './FotosLocalesService.js'
 
 const CLAVE_RESPALDO_URGENTE_SESION_ESCANEO = 'precioJustoRespaldoUrgenteSesionEscaneo'
 
@@ -13,7 +14,12 @@ class SesionEscaneoService {
 
   async obtenerSesion() {
     try {
-      return await this.adaptador.obtener(CLAVE_SESION_ESCANEO)
+      const sesion = await this.adaptador.obtener(CLAVE_SESION_ESCANEO)
+      if (!Array.isArray(sesion?.items)) return sesion
+      return {
+        ...sesion,
+        items: await fotosLocalesService.protegerItemsMesa(sesion.items),
+      }
     } catch (error) {
       console.error('Error al obtener sesión de escaneo:', error)
       return null
@@ -30,8 +36,9 @@ class SesionEscaneoService {
 
   async guardarSesion(items) {
     try {
-      this.guardarRespaldoUrgente(items)
-      return await this.adaptador.guardar(CLAVE_SESION_ESCANEO, { items })
+      const itemsParaCache = await fotosLocalesService.protegerItemsMesa(items)
+      this.guardarRespaldoUrgente(itemsParaCache)
+      return await this.adaptador.guardar(CLAVE_SESION_ESCANEO, { items: itemsParaCache })
     } catch (error) {
       console.error('Error al guardar sesión de escaneo:', error)
       return false
@@ -50,8 +57,9 @@ class SesionEscaneoService {
 
   async guardarItemsEnCacheLocal(items = []) {
     try {
-      this.guardarRespaldoUrgente(items)
-      return await this.adaptador.guardar(CLAVE_SESION_ESCANEO, { items })
+      const itemsParaCache = await fotosLocalesService.protegerItemsMesa(items)
+      this.guardarRespaldoUrgente(itemsParaCache)
+      return await this.adaptador.guardar(CLAVE_SESION_ESCANEO, { items: itemsParaCache })
     } catch (error) {
       console.error('Error al guardar cache local de Mesa:', error)
       return false
@@ -82,9 +90,10 @@ class SesionEscaneoService {
   guardarRespaldoUrgente(items) {
     try {
       if (typeof window === 'undefined' || !window.localStorage) return false
+      const itemsLivianos = fotosLocalesService.quitarFotosPesadasMesa(items)
       window.localStorage.setItem(
         CLAVE_RESPALDO_URGENTE_SESION_ESCANEO,
-        JSON.stringify({ items, fecha: new Date().toISOString() }),
+        JSON.stringify({ items: itemsLivianos, fecha: new Date().toISOString() }),
       )
       return true
     } catch (error) {
@@ -99,7 +108,7 @@ class SesionEscaneoService {
       const respaldo = window.localStorage.getItem(CLAVE_RESPALDO_URGENTE_SESION_ESCANEO)
       if (!respaldo) return []
       const datos = JSON.parse(respaldo)
-      return Array.isArray(datos?.items) ? datos.items : []
+      return Array.isArray(datos?.items) ? fotosLocalesService.quitarFotosPesadasMesa(datos.items) : []
     } catch (error) {
       console.warn('No se pudo leer respaldo urgente de Mesa:', error)
       return []

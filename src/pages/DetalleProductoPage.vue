@@ -103,6 +103,7 @@ import PieAtribucion from '../components/Compartidos/PieAtribucion.vue'
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
 import { useConfirmacionesStore } from '../almacenamiento/stores/confirmacionesStore.js'
 import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
+import fotosLocalesService from '../almacenamiento/servicios/FotosLocalesService.js'
 import { useDialogoAgregarPrecio } from '../composables/useDialogoAgregarPrecio.js'
 import { useQuasar } from 'quasar'
 
@@ -129,7 +130,7 @@ async function alGuardarPrecioDetalle() {
   /* Refrescar producto local con datos actualizados del store */
   const productoActualizado = productosStore.obtenerProductoPorId(route.params.id)
   if (productoActualizado) {
-    productoActual.value = productoActualizado
+    productoActual.value = await prepararProductoDetalle(productoActualizado)
   }
 }
 
@@ -149,8 +150,8 @@ const accionFab = computed(() => [
 // Sincronizar productoActual cuando el store actualiza el producto (ej: edición de categoría)
 watch(
   () => productosStore.productos.find((p) => p.id == route.params.id),
-  (productoActualizado) => {
-    if (productoActualizado) productoActual.value = productoActualizado
+  async (productoActualizado) => {
+    if (productoActualizado) productoActual.value = await prepararProductoDetalle(productoActualizado)
   },
 )
 
@@ -229,6 +230,14 @@ const preciosFiltrados = computed(() => {
 // ========================================
 
 /* Cargar producto desde el store */
+async function prepararProductoDetalle(producto) {
+  if (!producto || producto.imagen || !producto.fotoLocalId) return producto
+  const imagenLocal = await fotosLocalesService.hidratarFotoLocal(producto.fotoLocalId)
+  return imagenLocal
+    ? { ...producto, imagen: imagenLocal }
+    : producto
+}
+
 async function cargarProducto() {
   cargando.value = true
   error.value = null
@@ -250,7 +259,7 @@ async function cargarProducto() {
       return
     }
 
-    productoActual.value = producto
+    productoActual.value = await prepararProductoDetalle(producto)
     console.log('✅ Producto cargado:', producto.nombre)
   } catch (err) {
     console.error('❌ Error al cargar producto:', err)

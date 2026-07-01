@@ -4,6 +4,7 @@ import {
   CLAVE_COMERCIOS,
 } from '../constantes/ClavesAlmacenamiento.js'
 import { ESTADOS_SINCRONIZACION, ORIGENES_FOTO } from '../constantes/PreparacionFirebase.js'
+import fotosLocalesService from './FotosLocalesService.js'
 import firestoreComerciosService from './FirestoreComerciosService.js'
 import usuarioActualService from './UsuarioActualService.js'
 
@@ -137,11 +138,16 @@ function similitudTexto(texto1, texto2) {
 async function obtenerTodos() {
   try {
     const comercios = await adaptadorActual.obtener(CLAVE_COMERCIOS)
-    return comercios || []
+    return await fotosLocalesService.protegerComercios(comercios || [])
   } catch (error) {
     console.error('Error al obtener comercios:', error)
     return []
   }
+}
+
+async function guardarComerciosProtegidos(comercios = []) {
+  const comerciosParaCache = await fotosLocalesService.protegerComercios(comercios)
+  return adaptadorActual.guardar(CLAVE_COMERCIOS, comerciosParaCache)
 }
 
 /**
@@ -295,10 +301,10 @@ async function agregarComercio(datosComercio) {
 
   comercios.push(nuevoComercio)
   await prepararFotosStorageComercio(nuevoComercio)
-  await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  await guardarComerciosProtegidos(comercios)
   nuevoComercio.sincronizacionFirestore = await sincronizarComercioFirestore(nuevoComercio)
 
-  return nuevoComercio
+  return await fotosLocalesService.protegerComercio(nuevoComercio)
 }
 
 /**
@@ -322,9 +328,9 @@ async function editarComercio(id, datosActualizados) {
 
   await prepararFotosStorageComercio(comercios[indice])
 
-  await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  await guardarComerciosProtegidos(comercios)
   comercios[indice].sincronizacionFirestore = await sincronizarComercioFirestore(comercios[indice])
-  return comercios[indice]
+  return await fotosLocalesService.protegerComercio(comercios[indice])
 }
 
 /**
@@ -340,7 +346,7 @@ async function eliminarComercio(id) {
     return false // No se encontró
   }
 
-  await adaptadorActual.guardar(CLAVE_COMERCIOS, comerciosFiltrados)
+  await guardarComerciosProtegidos(comerciosFiltrados)
   await sincronizarEliminacionComercioFirestore(id)
   return true
 }
@@ -375,9 +381,9 @@ async function agregarDireccion(comercioId, datosDireccion) {
   comercio.fechaActualizacion = ahora
   await prepararFotosStorageComercio(comercio)
 
-  await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  await guardarComerciosProtegidos(comercios)
   comercio.sincronizacionFirestore = await sincronizarComercioFirestore(comercio)
-  return comercio
+  return await fotosLocalesService.protegerComercio(comercio)
 }
 
 /**
@@ -409,9 +415,9 @@ async function editarDireccion(comercioId, direccionId, datosDireccion) {
 
   comercio.fechaActualizacion = new Date().toISOString()
   await prepararFotosStorageComercio(comercio)
-  await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  await guardarComerciosProtegidos(comercios)
   comercio.sincronizacionFirestore = await sincronizarComercioFirestore(comercio)
-  return comercio
+  return await fotosLocalesService.protegerComercio(comercio)
 }
 
 /**
@@ -435,7 +441,7 @@ async function eliminarDireccion(comercioId, direccionId) {
 
   comercio.fechaActualizacion = new Date().toISOString()
   await prepararFotosStorageComercio(comercio)
-  await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  await guardarComerciosProtegidos(comercios)
   await sincronizarComercioFirestore(comercio)
   return true
 }
@@ -458,7 +464,7 @@ async function actualizarFotoDireccion(comercioId, direccionId, base64) {
   direccion.fechaActualizacion = new Date().toISOString()
   comercio.fechaActualizacion = new Date().toISOString()
   await prepararFotosStorageComercio(comercio)
-  await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  await guardarComerciosProtegidos(comercios)
   await sincronizarComercioFirestore(comercio)
   return true
 }
@@ -489,7 +495,7 @@ async function registrarUsoComercio(comercioId, direccionId = null) {
     }
   }
 
-  await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  await guardarComerciosProtegidos(comercios)
   await sincronizarComercioFirestore(comercio)
 }
 
@@ -595,7 +601,7 @@ async function prepararFotosStorageComercio(comercio) {
 
 async function guardarComerciosEnCacheLocal(comercios = []) {
   try {
-    return await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+    return await guardarComerciosProtegidos(comercios)
   } catch (error) {
     console.error('Error al guardar comercios en caché local:', error)
     return false
