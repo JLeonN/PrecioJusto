@@ -1,5 +1,8 @@
 import { adaptadorActual } from './AlmacenamientoService.js'
-import { CLAVE_COMERCIOS } from '../constantes/ClavesAlmacenamiento.js'
+import {
+  CLAVE_CACHE_FIRESTORE_COMERCIOS_META,
+  CLAVE_COMERCIOS,
+} from '../constantes/ClavesAlmacenamiento.js'
 import { ESTADOS_SINCRONIZACION, ORIGENES_FOTO } from '../constantes/PreparacionFirebase.js'
 import firestoreComerciosService from './FirestoreComerciosService.js'
 import usuarioActualService from './UsuarioActualService.js'
@@ -590,6 +593,26 @@ async function prepararFotosStorageComercio(comercio) {
   return comercio
 }
 
+async function guardarComerciosEnCacheLocal(comercios = []) {
+  try {
+    return await adaptadorActual.guardar(CLAVE_COMERCIOS, comercios)
+  } catch (error) {
+    console.error('Error al guardar comercios en caché local:', error)
+    return false
+  }
+}
+
+async function obtenerMetaCacheFirestore() {
+  return (await adaptadorActual.obtener(CLAVE_CACHE_FIRESTORE_COMERCIOS_META)) || null
+}
+
+async function guardarMetaCacheFirestore(meta) {
+  return adaptadorActual.guardar(CLAVE_CACHE_FIRESTORE_COMERCIOS_META, {
+    ...meta,
+    fechaGuardado: new Date().toISOString(),
+  })
+}
+
 async function sincronizarFotosPendientesStorage() {
   return 0
 }
@@ -630,6 +653,9 @@ async function ejecutarConTimeoutFirestore(promesa) {
 
 export default {
   obtenerTodos,
+  guardarComerciosEnCacheLocal,
+  obtenerMetaCacheFirestore,
+  guardarMetaCacheFirestore,
   buscarPorNombre,
   buscarPorId,
   agregarComercio,

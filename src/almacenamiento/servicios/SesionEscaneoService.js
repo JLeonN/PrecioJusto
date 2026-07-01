@@ -1,5 +1,8 @@
 import { adaptadorActual } from './AlmacenamientoService.js'
-import { CLAVE_SESION_ESCANEO } from '../constantes/ClavesAlmacenamiento.js'
+import {
+  CLAVE_CACHE_FIRESTORE_MESA_META,
+  CLAVE_SESION_ESCANEO,
+} from '../constantes/ClavesAlmacenamiento.js'
 
 const CLAVE_RESPALDO_URGENTE_SESION_ESCANEO = 'precioJustoRespaldoUrgenteSesionEscaneo'
 
@@ -17,10 +20,11 @@ class SesionEscaneoService {
     }
   }
 
-  async obtenerItemsSesion() {
+  async obtenerItemsSesion(opciones = {}) {
     const sesion = await this.obtenerSesion()
     const items = Array.isArray(sesion?.items) ? sesion.items : []
     if (items.length > 0) return items
+    if (opciones.usarRespaldoUrgente === false) return []
     return this.obtenerItemsRespaldoUrgente()
   }
 
@@ -40,6 +44,37 @@ class SesionEscaneoService {
       return await this.adaptador.eliminar(CLAVE_SESION_ESCANEO)
     } catch (error) {
       console.error('Error al eliminar sesión de escaneo:', error)
+      return false
+    }
+  }
+
+  async guardarItemsEnCacheLocal(items = []) {
+    try {
+      this.guardarRespaldoUrgente(items)
+      return await this.adaptador.guardar(CLAVE_SESION_ESCANEO, { items })
+    } catch (error) {
+      console.error('Error al guardar cache local de Mesa:', error)
+      return false
+    }
+  }
+
+  async obtenerMetaCacheFirestore() {
+    try {
+      return (await this.adaptador.obtener(CLAVE_CACHE_FIRESTORE_MESA_META)) || null
+    } catch (error) {
+      console.warn('No se pudo leer meta cache Firestore de Mesa:', error)
+      return null
+    }
+  }
+
+  async guardarMetaCacheFirestore(meta = {}) {
+    try {
+      return await this.adaptador.guardar(CLAVE_CACHE_FIRESTORE_MESA_META, {
+        ...meta,
+        fechaGuardado: new Date().toISOString(),
+      })
+    } catch (error) {
+      console.warn('No se pudo guardar meta cache Firestore de Mesa:', error)
       return false
     }
   }

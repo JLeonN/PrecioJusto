@@ -7,6 +7,8 @@ import { MONEDA_DEFAULT } from '../constantes/Monedas.js'
 import { detectarMonedaPorRegion, obtenerMonedaFallback } from '../servicios/DeteccionRegionService.js'
 import { useUsuarioStore } from './UsuarioStore.js'
 
+const TIEMPO_MINIMO_REFRESCO_FIRESTORE_MS = 3 * 60 * 1000
+
 export const usePreferenciasStore = defineStore('preferencias', () => {
   const modoMoneda = ref('automatica')
   const modoTema = ref('sistema')
@@ -85,18 +87,50 @@ export const usePreferenciasStore = defineStore('preferencias', () => {
     try {
       const usuarioStore = useUsuarioStore()
       await usuarioStore.esperarSesionLista()
+      const usuarioActual = fuentePrincipalFirestoreService.obtenerUsuarioActual()
+      const preferenciasLocales = await preferenciasService.obtenerPreferencias()
 
-      const resultado = await fuentePrincipalFirestoreService.cargarPreferencias({
-        cargarLocal: () => preferenciasService.obtenerPreferencias(),
+      aplicarPreferencias(preferenciasLocales)
+      fuenteDatos.value = {
+        ...fuentePrincipalFirestoreService.crearEstadoInicial(
+          fuentePrincipalFirestoreService.DOMINIOS.PREFERENCIAS,
+        ),
+        datos: preferenciasLocales,
+        fechaActualizacion: new Date().toISOString(),
+      }
+
+      if (!fuentePrincipalFirestoreService.debeUsarFirestore(usuarioActual)) return
+      if (await cacheFirestoreReciente(usuarioActual.id)) return
+
+      const resultado = await fuentePrincipalFirestoreService.cargarPreferenciasFirestoreCrudas({
+        usuarioId: usuarioActual.id,
       })
+      fuenteDatos.value = resultado
 
       if (resultado.datos) {
         aplicarPreferencias(resultado.datos)
-        fuenteDatos.value = resultado
+        await preferenciasService.guardarPreferenciasEnCacheLocal(resultado.datos)
+        await preferenciasService.guardarMetaCacheFirestore({
+          usuarioId: usuarioActual.id,
+          fechaUltimaSincronizacion: new Date().toISOString(),
+          fechaUltimoIntento: new Date().toISOString(),
+          cantidadRemota: 1,
+          versionCache: 1,
+        })
       }
     } catch (error) {
       console.error('Error al hidratar preferencias desde la fuente principal:', error)
     }
+  }
+
+  async function cacheFirestoreReciente(usuarioId) {
+    const meta = await preferenciasService.obtenerMetaCacheFirestore()
+    if (!meta || meta.usuarioId !== usuarioId || !meta.fechaUltimaSincronizacion) return false
+
+    const fecha = new Date(meta.fechaUltimaSincronizacion).getTime()
+    if (!Number.isFinite(fecha)) return false
+
+    return Date.now() - fecha < TIEMPO_MINIMO_REFRESCO_FIRESTORE_MS
   }
 
   function aplicarPreferencias(preferencias = {}) {

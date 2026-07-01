@@ -20,6 +20,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { ESTADOS_SINCRONIZACION } from '../constantes/PreparacionFirebase.js'
+import fotosLegacyCacheService from '../servicios/FotosLegacyCacheService.js'
 import fuentePrincipalFirestoreService from '../servicios/FuentePrincipalFirestoreService.js'
 import productosService from '../servicios/ProductosService.js'
 import { useUsuarioStore } from './UsuarioStore.js'
@@ -143,12 +144,17 @@ export const useProductosStore = defineStore('productos', () => {
       await usuarioStore.esperarSesionLista()
       const usuarioActual = fuentePrincipalFirestoreService.obtenerUsuarioActual()
       const datosLocales = await productosService.obtenerTodos()
-      const productosLocalesVisibles = fuentePrincipalFirestoreService.fusionarProductosLocalFirestore(
+      const productosLocalesBase = fuentePrincipalFirestoreService.fusionarProductosLocalFirestore(
         datosLocales,
         [],
       )
+      const productosLocalesVisibles =
+        await fotosLegacyCacheService.recuperarFotosProductos(productosLocalesBase)
 
       productos.value = productosLocalesVisibles
+      if (productosLocalesVisibles.length > 0) {
+        await productosService.guardarProductosEnCacheLocal(productosLocalesVisibles)
+      }
       fuenteDatos.value = {
         ...fuentePrincipalFirestoreService.crearEstadoInicial(
           fuentePrincipalFirestoreService.DOMINIOS.PRODUCTOS,
@@ -213,10 +219,12 @@ export const useProductosStore = defineStore('productos', () => {
         return
       }
 
-      const productosFusionados = fuentePrincipalFirestoreService.fusionarProductosLocalFirestore(
+      const productosFusionadosBase = fuentePrincipalFirestoreService.fusionarProductosLocalFirestore(
         datosLocales,
         resultado.datos,
       )
+      const productosFusionados =
+        await fotosLegacyCacheService.recuperarFotosProductos(productosFusionadosBase)
       const productosEliminados = resultado.datos.filter((producto) => producto?.eliminado)
 
       productos.value = productosFusionados

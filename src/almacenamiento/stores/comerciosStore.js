@@ -1,8 +1,11 @@
 import { defineStore } from 'pinia'
 import ComerciosService from '../servicios/ComerciosService'
+import fotosLegacyCacheService from '../servicios/FotosLegacyCacheService.js'
 import fuentePrincipalFirestoreService from '../servicios/FuentePrincipalFirestoreService.js'
 import { useProductosStore } from './productosStore.js'
 import { useUsuarioStore } from './UsuarioStore.js'
+
+const TIEMPO_MINIMO_REFRESCO_FIRESTORE_MS = 3 * 60 * 1000
 
 /**
  * COMERCIOS STORE
@@ -16,6 +19,8 @@ export const useComerciStore = defineStore('comercios', {
     comercios: [],
     cargando: false,
     error: null,
+    sincronizando: false,
+    errorSincronizacion: null,
     fuenteDatos: fuentePrincipalFirestoreService.crearEstadoInicial(
       fuentePrincipalFirestoreService.DOMINIOS.COMERCIOS,
     ),
@@ -153,12 +158,35 @@ export const useComerciStore = defineStore('comercios', {
       try {
         const usuarioStore = useUsuarioStore()
         await usuarioStore.esperarSesionLista()
+        const usuarioActual = fuentePrincipalFirestoreService.obtenerUsuarioActual()
+        const datosLocales = await ComerciosService.obtenerTodos()
+        const comerciosLocalesBase = fuentePrincipalFirestoreService.fusionarComerciosLocalFirestore(
+          datosLocales,
+          [],
+        )
+        const comerciosLocalesVisibles =
+          await fotosLegacyCacheService.recuperarFotosComercios(comerciosLocalesBase)
 
-        const resultado = await fuentePrincipalFirestoreService.cargarComercios({
-          cargarLocal: () => ComerciosService.obtenerTodos(),
-        })
-        this.comercios = resultado.datos || []
-        this.fuenteDatos = resultado
+        this.comercios = comerciosLocalesVisibles
+        if (comerciosLocalesVisibles.length > 0) {
+          await ComerciosService.guardarComerciosEnCacheLocal(comerciosLocalesVisibles)
+        }
+        this.fuenteDatos = {
+          ...fuentePrincipalFirestoreService.crearEstadoInicial(
+            fuentePrincipalFirestoreService.DOMINIOS.COMERCIOS,
+          ),
+          datos: comerciosLocalesVisibles,
+          fechaActualizacion: new Date().toISOString(),
+        }
+
+        if (!fuentePrincipalFirestoreService.debeUsarFirestore(usuarioActual)) return
+
+        if (comerciosLocalesVisibles.length > 0) {
+          this.cargando = false
+          void this.sincronizarComerciosDesdeFirestore({ datosLocales })
+        } else {
+          await this.sincronizarComerciosDesdeFirestore({ datosLocales, forzar: true })
+        }
       } catch (error) {
         console.error('Error al cargar comercios:', error)
         this.error = 'No se pudieron cargar los comercios'
@@ -166,6 +194,59 @@ export const useComerciStore = defineStore('comercios', {
       } finally {
         this.cargando = false
       }
+    },
+
+    async sincronizarComerciosDesdeFirestore({ datosLocales = [], forzar = false } = {}) {
+      const usuarioActual = fuentePrincipalFirestoreService.obtenerUsuarioActual()
+      if (!fuentePrincipalFirestoreService.debeUsarFirestore(usuarioActual)) return
+      if (!forzar && (await this.cacheFirestoreReciente(usuarioActual.id))) return
+
+      this.sincronizando = true
+      this.errorSincronizacion = null
+
+      try {
+        const resultado = await fuentePrincipalFirestoreService.cargarComerciosFirestoreCrudos({
+          usuarioId: usuarioActual.id,
+        })
+        this.fuenteDatos = resultado
+
+        if (resultado.error || !Array.isArray(resultado.datos)) {
+          this.errorSincronizacion = resultado.mensaje || 'No se pudo actualizar desde la nube.'
+          return
+        }
+
+        const comerciosFusionadosBase = fuentePrincipalFirestoreService.fusionarComerciosLocalFirestore(
+          datosLocales,
+          resultado.datos,
+        )
+        const comerciosFusionados =
+          await fotosLegacyCacheService.recuperarFotosComercios(comerciosFusionadosBase)
+
+        this.comercios = comerciosFusionados
+        await ComerciosService.guardarComerciosEnCacheLocal(comerciosFusionados)
+        await ComerciosService.guardarMetaCacheFirestore({
+          usuarioId: usuarioActual.id,
+          fechaUltimaSincronizacion: new Date().toISOString(),
+          fechaUltimoIntento: new Date().toISOString(),
+          cantidadRemota: resultado.datos.length,
+          versionCache: 1,
+        })
+      } catch (error) {
+        console.error('Error al sincronizar comercios desde Firestore:', error)
+        this.errorSincronizacion = 'No se pudo actualizar desde la nube.'
+      } finally {
+        this.sincronizando = false
+      }
+    },
+
+    async cacheFirestoreReciente(usuarioId) {
+      const meta = await ComerciosService.obtenerMetaCacheFirestore()
+      if (!meta || meta.usuarioId !== usuarioId || !meta.fechaUltimaSincronizacion) return false
+
+      const fecha = new Date(meta.fechaUltimaSincronizacion).getTime()
+      if (!Number.isFinite(fecha)) return false
+
+      return Date.now() - fecha < TIEMPO_MINIMO_REFRESCO_FIRESTORE_MS
     },
 
     /**

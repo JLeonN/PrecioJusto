@@ -5,7 +5,10 @@
 
 import { adaptadorActual } from './AlmacenamientoService.js'
 import { MONEDA_DEFAULT } from '../constantes/Monedas.js'
-import { CLAVE_PREFERENCIAS_USUARIO } from '../constantes/ClavesAlmacenamiento.js'
+import {
+  CLAVE_CACHE_FIRESTORE_PREFERENCIAS_META,
+  CLAVE_PREFERENCIAS_USUARIO,
+} from '../constantes/ClavesAlmacenamiento.js'
 import { ESTADOS_SINCRONIZACION } from '../constantes/PreparacionFirebase.js'
 import firestorePreferenciasService from './FirestorePreferenciasService.js'
 import usuarioActualService from './UsuarioActualService.js'
@@ -82,6 +85,37 @@ class PreferenciasService {
     } catch (error) {
       console.error('Error al guardar preferencias:', error)
       throw error
+    }
+  }
+
+  async guardarPreferenciasEnCacheLocal(preferencias) {
+    try {
+      const normalizadas = normalizarPreferencias(preferencias)
+      return await this.adaptador.guardar(this.clavePreferencias, normalizadas)
+    } catch (error) {
+      console.error('Error al guardar cache local de preferencias:', error)
+      return false
+    }
+  }
+
+  async obtenerMetaCacheFirestore() {
+    try {
+      return (await this.adaptador.obtener(CLAVE_CACHE_FIRESTORE_PREFERENCIAS_META)) || null
+    } catch (error) {
+      console.warn('No se pudo leer meta cache Firestore de preferencias:', error)
+      return null
+    }
+  }
+
+  async guardarMetaCacheFirestore(meta = {}) {
+    try {
+      return await this.adaptador.guardar(CLAVE_CACHE_FIRESTORE_PREFERENCIAS_META, {
+        ...meta,
+        fechaGuardado: new Date().toISOString(),
+      })
+    } catch (error) {
+      console.warn('No se pudo guardar meta cache Firestore de preferencias:', error)
+      return false
     }
   }
 

@@ -80,17 +80,22 @@ function fusionarProductoLocalFirestore(productoLocal, productoFirestore) {
   if (productoFirestore.eliminado) return { ...productoFirestore }
 
   const imagenLocal = productoLocal?.imagen
+  const imagenUrlLocal = productoLocal?.imagenUrl
   const imagenRemota = productoFirestore?.imagen || productoFirestore?.imagenUrl
+  const tieneFotoRemota = esImagenBase64(imagenRemota) || esUrlImagen(imagenRemota)
   const conservaFotoLocal =
-    esImagenBase64(imagenLocal) && !esUrlImagen(imagenRemota) && !esImagenBase64(imagenRemota)
-  const imagen = conservaFotoLocal ? imagenLocal : imagenRemota || null
+    !tieneFotoRemota && (esImagenBase64(imagenLocal) || esUrlImagen(imagenLocal) || esUrlImagen(imagenUrlLocal))
+  const imagen = conservaFotoLocal ? imagenLocal || imagenUrlLocal : imagenRemota || null
 
   return {
     ...productoLocal,
     ...productoFirestore,
     imagen,
-    imagenUrl: productoFirestore.imagenUrl || (esUrlImagen(imagen) ? imagen : null),
+    imagenUrl: productoFirestore.imagenUrl || (esUrlImagen(imagen) ? imagen : productoLocal?.imagenUrl || null),
     imagenRutaStorage: productoFirestore.imagenRutaStorage || null,
+    fotoFuente: conservaFotoLocal
+      ? productoLocal?.fotoFuente || productoFirestore?.fotoFuente || null
+      : productoFirestore?.fotoFuente || productoLocal?.fotoFuente || null,
     sincronizacionFoto: conservaFotoLocal
       ? productoLocal?.sincronizacionFoto
       : productoFirestore?.sincronizacionFoto,
@@ -121,6 +126,169 @@ function fusionarProductosLocalFirestore(productosLocales = [], productosFiresto
   }
 
   return prepararProductosVisuales([...productosPorId.values()])
+}
+
+function resolverImagenLocalRemota(local, remoto, campoImagen, campoUrl) {
+  const imagenLocal = local?.[campoImagen]
+  const imagenUrlLocal = local?.[campoUrl]
+  const imagenRemota = remoto?.[campoImagen] || remoto?.[campoUrl]
+
+  if (esImagenBase64(imagenRemota) || esUrlImagen(imagenRemota)) {
+    return imagenRemota
+  }
+
+  if (esImagenBase64(imagenLocal) || esUrlImagen(imagenLocal)) {
+    return imagenLocal
+  }
+
+  if (esUrlImagen(imagenUrlLocal)) {
+    return imagenUrlLocal
+  }
+
+  return imagenRemota || null
+}
+
+function fusionarComercioLocalFirestore(comercioLocal, comercioFirestore) {
+  if (!comercioFirestore) return comercioLocal
+  if (comercioFirestore.eliminado) return { ...comercioFirestore }
+
+  const direccionesLocales = new Map(
+    (comercioLocal?.direcciones || []).map((direccion) => [String(direccion.id), direccion]),
+  )
+
+  return {
+    ...comercioLocal,
+    ...comercioFirestore,
+    foto: resolverImagenLocalRemota(comercioLocal, comercioFirestore, 'foto', 'fotoUrl'),
+    fotoUrl: comercioFirestore.fotoUrl || null,
+    fotoRutaStorage: comercioFirestore.fotoRutaStorage || null,
+    fotoFuente: comercioFirestore.fotoFuente || comercioLocal?.fotoFuente || null,
+    direcciones: (comercioFirestore.direcciones || []).map((direccionFirestore) => {
+      const direccionLocal = direccionesLocales.get(String(direccionFirestore.id))
+      return {
+        ...direccionLocal,
+        ...direccionFirestore,
+        foto: resolverImagenLocalRemota(direccionLocal, direccionFirestore, 'foto', 'fotoUrl'),
+        fotoUrl: direccionFirestore.fotoUrl || null,
+        fotoRutaStorage: direccionFirestore.fotoRutaStorage || null,
+        fotoFuente: direccionFirestore.fotoFuente || direccionLocal?.fotoFuente || null,
+      }
+    }),
+  }
+}
+
+function fusionarComerciosLocalFirestore(comerciosLocales = [], comerciosFirestore = []) {
+  const comerciosPorId = new Map()
+
+  for (const comercioLocal of comerciosLocales) {
+    if (!comercioLocal?.id || comercioLocal.eliminado) continue
+    comerciosPorId.set(String(comercioLocal.id), comercioLocal)
+  }
+
+  for (const comercioFirestore of comerciosFirestore) {
+    if (!comercioFirestore?.id) continue
+    const clave = String(comercioFirestore.id)
+    const fusionado = fusionarComercioLocalFirestore(comerciosPorId.get(clave), comercioFirestore)
+
+    if (fusionado?.eliminado) {
+      comerciosPorId.delete(clave)
+      continue
+    }
+
+    comerciosPorId.set(clave, fusionado)
+  }
+
+  return prepararComerciosVisuales([...comerciosPorId.values()])
+}
+
+function fusionarListaLocalFirestore(listaLocal, listaFirestore) {
+  if (!listaFirestore) return listaLocal
+  if (listaFirestore.eliminado || listaFirestore.estadoGeneral === 'eliminada') return { ...listaFirestore }
+
+  const itemsLocales = new Map((listaLocal?.items || []).map((item) => [String(item.id), item]))
+
+  return {
+    ...listaLocal,
+    ...listaFirestore,
+    items: (listaFirestore.items || []).map((itemFirestore) => {
+      const itemLocal = itemsLocales.get(String(itemFirestore.id))
+      return {
+        ...itemLocal,
+        ...itemFirestore,
+        imagen: resolverImagenLocalRemota(itemLocal, itemFirestore, 'imagen', 'imagenUrl'),
+        imagenUrl: itemFirestore.imagenUrl || null,
+        imagenRutaStorage: itemFirestore.imagenRutaStorage || null,
+        fotoFuente: itemFirestore.fotoFuente || itemLocal?.fotoFuente || null,
+      }
+    }),
+  }
+}
+
+function fusionarListasLocalFirestore(listasLocales = [], listasFirestore = []) {
+  const listasPorId = new Map()
+
+  for (const listaLocal of listasLocales) {
+    if (!listaLocal?.id || listaLocal.eliminado || listaLocal.estadoGeneral === 'eliminada') continue
+    listasPorId.set(String(listaLocal.id), listaLocal)
+  }
+
+  for (const listaFirestore of listasFirestore) {
+    if (!listaFirestore?.id) continue
+    const clave = String(listaFirestore.id)
+    const fusionada = fusionarListaLocalFirestore(listasPorId.get(clave), listaFirestore)
+
+    if (fusionada?.eliminado || fusionada?.estadoGeneral === 'eliminada') {
+      listasPorId.delete(clave)
+      continue
+    }
+
+    listasPorId.set(clave, fusionada)
+  }
+
+  return prepararListasVisuales([...listasPorId.values()])
+}
+
+function fusionarMesaLocalFirestore(itemsLocales = [], itemsFirestore = []) {
+  const itemsPorId = new Map()
+
+  for (const itemLocal of itemsLocales) {
+    if (!itemLocal?.id) continue
+    itemsPorId.set(String(itemLocal.id), itemLocal)
+  }
+
+  for (const itemFirestore of itemsFirestore) {
+    if (!itemFirestore?.id) continue
+    const clave = String(itemFirestore.id)
+    const itemLocal = itemsPorId.get(clave)
+    const datosOriginalesLocal = itemLocal?.datosOriginales
+    const datosOriginalesFirestore = itemFirestore.datosOriginales
+    const datosOriginales =
+      datosOriginalesLocal || datosOriginalesFirestore
+        ? {
+          ...datosOriginalesLocal,
+          ...datosOriginalesFirestore,
+          imagen: resolverImagenLocalRemota(
+            datosOriginalesLocal,
+            datosOriginalesFirestore,
+            'imagen',
+            'imagenUrl',
+          ),
+          fotoFuente: datosOriginalesFirestore?.fotoFuente || datosOriginalesLocal?.fotoFuente || null,
+        }
+        : null
+
+    itemsPorId.set(clave, {
+      ...itemLocal,
+      ...itemFirestore,
+      imagen: resolverImagenLocalRemota(itemLocal, itemFirestore, 'imagen', 'imagenUrl'),
+      imagenUrl: itemFirestore.imagenUrl || null,
+      imagenRutaStorage: itemFirestore.imagenRutaStorage || null,
+      fotoFuente: itemFirestore.fotoFuente || itemLocal?.fotoFuente || null,
+      datosOriginales,
+    })
+  }
+
+  return [...itemsPorId.values()]
 }
 
 function prepararComerciosVisuales(comercios = []) {
@@ -343,6 +511,46 @@ async function cargarComercios({ cargarLocal }) {
   })
 }
 
+async function cargarComerciosFirestoreCrudos({ usuarioId } = {}) {
+  const conexion = await obtenerConexionSegura()
+  const usuario = obtenerUsuarioActual()
+  const idUsuario = usuarioId || usuario.id
+
+  if (!debeUsarFirestore(usuario) || !idUsuario) {
+    return crearResultado({
+      dominio: DOMINIOS.COMERCIOS,
+      datos: [],
+      fuente: FUENTES_DATOS.LOCAL,
+      mensaje: 'Usuario local: se usa almacenamiento local.',
+      conexion,
+    })
+  }
+
+  try {
+    const comercios = await firestoreComerciosService.obtenerComerciosUsuario({
+      usuarioId: idUsuario,
+      limite: 200,
+    })
+
+    return crearResultado({
+      dominio: DOMINIOS.COMERCIOS,
+      datos: comercios,
+      fuente: resolverFuenteFirestore(conexion),
+      mensaje: 'Datos actualizados desde la nube.',
+      conexion,
+    })
+  } catch (error) {
+    return crearResultado({
+      dominio: DOMINIOS.COMERCIOS,
+      datos: null,
+      fuente: FUENTES_DATOS.ERROR,
+      mensaje: 'No se pudieron actualizar comercios desde la nube.',
+      conexion,
+      error: error.message || 'Error al cargar Firestore.',
+    })
+  }
+}
+
 async function cargarListas({ cargarLocal }) {
   return cargarConFuentePrincipal({
     dominio: DOMINIOS.LISTAS,
@@ -350,6 +558,46 @@ async function cargarListas({ cargarLocal }) {
     cargarFirestore: () => firestoreListasJustasService.obtenerListasJustasUsuario(),
     normalizarFirestore: prepararListasVisuales,
   })
+}
+
+async function cargarListasFirestoreCrudas({ usuarioId } = {}) {
+  const conexion = await obtenerConexionSegura()
+  const usuario = obtenerUsuarioActual()
+  const idUsuario = usuarioId || usuario.id
+
+  if (!debeUsarFirestore(usuario) || !idUsuario) {
+    return crearResultado({
+      dominio: DOMINIOS.LISTAS,
+      datos: [],
+      fuente: FUENTES_DATOS.LOCAL,
+      mensaje: 'Usuario local: se usa almacenamiento local.',
+      conexion,
+    })
+  }
+
+  try {
+    const listas = await firestoreListasJustasService.obtenerListasJustasUsuario({
+      usuarioId: idUsuario,
+      limite: 100,
+    })
+
+    return crearResultado({
+      dominio: DOMINIOS.LISTAS,
+      datos: listas,
+      fuente: resolverFuenteFirestore(conexion),
+      mensaje: 'Datos actualizados desde la nube.',
+      conexion,
+    })
+  } catch (error) {
+    return crearResultado({
+      dominio: DOMINIOS.LISTAS,
+      datos: null,
+      fuente: FUENTES_DATOS.ERROR,
+      mensaje: 'No se pudieron actualizar listas desde la nube.',
+      conexion,
+      error: error.message || 'Error al cargar Firestore.',
+    })
+  }
 }
 
 async function cargarMesaTrabajo({ cargarLocal }) {
@@ -360,12 +608,91 @@ async function cargarMesaTrabajo({ cargarLocal }) {
   })
 }
 
+async function cargarMesaTrabajoFirestoreCruda({ usuarioId } = {}) {
+  const conexion = await obtenerConexionSegura()
+  const usuario = obtenerUsuarioActual()
+  const idUsuario = usuarioId || usuario.id
+
+  if (!debeUsarFirestore(usuario) || !idUsuario) {
+    return crearResultado({
+      dominio: DOMINIOS.MESA_TRABAJO,
+      datos: [],
+      fuente: FUENTES_DATOS.LOCAL,
+      mensaje: 'Usuario local: se usa almacenamiento local.',
+      conexion,
+    })
+  }
+
+  try {
+    const items = await firestoreMesaTrabajoService.obtenerItemsMesaTrabajoUsuario({
+      usuarioId: idUsuario,
+      limite: 300,
+    })
+
+    return crearResultado({
+      dominio: DOMINIOS.MESA_TRABAJO,
+      datos: items,
+      fuente: resolverFuenteFirestore(conexion),
+      mensaje: 'Datos actualizados desde la nube.',
+      conexion,
+    })
+  } catch (error) {
+    return crearResultado({
+      dominio: DOMINIOS.MESA_TRABAJO,
+      datos: null,
+      fuente: FUENTES_DATOS.ERROR,
+      mensaje: 'No se pudo actualizar la mesa desde la nube.',
+      conexion,
+      error: error.message || 'Error al cargar Firestore.',
+    })
+  }
+}
+
 async function cargarPreferencias({ cargarLocal }) {
   return cargarConFuentePrincipal({
     dominio: DOMINIOS.PREFERENCIAS,
     cargarLocal,
     cargarFirestore: () => firestorePreferenciasService.obtenerPreferenciasUsuario(),
   })
+}
+
+async function cargarPreferenciasFirestoreCrudas({ usuarioId } = {}) {
+  const conexion = await obtenerConexionSegura()
+  const usuario = obtenerUsuarioActual()
+  const idUsuario = usuarioId || usuario.id
+
+  if (!debeUsarFirestore(usuario) || !idUsuario) {
+    return crearResultado({
+      dominio: DOMINIOS.PREFERENCIAS,
+      datos: null,
+      fuente: FUENTES_DATOS.LOCAL,
+      mensaje: 'Usuario local: se usa almacenamiento local.',
+      conexion,
+    })
+  }
+
+  try {
+    const preferencias = await firestorePreferenciasService.obtenerPreferenciasUsuario({
+      usuarioId: idUsuario,
+    })
+
+    return crearResultado({
+      dominio: DOMINIOS.PREFERENCIAS,
+      datos: preferencias,
+      fuente: resolverFuenteFirestore(conexion),
+      mensaje: 'Datos actualizados desde la nube.',
+      conexion,
+    })
+  } catch (error) {
+    return crearResultado({
+      dominio: DOMINIOS.PREFERENCIAS,
+      datos: null,
+      fuente: FUENTES_DATOS.ERROR,
+      mensaje: 'No se pudieron actualizar preferencias desde la nube.',
+      conexion,
+      error: error.message || 'Error al cargar Firestore.',
+    })
+  }
 }
 
 async function cargarConfirmaciones({ cargarLocal }) {
@@ -405,13 +732,20 @@ export default {
   cargarProductos,
   cargarProductosFirestoreCrudos,
   cargarComercios,
+  cargarComerciosFirestoreCrudos,
   cargarListas,
+  cargarListasFirestoreCrudas,
   cargarMesaTrabajo,
+  cargarMesaTrabajoFirestoreCruda,
   cargarPreferencias,
+  cargarPreferenciasFirestoreCrudas,
   cargarConfirmaciones,
   registrarResultadoCarga,
   fusionarProductoLocalFirestore,
   fusionarProductosLocalFirestore,
+  fusionarComerciosLocalFirestore,
+  fusionarListasLocalFirestore,
+  fusionarMesaLocalFirestore,
   obtenerEstadoDominio,
   obtenerResumenFuentes,
   obtenerEtiquetaFuente,

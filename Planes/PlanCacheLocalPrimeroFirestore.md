@@ -52,8 +52,8 @@ Confirmar los puntos exactos donde la app bloquea la pantalla esperando Firestor
 - [x] Revisar `ProductosService.js` y confirmar que `guardarProducto()` sincroniza hacia Firestore.
 - [x] Revisar `FirestoreProductosService.js` y confirmar que `obtenerProductosUsuario()` solo trae pagina limitada por `fechaActualizacion`.
 - [x] Revisar `UsuarioStore.js`, `UsuarioActualService.js`, `AlmacenamientoService.js`, `IndexedDbAdapter.js` y `CapacitorAdapter.js` para confirmar separacion de cache por usuario.
-- [ ] Repetir auditoria rapida en comercios, Lista Justa, preferencias y mesa para ubicar stores y servicios equivalentes.
-- [ ] Documentar en el mismo plan cualquier archivo adicional encontrado antes de implementar.
+- [x] Repetir auditoria rapida en comercios, Lista Justa, preferencias y mesa para ubicar stores y servicios equivalentes.
+- [x] Documentar en el mismo plan cualquier archivo adicional encontrado antes de implementar.
 
 ## FASE 2: Separar Cache Local Por Usuario
 
@@ -84,7 +84,7 @@ Permitir guardar en el dispositivo datos recibidos desde Firestore sin reenviarl
 - [ ] No clonar ni serializar fotos base64 mas de lo necesario.
 - [ ] No modificar `fechaActualizacion` cuando el dato viene de Firestore.
 - [ ] Si el producto remoto esta marcado como `eliminado: true`, eliminarlo o marcarlo localmente sin volver a enviarlo a Firestore.
-- [ ] Dejar nombres de metodos equivalentes preparados para comercios, listas, preferencias y mesa cuando se extienda el patron.
+- [x] Dejar nombres de metodos equivalentes preparados para comercios, listas, preferencias y mesa cuando se extienda el patron.
 
 ## FASE 4: Implementar Local Primero En Mis Productos
 
@@ -143,23 +143,23 @@ Reducir consultas repetidas sin asumir que ya existe sincronizacion incremental 
 
 Recuperar fotos locales antiguas que quedaron en el espacio `compartido` cuando el cache paso a estar separado por usuario. Esta fase debe resolverse como helper global antes de extender el patron al resto.
 
-- [ ] Crear un helper global, por ejemplo `FotosLegacyCacheService`, para leer temporalmente desde `compartido` usando `ejecutarConEspacioTrabajoAlmacenamiento('compartido', ...)`.
-- [ ] El helper debe leer solo datos legacy necesarios para fotos desde estas claves reales: `PREFIJO_PRODUCTOS`, `CLAVE_COMERCIOS`, `CLAVE_LISTA_JUSTA` y `CLAVE_SESION_ESCANEO`.
-- [ ] El helper debe exponer funciones puras para fusionar fotos, sin guardar ni sincronizar por su cuenta.
-- [ ] Productos: buscar por `producto.id` y recuperar solo `imagen`, `fotoFuente`, `sincronizacionFoto`, `imagenUrl` externa si corresponde y `imagenRutaStorage`.
-- [ ] Comercios: buscar por `comercio.id` y recuperar solo `foto`, `fotoFuente`, `fotoUrl` externa si corresponde y `fotoRutaStorage`.
-- [ ] Direcciones: buscar por `comercio.id` + `direccion.id` y recuperar solo `foto`, `fotoFuente`, `fotoUrl` externa si corresponde y `fotoRutaStorage`.
-- [ ] Lista Justa: buscar por `lista.id` + `item.id` y recuperar solo `imagen`, `fotoFuente`, `imagenUrl` externa si corresponde y `imagenRutaStorage`.
-- [ ] Mesa de trabajo: buscar por `item.id` y recuperar solo `imagen`, `fotoFuente`, `imagenUrl` externa si corresponde, `imagenRutaStorage` y, si existe, `datosOriginales.imagen` con su `fotoFuente`.
-- [ ] No copiar nombre, precios, fechas, estado, comercio, moneda, cantidades ni ningun otro dato de negocio desde `compartido`.
-- [ ] No copiar fotos base64 a Firestore, backups, colas ni estados globales.
-- [ ] Guardar la foto recuperada en el cache local del usuario con metodos local-only del dominio correspondiente.
-- [ ] No subir la foto recuperada a Firestore ni Firebase Storage.
-- [ ] Si no existe foto legacy, dejar el item sin imagen y no mostrar error al usuario.
-- [ ] Integrar el helper en el merge de productos ya existente.
-- [ ] Integrar el helper en el merge de comercios/direcciones cuando se implemente comercios.
-- [ ] Integrar el helper en el merge de listas cuando se implemente Lista Justa.
-- [ ] Integrar el helper en el merge de mesa cuando se implemente mesa de trabajo.
+- [x] Crear un helper global, por ejemplo `FotosLegacyCacheService`, para leer temporalmente desde `compartido` usando `ejecutarConEspacioTrabajoAlmacenamiento('compartido', ...)`.
+- [x] El helper debe leer solo datos legacy necesarios para fotos desde estas claves reales: `PREFIJO_PRODUCTOS`, `CLAVE_COMERCIOS`, `CLAVE_LISTA_JUSTA` y `CLAVE_SESION_ESCANEO`.
+- [x] El helper debe exponer funciones puras para fusionar fotos, sin guardar ni sincronizar por su cuenta.
+- [x] Productos: buscar por `producto.id` y recuperar solo `imagen`, `fotoFuente`, `sincronizacionFoto`, `imagenUrl` externa si corresponde y `imagenRutaStorage`.
+- [x] Comercios: buscar por `comercio.id` y recuperar solo `foto`, `fotoFuente`, `fotoUrl` externa si corresponde y `fotoRutaStorage`.
+- [x] Direcciones: buscar por `comercio.id` + `direccion.id` y recuperar solo `foto`, `fotoFuente`, `fotoUrl` externa si corresponde y `fotoRutaStorage`.
+- [x] Lista Justa: buscar por `lista.id` + `item.id` y recuperar solo `imagen`, `fotoFuente`, `imagenUrl` externa si corresponde y `imagenRutaStorage`.
+- [x] Mesa de trabajo: buscar por `item.id` y recuperar solo `imagen`, `fotoFuente`, `imagenUrl` externa si corresponde, `imagenRutaStorage` y, si existe, `datosOriginales.imagen` con su `fotoFuente`.
+- [x] No copiar nombre, precios, fechas, estado, comercio, moneda, cantidades ni ningun otro dato de negocio desde `compartido`.
+- [x] No copiar fotos base64 a Firestore, backups, colas ni estados globales.
+- [x] Guardar la foto recuperada en el cache local del usuario con metodos local-only del dominio correspondiente.
+- [x] No subir la foto recuperada a Firestore ni Firebase Storage.
+- [x] Si no existe foto legacy, dejar el item sin imagen y no mostrar error al usuario.
+- [x] Integrar el helper en el merge de productos ya existente.
+- [x] Integrar el helper en el merge de comercios/direcciones cuando se implemente comercios.
+- [x] Integrar el helper en el merge de listas cuando se implemente Lista Justa.
+- [x] Integrar el helper en el merge de mesa cuando se implemente mesa de trabajo.
 - [ ] Probar con una cuenta que antes tenia fotos locales y confirmar que reaparecen si todavia existen en el dispositivo.
 
 ## FASE 8: Extender Patron A Otros Dominios
@@ -168,27 +168,27 @@ Recuperar fotos locales antiguas que quedaron en el espacio `compartido` cuando 
 
 Aplicar el patron validado de Mis Productos al resto de datos privados sin romper lo que ya sincroniza bien.
 
-- [ ] Auditar `ComerciosService`, `FirestoreComerciosService`, `comerciosStore` y paginas que llaman `cargarComercios()`.
-- [ ] En `ComerciosService`, agregar metodos local-only para guardar cache de comercios y direcciones sin llamar `sincronizarComercioFirestore`.
-- [ ] Aplicar local primero a comercios y direcciones usando `ComerciosService`, `FirestoreComerciosService` y `comerciosStore`.
-- [ ] Fusionar comercios por `id` preservando fotos locales de comercio y direcciones si Firestore no trae URL valida.
-- [ ] Usar recuperacion legacy global para `comercio.foto` y `direccion.foto`.
-- [ ] Guardar metadatos de ultima sincronizacion de comercios con una clave propia, por ejemplo `cacheFirestoreComerciosMeta`.
-- [ ] Auditar `ListaJustaService`, `FirestoreListasJustasService`, `ListaJustaStore` y paginas de Lista Justa.
-- [ ] En `ListaJustaService`, agregar metodos local-only para guardar cache de listas sin llamar `sincronizarListasFirestore`.
-- [ ] Aplicar local primero a Lista Justa usando `ListaJustaService`, `FirestoreListasJustasService` y `ListaJustaStore`.
-- [ ] Fusionar listas por `id` y preservar imagenes locales de items si existen.
-- [ ] Usar recuperacion legacy global para `lista.items[].imagen`.
-- [ ] Guardar metadatos de ultima sincronizacion de listas con una clave propia, por ejemplo `cacheFirestoreListasMeta`.
-- [ ] Auditar `PreferenciasService`, `FirestorePreferenciasService` y `preferenciasStore`.
-- [ ] En `PreferenciasService`, agregar guardado local-only de preferencias para cache remoto sin reenviar inmediatamente a Firestore.
-- [ ] Aplicar local primero a preferencias, manteniendo Firestore como fuente principal cuando responde.
-- [ ] Auditar `sesionEscaneoStore`, `FirestoreMesaTrabajoService`, `SesionEscaneoService` y `MesaTrabajoPage`.
-- [ ] En `SesionEscaneoService`, agregar metodos local-only para cache de mesa sin llamar `firestoreMesaTrabajoService`.
-- [ ] Aplicar local primero a mesa de trabajo y preservar imagenes locales de items si existen.
-- [ ] Revisar y ajustar `resolverCargaMesaConRespaldoLocal` para no migrar datos compartidos silenciosamente a la cuenta actual; el espacio `compartido` solo debe usarse para fotos legacy.
-- [ ] Usar recuperacion legacy global para `item.imagen` y `item.datosOriginales.imagen`.
-- [ ] Guardar metadatos de ultima sincronizacion de mesa con una clave propia, por ejemplo `cacheFirestoreMesaMeta`.
+- [x] Auditar `ComerciosService`, `FirestoreComerciosService`, `comerciosStore` y paginas que llaman `cargarComercios()`.
+- [x] En `ComerciosService`, agregar metodos local-only para guardar cache de comercios y direcciones sin llamar `sincronizarComercioFirestore`.
+- [x] Aplicar local primero a comercios y direcciones usando `ComerciosService`, `FirestoreComerciosService` y `comerciosStore`.
+- [x] Fusionar comercios por `id` preservando fotos locales de comercio y direcciones si Firestore no trae URL valida.
+- [x] Usar recuperacion legacy global para `comercio.foto` y `direccion.foto`.
+- [x] Guardar metadatos de ultima sincronizacion de comercios con una clave propia, por ejemplo `cacheFirestoreComerciosMeta`.
+- [x] Auditar `ListaJustaService`, `FirestoreListasJustasService`, `ListaJustaStore` y paginas de Lista Justa.
+- [x] En `ListaJustaService`, agregar metodos local-only para guardar cache de listas sin llamar `sincronizarListasFirestore`.
+- [x] Aplicar local primero a Lista Justa usando `ListaJustaService`, `FirestoreListasJustasService` y `ListaJustaStore`.
+- [x] Fusionar listas por `id` y preservar imagenes locales de items si existen.
+- [x] Usar recuperacion legacy global para `lista.items[].imagen`.
+- [x] Guardar metadatos de ultima sincronizacion de listas con una clave propia, por ejemplo `cacheFirestoreListasMeta`.
+- [x] Auditar `PreferenciasService`, `FirestorePreferenciasService` y `preferenciasStore`.
+- [x] En `PreferenciasService`, agregar guardado local-only de preferencias para cache remoto sin reenviar inmediatamente a Firestore.
+- [x] Aplicar local primero a preferencias, manteniendo Firestore como fuente principal cuando responde.
+- [x] Auditar `sesionEscaneoStore`, `FirestoreMesaTrabajoService`, `SesionEscaneoService` y `MesaTrabajoPage`.
+- [x] En `SesionEscaneoService`, agregar metodos local-only para cache de mesa sin llamar `firestoreMesaTrabajoService`.
+- [x] Aplicar local primero a mesa de trabajo y preservar imagenes locales de items si existen.
+- [x] Revisar y ajustar `resolverCargaMesaConRespaldoLocal` para no migrar datos compartidos silenciosamente a la cuenta actual; el espacio `compartido` solo debe usarse para fotos legacy.
+- [x] Usar recuperacion legacy global para `item.imagen` y `item.datosOriginales.imagen`.
+- [x] Guardar metadatos de ultima sincronizacion de mesa con una clave propia, por ejemplo `cacheFirestoreMesaMeta`.
 - [ ] Crear helpers compartidos solo si el patron ya se repitio al menos en productos y comercios.
 - [ ] Confirmar que cada dominio usa cache por usuario y no cache global compartida.
 - [ ] No cambiar reglas de migracion local preguntada salvo que una prueba demuestre que afecta este flujo.
@@ -214,7 +214,7 @@ Hacer que el usuario sienta la app rapida sin mostrar informacion tecnica innece
 
 Validar de forma ejecutable por IA y revisable por humano que la app carga rapido, conserva fotos locales y sincroniza sin mezclar usuarios.
 
-- [ ] Ejecutar `rg -n "\\x{00C3}|\\x{00C2}|\\x{00E2}|\\x{FFFD}" src Planes`.
+- [x] Ejecutar `rg -n "\\x{00C3}|\\x{00C2}|\\x{00E2}|\\x{FFFD}" src Planes`.
 - [x] Ejecutar `npm run lint`.
 - [x] Ejecutar `npm run build`.
 - [ ] Probar con una cuenta que tenga mas de 80 productos.
@@ -242,8 +242,8 @@ Validar de forma ejecutable por IA y revisable por humano que la app carga rapid
 - [x] Fase 4: Implementar Local Primero En Mis Productos
 - [x] Fase 5: Merge Sin Perder Fotos
 - [x] Fase 6: Control De Sincronizacion Y Lecturas
-- [ ] Fase 7: Recuperar Fotos Legacy Del Dispositivo
-- [ ] Fase 8: Extender Patron A Otros Dominios
+- [x] Fase 7: Recuperar Fotos Legacy Del Dispositivo
+- [x] Fase 8: Extender Patron A Otros Dominios
 - [ ] Fase 9: Ajustes De UX
 - [ ] Fase Testing
 

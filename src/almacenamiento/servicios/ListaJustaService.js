@@ -1,6 +1,9 @@
 ﻿import { adaptadorActual } from './AlmacenamientoService.js'
 
-import { CLAVE_LISTA_JUSTA } from '../constantes/ClavesAlmacenamiento.js'
+import {
+  CLAVE_CACHE_FIRESTORE_LISTAS_META,
+  CLAVE_LISTA_JUSTA,
+} from '../constantes/ClavesAlmacenamiento.js'
 import { ESTADOS_SINCRONIZACION, ORIGENES_FOTO } from '../constantes/PreparacionFirebase.js'
 import firestoreListasJustasService from './FirestoreListasJustasService.js'
 import usuarioActualService from './UsuarioActualService.js'
@@ -368,6 +371,36 @@ class ListaJustaService {
         item.imagenUrl = item.imagen
         item.imagenRutaStorage = null
       }
+    }
+  }
+
+  async guardarListasEnCacheLocal(listas = []) {
+    try {
+      return await this.adaptador.guardar(CLAVE_LISTAS, { listas })
+    } catch (error) {
+      console.error('Error al guardar cache local de Lista Justa:', error)
+      return false
+    }
+  }
+
+  async obtenerMetaCacheFirestore() {
+    try {
+      return (await this.adaptador.obtener(CLAVE_CACHE_FIRESTORE_LISTAS_META)) || null
+    } catch (error) {
+      console.warn('No se pudo leer meta cache Firestore de listas:', error)
+      return null
+    }
+  }
+
+  async guardarMetaCacheFirestore(meta = {}) {
+    try {
+      return await this.adaptador.guardar(CLAVE_CACHE_FIRESTORE_LISTAS_META, {
+        ...meta,
+        fechaGuardado: new Date().toISOString(),
+      })
+    } catch (error) {
+      console.warn('No se pudo guardar meta cache Firestore de listas:', error)
+      return false
     }
   }
 

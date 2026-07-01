@@ -2,11 +2,14 @@
 import { computed, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import fuentePrincipalFirestoreService from '../servicios/FuentePrincipalFirestoreService.js'
+import fotosLegacyCacheService from '../servicios/FotosLegacyCacheService.js'
 import ListaJustaService from '../servicios/ListaJustaService.js'
 import productosService from '../servicios/ProductosService.js'
 import { useProductosStore } from './productosStore.js'
 import { useSesionEscaneoStore } from './sesionEscaneoStore.js'
 import { useUsuarioStore } from './UsuarioStore.js'
+
+const TIEMPO_MINIMO_REFRESCO_FIRESTORE_MS = 3 * 60 * 1000
 
 export const useListaJustaStore = defineStore('listaJusta', () => {
   const quasar = useQuasar()
@@ -16,6 +19,8 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
   const listas = ref([])
   const cargando = ref(false)
   const error = ref(null)
+  const sincronizando = ref(false)
+  const errorSincronizacion = ref(null)
   const fuenteDatos = ref(
     fuentePrincipalFirestoreService.crearEstadoInicial(
       fuentePrincipalFirestoreService.DOMINIOS.LISTAS,
@@ -39,18 +44,94 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     try {
       const usuarioStore = useUsuarioStore()
       await usuarioStore.esperarSesionLista()
+      const usuarioActual = fuentePrincipalFirestoreService.obtenerUsuarioActual()
+      const datosLocales = await ListaJustaService.obtenerListas()
+      const listasLocalesBase = fuentePrincipalFirestoreService.fusionarListasLocalFirestore(
+        datosLocales,
+        [],
+      )
+      const listasLocalesVisibles =
+        await fotosLegacyCacheService.recuperarFotosListas(listasLocalesBase)
 
-      const resultado = await fuentePrincipalFirestoreService.cargarListas({
-        cargarLocal: () => ListaJustaService.obtenerListas(),
-      })
-      listas.value = resultado.datos || []
-      fuenteDatos.value = resultado
+      listas.value = listasLocalesVisibles
+      if (listasLocalesVisibles.length > 0) {
+        await ListaJustaService.guardarListasEnCacheLocal(listasLocalesVisibles)
+      }
+      fuenteDatos.value = {
+        ...fuentePrincipalFirestoreService.crearEstadoInicial(
+          fuentePrincipalFirestoreService.DOMINIOS.LISTAS,
+        ),
+        datos: listasLocalesVisibles,
+        fechaActualizacion: new Date().toISOString(),
+      }
+
+      if (!fuentePrincipalFirestoreService.debeUsarFirestore(usuarioActual)) return
+
+      if (listasLocalesVisibles.length > 0) {
+        cargando.value = false
+        void sincronizarListasDesdeFirestore({ datosLocales })
+      } else {
+        await sincronizarListasDesdeFirestore({ datosLocales, forzar: true })
+      }
     } catch (err) {
       error.value = 'No se pudieron cargar las listas.'
       console.error('Error al cargar listas de Lista Justa:', err)
     } finally {
       cargando.value = false
     }
+  }
+
+  async function sincronizarListasDesdeFirestore({ datosLocales = [], forzar = false } = {}) {
+    const usuarioActual = fuentePrincipalFirestoreService.obtenerUsuarioActual()
+    if (!fuentePrincipalFirestoreService.debeUsarFirestore(usuarioActual)) return
+    if (!forzar && (await cacheFirestoreReciente(usuarioActual.id))) return
+
+    sincronizando.value = true
+    errorSincronizacion.value = null
+
+    try {
+      const resultado = await fuentePrincipalFirestoreService.cargarListasFirestoreCrudas({
+        usuarioId: usuarioActual.id,
+      })
+      fuenteDatos.value = resultado
+
+      if (resultado.error || !Array.isArray(resultado.datos)) {
+        errorSincronizacion.value = resultado.mensaje || 'No se pudo actualizar desde la nube.'
+        return
+      }
+
+      const listasFusionadasBase = fuentePrincipalFirestoreService.fusionarListasLocalFirestore(
+        datosLocales,
+        resultado.datos,
+      )
+      const listasFusionadas =
+        await fotosLegacyCacheService.recuperarFotosListas(listasFusionadasBase)
+
+      listas.value = listasFusionadas
+      await ListaJustaService.guardarListasEnCacheLocal(listasFusionadas)
+      await ListaJustaService.guardarMetaCacheFirestore({
+        usuarioId: usuarioActual.id,
+        fechaUltimaSincronizacion: new Date().toISOString(),
+        fechaUltimoIntento: new Date().toISOString(),
+        cantidadRemota: resultado.datos.length,
+        versionCache: 1,
+      })
+    } catch (err) {
+      console.error('Error al sincronizar listas desde Firestore:', err)
+      errorSincronizacion.value = 'No se pudo actualizar desde la nube.'
+    } finally {
+      sincronizando.value = false
+    }
+  }
+
+  async function cacheFirestoreReciente(usuarioId) {
+    const meta = await ListaJustaService.obtenerMetaCacheFirestore()
+    if (!meta || meta.usuarioId !== usuarioId || !meta.fechaUltimaSincronizacion) return false
+
+    const fecha = new Date(meta.fechaUltimaSincronizacion).getTime()
+    if (!Number.isFinite(fecha)) return false
+
+    return Date.now() - fecha < TIEMPO_MINIMO_REFRESCO_FIRESTORE_MS
   }
 
   async function crearLista(nombre) {
@@ -829,11 +910,14 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     listas,
     cargando,
     error,
+    sincronizando,
+    errorSincronizacion,
     fuenteDatos,
     tieneListas,
     totalListas,
     listasOrdenadas,
     cargarListas,
+    sincronizarListasDesdeFirestore,
     obtenerListaPorId,
     crearLista,
     actualizarNombreLista,

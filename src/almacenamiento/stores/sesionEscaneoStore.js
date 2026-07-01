@@ -6,10 +6,12 @@ import {
 } from '../constantes/PreparacionFirebase.js'
 import firestoreMesaTrabajoService from '../servicios/FirestoreMesaTrabajoService.js'
 import fuentePrincipalFirestoreService from '../servicios/FuentePrincipalFirestoreService.js'
+import fotosLegacyCacheService from '../servicios/FotosLegacyCacheService.js'
 import sesionEscaneoService from '../servicios/SesionEscaneoService.js'
 import { useUsuarioStore } from './UsuarioStore.js'
 
 const RETARDO_PERSISTENCIA_MS = 220
+const TIEMPO_MINIMO_REFRESCO_FIRESTORE_MS = 3 * 60 * 1000
 
 export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
   const items = ref([])
@@ -154,31 +156,6 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
     suprimirPersistencia.value = false
   }
 
-  function resolverCargaMesaConRespaldoLocal(resultado, datosLocales) {
-    const datosPrincipal = Array.isArray(resultado?.datos) ? resultado.datos : []
-    const tieneRespaldoLocal = Array.isArray(datosLocales) && datosLocales.length > 0
-    const fuenteRemota = [
-      fuentePrincipalFirestoreService.FUENTES_DATOS.FIRESTORE,
-      fuentePrincipalFirestoreService.FUENTES_DATOS.FIRESTORE_CACHE,
-      fuentePrincipalFirestoreService.FUENTES_DATOS.ERROR,
-    ].includes(resultado?.fuente)
-
-    if (!debeSincronizarConFirestore() || datosPrincipal.length > 0 || !tieneRespaldoLocal || !fuenteRemota) {
-      return { resultado, datos: datosPrincipal }
-    }
-
-    return {
-      resultado: {
-        ...resultado,
-        datos: datosLocales,
-        fuente: fuentePrincipalFirestoreService.FUENTES_DATOS.FALLBACK_LOCAL,
-        mensaje: 'Firestore no devolvió la mesa; se usa respaldo local.',
-        error: resultado?.error || null,
-      },
-      datos: datosLocales,
-    }
-  }
-
   async function ejecutarCargaSesion() {
     cargando.value = true
     sesionCargada.value = false
@@ -187,30 +164,36 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
 
     try {
       await usuarioStore.esperarSesionLista()
-      const datosLocales = await sesionEscaneoService.obtenerItemsSesion()
-
-      const resultado = await fuentePrincipalFirestoreService.cargarMesaTrabajo({
-        cargarLocal: () => datosLocales,
+      const usuarioActual = fuentePrincipalFirestoreService.obtenerUsuarioActual()
+      const usaFirestore = fuentePrincipalFirestoreService.debeUsarFirestore(usuarioActual)
+      const datosLocales = await sesionEscaneoService.obtenerItemsSesion({
+        usarRespaldoUrgente: !usaFirestore,
       })
-      const cargaMesa = resolverCargaMesaConRespaldoLocal(resultado, datosLocales)
-
-      const itemsNormalizados = cargaMesa.datos.map((item) => normalizarItem(item))
+      const itemsLocalesBase = fuentePrincipalFirestoreService.fusionarMesaLocalFirestore(
+        datosLocales,
+        [],
+      )
+      const itemsLocalesConFotos = await fotosLegacyCacheService.recuperarFotosMesa(itemsLocalesBase)
+      const itemsNormalizados = itemsLocalesConFotos.map((item) => normalizarItem(item))
 
       await asignarItemsCargados(itemsNormalizados)
-      fuenteDatos.value = cargaMesa.resultado
+      if (itemsNormalizados.length > 0) {
+        await sesionEscaneoService.guardarItemsEnCacheLocal(itemsNormalizados)
+      }
+      fuenteDatos.value = {
+        ...fuentePrincipalFirestoreService.crearEstadoInicial(
+          fuentePrincipalFirestoreService.DOMINIOS.MESA_TRABAJO,
+        ),
+        datos: itemsNormalizados,
+        fechaActualizacion: new Date().toISOString(),
+      }
 
-      if (
-        cargaMesa.resultado?.fuente === fuentePrincipalFirestoreService.FUENTES_DATOS.FALLBACK_LOCAL &&
-        itemsNormalizados.length > 0 &&
-        debeSincronizarConFirestore()
-      ) {
-        const resultadoMigracion = await firestoreMesaTrabajoService.guardarItemsMesaTrabajo(itemsNormalizados)
-        actualizarEstadoSincronizacion({
-          ...resultadoMigracion,
-          mensaje: resultadoMigracion.exito
-            ? 'Mesa local migrada a Firestore para el usuario actual.'
-            : resultadoMigracion.mensaje,
-        })
+      if (!usaFirestore) return
+
+      if (itemsNormalizados.length > 0) {
+        void sincronizarMesaDesdeFirestore({ datosLocales: itemsNormalizados })
+      } else {
+        await sincronizarMesaDesdeFirestore({ datosLocales: itemsNormalizados, forzar: true })
       }
     } catch (error) {
       console.error('Error al cargar sesión de escaneo:', error)
@@ -225,6 +208,51 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
       sesionCargada.value = true
       cargando.value = false
     }
+  }
+
+  async function sincronizarMesaDesdeFirestore({ datosLocales = [], forzar = false } = {}) {
+    const usuarioActual = fuentePrincipalFirestoreService.obtenerUsuarioActual()
+    if (!fuentePrincipalFirestoreService.debeUsarFirestore(usuarioActual)) return
+    if (!forzar && (await cacheFirestoreReciente(usuarioActual.id))) return
+
+    try {
+      const resultado = await fuentePrincipalFirestoreService.cargarMesaTrabajoFirestoreCruda({
+        usuarioId: usuarioActual.id,
+      })
+      fuenteDatos.value = resultado
+
+      if (resultado.error || !Array.isArray(resultado.datos)) return
+
+      const itemsFusionadosBase = fuentePrincipalFirestoreService.fusionarMesaLocalFirestore(
+        datosLocales,
+        resultado.datos,
+      )
+      const itemsFusionadosConFotos =
+        await fotosLegacyCacheService.recuperarFotosMesa(itemsFusionadosBase)
+      const itemsNormalizados = itemsFusionadosConFotos.map((item) => normalizarItem(item))
+
+      await asignarItemsCargados(itemsNormalizados)
+      await sesionEscaneoService.guardarItemsEnCacheLocal(itemsNormalizados)
+      await sesionEscaneoService.guardarMetaCacheFirestore({
+        usuarioId: usuarioActual.id,
+        fechaUltimaSincronizacion: new Date().toISOString(),
+        fechaUltimoIntento: new Date().toISOString(),
+        cantidadRemota: resultado.datos.length,
+        versionCache: 1,
+      })
+    } catch (error) {
+      console.error('Error al sincronizar Mesa desde Firestore:', error)
+    }
+  }
+
+  async function cacheFirestoreReciente(usuarioId) {
+    const meta = await sesionEscaneoService.obtenerMetaCacheFirestore()
+    if (!meta || meta.usuarioId !== usuarioId || !meta.fechaUltimaSincronizacion) return false
+
+    const fecha = new Date(meta.fechaUltimaSincronizacion).getTime()
+    if (!Number.isFinite(fecha)) return false
+
+    return Date.now() - fecha < TIEMPO_MINIMO_REFRESCO_FIRESTORE_MS
   }
 
   async function cargarSesion() {
@@ -381,6 +409,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
     cantidadItems,
     tieneItemsPendientes,
     cargarSesion,
+    sincronizarMesaDesdeFirestore,
     asegurarSesionCargada,
     agregarItem,
     actualizarItem,
