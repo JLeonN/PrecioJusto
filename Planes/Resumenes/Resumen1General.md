@@ -30,7 +30,8 @@ La app está desarrollada con **Vue.js 3**, **Quasar Framework** y **Capacitor**
 ### Mobile
 
 - **Capacitor** (wrapper para Android)
-- **Capacitor Storage** (almacenamiento local)
+- **IndexedDB** como caché local principal en Android y web
+- **Capacitor Preferences** solo como origen legacy o para datos chicos
 - **`@capacitor-mlkit/barcode-scanning`** (scanner de código de barras con ML Kit)
 - **`@capacitor/camera`** (captura de fotos)
 - **`@capacitor/network`** (detección nativa de conectividad)
@@ -79,7 +80,7 @@ La app está desarrollada con **Vue.js 3**, **Quasar Framework** y **Capacitor**
 2. **Componente llama** a método del Store (Pinia)
 3. **Store ejecuta** lógica en Service
 4. **Service usa** Adapter para persistir datos
-5. **Adapter interactúa** con Capacitor Storage
+5. **Adapter interactúa** con IndexedDB o el respaldo local correspondiente
 6. **Estado se actualiza** reactivamente en la UI
 
 ---
@@ -108,8 +109,8 @@ src/
 ├── almacenamiento/
 │   ├── adaptadores/
 │   │   ├── LocalStorageAdapter.js          # Implementación con localStorage (dev/testing)
-│   │   ├── CapacitorAdapter.js             # Implementación con Capacitor Preferences
-│   │   └── FirestoreAdapter.js             # Implementación con Firebase (futuro)
+│   │   ├── CapacitorAdapter.js             # Implementación legacy con Capacitor Preferences
+│   │   └── IndexedDbAdapter.js             # Caché local principal para datos grandes
 │   │
 │   ├── constantes/                          # Constantes globales
 │   │   └── Monedas.js                       # Lista completa de monedas del mundo (20+ opciones)
@@ -1200,7 +1201,7 @@ H. Arquitectura y Código
 
 ### Estado Actual
 
-- **Versión:** 1.2.7
+- **Versión:** 1.2.9
 - **Almacenamiento:** Firebase/Firestore como fuente principal con respaldo local del dispositivo
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
@@ -1219,6 +1220,7 @@ H. Arquitectura y Código
 - **Fotos de productos y comercios:** Completada (useCamaraFoto, q-menu contextual, 5 componentes)
 - **Pie de atribución:** Completado (PieAtribucion.vue en DetalleProductoPage + EditarComercioPage; campo fotoFuente en productos)
 - **Firebase:** Completado en producción para cuenta, productos, comercios, listas, preferencias y mesa de trabajo; las fotos locales quedan en el dispositivo
+- **Rescate de memoria Android:** Completado; los datos grandes usan IndexedDB, las fotos base64 se separan del caché principal y los listados cargan objetos livianos
 - **Configuración global:** Completada (moneda predeterminada manual/automática; ver Resumen9Configuracion.md)
 - **Publicidad AdMob:** Integrada y en producción; banner, interstitial y rewarded activos. Los IDs de producción fueron regenerados para corregir fallos de serving en algunas unidades (ver PlanPublicidadAdMob.md)
 - **app-ads.txt:** Publicado en GitHub Pages para ayudar a la verificación de AdMob
@@ -1252,4 +1254,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 30 de Junio de 2026 — Se preparó el release `1.2.7` con carga local primero en Mis Productos, separación de caché por usuario y conservación de fotos locales durante la actualización desde la nube.
+**Última actualización:** 1 de Julio de 2026 — Se preparó el release `1.2.9` con rescate de memoria Android, caché local más liviano y carga segura de fotos locales bajo demanda.
