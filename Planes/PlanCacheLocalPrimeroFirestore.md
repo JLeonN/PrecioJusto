@@ -20,8 +20,9 @@ La regla central del plan es: mostrar local primero, actualizar desde la nube de
 - Mostrar productos, comercios, listas, preferencias y mesa desde cache local por usuario antes de esperar Firestore.
 - Actualizar desde Firestore en segundo plano cuando corresponda.
 - Evitar que datos remotos sin foto pisen fotos locales del dispositivo.
+- Recuperar fotos locales antiguas que quedaron en el espacio compartido antes de separar cache por usuario.
 - Reducir esperas y lecturas repetidas al navegar por la app.
-- Crear un patron reutilizable empezando por Mis Productos como dominio piloto.
+- Completar el patron en productos, comercios, listas, preferencias y mesa para cerrar este frente.
 
 ## Reglas del plan
 
@@ -31,8 +32,11 @@ La regla central del plan es: mostrar local primero, actualizar desde la nube de
 - No mezclar datos entre usuarios Firebase ni con el usuario local legacy.
 - No guardar fotos base64 en Firestore, backups, colas, inventarios ni estados globales.
 - Preservar fotos locales cuando Firestore traiga `null`, campo vacio o no traiga foto.
+- Buscar fotos legacy en el espacio `compartido` solo para recuperar imagenes locales, nunca para mezclar datos de negocio entre cuentas.
+- La recuperacion legacy debe ser global para todos los dominios con imagenes: productos, comercios, direcciones, items de Lista Justa y mesa de trabajo.
+- Preferencias no tienen fotos; ahi solo aplica local primero y cache por usuario.
 - Mantener LocalStorage, IndexedDB o Capacitor como cache local por usuario.
-- Aplicar primero en Mis Productos y extender al resto solo cuando el piloto este validado.
+- Aplicar el patron ya validado en Mis Productos y extenderlo al resto en este mismo plan.
 - No crear un segundo sistema paralelo de datos: extender los servicios actuales.
 - No usar `ProductosService.guardarProducto()` para guardar cache remota local si eso vuelve a sincronizar hacia Firestore.
 
@@ -133,22 +137,63 @@ Reducir consultas repetidas sin asumir que ya existe sincronizacion incremental 
 - [ ] El incremental debe usar `where('fechaActualizacion', '>', fechaIso)` + `orderBy('fechaActualizacion', 'asc')` y contemplar indices de Firestore si aparecen errores.
 - [ ] Mantener fallback a refresh completo si falta fecha, falla el indice o la cuenta no tiene marca local.
 
-## FASE 7: Extender Patron A Otros Dominios
+## FASE 7: Recuperar Fotos Legacy Del Dispositivo
+
+### Objetivo
+
+Recuperar fotos locales antiguas que quedaron en el espacio `compartido` cuando el cache paso a estar separado por usuario. Esta fase debe resolverse como helper global antes de extender el patron al resto.
+
+- [ ] Crear un helper global, por ejemplo `FotosLegacyCacheService`, para leer temporalmente desde `compartido` usando `ejecutarConEspacioTrabajoAlmacenamiento('compartido', ...)`.
+- [ ] El helper debe leer solo datos legacy necesarios para fotos desde estas claves reales: `PREFIJO_PRODUCTOS`, `CLAVE_COMERCIOS`, `CLAVE_LISTA_JUSTA` y `CLAVE_SESION_ESCANEO`.
+- [ ] El helper debe exponer funciones puras para fusionar fotos, sin guardar ni sincronizar por su cuenta.
+- [ ] Productos: buscar por `producto.id` y recuperar solo `imagen`, `fotoFuente`, `sincronizacionFoto`, `imagenUrl` externa si corresponde y `imagenRutaStorage`.
+- [ ] Comercios: buscar por `comercio.id` y recuperar solo `foto`, `fotoFuente`, `fotoUrl` externa si corresponde y `fotoRutaStorage`.
+- [ ] Direcciones: buscar por `comercio.id` + `direccion.id` y recuperar solo `foto`, `fotoFuente`, `fotoUrl` externa si corresponde y `fotoRutaStorage`.
+- [ ] Lista Justa: buscar por `lista.id` + `item.id` y recuperar solo `imagen`, `fotoFuente`, `imagenUrl` externa si corresponde y `imagenRutaStorage`.
+- [ ] Mesa de trabajo: buscar por `item.id` y recuperar solo `imagen`, `fotoFuente`, `imagenUrl` externa si corresponde, `imagenRutaStorage` y, si existe, `datosOriginales.imagen` con su `fotoFuente`.
+- [ ] No copiar nombre, precios, fechas, estado, comercio, moneda, cantidades ni ningun otro dato de negocio desde `compartido`.
+- [ ] No copiar fotos base64 a Firestore, backups, colas ni estados globales.
+- [ ] Guardar la foto recuperada en el cache local del usuario con metodos local-only del dominio correspondiente.
+- [ ] No subir la foto recuperada a Firestore ni Firebase Storage.
+- [ ] Si no existe foto legacy, dejar el item sin imagen y no mostrar error al usuario.
+- [ ] Integrar el helper en el merge de productos ya existente.
+- [ ] Integrar el helper en el merge de comercios/direcciones cuando se implemente comercios.
+- [ ] Integrar el helper en el merge de listas cuando se implemente Lista Justa.
+- [ ] Integrar el helper en el merge de mesa cuando se implemente mesa de trabajo.
+- [ ] Probar con una cuenta que antes tenia fotos locales y confirmar que reaparecen si todavia existen en el dispositivo.
+
+## FASE 8: Extender Patron A Otros Dominios
 
 ### Objetivo
 
 Aplicar el patron validado de Mis Productos al resto de datos privados sin romper lo que ya sincroniza bien.
 
+- [ ] Auditar `ComerciosService`, `FirestoreComerciosService`, `comerciosStore` y paginas que llaman `cargarComercios()`.
+- [ ] En `ComerciosService`, agregar metodos local-only para guardar cache de comercios y direcciones sin llamar `sincronizarComercioFirestore`.
 - [ ] Aplicar local primero a comercios y direcciones usando `ComerciosService`, `FirestoreComerciosService` y `comerciosStore`.
-- [ ] Preservar fotos locales de comercios si existen.
+- [ ] Fusionar comercios por `id` preservando fotos locales de comercio y direcciones si Firestore no trae URL valida.
+- [ ] Usar recuperacion legacy global para `comercio.foto` y `direccion.foto`.
+- [ ] Guardar metadatos de ultima sincronizacion de comercios con una clave propia, por ejemplo `cacheFirestoreComerciosMeta`.
+- [ ] Auditar `ListaJustaService`, `FirestoreListasJustasService`, `ListaJustaStore` y paginas de Lista Justa.
+- [ ] En `ListaJustaService`, agregar metodos local-only para guardar cache de listas sin llamar `sincronizarListasFirestore`.
 - [ ] Aplicar local primero a Lista Justa usando `ListaJustaService`, `FirestoreListasJustasService` y `ListaJustaStore`.
-- [ ] Aplicar local primero a preferencias usando `PreferenciasService`, `FirestorePreferenciasService` y `preferenciasStore`.
-- [ ] Aplicar local primero a mesa usando `sesionEscaneoStore`, `FirestoreMesaTrabajoService` y servicios relacionados.
+- [ ] Fusionar listas por `id` y preservar imagenes locales de items si existen.
+- [ ] Usar recuperacion legacy global para `lista.items[].imagen`.
+- [ ] Guardar metadatos de ultima sincronizacion de listas con una clave propia, por ejemplo `cacheFirestoreListasMeta`.
+- [ ] Auditar `PreferenciasService`, `FirestorePreferenciasService` y `preferenciasStore`.
+- [ ] En `PreferenciasService`, agregar guardado local-only de preferencias para cache remoto sin reenviar inmediatamente a Firestore.
+- [ ] Aplicar local primero a preferencias, manteniendo Firestore como fuente principal cuando responde.
+- [ ] Auditar `sesionEscaneoStore`, `FirestoreMesaTrabajoService`, `SesionEscaneoService` y `MesaTrabajoPage`.
+- [ ] En `SesionEscaneoService`, agregar metodos local-only para cache de mesa sin llamar `firestoreMesaTrabajoService`.
+- [ ] Aplicar local primero a mesa de trabajo y preservar imagenes locales de items si existen.
+- [ ] Revisar y ajustar `resolverCargaMesaConRespaldoLocal` para no migrar datos compartidos silenciosamente a la cuenta actual; el espacio `compartido` solo debe usarse para fotos legacy.
+- [ ] Usar recuperacion legacy global para `item.imagen` y `item.datosOriginales.imagen`.
+- [ ] Guardar metadatos de ultima sincronizacion de mesa con una clave propia, por ejemplo `cacheFirestoreMesaMeta`.
 - [ ] Crear helpers compartidos solo si el patron ya se repitio al menos en productos y comercios.
 - [ ] Confirmar que cada dominio usa cache por usuario y no cache global compartida.
 - [ ] No cambiar reglas de migracion local preguntada salvo que una prueba demuestre que afecta este flujo.
 
-## FASE 8: Ajustes De UX
+## FASE 9: Ajustes De UX
 
 ### Objetivo
 
@@ -160,6 +205,8 @@ Hacer que el usuario sienta la app rapida sin mostrar informacion tecnica innece
 - [ ] Mantener feedback de error si no se pudo actualizar, sin ocultar datos locales.
 - [ ] Confirmar que navegar entre pantallas no dispara cargas visibles innecesarias.
 - [ ] Confirmar que las fotos locales no desaparecen visualmente durante la actualizacion.
+- [ ] Si una foto legacy se recupera correctamente, no mostrar aviso tecnico al usuario.
+- [ ] Si una foto legacy ya no existe en el dispositivo, no mostrar error; simplemente dejar el producto sin imagen.
 
 ## FASE TESTING
 
@@ -176,7 +223,11 @@ Validar de forma ejecutable por IA y revisable por humano que la app carga rapid
 - [ ] Confirmar que fotos locales de productos no desaparecen despues de sincronizar.
 - [ ] Crear o editar un producto en otro dispositivo o entorno de prueba y confirmar que aparece luego de la sincronizacion.
 - [ ] Probar con producto local con foto y Firestore sin foto.
+- [ ] Probar recuperacion de foto legacy desde el espacio `compartido` hacia el cache del usuario.
 - [ ] Probar con producto de API con URL externa y confirmar que la URL se conserva.
+- [ ] Probar comercio con foto local antigua y Firestore sin foto.
+- [ ] Probar direccion de comercio con foto local antigua y Firestore sin foto.
+- [ ] Probar item de Lista Justa o mesa con imagen local antigua si existe ese caso.
 - [ ] Probar cierre de sesion e ingreso con otro usuario, confirmando que no se mezclan datos ni fotos.
 - [ ] Probar sin internet y confirmar que se muestran datos locales.
 - [ ] Recuperar internet y confirmar que se actualiza en segundo plano.
@@ -191,8 +242,9 @@ Validar de forma ejecutable por IA y revisable por humano que la app carga rapid
 - [x] Fase 4: Implementar Local Primero En Mis Productos
 - [x] Fase 5: Merge Sin Perder Fotos
 - [x] Fase 6: Control De Sincronizacion Y Lecturas
-- [ ] Fase 7: Extender Patron A Otros Dominios
-- [ ] Fase 8: Ajustes De UX
+- [ ] Fase 7: Recuperar Fotos Legacy Del Dispositivo
+- [ ] Fase 8: Extender Patron A Otros Dominios
+- [ ] Fase 9: Ajustes De UX
 - [ ] Fase Testing
 
 Fecha de creacion: 30 de Junio 2026
