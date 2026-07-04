@@ -27,7 +27,13 @@
         <div v-if="!producto.imagen" class="tarjeta-yugioh__placeholder">
           <IconShoppingBag :size="48" class="text-grey-5" />
         </div>
-        <q-img v-else :src="producto.imagen" class="tarjeta-yugioh__imagen" fit="cover" />
+        <q-img
+          v-else
+          :src="producto.imagen"
+          class="tarjeta-yugioh__imagen"
+          fit="cover"
+          position="center 62%"
+        />
 
         <div v-if="hayVentajaMayoristaTarjeta" class="overlay-mayorista-tarjeta">
           <q-slide-transition>
@@ -364,6 +370,15 @@ const textoBotonMayorista = computed(() => {
   position: relative;
   width: 100%;
   height: 100%;
+}
+.imagen-contenedor-personalizado .tarjeta-yugioh__imagen {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.imagen-contenedor-personalizado :deep(.q-img__image) {
+  object-position: center 62% !important;
+  background-position: center 62% !important;
 }
 .overlay-precio-normal {
   position: absolute;
