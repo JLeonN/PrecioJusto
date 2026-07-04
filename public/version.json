@@ -1,17 +1,15 @@
 {
-  "versionDisponible": "1.2.9",
+  "versionDisponible": "1.2.10",
   "urlPlayStore": "https://play.google.com/store/apps/details?id=com.preciojusto.app",
   "mostrarActualizacion": true,
   "cambios": {
     "es-AR": [
       {
-        "apartado": "Actualizaciones",
+        "apartado": "Fotos de productos",
         "novedades": [
-          "Se mejoró la estabilidad al abrir Mis Productos con muchos datos guardados.",
-          "La app reduce el uso de memoria al manejar fotos locales.",
-          "Productos, comercios, listas y mesa de trabajo guardan datos locales de forma más liviana.",
-          "Las fotos del dispositivo se cargan solo cuando hacen falta, no todas juntas.",
-          "Se reforzó la recuperación segura de datos guardados en versiones anteriores."
+          "Las fotos guardadas en el dispositivo vuelven a verse correctamente en los productos.",
+          "Al restaurar datos desde internet, la app conserva mejor las fotos locales que ya tenías.",
+          "Las fotos de las tarjetas quedan mejor centradas para mostrar el producto con más claridad."
         ]
       }
     ]
