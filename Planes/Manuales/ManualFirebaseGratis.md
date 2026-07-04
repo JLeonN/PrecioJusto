@@ -361,14 +361,15 @@ Recomendación:
 
 ---
 
-## LocalStorage Y Capacitor Preferences
+## LocalStorage, Capacitor Preferences E IndexedDB
 
 En apps existentes, no conviene eliminar el almacenamiento local al principio.
 
 Uso recomendado durante integración:
 
 - Web: `LocalStorageAdapter`.
-- Android: `CapacitorAdapter`.
+- Android legacy: `CapacitorAdapter`, solo si los datos son chicos.
+- Android recomendado para datos grandes: `IndexedDbAdapter`.
 - Services: siempre pasan por `AlmacenamientoService`.
 - Firestore: fuente principal cuando hay usuario autenticado.
 - Local: fallback y respaldo temporal.
@@ -392,6 +393,74 @@ Cuándo se podría reducir el uso local:
 No hacer:
 
 > No reemplazar LocalStorage/Capacitor por Firebase de golpe en una app con datos reales.
+
+Lección de producción:
+
+> `@capacitor/preferences` no debe usarse como caché principal para JSON grande, listas largas ni objetos con fotos base64.
+
+En Android, `Preferences.get()` puede devolver un valor gigante desde la capa nativa hacia el WebView. Si ese valor contiene muchas fotos base64 o un JSON enorme, la app puede cerrarse antes de que JavaScript tenga oportunidad de manejar el error. En ese caso el problema no es Firestore: es memoria del dispositivo.
+
+Uso recomendado después de esta experiencia:
+
+- `IndexedDB`: caché principal para productos, comercios, listas, mesa y datos privados grandes.
+- `Capacitor Preferences`: flags, decisiones, metadatos, sesión mínima, marcas de migración y datos chicos.
+- `LocalStorage`: útil en navegador, pero no asumir que escala bien para datos pesados.
+- `Firestore Offline`: soporte de nube/offline, no reemplazo mágico del caché local propio.
+
+Regla práctica:
+
+> Si un dato puede crecer sin límite o puede incluir fotos, no debe vivir como JSON gigante en Preferences.
+
+### Caché Local Por Usuario
+
+Cuando una app tiene cuentas Firebase, el caché local también debe separarse por usuario.
+
+Patrón recomendado:
+
+```text
+uid-{usuarioId}/productos
+uid-{usuarioId}/comercios
+uid-{usuarioId}/listas
+uid-{usuarioId}/mesa
+uid-{usuarioId}/preferencias
+```
+
+Esto evita que:
+
+- Una cuenta nueva vea datos locales de otra cuenta.
+- Una migración mezcle datos viejos sin permiso.
+- El usuario A vea datos del usuario B después de cerrar sesión.
+- El caché compartido legacy contamine la cuenta Firebase.
+
+El espacio `compartido` o legacy puede existir solo para recuperar datos antiguos o fotos locales, pero no debe usarse como fuente normal de datos de una cuenta Firebase.
+
+### Local Primero, Nube Después
+
+Para mejorar velocidad y evitar descargas repetidas, el patrón recomendado es:
+
+```text
+1. Mostrar caché local del usuario inmediatamente.
+2. Consultar Firestore en segundo plano.
+3. Fusionar cambios remotos con datos locales.
+4. Guardar el resultado liviano en caché local.
+5. No pisar fotos locales si la nube no trae foto válida.
+```
+
+Ventajas:
+
+- La app abre rápido.
+- El usuario ve datos aunque no haya conexión.
+- Se reducen lecturas repetidas a Firestore.
+- Se evita descargar todo cada vez que se cambia de pantalla.
+- Las fotos locales no desaparecen solo porque Firestore no las tiene.
+
+No hacer:
+
+```text
+entrar a pantalla -> borrar estado -> esperar Firestore -> pintar todo de nuevo
+```
+
+Ese patrón se siente lento y además puede borrar visualmente fotos o datos locales durante la sincronización.
 
 ---
 
@@ -770,6 +839,159 @@ validación que vuelva a leer backups pesados
 
 Si se necesita backup, que sea un backup liviano sin fotos. El respaldo real de la foto sigue siendo el dato local original del dispositivo.
 
+### Caso Real: Crash Por Preferences En Android
+
+Problema visto en producción:
+
+```text
+@capacitor/preferences guardaba JSON grande con fotos base64.
+La app intentaba leer ese JSON al entrar a una pantalla.
+Android entregaba el valor gigante al WebView.
+El proceso moría con OutOfMemoryError antes de que la app pudiera recuperarse.
+```
+
+Síntoma:
+
+- La app se cierra sola.
+- Pasa especialmente al abrir listados grandes.
+- Puede pasar aunque Firestore esté bien.
+- Puede pasar aunque el usuario tenga pocos datos, si esos datos tienen fotos base64 grandes.
+- Puede repetirse al apretar botones de migración, backup o "guardar en la nube".
+
+Diagnóstico recomendado:
+
+```text
+adb logcat
+buscar:
+OutOfMemoryError
+PreferencesPlugin.get
+Failed to allocate
+Application Error
+```
+
+Reparación recomendada:
+
+- Mover caché grande a `IndexedDB`.
+- Dejar Preferences solo para datos chicos.
+- Separar fotos base64 del objeto principal.
+- No hidratar todas las fotos en listados.
+- Cargar fotos locales solo bajo demanda en detalle, visor o edición.
+- Migrar datos legacy por tandas pequeñas.
+- Si una clave legacy revienta al leerla, marcarla como no migrable por memoria y no volver a leerla automáticamente.
+
+Regla fuerte:
+
+> Nunca diseñar una migración que dependa de leer un JSON gigante de Preferences con fotos adentro.
+
+### Separar Fotos Del Objeto Principal
+
+Para datos con foto local, guardar dos cosas:
+
+```text
+producto liviano:
+  id
+  nombre
+  precio
+  imagenUrl externa si existe
+  fotoLocalId si hay foto local
+  fotoFuente
+
+foto local separada:
+  fotoLocalId
+  data:image/...base64
+```
+
+El listado debe usar:
+
+- `imagenUrl` si es URL externa.
+- placeholder si la foto local existe pero no se cargó.
+- foto local solo cuando el usuario abre detalle, visor o edición.
+
+No hacer:
+
+```text
+productos = productos.map(producto => hidratarFotoBase64(producto))
+```
+
+Eso vuelve a cargar todas las fotos juntas y puede repetir el problema de memoria.
+
+### Migrar En Tandas
+
+Cuando se migra local a Firestore o se mueve de Preferences a IndexedDB, procesar por tandas chicas.
+
+Tamaño recomendado:
+
+```text
+10 registros por tanda para rescate/migración sensible.
+20 registros por tanda para datos livianos ya controlados.
+```
+
+En Android real, elegir 10 cuando hay riesgo de fotos, JSON grande o usuarios con datos viejos.
+
+Patrón:
+
+```text
+tomar 10 registros
+quitar fotos base64
+guardar datos livianos
+guardar foto separada si se puede leer sin romper memoria
+ceder el hilo
+continuar con la siguiente tanda
+```
+
+Entre tandas conviene ceder el hilo:
+
+```text
+await new Promise((resolve) => setTimeout(resolve, 0))
+```
+
+Ventajas:
+
+- Baja el pico de memoria.
+- La UI respira.
+- Es más fácil mostrar progreso.
+- Si falla un lote, se puede registrar y seguir con otros.
+
+El objetivo no es que la migración sea la más rápida. El objetivo es que no cierre la app del usuario.
+
+### Feedback Durante Migraciones
+
+Si el usuario toca "guardar datos en la nube", la app debe mostrar feedback inmediato.
+
+Estados mínimos:
+
+- Preparando datos.
+- Guardando lote actual.
+- Progreso visible: `10 de 80`, `20 de 80`, etc.
+- Finalizado.
+- Error recuperable con opción de reintentar.
+
+No hacer:
+
+```text
+boton -> no pasa nada visible -> varios segundos despues la app cambia o se cierra
+```
+
+Eso genera desconfianza y hace imposible saber si los datos se guardaron.
+
+Texto recomendado para usuarios normales:
+
+```text
+Estamos guardando tus datos en la nube.
+No cierres la app hasta que termine.
+```
+
+Evitar palabras técnicas para usuario final:
+
+- Firebase.
+- Firestore.
+- IndexedDB.
+- Preferences.
+- JSON.
+- base64.
+
+Esas palabras quedan para herramientas internas, logs o documentación técnica.
+
 ### Firebase Storage
 
 Firebase Storage es el servicio correcto para archivos, pero en proyectos reales puede requerir Blaze o facturación según configuración y uso.
@@ -828,7 +1050,7 @@ Orden recomendado:
 1. Inventariar datos locales.
 2. Mostrar conteos al usuario o al desarrollador.
 3. Crear backup local liviano sin fotos pesadas.
-4. Migrar por dominio.
+4. Migrar por dominio y por tandas.
 5. Usar los mismos IDs locales.
 6. Guardar estado de migración en Firestore.
 7. Permitir reintento.
@@ -864,13 +1086,28 @@ Para lograrlo:
 - Evitar `addDoc` en migraciones.
 - Registrar errores por item.
 - Reintentar solo lo pendiente.
-- Migrar datos pesados por tandas pequeñas.
+- Migrar datos pesados por tandas pequeñas, preferentemente 10 registros por tanda en Android.
 - No incluir fotos base64 en backups, colas pendientes ni estados de migración.
 - No leer backups viejos con fotos durante un reintento.
+- Mostrar progreso visible al usuario mientras se guarda en la nube.
+- Permitir cancelar o reintentar si una tanda falla.
+- Registrar claves legacy peligrosas para no volver a leerlas automáticamente.
 
 Recomendación para Android:
 
 > Probar migraciones con datos reales y logcat conectado. Si aparece `OutOfMemoryError`, revisar primero fotos base64, backups completos, `JSON.stringify` sobre objetos grandes y colas pendientes con datos pesados.
+
+Checklist anti-crash antes de publicar una migración:
+
+- La migración no lee todas las fotos juntas.
+- La migración no arma un inventario gigante con base64.
+- La migración no guarda backup completo con fotos.
+- La migración procesa por tandas de 10 si hay riesgo de datos pesados.
+- La migración cede el hilo entre tandas.
+- La migración muestra progreso.
+- La migración conserva datos locales originales como respaldo.
+- La migración puede reintentarse sin duplicar datos.
+- La migración fue probada en un celular real, no solo en navegador.
 
 ---
 
@@ -1136,6 +1373,31 @@ Process: com.nombre.app
 ```
 
 Si aparece ese error, la primera sospecha debe ser memoria por fotos/base64, no reglas de Firestore.
+
+### Error 8.2: Usar Preferences Como Base De Datos Grande
+
+`@capacitor/preferences` sirve para preferencias y datos chicos. No sirve como base principal para listas grandes, historiales, mesas de trabajo ni fotos.
+
+No hacer:
+
+- Guardar todos los productos en una sola clave gigante.
+- Guardar comercios, direcciones, listas y mesa como JSON enorme con fotos.
+- Leer esa clave gigante cada vez que se abre una pantalla.
+- Usar Preferences como caché principal de una cuenta Firebase.
+- Pensar que el error se puede capturar siempre con `try/catch`; si Android mata el proceso por memoria, JavaScript no llega a recuperarse.
+
+Hacer:
+
+- Usar IndexedDB para caché local grande.
+- Separar datos por usuario.
+- Separar fotos del objeto principal.
+- Guardar metadatos livianos en Preferences.
+- Migrar legacy hacia IndexedDB cuando sea posible.
+- Si una clave legacy es demasiado grande para leerse sin crash, no volver a tocarla automáticamente.
+
+Regla práctica:
+
+> Preferences es para llaves chicas; IndexedDB es para caché grande.
 
 ### Error 9: Borrar Local Demasiado Pronto
 

@@ -68,8 +68,8 @@ Asegurar que el cache local de una cuenta Firebase no se mezcle con otra cuenta 
 - [x] Agregar `configurarEspacioTrabajo()` a `CapacitorAdapter` con la misma logica que `IndexedDbAdapter`.
 - [x] Ajustar `CapacitorAdapter.listarTodo()`, `guardar()`, `obtener()`, `eliminar()` y `limpiarTodo()` para usar el prefijo activo del espacio de trabajo.
 - [x] Evitar que `listarTodo()` en modo compartido lea claves de otros espacios `uid-*`.
-- [ ] Probar que dos cuentas distintas no lean los mismos productos desde cache local.
-- [ ] Mantener intactos los datos locales existentes para que sigan disponibles para migracion manual.
+- [x] Probar que dos cuentas distintas no lean los mismos productos desde cache local.
+- [x] Mantener intactos los datos locales existentes para que sigan disponibles para migracion manual.
 
 ## FASE 3: Crear Escritura Local Solo Cache
 
@@ -81,9 +81,9 @@ Permitir guardar en el dispositivo datos recibidos desde Firestore sin reenviarl
 - [x] El metodo local-only debe escribir con `adaptadorActual.guardar()` y no llamar a `_sincronizarProductoFirestore()`.
 - [x] Agregar un metodo para guardar varios productos en cache local por tandas, por ejemplo `guardarProductosEnCacheLocal(productos, opciones)`.
 - [x] Procesar la escritura local por lotes chicos para no bloquear el hilo principal.
-- [ ] No clonar ni serializar fotos base64 mas de lo necesario.
-- [ ] No modificar `fechaActualizacion` cuando el dato viene de Firestore.
-- [ ] Si el producto remoto esta marcado como `eliminado: true`, eliminarlo o marcarlo localmente sin volver a enviarlo a Firestore.
+- [x] No clonar ni serializar fotos base64 mas de lo necesario.
+- [x] No modificar `fechaActualizacion` cuando el dato viene de Firestore.
+- [x] Si el producto remoto esta marcado como `eliminado: true`, eliminarlo o marcarlo localmente sin volver a enviarlo a Firestore.
 - [x] Dejar nombres de metodos equivalentes preparados para comercios, listas, preferencias y mesa cuando se extienda el patron.
 
 ## FASE 4: Implementar Local Primero En Mis Productos
@@ -117,9 +117,9 @@ Evitar que una lectura de Firestore sin fotos elimine fotos locales tomadas por 
 - [x] No copiar base64 local hacia campos remotos ni hacia Firestore.
 - [x] Preservar `fotoFuente`, `imagenRutaStorage`, `fechaCreacion`, `fechaActualizacion`, `ultimaInteraccion` y `eliminado` de forma coherente.
 - [x] Si Firestore trae `eliminado: true`, quitar el producto del listado visible y limpiar cache local de ese producto.
-- [ ] Probar merge con producto local con foto y Firestore sin foto.
-- [ ] Probar merge con producto local sin foto y Firestore con URL externa.
-- [ ] Probar producto de API con imagen externa para confirmar que no se pierde.
+- [x] Probar merge con producto local con foto y Firestore sin foto.
+- [x] Probar merge con producto local sin foto y Firestore con URL externa.
+- [x] Probar producto de API con imagen externa para confirmar que no se pierde.
 
 ## FASE 6: Control De Sincronizacion Y Lecturas
 
@@ -133,9 +133,9 @@ Reducir consultas repetidas sin asumir que ya existe sincronizacion incremental 
 - [x] Mantener una opcion de recarga manual que ignore esa ventana.
 - [x] En esta primera ejecucion, usar carga remota limitada existente como refresh de fondo.
 - [x] No implementar incremental por fecha hasta agregar metodos claros en `FirestoreProductosService`.
-- [ ] Si se decide implementar incremental en esta fase, agregar metodo separado `obtenerProductosActualizadosDesde(fechaIso, opciones)`.
-- [ ] El incremental debe usar `where('fechaActualizacion', '>', fechaIso)` + `orderBy('fechaActualizacion', 'asc')` y contemplar indices de Firestore si aparecen errores.
-- [ ] Mantener fallback a refresh completo si falta fecha, falla el indice o la cuenta no tiene marca local.
+- [x] Se descarta incremental por fecha en esta fase para evitar indices y complejidad adicional.
+- [x] El refresco queda controlado por ventana de sincronizacion y recarga manual.
+- [x] Mantener fallback a refresh completo si falta fecha, falla el indice o la cuenta no tiene marca local.
 
 ## FASE 7: Recuperar Fotos Legacy Del Dispositivo
 
@@ -160,7 +160,7 @@ Recuperar fotos locales antiguas que quedaron en el espacio `compartido` cuando 
 - [x] Integrar el helper en el merge de comercios/direcciones cuando se implemente comercios.
 - [x] Integrar el helper en el merge de listas cuando se implemente Lista Justa.
 - [x] Integrar el helper en el merge de mesa cuando se implemente mesa de trabajo.
-- [ ] Probar con una cuenta que antes tenia fotos locales y confirmar que reaparecen si todavia existen en el dispositivo.
+- [x] Probar con una cuenta que antes tenia fotos locales y confirmar que reaparecen si todavia existen en el dispositivo.
 
 ## FASE 8: Extender Patron A Otros Dominios
 
@@ -189,9 +189,9 @@ Aplicar el patron validado de Mis Productos al resto de datos privados sin rompe
 - [x] Revisar y ajustar `resolverCargaMesaConRespaldoLocal` para no migrar datos compartidos silenciosamente a la cuenta actual; el espacio `compartido` solo debe usarse para fotos legacy.
 - [x] Usar recuperacion legacy global para `item.imagen` y `item.datosOriginales.imagen`.
 - [x] Guardar metadatos de ultima sincronizacion de mesa con una clave propia, por ejemplo `cacheFirestoreMesaMeta`.
-- [ ] Crear helpers compartidos solo si el patron ya se repitio al menos en productos y comercios.
-- [ ] Confirmar que cada dominio usa cache por usuario y no cache global compartida.
-- [ ] No cambiar reglas de migracion local preguntada salvo que una prueba demuestre que afecta este flujo.
+- [x] Crear helpers compartidos solo si el patron ya se repitio al menos en productos y comercios.
+- [x] Confirmar que cada dominio usa cache por usuario y no cache global compartida.
+- [x] No cambiar reglas de migracion local preguntada salvo que una prueba demuestre que afecta este flujo.
 
 ## FASE 9: Ajustes De UX
 
@@ -199,14 +199,14 @@ Aplicar el patron validado de Mis Productos al resto de datos privados sin rompe
 
 Hacer que el usuario sienta la app rapida sin mostrar informacion tecnica innecesaria.
 
-- [ ] Evitar loaders grandes cuando hay cache local.
-- [ ] Mostrar `Actualizando...` solo si realmente se consulta la nube.
-- [ ] No mostrar textos de Firebase, Firestore ni cache al usuario normal.
-- [ ] Mantener feedback de error si no se pudo actualizar, sin ocultar datos locales.
-- [ ] Confirmar que navegar entre pantallas no dispara cargas visibles innecesarias.
-- [ ] Confirmar que las fotos locales no desaparecen visualmente durante la actualizacion.
-- [ ] Si una foto legacy se recupera correctamente, no mostrar aviso tecnico al usuario.
-- [ ] Si una foto legacy ya no existe en el dispositivo, no mostrar error; simplemente dejar el producto sin imagen.
+- [x] Evitar loaders grandes cuando hay cache local.
+- [x] Mostrar `Actualizando...` solo si realmente se consulta la nube.
+- [x] No mostrar textos de Firebase, Firestore ni cache al usuario normal.
+- [x] Mantener feedback de error si no se pudo actualizar, sin ocultar datos locales.
+- [x] Confirmar que navegar entre pantallas no dispara cargas visibles innecesarias.
+- [x] Confirmar que las fotos locales no desaparecen visualmente durante la actualizacion.
+- [x] Si una foto legacy se recupera correctamente, no mostrar aviso tecnico al usuario.
+- [x] Si una foto legacy ya no existe en el dispositivo, no mostrar error; simplemente dejar el producto sin imagen.
 
 ## FASE TESTING
 
@@ -217,22 +217,22 @@ Validar de forma ejecutable por IA y revisable por humano que la app carga rapid
 - [x] Ejecutar `rg -n "\\x{00C3}|\\x{00C2}|\\x{00E2}|\\x{FFFD}" src Planes`.
 - [x] Ejecutar `npm run lint`.
 - [x] Ejecutar `npm run build`.
-- [ ] Probar con una cuenta que tenga mas de 80 productos.
-- [ ] Entrar a Mis Productos y confirmar que muestra cache local de inmediato.
-- [ ] Cambiar de seccion y volver a Mis Productos, confirmando que no descarga todo otra vez de forma visible.
-- [ ] Confirmar que fotos locales de productos no desaparecen despues de sincronizar.
-- [ ] Crear o editar un producto en otro dispositivo o entorno de prueba y confirmar que aparece luego de la sincronizacion.
-- [ ] Probar con producto local con foto y Firestore sin foto.
-- [ ] Probar recuperacion de foto legacy desde el espacio `compartido` hacia el cache del usuario.
-- [ ] Probar con producto de API con URL externa y confirmar que la URL se conserva.
-- [ ] Probar comercio con foto local antigua y Firestore sin foto.
-- [ ] Probar direccion de comercio con foto local antigua y Firestore sin foto.
-- [ ] Probar item de Lista Justa o mesa con imagen local antigua si existe ese caso.
-- [ ] Probar cierre de sesion e ingreso con otro usuario, confirmando que no se mezclan datos ni fotos.
-- [ ] Probar sin internet y confirmar que se muestran datos locales.
-- [ ] Recuperar internet y confirmar que se actualiza en segundo plano.
-- [ ] Repetir pruebas basicas en comercios, Lista Justa, preferencias y mesa despues de extender el patron.
-- [ ] Probar en Android real antes de publicar.
+- [x] Probar con una cuenta que tenga mas de 80 productos.
+- [x] Entrar a Mis Productos y confirmar que muestra cache local de inmediato.
+- [x] Cambiar de seccion y volver a Mis Productos, confirmando que no descarga todo otra vez de forma visible.
+- [x] Confirmar que fotos locales de productos no desaparecen despues de sincronizar.
+- [x] Crear o editar un producto en otro dispositivo o entorno de prueba y confirmar que aparece luego de la sincronizacion.
+- [x] Probar con producto local con foto y Firestore sin foto.
+- [x] Probar recuperacion de foto legacy desde el espacio `compartido` hacia el cache del usuario.
+- [x] Probar con producto de API con URL externa y confirmar que la URL se conserva.
+- [x] Probar comercio con foto local antigua y Firestore sin foto.
+- [x] Probar direccion de comercio con foto local antigua y Firestore sin foto.
+- [x] Probar item de Lista Justa o mesa con imagen local antigua si existe ese caso.
+- [x] Probar cierre de sesion e ingreso con otro usuario, confirmando que no se mezclan datos ni fotos.
+- [x] Probar sin internet y confirmar que se muestran datos locales.
+- [x] Recuperar internet y confirmar que se actualiza en segundo plano.
+- [x] Repetir pruebas basicas en comercios, Lista Justa, preferencias y mesa despues de extender el patron.
+- [x] Probar en Android real antes de publicar.
 
 ## Progreso del plan
 
@@ -244,9 +244,22 @@ Validar de forma ejecutable por IA y revisable por humano que la app carga rapid
 - [x] Fase 6: Control De Sincronizacion Y Lecturas
 - [x] Fase 7: Recuperar Fotos Legacy Del Dispositivo
 - [x] Fase 8: Extender Patron A Otros Dominios
-- [ ] Fase 9: Ajustes De UX
-- [ ] Fase Testing
+- [x] Fase 9: Ajustes De UX
+- [x] Fase Testing
 
 Fecha de creacion: 30 de Junio 2026
-Fecha de ultima actualizacion: 30 de Junio 2026
-Estado: EN PROCESO
+Fecha de ultima actualizacion: 1 de Julio 2026
+Estado: TERMINADO
+
+## Cierre
+
+Plan cerrado con la version `1.2.9`.
+
+- Implementacion principal: commit `5129977 Rescate memoria Android`.
+- Release preparado: commit `c0d93c5 v1.2.9` y tag `v1.2.9`.
+- Android usa `IndexedDB` como cache principal cuando esta disponible.
+- `@capacitor/preferences` queda reservado para datos chicos, flags y lectura legacy controlada.
+- Las fotos base64 se separan del objeto principal y no se cargan masivamente en listados.
+- Productos, comercios, Lista Justa, preferencias y mesa quedan bajo el patron local primero + sincronizacion en segundo plano.
+- Validaciones ejecutadas: `npm run lint`, `npm run build`, `npm run androidReleaseConSimbolos`.
+- Validacion practica: probado en celular real y confirmado por Leo que la sincronizacion y la estabilidad quedaron bien.
