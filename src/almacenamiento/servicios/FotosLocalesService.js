@@ -309,11 +309,29 @@ async function hidratarFotoLocal(fotoLocalId) {
   return registro?.imagen || null
 }
 
+async function hidratarProducto(producto) {
+  if (!producto?.fotoLocalId) return producto
+  const imagenLocal = await hidratarFotoLocal(producto.fotoLocalId)
+  return imagenLocal
+    ? { ...producto, imagen: imagenLocal }
+    : producto
+}
+
+async function hidratarProductos(productos = []) {
+  const hidratados = []
+  for (const producto of productos || []) {
+    hidratados.push(await hidratarProducto(producto))
+  }
+  return hidratados
+}
+
 export default {
   clonar,
   esBase64Imagen,
   esUrlImagen,
   hidratarFotoLocal,
+  hidratarProducto,
+  hidratarProductos,
   protegerProducto,
   protegerProductos,
   protegerComercio,

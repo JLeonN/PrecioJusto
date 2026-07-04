@@ -96,7 +96,8 @@ async function recuperarFotosProductos(productos = []) {
     recuperados.push(await recuperarFotoProducto(producto))
   }
 
-  return fotosLocalesService.protegerProductos(recuperados)
+  const protegidos = await fotosLocalesService.protegerProductos(recuperados)
+  return fotosLocalesService.hidratarProductos(protegidos)
 }
 
 async function recuperarFotosComercios(comercios = []) {
