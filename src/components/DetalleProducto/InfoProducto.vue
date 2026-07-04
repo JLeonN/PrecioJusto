@@ -406,6 +406,8 @@ async function restaurarDesdeApi() {
       cantidad: resultado.cantidad || props.producto.cantidad,
       unidad: resultado.unidad || props.producto.unidad,
       imagen: resultado.imagen || props.producto.imagen,
+      fotoLocalId: resultado.imagen ? null : props.producto.fotoLocalId,
+      sincronizacionFoto: resultado.imagen ? null : props.producto.sincronizacionFoto,
       fuenteDato: resultadoApi.fuenteDato,
       fotoFuente: nuevaFotoFuente,
     })

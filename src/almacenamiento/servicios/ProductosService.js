@@ -595,6 +595,8 @@ class ProductosService {
     if (!producto?.imagen) {
       producto.imagenUrl = null
       producto.imagenRutaStorage = null
+      producto.fotoLocalId = null
+      producto.sincronizacionFoto = null
       return producto
     }
 
