@@ -20,6 +20,7 @@ import { adaptadorActual } from './AlmacenamientoService.js'
 import { normalizarEscalasPorCantidad, obtenerResumenEscalas } from '../../utils/EscalasCantidadUtils.js'
 import {
   CLAVE_CACHE_FIRESTORE_PRODUCTOS_META,
+  PREFIJO_CONFIRMACIONES,
   PREFIJO_PRODUCTOS,
 } from '../constantes/ClavesAlmacenamiento.js'
 import { ESTADOS_SINCRONIZACION, ORIGENES_FOTO } from '../constantes/PreparacionFirebase.js'
@@ -332,9 +333,13 @@ class ProductosService {
   async eliminarProducto(productoId) {
     try {
       const clave = `${this.prefijoProductos}${productoId}`
+      const productoActual = await this.obtenerProducto(productoId)
       const eliminado = await this.adaptador.eliminar(clave)
 
       if (eliminado) {
+        await fotosLocalesService.eliminarFotosProducto(productoActual)
+        await this._eliminarConfirmacionesLocalesProducto(productoActual)
+        await this.adaptador.eliminar(CLAVE_CACHE_FIRESTORE_PRODUCTOS_META)
         await this._sincronizarEliminacionProductoFirestore(productoId)
         console.log(`Producto ${productoId} eliminado`)
       }
@@ -665,6 +670,15 @@ class ProductosService {
     }
   }
 
+  async eliminarProductoLocalPorSincronizacion(producto) {
+    if (!producto?.id) return false
+
+    await fotosLocalesService.eliminarFotosProducto(producto)
+    await this._eliminarConfirmacionesLocalesProducto(producto)
+    await this.adaptador.eliminar(CLAVE_CACHE_FIRESTORE_PRODUCTOS_META)
+    return this.eliminarProductoDeCacheLocal(producto.id)
+  }
+
   async obtenerMetaCacheFirestore() {
     return (await this.adaptador.obtener(CLAVE_CACHE_FIRESTORE_PRODUCTOS_META)) || null
   }
@@ -687,14 +701,39 @@ class ProductosService {
   async _sincronizarEliminacionProductoFirestore(productoId) {
     try {
       const resultado = await this._ejecutarConTimeoutFirestore(
-        firestoreProductosService.eliminarProducto(productoId),
+        firestoreProductosService.eliminarProductoDefinitivo(productoId),
       )
       if (!resultado.omitido && !resultado.exito) {
-        console.warn('El producto se eliminó localmente, pero no se marcó como eliminado en Firestore.')
+        console.warn('El producto se eliminó localmente, pero no se borró en Firestore.')
       }
     } catch (error) {
-      console.warn('El producto se eliminó localmente, pero falló la eliminación Firestore.', error)
+      console.warn('El producto se eliminó localmente, pero falló el borrado Firestore.', error)
     }
+  }
+
+  async _eliminarConfirmacionesLocalesProducto(producto) {
+    const precioIds = new Set((producto?.precios || []).map((precio) => precio?.id).filter(Boolean))
+    if (precioIds.size === 0) return
+
+    const usuarioId = usuarioActualService.obtenerUsuarioIdActual()
+    if (!usuarioId) return
+
+    const clave = `${PREFIJO_CONFIRMACIONES}${usuarioId}`
+    const confirmaciones = await this.adaptador.obtener(clave)
+    const preciosConfirmados = Array.isArray(confirmaciones?.preciosConfirmados)
+      ? confirmaciones.preciosConfirmados
+      : Array.isArray(confirmaciones)
+        ? confirmaciones
+        : []
+    const filtradas = preciosConfirmados.filter((precioId) => !precioIds.has(precioId))
+
+    if (filtradas.length === preciosConfirmados.length) return
+
+    await this.adaptador.guardar(clave, {
+      usuarioId,
+      preciosConfirmados: filtradas,
+      fechaActualizacion: new Date().toISOString(),
+    })
   }
 
   async _ejecutarConTimeoutFirestore(promesa) {

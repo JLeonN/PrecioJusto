@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -15,6 +16,7 @@ import {
   TIPOS_USUARIO,
 } from '../constantes/PreparacionFirebase.js'
 import firebaseBaseService from './FirebaseBaseService.js'
+import firestoreConfirmacionesService from './FirestoreConfirmacionesService.js'
 import usuarioActualService from './UsuarioActualService.js'
 
 const LIMITE_PRECIOS_POR_PRODUCTO = 200
@@ -210,6 +212,71 @@ async function eliminarPrecio(productoId, precioId) {
   })
 }
 
+async function eliminarPrecioDefinitivo(productoId, precioId) {
+  const usuarioId = obtenerUsuarioFirebaseActual()
+  if (!usuarioId) return crearResultadoOmitido()
+
+  await firestoreConfirmacionesService.eliminarConfirmacionesPrecios([precioId])
+  await deleteDoc(obtenerReferenciaPrecio(usuarioId, productoId, precioId))
+
+  return {
+    exito: true,
+    estado: obtenerEstadoEscrituraAceptada(),
+  }
+}
+
+async function eliminarPreciosProductoDefinitivo(productoId, opciones = {}) {
+  const usuarioId = opciones.usuarioId || obtenerUsuarioFirebaseActual()
+  if (!usuarioId) return crearResultadoOmitido()
+
+  const snapshot = await getDocs(obtenerColeccionPrecios(usuarioId, productoId))
+  await firestoreConfirmacionesService.eliminarConfirmacionesProducto(productoId)
+  await ejecutarEnLotes(snapshot.docs, async (documento) => deleteDoc(documento.ref))
+
+  return {
+    exito: true,
+    estado: obtenerEstadoEscrituraAceptada(),
+    eliminados: snapshot.docs.length,
+  }
+}
+
+async function eliminarPreciosPorComercioDefinitivo(comercioId, direccionId = null) {
+  const usuarioId = obtenerUsuarioFirebaseActual()
+  if (!usuarioId) return crearResultadoOmitido()
+
+  const productosSnapshot = await getDocs(collection(obtenerDb(), 'usuarios', usuarioId, 'productos'))
+  let eliminados = 0
+
+  for (const productoDocumento of productosSnapshot.docs) {
+    const preciosSnapshot = await getDocs(obtenerColeccionPrecios(usuarioId, productoDocumento.id))
+    const preciosRelacionados = preciosSnapshot.docs.filter((precioDocumento) => {
+      const precio = precioDocumento.data()
+      if (precio?.comercioId !== comercioId) return false
+      return !direccionId || precio?.direccionId === direccionId
+    })
+    await firestoreConfirmacionesService.eliminarConfirmacionesPrecios(
+      preciosRelacionados.map((documento) => documento.id),
+    )
+
+    await ejecutarEnLotes(preciosRelacionados, async (documento) => deleteDoc(documento.ref))
+    eliminados += preciosRelacionados.length
+  }
+
+  return {
+    exito: true,
+    estado: obtenerEstadoEscrituraAceptada(),
+    eliminados,
+  }
+}
+
+async function ejecutarEnLotes(items = [], accion, tamanoLote = 20) {
+  for (let indice = 0; indice < items.length; indice += tamanoLote) {
+    const lote = items.slice(indice, indice + tamanoLote)
+    await Promise.all(lote.map((item) => accion(item)))
+    await new Promise((resolve) => setTimeout(resolve, 0))
+  }
+}
+
 export default {
   obtenerColeccionPrecios,
   obtenerReferenciaPrecio,
@@ -219,4 +286,7 @@ export default {
   obtenerPreciosProducto,
   actualizarPrecio,
   eliminarPrecio,
+  eliminarPrecioDefinitivo,
+  eliminarPreciosProductoDefinitivo,
+  eliminarPreciosPorComercioDefinitivo,
 }

@@ -2,10 +2,12 @@ import { defineStore } from 'pinia'
 import ComerciosService from '../servicios/ComerciosService'
 import fotosLegacyCacheService from '../servicios/FotosLegacyCacheService.js'
 import fuentePrincipalFirestoreService from '../servicios/FuentePrincipalFirestoreService.js'
+import reconciliacionFirestoreLocalService from '../servicios/ReconciliacionFirestoreLocalService.js'
 import { useProductosStore } from './productosStore.js'
 import { useUsuarioStore } from './UsuarioStore.js'
 
 const TIEMPO_MINIMO_REFRESCO_FIRESTORE_MS = 3 * 60 * 1000
+let primeraSincronizacionFirestore = true
 
 /**
  * COMERCIOS STORE
@@ -183,8 +185,12 @@ export const useComerciStore = defineStore('comercios', {
 
         if (comerciosLocalesVisibles.length > 0) {
           this.cargando = false
-          void this.sincronizarComerciosDesdeFirestore({ datosLocales })
+          void this.sincronizarComerciosDesdeFirestore({
+            datosLocales,
+            forzar: this.consumirPrimeraSincronizacionFirestore(),
+          })
         } else {
+          this.consumirPrimeraSincronizacionFirestore()
           await this.sincronizarComerciosDesdeFirestore({ datosLocales, forzar: true })
         }
       } catch (error) {
@@ -215,8 +221,19 @@ export const useComerciStore = defineStore('comercios', {
           return
         }
 
+        await reconciliacionFirestoreLocalService.limpiarLocalesSobrantes({
+          locales: datosLocales,
+          remotos: resultado.datos,
+          limpiarEntidad: (comercio) =>
+            ComerciosService.eliminarComercioLocalPorSincronizacion(comercio),
+        })
+        const datosLocalesVigentes =
+          reconciliacionFirestoreLocalService.filtrarLocalesExistentesEnRemotos(
+            datosLocales,
+            resultado.datos,
+          )
         const comerciosFusionadosBase = fuentePrincipalFirestoreService.fusionarComerciosLocalFirestore(
-          datosLocales,
+          datosLocalesVigentes,
           resultado.datos,
         )
         const comerciosFusionados =
@@ -247,6 +264,12 @@ export const useComerciStore = defineStore('comercios', {
       if (!Number.isFinite(fecha)) return false
 
       return Date.now() - fecha < TIEMPO_MINIMO_REFRESCO_FIRESTORE_MS
+    },
+
+    consumirPrimeraSincronizacionFirestore() {
+      const debeForzar = primeraSincronizacionFirestore
+      primeraSincronizacionFirestore = false
+      return debeForzar
     },
 
     /**
@@ -375,6 +398,26 @@ export const useComerciStore = defineStore('comercios', {
       }
     },
 
+    async _eliminarPreciosComercio(comercioId, direccionId = null) {
+      try {
+        const productosStore = useProductosStore()
+
+        for (const producto of productosStore.productos) {
+          const preciosActuales = Array.isArray(producto.precios) ? producto.precios : []
+          const preciosFiltrados = preciosActuales.filter((precio) => {
+            if (precio.comercioId !== comercioId) return true
+            return direccionId && precio.direccionId !== direccionId
+          })
+
+          if (preciosFiltrados.length === preciosActuales.length) continue
+
+          await productosStore.actualizarProducto(producto.id, { precios: preciosFiltrados })
+        }
+      } catch (err) {
+        console.error('Error al limpiar precios del comercio eliminado:', err)
+      }
+    },
+
     /**
      * Elimina un comercio
      * @param {string} id - ID del comercio
@@ -389,6 +432,7 @@ export const useComerciStore = defineStore('comercios', {
 
         if (eliminado) {
           this.comercios = this.comercios.filter((c) => c.id !== id)
+          await this._eliminarPreciosComercio(id)
         }
 
         return eliminado
@@ -420,6 +464,7 @@ export const useComerciStore = defineStore('comercios', {
           const eliminado = await ComerciosService.eliminarComercio(id)
           if (eliminado) {
             resultados.exitosos.push(id)
+            await this._eliminarPreciosComercio(id)
           } else {
             resultados.fallidos.push(id)
           }
@@ -520,6 +565,7 @@ export const useComerciStore = defineStore('comercios', {
           if (comercio) {
             comercio.direcciones = comercio.direcciones.filter((d) => d.id !== direccionId)
           }
+          await this._eliminarPreciosComercio(comercioId, direccionId)
         }
 
         return eliminado

@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteDoc,
   doc,
   getDocs,
   limit,
@@ -224,25 +225,11 @@ async function guardarItemsMesaTrabajo(items = []) {
   }
 }
 
-async function eliminarItemMesaTrabajo(itemId, datosResolucion = {}) {
+async function eliminarItemMesaTrabajo(itemId) {
   const usuarioId = obtenerUsuarioFirebaseActual()
   if (!usuarioId) return crearResultadoOmitido()
 
-  const fechaResolucion = datosResolucion.fechaResolucion || new Date().toISOString()
-  await setDoc(
-    obtenerReferenciaItemMesaTrabajo(usuarioId, itemId),
-    {
-      id: normalizarIdDocumento(itemId),
-      usuarioId,
-      codigoBarras: datosResolucion.codigoBarras || null,
-      productoDestinoId: datosResolucion.productoDestinoId || datosResolucion.productoExistenteId || null,
-      estadoMesa: 'resuelto',
-      eliminado: true,
-      fechaResolucion,
-      fechaActualizacion: fechaResolucion,
-    },
-    { merge: true },
-  )
+  await deleteDoc(obtenerReferenciaItemMesaTrabajo(usuarioId, itemId))
 
   return {
     exito: true,
@@ -255,21 +242,7 @@ async function limpiarMesaTrabajoUsuario() {
   if (!usuarioId) return crearResultadoOmitido()
 
   const snapshot = await getDocs(obtenerColeccionMesaTrabajo(usuarioId))
-  const fechaResolucion = new Date().toISOString()
-  const eliminaciones = snapshot.docs.map((documento) =>
-    setDoc(
-      documento.ref,
-      {
-        id: documento.id,
-        usuarioId,
-        estadoMesa: 'resuelto',
-        eliminado: true,
-        fechaResolucion,
-        fechaActualizacion: fechaResolucion,
-      },
-      { merge: true },
-    ),
-  )
+  const eliminaciones = snapshot.docs.map((documento) => deleteDoc(documento.ref))
   await Promise.all(eliminaciones)
 
   return {

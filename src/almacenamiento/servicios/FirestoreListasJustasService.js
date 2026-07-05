@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -289,6 +290,18 @@ async function eliminarListaJusta(listaId) {
   })
 }
 
+async function eliminarListaJustaDefinitiva(listaId) {
+  const usuarioId = obtenerUsuarioFirebaseActual()
+  if (!usuarioId) return crearResultadoOmitido()
+
+  await deleteDoc(obtenerReferenciaListaJusta(usuarioId, listaId))
+
+  return {
+    exito: true,
+    estado: obtenerEstadoEscrituraAceptada(),
+  }
+}
+
 export default {
   obtenerColeccionListasJustas,
   obtenerReferenciaListaJusta,
@@ -300,4 +313,5 @@ export default {
   obtenerListasJustasUsuario,
   actualizarListaJusta,
   eliminarListaJusta,
+  eliminarListaJustaDefinitiva,
 }

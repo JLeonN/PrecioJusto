@@ -309,6 +309,45 @@ async function hidratarFotoLocal(fotoLocalId) {
   return registro?.imagen || null
 }
 
+async function eliminarFotoLocal(fotoLocalId) {
+  if (!fotoLocalId) return false
+  return adaptadorActual.eliminar(`${PREFIJO_FOTOS_LOCALES}${fotoLocalId}`)
+}
+
+async function eliminarFotosPorIds(fotoLocalIds = []) {
+  const idsUnicos = [...new Set((fotoLocalIds || []).filter(Boolean))]
+  let eliminadas = 0
+
+  for (const fotoLocalId of idsUnicos) {
+    const eliminada = await eliminarFotoLocal(fotoLocalId)
+    if (eliminada) eliminadas++
+  }
+
+  return eliminadas
+}
+
+async function eliminarFotosProducto(producto) {
+  return eliminarFotosPorIds([producto?.fotoLocalId])
+}
+
+async function eliminarFotosComercio(comercio) {
+  const ids = [comercio?.fotoLocalId]
+
+  for (const direccion of comercio?.direcciones || []) {
+    ids.push(direccion?.fotoLocalId)
+  }
+
+  return eliminarFotosPorIds(ids)
+}
+
+async function eliminarFotosLista(lista) {
+  return eliminarFotosPorIds((lista?.items || []).map((item) => item?.fotoLocalId))
+}
+
+async function eliminarFotosMesa(item) {
+  return eliminarFotosPorIds([item?.fotoLocalId, item?.datosOriginales?.fotoLocalId])
+}
+
 async function hidratarProducto(producto) {
   if (!producto?.fotoLocalId) return producto
   const imagenLocal = await hidratarFotoLocal(producto.fotoLocalId)
@@ -329,6 +368,11 @@ export default {
   clonar,
   esBase64Imagen,
   esUrlImagen,
+  eliminarFotoLocal,
+  eliminarFotosProducto,
+  eliminarFotosComercio,
+  eliminarFotosLista,
+  eliminarFotosMesa,
   hidratarFotoLocal,
   hidratarProducto,
   hidratarProductos,

@@ -91,6 +91,7 @@ class SesionEscaneoService {
   async eliminarSesion() {
     try {
       this.eliminarRespaldoUrgente()
+      await this.adaptador.eliminar(CLAVE_CACHE_FIRESTORE_MESA_META)
       return await this.adaptador.eliminar(CLAVE_SESION_ESCANEO)
     } catch (error) {
       console.error('Error al eliminar sesión de escaneo:', error)
@@ -218,6 +219,15 @@ class SesionEscaneoService {
       })
     } catch (error) {
       console.warn('No se pudo guardar meta cache Firestore de Mesa:', error)
+      return false
+    }
+  }
+
+  async eliminarMetaCacheFirestore() {
+    try {
+      return await this.adaptador.eliminar(CLAVE_CACHE_FIRESTORE_MESA_META)
+    } catch (error) {
+      console.warn('No se pudo borrar meta cache Firestore de Mesa:', error)
       return false
     }
   }

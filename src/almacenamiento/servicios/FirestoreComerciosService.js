@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -15,6 +16,7 @@ import {
   TIPOS_USUARIO,
 } from '../constantes/PreparacionFirebase.js'
 import firebaseBaseService from './FirebaseBaseService.js'
+import firestorePreciosService from './FirestorePreciosService.js'
 import usuarioActualService from './UsuarioActualService.js'
 
 function obtenerUsuarioFirebaseActual() {
@@ -282,6 +284,35 @@ async function eliminarComercio(comercioId) {
   })
 }
 
+async function eliminarComercioDefinitivo(comercioId) {
+  const usuarioId = obtenerUsuarioFirebaseActual()
+  if (!usuarioId) return crearResultadoOmitido()
+
+  await firestorePreciosService.eliminarPreciosPorComercioDefinitivo(comercioId)
+  await deleteDoc(obtenerReferenciaComercio(usuarioId, comercioId))
+
+  return {
+    exito: true,
+    estado: obtenerEstadoEscrituraAceptada(),
+  }
+}
+
+async function eliminarDireccionDefinitiva(comercioId, direccionId, comercioActualizado) {
+  const usuarioId = obtenerUsuarioFirebaseActual()
+  if (!usuarioId) return crearResultadoOmitido()
+
+  await firestorePreciosService.eliminarPreciosPorComercioDefinitivo(comercioId, direccionId)
+
+  if (comercioActualizado) {
+    return guardarComercio(comercioActualizado)
+  }
+
+  return {
+    exito: true,
+    estado: obtenerEstadoEscrituraAceptada(),
+  }
+}
+
 export default {
   obtenerColeccionComercios,
   obtenerReferenciaComercio,
@@ -293,4 +324,6 @@ export default {
   actualizarDirecciones,
   registrarUsoComercio,
   eliminarComercio,
+  eliminarComercioDefinitivo,
+  eliminarDireccionDefinitiva,
 }

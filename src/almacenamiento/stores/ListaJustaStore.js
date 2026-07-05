@@ -5,11 +5,13 @@ import fuentePrincipalFirestoreService from '../servicios/FuentePrincipalFiresto
 import fotosLegacyCacheService from '../servicios/FotosLegacyCacheService.js'
 import ListaJustaService from '../servicios/ListaJustaService.js'
 import productosService from '../servicios/ProductosService.js'
+import reconciliacionFirestoreLocalService from '../servicios/ReconciliacionFirestoreLocalService.js'
 import { useProductosStore } from './productosStore.js'
 import { useSesionEscaneoStore } from './sesionEscaneoStore.js'
 import { useUsuarioStore } from './UsuarioStore.js'
 
 const TIEMPO_MINIMO_REFRESCO_FIRESTORE_MS = 3 * 60 * 1000
+let primeraSincronizacionFirestore = true
 
 export const useListaJustaStore = defineStore('listaJusta', () => {
   const quasar = useQuasar()
@@ -69,8 +71,12 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
 
       if (listasLocalesVisibles.length > 0) {
         cargando.value = false
-        void sincronizarListasDesdeFirestore({ datosLocales })
+        void sincronizarListasDesdeFirestore({
+          datosLocales,
+          forzar: consumirPrimeraSincronizacionFirestore(),
+        })
       } else {
+        consumirPrimeraSincronizacionFirestore()
         await sincronizarListasDesdeFirestore({ datosLocales, forzar: true })
       }
     } catch (err) {
@@ -100,8 +106,18 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
         return
       }
 
+      await reconciliacionFirestoreLocalService.limpiarLocalesSobrantes({
+        locales: datosLocales,
+        remotos: resultado.datos,
+        limpiarEntidad: (lista) => ListaJustaService.eliminarListaLocalPorSincronizacion(lista),
+      })
+      const datosLocalesVigentes =
+        reconciliacionFirestoreLocalService.filtrarLocalesExistentesEnRemotos(
+          datosLocales,
+          resultado.datos,
+        )
       const listasFusionadasBase = fuentePrincipalFirestoreService.fusionarListasLocalFirestore(
-        datosLocales,
+        datosLocalesVigentes,
         resultado.datos,
       )
       const listasFusionadas =
@@ -132,6 +148,12 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     if (!Number.isFinite(fecha)) return false
 
     return Date.now() - fecha < TIEMPO_MINIMO_REFRESCO_FIRESTORE_MS
+  }
+
+  function consumirPrimeraSincronizacionFirestore() {
+    const debeForzar = primeraSincronizacionFirestore
+    primeraSincronizacionFirestore = false
+    return debeForzar
   }
 
   async function crearLista(nombre) {
@@ -237,6 +259,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     await persistir()
 
     if (listaEliminada) {
+      await ListaJustaService.limpiarDatosLocalesLista(listaEliminada)
       await ListaJustaService.sincronizarEliminacionListaFirestore(listaEliminada.id)
     }
 
@@ -422,8 +445,10 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
     const lista = obtenerListaPorId(listaId)
     if (!lista) return false
 
+    const itemEliminado = lista.items.find((item) => item.id === itemId)
     lista.items = lista.items.filter((item) => item.id !== itemId)
     lista.fechaActualizacion = new Date().toISOString()
+    await ListaJustaService.limpiarDatosLocalesItemLista(itemEliminado)
     await persistir()
     return true
   }

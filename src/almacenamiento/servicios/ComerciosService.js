@@ -340,6 +340,7 @@ async function editarComercio(id, datosActualizados) {
  */
 async function eliminarComercio(id) {
   const comercios = await obtenerTodos()
+  const comercioEliminado = comercios.find((c) => c.id === id)
   const comerciosFiltrados = comercios.filter((c) => c.id !== id)
 
   if (comercios.length === comerciosFiltrados.length) {
@@ -347,6 +348,8 @@ async function eliminarComercio(id) {
   }
 
   await guardarComerciosProtegidos(comerciosFiltrados)
+  await fotosLocalesService.eliminarFotosComercio(comercioEliminado)
+  await adaptadorActual.eliminar(CLAVE_CACHE_FIRESTORE_COMERCIOS_META)
   await sincronizarEliminacionComercioFirestore(id)
   return true
 }
@@ -433,6 +436,7 @@ async function eliminarDireccion(comercioId, direccionId) {
   if (!comercio) return false
 
   const longitudOriginal = comercio.direcciones.length
+  const direccionEliminada = comercio.direcciones.find((d) => d.id === direccionId)
   comercio.direcciones = comercio.direcciones.filter((d) => d.id !== direccionId)
 
   if (comercio.direcciones.length === longitudOriginal) {
@@ -442,7 +446,9 @@ async function eliminarDireccion(comercioId, direccionId) {
   comercio.fechaActualizacion = new Date().toISOString()
   await prepararFotosStorageComercio(comercio)
   await guardarComerciosProtegidos(comercios)
-  await sincronizarComercioFirestore(comercio)
+  await fotosLocalesService.eliminarFotosComercio({ direcciones: [direccionEliminada] })
+  await adaptadorActual.eliminar(CLAVE_CACHE_FIRESTORE_COMERCIOS_META)
+  await sincronizarEliminacionDireccionFirestore(comercioId, direccionId, comercio)
   return true
 }
 
@@ -608,6 +614,17 @@ async function guardarComerciosEnCacheLocal(comercios = []) {
   }
 }
 
+async function eliminarComercioLocalPorSincronizacion(comercio) {
+  if (!comercio?.id) return false
+
+  const comercios = await obtenerTodos()
+  const comerciosFiltrados = comercios.filter((actual) => String(actual.id) !== String(comercio.id))
+
+  await fotosLocalesService.eliminarFotosComercio(comercio)
+  await adaptadorActual.eliminar(CLAVE_CACHE_FIRESTORE_COMERCIOS_META)
+  return guardarComerciosProtegidos(comerciosFiltrados)
+}
+
 async function obtenerMetaCacheFirestore() {
   return (await adaptadorActual.obtener(CLAVE_CACHE_FIRESTORE_COMERCIOS_META)) || null
 }
@@ -630,13 +647,30 @@ function esDataUriImagen(valor) {
 async function sincronizarEliminacionComercioFirestore(comercioId) {
   try {
     const resultado = await ejecutarConTimeoutFirestore(
-      firestoreComerciosService.eliminarComercio(comercioId),
+      firestoreComerciosService.eliminarComercioDefinitivo(comercioId),
     )
     if (!resultado.omitido && !resultado.exito) {
-      console.warn('El comercio se eliminó localmente, pero no se marcó como eliminado en Firestore.')
+      console.warn('El comercio se eliminó localmente, pero no se borró en Firestore.')
     }
   } catch (error) {
-    console.warn('El comercio se eliminó localmente, pero falló la eliminación Firestore.', error)
+    console.warn('El comercio se eliminó localmente, pero falló el borrado Firestore.', error)
+  }
+}
+
+async function sincronizarEliminacionDireccionFirestore(comercioId, direccionId, comercioActualizado) {
+  try {
+    const resultado = await ejecutarConTimeoutFirestore(
+      firestoreComerciosService.eliminarDireccionDefinitiva(
+        comercioId,
+        direccionId,
+        comercioActualizado,
+      ),
+    )
+    if (!resultado.omitido && !resultado.exito) {
+      console.warn('La dirección se eliminó localmente, pero no se borró en Firestore.')
+    }
+  } catch (error) {
+    console.warn('La dirección se eliminó localmente, pero falló el borrado Firestore.', error)
   }
 }
 
@@ -660,6 +694,7 @@ async function ejecutarConTimeoutFirestore(promesa) {
 export default {
   obtenerTodos,
   guardarComerciosEnCacheLocal,
+  eliminarComercioLocalPorSincronizacion,
   obtenerMetaCacheFirestore,
   guardarMetaCacheFirestore,
   buscarPorNombre,

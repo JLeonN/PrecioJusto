@@ -23,9 +23,11 @@ import { ESTADOS_SINCRONIZACION } from '../constantes/PreparacionFirebase.js'
 import fotosLegacyCacheService from '../servicios/FotosLegacyCacheService.js'
 import fuentePrincipalFirestoreService from '../servicios/FuentePrincipalFirestoreService.js'
 import productosService from '../servicios/ProductosService.js'
+import reconciliacionFirestoreLocalService from '../servicios/ReconciliacionFirestoreLocalService.js'
 import { useUsuarioStore } from './UsuarioStore.js'
 
 const TIEMPO_MINIMO_REFRESCO_FIRESTORE_MS = 3 * 60 * 1000
+let primeraSincronizacionFirestore = true
 
 export const useProductosStore = defineStore('productos', () => {
   // ========================================
@@ -171,9 +173,13 @@ export const useProductosStore = defineStore('productos', () => {
       if (productosLocalesVisibles.length > 0) {
         cargando.value = false
         if (opciones.sincronizarFondo !== false) {
-          void sincronizarProductosDesdeFirestore({ datosLocales })
+          void sincronizarProductosDesdeFirestore({
+            datosLocales,
+            forzar: consumirPrimeraSincronizacionFirestore(),
+          })
         }
       } else {
+        consumirPrimeraSincronizacionFirestore()
         await sincronizarProductosDesdeFirestore({ datosLocales, forzar: true })
       }
 
@@ -219,8 +225,19 @@ export const useProductosStore = defineStore('productos', () => {
         return
       }
 
+      await reconciliacionFirestoreLocalService.limpiarLocalesSobrantes({
+        locales: datosLocales,
+        remotos: resultado.datos,
+        limpiarEntidad: (producto) =>
+          productosService.eliminarProductoLocalPorSincronizacion(producto),
+      })
+      const datosLocalesVigentes =
+        reconciliacionFirestoreLocalService.filtrarLocalesExistentesEnRemotos(
+          datosLocales,
+          resultado.datos,
+        )
       const productosFusionadosBase = fuentePrincipalFirestoreService.fusionarProductosLocalFirestore(
-        datosLocales,
+        datosLocalesVigentes,
         resultado.datos,
       )
       const productosFusionados =
@@ -255,6 +272,12 @@ export const useProductosStore = defineStore('productos', () => {
     if (!Number.isFinite(fecha)) return false
 
     return Date.now() - fecha < TIEMPO_MINIMO_REFRESCO_FIRESTORE_MS
+  }
+
+  function consumirPrimeraSincronizacionFirestore() {
+    const debeForzar = primeraSincronizacionFirestore
+    primeraSincronizacionFirestore = false
+    return debeForzar
   }
 
   // ========================================
@@ -408,7 +431,7 @@ export const useProductosStore = defineStore('productos', () => {
    * @param {number} productoId - ID del producto
    * @returns {Promise<boolean>} - true si eliminó exitosamente
    *
-   * 🔥 FIRESTORE: Considerar soft delete (marcar eliminado: true)
+   * FIRESTORE: Borrado real del producto y sus precios.
    */
   async function eliminarProducto(productoId) {
     cargando.value = true

@@ -145,6 +145,50 @@ async function eliminarConfirmacion(confirmacion) {
   }
 }
 
+async function eliminarConfirmacionesProducto(productoId) {
+  const usuarioId = obtenerUsuarioFirebaseActual()
+  if (!usuarioId) return crearResultadoOmitido()
+
+  const productoNormalizado = normalizarIdDocumento(productoId)
+  const snapshot = await getDocs(obtenerColeccionConfirmaciones(usuarioId))
+  const relacionadas = snapshot.docs.filter(
+    (documento) => normalizarIdDocumento(documento.data()?.productoId) === productoNormalizado,
+  )
+  await Promise.all(relacionadas.map((documento) => deleteDoc(documento.ref)))
+
+  return {
+    exito: true,
+    estado: obtenerEstadoEscrituraAceptada(),
+    eliminadas: relacionadas.length,
+  }
+}
+
+async function eliminarConfirmacionesPrecios(precioIds = []) {
+  const usuarioId = obtenerUsuarioFirebaseActual()
+  if (!usuarioId) return crearResultadoOmitido()
+
+  const ids = new Set((precioIds || []).map((precioId) => normalizarIdDocumento(precioId)))
+  if (ids.size === 0) {
+    return {
+      exito: true,
+      estado: obtenerEstadoEscrituraAceptada(),
+      eliminadas: 0,
+    }
+  }
+
+  const snapshot = await getDocs(obtenerColeccionConfirmaciones(usuarioId))
+  const relacionadas = snapshot.docs.filter((documento) =>
+    ids.has(normalizarIdDocumento(documento.data()?.precioId)),
+  )
+  await Promise.all(relacionadas.map((documento) => deleteDoc(documento.ref)))
+
+  return {
+    exito: true,
+    estado: obtenerEstadoEscrituraAceptada(),
+    eliminadas: relacionadas.length,
+  }
+}
+
 async function limpiarConfirmacionesUsuario() {
   const usuarioId = obtenerUsuarioFirebaseActual()
   if (!usuarioId) return crearResultadoOmitido()
@@ -169,5 +213,7 @@ export default {
   obtenerConfirmacionesUsuario,
   usuarioConfirmoPrecio,
   eliminarConfirmacion,
+  eliminarConfirmacionesProducto,
+  eliminarConfirmacionesPrecios,
   limpiarConfirmacionesUsuario,
 }

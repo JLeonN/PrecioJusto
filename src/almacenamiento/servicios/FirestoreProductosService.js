@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -276,6 +277,19 @@ async function eliminarProducto(productoId) {
   })
 }
 
+async function eliminarProductoDefinitivo(productoId) {
+  const usuarioId = obtenerUsuarioFirebaseActual()
+  if (!usuarioId) return crearResultadoOmitido()
+
+  await firestorePreciosService.eliminarPreciosProductoDefinitivo(productoId, { usuarioId })
+  await deleteDoc(obtenerReferenciaProducto(usuarioId, productoId))
+
+  return {
+    exito: true,
+    estado: obtenerEstadoEscrituraAceptada(),
+  }
+}
+
 export default {
   obtenerColeccionProductos,
   obtenerReferenciaProducto,
@@ -286,4 +300,5 @@ export default {
   obtenerProductosUsuario,
   actualizarProducto,
   eliminarProducto,
+  eliminarProductoDefinitivo,
 }

@@ -99,14 +99,34 @@ class ListaJustaService {
   async sincronizarEliminacionListaFirestore(listaId) {
     try {
       const resultado = await this._ejecutarConTimeoutFirestore(
-        firestoreListasJustasService.eliminarListaJusta(listaId),
+        firestoreListasJustasService.eliminarListaJustaDefinitiva(listaId),
       )
       if (!resultado.omitido && !resultado.exito) {
-        console.warn('La lista se eliminó localmente, pero no se marcó como eliminada en Firestore.')
+        console.warn('La lista se eliminó localmente, pero no se borró en Firestore.')
       }
     } catch (error) {
-      console.warn('La lista se eliminó localmente, pero falló la eliminación Firestore.', error)
+      console.warn('La lista se eliminó localmente, pero falló el borrado Firestore.', error)
     }
+  }
+
+  async limpiarDatosLocalesLista(lista) {
+    await fotosLocalesService.eliminarFotosLista(lista)
+    await this.adaptador.eliminar(CLAVE_CACHE_FIRESTORE_LISTAS_META)
+  }
+
+  async eliminarListaLocalPorSincronizacion(lista) {
+    if (!lista?.id) return false
+
+    const listas = await this.obtenerListas()
+    const listasFiltradas = listas.filter((actual) => String(actual.id) !== String(lista.id))
+
+    await this.limpiarDatosLocalesLista(lista)
+    return this.guardarListasEnCacheLocal(listasFiltradas)
+  }
+
+  async limpiarDatosLocalesItemLista(item) {
+    await fotosLocalesService.eliminarFotosLista({ items: [item] })
+    await this.adaptador.eliminar(CLAVE_CACHE_FIRESTORE_LISTAS_META)
   }
 
   crearListaVacia(nombre, orden = 0) {

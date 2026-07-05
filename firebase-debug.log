@@ -152,3 +152,67 @@
 [debug] [2026-06-19T23:16:36.472Z] <<< [apiv2][status] POST https://firestore.googleapis.com/v1/projects/preciojustopruebas2/databases/(default)/documents/usuarios/DrpGiJhmV5QirIBS30VGqJB220U2:runQuery 200
 [debug] [2026-06-19T23:16:36.473Z] <<< [apiv2][body] POST https://firestore.googleapis.com/v1/projects/preciojustopruebas2/databases/(default)/documents/usuarios/DrpGiJhmV5QirIBS30VGqJB220U2:runQuery [{"readTime":"2026-06-19T23:16:36.025444Z"}]
 [debug] [2026-06-19T23:16:36.623Z] <<< [apiv2][status] POST https://firestore.googleapis.com/v1/projects/preciojustopruebas2/databases/(default)/documents:commit 200
+[debug] [2026-07-05T16:46:08.526Z] ----------------------------------------------------------------------
+[debug] [2026-07-05T16:46:08.533Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Omat\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\bin\firebase.js auth:export C:\Users\Omat\AppData\Local\Temp\preciojusto-usuarios-check.json --project preciojustoprod --format=json
+[debug] [2026-07-05T16:46:08.534Z] CLI Version:   15.22.4
+[debug] [2026-07-05T16:46:08.534Z] Platform:      win32
+[debug] [2026-07-05T16:46:08.534Z] Node Version:  v22.13.0
+[debug] [2026-07-05T16:46:08.535Z] Detected Agent: codex_cli
+[debug] [2026-07-05T16:46:08.536Z] Time:          Sun Jul 05 2026 13:46:08 GMT-0300 (hora estándar de Uruguay)
+[debug] [2026-07-05T16:46:08.536Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-07-05T16:46:09.073Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-05T16:46:09.074Z] > authorizing via signed-in user (leodevapps.75@gmail.com)
+[debug] [2026-07-05T16:46:09.075Z] [iam] checking project preciojustoprod for permissions ["firebase.projects.get","firebaseauth.users.get"]
+[debug] [2026-07-05T16:46:09.081Z] Checked if tokens are valid: false, expires at: 1783252731903
+[debug] [2026-07-05T16:46:09.081Z] Checked if tokens are valid: false, expires at: 1783252731903
+[debug] [2026-07-05T16:46:09.082Z] > refreshing access token with scopes: []
+[debug] [2026-07-05T16:46:09.086Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-05T16:46:09.087Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-05T16:46:09.336Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-05T16:46:09.337Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-05T16:46:09.355Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/preciojustoprod:testIamPermissions [none]
+[debug] [2026-07-05T16:46:09.355Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/preciojustoprod:testIamPermissions  x-goog-user-project=preciojustoprod
+[debug] [2026-07-05T16:46:09.355Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/preciojustoprod:testIamPermissions {"permissions":["firebase.projects.get","firebaseauth.users.get"]}
+[debug] [2026-07-05T16:46:10.251Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/preciojustoprod:testIamPermissions 200
+[debug] [2026-07-05T16:46:10.251Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/preciojustoprod:testIamPermissions {"permissions":["firebase.projects.get","firebaseauth.users.get"]}
+[info] Exporting accounts to C:\Users\Omat\AppData\Local\Temp\preciojusto-usuarios-check.json
+[debug] [2026-07-05T16:46:10.253Z] Checked if tokens are valid: true, expires at: 1783273568337
+[debug] [2026-07-05T16:46:10.253Z] Checked if tokens are valid: true, expires at: 1783273568337
+[debug] [2026-07-05T16:46:10.254Z] >>> [apiv2][query] POST https://www.googleapis.com/identitytoolkit/v3/relyingparty/downloadAccount [none]
+[debug] [2026-07-05T16:46:10.254Z] >>> [apiv2][body] POST https://www.googleapis.com/identitytoolkit/v3/relyingparty/downloadAccount {"targetProjectId":"preciojustoprod","maxResults":1000}
+[debug] [2026-07-05T16:46:10.531Z] <<< [apiv2][status] POST https://www.googleapis.com/identitytoolkit/v3/relyingparty/downloadAccount 200
+[debug] [2026-07-05T16:46:10.531Z] <<< [apiv2][body] POST https://www.googleapis.com/identitytoolkit/v3/relyingparty/downloadAccount [omitted]
+[info] +  Exported 14 account(s) successfully. 
+[debug] [2026-07-05T23:16:57.275Z] ----------------------------------------------------------------------
+[debug] [2026-07-05T23:16:57.279Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Omat\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\bin\firebase.js auth:export C:\Users\Omat\AppData\Local\Temp\preciojusto-usuarios-check.json --project preciojustoprod --format=json
+[debug] [2026-07-05T23:16:57.279Z] CLI Version:   15.22.4
+[debug] [2026-07-05T23:16:57.279Z] Platform:      win32
+[debug] [2026-07-05T23:16:57.280Z] Node Version:  v22.13.0
+[debug] [2026-07-05T23:16:57.281Z] Detected Agent: codex_cli
+[debug] [2026-07-05T23:16:57.281Z] Time:          Sun Jul 05 2026 20:16:57 GMT-0300 (hora estándar de Uruguay)
+[debug] [2026-07-05T23:16:57.283Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-07-05T23:16:57.730Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-05T23:16:57.733Z] > authorizing via signed-in user (leodevapps.75@gmail.com)
+[debug] [2026-07-05T23:16:57.733Z] [iam] checking project preciojustoprod for permissions ["firebase.projects.get","firebaseauth.users.get"]
+[debug] [2026-07-05T23:16:57.735Z] Checked if tokens are valid: false, expires at: 1783273568337
+[debug] [2026-07-05T23:16:57.736Z] Checked if tokens are valid: false, expires at: 1783273568337
+[debug] [2026-07-05T23:16:57.736Z] > refreshing access token with scopes: []
+[debug] [2026-07-05T23:16:57.739Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-05T23:16:57.740Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-05T23:16:58.021Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-05T23:16:58.022Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-05T23:16:58.043Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/preciojustoprod:testIamPermissions [none]
+[debug] [2026-07-05T23:16:58.043Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/preciojustoprod:testIamPermissions  x-goog-user-project=preciojustoprod
+[debug] [2026-07-05T23:16:58.043Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/preciojustoprod:testIamPermissions {"permissions":["firebase.projects.get","firebaseauth.users.get"]}
+[debug] [2026-07-05T23:16:58.957Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/preciojustoprod:testIamPermissions 200
+[debug] [2026-07-05T23:16:58.957Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/preciojustoprod:testIamPermissions {"permissions":["firebase.projects.get","firebaseauth.users.get"]}
+[info] Exporting accounts to C:\Users\Omat\AppData\Local\Temp\preciojusto-usuarios-check.json
+[debug] [2026-07-05T23:16:58.958Z] Checked if tokens are valid: true, expires at: 1783297017023
+[debug] [2026-07-05T23:16:58.959Z] Checked if tokens are valid: true, expires at: 1783297017023
+[debug] [2026-07-05T23:16:58.959Z] >>> [apiv2][query] POST https://www.googleapis.com/identitytoolkit/v3/relyingparty/downloadAccount [none]
+[debug] [2026-07-05T23:16:58.959Z] >>> [apiv2][body] POST https://www.googleapis.com/identitytoolkit/v3/relyingparty/downloadAccount {"targetProjectId":"preciojustoprod","maxResults":1000}
+[debug] [2026-07-05T23:16:59.265Z] <<< [apiv2][status] POST https://www.googleapis.com/identitytoolkit/v3/relyingparty/downloadAccount 200
+[debug] [2026-07-05T23:16:59.266Z] <<< [apiv2][body] POST https://www.googleapis.com/identitytoolkit/v3/relyingparty/downloadAccount [omitted]
+[info] +  Exported 14 account(s) successfully. 

@@ -7,12 +7,15 @@ import {
 import firestoreMesaTrabajoService from '../servicios/FirestoreMesaTrabajoService.js'
 import fuentePrincipalFirestoreService from '../servicios/FuentePrincipalFirestoreService.js'
 import fotosLegacyCacheService from '../servicios/FotosLegacyCacheService.js'
+import fotosLocalesService from '../servicios/FotosLocalesService.js'
 import productosService from '../servicios/ProductosService.js'
+import reconciliacionFirestoreLocalService from '../servicios/ReconciliacionFirestoreLocalService.js'
 import sesionEscaneoService from '../servicios/SesionEscaneoService.js'
 import { useUsuarioStore } from './UsuarioStore.js'
 
 const RETARDO_PERSISTENCIA_MS = 220
 const TIEMPO_MINIMO_REFRESCO_FIRESTORE_MS = 3 * 60 * 1000
+let primeraSincronizacionFirestore = true
 
 export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
   const items = ref([])
@@ -208,8 +211,12 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
       if (!usaFirestore) return
 
       if (itemsNormalizados.length > 0) {
-        void sincronizarMesaDesdeFirestore({ datosLocales: itemsNormalizados })
+        void sincronizarMesaDesdeFirestore({
+          datosLocales: itemsNormalizados,
+          forzar: consumirPrimeraSincronizacionFirestore(),
+        })
       } else {
+        consumirPrimeraSincronizacionFirestore()
         await sincronizarMesaDesdeFirestore({ datosLocales: itemsNormalizados, forzar: true })
       }
     } catch (error) {
@@ -257,8 +264,24 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
         ),
       )
 
+      const itemsLocalesNoResueltos = await sesionEscaneoService.filtrarItemsNoResueltos(datosLocales, {
+        productosExistentes: productosLocales,
+      })
+      await reconciliacionFirestoreLocalService.limpiarLocalesSobrantes({
+        locales: itemsLocalesNoResueltos,
+        remotos: itemsRemotosPendientes,
+        limpiarEntidad: async (item) => {
+          await fotosLocalesService.eliminarFotosMesa(item)
+          await sesionEscaneoService.marcarItemResuelto(item)
+        },
+      })
+      const itemsLocalesVigentes =
+        reconciliacionFirestoreLocalService.filtrarLocalesExistentesEnRemotos(
+          itemsLocalesNoResueltos,
+          itemsRemotosPendientes,
+        )
       const itemsFusionadosBase = fuentePrincipalFirestoreService.fusionarMesaLocalFirestore(
-        await sesionEscaneoService.filtrarItemsNoResueltos(datosLocales, {
+        await sesionEscaneoService.filtrarItemsNoResueltos(itemsLocalesVigentes, {
           productosExistentes: productosLocales,
         }),
         itemsRemotosPendientes,
@@ -293,6 +316,12 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
     if (!Number.isFinite(fecha)) return false
 
     return Date.now() - fecha < TIEMPO_MINIMO_REFRESCO_FIRESTORE_MS
+  }
+
+  function consumirPrimeraSincronizacionFirestore() {
+    const debeForzar = primeraSincronizacionFirestore
+    primeraSincronizacionFirestore = false
+    return debeForzar
   }
 
   async function cargarSesion() {
@@ -389,9 +418,11 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
     }
 
     await sesionEscaneoService.marcarItemResuelto(itemResuelto)
+    await fotosLocalesService.eliminarFotosMesa(itemActual)
     items.value = items.value.filter((item) => item.id !== id)
     limpiarTimerPersistencia()
     await sesionEscaneoService.guardarItemsEnCacheLocal(items.value)
+    await sesionEscaneoService.eliminarMetaCacheFirestore()
 
     if (debeSincronizarConFirestore()) {
       try {
@@ -413,12 +444,16 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
 
   async function limpiarTodo() {
     suprimirPersistencia.value = true
+    for (const item of items.value) {
+      await fotosLocalesService.eliminarFotosMesa(item)
+    }
     await sesionEscaneoService.marcarItemsResueltos(items.value)
     items.value = []
     suprimirPersistencia.value = false
     limpiarTimerPersistencia()
 
     await sesionEscaneoService.eliminarSesion()
+    await sesionEscaneoService.eliminarMetaCacheFirestore()
 
     if (debeSincronizarConFirestore()) {
       const resultado = await firestoreMesaTrabajoService.limpiarMesaTrabajoUsuario()
