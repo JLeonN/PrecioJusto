@@ -462,6 +462,103 @@ entrar a pantalla -> borrar estado -> esperar Firestore -> pintar todo de nuevo
 
 Ese patrón se siente lento y además puede borrar visualmente fotos o datos locales durante la sincronización.
 
+### Firestore Como Verdad Después De Responder
+
+El patrón `local primero, nube después` no significa que el caché local pueda conservar datos viejos para siempre.
+
+Regla aprendida en producción:
+
+> Cuando Firestore responde correctamente, Firestore pasa a ser la verdad para esa cuenta y ese dominio.
+
+Esto es especialmente importante con borrados hechos desde otro dispositivo.
+
+Flujo correcto:
+
+```text
+1. Mostrar caché local inmediatamente.
+2. Consultar Firestore en segundo plano.
+3. Si Firestore falla u offline, no borrar nada local.
+4. Si Firestore responde bien, comparar IDs locales contra IDs remotos.
+5. Todo ID local que ya no existe en Firestore debe eliminarse del caché local.
+6. Guardar en caché local el resultado reconciliado.
+```
+
+Esto evita el problema clásico:
+
+```text
+celular borra producto -> Firestore ya no lo tiene -> navegador sigue mostrando el producto local viejo
+```
+
+Para resolverlo de forma global, crear un helper reusable de reconciliación, por ejemplo:
+
+```text
+obtenerEntidadesLocalesSobrantes(locales, remotos)
+filtrarLocalesExistentesEnRemotos(locales, remotos)
+limpiarLocalesSobrantes({ locales, remotos, limpiarEntidad })
+ejecutarEnTandas(items, accion, 20)
+```
+
+La limpieza debe aplicarse en todos los dominios privados:
+
+- Productos.
+- Precios o subcolecciones asociadas.
+- Comercios y direcciones.
+- Listas e items.
+- Mesa de trabajo.
+- Confirmaciones o marcas asociadas.
+- Fotos locales y metadatos de caché.
+
+No hacer:
+
+```text
+fusionar local + remoto conservando IDs locales que ya no existen en Firestore
+```
+
+Eso reanima datos borrados y hace que el usuario piense que Firebase no eliminó nada.
+
+Regla de seguridad:
+
+> Nunca limpiar caché local si Firestore devolvió error, timeout, falta de sesión o estado offline dudoso.
+
+La reconciliación solo debe ejecutarse cuando la lectura remota terminó bien y representa una lista completa del dominio dentro del límite definido.
+
+Detalle de experiencia de usuario:
+
+- La pantalla puede mostrar datos locales viejos por unos segundos.
+- Cuando Firestore responde, esos datos deben desaparecer o actualizarse solos.
+- Esto es normal en una arquitectura local-first.
+- Si la demora es visible, conviene mostrar un estado suave como `Actualizando...`.
+
+### Cuidado Con Subcolecciones En La Carga Inicial
+
+Otra causa real de demora es cargar subcolecciones una por una.
+
+Ejemplo:
+
+```text
+leer 95 productos
+por cada producto leer subcolección precios
+actualizar UI recién cuando terminó todo
+```
+
+Aunque Firestore ya tenga el dato nuevo, la pantalla puede tardar en reflejarlo porque la sincronización está esperando muchas lecturas secundarias.
+
+Opciones recomendadas:
+
+- Mostrar la lista principal con datos livianos apenas llega Firestore.
+- Traer precios en segundo plano.
+- Traer precios bajo demanda en detalle.
+- Traer precios en paralelo con límite controlado.
+- Guardar un resumen calculado en el documento principal si la pantalla lo necesita rápido.
+
+No hacer:
+
+```text
+esperar todas las subcolecciones de todos los documentos antes de actualizar la lista visible
+```
+
+Esto funciona con pocos datos, pero empieza a sentirse lento cuando el usuario tiene muchos registros.
+
 ---
 
 ## Fuente Principal Firestore
@@ -503,6 +600,88 @@ Estados útiles:
 - `error`
 
 La UI puede mostrar el origen activo en configuración o diagnóstico.
+
+### Borrado Real Global
+
+Antes de implementar Firebase, decidir qué significa "borrar" en la app.
+
+Para apps de usuario normal, la recomendación práctica es:
+
+> Borrar es borrar.
+
+Eso significa que el dato debe desaparecer de:
+
+- UI.
+- Store en memoria.
+- Caché local.
+- Fotos locales asociadas.
+- Metadatos de sincronización.
+- Firestore.
+- Subcolecciones relacionadas.
+
+Ejemplo con productos:
+
+```text
+eliminar producto
+  -> borrar subcolección precios
+  -> borrar confirmaciones asociadas
+  -> borrar foto local si existe
+  -> borrar documento producto
+  -> borrar caché local del producto
+```
+
+Ejemplo con comercios:
+
+```text
+eliminar comercio
+  -> borrar documento comercio
+  -> borrar fotos de comercio/direcciones
+  -> limpiar precios que apuntan a ese comercio o dirección
+  -> borrar caché local y metadatos relacionados
+```
+
+Ejemplo con listas:
+
+```text
+eliminar lista
+  -> borrar documento lista
+  -> borrar fotos locales de items
+  -> guardar caché local sin esa lista
+```
+
+Ejemplo con Mesa de Trabajo:
+
+```text
+eliminar o resolver item
+  -> borrar documento remoto si existe
+  -> borrar cache local
+  -> borrar respaldo urgente local
+  -> borrar foto local
+  -> mantener solo marcas operativas mínimas si hacen falta para evitar fantasmas
+```
+
+No hacer:
+
+```text
+marcar eliminado: true y luego fusionar local + remoto sin limpiar local
+```
+
+Ese patrón puede dejar "fantasmas": datos que desaparecen, pero vuelven después de recargar, abrir otro dispositivo o sincronizar.
+
+Cuándo usar soft delete:
+
+- Auditoría obligatoria.
+- Papelera o recuperación.
+- Reglas legales.
+- Historial visible para el usuario.
+
+Si no existe una necesidad real de auditoría o papelera, el borrado real es más simple, ocupa menos espacio y evita reactivar datos viejos.
+
+Regla de implementación:
+
+> El borrado debe ser global por dominio, no un parche aislado en una pantalla.
+
+Si se corrige solo productos pero no comercios, listas o mesa, el mismo problema aparecerá en otro lugar.
 
 ---
 
@@ -1199,6 +1378,9 @@ Dominio por dominio:
 - Datos tienen `usuarioId`.
 - IDs son estables.
 - Eliminación definida: real o lógica.
+- Si la política es borrado real, se borran también subcolecciones, fotos, confirmaciones y caché local.
+- La sincronización remota limpia del caché local los IDs que ya no existen en Firestore.
+- La limpieza local por reconciliación solo corre si Firestore respondió sin error.
 - Offline no congela la UI.
 - Firestore no guarda base64.
 
@@ -1240,6 +1422,10 @@ Probar en celular:
 - Ver en navegador.
 - Crear dato en navegador.
 - Ver en celular.
+- Borrar dato en celular.
+- Confirmar que desaparece en navegador después de sincronizar.
+- Borrar dato en navegador.
+- Confirmar que desaparece en celular después de sincronizar.
 - Cambiar preferencias.
 - Cerrar y abrir app.
 
@@ -1398,6 +1584,47 @@ Hacer:
 Regla práctica:
 
 > Preferences es para llaves chicas; IndexedDB es para caché grande.
+
+### Error 8.3: Fusionar Local Y Remoto Sin Reconciliar Borrados
+
+Este error aparece cuando la app usa `local primero, nube después`, pero la fusión conserva cualquier dato local aunque Firestore ya no lo tenga.
+
+Síntoma real:
+
+- Un producto se borra desde el celular.
+- Firestore ya no tiene ese producto.
+- El navegador sigue mostrando el producto después de varios F5.
+- Más tarde desaparece cuando una sincronización correcta pisa el caché.
+
+Causa:
+
+```text
+fusionar(locales, remotos)
+  -> agregar todos los locales
+  -> agregar o pisar remotos
+  -> conservar locales que no vinieron de Firestore
+```
+
+Eso está mal cuando Firestore ya es la fuente de verdad.
+
+Hacer:
+
+- Comparar IDs locales contra IDs remotos después de una lectura remota exitosa.
+- Borrar del caché local los IDs sobrantes.
+- Borrar fotos locales y metadatos asociados de esos IDs.
+- Guardar en caché solo el resultado reconciliado.
+- Aplicar lo mismo en todos los dominios privados.
+
+No hacer:
+
+- Ejecutar esta limpieza si Firestore falló.
+- Ejecutar esta limpieza si no hay sesión.
+- Ejecutar esta limpieza con una respuesta parcial no controlada.
+- Corregir solo un dominio y dejar los demás con la fusión vieja.
+
+Regla práctica:
+
+> Local primero mejora velocidad, pero Firestore decide qué existe cuando responde bien.
 
 ### Error 9: Borrar Local Demasiado Pronto
 
