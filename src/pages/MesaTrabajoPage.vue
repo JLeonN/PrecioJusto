@@ -437,7 +437,10 @@ async function _guardarItem(item) {
   }
 
   if (comercio?.id) comerciosStore.registrarUso(comercio.id, comercio.direccionId)
-  sesionStore.eliminarItem(item.id)
+  await sesionStore.eliminarItem(item.id, {
+    codigoBarras: item.codigoBarras,
+    productoDestinoId,
+  })
 }
 
 async function guardarCompletos() {
@@ -502,13 +505,11 @@ function cancelarConfirmacionEliminar() {
   confirmacionEliminarActiva.value = false
 }
 
-function borrarSeleccionados() {
+async function borrarSeleccionados() {
   const idsSeleccionados = seleccion.arraySeleccionados.value
   if (!idsSeleccionados.length) return
 
-  idsSeleccionados.forEach((id) => {
-    sesionStore.eliminarItem(id)
-  })
+  await Promise.all(idsSeleccionados.map((id) => sesionStore.eliminarItem(id)))
 
   menuEliminacionAbierto.value = false
   confirmacionEliminarActiva.value = false

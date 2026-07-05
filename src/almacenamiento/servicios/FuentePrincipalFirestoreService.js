@@ -253,12 +253,19 @@ function fusionarMesaLocalFirestore(itemsLocales = [], itemsFirestore = []) {
 
   for (const itemLocal of itemsLocales) {
     if (!itemLocal?.id) continue
+    if (itemLocal.eliminado || itemLocal.estadoMesa === 'resuelto') continue
     itemsPorId.set(String(itemLocal.id), itemLocal)
   }
 
   for (const itemFirestore of itemsFirestore) {
     if (!itemFirestore?.id) continue
     const clave = String(itemFirestore.id)
+
+    if (itemFirestore.eliminado || itemFirestore.estadoMesa === 'resuelto') {
+      itemsPorId.delete(clave)
+      continue
+    }
+
     const itemLocal = itemsPorId.get(clave)
     const datosOriginalesLocal = itemLocal?.datosOriginales
     const datosOriginalesFirestore = itemFirestore.datosOriginales

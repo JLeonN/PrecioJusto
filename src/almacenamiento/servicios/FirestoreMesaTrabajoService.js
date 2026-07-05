@@ -1,6 +1,5 @@
 import {
   collection,
-  deleteDoc,
   doc,
   getDocs,
   limit,
@@ -151,9 +150,13 @@ function normalizarItemMesaTrabajoParaFirestore(item, usuarioId) {
     fuenteDato: item?.fuenteDato || null,
     sinCoincidencia: Boolean(item?.sinCoincidencia),
     productoExistenteId: item?.productoExistenteId || null,
+    productoDestinoId: item?.productoDestinoId || null,
     comercio: normalizarComercio(item?.comercio),
     origenListaJusta: normalizarOrigenListaJusta(item?.origenListaJusta),
     datosOriginales: normalizarDatosOriginales(item?.datosOriginales),
+    estadoMesa: item?.estadoMesa || 'pendiente',
+    eliminado: Boolean(item?.eliminado),
+    fechaResolucion: item?.fechaResolucion || null,
     fechaCreacion: normalizarFechaIso(item?.fechaCreacion || ahora),
     fechaActualizacion: normalizarFechaIso(item?.fechaActualizacion || ahora),
   }
@@ -221,11 +224,25 @@ async function guardarItemsMesaTrabajo(items = []) {
   }
 }
 
-async function eliminarItemMesaTrabajo(itemId) {
+async function eliminarItemMesaTrabajo(itemId, datosResolucion = {}) {
   const usuarioId = obtenerUsuarioFirebaseActual()
   if (!usuarioId) return crearResultadoOmitido()
 
-  await deleteDoc(obtenerReferenciaItemMesaTrabajo(usuarioId, itemId))
+  const fechaResolucion = datosResolucion.fechaResolucion || new Date().toISOString()
+  await setDoc(
+    obtenerReferenciaItemMesaTrabajo(usuarioId, itemId),
+    {
+      id: normalizarIdDocumento(itemId),
+      usuarioId,
+      codigoBarras: datosResolucion.codigoBarras || null,
+      productoDestinoId: datosResolucion.productoDestinoId || datosResolucion.productoExistenteId || null,
+      estadoMesa: 'resuelto',
+      eliminado: true,
+      fechaResolucion,
+      fechaActualizacion: fechaResolucion,
+    },
+    { merge: true },
+  )
 
   return {
     exito: true,
@@ -238,7 +255,21 @@ async function limpiarMesaTrabajoUsuario() {
   if (!usuarioId) return crearResultadoOmitido()
 
   const snapshot = await getDocs(obtenerColeccionMesaTrabajo(usuarioId))
-  const eliminaciones = snapshot.docs.map((documento) => deleteDoc(documento.ref))
+  const fechaResolucion = new Date().toISOString()
+  const eliminaciones = snapshot.docs.map((documento) =>
+    setDoc(
+      documento.ref,
+      {
+        id: documento.id,
+        usuarioId,
+        estadoMesa: 'resuelto',
+        eliminado: true,
+        fechaResolucion,
+        fechaActualizacion: fechaResolucion,
+      },
+      { merge: true },
+    ),
+  )
   await Promise.all(eliminaciones)
 
   return {
@@ -259,12 +290,14 @@ async function obtenerItemsMesaTrabajoUsuario(opciones = {}) {
     limit(cantidad),
   )
   const snapshot = await getDocs(consulta)
-  return snapshot.docs.map((documento) =>
-    normalizarItemFirestoreParaApp({
-      id: documento.id,
-      ...documento.data(),
-    }),
-  )
+  return snapshot.docs
+    .map((documento) =>
+      normalizarItemFirestoreParaApp({
+        id: documento.id,
+        ...documento.data(),
+      }),
+    )
+    .filter((item) => !item?.eliminado && item?.estadoMesa !== 'resuelto')
 }
 
 export default {

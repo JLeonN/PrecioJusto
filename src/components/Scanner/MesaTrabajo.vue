@@ -215,6 +215,7 @@ const itemsOrdenados = computed(() => {
 // Guarda un ítem en el store de productos y lo elimina de la sesión
 async function _guardarItem(item) {
   const comercio = item.comercio
+  let productoDestinoId = item.productoExistenteId || null
   const datoPrecio = {
     comercioId: comercio?.id || null,
     direccionId: comercio?.direccionId || null,
@@ -243,7 +244,7 @@ async function _guardarItem(item) {
       unidad: item.unidad,
     })
   } else {
-    await productosStore.agregarProducto({
+    const productoGuardado = await productosStore.agregarProducto({
       codigoBarras: item.codigoBarras,
       nombre: item.nombre,
       imagen: item.imagen,
@@ -253,10 +254,14 @@ async function _guardarItem(item) {
       unidad: item.unidad,
       precios: [datoPrecio],
     })
+    productoDestinoId = productoGuardado?.id || null
   }
 
   if (comercio?.id) comerciosStore.registrarUso(comercio.id, comercio.direccionId)
-  sesionStore.eliminarItem(item.id)
+  await sesionStore.eliminarItem(item.id, {
+    codigoBarras: item.codigoBarras,
+    productoDestinoId,
+  })
 }
 
 async function guardarCompletos() {
@@ -296,8 +301,8 @@ function confirmarLimpiar() {
     message: '¿Eliminar todos los ítems de la mesa de trabajo?',
     cancel: true,
     persistent: true,
-  }).onOk(() => {
-    sesionStore.limpiarTodo()
+  }).onOk(async () => {
+    await sesionStore.limpiarTodo()
     abierto.value = false
   })
 }

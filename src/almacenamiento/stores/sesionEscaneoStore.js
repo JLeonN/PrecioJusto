@@ -7,6 +7,7 @@ import {
 import firestoreMesaTrabajoService from '../servicios/FirestoreMesaTrabajoService.js'
 import fuentePrincipalFirestoreService from '../servicios/FuentePrincipalFirestoreService.js'
 import fotosLegacyCacheService from '../servicios/FotosLegacyCacheService.js'
+import productosService from '../servicios/ProductosService.js'
 import sesionEscaneoService from '../servicios/SesionEscaneoService.js'
 import { useUsuarioStore } from './UsuarioStore.js'
 
@@ -53,6 +54,10 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
       escalasPorCantidad: Array.isArray(item?.escalasPorCantidad) ? item.escalasPorCantidad : [],
       fechaCreacion: item?.fechaCreacion || item?.creadoEn || new Date().toISOString(),
       fechaActualizacion: item?.fechaActualizacion || item?.actualizadoEn || new Date().toISOString(),
+      estadoMesa: item?.estadoMesa || 'pendiente',
+      eliminado: Boolean(item?.eliminado),
+      productoDestinoId: item?.productoDestinoId || null,
+      fechaResolucion: item?.fechaResolucion || null,
     }
   }
 
@@ -156,6 +161,15 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
     suprimirPersistencia.value = false
   }
 
+  async function obtenerProductosLocalesParaFiltro() {
+    try {
+      return await productosService.obtenerTodos()
+    } catch (error) {
+      console.warn('No se pudieron obtener productos para filtrar Mesa resuelta:', error)
+      return []
+    }
+  }
+
   async function ejecutarCargaSesion() {
     cargando.value = true
     sesionCargada.value = false
@@ -174,12 +188,15 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
         [],
       )
       const itemsLocalesConFotos = await fotosLegacyCacheService.recuperarFotosMesa(itemsLocalesBase)
-      const itemsNormalizados = itemsLocalesConFotos.map((item) => normalizarItem(item))
+      const productosLocales = await obtenerProductosLocalesParaFiltro()
+      const itemsLocalesNoResueltos = await sesionEscaneoService.filtrarItemsNoResueltos(
+        itemsLocalesConFotos,
+        { productosExistentes: productosLocales },
+      )
+      const itemsNormalizados = itemsLocalesNoResueltos.map((item) => normalizarItem(item))
 
       await asignarItemsCargados(itemsNormalizados)
-      if (itemsNormalizados.length > 0) {
-        await sesionEscaneoService.guardarItemsEnCacheLocal(itemsNormalizados)
-      }
+      await sesionEscaneoService.guardarItemsEnCacheLocal(itemsNormalizados)
       fuenteDatos.value = {
         ...fuentePrincipalFirestoreService.crearEstadoInicial(
           fuentePrincipalFirestoreService.DOMINIOS.MESA_TRABAJO,
@@ -223,13 +240,36 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
 
       if (resultado.error || !Array.isArray(resultado.datos)) return
 
-      const itemsFusionadosBase = fuentePrincipalFirestoreService.fusionarMesaLocalFirestore(
-        datosLocales,
+      const productosLocales = await obtenerProductosLocalesParaFiltro()
+      const itemsRemotosPendientes = await sesionEscaneoService.filtrarItemsNoResueltos(
         resultado.datos,
+        { productosExistentes: productosLocales },
+      )
+      const idsRemotosPendientes = new Set(itemsRemotosPendientes.map((item) => String(item.id)))
+      const itemsRemotosResueltos = resultado.datos.filter(
+        (item) => item?.id && !idsRemotosPendientes.has(String(item.id)),
+      )
+
+      await sesionEscaneoService.marcarItemsResueltos(itemsRemotosResueltos)
+      await Promise.allSettled(
+        itemsRemotosResueltos.map((item) =>
+          firestoreMesaTrabajoService.eliminarItemMesaTrabajo(item.id, item),
+        ),
+      )
+
+      const itemsFusionadosBase = fuentePrincipalFirestoreService.fusionarMesaLocalFirestore(
+        await sesionEscaneoService.filtrarItemsNoResueltos(datosLocales, {
+          productosExistentes: productosLocales,
+        }),
+        itemsRemotosPendientes,
       )
       const itemsFusionadosConFotos =
         await fotosLegacyCacheService.recuperarFotosMesa(itemsFusionadosBase)
-      const itemsNormalizados = itemsFusionadosConFotos.map((item) => normalizarItem(item))
+      const itemsNoResueltos = await sesionEscaneoService.filtrarItemsNoResueltos(
+        itemsFusionadosConFotos,
+        { productosExistentes: productosLocales },
+      )
+      const itemsNormalizados = itemsNoResueltos.map((item) => normalizarItem(item))
 
       await asignarItemsCargados(itemsNormalizados)
       await sesionEscaneoService.guardarItemsEnCacheLocal(itemsNormalizados)
@@ -237,7 +277,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
         usuarioId: usuarioActual.id,
         fechaUltimaSincronizacion: new Date().toISOString(),
         fechaUltimoIntento: new Date().toISOString(),
-        cantidadRemota: resultado.datos.length,
+        cantidadRemota: itemsRemotosPendientes.length,
         versionCache: 1,
       })
     } catch (error) {
@@ -338,13 +378,34 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
     void encolarPersistencia()
   }
 
-  async function eliminarItem(id) {
+  async function eliminarItem(id, datosResolucion = {}) {
+    const itemActual = items.value.find((item) => item.id === id) || { id }
+    const itemResuelto = {
+      ...itemActual,
+      ...datosResolucion,
+      estadoMesa: 'resuelto',
+      eliminado: true,
+      fechaResolucion: datosResolucion.fechaResolucion || new Date().toISOString(),
+    }
+
+    await sesionEscaneoService.marcarItemResuelto(itemResuelto)
     items.value = items.value.filter((item) => item.id !== id)
-    void encolarPersistencia()
+    limpiarTimerPersistencia()
+    await sesionEscaneoService.guardarItemsEnCacheLocal(items.value)
 
     if (debeSincronizarConFirestore()) {
-      const resultado = await firestoreMesaTrabajoService.eliminarItemMesaTrabajo(id)
-      actualizarEstadoSincronizacion(resultado)
+      try {
+        const resultado = await firestoreMesaTrabajoService.eliminarItemMesaTrabajo(id, itemResuelto)
+        actualizarEstadoSincronizacion(resultado)
+      } catch (error) {
+        console.warn('El ítem se resolvió localmente, pero no se pudo borrar de Firestore:', error)
+        sincronizacionFirestore.value = {
+          estado: ESTADOS_SINCRONIZACION.PENDIENTE,
+          mensaje: 'Mesa actualizada en este dispositivo; se reintentará limpiar la nube.',
+          fecha: new Date().toISOString(),
+          error: error?.message || 'Error al borrar ítem remoto.',
+        }
+      }
     }
 
     await sincronizarEstadosListaJusta()
@@ -352,6 +413,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
 
   async function limpiarTodo() {
     suprimirPersistencia.value = true
+    await sesionEscaneoService.marcarItemsResueltos(items.value)
     items.value = []
     suprimirPersistencia.value = false
     limpiarTimerPersistencia()
