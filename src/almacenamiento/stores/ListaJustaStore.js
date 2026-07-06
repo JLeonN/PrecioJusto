@@ -6,6 +6,7 @@ import fotosLegacyCacheService from '../servicios/FotosLegacyCacheService.js'
 import ListaJustaService from '../servicios/ListaJustaService.js'
 import productosService from '../servicios/ProductosService.js'
 import reconciliacionFirestoreLocalService from '../servicios/ReconciliacionFirestoreLocalService.js'
+import sincronizacionIncrementalFirestoreService from '../servicios/SincronizacionIncrementalFirestoreService.js'
 import { useProductosStore } from './productosStore.js'
 import { useSesionEscaneoStore } from './sesionEscaneoStore.js'
 import { useUsuarioStore } from './UsuarioStore.js'
@@ -106,16 +107,23 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
         return
       }
 
-      await reconciliacionFirestoreLocalService.limpiarLocalesSobrantes({
+      const lecturaCompleta =
+        sincronizacionIncrementalFirestoreService.puedeReconciliarBorrados(resultado)
+
+      await sincronizacionIncrementalFirestoreService.limpiarSobrantesSiCorresponde({
         locales: datosLocales,
         remotos: resultado.datos,
+        reconciliacionService: reconciliacionFirestoreLocalService,
+        lecturaCompleta,
         limpiarEntidad: (lista) => ListaJustaService.eliminarListaLocalPorSincronizacion(lista),
       })
       const datosLocalesVigentes =
-        reconciliacionFirestoreLocalService.filtrarLocalesExistentesEnRemotos(
-          datosLocales,
-          resultado.datos,
-        )
+        sincronizacionIncrementalFirestoreService.obtenerLocalesVigentes({
+          locales: datosLocales,
+          remotos: resultado.datos,
+          reconciliacionService: reconciliacionFirestoreLocalService,
+          lecturaCompleta,
+        })
       const listasFusionadasBase = fuentePrincipalFirestoreService.fusionarListasLocalFirestore(
         datosLocalesVigentes,
         resultado.datos,
@@ -130,6 +138,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
         fechaUltimaSincronizacion: new Date().toISOString(),
         fechaUltimoIntento: new Date().toISOString(),
         cantidadRemota: resultado.datos.length,
+        lecturaCompleta,
         versionCache: 1,
       })
     } catch (err) {

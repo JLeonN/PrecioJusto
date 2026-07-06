@@ -2,6 +2,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   limit,
   orderBy,
@@ -237,6 +238,19 @@ async function eliminarItemMesaTrabajo(itemId) {
   }
 }
 
+async function obtenerItemMesaTrabajoPorId(itemId, opciones = {}) {
+  const usuarioId = opciones.usuarioId || obtenerUsuarioFirebaseActual()
+  if (!usuarioId || !itemId) return null
+
+  const snapshot = await getDoc(obtenerReferenciaItemMesaTrabajo(usuarioId, itemId))
+  if (!snapshot.exists()) return null
+
+  return normalizarItemFirestoreParaApp({
+    id: snapshot.id,
+    ...snapshot.data(),
+  })
+}
+
 async function limpiarMesaTrabajoUsuario() {
   const usuarioId = obtenerUsuarioFirebaseActual()
   if (!usuarioId) return crearResultadoOmitido()
@@ -280,6 +294,7 @@ export default {
   guardarItemMesaTrabajo,
   guardarItemsMesaTrabajo,
   eliminarItemMesaTrabajo,
+  obtenerItemMesaTrabajoPorId,
   limpiarMesaTrabajoUsuario,
   obtenerItemsMesaTrabajoUsuario,
 }

@@ -6,6 +6,7 @@ import firestoreListasJustasService from './FirestoreListasJustasService.js'
 import firestoreMesaTrabajoService from './FirestoreMesaTrabajoService.js'
 import firestorePreferenciasService from './FirestorePreferenciasService.js'
 import firestoreProductosService from './FirestoreProductosService.js'
+import sincronizacionIncrementalFirestoreService from './SincronizacionIncrementalFirestoreService.js'
 import usuarioActualService from './UsuarioActualService.js'
 
 export const FUENTES_DATOS = Object.freeze({
@@ -71,6 +72,8 @@ function esUrlImagen(valor) {
 function prepararProductosVisuales(productos = []) {
   return filtrarEliminados(productos).map((producto) => ({
     ...producto,
+    precios: Array.isArray(producto?.precios) ? producto.precios : [],
+    preciosCargados: Array.isArray(producto?.precios),
     imagen: producto?.imagen || producto?.imagenUrl || null,
   }))
 }
@@ -90,6 +93,14 @@ function fusionarProductoLocalFirestore(productoLocal, productoFirestore) {
   return {
     ...productoLocal,
     ...productoFirestore,
+    precios: Array.isArray(productoFirestore.precios)
+      ? productoFirestore.precios
+      : Array.isArray(productoLocal?.precios)
+        ? productoLocal.precios
+        : [],
+    preciosCargados: Array.isArray(productoFirestore.precios)
+      ? true
+      : Boolean(productoLocal?.preciosCargados || Array.isArray(productoLocal?.precios)),
     imagen,
     imagenUrl: productoFirestore.imagenUrl || (esUrlImagen(imagen) ? imagen : productoLocal?.imagenUrl || null),
     imagenRutaStorage: productoFirestore.imagenRutaStorage || null,
@@ -340,7 +351,7 @@ function resolverFuenteFirestore(conexion) {
   return conexion?.conectado ? FUENTES_DATOS.FIRESTORE : FUENTES_DATOS.FIRESTORE_CACHE
 }
 
-function crearResultado({ dominio, datos, fuente, mensaje, conexion, error = null }) {
+function crearResultado({ dominio, datos, fuente, mensaje, conexion, error = null, completa = true }) {
   const resultado = {
     dominio,
     datos,
@@ -349,6 +360,7 @@ function crearResultado({ dominio, datos, fuente, mensaje, conexion, error = nul
     conectado: Boolean(conexion?.conectado),
     fechaActualizacion: new Date().toISOString(),
     error,
+    completa,
   }
 
   registrarResultadoCarga(dominio, resultado)
@@ -363,6 +375,7 @@ function registrarResultadoCarga(dominio, resultado) {
     conectado: resultado.conectado,
     fechaActualizacion: resultado.fechaActualizacion,
     error: resultado.error || null,
+    completa: resultado.completa,
   })
 }
 
@@ -463,7 +476,7 @@ async function cargarProductos({ cargarLocal }) {
   return cargarConFuentePrincipal({
     dominio: DOMINIOS.PRODUCTOS,
     cargarLocal,
-    cargarFirestore: () => firestoreProductosService.obtenerProductosUsuario({ incluirPrecios: true }),
+    cargarFirestore: () => firestoreProductosService.obtenerProductosUsuario({ incluirPrecios: false }),
     normalizarFirestore: prepararProductosVisuales,
   })
 }
@@ -484,10 +497,11 @@ async function cargarProductosFirestoreCrudos({ usuarioId } = {}) {
   }
 
   try {
+    const limiteProductos = 200
     const productos = await firestoreProductosService.obtenerProductosUsuario({
       usuarioId: idUsuario,
-      limite: 200,
-      incluirPrecios: true,
+      limite: limiteProductos,
+      incluirPrecios: false,
     })
 
     return crearResultado({
@@ -496,6 +510,10 @@ async function cargarProductosFirestoreCrudos({ usuarioId } = {}) {
       fuente: resolverFuenteFirestore(conexion),
       mensaje: 'Datos actualizados desde la nube.',
       conexion,
+      completa: sincronizacionIncrementalFirestoreService.lecturaCompletaPorLimite(
+        productos.length,
+        limiteProductos,
+      ),
     })
   } catch (error) {
     return crearResultado({
@@ -534,9 +552,10 @@ async function cargarComerciosFirestoreCrudos({ usuarioId } = {}) {
   }
 
   try {
+    const limiteComercios = 200
     const comercios = await firestoreComerciosService.obtenerComerciosUsuario({
       usuarioId: idUsuario,
-      limite: 200,
+      limite: limiteComercios,
     })
 
     return crearResultado({
@@ -545,6 +564,10 @@ async function cargarComerciosFirestoreCrudos({ usuarioId } = {}) {
       fuente: resolverFuenteFirestore(conexion),
       mensaje: 'Datos actualizados desde la nube.',
       conexion,
+      completa: sincronizacionIncrementalFirestoreService.lecturaCompletaPorLimite(
+        comercios.length,
+        limiteComercios,
+      ),
     })
   } catch (error) {
     return crearResultado({
@@ -583,9 +606,10 @@ async function cargarListasFirestoreCrudas({ usuarioId } = {}) {
   }
 
   try {
+    const limiteListas = 100
     const listas = await firestoreListasJustasService.obtenerListasJustasUsuario({
       usuarioId: idUsuario,
-      limite: 100,
+      limite: limiteListas,
     })
 
     return crearResultado({
@@ -594,6 +618,10 @@ async function cargarListasFirestoreCrudas({ usuarioId } = {}) {
       fuente: resolverFuenteFirestore(conexion),
       mensaje: 'Datos actualizados desde la nube.',
       conexion,
+      completa: sincronizacionIncrementalFirestoreService.lecturaCompletaPorLimite(
+        listas.length,
+        limiteListas,
+      ),
     })
   } catch (error) {
     return crearResultado({
@@ -631,9 +659,10 @@ async function cargarMesaTrabajoFirestoreCruda({ usuarioId } = {}) {
   }
 
   try {
+    const limiteMesa = 300
     const items = await firestoreMesaTrabajoService.obtenerItemsMesaTrabajoUsuario({
       usuarioId: idUsuario,
-      limite: 300,
+      limite: limiteMesa,
     })
 
     return crearResultado({
@@ -642,6 +671,10 @@ async function cargarMesaTrabajoFirestoreCruda({ usuarioId } = {}) {
       fuente: resolverFuenteFirestore(conexion),
       mensaje: 'Datos actualizados desde la nube.',
       conexion,
+      completa: sincronizacionIncrementalFirestoreService.lecturaCompletaPorLimite(
+        items.length,
+        limiteMesa,
+      ),
     })
   } catch (error) {
     return crearResultado({

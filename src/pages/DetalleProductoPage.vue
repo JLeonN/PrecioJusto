@@ -46,6 +46,12 @@
 
         <!-- Título de sección historial -->
         <p class="text-subtitle1 text-weight-bold q-mt-md q-mb-xs">Historial de precios</p>
+        <q-banner v-if="cargandoPrecios" rounded class="banner-precios q-mb-md">
+          <template #avatar>
+            <q-spinner color="primary" size="20px" />
+          </template>
+          Actualizando precios...
+        </q-banner>
 
         <!-- Filtros del historial -->
         <FiltrosHistorial
@@ -141,6 +147,7 @@ async function alGuardarPrecioDetalle() {
 const cargando = ref(false)
 const error = ref(null)
 const productoActual = ref(null)
+const cargandoPrecios = ref(false)
 
 // Acción del FAB para agregar precio al producto actual
 const accionFab = computed(() => [
@@ -260,12 +267,30 @@ async function cargarProducto() {
     }
 
     productoActual.value = await prepararProductoDetalle(producto)
+    if (producto.preciosCargados === false) {
+      void cargarPreciosCompletosProducto(productoId)
+    }
     console.log('✅ Producto cargado:', producto.nombre)
   } catch (err) {
     console.error('❌ Error al cargar producto:', err)
     error.value = 'Error al cargar el producto'
   } finally {
     cargando.value = false
+  }
+}
+
+async function cargarPreciosCompletosProducto(productoId) {
+  if (cargandoPrecios.value) return
+
+  cargandoPrecios.value = true
+  try {
+    const productoConPrecios =
+      await productosStore.cargarPreciosProductoDesdeFirestore(productoId)
+    if (productoConPrecios) {
+      productoActual.value = await prepararProductoDetalle(productoConPrecios)
+    }
+  } finally {
+    cargandoPrecios.value = false
   }
 }
 
@@ -324,5 +349,10 @@ onMounted(async () => {
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
+}
+.banner-precios {
+  background: var(--fondo-banner-informativo);
+  color: var(--texto-primario);
+  border: 1px solid var(--borde-color);
 }
 </style>

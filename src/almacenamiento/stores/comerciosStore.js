@@ -3,6 +3,7 @@ import ComerciosService from '../servicios/ComerciosService'
 import fotosLegacyCacheService from '../servicios/FotosLegacyCacheService.js'
 import fuentePrincipalFirestoreService from '../servicios/FuentePrincipalFirestoreService.js'
 import reconciliacionFirestoreLocalService from '../servicios/ReconciliacionFirestoreLocalService.js'
+import sincronizacionIncrementalFirestoreService from '../servicios/SincronizacionIncrementalFirestoreService.js'
 import { useProductosStore } from './productosStore.js'
 import { useUsuarioStore } from './UsuarioStore.js'
 
@@ -221,17 +222,24 @@ export const useComerciStore = defineStore('comercios', {
           return
         }
 
-        await reconciliacionFirestoreLocalService.limpiarLocalesSobrantes({
+        const lecturaCompleta =
+          sincronizacionIncrementalFirestoreService.puedeReconciliarBorrados(resultado)
+
+        await sincronizacionIncrementalFirestoreService.limpiarSobrantesSiCorresponde({
           locales: datosLocales,
           remotos: resultado.datos,
+          reconciliacionService: reconciliacionFirestoreLocalService,
+          lecturaCompleta,
           limpiarEntidad: (comercio) =>
             ComerciosService.eliminarComercioLocalPorSincronizacion(comercio),
         })
         const datosLocalesVigentes =
-          reconciliacionFirestoreLocalService.filtrarLocalesExistentesEnRemotos(
-            datosLocales,
-            resultado.datos,
-          )
+          sincronizacionIncrementalFirestoreService.obtenerLocalesVigentes({
+            locales: datosLocales,
+            remotos: resultado.datos,
+            reconciliacionService: reconciliacionFirestoreLocalService,
+            lecturaCompleta,
+          })
         const comerciosFusionadosBase = fuentePrincipalFirestoreService.fusionarComerciosLocalFirestore(
           datosLocalesVigentes,
           resultado.datos,
@@ -246,6 +254,7 @@ export const useComerciStore = defineStore('comercios', {
           fechaUltimaSincronizacion: new Date().toISOString(),
           fechaUltimoIntento: new Date().toISOString(),
           cantidadRemota: resultado.datos.length,
+          lecturaCompleta,
           versionCache: 1,
         })
       } catch (error) {

@@ -21,9 +21,11 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { ESTADOS_SINCRONIZACION } from '../constantes/PreparacionFirebase.js'
 import fotosLegacyCacheService from '../servicios/FotosLegacyCacheService.js'
+import firestorePreciosService from '../servicios/FirestorePreciosService.js'
 import fuentePrincipalFirestoreService from '../servicios/FuentePrincipalFirestoreService.js'
 import productosService from '../servicios/ProductosService.js'
 import reconciliacionFirestoreLocalService from '../servicios/ReconciliacionFirestoreLocalService.js'
+import sincronizacionIncrementalFirestoreService from '../servicios/SincronizacionIncrementalFirestoreService.js'
 import { useUsuarioStore } from './UsuarioStore.js'
 
 const TIEMPO_MINIMO_REFRESCO_FIRESTORE_MS = 3 * 60 * 1000
@@ -225,17 +227,24 @@ export const useProductosStore = defineStore('productos', () => {
         return
       }
 
-      await reconciliacionFirestoreLocalService.limpiarLocalesSobrantes({
+      const lecturaCompleta =
+        sincronizacionIncrementalFirestoreService.puedeReconciliarBorrados(resultado)
+
+      await sincronizacionIncrementalFirestoreService.limpiarSobrantesSiCorresponde({
         locales: datosLocales,
         remotos: resultado.datos,
+        reconciliacionService: reconciliacionFirestoreLocalService,
+        lecturaCompleta,
         limpiarEntidad: (producto) =>
           productosService.eliminarProductoLocalPorSincronizacion(producto),
       })
       const datosLocalesVigentes =
-        reconciliacionFirestoreLocalService.filtrarLocalesExistentesEnRemotos(
-          datosLocales,
-          resultado.datos,
-        )
+        sincronizacionIncrementalFirestoreService.obtenerLocalesVigentes({
+          locales: datosLocales,
+          remotos: resultado.datos,
+          reconciliacionService: reconciliacionFirestoreLocalService,
+          lecturaCompleta,
+        })
       const productosFusionadosBase = fuentePrincipalFirestoreService.fusionarProductosLocalFirestore(
         datosLocalesVigentes,
         resultado.datos,
@@ -254,6 +263,7 @@ export const useProductosStore = defineStore('productos', () => {
         fechaUltimaSincronizacion: new Date().toISOString(),
         fechaUltimoIntento: new Date().toISOString(),
         cantidadRemota: resultado.datos.length,
+        lecturaCompleta,
         versionCache: 1,
       })
     } catch (err) {
@@ -336,6 +346,11 @@ export const useProductosStore = defineStore('productos', () => {
 
     try {
       console.log(`💰 Agregando precio a producto ${productoId}`)
+
+      const productoActual = productos.value.find((producto) => String(producto.id) === String(productoId))
+      if (productoActual?.preciosCargados === false) {
+        await cargarPreciosProductoDesdeFirestore(productoId)
+      }
 
       const productoActualizado = await productosService.agregarPrecio(productoId, precio)
 
@@ -508,6 +523,30 @@ export const useProductosStore = defineStore('productos', () => {
     }
   }
 
+  async function cargarPreciosProductoDesdeFirestore(productoId) {
+    const usuarioActual = fuentePrincipalFirestoreService.obtenerUsuarioActual()
+    if (!productoId || !fuentePrincipalFirestoreService.debeUsarFirestore(usuarioActual)) return null
+
+    try {
+      const precios = await firestorePreciosService.obtenerPreciosProducto(productoId)
+      const indice = productos.value.findIndex((producto) => String(producto.id) === String(productoId))
+      if (indice === -1) return null
+
+      const productoActualizado = {
+        ...productos.value[indice],
+        precios,
+        preciosCargados: true,
+      }
+
+      productos.value[indice] = productoActualizado
+      await productosService.guardarProductoEnCacheLocal(productoActualizado)
+      return productoActualizado
+    } catch (err) {
+      console.warn('No se pudieron cargar precios desde Firestore:', err)
+      return null
+    }
+  }
+
   // ========================================
   // 📊 ACCIONES (ESTADÍSTICAS)
   // ========================================
@@ -592,6 +631,7 @@ export const useProductosStore = defineStore('productos', () => {
     eliminarProducto,
     registrarInteraccion,
     buscarProductos,
+    cargarPreciosProductoDesdeFirestore,
     obtenerEstadisticas,
     limpiarEstado,
   }

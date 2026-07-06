@@ -11,6 +11,7 @@ import fotosLocalesService from '../servicios/FotosLocalesService.js'
 import productosService from '../servicios/ProductosService.js'
 import reconciliacionFirestoreLocalService from '../servicios/ReconciliacionFirestoreLocalService.js'
 import sesionEscaneoService from '../servicios/SesionEscaneoService.js'
+import sincronizacionIncrementalFirestoreService from '../servicios/SincronizacionIncrementalFirestoreService.js'
 import { useUsuarioStore } from './UsuarioStore.js'
 
 const RETARDO_PERSISTENCIA_MS = 220
@@ -247,6 +248,9 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
 
       if (resultado.error || !Array.isArray(resultado.datos)) return
 
+      const lecturaCompleta =
+        sincronizacionIncrementalFirestoreService.puedeReconciliarBorrados(resultado)
+
       const productosLocales = await obtenerProductosLocalesParaFiltro()
       const itemsRemotosPendientes = await sesionEscaneoService.filtrarItemsNoResueltos(
         resultado.datos,
@@ -257,29 +261,35 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
         (item) => item?.id && !idsRemotosPendientes.has(String(item.id)),
       )
 
-      await sesionEscaneoService.marcarItemsResueltos(itemsRemotosResueltos)
-      await Promise.allSettled(
-        itemsRemotosResueltos.map((item) =>
-          firestoreMesaTrabajoService.eliminarItemMesaTrabajo(item.id, item),
-        ),
-      )
+      if (lecturaCompleta) {
+        await sesionEscaneoService.marcarItemsResueltos(itemsRemotosResueltos)
+        await Promise.allSettled(
+          itemsRemotosResueltos.map((item) =>
+            firestoreMesaTrabajoService.eliminarItemMesaTrabajo(item.id, item),
+          ),
+        )
+      }
 
       const itemsLocalesNoResueltos = await sesionEscaneoService.filtrarItemsNoResueltos(datosLocales, {
         productosExistentes: productosLocales,
       })
-      await reconciliacionFirestoreLocalService.limpiarLocalesSobrantes({
+      await sincronizacionIncrementalFirestoreService.limpiarSobrantesSiCorresponde({
         locales: itemsLocalesNoResueltos,
         remotos: itemsRemotosPendientes,
+        reconciliacionService: reconciliacionFirestoreLocalService,
+        lecturaCompleta,
         limpiarEntidad: async (item) => {
           await fotosLocalesService.eliminarFotosMesa(item)
           await sesionEscaneoService.marcarItemResuelto(item)
         },
       })
       const itemsLocalesVigentes =
-        reconciliacionFirestoreLocalService.filtrarLocalesExistentesEnRemotos(
-          itemsLocalesNoResueltos,
-          itemsRemotosPendientes,
-        )
+        sincronizacionIncrementalFirestoreService.obtenerLocalesVigentes({
+          locales: itemsLocalesNoResueltos,
+          remotos: itemsRemotosPendientes,
+          reconciliacionService: reconciliacionFirestoreLocalService,
+          lecturaCompleta,
+        })
       const itemsFusionadosBase = fuentePrincipalFirestoreService.fusionarMesaLocalFirestore(
         await sesionEscaneoService.filtrarItemsNoResueltos(itemsLocalesVigentes, {
           productosExistentes: productosLocales,
@@ -301,6 +311,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
         fechaUltimaSincronizacion: new Date().toISOString(),
         fechaUltimoIntento: new Date().toISOString(),
         cantidadRemota: itemsRemotosPendientes.length,
+        lecturaCompleta,
         versionCache: 1,
       })
     } catch (error) {
