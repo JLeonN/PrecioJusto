@@ -80,6 +80,15 @@ function resolverPreciosCargados(producto) {
   return Array.isArray(precios)
 }
 
+function fechaRemotaMasNueva(productoLocal, productoFirestore) {
+  const fechaLocal = new Date(productoLocal?.fechaActualizacion || 0).getTime()
+  const fechaFirestore = new Date(productoFirestore?.fechaActualizacion || 0).getTime()
+
+  if (!Number.isFinite(fechaLocal) || !Number.isFinite(fechaFirestore)) return false
+
+  return fechaFirestore > fechaLocal
+}
+
 function prepararProductosVisuales(productos = []) {
   return filtrarEliminados(productos).map((producto) => ({
     ...producto,
@@ -100,18 +109,24 @@ function fusionarProductoLocalFirestore(productoLocal, productoFirestore) {
   const conservaFotoLocal =
     !tieneFotoRemota && (esImagenBase64(imagenLocal) || esUrlImagen(imagenLocal) || esUrlImagen(imagenUrlLocal))
   const imagen = conservaFotoLocal ? imagenLocal || imagenUrlLocal : imagenRemota || null
+  const firestoreTrajoPrecios = Array.isArray(productoFirestore.precios)
+  const preciosLocalesPosiblementeViejos =
+    !firestoreTrajoPrecios && fechaRemotaMasNueva(productoLocal, productoFirestore)
+  const preciosCargados = preciosLocalesPosiblementeViejos
+    ? false
+    : firestoreTrajoPrecios
+      ? true
+      : resolverPreciosCargados(productoLocal)
 
   return {
     ...productoLocal,
     ...productoFirestore,
-    precios: Array.isArray(productoFirestore.precios)
+    precios: firestoreTrajoPrecios
       ? productoFirestore.precios
       : Array.isArray(productoLocal?.precios)
         ? productoLocal.precios
         : [],
-    preciosCargados: Array.isArray(productoFirestore.precios)
-      ? true
-      : resolverPreciosCargados(productoLocal),
+    preciosCargados,
     imagen,
     imagenUrl: productoFirestore.imagenUrl || (esUrlImagen(imagen) ? imagen : productoLocal?.imagenUrl || null),
     imagenRutaStorage: productoFirestore.imagenRutaStorage || null,

@@ -205,10 +205,13 @@ const preciosPendientes = computed(() => {
 const debeIntentarCargarPrecios = computed(() => {
   const idProducto = String(props.producto.id)
   const resumenSinPrecio = Number(props.producto.precioMejor || 0) <= 0
-  return props.producto.precios.length === 0 && (
-    props.producto.preciosCargados !== true ||
-    (resumenSinPrecio && !idsConReintentoPrecios.value.has(idProducto))
-  )
+  const necesitaActualizarHistorial = props.producto.preciosCargados !== true
+  const puedeReintentarResumenSinPrecio =
+    props.producto.precios.length === 0 &&
+    resumenSinPrecio &&
+    !idsConReintentoPrecios.value.has(idProducto)
+
+  return necesitaActualizarHistorial || puedeReintentarResumenSinPrecio
 })
 
 /* TOP de precios vigentes por comercio en la moneda de referencia */
