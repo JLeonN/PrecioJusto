@@ -125,7 +125,15 @@
             <q-chip dense size="sm" color="green" text-color="white"> Mejor precio </q-chip>
           </div>
         </div>
-        <div v-if="producto.precios.length === 0" class="sin-precios">
+        <div v-if="cargandoPrecios" class="sin-precios">
+          <q-spinner color="primary" size="20px" />
+          <span class="text-grey-6">Actualizando precios...</span>
+        </div>
+        <div v-else-if="preciosPendientes || debeIntentarCargarPrecios" class="sin-precios">
+          <IconAlertCircle :size="20" class="text-grey-5" />
+          <span class="text-grey-6">Precios pendientes de cargar</span>
+        </div>
+        <div v-else-if="producto.precios.length === 0" class="sin-precios">
           <IconAlertCircle :size="20" class="text-grey-5" />
           <span class="text-grey-6">No hay precios registrados</span>
         </div>
@@ -158,6 +166,7 @@ import {
   IconAlertTriangle,
 } from '@tabler/icons-vue'
 import { MONEDA_DEFAULT } from '../../almacenamiento/constantes/Monedas.js'
+import { useProductosStore } from '../../almacenamiento/stores/productosStore.js'
 import { formatearPrecioConCodigo } from '../../utils/PrecioUtils.js'
 
 /* Props del componente */
@@ -184,7 +193,23 @@ defineEmits(['long-press', 'toggle-seleccion', 'agregar-precio'])
 
 /* Quasar */
 const $q = useQuasar()
+const productosStore = useProductosStore()
 const mostrarMayoristasEnTarjeta = ref(false)
+const cargandoPrecios = ref(false)
+const idsConReintentoPrecios = ref(new Set())
+
+const preciosPendientes = computed(() => {
+  return props.producto.preciosCargados === false && props.producto.precios.length === 0
+})
+
+const debeIntentarCargarPrecios = computed(() => {
+  const idProducto = String(props.producto.id)
+  const resumenSinPrecio = Number(props.producto.precioMejor || 0) <= 0
+  return props.producto.precios.length === 0 && (
+    props.producto.preciosCargados !== true ||
+    (resumenSinPrecio && !idsConReintentoPrecios.value.has(idProducto))
+  )
+})
 
 /* TOP de precios vigentes por comercio en la moneda de referencia */
 const preciosVigentesPorComercio = computed(() => {
@@ -344,8 +369,17 @@ const copiarCodigoBarras = async () => {
 }
 
 /* Manejar expansión */
-const manejarExpansion = (expandido) => {
+const manejarExpansion = async (expandido) => {
   console.log('Tarjeta expandida:', expandido)
+  if (!expandido || !debeIntentarCargarPrecios.value || cargandoPrecios.value) return
+
+  cargandoPrecios.value = true
+  try {
+    idsConReintentoPrecios.value.add(String(props.producto.id))
+    await productosStore.cargarPreciosProductoDesdeFirestore(props.producto.id)
+  } finally {
+    cargandoPrecios.value = false
+  }
 }
 
 const toggleMayoristasTarjeta = () => {

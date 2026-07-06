@@ -69,11 +69,22 @@ function esUrlImagen(valor) {
   return /^https?:\/\//.test(String(valor || '').trim())
 }
 
+function resolverPreciosCargados(producto) {
+  const precios = Array.isArray(producto?.precios) ? producto.precios : null
+  const tieneResumenPrecio = Number(producto?.precioMejor || 0) > 0
+
+  if (producto?.preciosCargados === false) return false
+  if (producto?.preciosCargados === true && precios?.length === 0 && tieneResumenPrecio) return false
+  if (producto?.preciosCargados === true) return true
+
+  return Array.isArray(precios)
+}
+
 function prepararProductosVisuales(productos = []) {
   return filtrarEliminados(productos).map((producto) => ({
     ...producto,
     precios: Array.isArray(producto?.precios) ? producto.precios : [],
-    preciosCargados: Array.isArray(producto?.precios),
+    preciosCargados: resolverPreciosCargados(producto),
     imagen: producto?.imagen || producto?.imagenUrl || null,
   }))
 }
@@ -100,7 +111,7 @@ function fusionarProductoLocalFirestore(productoLocal, productoFirestore) {
         : [],
     preciosCargados: Array.isArray(productoFirestore.precios)
       ? true
-      : Boolean(productoLocal?.preciosCargados || Array.isArray(productoLocal?.precios)),
+      : resolverPreciosCargados(productoLocal),
     imagen,
     imagenUrl: productoFirestore.imagenUrl || (esUrlImagen(imagen) ? imagen : productoLocal?.imagenUrl || null),
     imagenRutaStorage: productoFirestore.imagenRutaStorage || null,
