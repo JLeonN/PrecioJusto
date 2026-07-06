@@ -522,6 +522,51 @@ Regla de seguridad:
 
 La reconciliación solo debe ejecutarse cuando la lectura remota terminó bien y representa una lista completa del dominio dentro del límite definido.
 
+### Lecturas Completas, Parciales Y Limpieza Local
+
+En una app local-first no alcanza con saber si Firestore respondió. También hay que saber si la lectura representa el dominio completo.
+
+Regla práctica:
+
+> Una lectura parcial puede actualizar o agregar datos, pero no debe borrar sobrantes locales.
+
+Ejemplo:
+
+```text
+leer productos con limit(200)
+si llegaron menos de 200 -> lectura completa probable
+si llegaron 200 -> lectura parcial o al límite
+```
+
+Con lectura completa:
+
+- Se pueden fusionar datos remotos.
+- Se pueden eliminar del caché local los IDs que ya no existen en Firestore.
+- Se puede guardar metadata de sincronización como `lecturaCompleta: true`.
+
+Con lectura parcial, error, timeout u offline:
+
+- Se pueden mostrar datos locales.
+- Se pueden incorporar entidades nuevas o modificadas que llegaron desde Firestore.
+- No se deben borrar entidades locales sobrantes.
+- No se debe marcar la limpieza como terminada.
+
+Patrón recomendado:
+
+```text
+resultadoFirestore = {
+  datos,
+  conectado,
+  error,
+  completa
+}
+
+puedeReconciliarBorrados =
+  conectado && !error && Array.isArray(datos) && completa
+```
+
+Esto evita que una consulta limitada borre datos válidos solo porque no entraron en la página leída.
+
 Detalle de experiencia de usuario:
 
 - La pantalla puede mostrar datos locales viejos por unos segundos.
@@ -558,6 +603,58 @@ esperar todas las subcolecciones de todos los documentos antes de actualizar la 
 ```
 
 Esto funciona con pocos datos, pero empieza a sentirse lento cuando el usuario tiene muchos registros.
+
+### Datos Principales Livianos Y Datos Secundarios Bajo Demanda
+
+Cuando un dominio tiene datos secundarios pesados, la lista principal debe cargar solo lo necesario para pintar rápido.
+
+Ejemplo de producto:
+
+```text
+documento producto:
+  id
+  nombre
+  codigoBarras
+  imagenUrl
+  precioMejor
+  comercioMejor
+  monedaReferencia
+  fechaActualizacion
+
+subcolección precios:
+  historial completo de precios
+```
+
+La lista principal puede usar `precioMejor` y `comercioMejor`. El historial completo se pide al abrir la tarjeta, el detalle o una pantalla que realmente lo necesite.
+
+Regla importante:
+
+> Un array local de datos secundarios no siempre significa que el historial esté completo.
+
+Caso real:
+
+```text
+1. El navegador tiene un producto con 1 precio viejo en caché local.
+2. El celular agrega un precio nuevo y Firestore actualiza el documento principal.
+3. La lista remota liviana trae el producto actualizado, pero no trae la subcolección precios.
+4. Si la app conserva el array local viejo y lo marca como completo, nunca carga el precio nuevo.
+```
+
+Solución:
+
+- Guardar un flag explícito como `preciosCargados`, `historialCargado` o `detalleSecundarioCargado`.
+- Si Firestore trae el documento principal con `fechaActualizacion` más nueva que el caché local y no trae la subcolección, marcar los datos secundarios como pendientes.
+- Al abrir la tarjeta o el detalle, cargar la subcolección del ID específico.
+- Después de cargarla, actualizar el store visible y guardar el caché local.
+- Si el resumen principal dice que hay datos, pero el array local está vacío o viejo, intentar una carga bajo demanda antes de mostrar "sin datos".
+
+No hacer:
+
+```text
+si producto.precios.length > 0 -> asumir que todos los precios están cargados
+```
+
+Eso deja historiales viejos pegados al dispositivo y oculta precios guardados desde otro navegador o celular.
 
 ---
 
@@ -1381,6 +1478,10 @@ Dominio por dominio:
 - Si la política es borrado real, se borran también subcolecciones, fotos, confirmaciones y caché local.
 - La sincronización remota limpia del caché local los IDs que ya no existen en Firestore.
 - La limpieza local por reconciliación solo corre si Firestore respondió sin error.
+- La limpieza local por reconciliación solo corre si la lectura remota fue completa, no parcial.
+- Las listas principales cargan datos livianos y no esperan subcolecciones pesadas.
+- Los datos secundarios bajo demanda tienen un flag explícito de carga completa.
+- Si el documento remoto principal es más nuevo que el caché local, los datos secundarios locales se consideran posiblemente viejos.
 - Offline no congela la UI.
 - Firestore no guarda base64.
 
@@ -1625,6 +1726,45 @@ No hacer:
 Regla práctica:
 
 > Local primero mejora velocidad, pero Firestore decide qué existe cuando responde bien.
+
+### Error 8.4: Marcar Datos Secundarios Viejos Como Completos
+
+Este error aparece cuando la lista principal carga documentos livianos desde Firestore, pero conserva datos secundarios viejos desde el caché local.
+
+Síntoma real:
+
+- Un producto muestra el precio principal correcto o parcialmente correcto.
+- Se agrega un precio nuevo desde otro dispositivo.
+- Firestore tiene el precio nuevo en la subcolección.
+- La tarjeta expandida o el detalle siguen mostrando solo el historial viejo.
+
+Causa:
+
+```text
+producto local tiene precios: [precioViejo]
+producto remoto liviano llega sin subcolección precios
+fusionar conserva precios locales
+preciosCargados queda true
+la UI nunca pide la subcolección completa
+```
+
+Hacer:
+
+- Comparar `fechaActualizacion` del documento remoto contra la fecha local.
+- Si el remoto es más nuevo y no trajo la subcolección, marcar el historial como pendiente.
+- Usar flags explícitos: `preciosCargados`, `historialCargado` o `detalleSecundarioCargado`.
+- Cargar la subcolección bajo demanda al abrir tarjeta, detalle o vista avanzada.
+- Guardar el resultado completo en caché local después de cargarlo.
+
+No hacer:
+
+```text
+si hay un array local con 1 item -> marcar historial como completo
+```
+
+Regla práctica:
+
+> Datos secundarios locales son útiles para mostrar rápido, pero deben invalidarse si el documento principal remoto cambió.
 
 ### Error 9: Borrar Local Demasiado Pronto
 
