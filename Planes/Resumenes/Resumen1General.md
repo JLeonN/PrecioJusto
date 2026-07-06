@@ -1201,7 +1201,7 @@ H. Arquitectura y Código
 
 ### Estado Actual
 
-- **Versión:** 1.2.10
+- **Versión:** 1.2.11
 - **Almacenamiento:** Firebase/Firestore como fuente principal con respaldo local del dispositivo
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
@@ -1254,4 +1254,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 4 de Julio de 2026 — Se preparó el release `1.2.10` con recuperación de fotos locales, restauración más segura desde internet y mejor encuadre de fotos en tarjetas.
+**Última actualización:** 6 de Julio de 2026 — Se preparó el release `1.2.11` con sincronización más rápida entre dispositivos, borrados reconciliados, mesa de trabajo más consistente y carga de precios bajo demanda.
