@@ -1,8 +1,8 @@
-# PLAN FOTOS DE PRODUCTOS EN FIRESTORE GRATIS
+# PLAN FOTOS EN FIRESTORE GRATIS
 
 ## Descripción del plan
 
-Probar una estrategia gratis para sincronizar imágenes de Mis Productos entre Android, navegador y otros dispositivos usando solo Firebase Firestore, sin Firebase Storage ni facturación Blaze. El piloto se limita a una imagen principal reducida por producto, guardada en una colección separada para no inflar el documento principal del producto.
+Probar y extender una estrategia gratis para sincronizar imágenes entre Android, navegador y otros dispositivos usando solo Firebase Firestore, sin Firebase Storage ni facturación Blaze. El piloto inicial se valida en Mis Productos con una imagen principal reducida por producto, guardada en una colección separada para no inflar el documento principal. Después de validar el piloto, el patrón se extiende de forma controlada al resto de la app.
 
 ## Objetivo principal
 
@@ -10,17 +10,18 @@ Probar una estrategia gratis para sincronizar imágenes de Mis Productos entre A
 - Mantener Firestore como única nube del piloto, sin mezclar otra base de datos ni activar Storage.
 - Evitar fotos grandes dentro de productos, Preferences, backups o colas de migración.
 - Medir peso, rendimiento y comportamiento real antes de extender la solución al resto de la app.
+- Extender el patrón validado a comercios, direcciones, listas y mesa sin duplicar lógica.
 
 ## Reglas del plan
 
-- Aplicar el piloto solo a Mis Productos y Detalle de Producto.
+- La base validada queda en Mis Productos y Detalle de Producto.
 - No usar `FirebaseStorageFotosService.js` ni `storage.rules` en este piloto.
-- No guardar base64 grande en `usuarios/{usuarioId}/productos/{productoId}`.
-- Guardar la miniatura sincronizada en un documento separado bajo `usuarios/{usuarioId}/imagenesProductos/{productoId}`.
-- Mantener una sola imagen principal por producto.
+- No guardar base64 grande dentro de documentos principales como productos, comercios, listas o mesa.
+- Guardar miniaturas sincronizadas en documentos separados por dominio.
+- Mantener una sola imagen principal por entidad en esta etapa.
 - Comprimir toda imagen de usuario antes de sincronizarla con Firestore.
 - Mantener la foto local protegida por `FotosLocalesService.js` para caché y uso offline.
-- No tocar comercios, listas ni mesa de trabajo hasta validar el piloto.
+- Extender dominio por dominio, sin mezclar todos los flujos en una sola fase.
 
 ## FASE 1: Relevar el flujo actual de fotos de productos
 
@@ -148,12 +149,14 @@ Confirmar que cada usuario pueda leer y escribir solo sus propias imágenes de p
 
 Saber si Firestore con miniaturas sirve antes de extender la solución a más partes de la app.
 
+- [x] Confirmar sincronización navegador -> Android con una foto de producto.
+- [x] Confirmar sincronización Android -> navegador con una foto de producto.
 - [ ] Crear 5 productos con imagen desde Android.
 - [ ] Verificar en Firebase Console que cada producto tiene documento liviano y cada imagen vive en `imagenesProductos`.
 - [ ] Confirmar que ningún documento `productos/{productoId}` tiene `imagen` ni `imagenBase64`.
 - [ ] Confirmar que cada documento de imagen pesa menos de `180000` bytes.
-- [ ] Abrir navegador con la misma cuenta y confirmar que aparecen las imágenes.
-- [ ] Cambiar una foto desde navegador y confirmar que Android la recibe al recargar/sincronizar.
+- [x] Abrir navegador con la misma cuenta y confirmar que aparecen las imágenes.
+- [x] Cambiar una foto desde navegador y confirmar que Android la recibe al recargar/sincronizar.
 - [ ] Quitar una foto y confirmar que desaparece en ambos dispositivos.
 - [ ] Eliminar un producto y confirmar que se elimina su imagen remota.
 - [ ] Repetir con 20 productos.
@@ -171,6 +174,82 @@ Cerrar el piloto con una decisión técnica clara: mantener, ajustar o descartar
 - [ ] Si el piloto es lento o pesado, dejar recomendado volver a fotos locales hasta poder usar Firebase Storage.
 - [ ] Si el piloto se acepta, crear un plan nuevo para extender el patrón a comercios, listas o mesa.
 - [ ] No extender el patrón a otros dominios dentro de este plan.
+
+## FASE 11: Generalizar servicios de imágenes
+
+### Objetivo
+
+Convertir lo validado en productos en una base reusable para todos los dominios con fotos.
+
+- [ ] Revisar `FirestoreImagenesProductosService.js` y extraer lógica común sin romper el piloto validado.
+- [ ] Crear `FirestoreImagenesService.js` o equivalente con soporte por dominio.
+- [ ] Definir rutas separadas por dominio: `imagenesProductos`, `imagenesComercios`, `imagenesDirecciones`, `imagenesListas` e `imagenesMesa`.
+- [ ] Mantener helpers de usuario Firebase, normalización de IDs, tandas de lectura y borrado en un solo lugar.
+- [ ] Mantener wrappers de dominio si ayudan a que cada store quede claro.
+- [ ] Reutilizar `ImagenesFirestoreUtils.js` para todos los dominios.
+- [ ] Evitar que un dominio dependa de nombres internos de otro dominio.
+
+## FASE 12: Extender fotos a comercios y direcciones
+
+### Objetivo
+
+Sincronizar fotos de comercios y direcciones usando el mismo patrón validado en productos.
+
+- [ ] Revisar `FirestoreComerciosService.js`, `comerciosStore.js` y componentes de edición de comercio.
+- [ ] Identificar el flujo exacto donde se guarda `foto`, `fotoUrl`, `fotoRutaStorage`, `fotoFuente` y `fotoLocalId`.
+- [ ] Agregar metadatos livianos para comercio: `fotoFirestoreId`, `fotoFirestoreEstado`, `fotoFirestorePesoBytes` y `fechaFotoFirestore`.
+- [ ] Agregar metadatos livianos equivalentes para cada dirección.
+- [ ] Guardar miniaturas de comercios en `usuarios/{uid}/imagenesComercios/{comercioId}`.
+- [ ] Guardar miniaturas de direcciones en `usuarios/{uid}/imagenesDirecciones/{comercioIdDireccionId}`.
+- [ ] Hidratar fotos remotas al cargar comercios desde Firestore.
+- [ ] Borrar miniaturas remotas al quitar foto, borrar comercio o borrar dirección.
+- [ ] Probar navegador -> Android y Android -> navegador con una foto de comercio.
+- [ ] Probar navegador -> Android y Android -> navegador con una foto de dirección.
+
+## FASE 13: Extender fotos a listas
+
+### Objetivo
+
+Sincronizar imágenes de items de listas sin inflar el documento principal de la lista.
+
+- [ ] Revisar `FirestoreListasJustasService.js`, `ListaJustaStore.js` y pantallas de detalle de lista.
+- [ ] Identificar si la imagen visible del item viene del producto, del item manual o de una captura propia.
+- [ ] No duplicar imágenes de producto si el item puede resolver la foto desde `productoId`.
+- [ ] Agregar metadatos livianos solo cuando el item tenga imagen propia.
+- [ ] Guardar miniaturas propias de items en `usuarios/{uid}/imagenesListas/{listaIdItemId}`.
+- [ ] Hidratar imágenes remotas al cargar listas desde Firestore.
+- [ ] Borrar miniaturas remotas al quitar item, limpiar lista o eliminar lista.
+- [ ] Probar una lista con item de producto existente y confirmar que usa la foto de producto.
+- [ ] Probar una lista con item manual con foto propia y confirmar sincronización entre dispositivos.
+
+## FASE 14: Extender fotos a mesa de trabajo
+
+### Objetivo
+
+Sincronizar imágenes de items de mesa cuando la foto todavía no pertenece a un producto definitivo.
+
+- [ ] Revisar `FirestoreMesaTrabajoService.js`, `sesionEscaneoStore.js` y `MesaTrabajoPage.vue`.
+- [ ] Identificar diferencias entre `item.imagen` y `item.datosOriginales.imagen`.
+- [ ] Guardar miniaturas de mesa en `usuarios/{uid}/imagenesMesa/{mesaItemId}`.
+- [ ] Evitar duplicar la foto cuando el item ya se resolvió hacia un producto con imagen sincronizada.
+- [ ] Al convertir un item de mesa en producto, mover o reutilizar la imagen siguiendo el patrón de productos.
+- [ ] Borrar miniaturas remotas cuando el item de mesa se resuelva o se elimine.
+- [ ] Probar captura desde mesa en Android y confirmarla en navegador.
+- [ ] Probar resolución hacia producto y confirmar que la foto queda visible en producto.
+
+## FASE 15: Consolidar reglas y manual
+
+### Objetivo
+
+Dejar documentada la estrategia global de fotos gratis y cerrar el patrón para futuras extensiones.
+
+- [ ] Confirmar que `firestore.rules` cubre todas las colecciones nuevas bajo `usuarios/{uid}`.
+- [ ] Confirmar que no se usa `FirebaseStorageFotosService.js` en el flujo gratis global.
+- [ ] Revisar que ningún documento principal guarde `imagenBase64` o `fotoBase64`.
+- [ ] Actualizar `Planes/Manuales/ManualFirebaseGratis.md` con la estrategia validada de miniaturas Firestore.
+- [ ] Documentar límites usados: tamaño máximo, calidad, formato, rutas y dominios cubiertos.
+- [ ] Documentar cuándo conviene migrar a Firebase Storage si la app empieza a generar ingresos.
+- [ ] Marcar este plan como completado solo después de probar productos, comercios, listas y mesa en navegador y Android.
 
 ## FASE TESTING
 
@@ -193,6 +272,12 @@ Validar de forma ejecutable por IA y revisable por humano que el piloto sincroni
 - [ ] Probar en Android real con `adb logcat` si hay cierre inesperado o lentitud fuerte.
 - [ ] Confirmar que borrar producto elimina o invalida su imagen remota.
 - [ ] Confirmar que logout/login no deja imágenes de otro usuario visibles.
+- [ ] Probar foto de comercio en navegador y Android.
+- [ ] Probar foto de dirección en navegador y Android.
+- [ ] Probar item de lista con foto propia en navegador y Android.
+- [ ] Probar item de mesa con foto propia en navegador y Android.
+- [ ] Verificar que los documentos principales de todos los dominios quedan livianos.
+- [ ] Verificar que las colecciones de imágenes por dominio se crean bajo `usuarios/{uid}`.
 
 ## Progreso del plan
 
@@ -206,6 +291,11 @@ Validar de forma ejecutable por IA y revisable por humano que el piloto sincroni
 - [x] Fase 8: Revisar reglas Firestore
 - [ ] Fase 9: Medir el piloto
 - [ ] Fase 10: Documentar decisión después de la prueba
+- [ ] Fase 11: Generalizar servicios de imágenes
+- [ ] Fase 12: Extender fotos a comercios y direcciones
+- [ ] Fase 13: Extender fotos a listas
+- [ ] Fase 14: Extender fotos a mesa de trabajo
+- [ ] Fase 15: Consolidar reglas y manual
 - [ ] Fase Testing
 
 Fecha de creación: 7 de Julio 2026
