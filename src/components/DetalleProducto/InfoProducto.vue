@@ -449,7 +449,14 @@ async function alGuardarFotoEditada(nuevaImagenBase64) {
 
 async function quitarFoto() {
   try {
-    await productosStore.actualizarProducto(props.producto.id, { imagen: null, fotoFuente: null })
+    await productosStore.actualizarProducto(props.producto.id, {
+      imagen: null,
+      fotoFuente: null,
+      imagenFirestoreId: null,
+      imagenFirestoreEstado: null,
+      imagenFirestorePesoBytes: null,
+      fechaImagenFirestore: null,
+    })
     $q.notify({ type: 'positive', message: 'Foto eliminada', position: 'top', timeout: 1500 })
   } catch {
     $q.notify({ type: 'negative', message: 'No se pudo quitar la foto', position: 'top' })

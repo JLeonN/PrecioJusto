@@ -178,12 +178,12 @@ Cerrar el piloto con una decisión técnica clara: mantener, ajustar o descartar
 
 Validar de forma ejecutable por IA y revisable por humano que el piloto sincroniza imágenes sin romper caché local, Firestore ni Android.
 
-- [ ] Ejecutar `npm run lint`.
-- [ ] Ejecutar `npm run build`.
-- [ ] Probar en navegador con una cuenta Firebase real.
-- [ ] Probar en Android con la misma cuenta Firebase real.
-- [ ] Desde Android, tomar foto en un producto y verificar que aparece en navegador.
-- [ ] Desde navegador, cambiar foto de un producto y verificar que aparece en Android.
+- [x] Ejecutar `npm run lint`.
+- [x] Ejecutar `npm run build`.
+- [x] Probar en navegador con una cuenta Firebase real.
+- [x] Probar en Android con la misma cuenta Firebase real.
+- [x] Desde Android, tomar foto en un producto y verificar que aparece en navegador.
+- [x] Desde navegador, cambiar foto de un producto y verificar que aparece en Android.
 - [ ] Probar sin conexión: cambiar una foto, confirmar que queda local y que la app no se rompe.
 - [ ] Recuperar conexión y confirmar comportamiento definido para reintento o error.
 - [ ] Verificar en Firestore Console que la ruta usada es `usuarios/{uid}/imagenesProductos/{productoId}`.
@@ -196,18 +196,18 @@ Validar de forma ejecutable por IA y revisable por humano que el piloto sincroni
 
 ## Progreso del plan
 
-- [ ] Fase 1: Relevar el flujo actual de fotos de productos
-- [ ] Fase 2: Crear compresión de imágenes para el piloto
-- [ ] Fase 3: Crear servicio Firestore para imágenes de productos
-- [ ] Fase 4: Agregar campos livianos al modelo de producto
-- [ ] Fase 5: Sincronizar imagen al guardar foto de producto
-- [ ] Fase 6: Cargar imágenes sincronizadas desde Firestore
-- [ ] Fase 7: Eliminar o reemplazar imagen sincronizada
-- [ ] Fase 8: Revisar reglas Firestore
+- [x] Fase 1: Relevar el flujo actual de fotos de productos
+- [x] Fase 2: Crear compresión de imágenes para el piloto
+- [x] Fase 3: Crear servicio Firestore para imágenes de productos
+- [x] Fase 4: Agregar campos livianos al modelo de producto
+- [x] Fase 5: Sincronizar imagen al guardar foto de producto
+- [x] Fase 6: Cargar imágenes sincronizadas desde Firestore
+- [x] Fase 7: Eliminar o reemplazar imagen sincronizada
+- [x] Fase 8: Revisar reglas Firestore
 - [ ] Fase 9: Medir el piloto
 - [ ] Fase 10: Documentar decisión después de la prueba
 - [ ] Fase Testing
 
 Fecha de creación: 7 de Julio 2026
 Fecha de última actualización: 7 de Julio 2026
-Estado: BORRADOR
+Estado: EN PROCESO

@@ -21,6 +21,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { ESTADOS_SINCRONIZACION } from '../constantes/PreparacionFirebase.js'
 import fotosLegacyCacheService from '../servicios/FotosLegacyCacheService.js'
+import firestoreImagenesProductosService from '../servicios/FirestoreImagenesProductosService.js'
 import firestorePreciosService from '../servicios/FirestorePreciosService.js'
 import fuentePrincipalFirestoreService from '../servicios/FuentePrincipalFirestoreService.js'
 import productosService from '../servicios/ProductosService.js'
@@ -249,8 +250,10 @@ export const useProductosStore = defineStore('productos', () => {
         datosLocalesVigentes,
         resultado.datos,
       )
-      const productosFusionados =
+      const productosFusionadosConFotosLocales =
         await fotosLegacyCacheService.recuperarFotosProductos(productosFusionadosBase)
+      const productosFusionados =
+        await hidratarImagenesProductosFirestore(productosFusionadosConFotosLocales)
       const productosEliminados = resultado.datos.filter((producto) => producto?.eliminado)
 
       productos.value = productosFusionados
@@ -282,6 +285,49 @@ export const useProductosStore = defineStore('productos', () => {
     if (!Number.isFinite(fecha)) return false
 
     return Date.now() - fecha < TIEMPO_MINIMO_REFRESCO_FIRESTORE_MS
+  }
+
+  async function hidratarImagenesProductosFirestore(productosBase = []) {
+    const usuarioActual = fuentePrincipalFirestoreService.obtenerUsuarioActual()
+    if (!fuentePrincipalFirestoreService.debeUsarFirestore(usuarioActual)) return productosBase
+
+    const productosConImagenFirestore = productosBase.filter((producto) =>
+      producto?.imagenFirestoreId ||
+      producto?.fechaImagenFirestore ||
+      producto?.imagenFirestoreEstado === ESTADOS_SINCRONIZACION.SINCRONIZADO,
+    )
+
+    if (productosConImagenFirestore.length === 0) return productosBase
+
+    try {
+      const imagenesPorProducto = await firestoreImagenesProductosService.obtenerImagenesProductos(
+        productosConImagenFirestore.map((producto) => producto.id),
+        { usuarioId: usuarioActual.id },
+      )
+
+      return productosBase.map((producto) => {
+        const imagenRemota = imagenesPorProducto.get(String(producto.id))
+        if (!imagenRemota?.imagenBase64) return producto
+
+        return {
+          ...producto,
+          imagen: imagenRemota.imagenBase64,
+          imagenFirestoreId: imagenRemota.id || producto.id,
+          imagenFirestoreEstado: ESTADOS_SINCRONIZACION.SINCRONIZADO,
+          imagenFirestorePesoBytes: imagenRemota.pesoBytes || producto.imagenFirestorePesoBytes || null,
+          fechaImagenFirestore: imagenRemota.fechaActualizacion || producto.fechaImagenFirestore || null,
+          fotoFuente: producto.fotoFuente || 'usuario',
+          sincronizacionFoto: {
+            estado: ESTADOS_SINCRONIZACION.SINCRONIZADO,
+            fecha: imagenRemota.fechaActualizacion || new Date().toISOString(),
+            mensaje: 'Foto cargada desde Firestore.',
+          },
+        }
+      })
+    } catch (err) {
+      console.warn('No se pudieron hidratar imágenes de productos desde Firestore:', err)
+      return productosBase
+    }
   }
 
   function consumirPrimeraSincronizacionFirestore() {
@@ -405,9 +451,20 @@ export const useProductosStore = defineStore('productos', () => {
       }
 
       // Combinar datos
+      const actualizaImagen = Object.prototype.hasOwnProperty.call(datosActualizados, 'imagen')
       const productoActualizado = {
         ...productoActual,
         ...datosActualizados,
+      }
+      if (actualizaImagen) {
+        productoActualizado.sincronizarImagenFirestore = true
+      }
+      if (actualizaImagen && !datosActualizados.imagen) {
+        productoActualizado.limpiarImagenFirestore = true
+        productoActualizado.imagenFirestoreId = productoActual.imagenFirestoreId
+        productoActualizado.imagenFirestoreEstado = productoActual.imagenFirestoreEstado
+        productoActualizado.imagenFirestorePesoBytes = productoActual.imagenFirestorePesoBytes
+        productoActualizado.fechaImagenFirestore = productoActual.fechaImagenFirestore
       }
 
       // Guardar
