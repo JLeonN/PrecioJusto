@@ -52,6 +52,7 @@ Al terminar una integración correcta, la app debería tener:
 - Limpieza de stores al cambiar de usuario.
 - Reglas Firestore que impiden que un usuario lea datos de otro.
 - Pruebas en navegador y celular.
+- Build web publicado con variables Firebase disponibles en GitHub Actions si se usa GitHub Pages.
 - Validación manual o automática mirando documentos reales en Firebase.
 
 No se considera cerrada la integración si solo "parece funcionar" en la UI. También hay que comprobar Firestore.
@@ -1423,6 +1424,91 @@ Mi recomendación práctica:
 
 ---
 
+## Publicación Web En GitHub Pages Con Firebase
+
+Si la app también se publica como web en GitHub Pages, hay una diferencia importante entre el entorno local y el entorno publicado.
+
+Regla práctica:
+
+> GitHub Pages no usa el `.env.local` del desarrollador. El workflow de GitHub Actions debe recibir las variables Firebase antes de ejecutar `npm run build`.
+
+En apps Quasar/Vite, las variables públicas de Firebase suelen tener prefijo `VITE_`. Como Vite inserta esas variables durante la compilación, no alcanza con tenerlas configuradas localmente.
+
+Variables mínimas a validar en el workflow:
+
+```text
+VITE_FIREBASE_API_KEY
+VITE_FIREBASE_AUTH_DOMAIN
+VITE_FIREBASE_PROJECT_ID
+VITE_FIREBASE_STORAGE_BUCKET
+VITE_FIREBASE_MESSAGING_SENDER_ID
+VITE_FIREBASE_APP_ID
+```
+
+Patrón recomendado para GitHub Actions:
+
+1. Configurar las variables en `Settings -> Secrets and variables -> Actions`.
+2. Usar `secrets` para valores que se quieran tratar como sensibles.
+3. Usar `vars` para valores públicos si se decide gestionarlos como configuración visible del repo.
+4. Validar que todas las variables existen antes de compilar.
+5. Pasar las mismas variables al paso `npm run build`.
+6. Cortar el workflow con un mensaje claro si falta alguna.
+
+Ejemplo de validación:
+
+```yaml
+- name: Validar variables Firebase
+  run: |
+    for variable in \
+      VITE_FIREBASE_API_KEY \
+      VITE_FIREBASE_AUTH_DOMAIN \
+      VITE_FIREBASE_PROJECT_ID \
+      VITE_FIREBASE_STORAGE_BUCKET \
+      VITE_FIREBASE_MESSAGING_SENDER_ID \
+      VITE_FIREBASE_APP_ID
+    do
+      if [ -z "${!variable}" ]; then
+        echo "Falta configurar $variable en Secrets o Variables de GitHub Actions."
+        exit 1
+      fi
+    done
+  env:
+    VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY || vars.VITE_FIREBASE_API_KEY }}
+    VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN || vars.VITE_FIREBASE_AUTH_DOMAIN }}
+    VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID || vars.VITE_FIREBASE_PROJECT_ID }}
+    VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET || vars.VITE_FIREBASE_STORAGE_BUCKET }}
+    VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID || vars.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+    VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID || vars.VITE_FIREBASE_APP_ID }}
+```
+
+El paso de build debe recibir el mismo `env`:
+
+```yaml
+- name: Build
+  run: npm run build
+  env:
+    VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY || vars.VITE_FIREBASE_API_KEY }}
+    VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN || vars.VITE_FIREBASE_AUTH_DOMAIN }}
+    VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID || vars.VITE_FIREBASE_PROJECT_ID }}
+    VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET || vars.VITE_FIREBASE_STORAGE_BUCKET }}
+    VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID || vars.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+    VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID || vars.VITE_FIREBASE_APP_ID }}
+```
+
+No hacer:
+
+```text
+workflow -> npm run build -> publicar dist/spa sin validar variables
+```
+
+Ese flujo puede publicar una app incompleta: local funciona porque existe `.env.local`, Android puede funcionar por otra configuración, pero la web publicada queda sin Firebase.
+
+Recomendación práctica:
+
+> En toda app Firebase publicada por GitHub Pages, el deploy debe fallar temprano si falta una variable. Es mejor un workflow rojo con mensaje claro que una web publicada rota.
+
+---
+
 ## Checklist Para Replicar En Otra App
 
 Antes de empezar:
@@ -1445,6 +1531,9 @@ Firebase base:
 - App Android registrada si aplica.
 - Configuración Firebase agregada.
 - `.env.local` ignorado si se usan variables.
+- Variables `VITE_FIREBASE_*` configuradas en GitHub Actions si se publica en GitHub Pages.
+- Workflow de Pages valida variables Firebase antes de compilar.
+- Paso `npm run build` del workflow recibe las variables Firebase en `env`.
 - `google-services.json` actualizado si hay Android.
 
 Auth:
@@ -1490,6 +1579,7 @@ Cierre:
 - `npm run lint` pasa.
 - `npm run build` pasa.
 - Prueba navegador pasa.
+- Prueba web publicada en GitHub Pages pasa si existe deploy web.
 - Prueba Android pasa.
 - Firestore Console muestra documentos correctos.
 - No quedan llamadas a métodos viejos.
@@ -1788,6 +1878,37 @@ Conviene tener:
 - Resumen técnico.
 - Manual final.
 - Checklist de cierre.
+
+### Error 11: Publicar GitHub Pages Sin Variables Firebase
+
+Este error aparece cuando la app funciona en local, pero falla o queda incompleta en la web publicada.
+
+Causa:
+
+```text
+.env.local existe en la máquina del desarrollador
+GitHub Actions no tiene VITE_FIREBASE_*
+npm run build compila sin configuración Firebase válida
+GitHub Pages publica dist/spa incompleto
+```
+
+Hacer:
+
+- Configurar `VITE_FIREBASE_*` en Secrets o Variables de GitHub Actions.
+- Validar esas variables antes de compilar.
+- Pasar las variables al paso `npm run build`.
+- Hacer fallar el workflow si falta alguna.
+- Revisar la app ya publicada, no solo el build local.
+
+No hacer:
+
+```text
+asumir que .env.local viaja a GitHub Pages
+```
+
+Regla práctica:
+
+> Si Firebase depende de variables `VITE_`, GitHub Actions debe tenerlas durante el build.
 
 ---
 
