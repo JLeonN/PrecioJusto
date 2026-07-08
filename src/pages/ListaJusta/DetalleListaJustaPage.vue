@@ -369,18 +369,48 @@
           sin precio. Se muestra total parcial.
         </q-banner>
 
-        <q-banner v-if="tieneMultiplesMonedasCompradas" class="q-mt-md" rounded>
-          Hay productos comprados con distintas monedas. El total mezcla valores sin conversión.
+        <q-banner v-if="tieneMultiplesMonedasLista" class="q-mt-md" rounded>
+          Hay productos con distintas monedas. El resumen mezcla valores sin conversión.
         </q-banner>
 
         <q-card flat bordered class="resumen-gasto q-mt-md">
-          <q-card-section>
-            <div class="fila-resumen-gasto">
-              <span>{{ etiquetaTotalCalculada }}</span>
-              <strong>{{ formatearMoneda(totalCompradoCalculado, monedaTotalCalculada) }}</strong>
-            </div>
-            <div class="text-caption text-grey-7">
-              Estimación de precios: los valores pueden variar.
+          <q-card-section class="contenido-resumen-gasto">
+            <template v-if="filtroEstado === 'todos'">
+              <div class="grid-resumen-todo">
+                <div
+                  v-for="dato in datosResumenGasto"
+                  :key="dato.clave"
+                  class="dato-resumen-gasto dato-resumen-gasto-igual"
+                >
+                  <span>{{ dato.etiqueta }}</span>
+                  <strong>{{ dato.valor }}</strong>
+                </div>
+              </div>
+            </template>
+            <template v-else>
+              <div class="dato-resumen-gasto dato-resumen-gasto-principal">
+                <span>{{ resumenPrincipalGasto.etiqueta }}</span>
+                <strong>{{ resumenPrincipalGasto.valor }}</strong>
+              </div>
+              <div class="grid-resumen-secundario">
+                <div
+                  v-for="dato in resumenSecundarioGasto"
+                  :key="dato.clave"
+                  class="dato-resumen-gasto dato-resumen-gasto-secundario"
+                >
+                  <span>{{ dato.etiqueta }}</span>
+                  <strong>{{ dato.valor }}</strong>
+                </div>
+                <div
+                  v-if="mensajeResumenSecundario"
+                  class="mensaje-resumen-secundario"
+                >
+                  {{ mensajeResumenSecundario }}
+                </div>
+              </div>
+            </template>
+            <div class="texto-ayuda-resumen">
+              {{ textoAyudaResumenGasto }}
             </div>
           </q-card-section>
         </q-card>
@@ -714,6 +744,30 @@ const totalCompradoCalculado = computed(() => {
     return acumulado + precio * cantidad
   }, 0)
 })
+const totalListaCalculado = computed(() => {
+  if (!listaActual.value) return 0
+
+  return listaActual.value.items.reduce((acumulado, item) => {
+    const precio = Number(precioVisual(item))
+    if (!Number.isFinite(precio) || precio <= 0) return acumulado
+
+    const cantidad = Number(item.cantidad || 0)
+    return acumulado + precio * cantidad
+  }, 0)
+})
+const totalPendienteCalculado = computed(() => {
+  if (!listaActual.value) return 0
+
+  return listaActual.value.items.reduce((acumulado, item) => {
+    if (item.comprado) return acumulado
+
+    const precio = Number(precioVisual(item))
+    if (!Number.isFinite(precio) || precio <= 0) return acumulado
+
+    const cantidad = Number(item.cantidad || 0)
+    return acumulado + precio * cantidad
+  }, 0)
+})
 const compradosSinPrecio = computed(() => {
   if (!listaActual.value) return 0
 
@@ -723,9 +777,71 @@ const compradosSinPrecio = computed(() => {
     return !Number.isFinite(precio) || precio <= 0
   }).length
 })
-const etiquetaTotalCalculada = computed(() => {
-  if (tieneMultiplesMonedasCompradas.value) return 'Total mixto'
-  return compradosSinPrecio.value > 0 ? 'Total parcial' : 'Total'
+const itemsSinPrecio = computed(() => {
+  if (!listaActual.value) return 0
+
+  return listaActual.value.items.filter((item) => {
+    const precio = Number(precioVisual(item))
+    return !Number.isFinite(precio) || precio <= 0
+  }).length
+})
+const monedaResumenGasto = computed(() => {
+  if (monedasLista.value.length === 1) return monedasLista.value[0]
+  return preferenciasStore.monedaDefaultEfectiva
+})
+const datosResumenGasto = computed(() => [
+  {
+    clave: 'total',
+    etiqueta: 'Total de la lista',
+    valor: formatearMoneda(totalListaCalculado.value, monedaResumenGasto.value),
+  },
+  {
+    clave: 'gastado',
+    etiqueta: 'Gastado',
+    valor: formatearMoneda(totalCompradoCalculado.value, monedaResumenGasto.value),
+  },
+  {
+    clave: 'faltante',
+    etiqueta: 'Falta gastar',
+    valor: formatearMoneda(totalPendienteCalculado.value, monedaResumenGasto.value),
+  },
+])
+const resumenPrincipalGasto = computed(() => {
+  if (filtroEstado.value === 'comprados') {
+    return datosResumenGasto.value.find((dato) => dato.clave === 'gastado')
+  }
+
+  return datosResumenGasto.value.find((dato) => dato.clave === 'total')
+})
+const resumenSecundarioGasto = computed(() => {
+  if (filtroEstado.value === 'pendientes' && totalCompradoCalculado.value <= 0) {
+    return []
+  }
+
+  const clavePrincipal = resumenPrincipalGasto.value?.clave
+  return datosResumenGasto.value.filter((dato) => dato.clave !== clavePrincipal)
+})
+const mensajeResumenSecundario = computed(() => {
+  if (filtroEstado.value === 'pendientes' && totalCompradoCalculado.value <= 0) {
+    return 'Todavía no marcaste compras.'
+  }
+
+  return ''
+})
+const textoAyudaResumenGasto = computed(() => {
+  if (tieneMultiplesMonedasLista.value) {
+    return 'Hay monedas distintas. El resumen mezcla valores sin conversión.'
+  }
+
+  if (totalProductos.value > 0 && itemsSinPrecio.value === totalProductos.value) {
+    return 'Agregá precios para calcular el total.'
+  }
+
+  if (itemsSinPrecio.value > 0) {
+    return `Estimación parcial: ${itemsSinPrecio.value} producto${itemsSinPrecio.value > 1 ? 's' : ''} sin precio.`
+  }
+
+  return 'Los precios pueden cambiar en el comercio.'
 })
 
 const itemsOrdenados = computed(() => {
@@ -841,21 +957,16 @@ const formularioValido = computed(() => {
 
   return Boolean(formularioProductoManual.value.nombre.trim())
 })
-const monedasCompradas = computed(() => {
+const monedasLista = computed(() => {
   if (!listaActual.value) return []
 
   const monedas = listaActual.value.items
-    .filter((item) => item.comprado)
     .map((item) => precioVisualDetallado(item).moneda)
     .filter(Boolean)
 
   return [...new Set(monedas)]
 })
-const tieneMultiplesMonedasCompradas = computed(() => monedasCompradas.value.length > 1)
-const monedaTotalCalculada = computed(() => {
-  if (monedasCompradas.value.length === 1) return monedasCompradas.value[0]
-  return preferenciasStore.monedaDefaultEfectiva
-})
+const tieneMultiplesMonedasLista = computed(() => monedasLista.value.length > 1)
 
 function formatearMoneda(valor, moneda = preferenciasStore.monedaDefaultEfectiva) {
   return formatearPrecioConCodigo(valor, moneda)
@@ -2076,11 +2187,59 @@ onMounted(async () => {
   border-color: var(--borde-color);
   margin-bottom: 12px;
 }
-.fila-resumen-gasto {
+.contenido-resumen-gasto {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.dato-resumen-gasto {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin-bottom: 4px;
+  gap: 12px;
+}
+.dato-resumen-gasto span {
+  color: var(--texto-secundario);
+  font-weight: 700;
+}
+.dato-resumen-gasto strong {
+  color: var(--texto-primario);
+  text-align: right;
+}
+.dato-resumen-gasto-principal {
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--borde-color);
+}
+.dato-resumen-gasto-principal span {
+  font-size: 13px;
+}
+.dato-resumen-gasto-principal strong {
+  font-size: 22px;
+  line-height: 1.1;
+}
+.grid-resumen-secundario,
+.grid-resumen-todo {
+  display: grid;
+  gap: 8px;
+}
+.dato-resumen-gasto-secundario span,
+.dato-resumen-gasto-igual span {
+  font-size: 12px;
+}
+.dato-resumen-gasto-secundario strong,
+.dato-resumen-gasto-igual strong {
+  font-size: 14px;
+}
+.mensaje-resumen-secundario {
+  padding-top: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--texto-secundario);
+}
+.texto-ayuda-resumen {
+  font-size: 11px;
+  color: var(--texto-secundario);
+  line-height: 1.25;
 }
 .dialogo-agregar-item {
   width: min(92vw, 620px);
