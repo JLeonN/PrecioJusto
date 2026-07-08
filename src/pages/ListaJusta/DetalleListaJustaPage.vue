@@ -67,13 +67,33 @@
           {{ mensajeFiltro }}
         </q-banner>
 
-<q-expansion-item
-  class="bloque-comercio q-mb-sm"
-  dense
-  dense-toggle
-  icon="store"
-  :label="resumenComercioActual.tieneComercio ? resumenComercioActual.nombre : 'Seleccione comercio aquí'"
->
+        <q-expansion-item
+          class="bloque-comercio q-mb-sm"
+          dense
+          dense-toggle
+        >
+          <template #header>
+            <q-item-section avatar class="icono-comercio-actual">
+              <q-icon name="store" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>
+                {{ resumenComercioActual.tieneComercio ? resumenComercioActual.nombre : 'Seleccione comercio aquí' }}
+              </q-item-label>
+            </q-item-section>
+            <q-item-section side class="acciones-comercio-actual">
+              <q-btn
+                v-if="resumenComercioActual.tieneComercio"
+                flat
+                round
+                dense
+                icon="close"
+                color="secondary"
+                aria-label="Quitar comercio seleccionado"
+                @click.stop="quitarComercioSesionLista"
+              />
+            </q-item-section>
+          </template>
           <div class="q-pa-sm">
             <div v-if="resumenComercioActual.tieneComercio" class="resumen-comercio-actual q-mb-sm">
               <div class="resumen-comercio-actual-nombre">{{ resumenComercioActual.nombre }}</div>
@@ -1662,6 +1682,10 @@ function irAListaInteligente() {
   router.push(`/lista-justa/${listaActual.value.id}/inteligente`)
 }
 
+function quitarComercioSesionLista() {
+  comercioSesionLista.value = null
+}
+
 function abrirDialogoAgregarItem() {
   dialogoAgregarItemAbierto.value = true
   void hidratarPreciosProductosVisibles()
@@ -1784,6 +1808,15 @@ onMounted(async () => {
   border: 1px solid var(--borde-color);
   border-radius: 12px;
   background: var(--fondo-tarjeta);
+}
+.icono-comercio-actual {
+  min-width: 32px;
+  padding-right: 4px;
+}
+.acciones-comercio-actual {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
 }
 .resumen-comercio-actual {
   padding: 8px 10px;
