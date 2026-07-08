@@ -7,6 +7,7 @@ import ListaJustaService from '../servicios/ListaJustaService.js'
 import productosService from '../servicios/ProductosService.js'
 import reconciliacionFirestoreLocalService from '../servicios/ReconciliacionFirestoreLocalService.js'
 import sincronizacionIncrementalFirestoreService from '../servicios/SincronizacionIncrementalFirestoreService.js'
+import { construirResumenPreciosLista } from '../../utils/ListaJustaInteligenteUtils.js'
 import { useProductosStore } from './productosStore.js'
 import { useSesionEscaneoStore } from './sesionEscaneoStore.js'
 import { useUsuarioStore } from './UsuarioStore.js'
@@ -547,29 +548,10 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
   }
 
   function estimadoLista(lista) {
-    const itemsConPrecio = lista.items.filter((item) => Number.isFinite(obtenerPrecioVisualItem(item)))
-
-    if (lista.items.length === 0 || itemsConPrecio.length === 0) {
-      return {
-        etiqueta: 'Sin precios',
-        total: 0,
-        parcial: false,
-      }
-    }
-
-    const total = itemsConPrecio.reduce((suma, item) => {
-      const precio = Number(obtenerPrecioVisualItem(item) || 0)
-      const cantidad = Number(item.cantidad || 1)
-      return suma + precio * cantidad
-    }, 0)
-
-    const parcial = itemsConPrecio.length !== lista.items.length
-
-    return {
-      etiqueta: parcial ? 'Estimado parcial' : 'Estimado de la lista',
-      total,
-      parcial,
-    }
+    return construirResumenPreciosLista({
+      lista,
+      obtenerProductoPorId: productosStore.obtenerProductoPorId,
+    })
   }
 
   function resumenCompra(lista) {

@@ -75,15 +75,25 @@
             </q-card-section>
 
             <q-card-section class="q-pt-none q-pb-sm">
-              <div class="fila-estimado">
-                <span class="etiqueta-estimado">{{ estimadoDeLista(lista).etiqueta }}</span>
-                <span class="monto-estimado">{{ formatearMoneda(estimadoDeLista(lista).total) }}</span>
-              </div>
-              <div v-if="estimadoDeLista(lista).parcial" class="text-caption text-warning">
-                Faltan precios para completar el total.
-              </div>
-              <div v-if="estimadoDeLista(lista).etiqueta === 'Sin precios'" class="text-caption text-grey-7">
-                Ningún item tiene precio cargado.
+              <div class="bloque-resumen-precios">
+                <div class="fila-estimado">
+                  <span class="etiqueta-estimado">{{ estimadoDeLista(lista).etiqueta }}</span>
+                  <span class="monto-estimado">
+                    {{ formatearMoneda(estimadoDeLista(lista).total, estimadoDeLista(lista).moneda) }}
+                  </span>
+                </div>
+                <div
+                  v-if="estimadoDeLista(lista).estado !== 'sinComercio'"
+                  class="contador-precios-lista"
+                >
+                  {{ textoContadorPrecios(estimadoDeLista(lista)) }}
+                </div>
+                <div
+                  class="mensaje-resumen-precios"
+                  :class="claseMensajeResumen(estimadoDeLista(lista))"
+                >
+                  {{ estimadoDeLista(lista).mensaje }}
+                </div>
               </div>
             </q-card-section>
 
@@ -147,13 +157,14 @@
 
 <script setup>
 import InputFormularioReutilizable from '../../components/Compartidos/InputFormularioReutilizable.vue'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { IconEdit, IconListDetails, IconTrash } from '@tabler/icons-vue'
 import { useListaJustaStore } from '../../almacenamiento/stores/ListaJustaStore.js'
 import BotonConfirmacionEliminar from '../../components/Compartidos/BotonConfirmacionEliminar.vue'
 import BotonAccionSticky from '../../components/Compartidos/BotonAccionSticky.vue'
+import { formatearPrecioConCodigo } from '../../utils/PrecioUtils.js'
 import {
   obtenerPlaceholderAleatorio,
   PLACEHOLDERS_LISTA_JUSTA,
@@ -167,6 +178,12 @@ const dialogoListaAbierto = ref(false)
 const nombreLista = ref('')
 const listaEnEdicion = ref(null)
 const placeholderNombre = ref(obtenerPlaceholderAleatorio(PLACEHOLDERS_LISTA_JUSTA))
+const resumenesPreciosPorLista = computed(() => {
+  return listaJustaStore.listasOrdenadas.reduce((resumenes, lista) => {
+    resumenes[lista.id] = listaJustaStore.estimadoLista(lista)
+    return resumenes
+  }, {})
+})
 
 function abrirDialogoLista(lista = null) {
   listaEnEdicion.value = lista
@@ -214,7 +231,20 @@ async function abrirListaInteligente(listaId) {
 }
 
 function estimadoDeLista(lista) {
-  return listaJustaStore.estimadoLista(lista)
+  return resumenesPreciosPorLista.value[lista.id] || listaJustaStore.estimadoLista(lista)
+}
+function textoContadorPrecios(resumen) {
+  const total = Number(resumen?.totalProductos || 0)
+  const conPrecio = Number(resumen?.productosConPrecio || 0)
+  const etiqueta = total === 1 ? 'producto con precio' : 'productos con precio'
+  return `${conPrecio} de ${total} ${etiqueta}`
+}
+function claseMensajeResumen(resumen) {
+  if (resumen?.estado === 'completo') return 'mensaje-resumen-precios-completo'
+  if (resumen?.estado === 'sinComercio' || resumen?.estado === 'sinProductos') {
+    return 'mensaje-resumen-precios-neutro'
+  }
+  return 'mensaje-resumen-precios-alerta'
 }
 function resumenComercioLista(lista) {
   const nombre = String(lista?.comercioActual?.nombre || '').trim()
@@ -227,12 +257,8 @@ function resumenComercioLista(lista) {
   }
 }
 
-function formatearMoneda(valor) {
-  return new Intl.NumberFormat('es-UY', {
-    style: 'currency',
-    currency: 'UYU',
-    maximumFractionDigits: 0,
-  }).format(Number(valor || 0))
+function formatearMoneda(valor, moneda = 'UYU') {
+  return formatearPrecioConCodigo(valor, moneda)
 }
 
 async function reiniciarLista(listaId) {
@@ -312,6 +338,12 @@ onMounted(async () => {
   color: var(--texto-secundario);
   line-height: 1.2;
 }
+.bloque-resumen-precios {
+  border: 1px solid var(--borde-color);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: var(--fondo-app-secundario);
+}
 .fila-estimado {
   display: flex;
   align-items: baseline;
@@ -325,6 +357,27 @@ onMounted(async () => {
 .monto-estimado {
   font-weight: 700;
   color: var(--texto-primario);
+}
+.contador-precios-lista {
+  margin-top: 4px;
+  color: var(--texto-secundario);
+  font-size: 12px;
+  line-height: 1.25;
+}
+.mensaje-resumen-precios {
+  margin-top: 3px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.mensaje-resumen-precios-alerta {
+  color: var(--color-advertencia);
+}
+.mensaje-resumen-precios-completo {
+  color: var(--color-secundario);
+}
+.mensaje-resumen-precios-neutro {
+  color: var(--texto-secundario);
 }
 .acciones-lista {
   gap: 4px;
