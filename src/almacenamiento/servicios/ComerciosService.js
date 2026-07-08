@@ -3,9 +3,11 @@ import {
   CLAVE_CACHE_FIRESTORE_COMERCIOS_META,
   CLAVE_COMERCIOS,
 } from '../constantes/ClavesAlmacenamiento.js'
-import { ESTADOS_SINCRONIZACION, ORIGENES_FOTO } from '../constantes/PreparacionFirebase.js'
+import { ESTADOS_SINCRONIZACION, ORIGENES_FOTO, TIPOS_USUARIO } from '../constantes/PreparacionFirebase.js'
+import { comprimirImagenParaFirestore } from '../../utils/ImagenesFirestoreUtils.js'
 import fotosLocalesService from './FotosLocalesService.js'
 import firestoreComerciosService from './FirestoreComerciosService.js'
+import firestoreImagenesComerciosService from './FirestoreImagenesComerciosService.js'
 import usuarioActualService from './UsuarioActualService.js'
 
 const TIEMPO_MAXIMO_SINCRONIZACION_FIRESTORE_MS = 7000
@@ -138,7 +140,8 @@ function similitudTexto(texto1, texto2) {
 async function obtenerTodos() {
   try {
     const comercios = await adaptadorActual.obtener(CLAVE_COMERCIOS)
-    return await fotosLocalesService.protegerComercios(comercios || [])
+    const comerciosProtegidos = await fotosLocalesService.protegerComercios(comercios || [])
+    return await fotosLocalesService.hidratarComercios(comerciosProtegidos)
   } catch (error) {
     console.error('Error al obtener comercios:', error)
     return []
@@ -301,6 +304,7 @@ async function agregarComercio(datosComercio) {
 
   comercios.push(nuevoComercio)
   await prepararFotosStorageComercio(nuevoComercio)
+  await prepararImagenesFirestoreComercio(nuevoComercio)
   await guardarComerciosProtegidos(comercios)
   nuevoComercio.sincronizacionFirestore = await sincronizarComercioFirestore(nuevoComercio)
 
@@ -325,8 +329,12 @@ async function editarComercio(id, datosActualizados) {
     id, // Mantener ID original
     fechaActualizacion: new Date().toISOString(),
   }
+  if (Object.prototype.hasOwnProperty.call(datosActualizados, 'foto')) {
+    limpiarMetadatosFotoFirestore(comercios[indice])
+  }
 
   await prepararFotosStorageComercio(comercios[indice])
+  await prepararImagenesFirestoreComercio(comercios[indice])
 
   await guardarComerciosProtegidos(comercios)
   comercios[indice].sincronizacionFirestore = await sincronizarComercioFirestore(comercios[indice])
@@ -349,6 +357,7 @@ async function eliminarComercio(id) {
 
   await guardarComerciosProtegidos(comerciosFiltrados)
   await fotosLocalesService.eliminarFotosComercio(comercioEliminado)
+  await eliminarImagenesFirestoreComercio(comercioEliminado)
   await adaptadorActual.eliminar(CLAVE_CACHE_FIRESTORE_COMERCIOS_META)
   await sincronizarEliminacionComercioFirestore(id)
   return true
@@ -383,6 +392,7 @@ async function agregarDireccion(comercioId, datosDireccion) {
   comercio.direcciones.push(nuevaDireccion)
   comercio.fechaActualizacion = ahora
   await prepararFotosStorageComercio(comercio)
+  await prepararImagenesFirestoreComercio(comercio)
 
   await guardarComerciosProtegidos(comercios)
   comercio.sincronizacionFirestore = await sincronizarComercioFirestore(comercio)
@@ -410,6 +420,9 @@ async function editarDireccion(comercioId, direccionId, datosDireccion) {
     id: direccionId,
     fechaActualizacion: new Date().toISOString(),
   })
+  if (Object.prototype.hasOwnProperty.call(datosDireccion, 'foto')) {
+    limpiarMetadatosFotoFirestore(direccion)
+  }
 
   // Recalcular nombreCompleto (calle puede estar vacía)
   direccion.nombreCompleto = direccion.calle
@@ -418,6 +431,7 @@ async function editarDireccion(comercioId, direccionId, datosDireccion) {
 
   comercio.fechaActualizacion = new Date().toISOString()
   await prepararFotosStorageComercio(comercio)
+  await prepararImagenesFirestoreComercio(comercio)
   await guardarComerciosProtegidos(comercios)
   comercio.sincronizacionFirestore = await sincronizarComercioFirestore(comercio)
   return await fotosLocalesService.protegerComercio(comercio)
@@ -445,8 +459,10 @@ async function eliminarDireccion(comercioId, direccionId) {
 
   comercio.fechaActualizacion = new Date().toISOString()
   await prepararFotosStorageComercio(comercio)
+  await prepararImagenesFirestoreComercio(comercio)
   await guardarComerciosProtegidos(comercios)
   await fotosLocalesService.eliminarFotosComercio({ direcciones: [direccionEliminada] })
+  await eliminarImagenFirestoreDireccion(comercioId, direccionEliminada)
   await adaptadorActual.eliminar(CLAVE_CACHE_FIRESTORE_COMERCIOS_META)
   await sincronizarEliminacionDireccionFirestore(comercioId, direccionId, comercio)
   return true
@@ -467,9 +483,11 @@ async function actualizarFotoDireccion(comercioId, direccionId, base64) {
   if (!direccion) return false
   direccion.foto = base64 || null
   direccion.fotoFuente = base64 ? ORIGENES_FOTO.USUARIO : null
+  limpiarMetadatosFotoFirestore(direccion)
   direccion.fechaActualizacion = new Date().toISOString()
   comercio.fechaActualizacion = new Date().toISOString()
   await prepararFotosStorageComercio(comercio)
+  await prepararImagenesFirestoreComercio(comercio)
   await guardarComerciosProtegidos(comercios)
   await sincronizarComercioFirestore(comercio)
   return true
@@ -603,6 +621,170 @@ async function prepararFotosStorageComercio(comercio) {
   }
 
   return comercio
+}
+
+function debeUsarFirestore() {
+  const usuario = usuarioActualService.obtenerUsuarioActual()
+  return Boolean(usuario?.id && !usuario.esLocal && usuario.tipo === TIPOS_USUARIO.FIREBASE)
+}
+
+function limpiarMetadatosFotoFirestore(entidad) {
+  if (!entidad) return entidad
+  entidad.fotoFirestoreId = null
+  entidad.fotoFirestoreEstado = null
+  entidad.fotoFirestorePesoBytes = null
+  entidad.fechaFotoFirestore = null
+  return entidad
+}
+
+function marcarErrorFotoFirestore(entidad, mensaje) {
+  if (!entidad) return entidad
+  entidad.fotoFirestoreEstado = ESTADOS_SINCRONIZACION.ERROR
+  entidad.sincronizacionFoto = {
+    estado: ESTADOS_SINCRONIZACION.ERROR,
+    fecha: new Date().toISOString(),
+    mensaje,
+    error: mensaje,
+  }
+  return entidad
+}
+
+async function prepararFotoFirestoreComercio(comercio) {
+  if (!comercio?.id || !debeUsarFirestore()) return comercio
+
+  if (!comercio.foto) {
+    if (comercio.fotoFirestoreId || comercio.fechaFotoFirestore) {
+      await firestoreImagenesComerciosService.eliminarImagenComercio(comercio.id)
+    }
+    return limpiarMetadatosFotoFirestore(comercio)
+  }
+
+  if (!esDataUriImagen(comercio.foto) || comercio.fotoFirestoreId) return comercio
+
+  try {
+    const imagenOptimizada = await comprimirImagenParaFirestore(comercio.foto)
+    const resultado = await firestoreImagenesComerciosService.guardarImagenComercio(
+      comercio.id,
+      imagenOptimizada,
+    )
+
+    if (resultado.omitido) return comercio
+    if (!resultado.exito) {
+      return marcarErrorFotoFirestore(
+        comercio,
+        resultado.mensaje || 'No se pudo sincronizar la foto del comercio.',
+      )
+    }
+
+    comercio.fotoFirestoreId = comercio.id
+    comercio.fotoFirestoreEstado = resultado.estado || ESTADOS_SINCRONIZACION.SINCRONIZADO
+    comercio.fotoFirestorePesoBytes = imagenOptimizada.pesoBytes
+    comercio.fechaFotoFirestore = new Date().toISOString()
+    comercio.fotoFuente = ORIGENES_FOTO.USUARIO
+    comercio.sincronizacionFoto = {
+      estado: comercio.fotoFirestoreEstado,
+      fecha: new Date().toISOString(),
+      mensaje: 'Foto del comercio sincronizada como miniatura en Firestore.',
+    }
+  } catch (error) {
+    console.warn('No se pudo preparar la foto del comercio para Firestore:', error)
+    marcarErrorFotoFirestore(
+      comercio,
+      error.message || 'No se pudo sincronizar la foto del comercio.',
+    )
+  }
+
+  return comercio
+}
+
+async function prepararFotoFirestoreDireccion(comercio, direccion) {
+  if (!comercio?.id || !direccion?.id || !debeUsarFirestore()) return direccion
+
+  if (!direccion.foto) {
+    if (direccion.fotoFirestoreId || direccion.fechaFotoFirestore) {
+      await firestoreImagenesComerciosService.eliminarImagenDireccion(comercio.id, direccion.id)
+    }
+    return limpiarMetadatosFotoFirestore(direccion)
+  }
+
+  if (!esDataUriImagen(direccion.foto) || direccion.fotoFirestoreId) return direccion
+
+  try {
+    const imagenOptimizada = await comprimirImagenParaFirestore(direccion.foto)
+    const resultado = await firestoreImagenesComerciosService.guardarImagenDireccion(
+      comercio.id,
+      direccion.id,
+      imagenOptimizada,
+    )
+
+    if (resultado.omitido) return direccion
+    if (!resultado.exito) {
+      return marcarErrorFotoFirestore(
+        direccion,
+        resultado.mensaje || 'No se pudo sincronizar la foto de la dirección.',
+      )
+    }
+
+    direccion.fotoFirestoreId = firestoreImagenesComerciosService.crearImagenDireccionId(
+      comercio.id,
+      direccion.id,
+    )
+    direccion.fotoFirestoreEstado = resultado.estado || ESTADOS_SINCRONIZACION.SINCRONIZADO
+    direccion.fotoFirestorePesoBytes = imagenOptimizada.pesoBytes
+    direccion.fechaFotoFirestore = new Date().toISOString()
+    direccion.fotoFuente = ORIGENES_FOTO.USUARIO
+    direccion.sincronizacionFoto = {
+      estado: direccion.fotoFirestoreEstado,
+      fecha: new Date().toISOString(),
+      mensaje: 'Foto de la dirección sincronizada como miniatura en Firestore.',
+    }
+  } catch (error) {
+    console.warn('No se pudo preparar la foto de la dirección para Firestore:', error)
+    marcarErrorFotoFirestore(
+      direccion,
+      error.message || 'No se pudo sincronizar la foto de la dirección.',
+    )
+  }
+
+  return direccion
+}
+
+async function prepararImagenesFirestoreComercio(comercio) {
+  if (!comercio) return comercio
+
+  await prepararFotoFirestoreComercio(comercio)
+  for (const direccion of comercio.direcciones || []) {
+    await prepararFotoFirestoreDireccion(comercio, direccion)
+  }
+
+  return comercio
+}
+
+async function eliminarImagenFirestoreDireccion(comercioId, direccion) {
+  if (!direccion?.id || !debeUsarFirestore()) return
+  if (!direccion.fotoFirestoreId && !direccion.fechaFotoFirestore) return
+
+  try {
+    await firestoreImagenesComerciosService.eliminarImagenDireccion(comercioId, direccion.id)
+  } catch (error) {
+    console.warn('No se pudo eliminar la imagen remota de la dirección:', error)
+  }
+}
+
+async function eliminarImagenesFirestoreComercio(comercio) {
+  if (!comercio?.id || !debeUsarFirestore()) return
+
+  try {
+    if (comercio.fotoFirestoreId || comercio.fechaFotoFirestore) {
+      await firestoreImagenesComerciosService.eliminarImagenComercio(comercio.id)
+    }
+
+    for (const direccion of comercio.direcciones || []) {
+      await eliminarImagenFirestoreDireccion(comercio.id, direccion)
+    }
+  } catch (error) {
+    console.warn('No se pudieron eliminar las imágenes remotas del comercio:', error)
+  }
 }
 
 async function guardarComerciosEnCacheLocal(comercios = []) {

@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
+import { ESTADOS_SINCRONIZACION } from '../constantes/PreparacionFirebase.js'
 import ComerciosService from '../servicios/ComerciosService'
 import fotosLegacyCacheService from '../servicios/FotosLegacyCacheService.js'
+import firestoreImagenesComerciosService from '../servicios/FirestoreImagenesComerciosService.js'
 import fuentePrincipalFirestoreService from '../servicios/FuentePrincipalFirestoreService.js'
 import reconciliacionFirestoreLocalService from '../servicios/ReconciliacionFirestoreLocalService.js'
 import sincronizacionIncrementalFirestoreService from '../servicios/SincronizacionIncrementalFirestoreService.js'
@@ -244,8 +246,10 @@ export const useComerciStore = defineStore('comercios', {
           datosLocalesVigentes,
           resultado.datos,
         )
-        const comerciosFusionados =
+        const comerciosFusionadosConFotosLocales =
           await fotosLegacyCacheService.recuperarFotosComercios(comerciosFusionadosBase)
+        const comerciosFusionados =
+          await this.hidratarImagenesComerciosFirestore(comerciosFusionadosConFotosLocales)
 
         this.comercios = comerciosFusionados
         await ComerciosService.guardarComerciosEnCacheLocal(comerciosFusionados)
@@ -279,6 +283,86 @@ export const useComerciStore = defineStore('comercios', {
       const debeForzar = primeraSincronizacionFirestore
       primeraSincronizacionFirestore = false
       return debeForzar
+    },
+
+    async hidratarImagenesComerciosFirestore(comerciosBase = []) {
+      const usuarioActual = fuentePrincipalFirestoreService.obtenerUsuarioActual()
+      if (!fuentePrincipalFirestoreService.debeUsarFirestore(usuarioActual)) return comerciosBase
+
+      const comercioIds = comerciosBase
+        .filter((comercio) =>
+          comercio?.fotoFirestoreId ||
+          comercio?.fechaFotoFirestore ||
+          comercio?.fotoFirestoreEstado === ESTADOS_SINCRONIZACION.SINCRONIZADO,
+        )
+        .map((comercio) => comercio.id)
+
+      const direccionIds = []
+      for (const comercio of comerciosBase) {
+        for (const direccion of comercio?.direcciones || []) {
+          if (
+            direccion?.fotoFirestoreId ||
+            direccion?.fechaFotoFirestore ||
+            direccion?.fotoFirestoreEstado === ESTADOS_SINCRONIZACION.SINCRONIZADO
+          ) {
+            direccionIds.push(
+              firestoreImagenesComerciosService.crearImagenDireccionId(comercio.id, direccion.id),
+            )
+          }
+        }
+      }
+
+      if (comercioIds.length === 0 && direccionIds.length === 0) return comerciosBase
+
+      try {
+        const [imagenesComercios, imagenesDirecciones] = await Promise.all([
+          firestoreImagenesComerciosService.obtenerImagenesComercios(comercioIds, {
+            usuarioId: usuarioActual.id,
+          }),
+          firestoreImagenesComerciosService.obtenerImagenesDirecciones(direccionIds, {
+            usuarioId: usuarioActual.id,
+          }),
+        ])
+
+        return comerciosBase.map((comercio) => {
+          const imagenComercio = imagenesComercios.get(String(comercio.id))
+          const comercioHidratado = imagenComercio?.imagenBase64
+            ? {
+              ...comercio,
+              foto: imagenComercio.imagenBase64,
+              fotoFirestoreId: imagenComercio.id || comercio.id,
+              fotoFirestoreEstado: ESTADOS_SINCRONIZACION.SINCRONIZADO,
+              fotoFirestorePesoBytes: imagenComercio.pesoBytes || comercio.fotoFirestorePesoBytes || null,
+              fechaFotoFirestore: imagenComercio.fechaActualizacion || comercio.fechaFotoFirestore || null,
+              fotoFuente: comercio.fotoFuente || 'usuario',
+            }
+            : { ...comercio }
+
+          comercioHidratado.direcciones = (comercioHidratado.direcciones || []).map((direccion) => {
+            const imagenId = firestoreImagenesComerciosService.crearImagenDireccionId(
+              comercio.id,
+              direccion.id,
+            )
+            const imagenDireccion = imagenesDirecciones.get(imagenId)
+            if (!imagenDireccion?.imagenBase64) return direccion
+
+            return {
+              ...direccion,
+              foto: imagenDireccion.imagenBase64,
+              fotoFirestoreId: imagenDireccion.id || imagenId,
+              fotoFirestoreEstado: ESTADOS_SINCRONIZACION.SINCRONIZADO,
+              fotoFirestorePesoBytes: imagenDireccion.pesoBytes || direccion.fotoFirestorePesoBytes || null,
+              fechaFotoFirestore: imagenDireccion.fechaActualizacion || direccion.fechaFotoFirestore || null,
+              fotoFuente: direccion.fotoFuente || 'usuario',
+            }
+          })
+
+          return comercioHidratado
+        })
+      } catch (error) {
+        console.warn('No se pudieron hidratar imágenes de comercios desde Firestore:', error)
+        return comerciosBase
+      }
     },
 
     /**

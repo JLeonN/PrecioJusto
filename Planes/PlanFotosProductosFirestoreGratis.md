@@ -181,13 +181,13 @@ Cerrar el piloto con una decisión técnica clara: mantener, ajustar o descartar
 
 Convertir lo validado en productos en una base reusable para todos los dominios con fotos.
 
-- [ ] Revisar `FirestoreImagenesProductosService.js` y extraer lógica común sin romper el piloto validado.
-- [ ] Crear `FirestoreImagenesService.js` o equivalente con soporte por dominio.
-- [ ] Definir rutas separadas por dominio: `imagenesProductos`, `imagenesComercios`, `imagenesDirecciones`, `imagenesListas` e `imagenesMesa`.
-- [ ] Mantener helpers de usuario Firebase, normalización de IDs, tandas de lectura y borrado en un solo lugar.
-- [ ] Mantener wrappers de dominio si ayudan a que cada store quede claro.
-- [ ] Reutilizar `ImagenesFirestoreUtils.js` para todos los dominios.
-- [ ] Evitar que un dominio dependa de nombres internos de otro dominio.
+- [x] Revisar `FirestoreImagenesProductosService.js` y extraer lógica común sin romper el piloto validado.
+- [x] Crear `FirestoreImagenesService.js` o equivalente con soporte por dominio.
+- [x] Definir rutas separadas por dominio: `imagenesProductos`, `imagenesComercios`, `imagenesDirecciones`, `imagenesListas` e `imagenesMesa`.
+- [x] Mantener helpers de usuario Firebase, normalización de IDs, tandas de lectura y borrado en un solo lugar.
+- [x] Mantener wrappers de dominio si ayudan a que cada store quede claro.
+- [x] Reutilizar `ImagenesFirestoreUtils.js` para todos los dominios.
+- [x] Evitar que un dominio dependa de nombres internos de otro dominio.
 
 ## FASE 12: Extender fotos a comercios y direcciones
 
@@ -195,14 +195,14 @@ Convertir lo validado en productos en una base reusable para todos los dominios 
 
 Sincronizar fotos de comercios y direcciones usando el mismo patrón validado en productos.
 
-- [ ] Revisar `FirestoreComerciosService.js`, `comerciosStore.js` y componentes de edición de comercio.
-- [ ] Identificar el flujo exacto donde se guarda `foto`, `fotoUrl`, `fotoRutaStorage`, `fotoFuente` y `fotoLocalId`.
-- [ ] Agregar metadatos livianos para comercio: `fotoFirestoreId`, `fotoFirestoreEstado`, `fotoFirestorePesoBytes` y `fechaFotoFirestore`.
-- [ ] Agregar metadatos livianos equivalentes para cada dirección.
-- [ ] Guardar miniaturas de comercios en `usuarios/{uid}/imagenesComercios/{comercioId}`.
-- [ ] Guardar miniaturas de direcciones en `usuarios/{uid}/imagenesDirecciones/{comercioIdDireccionId}`.
-- [ ] Hidratar fotos remotas al cargar comercios desde Firestore.
-- [ ] Borrar miniaturas remotas al quitar foto, borrar comercio o borrar dirección.
+- [x] Revisar `FirestoreComerciosService.js`, `comerciosStore.js` y componentes de edición de comercio.
+- [x] Identificar el flujo exacto donde se guarda `foto`, `fotoUrl`, `fotoRutaStorage`, `fotoFuente` y `fotoLocalId`.
+- [x] Agregar metadatos livianos para comercio: `fotoFirestoreId`, `fotoFirestoreEstado`, `fotoFirestorePesoBytes` y `fechaFotoFirestore`.
+- [x] Agregar metadatos livianos equivalentes para cada dirección.
+- [x] Guardar miniaturas de comercios en `usuarios/{uid}/imagenesComercios/{comercioId}`.
+- [x] Guardar miniaturas de direcciones en `usuarios/{uid}/imagenesDirecciones/{comercioIdDireccionId}`.
+- [x] Hidratar fotos remotas al cargar comercios desde Firestore.
+- [x] Borrar miniaturas remotas al quitar foto, borrar comercio o borrar dirección.
 - [ ] Probar navegador -> Android y Android -> navegador con una foto de comercio.
 - [ ] Probar navegador -> Android y Android -> navegador con una foto de dirección.
 
@@ -291,7 +291,7 @@ Validar de forma ejecutable por IA y revisable por humano que el piloto sincroni
 - [x] Fase 8: Revisar reglas Firestore
 - [ ] Fase 9: Medir el piloto
 - [ ] Fase 10: Documentar decisión después de la prueba
-- [ ] Fase 11: Generalizar servicios de imágenes
+- [x] Fase 11: Generalizar servicios de imágenes
 - [ ] Fase 12: Extender fotos a comercios y direcciones
 - [ ] Fase 13: Extender fotos a listas
 - [ ] Fase 14: Extender fotos a mesa de trabajo

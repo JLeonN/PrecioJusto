@@ -130,7 +130,8 @@ async function recuperarFotosComercios(comercios = []) {
     }
   })
 
-  return fotosLocalesService.protegerComercios(recuperados)
+  const protegidos = await fotosLocalesService.protegerComercios(recuperados)
+  return fotosLocalesService.hidratarComercios(protegidos)
 }
 
 async function recuperarFotosListas(listas = []) {

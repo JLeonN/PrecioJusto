@@ -364,6 +364,38 @@ async function hidratarProductos(productos = []) {
   return hidratados
 }
 
+async function hidratarDireccion(direccion) {
+  if (!direccion?.fotoLocalId) return direccion
+  const imagenLocal = await hidratarFotoLocal(direccion.fotoLocalId)
+  return imagenLocal
+    ? { ...direccion, foto: imagenLocal }
+    : direccion
+}
+
+async function hidratarComercio(comercio) {
+  const comercioHidratado = comercio?.fotoLocalId
+    ? await hidratarDireccion(comercio)
+    : comercio
+
+  const direcciones = []
+  for (const direccion of comercioHidratado?.direcciones || []) {
+    direcciones.push(await hidratarDireccion(direccion))
+  }
+
+  return {
+    ...comercioHidratado,
+    direcciones,
+  }
+}
+
+async function hidratarComercios(comercios = []) {
+  const hidratados = []
+  for (const comercio of comercios || []) {
+    hidratados.push(await hidratarComercio(comercio))
+  }
+  return hidratados
+}
+
 export default {
   clonar,
   esBase64Imagen,
@@ -376,6 +408,9 @@ export default {
   hidratarFotoLocal,
   hidratarProducto,
   hidratarProductos,
+  hidratarDireccion,
+  hidratarComercio,
+  hidratarComercios,
   protegerProducto,
   protegerProductos,
   protegerComercio,
