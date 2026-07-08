@@ -11,10 +11,29 @@ export function useBotonAtras({ drawerAbierto, router, route }) {
   const ultimoTaqueBack = ref(null)
   let listenerHandle = null
 
+  function obtenerRutaRetorno() {
+    if (route.path.match(/^\/lista-justa\/[^/]+\/inteligente$/)) {
+      return `/lista-justa/${route.params.id}`
+    }
+
+    if (route.path.match(/^\/lista-justa\/[^/]+$/)) {
+      return '/lista-justa'
+    }
+
+    return null
+  }
+
   async function manejadorBack() {
     // 1. Si el drawer está abierto → cerrarlo
     if (drawerAbierto.value) {
       drawerAbierto.value = false
+      return
+    }
+
+    const rutaRetorno = obtenerRutaRetorno()
+
+    if (rutaRetorno) {
+      router.push(rutaRetorno)
       return
     }
 

@@ -9,7 +9,7 @@
           no-caps
           color="secondary"
           label="Volver a Lista Justa"
-          @click="router.push('/')"
+          @click="router.push('/lista-justa')"
         />
       </div>
 
