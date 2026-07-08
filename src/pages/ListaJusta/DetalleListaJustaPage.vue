@@ -59,6 +59,10 @@
           </div>
         </div>
 
+        <q-banner v-if="actualizandoPreciosLista" class="q-mb-md" rounded>
+          Actualizando precios de la lista...
+        </q-banner>
+
         <q-banner v-if="itemsFiltrados.length === 0" class="q-mb-md" rounded>
           {{ mensajeFiltro }}
         </q-banner>
@@ -367,7 +371,7 @@
       v-if="listaActual"
       etiqueta="Agregar producto"
       icono="add"
-      @click="dialogoAgregarItemAbierto = true"
+      @click="abrirDialogoAgregarItem"
     />
 
     <q-dialog v-model="dialogoAgregarItemAbierto" @hide="limpiarFormularioItem">
@@ -386,6 +390,13 @@
             <q-tab name="misProductos" label="Desde Mis Productos" />
             <q-tab name="manual" label="Manual" />
           </q-tabs>
+
+          <q-banner
+            v-if="modoAlta === 'misProductos' && actualizandoPreciosDialogo"
+            rounded
+          >
+            Actualizando precios de tus productos...
+          </q-banner>
 
           <div v-if="modoAlta === 'misProductos'" class="q-mt-sm">
             <div class="encabezado-seleccion-productos">
@@ -543,6 +554,8 @@ const preferenciasStore = usePreferenciasStore()
 const sesionEscaneoStore = useSesionEscaneoStore()
 
 const filtroEstado = ref('pendientes')
+const actualizandoPreciosLista = ref(false)
+const actualizandoPreciosDialogo = ref(false)
 
 const dialogoAgregarItemAbierto = ref(false)
 const modoAlta = ref('misProductos')
@@ -1649,6 +1662,36 @@ function irAListaInteligente() {
   router.push(`/lista-justa/${listaActual.value.id}/inteligente`)
 }
 
+function abrirDialogoAgregarItem() {
+  dialogoAgregarItemAbierto.value = true
+  void hidratarPreciosProductosVisibles()
+}
+
+async function hidratarPreciosListaActual() {
+  if (!listaActual.value) return
+
+  actualizandoPreciosLista.value = true
+  try {
+    await productosStore.hidratarPreciosLista(listaActual.value)
+  } finally {
+    actualizandoPreciosLista.value = false
+  }
+}
+
+async function hidratarPreciosProductosVisibles() {
+  if (!dialogoAgregarItemAbierto.value || modoAlta.value !== 'misProductos') return
+
+  const productoIds = productosFiltrados.value.map((producto) => producto.id)
+  if (productoIds.length === 0) return
+
+  actualizandoPreciosDialogo.value = true
+  try {
+    await productosStore.hidratarPreciosProductos(productoIds)
+  } finally {
+    actualizandoPreciosDialogo.value = false
+  }
+}
+
 watch(
   () => productosStore.productos,
   async () => {
@@ -1665,6 +1708,13 @@ watch(
   { deep: true },
 )
 
+watch(
+  () => [dialogoAgregarItemAbierto.value, modoAlta.value, textoBusquedaProducto.value],
+  () => {
+    void hidratarPreciosProductosVisibles()
+  },
+)
+
 onMounted(async () => {
   await Promise.all([
     listaJustaStore.cargarListas(),
@@ -1673,6 +1723,7 @@ onMounted(async () => {
     sesionEscaneoStore.cargarSesion(),
   ])
   await listaJustaStore.registrarUsoLista(route.params.id)
+  await hidratarPreciosListaActual()
   await listaJustaStore.sincronizarRelacionConMisProductos()
   await listaJustaStore.sincronizarEstadosMesaTrabajo()
   formularioProductoManual.value = {

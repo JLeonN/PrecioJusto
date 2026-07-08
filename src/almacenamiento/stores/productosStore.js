@@ -30,6 +30,7 @@ import sincronizacionIncrementalFirestoreService from '../servicios/Sincronizaci
 import { useUsuarioStore } from './UsuarioStore.js'
 
 const TIEMPO_MINIMO_REFRESCO_FIRESTORE_MS = 3 * 60 * 1000
+const TIEMPO_REFRESCO_PRECIOS_LISTA_MS = 10 * 60 * 1000
 let primeraSincronizacionFirestore = true
 
 export const useProductosStore = defineStore('productos', () => {
@@ -102,7 +103,7 @@ export const useProductosStore = defineStore('productos', () => {
    */
   const obtenerProductoPorId = computed(() => {
     return (productoId) => {
-      return productos.value.find((p) => p.id === productoId)
+      return productos.value.find((producto) => String(producto.id) === String(productoId))
     }
   })
 
@@ -593,6 +594,7 @@ export const useProductosStore = defineStore('productos', () => {
         ...productos.value[indice],
         precios,
         preciosCargados: true,
+        fechaPreciosFirestore: new Date().toISOString(),
       }
 
       productos.value[indice] = productoActualizado
@@ -602,6 +604,58 @@ export const useProductosStore = defineStore('productos', () => {
       console.warn('No se pudieron cargar precios desde Firestore:', err)
       return null
     }
+  }
+
+  function debeHidratarPreciosProducto(producto, forzar = false) {
+    if (!producto?.id) return false
+    if (forzar) return true
+    if (producto.preciosCargados !== true) return true
+    if (!Array.isArray(producto.precios) || producto.precios.length === 0) return true
+
+    const fechaPrecios = new Date(producto.fechaPreciosFirestore || 0).getTime()
+    if (!Number.isFinite(fechaPrecios)) return true
+
+    return Date.now() - fechaPrecios > TIEMPO_REFRESCO_PRECIOS_LISTA_MS
+  }
+
+  async function hidratarPreciosProductos(productoIds = [], opciones = {}) {
+    const usuarioActual = fuentePrincipalFirestoreService.obtenerUsuarioActual()
+    if (!fuentePrincipalFirestoreService.debeUsarFirestore(usuarioActual)) {
+      return {
+        hidratados: 0,
+        omitidos: productoIds.length,
+      }
+    }
+
+    const idsUnicos = [...new Set(productoIds.map((id) => String(id || '').trim()).filter(Boolean))]
+    const idsNecesarios = idsUnicos.filter((productoId) => {
+      const producto = obtenerProductoPorId.value(productoId)
+      return debeHidratarPreciosProducto(producto, opciones.forzar)
+    })
+
+    if (idsNecesarios.length === 0) {
+      return {
+        hidratados: 0,
+        omitidos: idsUnicos.length,
+      }
+    }
+
+    const resultados = await Promise.all(
+      idsNecesarios.map((productoId) => cargarPreciosProductoDesdeFirestore(productoId)),
+    )
+    const hidratados = resultados.filter(Boolean).length
+
+    return {
+      hidratados,
+      omitidos: idsUnicos.length - hidratados,
+    }
+  }
+
+  async function hidratarPreciosLista(lista, opciones = {}) {
+    const productoIds = Array.isArray(lista?.items)
+      ? lista.items.map((item) => item.productoId).filter(Boolean)
+      : []
+    return hidratarPreciosProductos(productoIds, opciones)
   }
 
   // ========================================
@@ -689,6 +743,8 @@ export const useProductosStore = defineStore('productos', () => {
     registrarInteraccion,
     buscarProductos,
     cargarPreciosProductoDesdeFirestore,
+    hidratarPreciosProductos,
+    hidratarPreciosLista,
     obtenerEstadisticas,
     limpiarEstado,
   }

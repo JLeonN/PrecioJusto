@@ -29,6 +29,10 @@
           </div>
         </div>
 
+        <q-banner v-if="actualizandoPreciosLista" class="q-mb-md" rounded>
+          Actualizando precios de la lista...
+        </q-banner>
+
         <q-card flat bordered class="bloque-inteligente q-mb-md">
           <q-card-section>
             <div class="fila-encabezado-bloque">
@@ -490,6 +494,7 @@ const mostrarAyudaResumen = ref(true)
 const mostrarAyudaOptimizacion = ref(true)
 const mostrarAyudaDetalle = ref(true)
 const estadoTarjetasDetalle = ref({})
+const actualizandoPreciosLista = ref(false)
 let contadorFilaComparacion = 0
 
 const listaActual = computed(() => listaJustaStore.obtenerListaPorId(route.params.id))
@@ -1025,6 +1030,17 @@ watch(
   { immediate: true },
 )
 
+async function hidratarPreciosListaActual() {
+  if (!listaActual.value) return
+
+  actualizandoPreciosLista.value = true
+  try {
+    await productosStore.hidratarPreciosLista(listaActual.value)
+  } finally {
+    actualizandoPreciosLista.value = false
+  }
+}
+
 onMounted(async () => {
   await Promise.all([
     listaJustaStore.cargarListas(),
@@ -1035,6 +1051,7 @@ onMounted(async () => {
   if (route.params.id) {
     await listaJustaStore.registrarUsoLista(route.params.id)
     await listaJustaStore.sincronizarComercioBaseInteligente(route.params.id)
+    await hidratarPreciosListaActual()
   }
 })
 </script>
