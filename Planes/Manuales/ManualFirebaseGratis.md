@@ -1312,9 +1312,246 @@ fotoFuente
 
 Pero si no se usa Storage, esos campos pueden quedar vacíos o apuntar a foto local.
 
+### Sistema Recomendado De Fotos Sincronizadas
+
+El sistema de fotos debe ser progresivo. Primero se resuelve el dato liviano en Firestore. Después se resuelve la foto completa con la estrategia disponible para esa app.
+
+Regla principal:
+
+> Firestore guarda metadata de la foto. El archivo de imagen vive fuera del documento.
+
+Arquitectura recomendada:
+
+```text
+UI Vue/Quasar
+  -> useCamaraFoto o composable equivalente
+    -> Store del dominio
+      -> Service del dominio
+        -> FotosService
+          -> Foto local optimizada
+          -> Firebase Storage si está disponible
+          -> Firestore guarda URL/ruta/metadata
+```
+
+Campos recomendados en documentos Firestore:
+
+```text
+fotoUrl
+fotoRutaStorage
+fotoFuente
+fotoEstado
+fotoActualizadaEn
+fotoEliminadaEn
+fotoVersion
+```
+
+Para productos puede usarse `imagenUrl` si el proyecto ya distingue imagen de producto y foto de comercio. Lo importante es mantener la misma convención dentro de cada dominio.
+
+Valores recomendados:
+
+```text
+fotoFuente: 'usuario' | 'api' | 'externa' | 'local' | null
+fotoEstado: 'sinFoto' | 'localPendiente' | 'sincronizada' | 'eliminada' | 'error'
+```
+
+Rutas recomendadas si se usa Firebase Storage:
+
+```text
+usuarios/{usuarioId}/fotos/productos/{productoId}.jpg
+usuarios/{usuarioId}/fotos/comercios/{comercioId}.jpg
+usuarios/{usuarioId}/fotos/direcciones/{comercioId}-{direccionId}.jpg
+usuarios/{usuarioId}/fotos/listas/{listaId}-{itemId}.jpg
+```
+
+Si un dominio puede tener varias fotos por entidad, agregar un ID estable:
+
+```text
+usuarios/{usuarioId}/fotos/productos/{productoId}/{fotoId}.jpg
+```
+
+Flujo para agregar o cambiar foto:
+
+```text
+1. Usuario toma foto o elige desde galería.
+2. La app reduce tamaño y comprime antes de guardar.
+3. Se guarda una copia local optimizada para mostrar rápido.
+4. Si hay usuario Firebase y Storage disponible, se sube el archivo.
+5. Firestore guarda solo `fotoUrl`, `fotoRutaStorage`, `fotoFuente`, `fotoEstado` y fechas.
+6. La UI muestra la foto local primero y luego la URL remota cuando esté lista.
+```
+
+Recomendación inicial de optimización:
+
+- Convertir a JPEG o WebP si el proyecto lo soporta.
+- Limitar lado mayor entre 900 px y 1280 px para fotos normales.
+- Usar calidad aproximada entre 0.65 y 0.8.
+- Crear miniatura separada solo si los listados cargan muchas imágenes.
+- No conservar la foto original de cámara si la app no la necesita.
+
+La mejor configuración depende del tipo de app. Para productos, comercios, tickets, perfiles y evidencias simples, una foto optimizada suele ser suficiente.
+
+Flujo para borrar foto:
+
+```text
+1. Marcar la entidad en memoria como sin foto.
+2. Limpiar `fotoUrl`, `fotoRutaStorage`, `fotoFuente` si corresponde.
+3. Guardar el cambio en Firestore.
+4. Borrar el archivo de Storage si existe ruta.
+5. Borrar foto local y miniatura local.
+6. Invalidar caché visual para que no reaparezca la imagen anterior.
+```
+
+El borrado debe ser idempotente:
+
+- Si Firestore ya no tiene foto, no debe fallar.
+- Si Storage ya no tiene archivo, no debe fallar.
+- Si el caché local no tiene foto, no debe fallar.
+- Si falla borrar Storage pero Firestore ya quedó sin foto, registrar pendiente de limpieza y no reanimar la foto.
+
+No hacer:
+
+```text
+borrar solo fotoUrl en Firestore
+dejar fotoRutaStorage vieja
+dejar miniatura local vieja
+mantener foto base64 en el objeto principal
+mostrar una imagen desde caché si `fotoEstado` es 'eliminada'
+```
+
+Regla práctica:
+
+> Cambiar foto y borrar foto son dos flujos distintos. El cambio puede pisar una URL vieja; el borrado debe limpiar Firestore, Storage, caché local y estado visual.
+
+### Reglas Storage Recomendadas
+
+Si la app usa Firebase Storage, versionar reglas locales igual que Firestore Rules.
+
+Regla base privada:
+
+```text
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function estaAutenticado() {
+      return request.auth != null;
+    }
+
+    function esDueno(usuarioId) {
+      return estaAutenticado() && request.auth.uid == usuarioId;
+    }
+
+    match /usuarios/{usuarioId}/fotos/{archivo=**} {
+      allow read, write: if esDueno(usuarioId)
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+  }
+}
+```
+
+Notas:
+
+- Ajustar el límite según la app.
+- Validar tipo MIME también en el cliente antes de subir.
+- No usar rutas públicas compartidas para fotos privadas.
+- No guardar fotos de usuario fuera de `usuarios/{usuarioId}`.
+
+### CORS En Desarrollo Web
+
+Si la app web local muestra fotos desde Firebase Storage, puede requerir CORS para `localhost`.
+
+Patrón:
+
+```text
+localhost:9000 -> permite GET de fotos durante desarrollo
+dominio publicado -> permite GET de fotos en producción web
+```
+
+No asumir que Android y navegador fallan igual. Android puede mostrar una foto mientras la web falla por CORS.
+
+### Cola De Fotos Pendientes
+
+Si la app permite sacar fotos sin conexión o si Storage falla, usar una cola liviana.
+
+La cola debe guardar:
+
+```text
+fotoLocalId
+dominio
+entidadId
+accion: 'subir' | 'borrar'
+intentos
+fechaCreacion
+ultimoError
+```
+
+La cola no debe guardar:
+
+```text
+base64 completo
+blob completo
+objeto de producto/comercio/lista completo
+```
+
+Al recuperar conexión:
+
+```text
+1. Leer item pendiente.
+2. Buscar foto local por `fotoLocalId`.
+3. Subir o borrar según acción.
+4. Actualizar Firestore con metadata liviana.
+5. Eliminar item de cola si terminó bien.
+```
+
+### Lectura Y Reconstrucción Visual
+
+Cuando Firestore es fuente principal, la UI no debería depender de base64.
+
+Orden recomendado para resolver una foto visible:
+
+```text
+1. Si `fotoEstado` es 'eliminada' o no hay metadata, mostrar placeholder.
+2. Si existe foto local vigente, mostrarla inmediatamente.
+3. Si existe `fotoUrl`, mostrar la URL remota.
+4. Si la URL remota carga bien, actualizar caché local opcionalmente.
+5. Si falla la URL remota, mostrar placeholder o foto local vieja solo si no está marcada como eliminada.
+```
+
+Esto evita dos problemas:
+
+- Que una foto tarde en aparecer al cambiar de dispositivo.
+- Que una foto borrada vuelva por caché local.
+
+### Prueba Mínima Del Sistema De Fotos
+
+No cerrar fotos solo porque una imagen aparece una vez.
+
+Prueba mínima:
+
+```text
+navegador -> agregar foto -> celular la ve
+celular -> cambiar foto -> navegador la ve
+navegador -> borrar foto -> celular la borra
+celular -> borrar foto -> navegador la borra
+recargar navegador -> la foto correcta sigue o sigue borrada
+cerrar y abrir Android -> la foto correcta sigue o sigue borrada
+Firebase Console -> Firestore no tiene base64
+Firebase Console -> Storage no tiene archivos huérfanos evidentes
+```
+
+Si el cambio funciona pero el borrado falla, revisar primero:
+
+- Caché local.
+- Miniaturas.
+- Campos `fotoUrl` y `fotoRutaStorage`.
+- Estado visual del componente.
+- Cola pendiente.
+- Reconciliación después de una lectura remota completa.
+
 Recomendación práctica:
 
-> Cerrar Firebase sin fotos. Luego abrir un plan separado de fotos solo si existe una opción gratuita real o si se acepta facturación.
+> Cerrar Auth + Firestore primero. Después agregar fotos como sistema separado. Si Storage no está disponible en modo gratis, mantener foto local optimizada + metadata en Firestore. Si Storage está disponible y aceptado, subir archivo a Storage y guardar solo URL/ruta en Firestore.
 
 ---
 
@@ -1574,6 +1811,17 @@ Dominio por dominio:
 - Offline no congela la UI.
 - Firestore no guarda base64.
 
+Fotos:
+
+- Las fotos están fuera del documento principal.
+- La app reduce tamaño y comprime antes de guardar o subir.
+- Firestore guarda solo URL, ruta, fuente, estado y fechas.
+- Si se usa Storage, las rutas viven bajo `usuarios/{usuarioId}/fotos`.
+- Si no se usa Storage, la app mantiene foto local optimizada y metadata liviana.
+- El borrado limpia Firestore, Storage si aplica, foto local, miniatura y caché visual.
+- Cambiar foto y borrar foto fueron probados en navegador y Android.
+- Una foto borrada no reaparece al recargar ni al cambiar de dispositivo.
+
 Cierre:
 
 - `npm run lint` pasa.
@@ -1619,6 +1867,17 @@ Probar en celular:
 - Confirmar que desaparece en celular después de sincronizar.
 - Cambiar preferencias.
 - Cerrar y abrir app.
+
+Probar fotos:
+
+- Agregar foto en navegador y verla en celular.
+- Cambiar foto en celular y verla en navegador.
+- Borrar foto en navegador y confirmar que desaparece en celular.
+- Borrar foto en celular y confirmar que desaparece en navegador.
+- Recargar navegador y confirmar que no vuelve una foto borrada.
+- Cerrar y abrir Android y confirmar que no vuelve una foto borrada.
+- Confirmar en Firestore que no hay base64.
+- Confirmar en Storage que la ruta pertenece al UID correcto si Storage está activo.
 
 Probar offline:
 
@@ -1910,6 +2169,45 @@ Regla práctica:
 
 > Si Firebase depende de variables `VITE_`, GitHub Actions debe tenerlas durante el build.
 
+### Error 12: Tratar El Borrado De Fotos Como Un Cambio Normal
+
+Cambiar una foto y borrar una foto no tienen el mismo riesgo.
+
+Síntoma:
+
+- El usuario borra una foto.
+- La UI parece limpiar la imagen.
+- Al volver a entrar o al sincronizar, aparece la foto anterior.
+
+Causas comunes:
+
+- Firestore conserva `fotoUrl` o `fotoRutaStorage`.
+- Storage conserva el archivo anterior.
+- IndexedDB conserva la foto local.
+- Una miniatura local sigue viva.
+- La UI conserva un objeto anterior en memoria.
+- La reconciliación fusiona local + remoto y reanima la foto local.
+
+Hacer:
+
+- Limpiar todos los campos remotos de foto.
+- Marcar `fotoEstado` como `eliminada` o dejar metadata coherente sin foto.
+- Borrar archivo de Storage si existe ruta.
+- Borrar foto local y miniatura.
+- Invalidar caché visual del componente.
+- Registrar pendiente de limpieza si una parte falla.
+- Probar borrado desde navegador hacia celular y desde celular hacia navegador.
+
+No hacer:
+
+```text
+actualizar fotoUrl = null y dejar el resto igual
+```
+
+Regla práctica:
+
+> Una foto borrada nunca debe poder volver desde caché local si Firestore ya respondió bien y dice que esa entidad no tiene foto.
+
 ---
 
 ## Señales De Que Firebase Está Bien Integrado
@@ -1923,6 +2221,8 @@ Buenas señales:
 - Cada dominio tiene service propio.
 - Las preferencias se guardan y se restauran.
 - El celular y el navegador ven los mismos datos.
+- Las fotos agregadas, cambiadas y borradas se reflejan entre navegador y Android.
+- Firestore no contiene base64 de fotos.
 - Offline no rompe la UI.
 - `npm run lint` pasa.
 - `npm run build` pasa.
@@ -1935,6 +2235,8 @@ Señales de peligro:
 - Hay documentos fuera de `usuarios/{uid}` sin necesidad.
 - Un usuario ve datos de otro.
 - La app depende de fotos para cerrar Firebase.
+- Una foto borrada reaparece después de recargar o sincronizar.
+- Firestore tiene base64, blobs o documentos gigantes de fotos.
 - Hay métodos viejos de sincronización que ya no existen.
 - Se cambia usuario y quedan datos anteriores en pantalla.
 
@@ -2061,8 +2363,8 @@ Para replicar Firebase en otras apps, usar este orden:
 8. Preferencias.
 9. Mesa o estados temporales importantes.
 10. Android.
-11. Cierre sin fotos.
-12. Fotos solo si hay estrategia gratis real.
+11. Cierre de datos sin depender de fotos.
+12. Fotos como sistema separado: local optimizado + metadata Firestore, o Storage si está disponible y aceptado.
 
 La lección más importante:
 
