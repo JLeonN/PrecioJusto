@@ -706,7 +706,21 @@ export const useComerciStore = defineStore('comercios', {
           const comercio = this.comercios.find((c) => c.id === comercioId)
           if (comercio) {
             const direccion = comercio.direcciones.find((d) => d.id === direccionId)
-            if (direccion) direccion.foto = base64 || null
+            if (direccion) {
+              direccion.foto = base64 || null
+              direccion.fotoEliminadaFecha = base64 ? null : new Date().toISOString()
+              if (!base64) {
+                direccion.fotoUrl = null
+                direccion.fotoRutaStorage = null
+                direccion.fotoLocalId = null
+                direccion.fotoFuente = null
+                direccion.fotoFirestoreId = null
+                direccion.fotoFirestoreEstado = null
+                direccion.fotoFirestorePesoBytes = null
+                direccion.fechaFotoFirestore = null
+                direccion.sincronizacionFoto = null
+              }
+            }
           }
         }
         return guardado

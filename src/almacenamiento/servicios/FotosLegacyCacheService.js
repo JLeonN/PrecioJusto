@@ -26,6 +26,7 @@ function tieneImagenActual(entidad, campoImagen, campoUrl) {
 function copiarCamposImagen(destino, origen, configuracion) {
   if (!destino || !origen) return destino
   if (tieneImagenActual(destino, configuracion.campoImagen, configuracion.campoUrl)) return destino
+  if (destino.imagenEliminadaFecha || destino.fotoEliminadaFecha) return destino
 
   const imagenLegacy = origen[configuracion.campoImagen]
   const urlLegacy = origen[configuracion.campoUrl]

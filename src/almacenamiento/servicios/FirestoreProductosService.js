@@ -124,6 +124,7 @@ function normalizarProductoParaFirestore(producto, usuarioId) {
     imagenFirestoreEstado: producto?.imagenFirestoreEstado || null,
     imagenFirestorePesoBytes: Number(producto?.imagenFirestorePesoBytes || 0) || null,
     fechaImagenFirestore: producto?.fechaImagenFirestore || null,
+    imagenEliminadaFecha: producto?.imagenEliminadaFecha || null,
     fotoFuente: producto?.fotoFuente || null,
     fuenteDato: producto?.fuenteDato || null,
     precioMejor: Number(producto?.precioMejor || 0),

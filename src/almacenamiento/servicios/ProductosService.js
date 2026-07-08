@@ -71,6 +71,16 @@ class ProductosService {
       const limpiarImagenFirestore = Boolean(producto.limpiarImagenFirestore)
       delete producto.sincronizarImagenFirestore
       delete producto.limpiarImagenFirestore
+      const fotoLocalIdAnterior = producto.fotoLocalId || null
+
+      if (limpiarImagenFirestore && !producto.imagen && fotoLocalIdAnterior) {
+        await fotosLocalesService.eliminarFotoLocal(fotoLocalIdAnterior)
+      }
+      if (limpiarImagenFirestore && !producto.imagen) {
+        producto.imagenEliminadaFecha = new Date().toISOString()
+      } else if (producto.imagen) {
+        producto.imagenEliminadaFecha = null
+      }
 
       // Agregar timestamps
       const ahora = new Date().toISOString()
@@ -680,6 +690,7 @@ class ProductosService {
         imagenFirestoreEstado: resultado.estado || ESTADOS_SINCRONIZACION.SINCRONIZADO,
         imagenFirestorePesoBytes: imagenOptimizada.pesoBytes,
         fechaImagenFirestore: new Date().toISOString(),
+        imagenEliminadaFecha: null,
         fotoFuente: ORIGENES_FOTO.USUARIO,
         sincronizacionFoto: {
           estado: resultado.estado || ESTADOS_SINCRONIZACION.SINCRONIZADO,

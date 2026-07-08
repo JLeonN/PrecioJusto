@@ -330,7 +330,14 @@ async function editarComercio(id, datosActualizados) {
     fechaActualizacion: new Date().toISOString(),
   }
   if (Object.prototype.hasOwnProperty.call(datosActualizados, 'foto')) {
+    if (!datosActualizados.foto) {
+      await eliminarFotoLocalEntidad(comercios[indice])
+      await eliminarImagenFirestoreComercio(comercios[indice])
+    } else {
+      comercios[indice].fotoEliminadaFecha = null
+    }
     limpiarMetadatosFotoFirestore(comercios[indice])
+    limpiarCamposFotoEntidad(comercios[indice])
   }
 
   await prepararFotosStorageComercio(comercios[indice])
@@ -421,7 +428,14 @@ async function editarDireccion(comercioId, direccionId, datosDireccion) {
     fechaActualizacion: new Date().toISOString(),
   })
   if (Object.prototype.hasOwnProperty.call(datosDireccion, 'foto')) {
+    if (!datosDireccion.foto) {
+      await eliminarFotoLocalEntidad(direccion)
+      await eliminarImagenFirestoreDireccion(comercioId, direccion)
+    } else {
+      direccion.fotoEliminadaFecha = null
+    }
     limpiarMetadatosFotoFirestore(direccion)
+    limpiarCamposFotoEntidad(direccion)
   }
 
   // Recalcular nombreCompleto (calle puede estar vacía)
@@ -481,9 +495,15 @@ async function actualizarFotoDireccion(comercioId, direccionId, base64) {
   if (!comercio) return false
   const direccion = comercio.direcciones.find((d) => d.id === direccionId)
   if (!direccion) return false
+  if (!base64) {
+    await eliminarFotoLocalEntidad(direccion)
+    await eliminarImagenFirestoreDireccion(comercioId, direccion)
+  }
   direccion.foto = base64 || null
   direccion.fotoFuente = base64 ? ORIGENES_FOTO.USUARIO : null
+  if (base64) direccion.fotoEliminadaFecha = null
   limpiarMetadatosFotoFirestore(direccion)
+  if (!base64) limpiarCamposFotoEntidad(direccion)
   direccion.fechaActualizacion = new Date().toISOString()
   comercio.fechaActualizacion = new Date().toISOString()
   await prepararFotosStorageComercio(comercio)
@@ -637,6 +657,28 @@ function limpiarMetadatosFotoFirestore(entidad) {
   return entidad
 }
 
+function limpiarCamposFotoEntidad(entidad) {
+  if (!entidad) return entidad
+  entidad.foto = null
+  entidad.fotoUrl = null
+  entidad.fotoRutaStorage = null
+  entidad.fotoLocalId = null
+  entidad.fotoFuente = null
+  entidad.sincronizacionFoto = null
+  entidad.fotoEliminadaFecha = new Date().toISOString()
+  return entidad
+}
+
+async function eliminarFotoLocalEntidad(entidad) {
+  if (!entidad?.fotoLocalId) return
+
+  try {
+    await fotosLocalesService.eliminarFotoLocal(entidad.fotoLocalId)
+  } catch (error) {
+    console.warn('No se pudo eliminar la foto local:', error)
+  }
+}
+
 function marcarErrorFotoFirestore(entidad, mensaje) {
   if (!entidad) return entidad
   entidad.fotoFirestoreEstado = ESTADOS_SINCRONIZACION.ERROR
@@ -681,6 +723,7 @@ async function prepararFotoFirestoreComercio(comercio) {
     comercio.fotoFirestorePesoBytes = imagenOptimizada.pesoBytes
     comercio.fechaFotoFirestore = new Date().toISOString()
     comercio.fotoFuente = ORIGENES_FOTO.USUARIO
+    comercio.fotoEliminadaFecha = null
     comercio.sincronizacionFoto = {
       estado: comercio.fotoFirestoreEstado,
       fecha: new Date().toISOString(),
@@ -733,6 +776,7 @@ async function prepararFotoFirestoreDireccion(comercio, direccion) {
     direccion.fotoFirestorePesoBytes = imagenOptimizada.pesoBytes
     direccion.fechaFotoFirestore = new Date().toISOString()
     direccion.fotoFuente = ORIGENES_FOTO.USUARIO
+    direccion.fotoEliminadaFecha = null
     direccion.sincronizacionFoto = {
       estado: direccion.fotoFirestoreEstado,
       fecha: new Date().toISOString(),
@@ -771,13 +815,22 @@ async function eliminarImagenFirestoreDireccion(comercioId, direccion) {
   }
 }
 
+async function eliminarImagenFirestoreComercio(comercio) {
+  if (!comercio?.id || !debeUsarFirestore()) return
+  if (!comercio.fotoFirestoreId && !comercio.fechaFotoFirestore) return
+
+  try {
+    await firestoreImagenesComerciosService.eliminarImagenComercio(comercio.id)
+  } catch (error) {
+    console.warn('No se pudo eliminar la imagen remota del comercio:', error)
+  }
+}
+
 async function eliminarImagenesFirestoreComercio(comercio) {
   if (!comercio?.id || !debeUsarFirestore()) return
 
   try {
-    if (comercio.fotoFirestoreId || comercio.fechaFotoFirestore) {
-      await firestoreImagenesComerciosService.eliminarImagenComercio(comercio.id)
-    }
+    await eliminarImagenFirestoreComercio(comercio)
 
     for (const direccion of comercio.direcciones || []) {
       await eliminarImagenFirestoreDireccion(comercio.id, direccion)

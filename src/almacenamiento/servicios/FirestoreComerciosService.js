@@ -121,6 +121,7 @@ function normalizarDireccionParaFirestore(direccion, comercio, ahora) {
     fotoFirestoreEstado: direccion?.fotoFirestoreEstado || null,
     fotoFirestorePesoBytes: Number(direccion?.fotoFirestorePesoBytes || 0) || null,
     fechaFotoFirestore: direccion?.fechaFotoFirestore || null,
+    fotoEliminadaFecha: direccion?.fotoEliminadaFecha || null,
     nombreCompleto:
       direccion?.nombreCompleto || (calle ? `${nombreComercio} - ${calle}` : nombreComercio),
     fechaCreacion: normalizarFechaIso(direccion?.fechaCreacion || ahora),
@@ -155,6 +156,7 @@ function normalizarComercioParaFirestore(comercio, usuarioId) {
     fotoFirestoreEstado: comercio?.fotoFirestoreEstado || null,
     fotoFirestorePesoBytes: Number(comercio?.fotoFirestorePesoBytes || 0) || null,
     fechaFotoFirestore: comercio?.fechaFotoFirestore || null,
+    fotoEliminadaFecha: comercio?.fotoEliminadaFecha || null,
     fechaCreacion: normalizarFechaIso(comercio?.fechaCreacion || ahora),
     fechaActualizacion: normalizarFechaIso(comercio?.fechaActualizacion || ahora),
     fechaUltimoUso: normalizarFechaIso(comercio?.fechaUltimoUso || comercio?.fechaCreacion || ahora),
