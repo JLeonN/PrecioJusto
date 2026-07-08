@@ -144,8 +144,8 @@
               <q-card-section class="q-pa-sm fila-item">
                 <div class="columna-imagen">
                   <q-img
-                    v-if="item.imagen"
-                    :src="item.imagen"
+                    v-if="obtenerImagenVisualItem(item)"
+                    :src="obtenerImagenVisualItem(item)"
                     :alt="item.nombre"
                     class="imagen-item"
                     fit="cover"
@@ -671,6 +671,17 @@ const resumenComercioActual = computed(() => {
     direccion,
   }
 })
+
+function obtenerImagenVisualItem(item) {
+  if (item?.imagen) return item.imagen
+  if (item?.imagenUrl) return item.imagenUrl
+
+  const producto = item?.productoId
+    ? productosStore.obtenerProductoPorId(item.productoId)
+    : null
+
+  return producto?.imagen || producto?.imagenUrl || null
+}
 
 const totalProductos = computed(() => (listaActual.value ? listaActual.value.items.length : 0))
 const productosComprados = computed(() => {
