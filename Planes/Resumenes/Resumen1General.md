@@ -1219,7 +1219,7 @@ H. Arquitectura y Código
 - **Splash screen:** Completada (imagen aleatoria, sin distorsión)
 - **Fotos de productos y comercios:** Completada (useCamaraFoto, q-menu contextual, 5 componentes)
 - **Pie de atribución:** Completado (PieAtribucion.vue en DetalleProductoPage + EditarComercioPage; campo fotoFuente en productos)
-- **Firebase:** Completado en producción para cuenta, productos, comercios, listas, preferencias y mesa de trabajo; las fotos locales quedan en el dispositivo
+- **Firebase:** Completado en producción para cuenta, productos, comercios, listas, preferencias, mesa de trabajo y fotos sincronizadas por Storage cuando está disponible
 - **Rescate de memoria Android:** Completado; los datos grandes usan IndexedDB, las fotos base64 se separan del caché principal y los listados cargan objetos livianos
 - **Configuración global:** Completada (moneda predeterminada manual/automática; ver Resumen9Configuracion.md)
 - **Publicidad AdMob:** Integrada y en producción; banner, interstitial y rewarded activos. Los IDs de producción fueron regenerados para corregir fallos de serving en algunas unidades (ver PlanPublicidadAdMob.md)
@@ -1254,4 +1254,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 6 de Julio de 2026 — Se preparó el release `1.2.11` con sincronización más rápida entre dispositivos, borrados reconciliados, mesa de trabajo más consistente y carga de precios bajo demanda.
+**Última actualización:** 8 de Julio de 2026 — Se preparó el release `1.2.12` con fotos sincronizadas entre navegador y Android, borrado de fotos más confiable y notas remotas de actualización.

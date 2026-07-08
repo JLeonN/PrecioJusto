@@ -242,8 +242,8 @@ Claves persistidas actuales:
 - La fuente principal Firestore reconstruye campos visuales `imagen` y `foto` desde URL Storage para que la UI siga mostrando fotos después de recargar.
 - `FotosPendientesStorageService` reintenta fotos locales pendientes al iniciar, al volver la app a primer plano y al recuperar conexión.
 - `FirebaseStorageCors.json` documenta la configuración CORS mínima de desarrollo para `localhost:9000`.
-- Decisión actual: no activar Blaze y no cerrar fotos con Firebase Storage.
-- Estado del cierre Firebase gratis: Storage/fotos queda fuera de alcance y no bloquea el cierre de Firestore privado.
+- Decisión actual: fotos sincronizadas con Firebase Storage cuando está disponible; Firestore guarda solo URL/ruta y no base64.
+- Estado actual: productos, comercios, direcciones e items de Lista Justa pueden mostrar fotos sincronizadas entre navegador y Android.
 
 ---
 

@@ -1,19 +1,17 @@
 {
-  "versionDisponible": "1.2.11",
+  "versionDisponible": "1.2.12",
   "urlPlayStore": "https://play.google.com/store/apps/details?id=com.preciojusto.app",
   "mostrarActualizacion": true,
   "cambios": {
     "es-AR": [
       {
-        "apartado": "Sincronización y precios",
+        "apartado": "Fotos y sincronización",
         "novedades": [
-          "Los productos, comercios, listas y mesa de trabajo se actualizan más rápido entre dispositivos.",
-          "La app abre primero con los datos guardados y actualiza la nube en segundo plano sin bloquearte.",
-          "Los productos nuevos aparecen antes, sin esperar a que se descargue todo el historial de precios.",
-          "Al abrir una tarjeta o el detalle de un producto, los precios se cargan cuando hacen falta.",
-          "Los productos borrados en otro dispositivo desaparecen correctamente después de sincronizar.",
-          "La mesa de trabajo evita recuperar elementos que ya fueron resueltos o eliminados.",
-          "Se protegió mejor la caché local cuando la conexión o la lectura de internet no están completas."
+          "Ahora podés ver fotos de productos, comercios y direcciones sincronizadas entre el navegador y el celular.",
+          "Las fotos se optimizan para cargar rápido y ocupar poco espacio mientras se mantienen visibles en tus dispositivos.",
+          "Al cambiar una foto, la actualización se refleja mejor entre dispositivos después de sincronizar.",
+          "Al borrar una foto, ya no debería volver a aparecer por caché o por datos antiguos.",
+          "La app protege mejor los datos guardados localmente cuando la conexión o la carga desde internet no están completas."
         ]
       }
     ]
