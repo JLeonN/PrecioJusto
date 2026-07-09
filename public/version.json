@@ -5,13 +5,14 @@
   "cambios": {
     "es-AR": [
       {
-        "apartado": "Fotos y sincronización",
+        "apartado": "Lista Justa",
         "novedades": [
-          "Ahora podés ver fotos de productos, comercios y direcciones sincronizadas entre el navegador y el celular.",
-          "Las fotos se optimizan para cargar rápido y ocupar poco espacio mientras se mantienen visibles en tus dispositivos.",
-          "Al cambiar una foto, la actualización se refleja mejor entre dispositivos después de sincronizar.",
-          "Al borrar una foto, ya no debería volver a aparecer por caché o por datos antiguos.",
-          "La app protege mejor los datos guardados localmente cuando la conexión o la carga desde internet no están completas."
+          "El resumen de cada lista ahora muestra el total general sin depender del comercio seleccionado.",
+          "Dentro de una lista podés ver mejor cuánto vale todo, cuánto llevás gastado y cuánto falta gastar.",
+          "Los avisos de precios ahora son más claros cuando faltan precios o cuando el cálculo está completo.",
+          "Al elegir un comercio, la lista actualiza mejor los precios guardados para mostrar valores más confiables.",
+          "Las fotos de productos en las listas se mantienen visibles con más consistencia.",
+          "El botón para volver desde una lista ahora regresa correctamente a la lista de listas."
         ]
       }
     ]
