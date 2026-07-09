@@ -1254,4 +1254,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 8 de Julio de 2026 — Se preparó el release `1.2.12` con fotos sincronizadas entre navegador y Android, borrado de fotos más confiable y notas remotas de actualización.
+**Última actualización:** 9 de Julio de 2026 — Se preparó el release `1.2.13` con mejoras en Lista Justa: totales más claros, precios sincronizados, fotos más estables y navegación corregida.
