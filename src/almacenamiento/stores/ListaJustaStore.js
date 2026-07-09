@@ -7,7 +7,6 @@ import ListaJustaService from '../servicios/ListaJustaService.js'
 import productosService from '../servicios/ProductosService.js'
 import reconciliacionFirestoreLocalService from '../servicios/ReconciliacionFirestoreLocalService.js'
 import sincronizacionIncrementalFirestoreService from '../servicios/SincronizacionIncrementalFirestoreService.js'
-import { construirResumenPreciosLista } from '../../utils/ListaJustaInteligenteUtils.js'
 import { useProductosStore } from './productosStore.js'
 import { useSesionEscaneoStore } from './sesionEscaneoStore.js'
 import { useUsuarioStore } from './UsuarioStore.js'
@@ -548,10 +547,82 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
   }
 
   function estimadoLista(lista) {
-    return construirResumenPreciosLista({
-      lista,
-      obtenerProductoPorId: productosStore.obtenerProductoPorId,
+    const items = Array.isArray(lista?.items) ? lista.items : []
+    const totalProductos = items.length
+    const resultados = items.map((item) => {
+      const precio = Number(obtenerPrecioVisualItem(item))
+      const cantidad = Number(item?.cantidad || 1)
+      const moneda = item?.moneda || productosStore.obtenerProductoPorId(item?.productoId)?.monedaReferencia || 'UYU'
+      const disponible = Number.isFinite(precio) && precio > 0
+
+      return {
+        disponible,
+        moneda,
+        total: disponible && Number.isFinite(cantidad) && cantidad > 0 ? precio * cantidad : 0,
+      }
     })
+    const disponibles = resultados.filter((resultado) => resultado.disponible)
+    const productosConPrecio = disponibles.length
+    const productosSinPrecio = totalProductos - productosConPrecio
+    const monedasDisponibles = [...new Set(disponibles.map((resultado) => resultado.moneda).filter(Boolean))]
+    const moneda = monedasDisponibles.length === 1 ? monedasDisponibles[0] : 'UYU'
+    const total = disponibles.reduce((suma, resultado) => suma + resultado.total, 0)
+
+    if (totalProductos === 0) {
+      return {
+        estado: 'sinProductos',
+        etiqueta: 'Sin productos',
+        total: 0,
+        moneda,
+        productosConPrecio: 0,
+        productosSinPrecio: 0,
+        totalProductos: 0,
+        parcial: false,
+        mensaje: 'Agregá productos para calcular el total.',
+      }
+    }
+
+    if (productosConPrecio === 0) {
+      return {
+        estado: 'sinPrecios',
+        etiqueta: 'Sin precios',
+        total: 0,
+        moneda,
+        productosConPrecio,
+        productosSinPrecio,
+        totalProductos,
+        parcial: true,
+        mensaje: 'Agregá precios para calcular el total.',
+      }
+    }
+
+    if (monedasDisponibles.length > 1) {
+      return {
+        estado: 'monedaMixta',
+        etiqueta: 'Total mixto',
+        total,
+        moneda,
+        productosConPrecio,
+        productosSinPrecio,
+        totalProductos,
+        parcial: true,
+        mensaje: 'Hay precios con distintas monedas.',
+      }
+    }
+
+    const parcial = productosSinPrecio > 0
+
+    return {
+      estado: parcial ? 'parcial' : 'completo',
+      etiqueta: parcial ? 'Total parcial' : 'Total de la lista',
+      total,
+      moneda,
+      productosConPrecio,
+      productosSinPrecio,
+      totalProductos,
+      parcial,
+      mensaje: parcial ? 'Faltan precios para completar el total.' : 'Precios completos.',
+    }
   }
 
   function resumenCompra(lista) {

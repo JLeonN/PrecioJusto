@@ -82,10 +82,7 @@
                     {{ formatearMoneda(estimadoDeLista(lista).total, estimadoDeLista(lista).moneda) }}
                   </span>
                 </div>
-                <div
-                  v-if="estimadoDeLista(lista).estado !== 'sinComercio'"
-                  class="contador-precios-lista"
-                >
+                <div class="contador-precios-lista">
                   {{ textoContadorPrecios(estimadoDeLista(lista)) }}
                 </div>
                 <div
@@ -241,7 +238,7 @@ function textoContadorPrecios(resumen) {
 }
 function claseMensajeResumen(resumen) {
   if (resumen?.estado === 'completo') return 'mensaje-resumen-precios-completo'
-  if (resumen?.estado === 'sinComercio' || resumen?.estado === 'sinProductos') {
+  if (resumen?.estado === 'sinProductos') {
     return 'mensaje-resumen-precios-neutro'
   }
   return 'mensaje-resumen-precios-alerta'
