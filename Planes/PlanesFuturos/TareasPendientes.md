@@ -10,10 +10,12 @@ Las tareas más difíciles siempre van arriba.
 
 ## Pendientes
 
-### Dificultad 6/10
-
-- **Migrar el resto de inputs al componente reutilizable:** Extender `InputFormularioReutilizable` al resto de formularios de la app para unificar estilos, foco, hover y autofill. Hacerlo por etapas para no romper pantallas existentes y validando visualmente cada formulario antes de pasar al siguiente.
-
 ### Dificultad 5/10
 
 - **App en varios idiomas:** Preparar la app para soportar múltiples idiomas. Antes de implementar cualquier cambio hay que hacer un plan dedicado para definir el alcance, la estrategia de traducciones y los puntos de la UI que se van a tocar.
+
+- **Mejorar el apartado de Gracias:** Revisar la pantalla de agradecimientos para agregar recompensas en los primeros 10 gracias y luego cada 50 o 100 gracias. Incluir un botón para compartir, pensar más ideas de motivación y cuidar que el sistema no se sienta invasivo ni confuso.
+
+### Dificultad 4/10
+
+- **Ampliar datos de configuración de cuenta:** Agregar más información editable en la cuenta del usuario, empezando por el país de origen y otros datos útiles que puedan mejorar la experiencia sin pedir información innecesaria. Definir bien qué campos aportan valor antes de implementarlos.
