@@ -38,9 +38,18 @@
         />
       </div>
 
-      <p v-if="tieneApoyos" class="contador-apoyos">
-        {{ resumenApoyos }}
-      </p>
+      <div v-if="tieneApoyos" class="resumen-apoyos">
+        <div class="contador-apoyo contador-videos">
+          <q-icon name="favorite" size="22px" />
+          <strong class="numero-apoyo">{{ apoyos.graciasVideo }}</strong>
+          <span class="etiqueta-apoyo">{{ etiquetaVideos }}</span>
+        </div>
+        <div class="contador-apoyo contador-compartidos">
+          <q-icon name="share" size="22px" />
+          <strong class="numero-apoyo">{{ apoyos.compartidosIniciados }}</strong>
+          <span class="etiqueta-apoyo">{{ etiquetaCompartidos }}</span>
+        </div>
+      </div>
     </div>
   </q-page>
 </template>
@@ -75,13 +84,10 @@ const tieneApoyos = computed(
 const etiquetaCompartir = computed(() =>
   compartirNativoDisponible.value ? 'Compartir la app' : 'Copiar enlace',
 )
-const resumenApoyos = computed(() => {
-  const textoVideos = apoyos.value.graciasVideo === 1 ? 'video visto' : 'videos vistos'
-  const textoCompartidos =
-    apoyos.value.compartidosIniciados === 1 ? 'compartido iniciado' : 'compartidos iniciados'
-
-  return `Tu apoyo hasta ahora: ${apoyos.value.graciasVideo} ${textoVideos} y ${apoyos.value.compartidosIniciados} ${textoCompartidos}.`
-})
+const etiquetaVideos = computed(() => (apoyos.value.graciasVideo === 1 ? 'video visto' : 'videos vistos'))
+const etiquetaCompartidos = computed(() =>
+  apoyos.value.compartidosIniciados === 1 ? 'vez compartida' : 'veces compartida',
+)
 
 onMounted(async () => {
   apoyos.value = await apoyosAppService.obtenerApoyos()
@@ -227,8 +233,7 @@ function obtenerMensajeGracias(contadorGracias) {
   gap: 10px;
 }
 .texto-explicacion-video,
-.texto-disponibilidad-video,
-.contador-apoyos {
+.texto-disponibilidad-video {
   margin: 0;
   color: var(--texto-secundario);
   line-height: 1.4;
@@ -243,9 +248,35 @@ function obtenerMensajeGracias(contadorGracias) {
 .boton-compartir {
   min-height: 44px;
 }
-.contador-apoyos {
-  max-width: 360px;
-  font-size: 0.88rem;
+.resumen-apoyos {
+  width: min(100%, 330px);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 4px;
+  padding: 12px 0;
+  border-top: 1px solid var(--borde-color);
+  border-bottom: 1px solid var(--borde-color);
+}
+.contador-apoyo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.contador-videos {
+  color: var(--color-error);
+}
+.contador-compartidos {
+  color: var(--color-secundario);
+  border-left: 1px solid var(--borde-color);
+}
+.numero-apoyo {
+  font-size: 1.55rem;
+  line-height: 1;
+}
+.etiqueta-apoyo {
+  color: var(--texto-secundario);
+  font-size: 0.82rem;
 }
 @keyframes latido-apoyo {
   0%,
