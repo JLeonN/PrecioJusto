@@ -335,6 +335,7 @@ import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoSto
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
 import { useUsuarioStore } from '../almacenamiento/stores/UsuarioStore.js'
 import { ESTADOS_MIGRACION_FIREBASE } from '../almacenamiento/constantes/PreparacionFirebase.js'
+import { MODO_PRUEBA } from '../almacenamiento/constantes/ConfigPublicidad.js'
 import migracionLocalFirebaseService from '../almacenamiento/servicios/MigracionLocalFirebaseService.js'
 import migracionLocalPreguntadaService from '../almacenamiento/servicios/MigracionLocalPreguntadaService.js'
 
@@ -369,12 +370,15 @@ const esComerciosActivo = computed(() => route.path.startsWith('/comercios'))
 const esMesaActivo = computed(() => route.path === '/mesa-trabajo')
 const esGraciasActivo = computed(() => route.path === '/gracias')
 const clasesHeader = computed(() => {
+  if (MODO_PRUEBA) return 'header-modo-prueba text-white'
+
   return quasar.dark.isActive ? 'header-tema-oscuro text-white' : 'header-tema-claro text-primary'
 })
 const clasesDrawer = computed(() =>
   quasar.dark.isActive ? 'drawer-tema drawer-tema-oscuro' : 'drawer-tema drawer-tema-claro',
 )
 const colorBotonMenu = computed(() => {
+  if (MODO_PRUEBA) return 'white'
   return quasar.dark.isActive ? 'white' : 'primary'
 })
 const estiloLayout = computed(() => ({
@@ -408,11 +412,15 @@ const seccionHeaderActiva = computed(() => {
   return null
 })
 const estiloTituloHeader = computed(() => {
+  if (MODO_PRUEBA) return { color: 'var(--texto-sobre-primario)' }
+
   const colorActivo = coloresHeaderPorSeccion[seccionHeaderActiva.value]
   return { color: colorActivo || colorInactivoHeader.value }
 })
 
 const obtenerEstiloIconoHeader = (estaActivo, seccion) => {
+  if (MODO_PRUEBA) return { color: 'var(--texto-sobre-primario)' }
+
   return {
     color: estaActivo.value ? coloresHeaderPorSeccion[seccion] : colorInactivoHeader.value,
   }
@@ -695,6 +703,11 @@ useBotonAtras({ drawerAbierto, router, route })
   background: var(--fondo-header-oscuro);
   border-bottom: 1px solid var(--borde-header-oscuro);
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+}
+.header-modo-prueba {
+  background: var(--color-acento);
+  border-bottom: 1px solid var(--color-acento-oscuro);
+  box-shadow: 0 2px 10px var(--color-acento-fondo-suave);
 }
 .drawer-tema-claro {
   background: var(--fondo-drawer-claro);
