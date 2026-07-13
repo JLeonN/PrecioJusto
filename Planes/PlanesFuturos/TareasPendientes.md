@@ -17,7 +17,3 @@ Las tareas más difíciles siempre van arriba.
 ### Dificultad 5/10
 
 - **App en varios idiomas:** Preparar la app para soportar múltiples idiomas. Antes de implementar cualquier cambio hay que hacer un plan dedicado para definir el alcance, la estrategia de traducciones y los puntos de la UI que se van a tocar.
-
-### Dificultad 3/10
-
-- **Actualizar ficha de Play Store:** Antes de la próxima publicación, revisar que la versión y las novedades de Play Store coincidan con la versión publicada y actualizar la descripción para que su idioma y contenido representen la app actual.

@@ -1,18 +1,15 @@
 {
-  "versionDisponible": "1.2.13",
+  "versionDisponible": "1.2.14",
   "urlPlayStore": "https://play.google.com/store/apps/details?id=com.preciojusto.app",
   "mostrarActualizacion": true,
   "cambios": {
     "es-AR": [
       {
-        "apartado": "Lista Justa",
+        "apartado": "Novedades",
         "novedades": [
-          "El resumen de cada lista ahora muestra el total general sin depender del comercio seleccionado.",
-          "Dentro de una lista podés ver mejor cuánto vale todo, cuánto llevás gastado y cuánto falta gastar.",
-          "Los avisos de precios ahora son más claros cuando faltan precios o cuando el cálculo está completo.",
-          "Al elegir un comercio, la lista actualiza mejor los precios guardados para mostrar valores más confiables.",
-          "Las fotos de productos en las listas se mantienen visibles con más consistencia.",
-          "El botón para volver desde una lista ahora regresa correctamente a la lista de listas."
+          "Ahora podés completar tu perfil con país y género de forma opcional.",
+          "La sección Gracias permite apoyar la app mirando un video o compartiéndola.",
+          "Los contadores de apoyo ahora muestran videos vistos y veces compartida de forma más clara."
         ]
       }
     ]

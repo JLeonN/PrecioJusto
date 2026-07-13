@@ -1201,7 +1201,7 @@ H. Arquitectura y Código
 
 ### Estado Actual
 
-- **Versión:** 1.2.11
+- **Versión:** 1.2.14
 - **Almacenamiento:** Firebase/Firestore como fuente principal con respaldo local del dispositivo
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
@@ -1223,6 +1223,8 @@ H. Arquitectura y Código
 - **Rescate de memoria Android:** Completado; los datos grandes usan IndexedDB, las fotos base64 se separan del caché principal y los listados cargan objetos livianos
 - **Configuración global:** Completada (moneda predeterminada manual/automática; ver Resumen9Configuracion.md)
 - **Publicidad AdMob:** Integrada y en producción; banner, interstitial y rewarded activos. Los IDs de producción fueron regenerados para corregir fallos de serving en algunas unidades (ver PlanPublicidadAdMob.md)
+- **Modo prueba de publicidad:** El header se muestra naranja cuando `MODO_PRUEBA` está activo para identificar la compilación de prueba rápidamente
+- **Apartado Gracias:** Completado con video recompensado, compartir la app, contadores de apoyo y mensajes variados
 - **app-ads.txt:** Publicado en GitHub Pages para ayudar a la verificación de AdMob
 - **Precios mayoristas por cantidad:** Completados en carga, persistencia, historial, detalle y tarjetas; la app conserva el mejor precio base para 1 unidad y destaca ventajas reales por cantidad en otros comercios
 - **Ver detalles del sistema de escaneo:** Resumen8Scanner.md
@@ -1254,4 +1256,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 9 de Julio de 2026 — Se preparó el release `1.2.13` con mejoras en Lista Justa: totales más claros, precios sincronizados, fotos más estables y navegación corregida.
+**Última actualización:** 13 de Julio de 2026 — Se preparó el release `1.2.14` con perfil ampliado, mejoras en el apartado Gracias y señal visual para modo prueba.
