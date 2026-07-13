@@ -18,4 +18,6 @@ Las tareas más difíciles siempre van arriba.
 
 - **App en varios idiomas:** Preparar la app para soportar múltiples idiomas. Antes de implementar cualquier cambio hay que hacer un plan dedicado para definir el alcance, la estrategia de traducciones y los puntos de la UI que se van a tocar.
 
-- **Mejorar el apartado de Gracias:** Revisar la pantalla de agradecimientos para agregar recompensas en los primeros 10 gracias y luego cada 50 o 100 gracias. Incluir un botón para compartir, pensar más ideas de motivación y cuidar que el sistema no se sienta invasivo ni confuso.
+### Dificultad 3/10
+
+- **Actualizar ficha de Play Store:** Antes de la próxima publicación, revisar que la versión y las novedades de Play Store coincidan con la versión publicada y actualizar la descripción para que su idioma y contenido representen la app actual.

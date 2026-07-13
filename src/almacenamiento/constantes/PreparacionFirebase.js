@@ -39,6 +39,7 @@ export const TIPOS_DATO_USUARIO = Object.freeze({
   LISTA_JUSTA: 'listaJusta',
   MESA_TRABAJO: 'mesaTrabajo',
   PREFERENCIAS: 'preferencias',
+  APOYOS_APP: 'apoyosApp',
   CONFIRMACION: 'confirmacion',
   SESION_ESCANEO: 'sesionEscaneo',
 })
@@ -57,6 +58,7 @@ export const DATOS_PRIVADOS_USUARIO = Object.freeze([
   TIPOS_DATO_USUARIO.LISTA_JUSTA,
   TIPOS_DATO_USUARIO.MESA_TRABAJO,
   TIPOS_DATO_USUARIO.PREFERENCIAS,
+  TIPOS_DATO_USUARIO.APOYOS_APP,
   TIPOS_DATO_USUARIO.CONFIRMACION,
 ])
 
@@ -71,6 +73,7 @@ export const COLECCIONES_FIRESTORE_FUTURAS = Object.freeze({
   listasPrivadas: 'usuarios/{usuarioId}/listasJustas',
   mesaTrabajoPrivada: 'usuarios/{usuarioId}/mesaTrabajoItems',
   preferenciasUsuario: 'usuarios/{usuarioId}/configuracion/preferencias',
+  apoyosAppUsuario: 'usuarios/{usuarioId}/configuracion/apoyosApp',
   perfilUsuario: 'usuarios/{usuarioId}/configuracion/perfil',
   confirmacionesUsuario: 'usuarios/{usuarioId}/confirmaciones',
   fotosPrivadas: 'usuarios/{usuarioId}/fotos',
@@ -89,6 +92,7 @@ export const RUTAS_FIRESTORE_PRIVADAS = Object.freeze({
   mesaTrabajoItems: 'usuarios/{usuarioId}/mesaTrabajoItems',
   mesaTrabajoItem: 'usuarios/{usuarioId}/mesaTrabajoItems/{itemId}',
   preferencias: 'usuarios/{usuarioId}/configuracion/preferencias',
+  apoyosApp: 'usuarios/{usuarioId}/configuracion/apoyosApp',
   perfil: 'usuarios/{usuarioId}/configuracion/perfil',
   confirmaciones: 'usuarios/{usuarioId}/confirmaciones',
   confirmacion: 'usuarios/{usuarioId}/confirmaciones/{confirmacionId}',
@@ -284,6 +288,12 @@ export const CAMPOS_MODELO_FIRESTORE = Object.freeze({
     'paisDetectado',
     'monedaDetectada',
     'unidad',
+    'fechaActualizacion',
+  ]),
+  apoyosApp: Object.freeze([
+    'usuarioId',
+    'graciasVideo',
+    'compartidosIniciados',
     'fechaActualizacion',
   ]),
   perfil: Object.freeze([

@@ -1,6 +1,7 @@
 export const PREFIJO_ALMACENAMIENTO = 'precio_justo_'
 
 export const CLAVE_COMERCIOS = 'comercios'
+export const CLAVE_APOYOS_APP = 'apoyosApp'
 export const CLAVE_CONTADOR_GRACIAS = 'contadorGracias'
 export const CLAVE_LISTA_JUSTA = 'lista_justa'
 export const CLAVE_PREFERENCIAS_USUARIO = 'preferencias_usuario'
