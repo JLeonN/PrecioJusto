@@ -53,7 +53,7 @@ export function useCompartirApp() {
 
     if (!(await puedeCompartir())) {
       await copiarTexto(texto)
-      return { exito: true, contabilizar: false, tipo: 'copiado' }
+      return { exito: true, contabilizar: true, tipo: 'copiado' }
     }
 
     try {
@@ -71,7 +71,7 @@ export function useCompartirApp() {
 
       try {
         await copiarTexto(texto)
-        return { exito: true, contabilizar: false, tipo: 'copiado' }
+        return { exito: true, contabilizar: true, tipo: 'copiado' }
       } catch {
         return { exito: false, cancelado: false, tipo: 'error' }
       }

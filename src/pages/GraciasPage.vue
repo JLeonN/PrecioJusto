@@ -149,7 +149,10 @@ const compartirApp = async () => {
       activarAnimacionApoyo()
       $q.notify({
         type: 'positive',
-        message: 'Gracias por compartir Precio Justo.',
+        message:
+          resultado.tipo === 'copiado'
+            ? 'Enlace copiado para compartir. Gracias por apoyar Precio Justo.'
+            : 'Gracias por compartir Precio Justo.',
         position: 'top',
         timeout: 1800,
       })
