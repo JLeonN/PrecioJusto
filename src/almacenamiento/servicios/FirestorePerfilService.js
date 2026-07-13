@@ -57,6 +57,8 @@ function normalizarPerfilParaFirestore(perfil, usuarioId) {
     usuarioId,
     nombreUsuario: normalizarTexto(perfil?.nombreUsuario),
     fechaNacimiento: normalizarFechaNacimiento(perfil?.fechaNacimiento),
+    paisCodigo: normalizarTexto(perfil?.paisCodigo),
+    genero: normalizarTexto(perfil?.genero),
     fechaActualizacion: normalizarFechaIso(perfil?.fechaActualizacion),
   }
 

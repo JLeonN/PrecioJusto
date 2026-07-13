@@ -290,6 +290,8 @@ export const CAMPOS_MODELO_FIRESTORE = Object.freeze({
     'usuarioId',
     'nombreUsuario',
     'fechaNacimiento',
+    'paisCodigo',
+    'genero',
     'fechaActualizacion',
   ]),
   confirmacion: Object.freeze([

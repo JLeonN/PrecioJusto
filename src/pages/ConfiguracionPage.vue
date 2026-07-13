@@ -29,6 +29,31 @@
                   dense
                   :disable="guardandoPerfil"
                 />
+                <q-select
+                  v-model="formularioPerfil.paisCodigo"
+                  :options="opcionesPaisVisibles"
+                  label="País (opcional)"
+                  emit-value
+                  map-options
+                  clearable
+                  use-input
+                  input-debounce="0"
+                  outlined
+                  dense
+                  :disable="guardandoPerfil"
+                  @filter="filtrarPaises"
+                />
+                <q-select
+                  v-model="formularioPerfil.genero"
+                  :options="opcionesGenero"
+                  label="Género (opcional)"
+                  emit-value
+                  map-options
+                  clearable
+                  outlined
+                  dense
+                  :disable="guardandoPerfil"
+                />
                 <div class="fila-acciones-panel">
                   <q-btn
                     no-caps
@@ -195,6 +220,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import { useRouter } from 'vue-router'
 import { MONEDAS } from '../almacenamiento/constantes/Monedas.js'
+import { PAISES } from '../almacenamiento/constantes/Paises.js'
 import { ESTADOS_MIGRACION_FIREBASE } from '../almacenamiento/constantes/PreparacionFirebase.js'
 import { usePublicidad } from '../composables/usePublicidad.js'
 import { useConfirmacionesStore } from '../almacenamiento/stores/confirmacionesStore.js'
@@ -227,12 +253,22 @@ const guardandoPerfil = ref(false)
 const formularioPerfil = ref({
   nombreUsuario: '',
   fechaNacimiento: '',
+  paisCodigo: '',
+  genero: '',
 })
+const opcionesPaisVisibles = ref([...PAISES])
 const TIEMPO_ESPERA_INTERSTICIAL_MS = 60000
 const opcionesModoTema = [
   { label: 'Claro', value: 'claro' },
   { label: 'Oscuro', value: 'oscuro' },
   { label: 'Según el sistema', value: 'sistema' },
+]
+const opcionesGenero = [
+  { label: 'Mujer', value: 'mujer' },
+  { label: 'Hombre', value: 'hombre' },
+  { label: 'No binario', value: 'noBinario' },
+  { label: 'Prefiero no decir', value: 'prefieroNoDecir' },
+  { label: 'Otro', value: 'otro' },
 ]
 
 const esModoAutomatico = computed(() => preferenciasStore.modoMoneda === 'automatica')
@@ -266,7 +302,19 @@ function limpiarFormularioPerfil() {
   formularioPerfil.value = {
     nombreUsuario: '',
     fechaNacimiento: '',
+    paisCodigo: '',
+    genero: '',
   }
+  opcionesPaisVisibles.value = [...PAISES]
+}
+
+function filtrarPaises(valor, actualizar) {
+  actualizar(() => {
+    const textoBusqueda = String(valor || '').trim().toLocaleLowerCase()
+    opcionesPaisVisibles.value = textoBusqueda
+      ? PAISES.filter((pais) => pais.label.toLocaleLowerCase().includes(textoBusqueda))
+      : [...PAISES]
+  })
 }
 
 async function cargarPerfilUsuario() {
@@ -282,6 +330,8 @@ async function cargarPerfilUsuario() {
     formularioPerfil.value = {
       nombreUsuario: perfil?.nombreUsuario || usuarioStore.nombre || '',
       fechaNacimiento: perfil?.fechaNacimiento || '',
+      paisCodigo: perfil?.paisCodigo || '',
+      genero: perfil?.genero || '',
     }
   } catch (error) {
     quasar.notify({
@@ -302,6 +352,8 @@ async function guardarPerfilUsuario() {
     await firestorePerfilService.guardarPerfil({
       nombreUsuario: formularioPerfil.value.nombreUsuario,
       fechaNacimiento: formularioPerfil.value.fechaNacimiento || null,
+      paisCodigo: formularioPerfil.value.paisCodigo || '',
+      genero: formularioPerfil.value.genero || '',
     })
     quasar.notify({
       type: 'positive',
