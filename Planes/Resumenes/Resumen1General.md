@@ -1201,7 +1201,7 @@ H. Arquitectura y Código
 
 ### Estado Actual
 
-- **Versión:** 1.2.14
+- **Versión:** 1.2.15
 - **Almacenamiento:** Firebase/Firestore como fuente principal con respaldo local del dispositivo
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
@@ -1220,6 +1220,7 @@ H. Arquitectura y Código
 - **Fotos de productos y comercios:** Completada (useCamaraFoto, q-menu contextual, 5 componentes)
 - **Pie de atribución:** Completado (PieAtribucion.vue en DetalleProductoPage + EditarComercioPage; campo fotoFuente en productos)
 - **Firebase:** Completado en producción para cuenta, productos, comercios, listas, preferencias, mesa de trabajo y fotos sincronizadas por Storage cuando está disponible
+- **Acceso con Google:** Completado en navegador y Android; conserva el usuario existente al vincular una cuenta con correo y contraseña
 - **Rescate de memoria Android:** Completado; los datos grandes usan IndexedDB, las fotos base64 se separan del caché principal y los listados cargan objetos livianos
 - **Configuración global:** Completada (moneda predeterminada manual/automática; ver Resumen9Configuracion.md)
 - **Publicidad AdMob:** Integrada y en producción; banner, interstitial y rewarded activos. Los IDs de producción fueron regenerados para corregir fallos de serving en algunas unidades (ver PlanPublicidadAdMob.md)
@@ -1256,4 +1257,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 13 de Julio de 2026 — Se preparó el release `1.2.14` con perfil ampliado, mejoras en el apartado Gracias y señal visual para modo prueba.
+**Última actualización:** 14 de Julio de 2026 — Se preparó el release `1.2.15` con acceso mediante Google en navegador y Android.
