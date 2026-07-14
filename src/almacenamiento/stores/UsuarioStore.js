@@ -153,6 +153,26 @@ export const useUsuarioStore = defineStore('usuario', () => {
     })
   }
 
+  async function iniciarSesionConGoogle() {
+    return ejecutarAccionAutenticacion(async () => {
+      const usuarioIngresado = await autenticacionFirebaseService.iniciarSesionConGoogle()
+      await aplicarUsuarioAutenticado(usuarioIngresado)
+      return usuarioIngresado
+    })
+  }
+
+  async function vincularGoogleConCorreo(datosIngreso) {
+    return ejecutarAccionAutenticacion(async () => {
+      const usuarioVinculado = await autenticacionFirebaseService.vincularGoogleConCorreo(datosIngreso)
+      await aplicarUsuarioAutenticado(usuarioVinculado)
+      return usuarioVinculado
+    })
+  }
+
+  function cancelarVinculacionGoogle() {
+    autenticacionFirebaseService.cancelarVinculacionGoogle()
+  }
+
   async function cerrarSesion() {
     return ejecutarAccionAutenticacion(async () => {
       await autenticacionFirebaseService.cerrarSesion()
@@ -182,6 +202,9 @@ export const useUsuarioStore = defineStore('usuario', () => {
     esperarSesionLista,
     registrarUsuario,
     iniciarSesion,
+    iniciarSesionConGoogle,
+    vincularGoogleConCorreo,
+    cancelarVinculacionGoogle,
     cerrarSesion,
     recuperarContrasena,
     limpiarError,

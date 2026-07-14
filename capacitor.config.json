@@ -2,5 +2,11 @@
   "appId": "com.preciojusto.app",
   "appName": "Precio Justo",
   "webDir": "dist/spa",
-  "bundledWebRuntime": false
+  "bundledWebRuntime": false,
+  "plugins": {
+    "FirebaseAuthentication": {
+      "skipNativeAuth": true,
+      "providers": ["google.com"]
+    }
+  }
 }

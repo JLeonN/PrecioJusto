@@ -9,13 +9,14 @@
       <q-card flat bordered class="tarjeta-autenticacion">
         <q-card-section>
           <q-tabs
+            v-if="modo !== 'vinculacionGoogle'"
             v-model="modo"
             dense
             no-caps
             active-color="primary"
             indicator-color="primary"
             align="justify"
-            @update:model-value="limpiarEstadoFormulario"
+            @update:model-value="manejarCambioModo"
           >
             <q-tab name="ingreso" label="Ingresar" />
             <q-tab name="registro" label="Crear cuenta" />
@@ -41,6 +42,7 @@
               dense
               autocomplete="email"
               :rules="[validarCorreo]"
+              :disable="modo === 'vinculacionGoogle'"
               lazy-rules
             />
             <q-input
@@ -92,6 +94,29 @@
                 <span>{{ etiquetaBoton }}</span>
               </template>
             </q-btn>
+            <template v-if="modo === 'ingreso' || modo === 'registro'">
+              <q-separator />
+              <q-btn
+                class="boton-autenticacion boton-google"
+                outline
+                no-caps
+                icon="account_circle"
+                type="button"
+                label="Continuar con Google"
+                :loading="usuarioStore.cargandoAccion"
+                :disable="usuarioStore.cargandoAccion"
+                @click="manejarIngresoGoogle"
+              />
+            </template>
+            <q-btn
+              v-if="modo === 'vinculacionGoogle'"
+              flat
+              no-caps
+              type="button"
+              label="Volver a ingresar"
+              :disable="usuarioStore.cargandoAccion"
+              @click="volverAIngreso"
+            />
           </q-form>
         </q-card-section>
       </q-card>
@@ -124,6 +149,7 @@ const mensajeErrorLocal = ref('')
 const tituloModo = computed(() => {
   if (modo.value === 'registro') return 'Crear cuenta'
   if (modo.value === 'recuperacion') return 'Recuperar acceso'
+  if (modo.value === 'vinculacionGoogle') return 'Vincular cuenta de Google'
   return 'Ingresar'
 })
 const textoModo = computed(() => {
@@ -131,17 +157,22 @@ const textoModo = computed(() => {
   if (modo.value === 'recuperacion') {
     return 'Ingresá tu correo y te enviaremos un enlace para recuperar el acceso.'
   }
+  if (modo.value === 'vinculacionGoogle') {
+    return 'Esta cuenta ya usa contraseña. Ingresala para vincular Google sin perder tus datos.'
+  }
   return 'Entrá para usar tus datos locales de Precio Justo.'
 })
 const etiquetaBoton = computed(() => {
   if (usuarioStore.cargandoAccion) {
     if (modo.value === 'registro') return 'Creando cuenta…'
     if (modo.value === 'recuperacion') return 'Enviando…'
+    if (modo.value === 'vinculacionGoogle') return 'Vinculando…'
     return 'Ingresando…'
   }
 
   if (modo.value === 'registro') return 'Crear cuenta'
   if (modo.value === 'recuperacion') return 'Enviar correo'
+  if (modo.value === 'vinculacionGoogle') return 'Vincular Google'
   return 'Ingresar'
 })
 const mensajeError = computed(() => mensajeErrorLocal.value || usuarioStore.error)
@@ -155,6 +186,21 @@ function validarCorreo(valor) {
   const correoNormalizado = String(valor || '').trim()
   if (!correoNormalizado) return MENSAJES_VALIDACION_AUTH.correoVacio
   return esCorreoValido(correoNormalizado) || MENSAJES_VALIDACION_AUTH.correoInvalido
+}
+
+function manejarCambioModo(nuevoModo) {
+  if (nuevoModo !== 'vinculacionGoogle') {
+    usuarioStore.cancelarVinculacionGoogle()
+  }
+
+  limpiarEstadoFormulario()
+}
+
+function volverAIngreso() {
+  usuarioStore.cancelarVinculacionGoogle()
+  contrasena.value = ''
+  modo.value = 'ingreso'
+  limpiarEstadoFormulario()
 }
 
 function validarContrasena(valor) {
@@ -182,6 +228,15 @@ async function enviarFormulario() {
   try {
     if (!validarCamposFormulario()) return
 
+    if (modo.value === 'vinculacionGoogle') {
+      await usuarioStore.vincularGoogleConCorreo({
+        correo: correo.value,
+        contrasena: contrasena.value,
+      })
+      await router.replace(obtenerRutaDestino())
+      return
+    }
+
     if (modo.value === 'registro') {
       await usuarioStore.registrarUsuario({
         correo: correo.value,
@@ -208,6 +263,24 @@ async function enviarFormulario() {
     })
     await router.replace(obtenerRutaDestino())
   } catch (error) {
+    mensajeErrorLocal.value = error.message || 'No se pudo completar la autenticación.'
+  }
+}
+
+async function manejarIngresoGoogle() {
+  limpiarEstadoFormulario()
+
+  try {
+    await usuarioStore.iniciarSesionConGoogle()
+    await router.replace(obtenerRutaDestino())
+  } catch (error) {
+    if (error.code === 'auth/account-exists-with-different-credential') {
+      correo.value = error.correo || correo.value
+      contrasena.value = ''
+      confirmacionContrasena.value = ''
+      modo.value = 'vinculacionGoogle'
+    }
+
     mensajeErrorLocal.value = error.message || 'No se pudo completar la autenticación.'
   }
 }
@@ -285,6 +358,10 @@ function validarCamposFormulario() {
 }
 .boton-autenticacion {
   min-height: 42px;
+}
+.boton-google {
+  color: var(--texto-primario);
+  border-color: var(--borde-color);
 }
 @media (max-width: 480px) {
   .autenticacion-page {

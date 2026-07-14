@@ -1,7 +1,11 @@
 {
   "auth": {
     "providers": {
-      "emailPassword": true
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "Precio Justo",
+        "supportEmail": "leodevapps.75@gmail.com"
+      }
     }
   },
   "firestore": {
