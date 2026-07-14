@@ -12,7 +12,20 @@
           "package_name": "com.preciojusto.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "809147089510-a95i4m94e7i07tt8mikglk5fa9609cgu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.preciojusto.app",
+            "certificate_hash": "cb16954d0c8c713776584a76e8b35f56e504ade2"
+          }
+        },
+        {
+          "client_id": "809147089510-1mdj0qu9ul13goh481khukkp70iov5f5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDHoBtorx6be6VK-GB3KHWMWvYe3RE9YcY"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "809147089510-1mdj0qu9ul13goh481khukkp70iov5f5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
