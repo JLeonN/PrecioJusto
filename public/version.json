@@ -1,5 +1,5 @@
 {
-  "versionDisponible": "1.2.15",
+  "versionDisponible": "1.2.16",
   "urlPlayStore": "https://play.google.com/store/apps/details?id=com.preciojusto.app",
   "mostrarActualizacion": true,
   "cambios": {
@@ -7,9 +7,9 @@
       {
         "apartado": "Novedades",
         "novedades": [
-          "Ahora podés completar tu perfil con país y género de forma opcional.",
-          "La sección Gracias permite apoyar la app mirando un video o compartiéndola.",
-          "Los contadores de apoyo ahora muestran videos vistos y veces compartida de forma más clara."
+          "Ahora podés ingresar con tu cuenta de Google.",
+          "Si ya usabas correo y contraseña, podés vincular Google sin perder tus datos.",
+          "Mejoramos el registro de apoyos al compartir la app."
         ]
       }
     ]

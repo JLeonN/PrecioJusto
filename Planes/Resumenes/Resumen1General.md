@@ -1201,7 +1201,7 @@ H. Arquitectura y Código
 
 ### Estado Actual
 
-- **Versión:** 1.2.15
+- **Versión:** 1.2.16
 - **Almacenamiento:** Firebase/Firestore como fuente principal con respaldo local del dispositivo
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
@@ -1257,4 +1257,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 14 de Julio de 2026 — Se preparó el release `1.2.15` con acceso mediante Google en navegador y Android.
+**Última actualización:** 14 de Julio de 2026 — Se preparó el release `1.2.16` con las novedades de acceso y apoyo listas para mostrar en la app.
