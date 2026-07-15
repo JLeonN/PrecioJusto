@@ -5,6 +5,7 @@
 
 import productosService from './ProductosService.js'
 import buscadorProductosService from './BuscadorProductosService.js'
+import firestoreCatalogoCompartidoService from './FirestoreCatalogoCompartidoService.js'
 import openFoodFactsService from './OpenFoodFactsService.js'
 
 /** Etiqueta mostrada en resultados y formulario (coincide con origen local) */
@@ -29,12 +30,26 @@ function mapearProductoLocalParaDialogo(producto) {
   }
 }
 
+function mapearProductoCatalogoParaDialogo(producto) {
+  if (!producto) return null
+  return {
+    nombre: producto.nombre || '',
+    marca: producto.marca || '',
+    codigoBarras: producto.codigoBarras || '',
+    cantidad: producto.cantidad ?? 1,
+    unidad: producto.unidad || 'unidad',
+    categoria: producto.categoria || '',
+    imagen: producto.imagenUrl || null,
+    fotoFuente: producto.imagenUrl ? 'api' : null,
+  }
+}
+
 class BusquedaProductosHibridaService {
   /**
    * @param {string} codigo
    * @param {{ forzarApi?: boolean, onAntesLlamadaApi?: () => void }} [options]
    * @returns {Promise<{
-   *   origen: 'local' | 'api' | 'ninguno',
+   *   origen: 'local' | 'catalogo' | 'api' | 'ninguno',
    *   productoLocal: Object | null,
    *   resultadoApi: { producto: Object, fuenteDato: string } | null,
    *   itemsParaDialogo: Array,
@@ -64,6 +79,21 @@ class BusquedaProductosHibridaService {
         resultadoApi: null,
         itemsParaDialogo: item ? [item] : [],
         puedeEnriquecerConApi: true,
+      }
+    }
+
+    if (!forzarApi) {
+      const productoCatalogo = await firestoreCatalogoCompartidoService.obtenerProductoPorCodigo(c)
+      const itemCatalogo = mapearProductoCatalogoParaDialogo(productoCatalogo)
+
+      if (itemCatalogo) {
+        return {
+          origen: 'catalogo',
+          productoLocal: productoLocal || null,
+          resultadoApi: null,
+          itemsParaDialogo: [itemCatalogo],
+          puedeEnriquecerConApi: false,
+        }
       }
     }
 

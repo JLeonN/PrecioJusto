@@ -243,6 +243,43 @@ Recomendación:
 
 ---
 
+### Catálogo Compartido Por GTIN
+
+Cuando una app necesita reutilizar datos generales de productos entre usuarios, crear una colección global separada de las rutas privadas:
+
+```text
+catalogoCompartidoProductos/{codigoBarras}
+```
+
+No reutilizar documentos ni fotos bajo `usuarios/{uid}`. El catálogo solo puede contener datos identificatorios sin UID, correo, precios, comercios, listas ni metadata privada.
+
+Contrato recomendado:
+
+```text
+codigoBarras
+nombre
+cantidad
+unidad
+marca opcional
+categoria opcional
+imagenUrl opcional de API pública
+origenCatalogo: api | manual
+fechaCreacion
+fechaActualizacion
+```
+
+Usar GTIN-8, GTIN-12, GTIN-13 o GTIN-14 como ID del documento. El cliente debe normalizar el código y validar su dígito verificador antes de consultar o publicar. Las reglas deben validar formato numérico, longitud, campos y coincidencia entre ID y `codigoBarras`; no sustituir la validación de dígito verificador del cliente.
+
+La búsqueda debe ser puntual con `get` por código exacto. Permitir `get` autenticado y denegar `list` evita descargar o enumerar el catálogo completo.
+
+Para crear o completar una ficha, usar `runTransaction`: leer el documento, crear si no existe y completar solo campos vacíos. No permitir que una edición privada reemplace datos comunitarios ya existentes. La transacción requiere conexión; si falla u opera offline, guardar el producto privado y omitir el aporte sin bloquear al usuario.
+
+La publicación debe ocurrir solo al crear un producto o modificar datos identificatorios. No dispararla al agregar precios, comercios, confirmaciones o interacciones. No hacer una migración masiva inicial si la cuota gratuita es una prioridad.
+
+Una foto tomada o elegida por el usuario sigue siendo privada aunque esté comprimida. Solo compartir `imagenUrl` cuando provenga de una API pública; no publicar base64, rutas de Storage ni documentos de imagen bajo `usuarios/{uid}`.
+
+---
+
 ## Reglas Firestore Recomendadas
 
 La seguridad real está en Firestore Rules, no en la UI.

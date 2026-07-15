@@ -67,6 +67,7 @@ export const DATOS_LOCALES_NO_SINCRONIZABLES = Object.freeze([
 ])
 
 export const COLECCIONES_FIRESTORE_FUTURAS = Object.freeze({
+  productosCatalogoCompartido: 'catalogoCompartidoProductos',
   productosPrivados: 'usuarios/{usuarioId}/productos',
   preciosPrivados: 'usuarios/{usuarioId}/productos/{productoId}/precios',
   comerciosPrivados: 'usuarios/{usuarioId}/comercios',
@@ -101,6 +102,11 @@ export const RUTAS_FIRESTORE_PRIVADAS = Object.freeze({
   migracion: 'usuarios/{usuarioId}/configuracion/migracionLocal',
 })
 
+export const RUTAS_FIRESTORE_CATALOGO_COMPARTIDO = Object.freeze({
+  productos: 'catalogoCompartidoProductos',
+  producto: 'catalogoCompartidoProductos/{codigoBarras}',
+})
+
 export const LIMITES_MODELO_FIRESTORE = Object.freeze({
   itemsListaEmbebidosMaximo: 100,
   direccionesComercioEmbebidasMaximo: 50,
@@ -110,6 +116,18 @@ export const LIMITES_MODELO_FIRESTORE = Object.freeze({
 })
 
 export const CAMPOS_MODELO_FIRESTORE = Object.freeze({
+  productoCatalogoCompartido: Object.freeze([
+    'codigoBarras',
+    'nombre',
+    'cantidad',
+    'unidad',
+    'marca',
+    'categoria',
+    'imagenUrl',
+    'origenCatalogo',
+    'fechaCreacion',
+    'fechaActualizacion',
+  ]),
   producto: Object.freeze([
     'id',
     'usuarioId',

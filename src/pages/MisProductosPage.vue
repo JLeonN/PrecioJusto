@@ -259,8 +259,7 @@ import { useSesionEscaneoStore } from '../almacenamiento/stores/sesionEscaneoSto
 import { usePreferenciasStore } from '../almacenamiento/stores/preferenciasStore.js'
 import { useSeleccionMultiple } from '../composables/useSeleccionMultiple.js'
 import { useDialogoAgregarPrecio } from '../composables/useDialogoAgregarPrecio.js'
-import buscadorProductosService from '../almacenamiento/servicios/BuscadorProductosService.js'
-import productosService from '../almacenamiento/servicios/ProductosService.js'
+import busquedaProductosHibridaService from '../almacenamiento/servicios/BusquedaProductosHibridaService.js'
 import { useQuasar } from 'quasar'
 
 const productosStore = useProductosStore()
@@ -335,25 +334,36 @@ function construirItem(codigo, existente, productoApi, resultadoApi) {
     imagen: productoApi?.imagen || existente?.imagen || null,
     precio: null,
     moneda: preferenciasStore.monedaDefaultEfectiva,
-    origenApi: !!productoApi,
+    origenApi: Boolean(resultadoApi?.producto),
     fuenteDato: resultadoApi?.fuenteDato || null,
     sinCoincidencia,
   }
 }
 
-// Busca en BD local; solo llama APIs si no hay producto local (plan búsqueda local primero)
+// Busca por código con el mismo orden que el resto de flujos de producto.
 async function buscarProducto(codigo) {
-  const existente = await productosService.buscarPorCodigoBarras(codigo)
-  let resultadoApi = null
-  if (!existente) {
-    escaneoConsultandoApi.value = true
-    try {
-      resultadoApi = await buscadorProductosService.buscarPorCodigo(codigo)
-    } finally {
-      escaneoConsultandoApi.value = false
-    }
+  let respuesta
+  try {
+    respuesta = await busquedaProductosHibridaService.buscarPorCodigoConPolitica(codigo, {
+      forzarApi: false,
+      onAntesLlamadaApi: () => {
+        escaneoConsultandoApi.value = true
+      },
+    })
+  } finally {
+    escaneoConsultandoApi.value = false
   }
-  return construirItem(codigo, existente, resultadoApi?.producto || null, resultadoApi)
+
+  const productoExterno = ['catalogo', 'api'].includes(respuesta.origen)
+    ? respuesta.itemsParaDialogo[0] || null
+    : null
+
+  return construirItem(
+    codigo,
+    respuesta.productoLocal,
+    productoExterno,
+    respuesta.resultadoApi,
+  )
 }
 
 // Fire-and-forget: busca en background y agrega a la mesa cuando termina (solo Ráfaga)

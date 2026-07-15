@@ -21,12 +21,14 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { ESTADOS_SINCRONIZACION } from '../constantes/PreparacionFirebase.js'
 import fotosLegacyCacheService from '../servicios/FotosLegacyCacheService.js'
+import firestoreCatalogoCompartidoService from '../servicios/FirestoreCatalogoCompartidoService.js'
 import firestoreImagenesProductosService from '../servicios/FirestoreImagenesProductosService.js'
 import firestorePreciosService from '../servicios/FirestorePreciosService.js'
 import fuentePrincipalFirestoreService from '../servicios/FuentePrincipalFirestoreService.js'
 import productosService from '../servicios/ProductosService.js'
 import reconciliacionFirestoreLocalService from '../servicios/ReconciliacionFirestoreLocalService.js'
 import sincronizacionIncrementalFirestoreService from '../servicios/SincronizacionIncrementalFirestoreService.js'
+import { tieneCambiosCatalogoCompartido } from '../../utils/CatalogoCompartidoUtils.js'
 import { useUsuarioStore } from './UsuarioStore.js'
 
 const TIEMPO_MINIMO_REFRESCO_FIRESTORE_MS = 3 * 60 * 1000
@@ -69,6 +71,14 @@ export const useProductosStore = defineStore('productos', () => {
       fuentePrincipalFirestoreService.DOMINIOS.PRODUCTOS,
     ),
   )
+
+  function publicarProductoEnCatalogoCompartido(producto) {
+    if (!producto) return
+
+    firestoreCatalogoCompartidoService.publicarProducto(producto).catch((error) => {
+      console.warn('No se pudo aportar el producto al catálogo compartido:', error)
+    })
+  }
 
   // ========================================
   // 🧮 COMPUTED (GETTERS)
@@ -363,6 +373,7 @@ export const useProductosStore = defineStore('productos', () => {
         registrarResultadoSincronizacion(productoGuardado)
         // Agregar al estado local
         productos.value.push(productoGuardado)
+        publicarProductoEnCatalogoCompartido(productoGuardado)
         console.log('✅ Producto agregado al store')
         return productoGuardado
       }
@@ -477,6 +488,9 @@ export const useProductosStore = defineStore('productos', () => {
         const index = productos.value.findIndex((p) => p.id === productoId)
         if (index !== -1) {
           productos.value[index] = guardado
+        }
+        if (tieneCambiosCatalogoCompartido(datosActualizados)) {
+          publicarProductoEnCatalogoCompartido(guardado)
         }
 
         console.log('✅ Producto actualizado en el store')

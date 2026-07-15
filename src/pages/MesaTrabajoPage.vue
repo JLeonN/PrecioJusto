@@ -413,6 +413,7 @@ async function _guardarItem(item) {
       marca: item.marca,
       cantidad: item.cantidad,
       unidad: item.unidad,
+      fuenteDato: item.origenApi ? item.fuenteDato || 'API' : null,
     })
   } else {
     const productoGuardado = await productosStore.agregarProducto({
@@ -423,6 +424,7 @@ async function _guardarItem(item) {
       marca: item.marca,
       cantidad: item.cantidad,
       unidad: item.unidad,
+      fuenteDato: item.origenApi ? item.fuenteDato || 'API' : null,
       precios: [datoPrecio],
     })
     productoDestinoId = productoGuardado?.id || null

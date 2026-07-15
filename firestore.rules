@@ -10,6 +10,81 @@ service cloud.firestore {
       return estaAutenticado() && request.auth.uid == usuarioId;
     }
 
+    function esCodigoCatalogoAdmitido(codigoBarras) {
+      return codigoBarras is string
+        && codigoBarras.matches('^[0-9]{8}$|^[0-9]{12}$|^[0-9]{13}$|^[0-9]{14}$');
+    }
+
+    function tieneCamposCatalogoPermitidos() {
+      return request.resource.data.keys().hasOnly([
+        'codigoBarras',
+        'nombre',
+        'cantidad',
+        'unidad',
+        'marca',
+        'categoria',
+        'imagenUrl',
+        'origenCatalogo',
+        'fechaCreacion',
+        'fechaActualizacion',
+      ]);
+    }
+
+    function tieneFichaCatalogoValida(codigoBarras) {
+      return tieneCamposCatalogoPermitidos()
+        && request.resource.data.keys().hasAll([
+          'codigoBarras',
+          'nombre',
+          'cantidad',
+          'unidad',
+          'origenCatalogo',
+          'fechaCreacion',
+          'fechaActualizacion',
+        ])
+        && request.resource.data.codigoBarras == codigoBarras
+        && esCodigoCatalogoAdmitido(codigoBarras)
+        && request.resource.data.nombre is string
+        && request.resource.data.nombre.size() > 0
+        && request.resource.data.nombre.size() <= 200
+        && request.resource.data.cantidad is number
+        && request.resource.data.cantidad > 0
+        && request.resource.data.unidad is string
+        && request.resource.data.unidad.size() > 0
+        && request.resource.data.unidad.size() <= 50
+        && request.resource.data.get('marca', '') is string
+        && request.resource.data.get('marca', '').size() <= 100
+        && request.resource.data.get('categoria', '') is string
+        && request.resource.data.get('categoria', '').size() <= 100
+        && request.resource.data.get('imagenUrl', '') is string
+        && (request.resource.data.get('imagenUrl', '') == ''
+          || request.resource.data.get('imagenUrl', '').matches('^https?://.*'))
+        && request.resource.data.origenCatalogo in ['api', 'manual'];
+    }
+
+    function soloCompletaCamposVacios() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'marca',
+        'categoria',
+        'imagenUrl',
+        'fechaActualizacion',
+      ])
+        && (resource.data.get('marca', '') == ''
+          || request.resource.data.get('marca', '') == resource.data.get('marca', ''))
+        && (resource.data.get('categoria', '') == ''
+          || request.resource.data.get('categoria', '') == resource.data.get('categoria', ''))
+        && (resource.data.get('imagenUrl', '') == ''
+          || request.resource.data.get('imagenUrl', '') == resource.data.get('imagenUrl', ''));
+    }
+
+    match /catalogoCompartidoProductos/{codigoBarras} {
+      allow get: if estaAutenticado();
+      allow list: if false;
+      allow create: if estaAutenticado() && tieneFichaCatalogoValida(codigoBarras);
+      allow update: if estaAutenticado()
+        && tieneFichaCatalogoValida(codigoBarras)
+        && soloCompletaCamposVacios();
+    }
+
     // Datos privados de cada usuario. Todo nuevo dominio privado debe quedar debajo de esta ruta.
     match /usuarios/{usuarioId} {
       allow read, write: if esDueno(usuarioId);
