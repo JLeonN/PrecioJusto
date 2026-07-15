@@ -20,7 +20,7 @@ Este manual asume que se quiere mantener la app dentro del plan gratis de Fireba
 
 Servicios recomendados para este enfoque:
 
-- Firebase Auth con correo y contraseña.
+- Firebase Auth con correo y contraseña y, si aporta valor, Google Sign-In.
 - Cloud Firestore para datos privados del usuario.
 - Firestore Offline para cache local y escrituras pendientes.
 - Firebase Security Rules para aislar datos por usuario.
@@ -43,7 +43,7 @@ Regla práctica:
 
 Al terminar una integración correcta, la app debería tener:
 
-- Login, registro, recuperación de contraseña y logout.
+- Login, registro, recuperación de contraseña, Google Sign-In y logout.
 - Sesión persistente entre recargas.
 - Datos privados guardados bajo el UID de Firebase Auth.
 - Firestore como fuente principal cuando hay usuario autenticado.
@@ -292,11 +292,12 @@ Orden recomendado:
 
 1. Crear proyecto Firebase.
 2. Activar proveedor de correo y contraseña.
-3. Crear service de Auth.
-4. Crear store de usuario.
-5. Crear página de acceso.
-6. Proteger rutas.
-7. Probar registro, login, persistencia y logout.
+3. Activar Google solo si la app necesita acceso rápido sin contraseña.
+4. Crear service de Auth.
+5. Crear store de usuario.
+6. Crear página de acceso.
+7. Proteger rutas.
+8. Probar registro, login, persistencia y logout.
 
 El store de usuario debería tener:
 
@@ -310,6 +311,8 @@ El store de usuario debería tener:
 - `esperarSesionLista`
 - `registrarUsuario`
 - `iniciarSesion`
+- `iniciarSesionConGoogle`
+- `vincularGoogleConCorreo`
 - `cerrarSesion`
 - `recuperarContrasena`
 
@@ -329,6 +332,93 @@ Al cerrar sesión:
 Error común:
 
 > Cerrar sesión sin limpiar stores deja datos del usuario anterior visibles en pantalla.
+
+### Inicio De Sesión Con Google
+
+Google Sign-In puede seguir dentro del plan gratis y conviene tratarlo como otro proveedor de Firebase Auth, no como una sesión paralela de Google.
+
+Objetivo de arquitectura:
+
+```text
+Pantalla de acceso
+  -> UsuarioStore
+    -> AutenticacionFirebaseService
+      -> Firebase Auth
+        -> UsuarioActualService + stores privados + caché uid-{usuarioId}
+```
+
+La UI nunca debe importar Firebase ni el plugin nativo directamente. El resultado final siempre debe ser una única sesión de Firebase Auth, para que `onAuthStateChanged`, el UID, los stores y Firestore sigan el mismo flujo que correo y contraseña.
+
+#### Configuración En Firebase
+
+1. Activar **Google** en Firebase Authentication, sin desactivar correo y contraseña si ambos métodos se mantienen.
+2. Definir un nombre visible y correo de soporte para la pantalla de consentimiento.
+3. En Authentication, agregar los dominios autorizados de cada entorno web. Para desarrollo usar `localhost`, sin puerto. Agregar también el dominio real publicado, por ejemplo GitHub Pages.
+4. Registrar la app Android con el `applicationId` exacto.
+5. Agregar SHA-1 y SHA-256 de cada certificado que firma la app: debug para pruebas USB, release y firma de Google Play si la tienda vuelve a firmar el AAB.
+6. Descargar nuevamente `google-services.json` después de agregar las huellas y reemplazar el archivo Android local.
+
+No copiar claves privadas ni credenciales de OAuth al repositorio, al manual ni a archivos de la UI.
+
+#### Flujo Web Y Android
+
+En navegador, iniciar el flujo desde el toque del usuario con `signInWithPopup` y un `GoogleAuthProvider`. Pedir selección de cuenta evita que el navegador reutilice silenciosamente una cuenta no deseada.
+
+En Android con Capacitor, usar un plugin nativo compatible con la versión de Capacitor. El selector nativo obtiene el ID token de Google y la capa de servicio lo transforma en una credencial de Firebase JavaScript mediante `GoogleAuthProvider.credential(...)` y `signInWithCredential(...)`.
+
+Usar `skipNativeAuth: true` cuando el resto de la app usa Firebase JavaScript. Así no se crean dos sesiones diferentes: el plugin solo obtiene la identidad de Google y Firebase JavaScript conserva la sesión que observan stores y services.
+
+Configuración orientativa de Capacitor:
+
+```json
+{
+  "plugins": {
+    "FirebaseAuthentication": {
+      "skipNativeAuth": true,
+      "providers": ["google.com"]
+    }
+  }
+}
+```
+
+Después de modificar plugins, `google-services.json` o dependencias nativas, ejecutar sincronización de Capacitor y probar en un celular real. El navegador no valida la configuración OAuth de Android.
+
+#### Cuentas Existentes Y UID
+
+No crear una cuenta nueva ni cambiar el UID cuando el correo de Google ya pertenece a una cuenta creada con correo y contraseña.
+
+Flujo recomendado ante `auth/account-exists-with-different-credential`:
+
+1. Conservar temporalmente la credencial Google pendiente solo en memoria.
+2. Pedir la contraseña de la cuenta existente para confirmar que el usuario es su dueño.
+3. Iniciar sesión con correo y contraseña.
+4. Ejecutar `linkWithCredential(usuario, credencialGooglePendiente)`.
+5. Limpiar la credencial pendiente y continuar con el mismo UID, stores y caché `uid-{usuarioId}`.
+
+Si el usuario vuelve atrás o cancela, limpiar la credencial pendiente. Nunca guardar esa credencial en IndexedDB, Preferences, localStorage ni Firestore.
+
+#### Errores Y Diagnóstico
+
+Traducir errores a mensajes claros. No mostrar códigos internos de Firebase al usuario.
+
+- Cancelación del selector o popup cerrado: informar que el ingreso fue cancelado, sin marcarlo como fallo grave.
+- Popup bloqueado: pedir permitir ventanas emergentes y reintentar desde el botón.
+- Sin red: informar que se necesita conexión.
+- Proveedor deshabilitado u origen no autorizado: informar que el método no está disponible y revisar Firebase.
+- Cuenta existente con otro método: pedir contraseña para vincular Google, no registrar otra cuenta.
+- Android sin selector o con error de configuración: revisar `applicationId`, SHA-1, SHA-256 y que el `google-services.json` renovado incluya clientes OAuth Android y web.
+
+Regla práctica:
+
+> Si Android informa que la aplicación no está registrada para OAuth, el problema está en paquete, certificado o `google-services.json`; no en el botón Vue.
+
+#### Pruebas Mínimas De Google Sign-In
+
+- Navegador: cuenta Google nueva, cuenta existente, cancelación, popup bloqueado, persistencia, logout y redirección a la ruta original.
+- Cuenta existente: correo y contraseña más Google con el mismo correo conserva UID y caché local.
+- Android real: selector de cuentas, cancelación, retorno a la app, reinicio, logout y reingreso.
+- Configuración: Google activo en Auth, dominios web autorizados y `google-services.json` actualizado con OAuth Android.
+- Release Android: comprobar la huella de la firma release y, si aplica, la huella de firma de Google Play antes de publicar.
 
 ---
 
@@ -1763,6 +1853,7 @@ Firebase base:
 
 - Proyecto Firebase nuevo creado.
 - Auth activado con correo y contraseña.
+- Google activado si se ofrece inicio rápido sin contraseña.
 - Firestore creado.
 - App web registrada.
 - App Android registrada si aplica.
@@ -1772,11 +1863,15 @@ Firebase base:
 - Workflow de Pages valida variables Firebase antes de compilar.
 - Paso `npm run build` del workflow recibe las variables Firebase en `env`.
 - `google-services.json` actualizado si hay Android.
+- SHA-1 y SHA-256 registradas para debug, release y Google Play si aplica.
+- Dominios de desarrollo y producción autorizados para OAuth web.
 
 Auth:
 
 - Registro funciona.
 - Login funciona.
+- Google Sign-In funciona en navegador y Android si está habilitado.
+- Vincular Google a una cuenta existente conserva el UID y los datos locales.
 - Logout funciona.
 - Recuperación de contraseña funciona.
 - Sesión persiste al recargar.
@@ -1853,6 +1948,15 @@ Probar con cuenta B:
 - Confirmar que no ve datos de cuenta A.
 - Crear dato propio.
 - Confirmar que cuenta A no lo ve.
+
+Probar Google Sign-In:
+
+- Ingresar con una cuenta Google nueva.
+- Ingresar con una cuenta Google existente.
+- Vincular Google a una cuenta creada con correo y contraseña y confirmar que mantiene el mismo UID.
+- Cancelar el selector y confirmar que la pantalla sigue usable.
+- En navegador, probar dominio publicado y `localhost`.
+- En Android, probar selector nativo con APK debug y con la firma que se publicará.
 
 Probar en celular:
 
