@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-pa-md">
+  <q-page class="pagina-gracias">
     <div class="contenedor-gracias">
       <div class="icono-corazon" :class="{ 'icono-corazon-activo': animarCorazon }">
         <IconHeart :size="76" />
@@ -38,16 +38,11 @@
         />
       </div>
 
-      <div v-if="tieneApoyos" class="resumen-apoyos">
+      <div v-if="apoyos.graciasVideo > 0" class="resumen-apoyos">
         <div class="contador-apoyo contador-videos">
           <q-icon name="favorite" size="22px" />
           <strong class="numero-apoyo">{{ apoyos.graciasVideo }}</strong>
           <span class="etiqueta-apoyo">{{ etiquetaVideos }}</span>
-        </div>
-        <div class="contador-apoyo contador-compartidos">
-          <q-icon name="share" size="22px" />
-          <strong class="numero-apoyo">{{ apoyos.compartidosIniciados }}</strong>
-          <span class="etiqueta-apoyo">{{ etiquetaCompartidos }}</span>
         </div>
       </div>
     </div>
@@ -78,16 +73,10 @@ const animarCorazon = ref(false)
 const esPlataformaNativa = Capacitor.isNativePlatform()
 const compartirNativoDisponible = ref(false)
 
-const tieneApoyos = computed(
-  () => apoyos.value.graciasVideo > 0 || apoyos.value.compartidosIniciados > 0,
-)
 const etiquetaCompartir = computed(() =>
   compartirNativoDisponible.value ? 'Compartir la app' : 'Copiar enlace',
 )
 const etiquetaVideos = computed(() => (apoyos.value.graciasVideo === 1 ? 'video visto' : 'videos vistos'))
-const etiquetaCompartidos = computed(() =>
-  apoyos.value.compartidosIniciados === 1 ? 'vez compartida' : 'veces compartida',
-)
 
 onMounted(async () => {
   apoyos.value = await apoyosAppService.obtenerApoyos()
@@ -198,14 +187,15 @@ function obtenerMensajeGracias(contadorGracias) {
 </script>
 
 <style scoped>
+.pagina-gracias {
+  padding: 24px 16px 16px;
+}
 .contenedor-gracias {
-  min-height: calc(100vh - 180px);
   max-width: 520px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   text-align: center;
   gap: 12px;
 }
@@ -254,7 +244,7 @@ function obtenerMensajeGracias(contadorGracias) {
 .resumen-apoyos {
   width: min(100%, 330px);
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   margin-top: 4px;
   padding: 12px 0;
   border-top: 1px solid var(--borde-color);
@@ -268,10 +258,6 @@ function obtenerMensajeGracias(contadorGracias) {
 }
 .contador-videos {
   color: var(--color-error);
-}
-.contador-compartidos {
-  color: var(--color-secundario);
-  border-left: 1px solid var(--borde-color);
 }
 .numero-apoyo {
   font-size: 1.55rem;
