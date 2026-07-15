@@ -2,113 +2,150 @@
 
 ## Descripción del plan
 
-Incorporar un catálogo técnico compartido en Firebase Firestore para reutilizar datos generales de productos entre usuarios. El catálogo será un respaldo de búsqueda entre los productos privados del usuario y las APIs externas. Los precios, comercios, listas, fotos privadas y datos del usuario seguirán siendo privados.
+Incorporar un catálogo técnico compartido en Firebase Firestore para reutilizar datos generales de productos entre usuarios. El catálogo será un respaldo de búsqueda por código de barras entre los productos privados del usuario y las APIs externas. Los precios, comercios, listas, fotos privadas y datos del usuario seguirán siendo privados.
 
 ## Objetivo principal
 
-- Consultar datos reutilizables de productos por código de barras sin descargar un catálogo completo.
-- Evitar duplicados comunitarios usando el código de barras normalizado como identificador único.
-- Mantener separados los datos compartidos de los datos privados de cada usuario.
-- Permitir que un producto comunitario incompleto reciba únicamente datos faltantes, sin sobrescribir automáticamente datos ya publicados.
+- Consultar una ficha compartida por código de barras sin descargar ni recorrer el catálogo completo.
+- Mantener un único documento por GTIN válido y evitar duplicados o sobrescrituras entre usuarios.
+- Conservar aislados los productos privados y toda la sincronización Firebase actual.
+- Publicar solamente fichas que tengan código de barras, nombre, cantidad y unidad.
 
 ## Reglas del plan
 
-- El orden de búsqueda será: Mis productos, catálogo compartido Firestore, APIs externas y creación manual.
-- El catálogo comunitario solo contendrá datos generales de identificación del producto; nunca precios, monedas, comercios, listas, fotos privadas, UID, correo ni datos del autor.
-- La clave comunitaria será el código de barras normalizado. Productos sin código de barras válido permanecen privados y no se publican.
-- La edición privada de un producto no debe alterar datos comunitarios ya existentes. Solo se podrán completar campos comunitarios que estén vacíos.
-- Respetar la arquitectura local-first existente: la interfaz conserva la respuesta local inmediata y las consultas remotas se ejecutan como respaldo.
+- El orden de búsqueda por código será: Mis productos, catálogo compartido Firestore, APIs externas y creación manual.
+- La búsqueda por nombre conserva su comportamiento actual y no consulta el catálogo compartido.
+- La clave comunitaria será un GTIN normalizado y validado. Solo se aceptarán GTIN-8, GTIN-12, GTIN-13 o GTIN-14 con dígito verificador correcto.
+- Cada ficha comunitaria deberá tener `codigoBarras`, `nombre`, `cantidad` y `unidad`. Marca y categoría son opcionales.
+- `imagenUrl` será opcional y solo podrá ser una URL HTTP(S) recibida de una API. Nunca se publicarán base64, fotos locales, rutas de Storage ni metadatos de fotos privadas.
+- El catálogo no contendrá precios, monedas, comercios, listas, UID, correo, fotos privadas ni datos del autor.
+- Una ficha compartida solo se puede crear o completar; los valores comunitarios ya existentes no se reemplazan desde una edición privada.
+- Solo usuarios Firebase autenticados podrán consultar o aportar al catálogo. Usuarios locales conservan el flujo actual y omiten esta fuente.
+- La publicación comunitaria es oportunista: no habrá migración masiva de productos existentes ni cola offline en esta versión. Un fallo remoto nunca impedirá guardar el producto privado.
+- Respetar la arquitectura local-first: el catálogo es una fuente de respaldo y no participa de la reconciliación de colecciones privadas.
 
-## FASE 1: Definir contrato y límites del catálogo
+## FASE 1: Definir contrato y validación comunitaria
 
 ### Objetivo
 
-Establecer el modelo comunitario mínimo, las condiciones de publicación y los límites de seguridad antes de modificar servicios o reglas.
+Dejar definido el documento compartido, la validación exclusiva de catálogo y los puntos de publicación sin alterar reglas privadas existentes.
 
-- [ ] Revisar el modelo actual de producto, la normalización de código de barras y los puntos reales de guardado manual y Mesa de trabajo.
-- [ ] Definir la ruta `catalogoCompartido/productos/{codigoBarrasNormalizado}` y documentar los campos compartidos permitidos: código de barras, nombre, marca, cantidad o presentación, categoría, imagen pública si corresponde, fechas técnicas y versión de datos.
-- [ ] Definir qué campos se consideran vacíos y pueden completarse sin reemplazar valores existentes.
-- [ ] Definir los requisitos mínimos para crear un documento comunitario incompleto: usuario autenticado, código de barras válido y campos con formato y longitud permitidos.
+- [ ] Consultar `Planes/Manuales/ManualFirebaseGratis.md` antes de implementar y actualizarlo al finalizar con el patrón confirmado.
+- [ ] Consultar `DatosLocalesProyectos.md` solo de forma local si está disponible, sin copiar, versionar ni exponer sus contenidos.
+- [ ] Definir la ruta `catalogoCompartido/productos/{codigoBarrasNormalizado}`.
+- [ ] Definir los campos permitidos: `codigoBarras`, `nombre`, `cantidad`, `unidad`, `marca`, `categoria`, `imagenUrl`, `origenCatalogo`, `fechaCreacion` y `fechaActualizacion`.
+- [ ] Definir `origenCatalogo` como metadato técnico limitado a `api` o `manual`, sin mostrar ni almacenar identidad del usuario.
+- [ ] Crear un validador de GTIN exclusivo para el catálogo, con normalización, longitudes admitidas y dígito verificador.
+- [ ] Mantener códigos no GTIN y formatos privados existentes funcionando en Mis productos sin publicarlos al catálogo.
+- [ ] Requerir código GTIN válido, nombre no vacío, cantidad mayor a cero y unidad no vacía antes de cualquier escritura comunitaria.
+- [ ] Definir que una imagen solo es apta si es una URL HTTP(S) externa proveniente de API; cualquier otra imagen queda privada.
 
 ## FASE 2: Crear acceso aislado al catálogo compartido
 
 ### Objetivo
 
-Incorporar un servicio de Firestore independiente de los productos privados para consultar, crear y completar fichas comunitarias por código de barras.
+Incorporar un servicio Firestore independiente de los productos privados para consultar, crear y completar fichas comunitarias por código exacto.
 
-- [ ] Crear un servicio con responsabilidades exclusivas de catálogo compartido, siguiendo los patrones de los servicios Firestore existentes.
-- [ ] Implementar consulta directa de un único documento por código de barras normalizado, sin consultas masivas ni carga inicial del catálogo.
-- [ ] Implementar creación idempotente para que varios usuarios que aporten el mismo código mantengan un único documento comunitario.
-- [ ] Implementar actualización limitada a campos vacíos y preservar los valores comunitarios ya existentes.
-- [ ] Mantener separado el resultado comunitario de las entidades privadas del almacenamiento local hasta que el usuario complete su propio flujo de guardado.
-- [ ] Registrar únicamente metadatos técnicos necesarios para depurar y ordenar datos, sin exponer identidad de usuarios.
+- [ ] Crear `FirestoreCatalogoCompartidoService.js` con responsabilidades exclusivas de catálogo compartido.
+- [ ] Agregar en `PreparacionFirebase.js` las rutas y campos exclusivos del catálogo, separados de las constantes privadas bajo `usuarios/{uid}`.
+- [ ] Implementar consulta directa de un único documento por referencia, sin `getDocs`, filtros, paginación ni carga inicial del catálogo.
+- [ ] Implementar creación y completado con `runTransaction` para leer la ficha, crearla si no existe y escribir únicamente los campos que estén vacíos.
+- [ ] Mantener la función de transacción sin cambios de estado de Vue o Pinia, porque Firestore puede reintentarla ante concurrencia.
+- [ ] Omitir la consulta y escritura comunitaria si el usuario actual es local, no está autenticado o el código no supera la validación GTIN.
+- [ ] Tratar un error, timeout u operación offline del catálogo como resultado omitido y permitir que el flujo continúe con la fuente siguiente o con el guardado privado.
 
-## FASE 3: Integrar la búsqueda de respaldo
-
-### Objetivo
-
-Usar el catálogo compartido como segunda fuente de datos en los flujos que hoy consultan productos locales y APIs.
-
-- [ ] Revisar `BusquedaProductosHibridaService.js` y centralizar allí la consulta al catálogo compartido entre la búsqueda local y las APIs externas.
-- [ ] Mantener las respuestas actuales de Mis productos como primera prioridad.
-- [ ] Cuando se encuentre una ficha comunitaria, devolverla con el mismo contrato de datos que consume el modal de agregar producto y los flujos de Lista Justa.
-- [ ] Completar automáticamente los campos del formulario con los datos comunitarios encontrados, sin mostrar un diálogo adicional.
-- [ ] Mantener la posibilidad de editar los campos en el modal antes de guardar.
-- [ ] Confirmar que el escaneo rápido y la ráfaga continúan enviando registros incompletos a Mesa de trabajo para su corrección.
-- [ ] Conservar el fallback a todas las APIs actuales si el catálogo compartido no tiene el código buscado.
-
-## FASE 4: Publicar y completar datos desde flujos privados
+## FASE 3: Integrar la búsqueda de respaldo por código
 
 ### Objetivo
 
-Publicar datos generales reutilizables sin modificar el comportamiento privado de productos, precios ni comercios.
+Usar el catálogo como segunda fuente solamente en la búsqueda exacta por código, sin alterar la búsqueda por nombre ni los flujos de APIs existentes.
 
-- [ ] Identificar el punto posterior al guardado local exitoso donde un producto manual con código de barras puede crear o completar la ficha comunitaria.
-- [ ] Publicar de forma silenciosa el producto cuando tenga código válido, sin agregar una confirmación visual adicional en el modal.
-- [ ] Permitir que una corrección hecha desde Mesa de trabajo complete campos comunitarios que estén vacíos.
-- [ ] Evitar que cambios de nombre, marca, presentación o imagen en un producto privado reemplacen datos comunitarios ya existentes.
-- [ ] Verificar que un fallo al publicar en el catálogo compartido no impida guardar el producto privado ni sus precios.
-- [ ] Mantener precios, comercios, listas y fotos privadas fuera de toda escritura al catálogo compartido.
+- [ ] Integrar el servicio en `BusquedaProductosHibridaService.js` después de Mis productos y antes de `BuscadorProductosService`.
+- [ ] Extender el contrato de `buscarPorCodigoConPolitica()` con el origen `catalogo` y mapear la ficha al contrato que ya consumen el modal y Lista Justa.
+- [ ] Mantener Mis productos como primera prioridad y devolver sus datos sin consultar el catálogo cuando exista coincidencia local.
+- [ ] Cuando exista una ficha comunitaria, completar el formulario como ocurre con una API y permitir que el usuario edite su copia privada antes de guardar.
+- [ ] Mantener `forzarApi` como una ruta que omite Mis productos y catálogo compartido para consultar únicamente las APIs externas.
+- [ ] Mantener `buscarPorNombreConPolitica()` sin consultas al catálogo compartido.
+- [ ] Si Firestore no responde, está offline o niega acceso, continuar silenciosamente con las APIs sin mostrar un error que bloquee la carga de producto.
+- [ ] Verificar que escaneo rápido, ráfaga y Mesa de trabajo continúen usando el mismo servicio de búsqueda y conserven su flujo de corrección.
 
-## FASE 5: Ajustar reglas y documentación Firebase
+## FASE 4: Publicar desde flujos privados elegibles
 
 ### Objetivo
 
-Proteger el catálogo compartido y dejar documentada su convivencia con las colecciones privadas actuales.
+Aportar datos comunitarios solo desde altas o cambios identificatorios, sin sumar lecturas o escrituras por precios, confirmaciones o interacciones.
 
-- [ ] Extender `firestore.rules` para permitir lectura del catálogo compartido y escritura solo a usuarios autenticados bajo el contrato de campos permitido.
-- [ ] Restringir por reglas los tipos, longitudes y campos admitidos, y bloquear datos privados o campos no autorizados.
-- [ ] Impedir por reglas que una actualización reemplace un campo comunitario no vacío por otro valor.
-- [ ] Mantener intactas las reglas privadas actuales bajo `usuarios/{uid}`.
-- [ ] Actualizar `Planes/Manuales/ManualFirebaseGratis.md` con la nueva colección, el criterio de completado, el flujo de respaldo y las restricciones de seguridad.
-- [ ] Revisar el impacto de lecturas, escrituras y almacenamiento respecto del plan gratuito de Firebase antes de habilitar la publicación general.
+- [ ] Identificar los flujos que crean un producto nuevo desde `DialogoAgregarProducto.vue` y `MesaTrabajoPage.vue`.
+- [ ] Integrar la publicación a través de un servicio o acción de dominio, nunca desde componentes Vue ni dentro de `ProductosService.guardarProducto()` de forma genérica.
+- [ ] Publicar después de que el producto privado quede guardado localmente y sin esperar éxito de la sincronización privada de precios, fotos o comercios.
+- [ ] Publicar solo en altas nuevas o cuando cambien `codigoBarras`, `nombre`, `cantidad`, `unidad`, `marca`, `categoria` o una `imagenUrl` apta.
+- [ ] No publicar al agregar un precio, confirmar un precio, registrar interacción, cambiar comercio ni modificar una foto privada.
+- [ ] Para un producto manual con los cuatro datos obligatorios, crear o completar su ficha comunitaria de forma silenciosa.
+- [ ] Para un producto de API con los cuatro datos obligatorios, crear o completar la misma ficha comunitaria y conservar `origenCatalogo: api`.
+- [ ] Si la app está offline, guardar solo el producto privado. El aporte se reintentará únicamente en una futura alta o edición identificatoria realizada con conexión.
+- [ ] No ejecutar una migración automática de productos ya existentes para proteger cuota, privacidad y rendimiento.
+
+## FASE 5: Proteger reglas y documentar Firebase
+
+### Objetivo
+
+Agregar la nueva colección sin relajar el aislamiento actual de `usuarios/{uid}` ni exponer el catálogo completo.
+
+- [ ] Extender `firestore.rules` con una coincidencia específica para `catalogoCompartido/productos/{codigoBarras}` antes del cierre global por defecto.
+- [ ] Permitir solo `get` autenticado sobre una ficha compartida y denegar `list` explícitamente.
+- [ ] Permitir `create` autenticado solo cuando el ID de documento coincida con el GTIN válido y el documento tenga exclusivamente los campos permitidos y obligatorios.
+- [ ] Permitir `update` autenticado solo para agregar campos comunitarios faltantes o actualizar `fechaActualizacion`, sin cambiar código, nombre, cantidad, unidad ni otros valores ya existentes.
+- [ ] Denegar `delete` desde clientes; una corrección excepcional se realizará de forma administrativa y controlada.
+- [ ] Mantener intactas las reglas privadas actuales bajo `usuarios/{uid}` y el cierre global del resto de rutas.
+- [ ] Validar las reglas en el emulador o Rules Playground con peticiones autenticadas y sin autenticación antes de cualquier despliegue.
+- [ ] Actualizar `Planes/Manuales/ManualFirebaseGratis.md` con colección, contrato, validación GTIN, consultas directas, transacciones, política offline y límites de seguridad.
+- [ ] Medir lecturas, escrituras y almacenamiento de la prueba antes de habilitar la publicación general.
+- [ ] Solicitar confirmación explícita de Leo antes de desplegar `firestore.rules` en el proyecto de producción.
+
+## FASE 6: Desplegar de forma controlada
+
+### Objetivo
+
+Publicar el cambio sin interrumpir las rutas privadas ni dejar una versión de app sin fallback.
+
+- [ ] Verificar que lint, build y pruebas de reglas finalicen correctamente antes del despliegue.
+- [ ] Revisar el diff de `firestore.rules` y confirmar que solo agrega la ruta del catálogo compartido.
+- [ ] Desplegar las reglas únicamente después de la confirmación explícita de Leo.
+- [ ] Publicar la versión de la app y verificar que una denegación o indisponibilidad temporal del catálogo continúe hacia las APIs externas.
+- [ ] Confirmar con dos cuentas reales que las rutas privadas siguen aisladas después del despliegue.
 
 ## FASE TESTING
 
 ### Objetivo
 
-Validar el catálogo compartido con dos usuarios, sin regresiones en el almacenamiento privado ni mezcla de datos.
+Validar el catálogo compartido, las reglas y los flujos privados con dos usuarios sin regresiones ni consumo masivo.
 
-- [ ] Ejecutar lint y build del proyecto al finalizar los cambios.
-- [ ] Con el usuario A, crear manualmente un producto con código de barras y verificar que se guarda de forma privada y crea una única ficha comunitaria.
-- [ ] Con el usuario B, buscar el mismo código y verificar que el modal se completa desde el catálogo compartido antes de consultar APIs.
-- [ ] Guardar el producto del usuario B con un precio y comercio propios, y verificar que esos datos no se escriben ni aparecen en la ficha comunitaria.
-- [ ] Crear desde el usuario A una ficha comunitaria con datos incompletos y comprobar que el usuario B puede completar solo sus campos vacíos.
-- [ ] Intentar modificar desde un usuario un campo comunitario ya completado y verificar que la regla o el servicio bloquea el reemplazo.
-- [ ] Buscar un código inexistente en Mis productos y catálogo compartido, y verificar el fallback actual hacia las APIs y creación manual.
-- [ ] Probar escaneo rápido y ráfaga con datos incompletos y verificar la continuidad del flujo hacia Mesa de trabajo.
+- [ ] Ejecutar `npm run lint` y `npm run build` al finalizar los cambios.
+- [ ] Validar GTIN-8, GTIN-12, GTIN-13 y GTIN-14 correctos, y comprobar que códigos con longitud o dígito verificador inválidos permanecen solo privados.
+- [ ] Intentar publicar sin nombre, sin cantidad o sin unidad y verificar que no se crea una ficha comunitaria.
+- [ ] Con el usuario A, crear un producto elegible y verificar una única ficha comunitaria con los campos permitidos.
+- [ ] Con el usuario B, buscar el mismo código y verificar que el modal se completa desde el catálogo antes de consultar APIs.
+- [ ] Ejecutar dos aportes simultáneos del mismo código y verificar que la transacción conserva una sola ficha y no reemplaza valores existentes.
+- [ ] Guardar desde el usuario B precio, comercio, lista, foto local o confirmación y verificar que nada de ello se escribe en la ficha comunitaria.
+- [ ] Probar una URL de imagen recibida de API y verificar que se guarda solo como `imagenUrl`; probar base64, foto local y ruta Storage, y verificar que no se publican.
+- [ ] Probar una edición privada que contradiga una ficha comunitaria existente y verificar que la ficha compartida no cambia.
+- [ ] Probar una búsqueda por nombre y verificar que no consulta el catálogo; probar `forzarApi` y verificar que omite fuente local y compartida.
+- [ ] Usar un usuario local y verificar que no intenta leer ni escribir el catálogo compartido.
+- [ ] Crear o editar un producto sin conexión y verificar que queda guardado de forma privada aunque el aporte comunitario sea omitido.
+- [ ] Validar reglas: lectura directa autenticada permitida, `list` denegado, lectura sin sesión denegada, escritura con campos extra denegada y reemplazo de campo existente denegado.
 - [ ] Verificar con dos usuarios que las colecciones privadas `usuarios/{uid}` no son legibles ni editables por el otro usuario.
-- [ ] Revisar en Firebase que no se generen documentos duplicados para el mismo código de barras ni lecturas masivas del catálogo.
+- [ ] Revisar en Firebase que no se generen documentos duplicados ni consultas masivas del catálogo.
 
 ## Progreso del plan
 
-- [ ] Fase 1: Definir contrato y límites del catálogo
+- [ ] Fase 1: Definir contrato y validación comunitaria
 - [ ] Fase 2: Crear acceso aislado al catálogo compartido
-- [ ] Fase 3: Integrar la búsqueda de respaldo
-- [ ] Fase 4: Publicar y completar datos desde flujos privados
-- [ ] Fase 5: Ajustar reglas y documentación Firebase
+- [ ] Fase 3: Integrar la búsqueda de respaldo por código
+- [ ] Fase 4: Publicar desde flujos privados elegibles
+- [ ] Fase 5: Proteger reglas y documentar Firebase
+- [ ] Fase 6: Desplegar de forma controlada
 - [ ] Fase Testing
 
 Fecha de creación: 14 de Julio 2026
-Fecha de última actualización: 14 de Julio 2026
+Fecha de última actualización: 15 de Julio 2026
 Estado: BORRADOR
