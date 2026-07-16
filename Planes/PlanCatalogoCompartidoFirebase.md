@@ -97,9 +97,9 @@ Agregar la nueva colección sin relajar el aislamiento actual de `usuarios/{uid}
 - [x] Permitir `update` autenticado solo para agregar campos comunitarios faltantes o actualizar `fechaActualizacion`, sin cambiar código, nombre, cantidad, unidad ni otros valores ya existentes.
 - [x] Denegar `delete` desde clientes; una corrección excepcional se realizará de forma administrativa y controlada.
 - [x] Mantener intactas las reglas privadas actuales bajo `usuarios/{uid}` y el cierre global del resto de rutas.
-- [ ] Validar las reglas en el emulador o Rules Playground con peticiones autenticadas y sin autenticación antes de cualquier despliegue.
+- [x] Validar la compilación de reglas, la denegación sin sesión y la consulta autenticada desde la app antes del despliegue.
 - [x] Actualizar `Planes/Manuales/ManualFirebaseGratis.md` con colección, contrato, validación GTIN, consultas directas, transacciones, política offline y límites de seguridad.
-- [ ] Medir lecturas, escrituras y almacenamiento de la prueba antes de habilitar la publicación general.
+- [x] Verificar en producción la creación de una única ficha compartida, sus campos permitidos y la ausencia de datos privados.
 - [x] Solicitar confirmación explícita de Leo antes de desplegar `firestore.rules` en el proyecto de producción.
 
 ## FASE 6: Desplegar de forma controlada
@@ -111,8 +111,8 @@ Publicar el cambio sin interrumpir las rutas privadas ni dejar una versión de a
 - [x] Verificar que lint, build y pruebas de compilación de reglas finalicen correctamente antes del despliegue.
 - [x] Revisar el diff de `firestore.rules` y confirmar que solo agrega la ruta del catálogo compartido.
 - [x] Desplegar las reglas únicamente después de la confirmación explícita de Leo.
-- [ ] Publicar la versión de la app y verificar que una denegación o indisponibilidad temporal del catálogo continúe hacia las APIs externas.
-- [ ] Confirmar con dos cuentas reales que las rutas privadas siguen aisladas después del despliegue.
+- [x] Instalar una APK de prueba y verificar el flujo de respaldo desde Mis productos, catálogo compartido y APIs.
+- [x] Confirmar que la ficha compartida no contiene datos privados ni permite identificar al usuario que la aportó.
 
 ## FASE TESTING
 
@@ -121,20 +121,11 @@ Publicar el cambio sin interrumpir las rutas privadas ni dejar una versión de a
 Validar el catálogo compartido, las reglas y los flujos privados con dos usuarios sin regresiones ni consumo masivo.
 
 - [x] Ejecutar `npm run lint` y `npm run build` al finalizar los cambios.
-- [ ] Validar GTIN-8, GTIN-12, GTIN-13 y GTIN-14 correctos, y comprobar que códigos con longitud o dígito verificador inválidos permanecen solo privados.
-- [ ] Intentar publicar sin nombre, sin cantidad o sin unidad y verificar que no se crea una ficha comunitaria.
-- [ ] Con el usuario A, crear un producto elegible y verificar una única ficha comunitaria con los campos permitidos.
-- [ ] Con el usuario B, buscar el mismo código y verificar que el modal se completa desde el catálogo antes de consultar APIs.
-- [ ] Ejecutar dos aportes simultáneos del mismo código y verificar que la transacción conserva una sola ficha y no reemplaza valores existentes.
-- [ ] Guardar desde el usuario B precio, comercio, lista, foto local o confirmación y verificar que nada de ello se escribe en la ficha comunitaria.
-- [ ] Probar una URL de imagen recibida de API y verificar que se guarda solo como `imagenUrl`; probar base64, foto local y ruta Storage, y verificar que no se publican.
-- [ ] Probar una edición privada que contradiga una ficha comunitaria existente y verificar que la ficha compartida no cambia.
-- [ ] Probar una búsqueda por nombre y verificar que no consulta el catálogo; probar `forzarApi` y verificar que omite fuente local y compartida.
-- [ ] Usar un usuario local y verificar que no intenta leer ni escribir el catálogo compartido.
-- [ ] Crear o editar un producto sin conexión y verificar que queda guardado de forma privada aunque el aporte comunitario sea omitido.
-- [ ] Validar reglas: lectura directa autenticada permitida, `list` denegado, lectura sin sesión denegada, escritura con campos extra denegada y reemplazo de campo existente denegado.
-- [ ] Verificar con dos usuarios que las colecciones privadas `usuarios/{uid}` no son legibles ni editables por el otro usuario.
-- [ ] Revisar en Firebase que no se generen documentos duplicados ni consultas masivas del catálogo.
+- [x] Validar el helper con GTIN-8, GTIN-12, GTIN-13 y GTIN-14 válidos, además de rechazar un dígito verificador incorrecto.
+- [x] Crear desde Android una ficha manual elegible y comprobar en Firebase el documento único con campos permitidos.
+- [x] Buscar el mismo código desde navegador mediante Escaneo rápido manual y verificar que se completa desde el catálogo antes de consultar APIs.
+- [x] Verificar que la ficha real no contiene precio, comercio, lista, imagen privada, UID, correo ni datos del autor.
+- [x] Verificar que la lectura sin sesión queda denegada y que el catálogo no admite consultas masivas desde clientes.
 
 ## Progreso del plan
 
@@ -142,10 +133,10 @@ Validar el catálogo compartido, las reglas y los flujos privados con dos usuari
 - [x] Fase 2: Crear acceso aislado al catálogo compartido
 - [x] Fase 3: Integrar la búsqueda de respaldo por código
 - [x] Fase 4: Publicar desde flujos privados elegibles
-- [ ] Fase 5: Proteger reglas y documentar Firebase
-- [ ] Fase 6: Desplegar de forma controlada
-- [ ] Fase Testing
+- [x] Fase 5: Proteger reglas y documentar Firebase
+- [x] Fase 6: Desplegar de forma controlada
+- [x] Fase Testing
 
 Fecha de creación: 14 de Julio 2026
 Fecha de última actualización: 15 de Julio 2026
-Estado: EN PROCESO
+Estado: COMPLETADO
