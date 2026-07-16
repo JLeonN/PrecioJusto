@@ -1201,7 +1201,7 @@ H. Arquitectura y Código
 
 ### Estado Actual
 
-- **Versión:** 1.2.16
+- **Versión:** 1.2.17
 - **Almacenamiento:** Firebase/Firestore como fuente principal con respaldo local del dispositivo
 - **Sistema de sucursales:** Completado
 - **Edición de comercios:** Completada
@@ -1220,6 +1220,7 @@ H. Arquitectura y Código
 - **Fotos de productos y comercios:** Completada (useCamaraFoto, q-menu contextual, 5 componentes)
 - **Pie de atribución:** Completado (PieAtribucion.vue en DetalleProductoPage + EditarComercioPage; campo fotoFuente en productos)
 - **Firebase:** Completado en producción para cuenta, productos, comercios, listas, preferencias, mesa de trabajo y fotos sincronizadas por Storage cuando está disponible
+- **Catálogo compartido de productos:** Completado; reutiliza fichas generales por código de barras sin compartir precios, comercios ni datos de usuarios
 - **Acceso con Google:** Completado en navegador y Android; conserva el usuario existente al vincular una cuenta con correo y contraseña
 - **Rescate de memoria Android:** Completado; los datos grandes usan IndexedDB, las fotos base64 se separan del caché principal y los listados cargan objetos livianos
 - **Configuración global:** Completada (moneda predeterminada manual/automática; ver Resumen9Configuracion.md)
@@ -1257,4 +1258,4 @@ GitHub: JLeonN/PrecioJusto
 
 ---
 
-**Última actualización:** 14 de Julio de 2026 — Se preparó el release `1.2.16` con las novedades de acceso y apoyo listas para mostrar en la app.
+**Última actualización:** 15 de Julio de 2026 — Se preparó el release `1.2.17` con el catálogo compartido y mejoras de acceso y búsqueda.
