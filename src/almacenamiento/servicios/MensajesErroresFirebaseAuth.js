@@ -8,7 +8,7 @@ const MENSAJES_POR_CODIGO = {
   'auth/popup-blocked': 'El navegador bloqueó la ventana de Google. Permitila e intentá de nuevo.',
   'auth/cancelled-popup-request': 'El ingreso con Google fue cancelado.',
   'auth/unauthorized-domain':
-    'Google no está habilitado para esta dirección. Agregá localhost en Firebase Authentication antes de intentar de nuevo.',
+    'El ingreso con Google no está disponible desde esta página por el momento. Probá de nuevo más tarde.',
   'auth/credential-already-in-use': 'Esta cuenta de Google ya está vinculada a otra cuenta.',
   'auth/requires-recent-login': 'Volvé a ingresar antes de vincular Google.',
   'auth/google-credential-unavailable':
