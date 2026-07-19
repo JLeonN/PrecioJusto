@@ -108,7 +108,7 @@ class ProductosService {
           await this._sincronizarProductoFirestore(producto)
         await this.guardarProductoEnCacheLocal(productoParaCacheActualizado)
         console.log(`Producto guardado: ${producto.nombre} (ID: ${producto.id})`)
-        return productoParaCacheActualizado
+        return await fotosLocalesService.hidratarProducto(productoParaCacheActualizado)
       }
 
       return null
@@ -197,12 +197,15 @@ class ProductosService {
       const productoProtegido = producto
         ? await fotosLocalesService.protegerProducto(producto)
         : null
+      const productoHidratado = productoProtegido
+        ? await fotosLocalesService.hidratarProducto(productoProtegido)
+        : null
 
-      if (productoProtegido) {
-        console.log(`Producto obtenido: ${productoProtegido.nombre}`)
+      if (productoHidratado) {
+        console.log(`Producto obtenido: ${productoHidratado.nombre}`)
       }
 
-      return productoProtegido
+      return productoHidratado
     } catch (error) {
       console.error(`Error al obtener producto ${productoId}:`, error)
       return null
@@ -222,7 +225,10 @@ class ProductosService {
   async obtenerTodos() {
     try {
       const resultados = await this.adaptador.listarTodo(this.prefijoProductos)
-      const productos = await fotosLocalesService.protegerProductos(resultados.map((r) => r.valor))
+      const productosProtegidos = await fotosLocalesService.protegerProductos(
+        resultados.map((r) => r.valor),
+      )
+      const productos = await fotosLocalesService.hidratarProductos(productosProtegidos)
 
       console.log(`Obtenidos ${productos.length} productos`)
       return productos
