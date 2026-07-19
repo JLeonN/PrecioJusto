@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
 import { Capacitor } from '@capacitor/core'
+import recuperacionCamaraService from '../servicios/RecuperacionCamaraService.js'
 
 /**
  * Composable reutilizable para captura de fotos.
@@ -20,7 +21,9 @@ export function useCamaraFoto() {
    * Abre la cámara nativa (solo Android/iOS).
    * @returns {Promise<string|null>} base64 con prefijo data URI, o null si cancela
    */
-  async function abrirCamara() {
+  async function abrirCamara(contexto = null) {
+    if (contexto) recuperacionCamaraService.guardarCapturaPendiente(contexto)
+
     try {
       const foto = await Camera.getPhoto({
         quality: 70,
@@ -35,6 +38,8 @@ export function useCamaraFoto() {
         console.error('Error al abrir cámara:', error)
       }
       return null
+    } finally {
+      recuperacionCamaraService.limpiarCapturaPendiente()
     }
   }
 

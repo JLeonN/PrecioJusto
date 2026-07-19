@@ -333,6 +333,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useCamaraFoto } from '../composables/useCamaraFoto.js'
+import recuperacionCamaraService from '../servicios/RecuperacionCamaraService.js'
 import {
   IconArrowLeft,
   IconBuilding,
@@ -650,7 +651,14 @@ async function ejecutarFusion(destinoId, origenId) {
 // ── Foto del local ───────────────────────────────────────
 
 async function seleccionarCamara() {
-  const resultado = await abrirCamara()
+  if (!comercioOriginalActual.value || !direccionSeleccionada.value) return
+
+  const parametrosRuta = new URLSearchParams(route.query)
+  parametrosRuta.set('direccionId', direccionSeleccionada.value.id)
+  const resultado = await abrirCamara({
+    clave: `comercio:${comercioOriginalActual.value.id}:${direccionSeleccionada.value.id}`,
+    rutaRetorno: `${route.path}?${parametrosRuta.toString()}`,
+  })
   if (resultado) await guardarFotoComercio(resultado)
 }
 
@@ -718,6 +726,13 @@ onMounted(async () => {
   if (productosStore.productos.length === 0) {
     await productosStore.cargarProductos()
   }
+
+  if (!comercioOriginalActual.value || !direccionSeleccionada.value) return
+
+  const imagenRestaurada = recuperacionCamaraService.consumirFotoRestaurada(
+    `comercio:${comercioOriginalActual.value.id}:${direccionSeleccionada.value.id}`,
+  )
+  if (imagenRestaurada) await guardarFotoComercio(imagenRestaurada)
 })
 </script>
 

@@ -148,6 +148,10 @@ const props = defineProps({
       foto: null,
     }),
   },
+  claveRecuperacionCamara: {
+    type: String,
+    default: '',
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'validar'])
@@ -214,7 +218,14 @@ function emitirCambios() {
 }
 
 async function seleccionarCamara() {
-  const resultado = await abrirCamara()
+  const contexto = props.claveRecuperacionCamara
+    ? {
+        clave: props.claveRecuperacionCamara,
+        rutaRetorno: window.location.hash.slice(1) || window.location.pathname,
+        borrador: { ...datosInternos.value },
+      }
+    : null
+  const resultado = await abrirCamara(contexto)
   if (resultado) {
     datosInternos.value.foto = resultado
     emitirCambios()

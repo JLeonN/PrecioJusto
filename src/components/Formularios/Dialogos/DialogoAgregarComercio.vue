@@ -10,7 +10,10 @@
 
       <!-- CONTENIDO DEL FORMULARIO -->
       <q-card-section class="q-pt-md contenido-scroll">
-        <FormularioComercio v-model="datosComercio" />
+        <FormularioComercio
+          v-model="datosComercio"
+          clave-recuperacion-camara="formularioAgregarComercio"
+        />
       </q-card-section>
 
       <!-- ACCIONES -->
@@ -56,13 +59,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 import FormularioComercio from '../FormularioComercio.vue'
 import DialogoCoincidencias from './DialogoCoincidencias.vue'
 import DialogoMismaUbicacion from './DialogoMismaUbicacion.vue'
 import DialogoDuplicadoExacto from './DialogoDuplicadoExacto.vue'
 import { useComerciStore } from '../../../almacenamiento/stores/comerciosStore.js'
+import recuperacionCamaraService from '../../../servicios/RecuperacionCamaraService.js'
 
 const props = defineProps({
   modelValue: {
@@ -112,6 +116,20 @@ const comercioDuplicadoExacto = ref(null)
 const dialogoAbierto = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value),
+})
+
+onMounted(() => {
+  const recuperacion = recuperacionCamaraService.consumirCapturaRestaurada(
+    'formularioAgregarComercio',
+  )
+  if (!recuperacion) return
+
+  datosComercio.value = {
+    ...datosComercio.value,
+    ...(recuperacion.contexto.borrador || {}),
+    foto: recuperacion.imagen,
+  }
+  dialogoAbierto.value = true
 })
 
 const formularioValido = computed(() => {

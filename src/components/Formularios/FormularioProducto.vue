@@ -179,6 +179,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  claveRecuperacionCamara: {
+    type: String,
+    default: '',
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'buscar-codigo', 'buscar-nombre', 'escanear-codigo'])
@@ -243,7 +247,14 @@ watch(
 
 // ── Foto del producto ─────────────────────────────────────
 async function seleccionarCamara() {
-  const resultado = await abrirCamara()
+  const contexto = props.claveRecuperacionCamara
+    ? {
+        clave: props.claveRecuperacionCamara,
+        rutaRetorno: window.location.hash.slice(1) || window.location.pathname,
+        borrador: { ...datosInternos.value },
+      }
+    : null
+  const resultado = await abrirCamara(contexto)
   if (resultado) {
     datosInternos.value.imagen = resultado
     datosInternos.value.fotoFuente = 'usuario'

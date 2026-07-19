@@ -308,8 +308,9 @@
 
 <script setup>
 import InputFormularioReutilizable from '../Compartidos/InputFormularioReutilizable.vue'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useCamaraFoto } from '../../composables/useCamaraFoto.js'
+import recuperacionCamaraService from '../../servicios/RecuperacionCamaraService.js'
 import {
   IconShoppingBag,
   IconMapPin,
@@ -424,9 +425,19 @@ async function restaurarDesdeApi() {
 const { inputArchivoRef, esNativo, abrirCamara, abrirGaleria, leerArchivo } = useCamaraFoto()
 
 async function seleccionarCamara() {
-  const resultado = await abrirCamara()
+  const resultado = await abrirCamara({
+    clave: `producto:${props.producto.id}`,
+    rutaRetorno: `/producto/${props.producto.id}`,
+  })
   if (resultado) await actualizarFoto(resultado)
 }
+
+onMounted(async () => {
+  const imagenRestaurada = recuperacionCamaraService.consumirFotoRestaurada(
+    `producto:${props.producto.id}`,
+  )
+  if (imagenRestaurada) await actualizarFoto(imagenRestaurada)
+})
 
 async function alSeleccionarArchivo(event) {
   const resultado = await leerArchivo(event)

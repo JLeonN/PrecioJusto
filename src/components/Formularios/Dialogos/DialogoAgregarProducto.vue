@@ -26,6 +26,7 @@
             <FormularioProducto
               ref="refFormularioProducto"
               v-model="datosProducto"
+              clave-recuperacion-camara="formularioAgregarProducto"
               :modo="modo"
               @buscar-codigo="buscarPorCodigo"
               @buscar-nombre="buscarPorNombre"
@@ -84,7 +85,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 import FormularioProducto from '../FormularioProducto.vue'
 import FormularioPrecio from '../FormularioPrecio.vue'
@@ -100,6 +101,7 @@ import busquedaProductosHibridaService, {
 import { usePreferenciasStore } from '../../../almacenamiento/stores/preferenciasStore.js'
 import { useTecladoVirtual } from '../../../composables/useTecladoVirtual.js'
 import { formatearPrecioConCodigo } from '../../../utils/PrecioUtils.js'
+import recuperacionCamaraService from '../../../servicios/RecuperacionCamaraService.js'
 
 const props = defineProps({
   modelValue: {
@@ -178,6 +180,21 @@ watch(dialogoResultadosAbierto, (abierto) => {
     variantePieResultados.value = null
     pieAccionesLoading.value = false
   }
+})
+
+onMounted(() => {
+  const recuperacion = recuperacionCamaraService.consumirCapturaRestaurada(
+    'formularioAgregarProducto',
+  )
+  if (!recuperacion) return
+
+  datosProducto.value = {
+    ...datosProducto.value,
+    ...(recuperacion.contexto.borrador || {}),
+    imagen: recuperacion.imagen,
+    fotoFuente: 'usuario',
+  }
+  dialogoAbierto.value = true
 })
 
 // Clases responsivas
