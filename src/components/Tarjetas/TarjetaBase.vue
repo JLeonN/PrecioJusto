@@ -82,8 +82,11 @@
       </div>
     </div>
 
-    <!-- INFO INFERIOR (código de barras / direcciones y usos) -->
-    <div class="tarjeta-yugioh__info-inferior">
+    <!-- INFO INFERIOR (acción de producto / direcciones y usos) -->
+    <div
+      v-if="tipo !== 'producto' || !expandido"
+      class="tarjeta-yugioh__info-inferior"
+    >
       <slot name="info-inferior">
         <!-- Contenido por defecto si no hay slot -->
       </slot>
@@ -496,11 +499,11 @@ const manejarLongPress = () => {
 .tarjeta-yugioh--con-expansion .tarjeta-yugioh__info-inferior {
   padding-right: 44px;
 }
-/* Cuando está expandida, centrar el botón */
-.tarjeta-yugioh--expandida .tarjeta-yugioh__icono-expandir {
-  left: 50%;
+/* En productos expandidos, alinear el botón de cierre al inicio */
+.tarjeta-yugioh--producto.tarjeta-yugioh--expandida .tarjeta-yugioh__icono-expandir {
+  left: 10px;
   right: auto;
-  transform: translateX(-50%);
+  transform: none;
 }
 /* ========================================
    ANIMACIONES

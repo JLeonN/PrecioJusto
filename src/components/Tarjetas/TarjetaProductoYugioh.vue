@@ -87,15 +87,7 @@
       </div>
     </template>
     <template #info-inferior>
-      <div v-if="producto.codigoBarras" class="codigo-barras" @click.stop="copiarCodigoBarras">
-        <IconBarcode :size="14" />
-        <span class="codigo-barras__texto">{{ producto.codigoBarras }}</span>
-        <q-tooltip class="bg-grey-8" :delay="500">Click para copiar</q-tooltip>
-      </div>
-      <div v-else class="sin-codigo">
-        <IconBarcode :size="14" class="text-grey-5" />
-        <span class="text-grey-6">Sin código de barras</span>
-      </div>
+      <span class="accion-ver-top">Ver top de precios</span>
     </template>
     <template #expandido-header>
       <div class="expandido-titulo">
@@ -113,7 +105,7 @@
               <IconMapPin :size="14" />
               {{ precio.nombreCompleto || precio.comercio }}
             </div>
-            <div class="item-precio__fecha">
+            <div v-if="calcularDiasPrecio(precio.fecha) <= 60" class="item-precio__fecha">
               {{ formatearFecha(precio.fecha) }}
             </div>
             <div v-if="calcularDiasPrecio(precio.fecha) > 60" class="badge-desactualizado">
@@ -155,12 +147,10 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import { useQuasar } from 'quasar'
 import TarjetaBase from './TarjetaBase.vue'
 import {
   IconShoppingBag,
   IconMapPin,
-  IconBarcode,
   IconCurrencyDollar,
   IconAlertCircle,
   IconAlertTriangle,
@@ -191,8 +181,6 @@ const props = defineProps({
 /* Emits del componente */
 defineEmits(['long-press', 'toggle-seleccion', 'agregar-precio'])
 
-/* Quasar */
-const $q = useQuasar()
 const productosStore = useProductosStore()
 const mostrarMayoristasEnTarjeta = ref(false)
 const cargandoPrecios = ref(false)
@@ -348,27 +336,6 @@ const formatearFecha = (fechaISO) => {
   if (diferencia < 604800) return `Hace ${Math.floor(diferencia / 86400)} días`
   if (diferencia < 2592000) return `Hace ${Math.floor(diferencia / 604800)} semanas`
   return `Hace ${Math.floor(diferencia / 2592000)} meses`
-}
-
-/* Copiar código de barras al portapapeles */
-const copiarCodigoBarras = async () => {
-  try {
-    await navigator.clipboard.writeText(props.producto.codigoBarras)
-    $q.notify({
-      type: 'positive',
-      message: 'Código copiado',
-      caption: props.producto.codigoBarras,
-      timeout: 1500,
-      position: 'top',
-    })
-  } catch {
-    $q.notify({
-      type: 'negative',
-      message: 'Error al copiar',
-      timeout: 1500,
-      position: 'top',
-    })
-  }
 }
 
 /* Manejar expansión */
@@ -538,33 +505,10 @@ const textoBotonMayorista = computed(() => {
   gap: 6px;
   min-width: 0;
 }
-.codigo-barras {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
-}
-.codigo-barras:hover {
-  background-color: var(--color-primario-claro);
-}
-.codigo-barras:active {
-  background-color: var(--color-primario);
-  color: var(--texto-sobre-primario);
-}
-.codigo-barras__texto {
-  font-family: 'Courier New', monospace;
+.accion-ver-top {
+  color: var(--color-primario);
   font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.5px;
-}
-.sin-codigo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
+  font-weight: 600;
 }
 .expandido-titulo {
   display: flex;
