@@ -14,7 +14,7 @@
       <!-- HEADER DE LA PÁGINA -->
       <div class="header-pagina">
         <h5 class="titulo-pagina">Mis Productos</h5>
-        <p class="contador-items">{{ productosStore.productos.length }} productos guardados</p>
+        <p class="contador-items">· {{ productosStore.productos.length }}</p>
       </div>
 
       <!-- INDICADOR DE CARGA -->

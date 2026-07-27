@@ -101,6 +101,9 @@ body.body--dark .text-black {
    HEADERS DE PÁGINA
    =========================== */
 .header-pagina {
+  align-items: baseline;
+  display: flex;
+  gap: 8px;
   margin-bottom: 16px;
 }
 .titulo-pagina {
@@ -109,7 +112,32 @@ body.body--dark .text-black {
 }
 .contador-items {
   color: var(--texto-secundario);
-  margin-bottom: 0;
+  font-size: 14px;
+  margin: 0;
+  white-space: nowrap;
+}
+@media (max-width: 599px) {
+  .header-pagina {
+    gap: 6px;
+  }
+  .titulo-pagina {
+    font-size: 22px;
+    line-height: 1.2;
+  }
+  .contador-items {
+    font-size: 13px;
+  }
+}
+@media (max-width: 380px) {
+  .titulo-pagina {
+    font-size: 20px;
+  }
+  .contador-items {
+    font-size: 12px;
+  }
+  .contador-sucursales {
+    display: none;
+  }
 }
 /* ===========================
    BUSCADORES

@@ -3,7 +3,7 @@
     <div class="contenedor-pagina">
       <div class="header-pagina">
         <h5 class="titulo-pagina">Lista Justa</h5>
-        <p class="contador-items">{{ listaJustaStore.totalListas }} listas guardadas</p>
+        <p class="contador-items">· {{ listaJustaStore.totalListas }}</p>
       </div>
 
       <div v-if="listaJustaStore.cargando" class="text-center q-pa-xl">

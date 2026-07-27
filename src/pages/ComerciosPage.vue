@@ -15,12 +15,12 @@
       <div class="header-pagina">
         <h5 class="titulo-pagina">Mis Comercios</h5>
         <p class="contador-items">
-          {{ comerciosStore.comerciosAgrupados.length }} comercios
+          · {{ comerciosStore.comerciosAgrupados.length }}
           <span
             v-if="comerciosStore.totalDirecciones > comerciosStore.comercios.length"
-            class="text-grey-6"
+            class="contador-sucursales"
           >
-            ({{ comerciosStore.totalDirecciones }} sucursales)
+            · {{ comerciosStore.totalDirecciones }} sucursales
           </span>
         </p>
       </div>
