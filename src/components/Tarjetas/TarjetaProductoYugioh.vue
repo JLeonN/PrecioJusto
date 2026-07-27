@@ -100,10 +100,25 @@
         <div v-for="(precio, index) in top3PreciosUnicos" :key="precio.id" class="item-precio">
           <div class="item-precio__posicion">{{ index + 1 }}</div>
           <div class="item-precio__info">
-            <div class="item-precio__valor">{{ formatearPrecio(precio.valor, precio.moneda) }}</div>
+            <div class="item-precio__fila-valor">
+              <div class="item-precio__valor">{{ formatearPrecio(precio.valor, precio.moneda) }}</div>
+              <q-chip
+                v-if="index === 0"
+                dense
+                size="sm"
+                color="green"
+                text-color="white"
+                class="item-precio__mejor-precio"
+              >
+                Mejor precio
+              </q-chip>
+            </div>
             <div class="item-precio__comercio">
               <IconMapPin :size="14" />
-              {{ precio.nombreCompleto || precio.comercio }}
+              <span>{{ obtenerNombreComercio(precio) }}</span>
+            </div>
+            <div v-if="obtenerDireccionComercio(precio)" class="item-precio__direccion">
+              {{ obtenerDireccionComercio(precio) }}
             </div>
             <div v-if="calcularDiasPrecio(precio.fecha) <= 60" class="item-precio__fecha">
               {{ formatearFecha(precio.fecha) }}
@@ -112,9 +127,6 @@
               <IconAlertTriangle :size="12" />
               <span>Hace {{ calcularMesesPrecio(precio.fecha) }}</span>
             </div>
-          </div>
-          <div v-if="index === 0" class="item-precio__badge">
-            <q-chip dense size="sm" color="green" text-color="white"> Mejor precio </q-chip>
           </div>
         </div>
         <div v-if="cargandoPrecios" class="sin-precios">
@@ -323,6 +335,26 @@ const calcularMesesPrecio = (fechaISO) => {
 
 /* Formatear precio */
 const formatearPrecio = (valor, moneda) => formatearPrecioConCodigo(valor, moneda)
+
+const separarNombreCompleto = (nombreCompleto) => {
+  const partes = String(nombreCompleto || '')
+    .split(/\s(?:—|-)\s/)
+    .map((parte) => parte.trim())
+    .filter(Boolean)
+
+  return {
+    comercio: partes[0] || '',
+    direccion: partes.slice(1).join(' — '),
+  }
+}
+
+const obtenerNombreComercio = (precio) => {
+  return precio.comercio || separarNombreCompleto(precio.nombreCompleto).comercio || 'Sin comercio'
+}
+
+const obtenerDireccionComercio = (precio) => {
+  return precio.direccion || separarNombreCompleto(precio.nombreCompleto).direccion
+}
 
 /* Formatear fecha relativa */
 const formatearFecha = (fechaISO) => {
@@ -544,14 +576,26 @@ const textoBotonMayorista = computed(() => {
 }
 .item-precio__info {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+.item-precio__fila-valor {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  min-width: 0;
 }
 .item-precio__valor {
   font-size: 20px;
   font-weight: bold;
   color: var(--color-primario);
+  white-space: nowrap;
+}
+.item-precio__mejor-precio {
+  flex-shrink: 0;
+  margin: 0 0 0 auto;
 }
 .item-precio__comercio {
   display: flex;
@@ -561,12 +605,15 @@ const textoBotonMayorista = computed(() => {
   color: var(--texto-secundario);
   font-weight: 500;
 }
+.item-precio__direccion {
+  color: var(--texto-deshabilitado);
+  font-size: 11px;
+  line-height: 1.25;
+  padding-left: 18px;
+}
 .item-precio__fecha {
   font-size: 11px;
   color: var(--texto-deshabilitado);
-}
-.item-precio__badge {
-  flex-shrink: 0;
 }
 .sin-precios {
   display: flex;
@@ -652,6 +699,14 @@ const textoBotonMayorista = computed(() => {
     right: 10px;
     bottom: 10px;
     font-size: 22px;
+  }
+  .item-precio__mejor-precio {
+    font-size: 9px;
+  }
+}
+@media (max-width: 340px) {
+  .item-precio__mejor-precio {
+    display: none;
   }
 }
 </style>
