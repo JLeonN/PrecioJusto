@@ -7,6 +7,8 @@
     :seleccionado="seleccionado"
     :permite-expansion="true"
     :mostrar-boton-agregar-precio="false"
+    :header-sobre-imagen="false"
+    :mostrar-info-inferior-expandida="true"
     :expandido-prop="expandidoLocal"
     @long-press="$emit('long-press')"
     @toggle-seleccion="$emit('toggle-seleccion')"
@@ -19,10 +21,10 @@
     <template #header-right>
       <BotonConfirmacionEliminar v-if="!modoSeleccion" @confirmar="$emit('eliminar')" />
     </template>
-    <!-- Chips de completitud + info de comercio/dirección -->
-    <template #tipo>
-      <div class="tipo-contenido">
-        <!-- Fila 1: chips de estado (botones) -->
+    <!-- Barra de estado -->
+    <template #barra-estado>
+      <div class="barra-estado-contenido">
+        <span class="barra-estado-titulo">Estado</span>
         <div class="chips-completitud">
           <q-chip
             clickable
@@ -52,12 +54,17 @@
             Comercio
           </q-chip>
         </div>
-        <!-- Fila 2: nombre del comercio -->
+      </div>
+    </template>
+    <!-- Información de comercio/dirección -->
+    <template v-if="item.comercio" #tipo>
+      <div class="tipo-contenido">
+        <!-- Nombre del comercio -->
         <div v-if="item.comercio" class="info-comercio">
           <IconBuildingStore :size="14" class="info-icono" />
           <span class="text-weight-medium ellipsis">{{ item.comercio.nombre }}</span>
         </div>
-        <!-- Fila 3: dirección -->
+        <!-- Dirección -->
         <div v-if="item.comercio?.direccionNombre" class="info-direccion">
           <IconMapPin :size="14" class="info-icono text-grey-6" />
           <span class="text-grey-7 ellipsis">{{ item.comercio.direccionNombre }}</span>
@@ -532,11 +539,28 @@ function emitirEnviar() {
   flex-direction: column;
   gap: 4px;
 }
+.barra-estado-contenido {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+.barra-estado-titulo {
+  color: var(--texto-secundario);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
 .chips-completitud {
   display: flex;
   gap: 4px;
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+@media (max-width: 340px) {
+  .barra-estado-titulo {
+    display: none;
+  }
 }
 .chip-campo {
   border: 1px solid var(--chip-campo-inactivo-borde);

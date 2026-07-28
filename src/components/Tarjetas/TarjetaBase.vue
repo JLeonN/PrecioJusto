@@ -7,6 +7,7 @@
       'tarjeta-yugioh--expandida': expandido,
       'tarjeta-yugioh--seleccionada': seleccionado,
       'tarjeta-yugioh--con-expansion': permiteExpansion,
+      'tarjeta-yugioh--header-sobre-imagen': tipo === 'producto' && headerSobreImagen,
     }"
     @click="manejarClick"
     v-touch-hold.mouse="manejarLongPress"
@@ -57,6 +58,11 @@
       </button>
     </div>
 
+    <!-- BARRA DE ESTADO (chips u otros indicadores) -->
+    <div v-if="$slots['barra-estado']" class="tarjeta-yugioh__barra-estado">
+      <slot name="barra-estado"></slot>
+    </div>
+
     <!-- TIPO / DIRECCIÓN (slot personalizable) -->
     <div v-if="$slots.tipo || tipoTexto" class="tarjeta-yugioh__tipo">
       <slot name="tipo">{{ tipoTexto }}</slot>
@@ -84,7 +90,7 @@
 
     <!-- INFO INFERIOR (acción de producto / direcciones y usos) -->
     <div
-      v-if="tipo !== 'producto' || !expandido"
+      v-if="tipo !== 'producto' || !expandido || mostrarInfoInferiorExpandida"
       class="tarjeta-yugioh__info-inferior"
     >
       <slot name="info-inferior">
@@ -172,6 +178,18 @@ const props = defineProps({
   mostrarBotonAgregarPrecio: {
     type: Boolean,
     default: true,
+  },
+
+  /* Superpone el título sobre la imagen en tarjetas de producto visuales */
+  headerSobreImagen: {
+    type: Boolean,
+    default: true,
+  },
+
+  /* Mantiene visible la información inferior al expandir la tarjeta */
+  mostrarInfoInferiorExpandida: {
+    type: Boolean,
+    default: false,
   },
 
   /* Modo selección activo */
@@ -295,6 +313,9 @@ const manejarLongPress = () => {
 }
 /* Degradado según tipo */
 .tarjeta-yugioh--producto .tarjeta-yugioh__header {
+  background: var(--degradado-carta-header);
+}
+.tarjeta-yugioh--header-sobre-imagen .tarjeta-yugioh__header {
   background: linear-gradient(to bottom, var(--overlay-oscuro-intenso), transparent);
   left: 0;
   position: absolute;
@@ -392,7 +413,19 @@ const manejarLongPress = () => {
   padding: 8px;
   background: var(--degradado-marco-imagen);
 }
-.tarjeta-yugioh--producto .tarjeta-yugioh__marco-imagen {
+/* ========================================
+   BARRA DE ESTADO
+   ======================================== */
+.tarjeta-yugioh__barra-estado {
+  background: var(--color-carta-info-bg);
+  border-bottom: 1px solid var(--color-carta-borde);
+  padding: 6px 12px;
+}
+.tarjeta-yugioh__barra-estado + .tarjeta-yugioh__tipo {
+  border-top: 0;
+  margin-top: calc(var(--carta-gap-secciones) * -1);
+}
+.tarjeta-yugioh--header-sobre-imagen .tarjeta-yugioh__marco-imagen {
   padding: 0;
 }
 .tarjeta-yugioh__contenedor-imagen {
@@ -404,13 +437,13 @@ const manejarLongPress = () => {
   box-shadow: var(--sombra-interna-marco);
   transition: height 0.3s ease;
 }
-.tarjeta-yugioh--producto .tarjeta-yugioh__contenedor-imagen {
+.tarjeta-yugioh--header-sobre-imagen .tarjeta-yugioh__contenedor-imagen {
   height: 230px;
 }
 .tarjeta-yugioh--expandida .tarjeta-yugioh__contenedor-imagen {
   height: var(--carta-imagen-altura-abierta);
 }
-.tarjeta-yugioh--producto.tarjeta-yugioh--expandida .tarjeta-yugioh__contenedor-imagen {
+.tarjeta-yugioh--header-sobre-imagen.tarjeta-yugioh--expandida .tarjeta-yugioh__contenedor-imagen {
   height: 250px;
 }
 .tarjeta-yugioh__imagen {
@@ -513,10 +546,10 @@ const manejarLongPress = () => {
 .tarjeta-yugioh--con-expansion .tarjeta-yugioh__info-inferior {
   padding-right: 44px;
 }
-.tarjeta-yugioh--producto .tarjeta-yugioh__nombre {
+.tarjeta-yugioh--header-sobre-imagen .tarjeta-yugioh__nombre {
   padding-right: 44px;
 }
-.tarjeta-yugioh--producto.tarjeta-yugioh--expandida .tarjeta-yugioh__nombre {
+.tarjeta-yugioh--header-sobre-imagen.tarjeta-yugioh--expandida .tarjeta-yugioh__nombre {
   padding-right: 160px;
 }
 /* En productos expandidos, alinear el botón de cierre al inicio */
@@ -526,10 +559,10 @@ const manejarLongPress = () => {
   transform: none;
 }
 @media (max-width: 599px) {
-  .tarjeta-yugioh--producto .tarjeta-yugioh__contenedor-imagen {
+  .tarjeta-yugioh--header-sobre-imagen .tarjeta-yugioh__contenedor-imagen {
     height: 210px;
   }
-  .tarjeta-yugioh--producto.tarjeta-yugioh--expandida .tarjeta-yugioh__contenedor-imagen {
+  .tarjeta-yugioh--header-sobre-imagen.tarjeta-yugioh--expandida .tarjeta-yugioh__contenedor-imagen {
     height: 230px;
   }
 }
