@@ -507,19 +507,45 @@ function copiarCodigo() {
   })
 }
 
-// Abre la tarjeta (si está cerrada) y hace focus en el campo indicado
-function irACampo(campo) {
+// Abre la tarjeta, ubica el campo debajo del buscador y le da foco
+async function irACampo(campo) {
   expandidoLocal.value = true
-  nextTick(() => {
-    if (campo === 'nombre') {
-      refInputNombre.value?.focus?.()
-      if (datosEditando.value.nombre?.trim()) refInputNombre.value?.select()
-    } else if (campo === 'precio') {
-      refInputPrecio.value?.focus?.()
-      if (datosEditando.value.precio > 0) refInputPrecio.value?.select()
-    } else if (campo === 'comercio') {
-      refSelectorComercio.value?.focus?.()
-    }
+  await nextTick()
+  await new Promise((resolver) => setTimeout(resolver, 420))
+
+  const referenciaCampo = obtenerReferenciaCampo(campo)
+  referenciaCampo?.focus?.()
+  await new Promise((resolver) => setTimeout(resolver, 120))
+  desplazarCampoDebajoDelBuscador(referenciaCampo)
+
+  if (campo === 'nombre' && datosEditando.value.nombre?.trim()) {
+    referenciaCampo?.select?.()
+  }
+  if (campo === 'precio' && datosEditando.value.precio > 0) {
+    referenciaCampo?.select?.()
+  }
+}
+
+function obtenerReferenciaCampo(campo) {
+  if (campo === 'nombre') return refInputNombre.value
+  if (campo === 'precio') return refInputPrecio.value
+  if (campo === 'comercio') return refSelectorComercio.value
+  return null
+}
+
+function desplazarCampoDebajoDelBuscador(referenciaCampo) {
+  const elementoCampo = referenciaCampo?.obtenerElemento?.() || referenciaCampo?.$el
+  const listaDesplazable = elementoCampo?.closest?.('.mesa-lista-scroll')
+  const buscador = document.querySelector('.buscador-mesa-sticky')
+  if (!elementoCampo || !listaDesplazable || !buscador) return
+
+  const margenSuperior = 8
+  const posicionObjetivo = buscador.getBoundingClientRect().bottom + margenSuperior
+  const desplazamiento = elementoCampo.getBoundingClientRect().top - posicionObjetivo
+
+  listaDesplazable.scrollBy({
+    top: desplazamiento,
+    behavior: 'smooth',
   })
 }
 
