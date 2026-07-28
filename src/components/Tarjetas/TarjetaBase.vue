@@ -295,7 +295,12 @@ const manejarLongPress = () => {
 }
 /* Degradado según tipo */
 .tarjeta-yugioh--producto .tarjeta-yugioh__header {
-  background: var(--degradado-carta-header);
+  background: linear-gradient(to bottom, var(--overlay-oscuro-intenso), transparent);
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 3;
 }
 .tarjeta-yugioh--comercio .tarjeta-yugioh__header {
   background: var(--degradado-carta-header-comercio);
@@ -387,6 +392,9 @@ const manejarLongPress = () => {
   padding: 8px;
   background: var(--degradado-marco-imagen);
 }
+.tarjeta-yugioh--producto .tarjeta-yugioh__marco-imagen {
+  padding: 0;
+}
 .tarjeta-yugioh__contenedor-imagen {
   position: relative;
   width: 100%;
@@ -396,8 +404,14 @@ const manejarLongPress = () => {
   box-shadow: var(--sombra-interna-marco);
   transition: height 0.3s ease;
 }
+.tarjeta-yugioh--producto .tarjeta-yugioh__contenedor-imagen {
+  height: 230px;
+}
 .tarjeta-yugioh--expandida .tarjeta-yugioh__contenedor-imagen {
   height: var(--carta-imagen-altura-abierta);
+}
+.tarjeta-yugioh--producto.tarjeta-yugioh--expandida .tarjeta-yugioh__contenedor-imagen {
+  height: 250px;
 }
 .tarjeta-yugioh__imagen {
   width: 100%;
@@ -499,11 +513,25 @@ const manejarLongPress = () => {
 .tarjeta-yugioh--con-expansion .tarjeta-yugioh__info-inferior {
   padding-right: 44px;
 }
+.tarjeta-yugioh--producto .tarjeta-yugioh__nombre {
+  padding-right: 44px;
+}
+.tarjeta-yugioh--producto.tarjeta-yugioh--expandida .tarjeta-yugioh__nombre {
+  padding-right: 160px;
+}
 /* En productos expandidos, alinear el botón de cierre al inicio */
 .tarjeta-yugioh--producto.tarjeta-yugioh--expandida .tarjeta-yugioh__icono-expandir {
   left: 10px;
   right: auto;
   transform: none;
+}
+@media (max-width: 599px) {
+  .tarjeta-yugioh--producto .tarjeta-yugioh__contenedor-imagen {
+    height: 210px;
+  }
+  .tarjeta-yugioh--producto.tarjeta-yugioh--expandida .tarjeta-yugioh__contenedor-imagen {
+    height: 230px;
+  }
 }
 /* ========================================
    ANIMACIONES

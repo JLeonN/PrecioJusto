@@ -11,14 +11,6 @@
     @toggle-seleccion="$emit('toggle-seleccion')"
     @agregar-precio="$emit('agregar-precio')"
   >
-    <template #tipo>
-      <div class="tipo-direccion">
-        <div class="tipo-direccion__principal">
-          <IconMapPin :size="14" />
-          <span>{{ producto.comercioMejor }}</span>
-        </div>
-      </div>
-    </template>
     <template #placeholder-icono>
       <IconShoppingBag :size="48" class="text-grey-5" />
     </template>
@@ -523,19 +515,6 @@ const textoBotonMayorista = computed(() => {
     0 0 0 1px var(--mayorista-destacado-borde),
     0 0 18px var(--mayorista-destacado-sombra-media);
   animation: pulsoVentajaMayorista 2.4s ease-in-out infinite;
-}
-.tipo-direccion {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  color: var(--texto-secundario);
-}
-.tipo-direccion__principal {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
 }
 .accion-ver-top {
   color: var(--color-primario);
