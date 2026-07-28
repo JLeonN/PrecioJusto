@@ -65,9 +65,7 @@
         <!-- Historial completo de precios -->
         <HistorialPrecios
           :precios="preciosFiltrados"
-          :precios-confirmados="confirmacionesStore.preciosConfirmados"
           :orden-seleccionado="ordenSeleccionado"
-          @confirmar-precio="confirmarPrecio"
         />
 
         <!-- Pie de atribución de fuentes -->
@@ -107,21 +105,17 @@ import FabAcciones from '../components/Compartidos/FabAcciones.vue'
 import PieAtribucion from '../components/Compartidos/PieAtribucion.vue'
 
 import { useProductosStore } from '../almacenamiento/stores/productosStore.js'
-import { useConfirmacionesStore } from '../almacenamiento/stores/confirmacionesStore.js'
 import { useComerciStore } from '../almacenamiento/stores/comerciosStore.js'
 import fotosLocalesService from '../almacenamiento/servicios/FotosLocalesService.js'
 import { useDialogoAgregarPrecio } from '../composables/useDialogoAgregarPrecio.js'
-import { useQuasar } from 'quasar'
 
 // ========================================
 // 🏪 STORES Y ROUTE
 // ========================================
 
 const productosStore = useProductosStore()
-const confirmacionesStore = useConfirmacionesStore()
 const comerciosStore = useComerciStore()
 const route = useRoute()
-const $q = useQuasar()
 
 // ========================================
 // 💰 COMPOSABLE AGREGAR PRECIO
@@ -225,8 +219,6 @@ const preciosFiltrados = computed(() => {
     precios.sort((a, b) => a.valor - b.valor)
   } else if (ordenSeleccionado.value === 'precio-mayor') {
     precios.sort((a, b) => b.valor - a.valor)
-  } else if (ordenSeleccionado.value === 'confirmaciones') {
-    precios.sort((a, b) => b.confirmaciones - a.confirmaciones)
   }
 
   return precios
@@ -294,48 +286,12 @@ async function cargarPreciosCompletosProducto(productoId) {
   }
 }
 
-/* Confirmar precio */
-async function confirmarPrecio(precioId) {
-  if (!productoActual.value) return
-
-  console.log(`👍 Confirmando precio ${precioId}...`)
-
-  if (confirmacionesStore.precioEstaConfirmado(precioId)) {
-    $q.notify({
-      type: 'warning',
-      message: 'Ya confirmaste este precio anteriormente',
-      position: 'top',
-    })
-    return
-  }
-
-  const resultado = await confirmacionesStore.confirmarPrecio(productoActual.value.id, precioId)
-
-  if (resultado.exito) {
-    productoActual.value = resultado.producto
-
-    $q.notify({
-      type: 'positive',
-      message: `Precio confirmado (${resultado.nuevasConfirmaciones} confirmaciones)`,
-      position: 'top',
-      icon: 'thumb_up',
-    })
-  } else {
-    $q.notify({
-      type: 'negative',
-      message: resultado.mensaje,
-      position: 'top',
-    })
-  }
-}
-
 // ========================================
 // ⚡ LIFECYCLE HOOKS
 // ========================================
 
 onMounted(async () => {
   await Promise.all([
-    confirmacionesStore.cargarConfirmaciones(),
     comerciosStore.cargarComercios(),
     cargarProducto(),
   ])

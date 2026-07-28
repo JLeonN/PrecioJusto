@@ -9,13 +9,6 @@
         {{ formatearPrecioConCodigo(precio.valor, precio.moneda) }}
       </div>
       <div class="precio-fecha text-caption text-grey-7">{{ fechaFormateada }}</div>
-      <q-badge :color="colorConfianza" class="q-mt-xs">
-        <div class="row items-center no-wrap q-gutter-xs">
-          <IconThumbUp :size="12" />
-          <span>{{ precio.confirmaciones }}</span>
-          <span>- {{ textoConfianza }}</span>
-        </div>
-      </q-badge>
       <div v-if="mostrarEscalera" class="escalera-precios q-mt-xs">
         <div class="escalera-titulo">Escalera mayorista</div>
         <div class="escalera-linea">
@@ -33,30 +26,11 @@
       </div>
     </div>
 
-    <!-- Botón confirmar (solo si es el más reciente y no está confirmado) -->
-    <div v-if="esMasReciente" class="precio-acciones">
-      <q-btn
-        v-if="!yaConfirmado"
-        flat
-        dense
-        color="primary"
-        size="sm"
-        @click.stop="$emit('confirmar-precio', precio.id)"
-      >
-        <IconThumbUp :size="16" class="q-mr-xs" />
-        Confirmar
-      </q-btn>
-      <q-chip v-else color="positive" text-color="white" size="sm">
-        <IconCheck :size="14" class="q-mr-xs" />
-        Confirmado
-      </q-chip>
-    </div>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
-import { IconThumbUp, IconCheck } from '@tabler/icons-vue'
 import { formatearPrecioConCodigo } from '../../utils/PrecioUtils.js'
 
 const props = defineProps({
@@ -64,17 +38,7 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-  esMasReciente: {
-    type: Boolean,
-    default: false,
-  },
-  yaConfirmado: {
-    type: Boolean,
-    default: false,
-  },
 })
-
-defineEmits(['confirmar-precio'])
 
 // Color del indicador según antigüedad
 const colorFrescura = computed(() => {
@@ -86,22 +50,6 @@ const colorFrescura = computed(() => {
   if (diasTranscurridos < 21) return 'warning'
   if (diasTranscurridos < 60) return 'orange'
   return 'grey-5'
-})
-
-// Color del badge de confianza
-const colorConfianza = computed(() => {
-  if (props.precio.confirmaciones === 0) return 'grey-6'
-  if (props.precio.confirmaciones < 6) return 'grey-7'
-  if (props.precio.confirmaciones < 20) return 'primary'
-  return 'positive'
-})
-
-// Texto de confianza
-const textoConfianza = computed(() => {
-  if (props.precio.confirmaciones === 0) return 'Sin validar'
-  if (props.precio.confirmaciones < 6) return 'Poco confirmado'
-  if (props.precio.confirmaciones < 20) return 'Confirmado'
-  return 'Muy confiable'
 })
 
 const escalonesOrdenados = computed(() => {
@@ -167,9 +115,6 @@ const fechaFormateada = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 4px;
-}
-.precio-acciones {
-  flex-shrink: 0;
 }
 .escalera-precios {
   border-left: 2px solid var(--color-primario);

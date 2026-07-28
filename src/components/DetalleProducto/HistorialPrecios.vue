@@ -16,8 +16,6 @@
         v-for="comercio in comerciosAgrupados"
         :key="comercio.nombreCompleto"
         :comercio="comercio"
-        :precios-confirmados="preciosConfirmados"
-        @confirmar-precio="$emit('confirmar-precio', $event)"
       />
     </div>
 
@@ -41,17 +39,11 @@ const props = defineProps({
     type: Array,
     required: true,
   },
-  preciosConfirmados: {
-    type: Set,
-    required: true,
-  },
   ordenSeleccionado: {
     type: String,
     required: true,
   },
 })
-
-defineEmits(['confirmar-precio'])
 
 // Agrupar precios por comercio — usar IDs si existen, sino nombreCompleto como fallback legacy
 const comerciosAgrupados = computed(() => {
@@ -109,9 +101,6 @@ const comerciosAgrupados = computed(() => {
         new Date(a.precioMasReciente.fecha).getTime() -
         new Date(b.precioMasReciente.fecha).getTime(),
     )
-  } else if (props.ordenSeleccionado === 'confirmaciones') {
-    // Ordenar por confirmaciones del precio más reciente
-    grupos.sort((a, b) => b.precioMasReciente.confirmaciones - a.precioMasReciente.confirmaciones)
   }
 
   return grupos

@@ -1,7 +1,7 @@
 <template>
-  <q-card class="item-comercio" clickable @click="toggleExpandir">
+  <q-card class="item-comercio" :clickable="tieneHistorial" @click="toggleExpandir">
     <!-- ESTADO COLAPSADO -->
-    <q-card-section class="comercio-header">
+    <q-card-section class="comercio-header" :class="{ 'comercio-header--expandible': tieneHistorial }">
       <div class="row items-center no-wrap">
         <!-- Foto del comercio con borde de frescura, o punto de color si no hay foto -->
         <div v-if="fotoComercio" class="avatar-foto q-mr-md" :style="{ borderColor: colorBordeFoto }">
@@ -24,15 +24,6 @@
             </div>
             <span class="text-caption text-grey-7">({{ fechaFormateada }})</span>
           </div>
-
-          <!-- Badge de confirmaciones del precio más reciente -->
-          <q-badge :color="colorConfianzaMasReciente" class="q-mt-xs">
-            <div class="row items-center no-wrap q-gutter-xs">
-              <IconThumbUp :size="12" />
-              <span>{{ precioMasReciente.confirmaciones }}</span>
-              <span>- {{ textoConfianzaMasReciente }}</span>
-            </div>
-          </q-badge>
 
           <!-- Tendencia del comercio (solo si hay 2+ precios) -->
           <q-chip
@@ -70,8 +61,8 @@
           </div>
         </div>
 
-        <!-- Ícono expandir/colapsar -->
-        <div class="comercio-icono">
+        <!-- Ícono expandir/colapsar, solo cuando hay precios anteriores -->
+        <div v-if="tieneHistorial" class="comercio-icono">
           <IconChevronDown v-if="!expandido" :size="20" class="text-grey-5" />
           <IconChevronUp v-else :size="20" class="text-grey-5" />
         </div>
@@ -80,7 +71,7 @@
 
     <!-- ESTADO EXPANDIDO -->
     <q-slide-transition>
-      <div v-show="expandido">
+      <div v-if="tieneHistorial" v-show="expandido">
         <q-separator />
         <div class="comercio-expandido">
           <!-- Título de la sección expandida -->
@@ -100,12 +91,9 @@
           <!-- Lista de precios históricos -->
           <div>
             <ItemPrecioHistorial
-              v-for="(precio, index) in preciosOrdenados"
+              v-for="precio in preciosHistoricos"
               :key="precio.id"
               :precio="precio"
-              :es-mas-reciente="index === 0"
-              :ya-confirmado="preciosConfirmados.has(precio.id)"
-              @confirmar-precio="$emit('confirmar-precio', $event)"
             />
           </div>
         </div>
@@ -117,7 +105,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { IconThumbUp, IconChevronDown, IconChevronUp, IconTrendingUp, IconTrendingDown, IconMinus, IconExternalLink } from '@tabler/icons-vue'
+import { IconChevronDown, IconChevronUp, IconTrendingUp, IconTrendingDown, IconMinus, IconExternalLink } from '@tabler/icons-vue'
 import ItemPrecioHistorial from './ItemPrecioHistorial.vue'
 import { useComerciStore } from 'src/almacenamiento/stores/comerciosStore'
 import { MONEDA_DEFAULT } from '../../almacenamiento/constantes/Monedas.js'
@@ -131,17 +119,12 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-  preciosConfirmados: {
-    type: Set,
-    required: true,
-  },
 })
-
-defineEmits(['confirmar-precio'])
 
 const expandido = ref(false)
 
 const toggleExpandir = () => {
+  if (!tieneHistorial.value) return
   expandido.value = !expandido.value
 }
 
@@ -201,6 +184,8 @@ const preciosOrdenados = computed(() => {
 const precioMasReciente = computed(() => {
   return preciosOrdenados.value[0]
 })
+const preciosHistoricos = computed(() => preciosOrdenados.value.slice(1))
+const tieneHistorial = computed(() => preciosHistoricos.value.length > 0)
 const escalonesResumen = computed(() => {
   const escalas = Array.isArray(precioMasReciente.value?.escalasPorCantidad)
     ? precioMasReciente.value.escalasPorCantidad
@@ -238,24 +223,6 @@ const colorFrescuraMasReciente = computed(() => {
   if (diasTranscurridos < 21) return 'warning'
   if (diasTranscurridos < 60) return 'orange'
   return 'grey-5'
-})
-
-// Color de confianza del precio más reciente
-const colorConfianzaMasReciente = computed(() => {
-  const conf = precioMasReciente.value.confirmaciones
-  if (conf === 0) return 'grey-6'
-  if (conf < 6) return 'grey-7'
-  if (conf < 20) return 'primary'
-  return 'positive'
-})
-
-// Texto de confianza del precio más reciente
-const textoConfianzaMasReciente = computed(() => {
-  const conf = precioMasReciente.value.confirmaciones
-  if (conf === 0) return 'Sin validar'
-  if (conf < 6) return 'Poco confirmado'
-  if (conf < 20) return 'Confirmado'
-  return 'Muy confiable'
 })
 
 // Fecha formateada del precio más reciente
@@ -340,7 +307,7 @@ const textoTendenciaCompleto = computed(() => {
 .item-comercio:active {
   transform: scale(0.98);
 }
-.comercio-header {
+.comercio-header--expandible {
   cursor: pointer;
 }
 .comercio-info {

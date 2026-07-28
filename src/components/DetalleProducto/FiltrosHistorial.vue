@@ -111,7 +111,6 @@ const opcionesOrden = [
   { label: 'Más antiguo', value: 'antiguo' },
   { label: 'Precio menor', value: 'precio-menor' },
   { label: 'Precio mayor', value: 'precio-mayor' },
-  { label: 'Más confirmaciones', value: 'confirmaciones' },
 ]
 </script>
 
