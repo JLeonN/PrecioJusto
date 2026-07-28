@@ -192,9 +192,14 @@
           label="Marca"
           outlined
           dense
-          hint="Opcional"
-          class="q-mt-xs"
           @update:model-value="(v) => actualizar('marca', v)"
+        />
+        <InputFormularioReutilizable
+          :model-value="datosEditando.categoria"
+          label="Categoría"
+          outlined
+          dense
+          @update:model-value="(v) => actualizar('categoria', v)"
         />
         <!-- Precio + Moneda -->
         <div class="row q-col-gutter-sm">
@@ -430,6 +435,7 @@ const datosModificados = computed(
     datosOriginales.value &&
     (datosEditando.value.nombre !== datosOriginales.value.nombre ||
       datosEditando.value.marca !== datosOriginales.value.marca ||
+      datosEditando.value.categoria !== datosOriginales.value.categoria ||
       datosEditando.value.cantidad !== datosOriginales.value.cantidad ||
       datosEditando.value.unidad !== datosOriginales.value.unidad),
 )
@@ -493,9 +499,10 @@ function alGuardarFotoEditada(nuevaImagenBase64) {
 
 function recuperarDatos() {
   if (!datosOriginales.value) return
-  const { nombre, marca, cantidad, unidad } = datosOriginales.value
+  const { nombre, marca, categoria, cantidad, unidad } = datosOriginales.value
   actualizar('nombre', nombre)
   actualizar('marca', marca)
+  actualizar('categoria', categoria)
   actualizar('cantidad', cantidad)
   actualizar('unidad', unidad)
 }

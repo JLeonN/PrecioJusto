@@ -122,6 +122,7 @@ function normalizarDatosOriginales(datosOriginales) {
   return {
     nombre: datosOriginales.nombre || '',
     marca: datosOriginales.marca || null,
+    categoria: datosOriginales.categoria || '',
     cantidad: Number(datosOriginales.cantidad || 1),
     unidad: datosOriginales.unidad || 'unidad',
     imagen: imagen.startsWith('data:') ? null : datosOriginales.imagen || null,
@@ -139,6 +140,7 @@ function normalizarItemMesaTrabajoParaFirestore(item, usuarioId) {
     codigoBarras: item?.codigoBarras || null,
     nombre: String(item?.nombre || '').trim(),
     marca: item?.marca || null,
+    categoria: String(item?.categoria || '').trim(),
     cantidad: Number.isFinite(Number(item?.cantidad)) ? Math.max(1, Number(item.cantidad)) : 1,
     unidad: item?.unidad || 'unidad',
     imagenUrl: imagenFirestore.imagenUrl,

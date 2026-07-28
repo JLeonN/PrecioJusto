@@ -329,6 +329,7 @@ function construirItem(codigo, existente, productoApi, resultadoApi) {
     productoExistenteId: existente?.id || null,
     nombre: productoApi?.nombre || existente?.nombre || '',
     marca: productoApi?.marca || existente?.marca || null,
+    categoria: productoApi?.categoria || existente?.categoria || '',
     cantidad: productoApi?.cantidad || existente?.cantidad || 1,
     unidad: productoApi?.unidad || existente?.unidad || 'unidad',
     imagen: productoApi?.imagen || existente?.imagen || null,

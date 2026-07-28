@@ -480,6 +480,7 @@ export const useListaJustaStore = defineStore('listaJusta', () => {
       codigoBarras: item.codigoBarras,
       nombre: item.nombre,
       marca: item.marca,
+      categoria: item.categoria || '',
       cantidad: item.cantidad,
       unidad: item.unidad,
       imagen: item.imagen,

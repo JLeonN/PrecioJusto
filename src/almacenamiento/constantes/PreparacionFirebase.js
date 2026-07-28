@@ -275,6 +275,7 @@ export const CAMPOS_MODELO_FIRESTORE = Object.freeze({
     'codigoBarras',
     'nombre',
     'marca',
+    'categoria',
     'cantidad',
     'unidad',
     'imagenUrl',

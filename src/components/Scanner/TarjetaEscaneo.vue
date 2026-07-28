@@ -283,6 +283,7 @@ const preferenciasStore = usePreferenciasStore()
 const datosForm = ref({
   nombre: '',
   marca: null,
+  categoria: '',
   cantidad: 1,
   unidad: 'unidad',
   imagen: null,
@@ -314,6 +315,7 @@ const datosOriginales = computed(() => {
     return {
       nombre: props.item.nombre || '',
       marca: props.item.marca || null,
+      categoria: props.item.categoria || '',
       cantidad: props.item.cantidad || 1,
       unidad: props.item.unidad || 'unidad',
       imagen: props.item.imagen || null,
@@ -331,6 +333,7 @@ const datosModificados = computed(
     datosOriginales.value &&
     (datosForm.value.nombre !== datosOriginales.value.nombre ||
       datosForm.value.marca !== datosOriginales.value.marca ||
+      datosForm.value.categoria !== datosOriginales.value.categoria ||
       datosForm.value.cantidad !== datosOriginales.value.cantidad ||
       datosForm.value.unidad !== datosOriginales.value.unidad),
 )
@@ -343,6 +346,7 @@ watch(
     datosForm.value = {
       nombre: nuevoItem.nombre || '',
       marca: nuevoItem.marca || null,
+      categoria: nuevoItem.categoria || '',
       cantidad: nuevoItem.cantidad || 1,
       unidad: nuevoItem.unidad || 'unidad',
       imagen: nuevoItem.imagen || null,
@@ -369,6 +373,7 @@ function alCerrar() {
   datosForm.value = {
     nombre: '',
     marca: null,
+    categoria: '',
     cantidad: 1,
     unidad: 'unidad',
     imagen: null,
@@ -406,11 +411,11 @@ function copiarCodigo() {
   })
 }
 
-// Recupera nombre, marca, cantidad y unidad originales de la API/BD (NO toca imagen ni precio)
+// Recupera datos originales de la API/BD (NO toca imagen ni precio)
 function recuperarDatos() {
   if (!datosOriginales.value) return
-  const { nombre, marca, cantidad, unidad } = datosOriginales.value
-  datosForm.value = { ...datosForm.value, nombre, marca, cantidad, unidad }
+  const { nombre, marca, categoria, cantidad, unidad } = datosOriginales.value
+  datosForm.value = { ...datosForm.value, nombre, marca, categoria, cantidad, unidad }
 }
 
 // Foto
@@ -429,6 +434,7 @@ function _itemActualizado() {
     ...props.item,
     nombre: datosForm.value.nombre.trim() || props.item?.nombre || '',
     marca: datosForm.value.marca,
+    categoria: datosForm.value.categoria,
     cantidad: datosForm.value.cantidad,
     unidad: datosForm.value.unidad,
     imagen: datosForm.value.imagen,

@@ -357,6 +357,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
       codigoBarras: item.codigoBarras || null,
       nombre: item.nombre || '',
       marca: item.marca || null,
+      categoria: item.categoria || '',
       cantidad: item.cantidad || 1,
       unidad: item.unidad || 'unidad',
       imagen: item.imagen || null,
@@ -375,6 +376,7 @@ export const useSesionEscaneoStore = defineStore('sesionEscaneo', () => {
         ? {
           nombre: item.nombre || '',
           marca: item.marca || null,
+          categoria: item.categoria || '',
           cantidad: item.cantidad || 1,
           unidad: item.unidad || 'unidad',
           imagen: item.imagen || null,
