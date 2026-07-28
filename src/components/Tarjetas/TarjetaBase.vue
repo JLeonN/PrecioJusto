@@ -315,6 +315,9 @@ const manejarLongPress = () => {
 .tarjeta-yugioh--producto .tarjeta-yugioh__header {
   background: var(--degradado-carta-header);
 }
+.tarjeta-yugioh--producto {
+  container-type: inline-size;
+}
 .tarjeta-yugioh--header-sobre-imagen .tarjeta-yugioh__header {
   background: linear-gradient(to bottom, var(--overlay-oscuro-intenso), transparent);
   left: 0;

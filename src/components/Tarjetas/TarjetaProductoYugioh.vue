@@ -28,35 +28,37 @@
         />
 
         <div v-if="hayVentajaMayoristaTarjeta" class="overlay-mayorista-tarjeta">
-          <q-slide-transition>
-            <div v-show="mostrarMayoristasEnTarjeta" class="panel-mayoristas-tarjeta">
-              <transition-group name="entradaEscalon" tag="div">
-                <div
-                  v-for="(alternativa, indiceAlternativa) in mayoristasConVentaja"
-                  :key="alternativa.clave"
-                  class="item-mayorista-tarjeta"
-                  :style="{ animationDelay: `${indiceAlternativa * 70}ms` }"
-                >
-                  <div class="item-mayorista-tarjeta__comercio">{{ alternativa.comercio }}</div>
-                  <div class="item-mayorista-tarjeta__linea">
-                    <span>Desde 1 unidad</span>
-                    <span>{{ formatearPrecio(alternativa.precioBase, precioMejorVigente.moneda) }}</span>
-                  </div>
+          <div class="contenedor-panel-mayoristas">
+            <q-slide-transition>
+              <div v-show="mostrarMayoristasEnTarjeta" class="panel-mayoristas-tarjeta">
+                <transition-group name="entradaEscalon" tag="div">
                   <div
-                    v-for="(escalon, indiceEscalon) in alternativa.escalones"
-                    :key="`${alternativa.clave}_escalon_${indiceEscalon}`"
-                    :class="[
-                      'item-mayorista-tarjeta__linea',
-                      { 'item-mayorista-tarjeta__linea--ventaja': escalon.precioUnitario < precioMejorVigente.valor },
-                    ]"
+                    v-for="(alternativa, indiceAlternativa) in mayoristasConVentaja"
+                    :key="alternativa.clave"
+                    class="item-mayorista-tarjeta"
+                    :style="{ animationDelay: `${indiceAlternativa * 70}ms` }"
                   >
-                    <span>Desde {{ escalon.cantidadMinima }} unidades</span>
-                    <span>{{ formatearPrecio(escalon.precioUnitario, precioMejorVigente.moneda) }}</span>
+                    <div class="item-mayorista-tarjeta__comercio">{{ alternativa.comercio }}</div>
+                    <div class="item-mayorista-tarjeta__linea">
+                      <span>Desde 1 unidad</span>
+                      <span>{{ formatearPrecio(alternativa.precioBase, precioMejorVigente.moneda) }}</span>
+                    </div>
+                    <div
+                      v-for="(escalon, indiceEscalon) in alternativa.escalones"
+                      :key="`${alternativa.clave}_escalon_${indiceEscalon}`"
+                      :class="[
+                        'item-mayorista-tarjeta__linea',
+                        { 'item-mayorista-tarjeta__linea--ventaja': escalon.precioUnitario < precioMejorVigente.valor },
+                      ]"
+                    >
+                      <span>Desde {{ escalon.cantidadMinima }} unidades</span>
+                      <span>{{ formatearPrecio(escalon.precioUnitario, precioMejorVigente.moneda) }}</span>
+                    </div>
                   </div>
-                </div>
-              </transition-group>
-            </div>
-          </q-slide-transition>
+                </transition-group>
+              </div>
+            </q-slide-transition>
+          </div>
           <div class="precio-valor precio-valor-mayorista">
             {{ formatearPrecio(precioMejorVigente.valor, precioMejorVigente.moneda) }}
           </div>
@@ -65,7 +67,7 @@
             dense
             no-caps
             color="primary"
-            icon="query_stats"
+            :icon="mostrarIconoMayorista ? 'query_stats' : undefined"
             :label="textoBotonMayorista"
             class="boton-ver-mayoristas-tarjeta"
             @click.stop="toggleMayoristasTarjeta"
@@ -151,6 +153,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { useQuasar } from 'quasar'
 import TarjetaBase from './TarjetaBase.vue'
 import {
   IconShoppingBag,
@@ -185,6 +188,7 @@ const props = defineProps({
 /* Emits del componente */
 defineEmits(['long-press', 'toggle-seleccion', 'agregar-precio'])
 
+const $q = useQuasar()
 const productosStore = useProductosStore()
 const mostrarMayoristasEnTarjeta = ref(false)
 const cargandoPrecios = ref(false)
@@ -385,6 +389,8 @@ const textoBotonMayorista = computed(() => {
     ? 'Ocultar mayorista'
     : 'Ver mayorista'
 })
+
+const mostrarIconoMayorista = computed(() => $q.screen.width > 360)
 </script>
 
 <style scoped>
@@ -455,14 +461,22 @@ const textoBotonMayorista = computed(() => {
     0 0 0 1px var(--mayorista-destacado-borde),
     0 0 14px var(--mayorista-destacado-sombra-media);
   animation: pulsoBotonMayorista 2.4s ease-in-out infinite;
+  position: relative;
+  z-index: 2;
 }
 .boton-ver-mayoristas-tarjeta:deep(.q-btn__content) {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+.contenedor-panel-mayoristas {
+  bottom: 46px;
+  left: 10px;
+  position: absolute;
+  right: 10px;
+  z-index: 2;
+}
 .panel-mayoristas-tarjeta {
-  margin-top: 10px;
   width: 100%;
   max-height: 112px;
   overflow: auto;
@@ -685,6 +699,11 @@ const textoBotonMayorista = computed(() => {
 }
 @media (max-width: 340px) {
   .item-precio__mejor-precio {
+    display: none;
+  }
+}
+@container (max-width: 300px) {
+  .boton-ver-mayoristas-tarjeta :deep(.q-icon) {
     display: none;
   }
 }
