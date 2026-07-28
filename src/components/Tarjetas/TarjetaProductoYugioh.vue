@@ -11,6 +11,9 @@
     @toggle-seleccion="$emit('toggle-seleccion')"
     @agregar-precio="$emit('agregar-precio')"
   >
+    <template v-if="textoPresentacion" #subtitulo>
+      {{ textoPresentacion }}
+    </template>
     <template #placeholder-icono>
       <IconShoppingBag :size="48" class="text-grey-5" />
     </template>
@@ -193,6 +196,13 @@ const productosStore = useProductosStore()
 const mostrarMayoristasEnTarjeta = ref(false)
 const cargandoPrecios = ref(false)
 const idsConReintentoPrecios = ref(new Set())
+
+const textoPresentacion = computed(() => {
+  const cantidad = Number(props.producto.cantidad)
+  const unidad = String(props.producto.unidad || '').trim()
+  if (!Number.isFinite(cantidad) || cantidad <= 0 || !unidad) return ''
+  return `${cantidad} ${unidad}`
+})
 
 const preciosPendientes = computed(() => {
   return props.producto.preciosCargados === false && props.producto.precios.length === 0

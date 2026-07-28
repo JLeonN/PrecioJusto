@@ -33,7 +33,12 @@
       </div>
 
       <div class="tarjeta-yugioh__nombre">
-        <slot name="nombre">{{ nombre }}</slot>
+        <div class="tarjeta-yugioh__nombre-principal">
+          <slot name="nombre">{{ nombre }}</slot>
+        </div>
+        <div v-if="$slots.subtitulo" class="tarjeta-yugioh__subtitulo">
+          <slot name="subtitulo"></slot>
+        </div>
       </div>
 
       <div
@@ -332,12 +337,25 @@ const manejarLongPress = () => {
 .tarjeta-yugioh__nombre {
   flex: 1;
   min-width: 0;
+}
+.tarjeta-yugioh__nombre-principal {
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   line-height: 1.3;
+}
+.tarjeta-yugioh__subtitulo {
+  color: var(--texto-sobre-primario);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  margin-top: 2px;
+  opacity: 0.82;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .tarjeta-yugioh__header-accion {
   flex: 0 0 auto;
