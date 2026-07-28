@@ -26,6 +26,7 @@ import {
 import { ESTADOS_SINCRONIZACION, ORIGENES_FOTO, TIPOS_USUARIO } from '../constantes/PreparacionFirebase.js'
 import { comprimirImagenParaFirestore } from '../../utils/ImagenesFirestoreUtils.js'
 import firestoreImagenesProductosService from './FirestoreImagenesProductosService.js'
+import firestorePreciosService from './FirestorePreciosService.js'
 import fotosLocalesService from './FotosLocalesService.js'
 import firestoreProductosService from './FirestoreProductosService.js'
 import usuarioActualService from './UsuarioActualService.js'
@@ -150,8 +151,7 @@ class ProductosService {
         // Mantener compatibilidad con precios viejos
       }
 
-      // Generar ID para el precio
-      precio.id = precio.id || this._generarId()
+      // Generar fecha para comparar el nuevo registro con el último del comercio
       precio.fecha = precio.fecha || new Date().toISOString()
       precio.confirmaciones = precio.confirmaciones || 0
 
@@ -166,15 +166,19 @@ class ProductosService {
       // Normalizar escalas por cantidad dentro del registro de precio
       precio = this._normalizarPrecioConEscalas(precio)
 
-      // Agregar a la lista de precios
       producto.precios = producto.precios || []
-      producto.precios.push(precio)
+      const ultimoPrecio = this._obtenerUltimoPrecioComercio(producto.precios, precio)
 
-      // Recalcular campos automáticos
-      const productoActualizado = this._calcularCamposAutomaticos(producto)
+      if (ultimoPrecio && this._preciosSonEquivalentes(ultimoPrecio, precio)) {
+        // Un precio sin cambios renueva su verificación, pero no crea otro evento histórico.
+        ultimoPrecio.fecha = precio.fecha
+        ultimoPrecio.fechaActualizacion = precio.fecha
+      } else {
+        precio.id = precio.id || this._generarId()
+        producto.precios.push(precio)
+      }
 
-      // Guardar
-      return await this.guardarProducto(productoActualizado)
+      return await this.consolidarPreciosDuplicadosProducto(producto, { guardar: true })
     } catch (error) {
       console.error('Error al agregar precio:', error)
       return null
@@ -382,9 +386,141 @@ class ProductosService {
     }
   }
 
+  /**
+   * Consolida tramos consecutivos de precios idénticos por comercio y sucursal.
+   * Conserva el registro más reciente de cada tramo para mantener la última verificación.
+   */
+  async consolidarPreciosDuplicadosProducto(producto, opciones = {}) {
+    if (!producto) return null
+
+    const resultado = this._consolidarPreciosDuplicados(producto.precios)
+    const productoConsolidado = this._calcularCamposAutomaticos({
+      ...producto,
+      precios: resultado.precios,
+    })
+
+    if (!opciones.guardar && resultado.idsDuplicados.length === 0) return productoConsolidado
+
+    const productoGuardado = await this.guardarProducto(productoConsolidado)
+    if (!productoGuardado) return productoConsolidado
+
+    if (resultado.idsDuplicados.length > 0) {
+      await this._eliminarPreciosDuplicadosFirestore(productoGuardado, resultado.idsDuplicados)
+    }
+
+    return productoGuardado
+  }
+
   // ========================================
   // CÁLCULOS Y TRANSFORMACIONES
   // ========================================
+  _obtenerClaveComercioPrecio(precio) {
+    if (precio?.comercioId && precio?.direccionId) {
+      return `ids:${precio.comercioId}:${precio.direccionId}`
+    }
+
+    const comercio = String(precio?.nombreCompleto || precio?.comercio || 'Sin comercio')
+      .trim()
+      .toLowerCase()
+    const direccion = String(precio?.direccion || '').trim().toLowerCase()
+    return `texto:${comercio}:${direccion}`
+  }
+
+  _obtenerFirmaPrecio(precio) {
+    const precioNormalizado = this._normalizarPrecioConEscalas(precio)
+    const escalas = precioNormalizado.escalasPorCantidad.map((escala) => ({
+      cantidadMinima: escala.cantidadMinima,
+      precioUnitario: escala.precioUnitario,
+    }))
+
+    return JSON.stringify({
+      valor: Number(precioNormalizado.valor),
+      moneda: String(precioNormalizado.moneda || 'UYU').trim().toUpperCase(),
+      activarPreciosMayoristas: precioNormalizado.activarPreciosMayoristas,
+      escalas,
+    })
+  }
+
+  _preciosSonEquivalentes(precioA, precioB) {
+    return (
+      this._obtenerClaveComercioPrecio(precioA) === this._obtenerClaveComercioPrecio(precioB) &&
+      this._obtenerFirmaPrecio(precioA) === this._obtenerFirmaPrecio(precioB)
+    )
+  }
+
+  _obtenerUltimoPrecioComercio(precios, precioReferencia) {
+    return (
+      [...precios]
+        .filter(
+          (precio) =>
+            this._obtenerClaveComercioPrecio(precio) ===
+            this._obtenerClaveComercioPrecio(precioReferencia),
+        )
+        .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))[0] || null
+    )
+  }
+
+  _consolidarPreciosDuplicados(precios) {
+    const preciosPorComercio = new Map()
+
+    for (const precio of Array.isArray(precios) ? precios : []) {
+      const precioNormalizado = this._normalizarPrecioConEscalas(precio)
+      const claveComercio = this._obtenerClaveComercioPrecio(precioNormalizado)
+      const preciosComercio = preciosPorComercio.get(claveComercio) || []
+      preciosComercio.push(precioNormalizado)
+      preciosPorComercio.set(claveComercio, preciosComercio)
+    }
+
+    const preciosConsolidados = []
+    const idsDuplicados = []
+
+    for (const preciosComercio of preciosPorComercio.values()) {
+      const ordenados = [...preciosComercio].sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
+      const consolidadosComercio = []
+
+      for (const precio of ordenados) {
+        const ultimoPrecio = consolidadosComercio[consolidadosComercio.length - 1]
+
+        if (ultimoPrecio && this._preciosSonEquivalentes(ultimoPrecio, precio)) {
+          if (ultimoPrecio.id) idsDuplicados.push(ultimoPrecio.id)
+          consolidadosComercio[consolidadosComercio.length - 1] = precio
+          continue
+        }
+
+        consolidadosComercio.push(precio)
+      }
+
+      preciosConsolidados.push(...consolidadosComercio)
+    }
+
+    return {
+      precios: preciosConsolidados,
+      idsDuplicados: [...new Set(idsDuplicados)],
+    }
+  }
+
+  async _eliminarPreciosDuplicadosFirestore(producto, idsDuplicados) {
+    const estado = producto?.sincronizacionFirestore?.estado
+    if (
+      estado === ESTADOS_SINCRONIZACION.LOCAL ||
+      estado === ESTADOS_SINCRONIZACION.ERROR ||
+      idsDuplicados.length === 0
+    ) {
+      return
+    }
+
+    const resultados = await Promise.allSettled(
+      idsDuplicados.map((precioId) =>
+        firestorePreciosService.eliminarPrecioDefinitivo(producto.id, precioId),
+      ),
+    )
+    const huboError = resultados.some((resultado) => resultado.status === 'rejected')
+
+    if (huboError) {
+      console.warn('Algunos precios duplicados no se pudieron eliminar de Firestore.')
+    }
+  }
+
   /* Calcular campos automáticos del producto (precio vigente por comercio) */
   _calcularCamposAutomaticos(producto) {
     if (!producto.precios || producto.precios.length === 0) {

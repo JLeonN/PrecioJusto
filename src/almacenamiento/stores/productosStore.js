@@ -611,9 +611,13 @@ export const useProductosStore = defineStore('productos', () => {
         fechaPreciosFirestore: new Date().toISOString(),
       }
 
-      productos.value[indice] = productoActualizado
-      await productosService.guardarProductoEnCacheLocal(productoActualizado)
-      return productoActualizado
+      const productoConsolidado = await productosService.consolidarPreciosDuplicadosProducto(
+        productoActualizado,
+      )
+
+      productos.value[indice] = productoConsolidado
+      await productosService.guardarProductoEnCacheLocal(productoConsolidado)
+      return productoConsolidado
     } catch (err) {
       console.warn('No se pudieron cargar precios desde Firestore:', err)
       return null

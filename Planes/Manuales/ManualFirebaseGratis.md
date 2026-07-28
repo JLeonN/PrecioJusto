@@ -955,6 +955,28 @@ permitir reintento
 
 Esto protege la experiencia del usuario.
 
+### Historiales Sin Precios Repetidos
+
+Cuando un historial registra cambios de precio, cada entrada debe representar un cambio real y no una repetición de la misma verificación.
+
+Regla recomendada para precios por comercio y sucursal:
+
+1. Normalizar valor, moneda y escalas por cantidad antes de comparar.
+2. Comparar el nuevo precio solamente con el último registro del mismo comercio y sucursal.
+3. Si valor, moneda, modalidad mayorista y escalas son iguales, actualizar la fecha del registro existente; no crear un documento nuevo.
+4. Si hubo un valor distinto entre medio, conservar ambos eventos aunque el valor original vuelva a aparecer.
+5. Al cargar o guardar un historial, consolidar tramos consecutivos idénticos y conservar el registro más reciente de cada tramo.
+
+Ejemplo correcto:
+
+```text
+$225 -> $230 -> $225
+```
+
+Los dos registros de `$225` se conservan porque hubo un cambio real entre ellos.
+
+Para limpiar duplicados históricos, usar los IDs existentes: guardar el precio conservado, borrar los documentos repetidos de la subcolección y actualizar el caché local. Si Firestore falla, está offline o no hay sesión, no borrar el caché local por una lectura remota dudosa; conservar el cambio local y permitir que la sincronización se reintente.
+
 ---
 
 ## Timeouts De Sincronización
