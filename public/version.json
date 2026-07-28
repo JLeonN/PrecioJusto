@@ -1,5 +1,5 @@
 {
-  "versionDisponible": "1.2.18",
+  "versionDisponible": "1.2.19",
   "urlPlayStore": "https://play.google.com/store/apps/details?id=com.preciojusto.app",
   "mostrarActualizacion": true,
   "cambios": {
@@ -7,8 +7,12 @@
       {
         "apartado": "Novedades",
         "novedades": [
-          "Las fotos que tomás para productos y comercios ahora se conservan mejor al volver de la cámara.",
-          "Mejoramos la estabilidad al editar productos con fotos guardadas."
+          "Las tarjetas de productos ahora muestran su presentación, como gramos, mililitros o litros.",
+          "El historial de precios evita registros repetidos y conserva mejor los cambios reales de cada comercio.",
+          "Los comercios con un único precio se muestran más claros, sin desplegar información repetida.",
+          "Mejoramos la visualización de precios mayoristas y del top de precios en pantallas chicas.",
+          "Ahora podés editar categoría, marca y otros datos de los productos más cómodamente desde la Mesa de trabajo.",
+          "Las fotos de productos tienen más espacio y una mejor lectura de sus acciones principales."
         ]
       }
     ]
