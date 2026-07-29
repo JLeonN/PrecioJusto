@@ -75,7 +75,7 @@
     <template #imagen>
       <div class="imagen-slot">
         <div v-if="!datosEditando.imagen" class="imagen-slot__placeholder">
-          <IconShoppingBag :size="48" class="text-grey-5" />
+          <IconShoppingBag :size="64" class="text-grey-5" />
         </div>
         <q-img
           v-else
@@ -141,16 +141,8 @@
       </div>
     </template>
     <!-- Precio en overlay si existe -->
-    <template v-if="item.precio > 0 || mostrarAvisoSinCoincidencia" #overlay-info>
+    <template v-if="item.precio > 0" #overlay-info>
       <div class="overlay-contenido">
-        <div v-if="mostrarAvisoSinCoincidencia" class="sin-coincidencia-overlay">
-          <div class="sin-coincidencia-overlay__titulo">
-            Este artículo no apareció en nuestras bases.
-          </div>
-          <div class="sin-coincidencia-overlay__texto">
-            Podés editarlo en esta tarjeta o desde el historial del artículo.
-          </div>
-        </div>
         <div v-if="item.precio > 0" class="precio-overlay">
           {{ formatearPrecio(item.precio, item.moneda) }}
         </div>
@@ -446,10 +438,6 @@ const itemCompleto = computed(
     datosEditando.value.precio > 0 &&
     !!datosEditando.value.comercio,
 )
-const mostrarAvisoSinCoincidencia = computed(
-  () => props.item?.sinCoincidencia === true && !datosEditando.value?.imagen,
-)
-
 function alCambiarPrecio(val) {
   precioTexto.value = filtrarInputPrecio(val)
   actualizar('precio', parseFloat(precioTexto.value) || 0)
@@ -642,30 +630,6 @@ function emitirEnviar() {
   width: 100%;
   min-height: 92px;
 }
-.sin-coincidencia-overlay {
-  position: absolute;
-  top: 20%;
-  left: 50%;
-  transform: translate(-50%, calc(-50% - 18px));
-  width: calc(100% - 24px);
-  max-width: 240px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: var(--overlay-oscuro-medio);
-  backdrop-filter: blur(4px);
-  text-align: center;
-  color: var(--texto-sobre-primario);
-}
-.sin-coincidencia-overlay__titulo {
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.35;
-}
-.sin-coincidencia-overlay__texto {
-  margin-top: 4px;
-  font-size: 11px;
-  line-height: 1.35;
-}
 .info-inferior-fila {
   display: flex;
   align-items: center;
@@ -705,7 +669,7 @@ function emitirEnviar() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-primario-claro);
+  background: var(--fondo-drawer);
 }
 .imagen-slot__imagen {
   width: 100%;

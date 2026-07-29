@@ -20,7 +20,7 @@
     <template #imagen>
       <div class="imagen-contenedor-personalizado">
         <div v-if="!producto.imagen" class="tarjeta-yugioh__placeholder">
-          <IconShoppingBag :size="48" class="text-grey-5" />
+          <IconShoppingBag :size="64" class="icono-placeholder-producto" />
         </div>
         <q-img
           v-else
@@ -414,6 +414,17 @@ const mostrarIconoMayorista = computed(() => $q.screen.width > 360)
   position: relative;
   width: 100%;
   height: 100%;
+}
+.imagen-contenedor-personalizado .tarjeta-yugioh__placeholder {
+  align-items: center;
+  background: var(--fondo-drawer-oscuro);
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  width: 100%;
+}
+.icono-placeholder-producto {
+  color: var(--texto-sobre-primario-suave);
 }
 .imagen-contenedor-personalizado .tarjeta-yugioh__imagen {
   width: 100%;
